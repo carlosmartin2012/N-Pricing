@@ -39,6 +39,7 @@ export const translations = {
         accountingLedger: 'Accounting Ledger',
         systemConfig: 'System Config',
         aiLab: 'N Pricing AI Lab',
+        auditLog: 'System Audit',
 
         // Calculator/Input
         transactionDetails: 'Transaction Details',
@@ -106,6 +107,7 @@ export const translations = {
         accountingLedger: 'Contabilidad',
         systemConfig: 'Config. del Sistema',
         aiLab: 'N Pricing AI Lab',
+        auditLog: 'Auditoría del Sistema',
 
         // Calculator/Input
         transactionDetails: 'Detalles de la Operación',

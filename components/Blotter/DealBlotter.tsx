@@ -5,6 +5,8 @@ import { Drawer } from '../ui/Drawer';
 import { Transaction, ProductDefinition, ClientEntity, BusinessUnit } from '../../types';
 import { MOCK_BEHAVIOURAL_MODELS } from '../../constants';
 import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus } from 'lucide-react';
+import { FileUploadModal } from '../ui/FileUploadModal';
+import { storage } from '../../utils/storage';
 
 interface Props {
   deals: Transaction[];
@@ -25,6 +27,45 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const [selectedDeal, setSelectedDeal] = useState<Partial<Transaction> | null>(null);
+
+  const dealTemplate = "id,clientId,clientType,productType,amount,currency,startDate,durationMonths,marginTarget,riskWeight,capitalRatio,targetROE,operationalCostBps,status\nTRD-90001,CL-1001,Corporate,LOAN_COMM,2500000,USD,2023-10-25,24,2.5,100,11.5,15,45,Pending\nTRD-90002,CL-1002,Corporate,DEP_TERM,500000,EUR,2023-10-25,12,1.2,0,11.5,12,20,Pending";
+
+  const handleImport = (data: any[]) => {
+    const newDeals: Transaction[] = data.map(row => ({
+      id: row.id || `TRD-IMP-${Math.floor(Math.random() * 100000)}`,
+      clientId: row.clientId || 'Unknown',
+      clientType: row.clientType || 'Corporate',
+      productType: row.productType || 'LOAN_COMM',
+      amount: parseFloat(row.amount) || 0,
+      currency: row.currency || 'USD',
+      startDate: row.startDate || new Date().toISOString().split('T')[0],
+      durationMonths: parseFloat(row.durationMonths) || 12,
+      amortization: (row.amortization as any) || 'Bullet',
+      repricingFreq: (row.repricingFreq as any) || 'Fixed',
+      marginTarget: parseFloat(row.marginTarget) || 0,
+      riskWeight: parseFloat(row.riskWeight) || 100,
+      capitalRatio: parseFloat(row.capitalRatio) || 11.5,
+      targetROE: parseFloat(row.targetROE) || 15,
+      operationalCostBps: parseFloat(row.operationalCostBps) || 40,
+      status: (row.status as any) || 'Pending',
+      businessLine: 'Imported',
+      businessUnit: 'BU-001',
+      fundingBusinessUnit: 'BU-900',
+      transitionRisk: 'Neutral',
+      physicalRisk: 'Low'
+    }));
+
+    setDeals(prev => [...newDeals, ...prev]);
+
+    storage.addAuditEntry({
+      userEmail: 'carlos.martin@nfq.es',
+      userName: 'Carlos Martin',
+      action: 'IMPORT_DEALS',
+      module: 'BLOTTER',
+      description: `Imported ${newDeals.length} deals from CSV batch.`
+    });
+    setIsImportOpen(false);
+  };
 
   const filteredDeals = deals.filter(deal => {
     // Search now matches ID or Client ID
@@ -247,8 +288,8 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                   key={status}
                   onClick={() => setFilterStatus(status)}
                   className={`px-3 py-1 text-[10px] uppercase font-bold rounded-sm transition-colors ${filterStatus === status
-                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
-                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                 >
                   {status}
@@ -380,32 +421,15 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           {renderDealForm()}
         </Drawer>
 
-        {/* Import Drawer */}
-        <Drawer
+        {/* Import Drawer (Replaced with FileUploadModal) */}
+        <FileUploadModal
           isOpen={isImportOpen}
           onClose={() => setIsImportOpen(false)}
+          onUpload={handleImport}
           title="Import Transaction Batch"
-          footer={
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setIsImportOpen(false)} className="px-4 py-2 text-xs text-slate-400 hover:text-white">Cancel</button>
-              <button onClick={() => setIsImportOpen(false)} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded">Process Import</button>
-            </div>
-          }
-        >
-          <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 rounded-lg p-8 hover:bg-slate-900 transition-colors cursor-pointer group">
-            <FileUp size={48} className="text-slate-600 group-hover:text-cyan-500 mb-4 transition-colors" />
-            <p className="text-sm text-slate-300 font-medium">Drag CSV/XML file here</p>
-            <p className="text-xs text-slate-500 mt-2">or click to browse</p>
-          </div>
-          <div className="mt-6">
-            <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Supported Formats</h4>
-            <ul className="text-xs text-slate-400 space-y-1 list-disc pl-4">
-              <li>Nexus Standard CSV (.csv)</li>
-              <li>FPML XML (.xml)</li>
-              <li>Legacy Excel (.xlsx)</li>
-            </ul>
-          </div>
-        </Drawer>
+          templateName="deals_template.csv"
+          templateContent={dealTemplate}
+        />
 
         {/* Delete Confirmation Drawer (Mini) */}
         <Drawer

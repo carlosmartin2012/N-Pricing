@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Transaction, ClientEntity, ProductDefinition, BusinessUnit } from '../../types';
+import { Transaction, ClientEntity, ProductDefinition, BusinessUnit, BehaviouralModel } from '../../types';
 import { MOCK_BEHAVIOURAL_MODELS, INITIAL_DEAL, EMPTY_DEAL } from '../../constants';
 import { InputGroup, TextInput, SelectInput, Panel, Badge } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
@@ -17,9 +17,10 @@ interface Props {
    products: ProductDefinition[];
    businessUnits: BusinessUnit[];
    language: Language;
+   behaviouralModels: BehaviouralModel[];
 }
 
-const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deals, clients, setClients, products, businessUnits, language }) => {
+const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deals, clients, setClients, products, businessUnits, language, behaviouralModels }) => {
    const [showConfig, setShowConfig] = useState(false);
    const t = translations[language];
 
@@ -56,7 +57,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
 
    // Filter models based on product definition category
    const selectedProductDef = products.find(p => p.id === values.productType);
-   const availableModels = MOCK_BEHAVIOURAL_MODELS.filter(m => {
+   const availableModels = behaviouralModels.filter(m => {
       if (selectedProductDef?.category === 'Asset') {
          return m.type === 'Prepayment_CPR';
       }

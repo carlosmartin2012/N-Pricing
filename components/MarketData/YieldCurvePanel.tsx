@@ -1,45 +1,96 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Panel, Badge, TextInput } from '../ui/LayoutComponents';
 import { MOCK_YIELD_CURVE } from '../../constants';
-import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap, Save, Upload } from 'lucide-react';
+import { storage } from '../../utils/storage';
+import { FileUploadModal } from '../ui/FileUploadModal';
+import { YieldCurvePoint } from '../../types';
 
 const YieldCurvePanel: React.FC = () => {
     const [currency, setCurrency] = useState('USD');
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [shockBps, setShockBps] = useState<number>(0);
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [curvesHistory, setCurvesHistory] = useState<Record<string, YieldCurvePoint[]>>(() => storage.getCurves());
 
-    // Simple scale functions for SVG
     const width = 800;
     const height = 300;
     const padding = 40;
 
+    // Sync History to Storage
+    useEffect(() => {
+        storage.saveCurves(curvesHistory);
+    }, [curvesHistory]);
+
     // Transform mock data based on currency AND date to simulate historical curves
-    // PLUS apply shock
     const data = useMemo(() => {
-        let modifier = 0;
-        if (currency === 'EUR') modifier = -1.5;
-        if (currency === 'GBP') modifier = 0.5;
-        if (currency === 'JPY') modifier = -4.0;
+        let basePoints = curvesHistory[`${currency}-${selectedDate}`];
 
-        // Pseudo-random modification based on date string
-        const dateNum = selectedDate.split('-').reduce((a, b) => a + parseInt(b), 0);
-        const dateMod = (dateNum % 5) * 0.1; // Shift slightly based on date
+        if (!basePoints) {
+            // Fallback to MOCK + pseudo-random if no snapshot exists
+            let modifier = 0;
+            if (currency === 'EUR') modifier = -1.5;
+            if (currency === 'GBP') modifier = 0.5;
+            if (currency === 'JPY') modifier = -4.0;
+            const dateNum = selectedDate.split('-').reduce((a, b) => a + parseInt(b), 0);
+            const dateMod = (dateNum % 5) * 0.1;
 
-        return MOCK_YIELD_CURVE.map((pt, i) => {
-            // Base Rate logic
-            const baseRate = Math.max(0.1, pt.rate + modifier + dateMod);
-            const shockedRate = baseRate + (shockBps / 100);
+            basePoints = MOCK_YIELD_CURVE.map(pt => ({
+                tenor: pt.tenor,
+                rate: Math.max(0.1, pt.rate + modifier + dateMod),
+                prev: Math.max(0.1, pt.prev + modifier)
+            }));
+        }
 
+        return basePoints.map((pt, i) => {
+            const shockedRate = pt.rate + (shockBps / 100);
             return {
                 ...pt,
-                baseRate: baseRate,
-                rate: Math.max(0.01, shockedRate), // Prevent negative visual for now
-                prev: Math.max(0.1, pt.prev + modifier),
+                baseRate: pt.rate,
+                rate: Math.max(0.01, shockedRate),
                 index: i
             };
         });
-    }, [currency, selectedDate, shockBps]);
+    }, [currency, selectedDate, shockBps, curvesHistory]);
+
+    const handleSaveSnapshot = () => {
+        const key = `${currency}-${selectedDate}`;
+        setCurvesHistory(prev => ({
+            ...prev,
+            [key]: data.map(d => ({ tenor: d.tenor, rate: d.baseRate, prev: d.prev })) // Save pre-shock
+        }));
+
+        storage.addAuditEntry({
+            userEmail: 'carlos.martin@nfq.es',
+            userName: 'Carlos Martin',
+            action: 'SAVE_CURVE_SNAPSHOT',
+            module: 'MARKET_DATA',
+            description: `Saved manual curve snapshot for ${currency} on ${selectedDate}`
+        });
+    };
+
+    const handleImport = (importedData: any[]) => {
+        const key = `${currency}-${selectedDate}`;
+        const newCurve: YieldCurvePoint[] = importedData.map(row => ({
+            tenor: row.tenor,
+            rate: parseFloat(row.rate) || 0,
+            prev: parseFloat(row.prev) || 0
+        }));
+
+        setCurvesHistory(prev => ({ ...prev, [key]: newCurve }));
+        setIsImportOpen(false);
+
+        storage.addAuditEntry({
+            userEmail: 'carlos.martin@nfq.es',
+            userName: 'Carlos Martin',
+            action: 'IMPORT_CURVE',
+            module: 'MARKET_DATA',
+            description: `Imported ${currency} yield curve for ${selectedDate}`
+        });
+    };
+
+    const curveTemplate = "tenor,rate,prev\nON,5.25,5.20\n1M,5.30,5.28\n1Y,5.10,5.05\n10Y,4.25,4.30";
 
     // Calculations for Chart
     const minRate = Math.min(...data.map(d => Math.min(d.rate, d.prev))) * 0.9;
@@ -107,15 +158,41 @@ const YieldCurvePanel: React.FC = () => {
                                     key={c}
                                     onClick={() => setCurrency(c)}
                                     className={`text-[10px] font-bold px-2 py-1 rounded border transition-colors ${currency === c
-                                            ? 'bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-700 shadow-[0_0_10px_rgba(34,211,238,0.2)]'
-                                            : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-800 dark:hover:text-slate-300'
+                                        ? 'bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-700 shadow-[0_0_10px_rgba(34,211,238,0.2)]'
+                                        : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-800 dark:hover:text-slate-300'
                                         }`}
                                 >
                                     {c}
                                 </button>
                             ))}
                         </div>
+
+                        <div className="h-6 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+
+                        <button
+                            onClick={handleSaveSnapshot}
+                            className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded transition-colors"
+                            title="Save Snapshot"
+                        >
+                            <Save size={14} />
+                        </button>
+                        <button
+                            onClick={() => setIsImportOpen(true)}
+                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition-colors"
+                            title="Import Curve"
+                        >
+                            <Upload size={14} />
+                        </button>
                     </div>
+
+                    <FileUploadModal
+                        isOpen={isImportOpen}
+                        onClose={() => setIsImportOpen(false)}
+                        onUpload={handleImport}
+                        title={`Import ${currency} Curve`}
+                        templateName="yield_curve_template.csv"
+                        templateContent={curveTemplate}
+                    />
 
                     <div className="flex-1 w-full h-full p-4 overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-900">
                         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
@@ -173,7 +250,7 @@ const YieldCurvePanel: React.FC = () => {
 
                     <div className="h-8 border-t border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex items-center px-4 justify-between text-[10px] text-slate-500 font-mono">
                         <div className="flex items-center gap-4">
-                            <span className="flex items-center gap-1"><div className={`w-3 h-0.5 ${shockBps !== 0 ? 'bg-amber-400' : 'bg-cyan-500'}`}></div> {selectedDate === new Date().toISOString().split('T')[0] ? 'LIVE' : 'SNAPSHOT'} {shockBps !== 0 ? '(SHOCKED)' : ''}</span>
+                            <span className="flex items-center gap-1"><div className={`w-3 h-0.5 ${shockBps !== 0 ? 'bg-amber-400' : 'bg-cyan-500'}`}></div> {curvesHistory[`${currency}-${selectedDate}`] ? 'PERSISTED SNAPSHOT' : 'PSEUDO-REALTIME'} {shockBps !== 0 ? '(SHOCKED)' : ''}</span>
                             <span className="flex items-center gap-1"><div className="w-3 h-0.5 bg-slate-400 dark:bg-slate-500 border border-slate-400 dark:border-slate-500 border-dashed"></div> PREV CLOSE</span>
                         </div>
                         <div>EFFECTIVE: {selectedDate} 17:00 EST</div>
@@ -192,21 +269,29 @@ const YieldCurvePanel: React.FC = () => {
                             <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Available Snapshots</span>
                         </div>
                         <div className="overflow-auto flex-1">
-                            {pricingVersions.map((v, i) => (
-                                <div key={i} className="flex items-center justify-between p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer group transition-colors">
+                            {Object.keys(curvesHistory).filter(k => k.startsWith(currency)).map((k, i) => (
+                                <div
+                                    key={i}
+                                    onClick={() => setSelectedDate(k.split('-').slice(1).join('-'))}
+                                    className={`flex items-center justify-between p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer group transition-colors ${selectedDate === k.split('-').slice(1).join('-') ? 'bg-cyan-50/50 dark:bg-cyan-950/20' : ''}`}
+                                >
                                     <div className="flex items-start gap-2">
-                                        <FileCheck size={14} className="text-slate-400 dark:text-slate-600 group-hover:text-emerald-500 mt-0.5" />
+                                        <FileCheck size={14} className="text-emerald-500 mt-0.5" />
                                         <div>
-                                            <div className="text-xs text-slate-700 dark:text-slate-300 font-mono">{v.id}</div>
-                                            <div className="text-[10px] text-slate-500">{v.date}</div>
+                                            <div className="text-xs text-slate-700 dark:text-slate-300 font-mono">{k.split('-').slice(1).join('-')}</div>
+                                            <div className="text-[10px] text-slate-500">Manual Snapshot</div>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <Badge variant="default">{v.curve}</Badge>
-                                        <div className="text-[9px] text-slate-500 dark:text-slate-600 mt-1">{v.user}</div>
+                                        <Badge variant="default">{currency}</Badge>
                                     </div>
                                 </div>
                             ))}
+                            {Object.keys(curvesHistory).filter(k => k.startsWith(currency)).length === 0 && (
+                                <div className="p-8 text-center text-slate-500 text-[10px] uppercase font-bold opacity-50">
+                                    No snapshots saved for {currency}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Panel>

@@ -42,7 +42,7 @@ export interface Transaction {
   clientId: string;
   // clientName removed - looked up from ClientEntity
   clientType: string;
-  
+
   // Organization
   businessUnit: string;
   fundingBusinessUnit: string;
@@ -52,23 +52,23 @@ export interface Transaction {
   productType: string;
   currency: string;
   amount: number;
-  
+
   // Time
   startDate: string;
   durationMonths: number;
   amortization: 'Bullet' | 'French' | 'Linear';
   repricingFreq: 'Daily' | 'Monthly' | 'Quarterly' | 'Fixed';
-  
+
   // Economics
   marginTarget: number;
   behaviouralModelId?: string;
-  
+
   // Regulatory & Capital
   riskWeight: number;
   capitalRatio: number;
   targetROE: number;
   operationalCostBps: number;
-  
+
   // ESG
   transitionRisk: 'Brown' | 'Amber' | 'Neutral' | 'Green';
   physicalRisk: 'High' | 'Medium' | 'Low';
@@ -83,16 +83,16 @@ export interface ReplicationTranche {
 export interface BehaviouralModel {
   id: string;
   name: string;
-  type: 'NMD_Replication' | 'Prepayment_CPR'; 
+  type: 'NMD_Replication' | 'Prepayment_CPR';
   // Caterpillar is now a "mode" within NMD_Replication
-  nmdMethod?: 'Parametric' | 'Caterpillar'; 
+  nmdMethod?: 'Parametric' | 'Caterpillar';
   description: string;
-  
+
   // NMD Parametric
   coreRatio?: number;
   decayRate?: number;
   betaFactor?: number;
-  
+
   // NMD Caterpillar
   replicationProfile?: ReplicationTranche[];
 
@@ -159,7 +159,7 @@ export interface FTPResult {
   matchReason: string;
 }
 
-export type ViewState = 'CALCULATOR' | 'BLOTTER' | 'CONFIG' | 'MARKET_DATA' | 'ACCOUNTING' | 'BEHAVIOURAL' | 'MANUAL' | 'USER_MGMT' | 'AI_LAB' | 'METHODOLOGY';
+export type ViewState = 'CALCULATOR' | 'BLOTTER' | 'CONFIG' | 'MARKET_DATA' | 'ACCOUNTING' | 'BEHAVIOURAL' | 'MANUAL' | 'USER_MGMT' | 'AI_LAB' | 'METHODOLOGY' | 'AUDIT_LOG';
 
 export interface YieldCurvePoint {
   tenor: string;
@@ -177,4 +177,15 @@ export interface GeneralRule {
   spreadMethod: string;
   liquidityReference?: string; // New: Curve ID for Liquidity
   strategicSpread: number;
+}
+
+export interface AuditEntry {
+  id: string;
+  timestamp: string;
+  userEmail: string;
+  userName: string;
+  action: string;
+  module: ViewState;
+  description: string;
+  details?: any;
 }

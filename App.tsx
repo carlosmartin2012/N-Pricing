@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile } from './types';
-import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE } from './constants';
+import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel } from './types';
+import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS } from './constants';
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
 import PricingReceipt from './components/Calculator/PricingReceipt';
@@ -11,14 +11,17 @@ import AccountingLedger from './components/Accounting/AccountingLedger';
 import BehaviouralModels from './components/Behavioural/BehaviouralModels';
 import UserManual from './components/Docs/UserManual';
 import UserManagement from './components/Admin/UserManagement';
+import AuditLog from './components/Admin/AuditLog';
 import GeminiAssistant from './components/Intelligence/GeminiAssistant';
 import GenAIChat from './components/Intelligence/GenAIChat';
 import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
-import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard } from 'lucide-react';
+import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { Login } from './components/ui/Login';
 import { UserConfigModal } from './components/ui/UserConfigModal';
 import { translations, Language } from './translations';
+
+import { storage } from './utils/storage';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -31,24 +34,36 @@ const App: React.FC = () => {
   const [matchedMethod, setMatchedMethod] = useState<string>('Matched Maturity');
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
-  const [clients, setClients] = useState<ClientEntity[]>(MOCK_CLIENTS);
-  const [products, setProducts] = useState<ProductDefinition[]>(MOCK_PRODUCT_DEFS);
-  const [businessUnits, setBusinessUnits] = useState<BusinessUnit[]>(MOCK_BUSINESS_UNITS);
-  const [deals, setDeals] = useState<Transaction[]>(MOCK_DEALS);
-  const [rules, setRules] = useState<GeneralRule[]>([
+  // Persistent States
+  const [clients, setClients] = useState<ClientEntity[]>(() => storage.load('n_pricing_clients', MOCK_CLIENTS));
+  const [products, setProducts] = useState<ProductDefinition[]>(() => storage.load('n_pricing_products', MOCK_PRODUCT_DEFS));
+  const [businessUnits, setBusinessUnits] = useState<BusinessUnit[]>(() => storage.load('n_pricing_business_units', MOCK_BUSINESS_UNITS));
+  const [deals, setDeals] = useState<Transaction[]>(() => storage.getDeals().length > 0 ? storage.getDeals() : MOCK_DEALS);
+  const [rules, setRules] = useState<GeneralRule[]>(() => storage.load('n_pricing_rules', [
     { id: 1, businessUnit: 'Commercial Banking', product: 'Commercial Loan', segment: 'Corporate', tenor: '< 1Y', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 10 },
     { id: 2, businessUnit: 'SME / Business', product: 'Commercial Loan', segment: 'SME', tenor: 'Any', baseMethod: 'Rate Card', baseReference: 'USD-SOFR', spreadMethod: 'Grid Pricing', liquidityReference: 'RC-COM-SME-A', strategicSpread: 25 },
     { id: 3, businessUnit: 'Retail Banking', product: 'Term Deposit', segment: 'Retail', tenor: '> 2Y', baseMethod: 'Moving Average', baseReference: 'EUR-ESTR', spreadMethod: 'Fixed Spread', liquidityReference: 'RC-LIQ-EUR-HY', strategicSpread: 0 },
     { id: 4, businessUnit: 'Retail Banking', product: 'Mortgage', segment: 'All', tenor: 'Fixed', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 5 },
-  ]);
-  const [users, setUsers] = useState<UserProfile[]>(MOCK_USERS);
+  ]));
+  const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>(() => storage.load('n_pricing_behavioural', MOCK_BEHAVIOURAL_MODELS));
+  const [users, setUsers] = useState<UserProfile[]>(() => storage.getUsers().length > 0 ? storage.getUsers() : MOCK_USERS);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
-  const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>({
+  const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.load('n_pricing_approval_matrix', {
     autoApprovalThreshold: 15.0,
     l1Threshold: 10.0,
     l2Threshold: 5.0
-  });
+  }));
+
+  // Auto-Save effects
+  React.useEffect(() => { storage.saveDeals(deals); }, [deals]);
+  React.useEffect(() => { storage.saveUsers(users); }, [users]);
+  React.useEffect(() => { storage.save('n_pricing_rules', rules); }, [rules]);
+  React.useEffect(() => { storage.save('n_pricing_clients', clients); }, [clients]);
+  React.useEffect(() => { storage.save('n_pricing_products', products); }, [products]);
+  React.useEffect(() => { storage.save('n_pricing_business_units', businessUnits); }, [businessUnits]);
+  React.useEffect(() => { storage.save('n_pricing_approval_matrix', approvalMatrix); }, [approvalMatrix]);
+  React.useEffect(() => { storage.save('n_pricing_behavioural', behaviouralModels); }, [behaviouralModels]);
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -61,11 +76,11 @@ const App: React.FC = () => {
 
   const handleLogin = (email: string) => {
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    let loggedUser: UserProfile;
     if (user) {
-      setCurrentUser(user);
+      loggedUser = user;
     } else {
-      // Fallback for whitelisted but not mocked users (shouldn't happen with current constants)
-      setCurrentUser({
+      loggedUser = {
         id: 'USR-TEMP',
         name: email.split('@')[0].replace('.', ' '),
         email: email,
@@ -73,9 +88,18 @@ const App: React.FC = () => {
         status: 'Active',
         lastLogin: new Date().toISOString(),
         department: 'General'
-      });
+      };
     }
+    setCurrentUser(loggedUser);
     setIsAuthenticated(true);
+
+    storage.addAuditEntry({
+      userEmail: email,
+      userName: loggedUser.name,
+      action: 'LOGIN',
+      module: 'CALCULATOR',
+      description: `User ${loggedUser.name} logged into the system.`
+    });
   };
 
   if (!isAuthenticated) {
@@ -95,6 +119,7 @@ const App: React.FC = () => {
   const bottomNavItems = [
     { id: 'USER_CONFIG', label: t.userConfig, icon: Settings },
     { id: 'USER_MGMT', label: t.userMgmt, icon: Users },
+    { id: 'AUDIT_LOG', label: t.auditLog, icon: ShieldCheck },
     { id: 'MANUAL', label: t.manual, icon: BookOpen },
   ];
 
@@ -145,6 +170,7 @@ const App: React.FC = () => {
                     products={products}
                     businessUnits={businessUnits}
                     language={language}
+                    behaviouralModels={behaviouralModels}
                   />
                 </div>
                 <div className="lg:col-span-4 h-full min-h-[300px]">
@@ -181,7 +207,7 @@ const App: React.FC = () => {
 
             {currentView === 'BEHAVIOURAL' && (
               <div className="h-full relative z-0">
-                <BehaviouralModels />
+                <BehaviouralModels models={behaviouralModels} setModels={setBehaviouralModels} />
               </div>
             )}
 
@@ -230,6 +256,12 @@ const App: React.FC = () => {
             {currentView === 'USER_MGMT' && (
               <div className="h-full relative z-0">
                 <UserManagement users={users} setUsers={setUsers} />
+              </div>
+            )}
+
+            {currentView === 'AUDIT_LOG' && (
+              <div className="h-full relative z-0">
+                <AuditLog />
               </div>
             )}
 
