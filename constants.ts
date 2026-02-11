@@ -27,22 +27,29 @@ export const MOCK_BUSINESS_UNITS: BusinessUnit[] = [
   { id: 'BU-900', name: 'Central Treasury (ALM)', code: 'ALM' },
 ];
 
+export const WHITELISTED_EMAILS = [
+  'carlos.martin@nfq.es',
+  'alejandro.lloveras@nfq.es',
+  'gregorio.gonzalo@nfq.es',
+  'francisco.herrero@nfq.es'
+];
+
 export const MOCK_USERS: UserProfile[] = [
-  { id: 'USR-001', name: 'Alex Chen', email: 'alex.chen@nexus.bank', role: 'Admin', status: 'Active', lastLogin: '2023-10-24 09:15', department: 'Treasury' },
-  { id: 'USR-002', name: 'Sarah Miller', email: 's.miller@nexus.bank', role: 'Trader', status: 'Active', lastLogin: '2023-10-24 14:20', department: 'Commercial Desk' },
-  { id: 'USR-003', name: 'James Roi', email: 'j.roi@nexus.bank', role: 'Risk_Manager', status: 'Active', lastLogin: '2023-10-23 18:45', department: 'Risk Control' },
-  { id: 'USR-004', name: 'Audit Bot', email: 'audit.sys@nexus.bank', role: 'Auditor', status: 'Locked', lastLogin: '2023-10-01 00:00', department: 'Compliance' },
+  { id: 'USR-001', name: 'Carlos Martin', email: 'carlos.martin@nfq.es', role: 'Admin', status: 'Active', lastLogin: '2023-10-24 09:15', department: 'Management' },
+  { id: 'USR-002', name: 'Alejandro Lloveras', email: 'alejandro.lloveras@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
+  { id: 'USR-003', name: 'Gregorio Gonzalo', email: 'gregorio.gonzalo@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: 'Never', department: 'Risk Control' },
+  { id: 'USR-004', name: 'Francisco Herrero', email: 'francisco.herrero@nfq.es', role: 'Auditor', status: 'Active', lastLogin: 'Never', department: 'Audit' },
 ];
 
 export const INITIAL_DEAL: Transaction = {
   // No ID implies new deal calculation
   clientId: 'CL-1001',
   clientType: 'Corporate',
-  
-  businessUnit: 'BU-001', 
-  fundingBusinessUnit: 'BU-900', 
+
+  businessUnit: 'BU-001',
+  fundingBusinessUnit: 'BU-900',
   businessLine: 'Corporate Finance',
-  
+
   productType: 'LOAN_COMM',
   currency: 'USD',
   amount: 5000000,
@@ -52,12 +59,12 @@ export const INITIAL_DEAL: Transaction = {
   repricingFreq: 'Fixed',
   marginTarget: 2.25,
   behaviouralModelId: '',
-  
-  riskWeight: 100, 
-  capitalRatio: 11.5, 
-  targetROE: 15.0, 
-  operationalCostBps: 45, 
-  
+
+  riskWeight: 100,
+  capitalRatio: 11.5,
+  targetROE: 15.0,
+  operationalCostBps: 45,
+
   transitionRisk: 'Neutral',
   physicalRisk: 'Low',
 };
@@ -76,17 +83,17 @@ export const MOCK_PHYSICAL_GRID: PhysicalRateCard[] = [
 ];
 
 export const MOCK_FTP_RATE_CARDS: FtpRateCard[] = [
-  { 
+  {
     id: 'RC-LIQ-USD-STD', name: 'USD Liquidity Curve (Std)', type: 'Liquidity', currency: 'USD',
-    grid: [{tenor: 'ON', spread: 5}, {tenor: '1M', spread: 10}, {tenor: '6M', spread: 18}, {tenor: '1Y', spread: 25}, {tenor: '5Y', spread: 45}]
+    grid: [{ tenor: 'ON', spread: 5 }, { tenor: '1M', spread: 10 }, { tenor: '6M', spread: 18 }, { tenor: '1Y', spread: 25 }, { tenor: '5Y', spread: 45 }]
   },
-  { 
+  {
     id: 'RC-LIQ-EUR-HY', name: 'EUR High Yield Liquidity', type: 'Liquidity', currency: 'EUR',
-    grid: [{tenor: 'ON', spread: 15}, {tenor: '1M', spread: 25}, {tenor: '1Y', spread: 60}, {tenor: '5Y', spread: 120}]
+    grid: [{ tenor: 'ON', spread: 15 }, { tenor: '1M', spread: 25 }, { tenor: '1Y', spread: 60 }, { tenor: '5Y', spread: 120 }]
   },
-  { 
+  {
     id: 'RC-COM-SME-A', name: 'SME Commercial Grid A', type: 'Commercial', currency: 'USD',
-    grid: [{tenor: '1Y', spread: 150}, {tenor: '3Y', spread: 185}, {tenor: '5Y', spread: 210}, {tenor: '7Y', spread: 250}]
+    grid: [{ tenor: '1Y', spread: 150 }, { tenor: '3Y', spread: 185 }, { tenor: '5Y', spread: 210 }, { tenor: '7Y', spread: 250 }]
   }
 ];
 
@@ -94,17 +101,17 @@ export const MOCK_BEHAVIOURAL_MODELS: BehaviouralModel[] = [
   // NMD Models
   { id: 'NMD-001', name: 'Retail Savings - Sticky', type: 'NMD_Replication', nmdMethod: 'Parametric', description: 'High stability retail deposits', coreRatio: 90, decayRate: 15, betaFactor: 0.15 },
   { id: 'NMD-002', name: 'Corporate Vista - Volatile', type: 'NMD_Replication', nmdMethod: 'Parametric', description: 'Operating accounts for large corp', coreRatio: 40, decayRate: 60, betaFactor: 0.85 },
-  { 
-      id: 'NMD-CAT-01', 
-      name: 'Wealth Mgmt Replication', 
-      type: 'NMD_Replication', 
-      nmdMethod: 'Caterpillar', 
-      description: 'Replicating portfolio for Wealth',
-      replicationProfile: [
-         { term: '1M', weight: 40, spread: 2 },
-         { term: '3M', weight: 30, spread: 5 },
-         { term: '1Y', weight: 30, spread: 12 }
-      ]
+  {
+    id: 'NMD-CAT-01',
+    name: 'Wealth Mgmt Replication',
+    type: 'NMD_Replication',
+    nmdMethod: 'Caterpillar',
+    description: 'Replicating portfolio for Wealth',
+    replicationProfile: [
+      { term: '1M', weight: 40, spread: 2 },
+      { term: '3M', weight: 30, spread: 5 },
+      { term: '1Y', weight: 30, spread: 12 }
+    ]
   },
   // Prepayment Models
   { id: 'PRE-001', name: 'Mortgage Standard CPR', type: 'Prepayment_CPR', description: 'Standard residential mortgage prepay', cpr: 5.0, penaltyExempt: 10 },
@@ -134,112 +141,112 @@ export const METHODOLOGIES = [
 
 // Expanded to full Transaction objects
 export const MOCK_DEALS: Transaction[] = [
-  { 
-      id: 'TRD-88392', clientId: 'CL-1001', clientType: 'Corporate',
-      productType: 'LOAN_COMM', amount: 12500000, currency: 'USD', marginTarget: 2.25, 
-      startDate: '2023-10-24', status: 'Booked', businessLine: 'Corp Fin',
-      businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
-      durationMonths: 36, amortization: 'Bullet', repricingFreq: 'Monthly',
-      riskWeight: 100, capitalRatio: 11.5, targetROE: 15, operationalCostBps: 45,
-      transitionRisk: 'Neutral', physicalRisk: 'Low'
+  {
+    id: 'TRD-88392', clientId: 'CL-1001', clientType: 'Corporate',
+    productType: 'LOAN_COMM', amount: 12500000, currency: 'USD', marginTarget: 2.25,
+    startDate: '2023-10-24', status: 'Booked', businessLine: 'Corp Fin',
+    businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
+    durationMonths: 36, amortization: 'Bullet', repricingFreq: 'Monthly',
+    riskWeight: 100, capitalRatio: 11.5, targetROE: 15, operationalCostBps: 45,
+    transitionRisk: 'Neutral', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88393', clientId: 'CL-1002', clientType: 'Corporate',
-      productType: 'DEP_TERM', amount: 5000000, currency: 'EUR', marginTarget: 1.50,
-      startDate: '2023-10-24', status: 'Pending', businessLine: 'Retail',
-      businessUnit: 'BU-002', fundingBusinessUnit: 'BU-900',
-      durationMonths: 12, amortization: 'Bullet', repricingFreq: 'Fixed',
-      riskWeight: 0, capitalRatio: 11.5, targetROE: 15, operationalCostBps: 20,
-      transitionRisk: 'Neutral', physicalRisk: 'Low'
+  {
+    id: 'TRD-88393', clientId: 'CL-1002', clientType: 'Corporate',
+    productType: 'DEP_TERM', amount: 5000000, currency: 'EUR', marginTarget: 1.50,
+    startDate: '2023-10-24', status: 'Pending', businessLine: 'Retail',
+    businessUnit: 'BU-002', fundingBusinessUnit: 'BU-900',
+    durationMonths: 12, amortization: 'Bullet', repricingFreq: 'Fixed',
+    riskWeight: 0, capitalRatio: 11.5, targetROE: 15, operationalCostBps: 20,
+    transitionRisk: 'Neutral', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88394', clientId: 'CL-2001', clientType: 'SME',
-      productType: 'LOAN_MORT', amount: 850000, currency: 'USD', marginTarget: 1.85, 
-      startDate: '2023-10-20', status: 'Review', businessLine: 'Real Estate',
-      businessUnit: 'BU-003', fundingBusinessUnit: 'BU-900',
-      durationMonths: 120, amortization: 'French', repricingFreq: 'Fixed',
-      riskWeight: 35, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 25,
-      transitionRisk: 'Green', physicalRisk: 'Medium'
+  {
+    id: 'TRD-88394', clientId: 'CL-2001', clientType: 'SME',
+    productType: 'LOAN_MORT', amount: 850000, currency: 'USD', marginTarget: 1.85,
+    startDate: '2023-10-20', status: 'Review', businessLine: 'Real Estate',
+    businessUnit: 'BU-003', fundingBusinessUnit: 'BU-900',
+    durationMonths: 120, amortization: 'French', repricingFreq: 'Fixed',
+    riskWeight: 35, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 25,
+    transitionRisk: 'Green', physicalRisk: 'Medium'
   },
-  { 
-      id: 'TRD-88395', clientId: 'CL-1002', clientType: 'Corporate',
-      productType: 'CRED_LINE', amount: 2000000, currency: 'EUR', marginTarget: 2.10, 
-      startDate: '2023-09-15', status: 'Booked', businessLine: 'Corp Fin',
-      businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
-      durationMonths: 24, amortization: 'Bullet', repricingFreq: 'Daily',
-      riskWeight: 75, capitalRatio: 11.5, targetROE: 14, operationalCostBps: 35,
-      transitionRisk: 'Neutral', physicalRisk: 'Low'
+  {
+    id: 'TRD-88395', clientId: 'CL-1002', clientType: 'Corporate',
+    productType: 'CRED_LINE', amount: 2000000, currency: 'EUR', marginTarget: 2.10,
+    startDate: '2023-09-15', status: 'Booked', businessLine: 'Corp Fin',
+    businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
+    durationMonths: 24, amortization: 'Bullet', repricingFreq: 'Daily',
+    riskWeight: 75, capitalRatio: 11.5, targetROE: 14, operationalCostBps: 35,
+    transitionRisk: 'Neutral', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88396', clientId: 'CL-4099', clientType: 'Retail',
-      productType: 'LOAN_AUTO', amount: 45000, currency: 'GBP', marginTarget: 3.50, 
-      startDate: '2023-10-22', status: 'Pending', businessLine: 'Retail',
-      businessUnit: 'BU-002', fundingBusinessUnit: 'BU-900',
-      durationMonths: 48, amortization: 'Linear', repricingFreq: 'Fixed',
-      riskWeight: 75, capitalRatio: 11.5, targetROE: 18, operationalCostBps: 80,
-      transitionRisk: 'Brown', physicalRisk: 'Low'
+  {
+    id: 'TRD-88396', clientId: 'CL-4099', clientType: 'Retail',
+    productType: 'LOAN_AUTO', amount: 45000, currency: 'GBP', marginTarget: 3.50,
+    startDate: '2023-10-22', status: 'Pending', businessLine: 'Retail',
+    businessUnit: 'BU-002', fundingBusinessUnit: 'BU-900',
+    durationMonths: 48, amortization: 'Linear', repricingFreq: 'Fixed',
+    riskWeight: 75, capitalRatio: 11.5, targetROE: 18, operationalCostBps: 80,
+    transitionRisk: 'Brown', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88397', clientId: 'CL-3055', clientType: 'Institution',
-      productType: 'DEP_TERM', amount: 50000000, currency: 'JPY', marginTarget: 0.15, 
-      startDate: '2023-10-01', status: 'Booked', businessLine: 'Institutional',
-      businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
-      durationMonths: 3, amortization: 'Bullet', repricingFreq: 'Fixed',
-      riskWeight: 0, capitalRatio: 11.5, targetROE: 10, operationalCostBps: 5,
-      transitionRisk: 'Neutral', physicalRisk: 'Low'
+  {
+    id: 'TRD-88397', clientId: 'CL-3055', clientType: 'Institution',
+    productType: 'DEP_TERM', amount: 50000000, currency: 'JPY', marginTarget: 0.15,
+    startDate: '2023-10-01', status: 'Booked', businessLine: 'Institutional',
+    businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
+    durationMonths: 3, amortization: 'Bullet', repricingFreq: 'Fixed',
+    riskWeight: 0, capitalRatio: 11.5, targetROE: 10, operationalCostBps: 5,
+    transitionRisk: 'Neutral', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88398', clientId: 'CL-1001', clientType: 'Corporate',
-      productType: 'LOAN_COMM', amount: 25000000, currency: 'USD', marginTarget: 2.00, 
-      startDate: '2023-08-10', status: 'Booked', businessLine: 'Corp Fin',
-      businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
-      durationMonths: 60, amortization: 'Bullet', repricingFreq: 'Quarterly',
-      riskWeight: 100, capitalRatio: 11.5, targetROE: 15, operationalCostBps: 40,
-      transitionRisk: 'Amber', physicalRisk: 'Medium'
+  {
+    id: 'TRD-88398', clientId: 'CL-1001', clientType: 'Corporate',
+    productType: 'LOAN_COMM', amount: 25000000, currency: 'USD', marginTarget: 2.00,
+    startDate: '2023-08-10', status: 'Booked', businessLine: 'Corp Fin',
+    businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
+    durationMonths: 60, amortization: 'Bullet', repricingFreq: 'Quarterly',
+    riskWeight: 100, capitalRatio: 11.5, targetROE: 15, operationalCostBps: 40,
+    transitionRisk: 'Amber', physicalRisk: 'Medium'
   },
-  { 
-      id: 'TRD-88399', clientId: 'CL-2001', clientType: 'SME',
-      productType: 'LOAN_COMM', amount: 350000, currency: 'EUR', marginTarget: 2.75, 
-      startDate: '2023-10-23', status: 'Rejected', businessLine: 'SME',
-      businessUnit: 'BU-003', fundingBusinessUnit: 'BU-900',
-      durationMonths: 36, amortization: 'Linear', repricingFreq: 'Monthly',
-      riskWeight: 85, capitalRatio: 11.5, targetROE: 16, operationalCostBps: 50,
-      transitionRisk: 'Brown', physicalRisk: 'High'
+  {
+    id: 'TRD-88399', clientId: 'CL-2001', clientType: 'SME',
+    productType: 'LOAN_COMM', amount: 350000, currency: 'EUR', marginTarget: 2.75,
+    startDate: '2023-10-23', status: 'Rejected', businessLine: 'SME',
+    businessUnit: 'BU-003', fundingBusinessUnit: 'BU-900',
+    durationMonths: 36, amortization: 'Linear', repricingFreq: 'Monthly',
+    riskWeight: 85, capitalRatio: 11.5, targetROE: 16, operationalCostBps: 50,
+    transitionRisk: 'Brown', physicalRisk: 'High'
   },
-  { 
-      id: 'TRD-88400', clientId: 'CL-4099', clientType: 'Retail',
-      productType: 'LOAN_MORT', amount: 650000, currency: 'USD', marginTarget: 1.60, 
-      startDate: '2023-09-01', status: 'Booked', businessLine: 'Retail',
-      businessUnit: 'BU-002', fundingBusinessUnit: 'BU-900',
-      durationMonths: 360, amortization: 'French', repricingFreq: 'Fixed',
-      riskWeight: 35, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 20,
-      transitionRisk: 'Green', physicalRisk: 'Low'
+  {
+    id: 'TRD-88400', clientId: 'CL-4099', clientType: 'Retail',
+    productType: 'LOAN_MORT', amount: 650000, currency: 'USD', marginTarget: 1.60,
+    startDate: '2023-09-01', status: 'Booked', businessLine: 'Retail',
+    businessUnit: 'BU-002', fundingBusinessUnit: 'BU-900',
+    durationMonths: 360, amortization: 'French', repricingFreq: 'Fixed',
+    riskWeight: 35, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 20,
+    transitionRisk: 'Green', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88401', clientId: 'CL-1001', clientType: 'Corporate',
-      productType: 'SWAP_IRS', amount: 10000000, currency: 'USD', marginTarget: 0.10, 
-      startDate: '2023-10-15', status: 'Booked', businessLine: 'Markets',
-      businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
-      durationMonths: 60, amortization: 'Bullet', repricingFreq: 'Quarterly',
-      riskWeight: 20, capitalRatio: 11.5, targetROE: 20, operationalCostBps: 10,
-      transitionRisk: 'Neutral', physicalRisk: 'Low'
+  {
+    id: 'TRD-88401', clientId: 'CL-1001', clientType: 'Corporate',
+    productType: 'SWAP_IRS', amount: 10000000, currency: 'USD', marginTarget: 0.10,
+    startDate: '2023-10-15', status: 'Booked', businessLine: 'Markets',
+    businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
+    durationMonths: 60, amortization: 'Bullet', repricingFreq: 'Quarterly',
+    riskWeight: 20, capitalRatio: 11.5, targetROE: 20, operationalCostBps: 10,
+    transitionRisk: 'Neutral', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88402', clientId: 'CL-4099', clientType: 'Retail',
-      productType: 'DEP_CASA', amount: 150000, currency: 'GBP', marginTarget: 2.20, 
-      startDate: '2023-01-01', status: 'Booked', businessLine: 'Wealth',
-      businessUnit: 'BU-004', fundingBusinessUnit: 'BU-900',
-      durationMonths: 1, amortization: 'Bullet', repricingFreq: 'Daily',
-      riskWeight: 0, capitalRatio: 11.5, targetROE: 25, operationalCostBps: 15,
-      transitionRisk: 'Neutral', physicalRisk: 'Low'
+  {
+    id: 'TRD-88402', clientId: 'CL-4099', clientType: 'Retail',
+    productType: 'DEP_CASA', amount: 150000, currency: 'GBP', marginTarget: 2.20,
+    startDate: '2023-01-01', status: 'Booked', businessLine: 'Wealth',
+    businessUnit: 'BU-004', fundingBusinessUnit: 'BU-900',
+    durationMonths: 1, amortization: 'Bullet', repricingFreq: 'Daily',
+    riskWeight: 0, capitalRatio: 11.5, targetROE: 25, operationalCostBps: 15,
+    transitionRisk: 'Neutral', physicalRisk: 'Low'
   },
-  { 
-      id: 'TRD-88403', clientId: 'CL-3055', clientType: 'Institution',
-      productType: 'LOAN_COMM', amount: 75000000, currency: 'USD', marginTarget: 1.25, 
-      startDate: '2023-10-24', status: 'Review', businessLine: 'Institutional',
-      businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
-      durationMonths: 12, amortization: 'Bullet', repricingFreq: 'Monthly',
-      riskWeight: 50, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 10,
-      transitionRisk: 'Green', physicalRisk: 'Low'
+  {
+    id: 'TRD-88403', clientId: 'CL-3055', clientType: 'Institution',
+    productType: 'LOAN_COMM', amount: 75000000, currency: 'USD', marginTarget: 1.25,
+    startDate: '2023-10-24', status: 'Review', businessLine: 'Institutional',
+    businessUnit: 'BU-001', fundingBusinessUnit: 'BU-900',
+    durationMonths: 12, amortization: 'Bullet', repricingFreq: 'Monthly',
+    riskWeight: 50, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 10,
+    transitionRisk: 'Green', physicalRisk: 'Low'
   },
 ];

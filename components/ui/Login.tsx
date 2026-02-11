@@ -2,6 +2,10 @@ import React from 'react';
 import { translations, Language } from '../../translations';
 import { Sidebar } from './Sidebar';
 
+import { useGoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
+import { WHITELISTED_EMAILS } from '../../constants';
+
 interface LoginProps {
     onLogin: () => void;
     language: Language;
@@ -9,13 +13,55 @@ interface LoginProps {
 
 export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     const t = translations[language];
+    const [error, setError] = React.useState<string | null>(null);
+
+    const login = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                // Fetch user info using the access token
+                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const userInfo = await userInfoResponse.json();
+
+                const email = userInfo.email;
+
+                if (!email) {
+                    setError('Could not retrieve email.');
+                    return;
+                }
+
+                // Check Domain
+                if (!email.endsWith('@nfq.es')) {
+                    setError('Access Restricted: Only @nfq.es emails are allowed.');
+                    return;
+                }
+
+                // Check Whitelist
+                if (!WHITELISTED_EMAILS.includes(email)) {
+                    setError('Access Denied: Your email is not whitelisted.');
+                    return;
+                }
+
+                setError(null);
+                onLogin();
+
+            } catch (err) {
+                console.error(err);
+                setError('Authentication failed.');
+            }
+        },
+        onError: () => {
+            setError('Login Failed');
+        },
+    });
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
             {/* Header Logo & Title */}
             <div className="flex flex-col items-center mb-12">
                 <div className="flex items-center gap-4 mb-2">
-                    <img src="/assets/logo_v3.jpg" alt="Logo" className="w-12 h-12 object-contain mix-blend-screen" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
+                    <img src="/assets/logo_final.png" alt="Logo" className="w-12 h-12 object-contain mix-blend-screen" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
                     <h1 className="text-4xl font-bold text-white tracking-tight">{t.pricing}</h1>
                 </div>
                 <p className="text-slate-400 text-lg">{t.subtitle}</p>
@@ -25,16 +71,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
             <div className="w-full max-w-md bg-[#111111] border border-white/5 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
                 <div className="flex flex-col items-center mt-10">
                     <button
-                        onClick={onLogin}
-                        className="w-full bg-white text-black rounded-full py-4 px-6 flex items-center justify-between hover:bg-slate-100 transition-colors mb-12"
+                        onClick={() => login()}
+                        className="w-full bg-white text-black rounded-full py-4 px-6 flex items-center justify-between hover:bg-slate-100 transition-colors mb-6"
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center overflow-hidden">
-                                <img src="https://ui-avatars.com/api/?name=Carlos+Martin&background=random" alt="User" />
+                                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-6 h-6" />
                             </div>
                             <div className="text-left">
-                                <div className="text-sm font-bold">{t.continueAs}</div>
-                                <div className="text-xs text-slate-500">{t.email}</div>
+                                <div className="text-sm font-bold">{t.continueAs} Google User</div>
+                                <div className="text-xs text-slate-500">@nfq.es only</div>
                             </div>
                         </div>
                         <svg className="w-6 h-6" viewBox="0 0 24 24">
@@ -44,6 +90,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                             <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                         </svg>
                     </button>
+
+                    {error && (
+                        <div className="mb-6 p-3 bg-red-900/30 border border-red-800 rounded text-red-200 text-xs text-center w-full">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="w-full h-px bg-white/5 mb-8"></div>
 
