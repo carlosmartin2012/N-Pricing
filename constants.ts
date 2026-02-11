@@ -71,6 +71,29 @@ export const INITIAL_DEAL: Transaction = {
   physicalRisk: 'Low',
 };
 
+export const EMPTY_DEAL: Transaction = {
+  clientId: '',
+  clientType: '',
+  businessUnit: '',
+  fundingBusinessUnit: '',
+  businessLine: '',
+  productType: '',
+  currency: 'USD',
+  amount: 0,
+  startDate: new Date().toISOString().split('T')[0],
+  durationMonths: 0,
+  amortization: 'Bullet',
+  repricingFreq: 'Fixed',
+  marginTarget: 0,
+  behaviouralModelId: '',
+  riskWeight: 0,
+  capitalRatio: 0,
+  targetROE: 0,
+  operationalCostBps: 0,
+  transitionRisk: 'Neutral',
+  physicalRisk: 'Low',
+};
+
 export const MOCK_TRANSITION_GRID: TransitionRateCard[] = [
   { id: 1, classification: 'Green', sector: 'All', adjustmentBps: -15, description: 'EU Taxonomy Aligned (Incentive)' },
   { id: 2, classification: 'Amber', sector: 'Manufacturing', adjustmentBps: 5, description: 'Transition plan required (Scope 1/2)' },

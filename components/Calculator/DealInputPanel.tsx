@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Transaction, ClientEntity, ProductDefinition, BusinessUnit } from '../../types';
-import { MOCK_BEHAVIOURAL_MODELS, INITIAL_DEAL } from '../../constants';
+import { MOCK_BEHAVIOURAL_MODELS, INITIAL_DEAL, EMPTY_DEAL } from '../../constants';
 import { InputGroup, TextInput, SelectInput, Panel, Badge } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { ShieldAlert, Leaf, Waves, BarChart3, UserPlus, Building2, Briefcase, FileSearch, Settings, ChevronDown, ChevronUp, Sliders, PlayCircle } from 'lucide-react';
@@ -25,7 +25,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
 
    // Resolve Client Name for Display
    const currentClient = clients.find(c => c.id === values.clientId);
-   const clientDisplayName = currentClient ? currentClient.name : 'Unknown Client';
+   const clientDisplayName = currentClient ? currentClient.name : 'No Selection';
 
    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Transaction) => {
       // Handle number and range inputs as numeric values to prevent string concatenation issues and .toFixed errors
@@ -36,7 +36,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
    const handleTransactionSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
       if (val === 'NEW') {
-         setDealParams(INITIAL_DEAL);
+         setDealParams(EMPTY_DEAL);
       } else {
          const found = deals.find(d => d.id === val);
          if (found) {
@@ -98,92 +98,102 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
             </div>
 
             {/* 2. MIDDLE: The "Levers" (Simulation Controls) */}
-            <div className="p-6 flex-1 overflow-y-auto space-y-8 relative">
+            <div className="p-4 flex-1 overflow-y-auto space-y-6 relative custom-scrollbar">
                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                   <Sliders size={120} />
                </div>
 
                {/* Amount Slider */}
-               <div>
-                  <div className="flex justify-between mb-2">
-                     <label className="text-xs font-bold text-slate-400 uppercase">Principal Amount</label>
-                     <span className="text-sm font-mono text-white font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: values.currency, maximumFractionDigits: 0 }).format(values.amount)}</span>
+               <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center mb-3">
+                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Principal Amount</label>
+                     <span className="text-xs font-mono text-cyan-700 dark:text-cyan-400 font-bold bg-cyan-100 dark:bg-cyan-950/50 px-2 py-0.5 rounded">
+                        {values.amount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: values.currency, maximumFractionDigits: 0 }).format(values.amount) : '-'}
+                     </span>
                   </div>
                   <input
                      type="range"
-                     min="100000" max="100000000" step="100000"
-                     value={values.amount}
+                     min="0" max="100000000" step="100000"
+                     value={values.amount || 0}
                      onChange={(e) => handleChange(e, 'amount')}
-                     className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 hover:accent-cyan-400 transition-all mb-3"
                   />
-                  <div className="mt-2 flex justify-end">
+                  <div className="flex justify-end">
                      <TextInput
                         type="number"
-                        value={values.amount}
+                        value={values.amount || ''}
                         onChange={(e) => handleChange(e, 'amount')}
-                        className="w-32 text-right"
+                        placeholder="0.00"
+                        className="w-28 text-right text-xs h-7 font-mono"
                      />
                   </div>
                </div>
 
                {/* Duration Slider */}
-               <div>
-                  <div className="flex justify-between mb-2">
-                     <label className="text-xs font-bold text-slate-400 uppercase">{t.tenor}</label>
-                     <span className="text-sm font-mono text-slate-900 dark:text-white font-bold">{values.durationMonths}m</span>
+               <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center mb-3">
+                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t.tenor}</label>
+                     <span className="text-xs font-mono text-slate-700 dark:text-slate-300 font-bold bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded">
+                        {values.durationMonths || 0}m
+                     </span>
                   </div>
                   <input
                      type="range"
-                     min="1" max="360" step="1"
-                     value={values.durationMonths}
+                     min="0" max="360" step="1"
+                     value={values.durationMonths || 0}
                      onChange={(e) => handleChange(e, 'durationMonths')}
-                     className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all mb-3"
                   />
-                  <div className="flex gap-2 mt-2">
-                     <div className="flex-1">
-                        <SelectInput value={values.amortization} onChange={(e) => handleChange(e, 'amortization')} className="w-full">
+                  <div className="flex gap-2 items-center">
+                     <div className="w-1/2">
+                        <SelectInput
+                           value={values.amortization}
+                           onChange={(e) => handleChange(e, 'amortization')}
+                           className="w-full text-xs h-7 py-0"
+                        >
                            <option value="Bullet">Bullet</option>
                            <option value="French">French</option>
                            <option value="Linear">Linear</option>
                         </SelectInput>
                      </div>
-                     <div className="w-24">
+                     <div className="w-1/2">
                         <TextInput
                            type="number"
-                           value={values.durationMonths}
+                           value={values.durationMonths || ''}
                            onChange={(e) => handleChange(e, 'durationMonths')}
-                           className="text-right"
+                           className="w-full text-right text-xs h-7 font-mono"
+                           placeholder="0"
                         />
                      </div>
                   </div>
                </div>
 
                {/* Margin Slider */}
-               <div>
-                  <div className="flex justify-between mb-2">
-                     <label className="text-xs font-bold text-slate-400 uppercase">Target Margin (Spread)</label>
-                     <span className="text-sm font-mono text-cyan-400 font-bold">+{Number(values.marginTarget).toFixed(2)}%</span>
+               <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                  <div className="flex justify-between items-center mb-3">
+                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Target Margin</label>
+                     <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-950/30 px-2 py-0.5 rounded">
+                        +{Number(values.marginTarget || 0).toFixed(2)}%
+                     </span>
                   </div>
                   <input
                      type="range"
                      min="0" max="10" step="0.05"
-                     value={values.marginTarget}
+                     value={values.marginTarget || 0}
                      onChange={(e) => handleChange(e, 'marginTarget')}
-                     className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-all mb-3"
                   />
-                  <div className="flex gap-2 mt-2 items-center">
-                     <div className="flex-1 text-[10px] text-slate-500">
-                        Adjust commercial spread to view RAROC impact.
-                     </div>
+                  <div className="flex gap-2 items-center justify-end">
                      <div className="w-24 relative">
                         <TextInput
                            type="number"
                            step="0.05"
-                           value={values.marginTarget}
+                           value={values.marginTarget || ''}
                            onChange={(e) => handleChange(e, 'marginTarget')}
-                           className="text-right pr-6"
+                           className="w-full text-right text-xs h-7 font-mono pr-6"
+                           placeholder="0.00"
                         />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">%</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-500">%</span>
                      </div>
                   </div>
                </div>
