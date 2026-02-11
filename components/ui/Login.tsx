@@ -79,8 +79,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                                 <img src="https://www.google.com/favicon.ico" alt="Google" className="w-6 h-6" />
                             </div>
                             <div className="text-left">
-                                <div className="text-sm font-bold">{t.continueAs} Google User</div>
-                                <div className="text-xs text-slate-500">@nfq.es only</div>
+                                <div className="text-sm font-bold">Continue with your Google User</div>
                             </div>
                         </div>
                         <svg className="w-6 h-6" viewBox="0 0 24 24">
