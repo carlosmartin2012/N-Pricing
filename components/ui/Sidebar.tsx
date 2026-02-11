@@ -38,10 +38,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
 
     return (
-        <div className={`${isSidebarOpen ? 'w-64' : 'w-16'} bg-black border-r border-slate-800 transition-all duration-300 flex flex-col z-20 shadow-2xl`}>
-            <div className="h-16 flex items-center px-4 border-b border-slate-900">
+        <div className={`${isSidebarOpen ? 'w-64' : 'w-16'} bg-white dark:bg-black border-r border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col z-20 shadow-2xl`}>
+            <div className="h-16 flex items-center px-4 border-b border-slate-100 dark:border-slate-900">
                 <Logo className="w-8 h-8 mr-3 shrink-0" />
-                {isSidebarOpen && <span className="font-bold text-xl tracking-tight text-white">N <span className="text-slate-500 font-light">Pricing</span></span>}
+                {isSidebarOpen && <span className="font-bold text-xl tracking-tight text-slate-900 dark:text-white">Pricing</span>}
             </div>
 
             {/* Main Menu */}
@@ -50,20 +50,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </nav>
 
             {/* Bottom Menu (User & Manual) */}
-            <div className="p-2 border-t border-slate-900 space-y-1">
+            <div className="p-2 border-t border-slate-100 dark:border-slate-900 space-y-1">
                 {bottomNavItems.map((item) => <NavButton key={item.id} item={item} />)}
             </div>
 
             {/* System Status Footer */}
-            <div className="p-4 border-t border-slate-900">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-900">
                 {isSidebarOpen ? (
-                    <div className="bg-slate-900/50 p-3 rounded border border-slate-800/50">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded border border-slate-100 dark:border-slate-800/50">
                         <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">System Status</div>
                         <div className="flex items-center gap-2 text-xs text-emerald-500 font-mono">
                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                             CORE: ONLINE
                         </div>
-                        <div className="text-[10px] text-slate-600 mt-1 font-mono">14ms latency</div>
+                        <div className="text-[10px] text-slate-400 dark:text-slate-600 mt-1 font-mono">14ms latency</div>
                     </div>
                 ) : (
                     <div className="flex justify-center">

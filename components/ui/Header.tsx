@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, Languages } from 'lucide-react';
 import { ViewState } from '../../types';
 
 interface HeaderProps {
@@ -8,6 +8,10 @@ interface HeaderProps {
     currentView: ViewState;
     mainNavItems: { id: string; label: string }[];
     bottomNavItems: { id: string; label: string }[];
+    theme: 'dark' | 'light';
+    setTheme: (theme: 'dark' | 'light') => void;
+    language: 'en' | 'es';
+    setLanguage: (lang: 'en' | 'es') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +20,10 @@ export const Header: React.FC<HeaderProps> = ({
     currentView,
     mainNavItems,
     bottomNavItems,
+    theme,
+    setTheme,
+    language,
+    setLanguage,
 }) => {
     const currentLabel =
         mainNavItems.find(n => n.id === currentView)?.label ||
@@ -23,33 +31,54 @@ export const Header: React.FC<HeaderProps> = ({
         (currentView === 'AI_LAB' ? 'N Pricing AI Lab' : 'Pricing Engine');
 
     return (
-        <header className="h-14 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10">
+        <header className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 transition-colors duration-300">
             <div className="flex items-center gap-4">
-                <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-slate-400 hover:text-white">
+                <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <Menu size={20} />
                 </button>
-                <h1 className="text-sm font-semibold text-slate-200 uppercase tracking-widest border-l border-slate-700 pl-4">
+
+                {/* Theme & Language Toggles */}
+                <div className="flex items-center gap-2 pl-4 border-l border-slate-200 dark:border-slate-700">
+                    <button
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    >
+                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                    </button>
+
+                    <button
+                        onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1.5"
+                        title="Switch Language"
+                    >
+                        <Languages size={18} />
+                        <span className="text-xs font-bold uppercase">{language}</span>
+                    </button>
+                </div>
+
+                <h1 className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-widest border-l border-slate-200 dark:border-slate-700 pl-4">
                     {currentLabel}
                 </h1>
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full">
                     <span className="text-[10px] text-slate-500 font-bold uppercase">Curve Date</span>
-                    <span className="text-xs font-mono text-cyan-400">LIVE (T+0)</span>
+                    <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400">LIVE (T+0)</span>
                 </div>
 
-                <button className="relative text-slate-400 hover:text-white">
+                <button className="relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <Bell size={18} />
-                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-slate-900" />
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-900" />
                 </button>
 
-                <div className="flex items-center gap-3 pl-6 border-l border-slate-700">
+                <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-700">
                     <div className="text-right hidden md:block">
-                        <div className="text-xs font-bold text-white">Alex Chen</div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white">Alex Chen</div>
                         <div className="text-[10px] text-slate-500">Snr. Treasury Mgr</div>
                     </div>
-                    <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center border border-slate-600 text-xs font-bold text-cyan-500">
+                    <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-600 text-xs font-bold text-cyan-600 dark:text-cyan-500">
                         AC
                     </div>
                 </div>

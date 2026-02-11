@@ -5,8 +5,7 @@
 @layer base {
   body {
     font-family: 'Inter', sans-serif;
-    background-color: #0f172a; /* Slate 900 */
-    color: #e2e8f0; /* Slate 200 */
+    @apply bg-white text-slate-900 dark:bg-black dark:text-slate-200 transition-colors duration-300;
   }
 }
 
@@ -15,13 +14,16 @@
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: #0f172a;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 2px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
