@@ -77,7 +77,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
 
       // Create a chat session (Gemini 2.5 Flash)
       const chat = ai.chats.create({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         config: {
           systemInstruction: systemPrompt,
           temperature: 0.5, // Lower temperature for more analytical answers

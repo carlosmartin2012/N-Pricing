@@ -1,6 +1,6 @@
 import React from 'react';
 import { Menu, Bell, Sun, Moon, Languages } from 'lucide-react';
-import { ViewState } from '../../types';
+import { ViewState, UserProfile } from '../../types';
 import { translations, Language } from '../../translations';
 
 interface HeaderProps {
@@ -13,6 +13,7 @@ interface HeaderProps {
     setTheme: (theme: 'dark' | 'light') => void;
     language: Language;
     setLanguage: (lang: Language) => void;
+    user: UserProfile | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
     setTheme,
     language,
     setLanguage,
+    user,
 }) => {
     const t = translations[language];
 
@@ -60,11 +62,11 @@ export const Header: React.FC<HeaderProps> = ({
 
                 <div className="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-slate-700">
                     <div className="text-right hidden md:block">
-                        <div className="text-xs font-bold text-slate-900 dark:text-white">Alex Chen</div>
-                        <div className="text-[10px] text-slate-500">Snr. Treasury Mgr</div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white">{user?.name || 'Guest User'}</div>
+                        <div className="text-[10px] text-slate-500">{user?.role || 'Visitor'} / {user?.department || 'External'}</div>
                     </div>
                     <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-600 text-xs font-bold text-cyan-600 dark:text-cyan-500">
-                        AC
+                        {user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'GU'}
                     </div>
                 </div>
             </div>

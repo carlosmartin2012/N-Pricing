@@ -7,7 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 import { WHITELISTED_EMAILS } from '../../constants';
 
 interface LoginProps {
-    onLogin: () => void;
+    onLogin: (email: string) => void;
     language: Language;
 }
 
@@ -44,7 +44,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                 }
 
                 setError(null);
-                onLogin();
+                onLogin(email);
 
             } catch (err) {
                 console.error(err);

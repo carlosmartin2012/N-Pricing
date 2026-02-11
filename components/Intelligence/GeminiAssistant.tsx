@@ -65,7 +65,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
       `;
 
       const response = await ai.models.generateContentStream({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         contents: [
           { role: 'user', parts: [{ text: input }] }
         ],

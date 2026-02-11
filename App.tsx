@@ -42,6 +42,8 @@ const App: React.FC = () => {
     { id: 4, businessUnit: 'Retail Banking', product: 'Mortgage', segment: 'All', tenor: 'Fixed', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 5 },
   ]);
   const [users, setUsers] = useState<UserProfile[]>(MOCK_USERS);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
   const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>({
     autoApprovalThreshold: 15.0,
     l1Threshold: 10.0,
@@ -57,8 +59,27 @@ const App: React.FC = () => {
     setDealParams(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleLogin = (email: string) => {
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (user) {
+      setCurrentUser(user);
+    } else {
+      // Fallback for whitelisted but not mocked users (shouldn't happen with current constants)
+      setCurrentUser({
+        id: 'USR-TEMP',
+        name: email.split('@')[0].replace('.', ' '),
+        email: email,
+        role: 'Trader',
+        status: 'Active',
+        lastLogin: new Date().toISOString(),
+        department: 'General'
+      });
+    }
+    setIsAuthenticated(true);
+  };
+
   if (!isAuthenticated) {
-    return <Login onLogin={() => setIsAuthenticated(true)} language={language} />;
+    return <Login onLogin={handleLogin} language={language} />;
   }
 
   const mainNavItems = [
@@ -103,6 +124,7 @@ const App: React.FC = () => {
             setTheme={setTheme}
             language={language}
             setLanguage={setLanguage}
+            user={currentUser}
           />
 
           <main className="flex-1 p-4 md:p-6 overflow-hidden relative">
