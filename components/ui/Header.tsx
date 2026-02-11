@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Bell, Sun, Moon, Languages } from 'lucide-react';
 import { ViewState } from '../../types';
+import { translations, Language } from '../../translations';
 
 interface HeaderProps {
     isSidebarOpen: boolean;
@@ -10,8 +11,8 @@ interface HeaderProps {
     bottomNavItems: { id: string; label: string }[];
     theme: 'dark' | 'light';
     setTheme: (theme: 'dark' | 'light') => void;
-    language: 'en' | 'es';
-    setLanguage: (lang: 'en' | 'es') => void;
+    language: Language;
+    setLanguage: (lang: Language) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,10 +26,12 @@ export const Header: React.FC<HeaderProps> = ({
     language,
     setLanguage,
 }) => {
+    const t = translations[language];
+
     const currentLabel =
         mainNavItems.find(n => n.id === currentView)?.label ||
         bottomNavItems.find(n => n.id === currentView)?.label ||
-        (currentView === 'AI_LAB' ? 'N Pricing AI Lab' : 'Pricing Engine');
+        (currentView === 'AI_LAB' ? t.aiLab : t.pricingEngine);
 
     return (
         <header className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-10 transition-colors duration-300">
@@ -42,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                         className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                        title={theme === 'dark' ? `Switch to ${t.light} Mode` : `Switch to ${t.dark} Mode`}
                     >
                         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                     </button>
@@ -64,8 +67,8 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase">Curve Date</span>
-                    <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400">LIVE (T+0)</span>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase">{t.curveDate}</span>
+                    <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-bold">{t.live}</span>
                 </div>
 
                 <button className="relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">

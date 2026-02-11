@@ -1,36 +1,14 @@
 import React from 'react';
+import { translations, Language } from '../../translations';
 import { Sidebar } from './Sidebar';
 
 interface LoginProps {
     onLogin: () => void;
-    language: 'en' | 'es';
+    language: Language;
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
-    const t = {
-        en: {
-            title: 'Pricing',
-            subtitle: 'Real Time Pricing Platform',
-            button: 'Continue as Carlos',
-            email: 'carlos.martin@nfq.es',
-            footer: '© 2024 NFQ ADVISORY SERVICES',
-            terms: 'Terms of Service',
-            privacy: 'Privacy Policy',
-            agree: 'By signing in, you agree to our',
-            and: 'and'
-        },
-        es: {
-            title: 'Pricing',
-            subtitle: 'Plataforma de Pricing en Tiempo Real',
-            button: 'Continuar como Carlos',
-            email: 'carlos.martin@nfq.es',
-            footer: '© 2024 NFQ ADVISORY SERVICES',
-            terms: 'Términos de Servicio',
-            privacy: 'Política de Privacidad',
-            agree: 'Al iniciar sesión, aceptas nuestros',
-            and: 'y'
-        }
-    }[language];
+    const t = translations[language];
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
@@ -38,7 +16,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
             <div className="flex flex-col items-center mb-12">
                 <div className="flex items-center gap-4 mb-2">
                     <img src="/assets/logo.png" alt="Logo" className="w-12 h-12 object-contain" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
-                    <h1 className="text-4xl font-bold text-white tracking-tight">{t.title}</h1>
+                    <h1 className="text-4xl font-bold text-white tracking-tight">{t.pricing}</h1>
                 </div>
                 <p className="text-slate-400 text-lg">{t.subtitle}</p>
             </div>
@@ -55,7 +33,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                                 <img src="https://ui-avatars.com/api/?name=Carlos+Martin&background=random" alt="User" />
                             </div>
                             <div className="text-left">
-                                <div className="text-sm font-bold">{t.button}</div>
+                                <div className="text-sm font-bold">{t.continueAs}</div>
                                 <div className="text-xs text-slate-500">{t.email}</div>
                             </div>
                         </div>

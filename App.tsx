@@ -17,6 +17,8 @@ import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
 import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard } from 'lucide-react';
 import { Login } from './components/ui/Login';
+import { UserConfigModal } from './components/ui/UserConfigModal';
+import { translations, Language } from './translations';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -46,6 +48,9 @@ const App: React.FC = () => {
   });
 
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+
+  const t = translations[language];
 
   const handleParamChange = (key: keyof Transaction, value: any) => {
     setDealParams(prev => ({ ...prev, [key]: value }));
@@ -56,18 +61,19 @@ const App: React.FC = () => {
   }
 
   const mainNavItems = [
-    { id: 'CALCULATOR', label: 'Pricing Engine', icon: Calculator },
-    { id: 'BLOTTER', label: 'Deal Blotter', icon: FileText },
-    { id: 'MARKET_DATA', label: 'Yield Curves', icon: LineChart },
-    { id: 'BEHAVIOURAL', label: 'Behavioural Models', icon: Activity },
-    { id: 'METHODOLOGY', label: 'Methodology', icon: GitBranch },
-    { id: 'ACCOUNTING', label: 'Accounting Ledger', icon: LayoutDashboard },
-    { id: 'CONFIG', label: 'System Config', icon: Settings },
+    { id: 'CALCULATOR', label: t.pricingEngine, icon: Calculator },
+    { id: 'BLOTTER', label: t.dealBlotter, icon: FileText },
+    { id: 'MARKET_DATA', label: t.yieldCurves, icon: LineChart },
+    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity },
+    { id: 'METHODOLOGY', label: t.methodology, icon: GitBranch },
+    { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard },
+    { id: 'CONFIG', label: t.systemConfig, icon: Settings },
   ];
 
   const bottomNavItems = [
-    { id: 'USER_MGMT', label: 'User Management', icon: Users },
-    { id: 'MANUAL', label: 'User Manual', icon: BookOpen },
+    { id: 'USER_CONFIG', label: t.userConfig, icon: Settings },
+    { id: 'USER_MGMT', label: t.userMgmt, icon: Users },
+    { id: 'MANUAL', label: t.manual, icon: BookOpen },
   ];
 
   return (
@@ -80,6 +86,8 @@ const App: React.FC = () => {
           setCurrentView={setCurrentView}
           mainNavItems={mainNavItems}
           bottomNavItems={bottomNavItems}
+          onOpenConfig={() => setIsConfigModalOpen(true)}
+          language={language}
         />
 
         <div className="flex-1 flex flex-col min-w-0 relative">
@@ -113,6 +121,7 @@ const App: React.FC = () => {
                     setClients={setClients}
                     products={products}
                     businessUnits={businessUnits}
+                    language={language}
                   />
                 </div>
                 <div className="lg:col-span-4 h-full min-h-[300px]">
@@ -123,6 +132,7 @@ const App: React.FC = () => {
                     deal={dealParams}
                     setMatchedMethod={setMatchedMethod}
                     approvalMatrix={approvalMatrix}
+                    language={language}
                   />
                 </div>
               </div>
@@ -235,6 +245,15 @@ const App: React.FC = () => {
               activeDeal: dealParams,
               marketContext: `Current Base USD Yield Curve: ${JSON.stringify(MOCK_YIELD_CURVE.slice(0, 5))}...`
             }}
+          />
+
+          <UserConfigModal
+            isOpen={isConfigModalOpen}
+            onClose={() => setIsConfigModalOpen(false)}
+            language={language}
+            setLanguage={setLanguage}
+            theme={theme}
+            setTheme={setTheme}
           />
 
         </div>
