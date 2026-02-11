@@ -38,11 +38,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
                 onClick={() => isConfig ? onOpenConfig() : setCurrentView(item.id as ViewState)}
                 className={`w-full flex items-center px-3 py-3 rounded-md text-sm transition-all ${!isConfig && currentView === item.id
-                    ? 'bg-slate-900 text-white border-l-2 border-cyan-500'
-                    : 'text-slate-500 hover:bg-slate-900 hover:text-slate-300'
+                    ? 'bg-cyan-50 text-cyan-700 border-l-2 border-cyan-600 dark:bg-slate-900 dark:text-white dark:border-cyan-500'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-500 dark:hover:bg-slate-900 dark:hover:text-slate-300'
                     }`}
             >
-                <item.icon size={20} className={!isConfig && currentView === item.id ? 'text-cyan-500' : 'text-slate-600'} />
+                <item.icon size={20} className={!isConfig && currentView === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-slate-500 dark:text-slate-600'} />
                 {isSidebarOpen && <span className="ml-3 font-medium">{item.label}</span>}
             </button>
         );

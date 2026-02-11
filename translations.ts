@@ -30,6 +30,7 @@ export const translations = {
         save: 'Save',
 
         // Views
+        intro: 'Introduction',
         pricingEngine: 'Pricing Engine',
         dealBlotter: 'Deal Blotter',
         yieldCurves: 'Yield Curves',
@@ -96,12 +97,13 @@ export const translations = {
         save: 'Guardar',
 
         // Views
+        intro: 'Introducción',
         pricingEngine: 'Motor de Pricing',
         dealBlotter: 'Blotter de Operaciones',
         yieldCurves: 'Curvas de Tipos',
-        behaviouralModels: 'Modelos de Comportamiento',
+        behaviouralModels: 'Comportamiento',
         methodology: 'Metodología',
-        accountingLedger: 'Libro Contable',
+        accountingLedger: 'Contabilidad',
         systemConfig: 'Config. del Sistema',
         aiLab: 'N Pricing AI Lab',
 

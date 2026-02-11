@@ -50,8 +50,8 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
 
    const manualContent = {
       en: {
-         introTitle: "Welcome to Nexus FTP",
-         introDesc: "The Nexus Funds Transfer Pricing (FTP) Engine is a high-performance calculation platform designed for modern commercial banking. It enables Treasury and Commercial desks to accurately price liquidity, credit risk, and option costs in real-time, bridging the gap between centralized ALM strategy and front-office execution.",
+         introTitle: "Welcome to N Pricing",
+         introDesc: "The N Pricing Engine is a high-performance calculation platform designed for modern commercial banking. It enables Treasury and Commercial desks to accurately price liquidity, credit risk, and option costs in real-time, bridging the gap between centralized ALM strategy and front-office execution.",
          pricingTitle: "Pricing Engine & Calculation",
          pricingDesc: "The core of the application. This module allows users to structure new deals or calculate pricing for existing products.",
          inputs: "Configure Amount, Tenor, Product Type, and Spread Targets via industrial sliders.",
@@ -70,8 +70,8 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
          accountingDesc: "Double-entry bookkeeping view of FTP flows between Business Units and Central Treasury."
       },
       es: {
-         introTitle: "Bienvenido a Nexus FTP",
-         introDesc: "El Motor Nexus FTP (Funds Transfer Pricing) es una plataforma de cálculo de alto rendimiento diseñada para la banca comercial moderna. Permite a las mesas de Tesorería y Comercial estimar con precisión la liquidez, el riesgo de crédito y los costes de opción en tiempo real, cerrando la brecha entre la estrategia ALM centralizada y la ejecución del front-office.",
+         introTitle: "Bienvenido a N Pricing",
+         introDesc: "El Motor N Pricing es una plataforma de cálculo de alto rendimiento diseñada para la banca comercial moderna. Permite a las mesas de Tesorería y Comercial estimar con precisión la liquidez, el riesgo de crédito y los costes de opción en tiempo real, cerrando la brecha entre la estrategia ALM centralizada y la ejecución del front-office.",
          pricingTitle: "Motor de Pricing y Cálculo",
          pricingDesc: "El núcleo de la aplicación. Este módulo permite estructurar nuevas operaciones o calcular precios para productos existentes.",
          inputs: "Configure Importe, Plazo, Tipo de Producto y Objetivos de Spread mediante deslizadores industriales.",
@@ -92,19 +92,19 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
    }[language];
 
    return (
-      <Panel title="Nexus FTP Engine - User Manual" className="h-full">
+      <Panel title={`N Pricing - ${t.manual}`} className="h-full">
          <div className="flex h-full">
             {/* Table of Contents - Hidden on mobile, visible on desktop */}
-            <div className="hidden lg:block w-64 border-r border-slate-800 bg-slate-900/50 p-4 space-y-4 overflow-y-auto">
+            <div className="hidden lg:block w-64 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-4 space-y-4 overflow-y-auto">
                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Contents</h4>
                <nav className="space-y-1">
-                  <TocItem targetId="intro" label="Introduction" />
-                  <TocItem targetId="calculator" label="Pricing Engine" />
-                  <TocItem targetId="blotter" label="Deal Blotter" />
-                  <TocItem targetId="curves" label="Yield Curves" />
-                  <TocItem targetId="behavioural" label="Behavioural Models" />
-                  <TocItem targetId="config" label="System Configuration" />
-                  <TocItem targetId="accounting" label="Accounting Ledger" />
+                  <TocItem targetId="intro" label={t.intro} />
+                  <TocItem targetId="calculator" label={t.pricingEngine} />
+                  <TocItem targetId="blotter" label={t.dealBlotter} />
+                  <TocItem targetId="curves" label={t.yieldCurves} />
+                  <TocItem targetId="behavioural" label={t.behaviouralModels} />
+                  <TocItem targetId="config" label={t.systemConfig} />
+                  <TocItem targetId="accounting" label={t.accountingLedger} />
                </nav>
             </div>
 

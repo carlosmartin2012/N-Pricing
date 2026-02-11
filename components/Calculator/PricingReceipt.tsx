@@ -143,15 +143,15 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
    const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency }).format(n);
 
    return (
-      <Panel title={t.pricingResult || "Profitability & Pricing Construction"} className="h-full border-l-4 border-l-cyan-500 dark:bg-[#0a0a0a]">
+      <Panel title={t.pricingResult || "Profitability & Pricing Construction"} className="h-full border-l-4 border-l-cyan-500 bg-white dark:bg-[#0a0a0a]">
          <div className="flex flex-col h-full">
 
             {/* RAROC Scorecard */}
-            <div className="p-4 bg-slate-900 border-b border-slate-700/50 dark:bg-black">
+            <div className="p-4 bg-slate-50 dark:bg-black border-b border-slate-200 dark:border-slate-700/50">
                <div className="flex justify-between items-start mb-3">
                   <div>
                      <h4 className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Projected RAROC</h4>
-                     <div className={`text-3xl font-mono font-bold tracking-tight ${result.raroc >= approvalMatrix.autoApprovalThreshold ? 'text-emerald-400' : result.raroc > 0 ? 'text-amber-400' : 'text-red-500'}`}>
+                     <div className={`text-3xl font-mono font-bold tracking-tight ${result.raroc >= approvalMatrix.autoApprovalThreshold ? 'text-emerald-600 dark:text-emerald-400' : result.raroc > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-red-500'}`}>
                         {result.raroc.toFixed(2)}%
                      </div>
                      <div className="text-[10px] text-slate-500">Target {deal.targetROE}%</div>
@@ -187,7 +187,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
             </div>
 
             {/* Pricing Waterfall */}
-            <div className="flex-1 p-4 space-y-1 overflow-auto bg-slate-900/50 dark:bg-[#050505]">
+            <div className="flex-1 p-4 space-y-1 overflow-auto bg-white dark:bg-[#050505]">
                <div className="text-[10px] uppercase text-slate-500 font-bold mb-2">Price Construction</div>
 
                <WaterfallItem label="Base Interest Rate" value={result.baseRate} />

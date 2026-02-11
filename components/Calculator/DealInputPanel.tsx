@@ -65,17 +65,17 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
 
    return (
       <Panel title={t.pricingSimulationEngine || "Pricing Simulation Engine"} className="h-full dark:bg-[#0a0a0a]">
-         <div className="flex flex-col h-full">
+         <div className="flex flex-col h-full text-slate-900 dark:text-slate-200">
 
             {/* 1. TOP: Deal Selector & Context (Always Visible) */}
-            <div className="p-4 bg-slate-900 border-b border-slate-800 dark:bg-black">
+            <div className="p-4 bg-white dark:bg-black border-b border-slate-200 dark:border-slate-800">
                <InputGroup label="Active Scenario / Deal Source">
                   <div className="relative">
-                     <FileSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400" />
+                     <FileSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600 dark:text-cyan-400" />
                      <SelectInput
                         value={values.id || ''}
                         onChange={handleTransactionSelect}
-                        className="pl-9 font-bold text-cyan-200 border-cyan-500/50 focus:border-cyan-400"
+                        className="pl-9 font-bold text-cyan-700 dark:text-cyan-200 border-cyan-500/50 focus:border-cyan-400 bg-slate-50 dark:bg-slate-900"
                      >
                         <option value="" disabled>-- Select Existing Deal --</option>
                         {deals.map(d => (
