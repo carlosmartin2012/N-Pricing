@@ -187,15 +187,15 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
             </div>
 
             {/* Pricing Waterfall */}
-            <div className="flex-1 p-4 space-y-1 overflow-auto bg-slate-900/50">
+            <div className="flex-1 p-4 space-y-1 overflow-auto bg-slate-900/50 dark:bg-[#050505]">
                <div className="text-[10px] uppercase text-slate-500 font-bold mb-2">Price Construction</div>
 
                <WaterfallItem label="Base Interest Rate" value={result.baseRate} />
-               <WaterfallItem label="Liquidity Premium" value={result.liquiditySpread} isAdd color="text-amber-400" />
-               <WaterfallItem label="Strategic Spread" value={result.strategicSpread} isAdd color="text-blue-400" />
+               <WaterfallItem label={t.liquidityCost} value={result.liquiditySpread} isAdd color="text-amber-600 dark:text-amber-400" />
+               <WaterfallItem label="Strategic Spread" value={result.strategicSpread} isAdd color="text-blue-600 dark:text-blue-400" />
 
-               <div className="my-1 border-t border-slate-700 border-dashed opacity-50"></div>
-               <WaterfallItem label="FTP (Transfer Price)" value={result.totalFTP} highlight />
+               <div className="my-1 border-t border-slate-200 dark:border-slate-800 border-dashed opacity-50"></div>
+               <WaterfallItem label={t.ftpRate} value={result.totalFTP} highlight />
 
                <div className="pl-2 border-l-2 border-slate-800 ml-1 my-1 space-y-1">
                   <WaterfallItem label="Expected Loss (Credit)" value={result.regulatoryCost} isAdd color="text-red-300" />

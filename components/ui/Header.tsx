@@ -40,25 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <Menu size={20} />
                 </button>
 
-                {/* Theme & Language Toggles */}
-                <div className="flex items-center gap-2 pl-4 border-l border-slate-200 dark:border-slate-700">
-                    <button
-                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                        title={theme === 'dark' ? `Switch to ${t.light} Mode` : `Switch to ${t.dark} Mode`}
-                    >
-                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                    </button>
 
-                    <button
-                        onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1.5"
-                        title="Switch Language"
-                    >
-                        <Languages size={18} />
-                        <span className="text-xs font-bold uppercase">{language}</span>
-                    </button>
-                </div>
 
                 <h1 className="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-widest border-l border-slate-200 dark:border-slate-700 pl-4">
                     {currentLabel}
