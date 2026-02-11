@@ -15,7 +15,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
             {/* Header Logo & Title */}
             <div className="flex flex-col items-center mb-12">
                 <div className="flex items-center gap-4 mb-2">
-                    <img src="/assets/logo_n_latest.jpg" alt="Logo" className="w-12 h-12 object-contain mix-blend-screen" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
+                    <img src="/assets/logo_v3.jpg" alt="Logo" className="w-12 h-12 object-contain mix-blend-screen" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
                     <h1 className="text-4xl font-bold text-white tracking-tight">{t.pricing}</h1>
                 </div>
                 <p className="text-slate-400 text-lg">{t.subtitle}</p>

@@ -22,7 +22,8 @@ import { translations, Language } from './translations';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme] = useState<'dark'>('dark');
+  const setTheme = () => { }; // Fixed: No-op for enforced dark mode
   const [language, setLanguage] = useState<'en' | 'es'>('en');
   const [currentView, setCurrentView] = useState<ViewState>('CALCULATOR');
 

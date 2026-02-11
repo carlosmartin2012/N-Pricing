@@ -61,8 +61,8 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                                     key={lang}
                                     onClick={() => setLanguage(lang)}
                                     className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all ${language === lang
-                                            ? 'border-cyan-500 bg-cyan-500/5 dark:bg-cyan-500/10 text-slate-900 dark:text-white'
-                                            : 'border-slate-100 dark:border-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 text-slate-500'
+                                        ? 'border-cyan-500 bg-cyan-500/5 dark:bg-cyan-500/10 text-slate-900 dark:text-white'
+                                        : 'border-slate-100 dark:border-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 text-slate-500'
                                         }`}
                                 >
                                     <span className="font-bold uppercase">{lang}</span>
@@ -72,31 +72,6 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                         </div>
                     </section>
 
-                    {/* Theme Section */}
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                            {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                            {t.theme}
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            {(['light', 'dark'] as const).map((mode) => (
-                                <button
-                                    key={mode}
-                                    onClick={() => setTheme(mode)}
-                                    className={`flex flex-col items-start gap-2 p-4 rounded-xl border-2 transition-all ${theme === mode
-                                            ? 'border-cyan-500 bg-cyan-500/5 dark:bg-cyan-500/10 text-slate-900 dark:text-white'
-                                            : 'border-slate-100 dark:border-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 text-slate-500'
-                                        }`}
-                                >
-                                    <div className="w-full flex items-center justify-between">
-                                        {mode === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
-                                        {theme === mode && <Check size={16} className="text-cyan-500" />}
-                                    </div>
-                                    <span className="font-bold">{t[mode]}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
 
                     {/* Contrast Note */}
                     <div className="p-4 bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800/50">
