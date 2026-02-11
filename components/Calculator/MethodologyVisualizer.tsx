@@ -125,12 +125,9 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
                      </div>
                   </div>
                </div>
-               </div>
-      </div>
-   )
-}
-         </div >
-      </Panel >
+            )}
+         </div>
+      </Panel>
    );
 };
 
