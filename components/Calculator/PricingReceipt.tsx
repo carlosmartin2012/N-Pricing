@@ -19,6 +19,16 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
    // SIMULATE REAL-TIME CALCULATION ENGINE
    const result: FTPResult = useMemo(() => {
+      // 0. Empty State Check
+      if (!deal.productType || deal.amount === 0) {
+         setMatchedMethod('-');
+         return {
+            baseRate: 0, liquiditySpread: 0, strategicSpread: 0, optionCost: 0, regulatoryCost: 0, operationalCost: 0, capitalCharge: 0, esgTransitionCharge: 0, esgPhysicalCharge: 0,
+            floorPrice: 0, technicalPrice: 0, targetPrice: 0, totalFTP: 0, finalClientRate: 0, raroc: 0, economicProfit: 0, approvalLevel: 'Rejected',
+            matchedMethodology: 'Matched Maturity' as any, matchReason: '', accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 }
+         };
+      }
+
       // 1. Base Interest Rate (Interés)
       let baseRate = 3.0 + (deal.durationMonths * 0.08);
       if (deal.currency === 'EUR') baseRate -= 1.0;
