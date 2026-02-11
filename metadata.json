@@ -1,0 +1,5 @@
+{
+  "name": "N-Pricing",
+  "description": "A high-performance, real-time Funds Transfer Pricing calculation engine for commercial banking. Features a Palantir-inspired industrial UI with dark mode, real-time yield curve integration, and granular methodology configuration.",
+  "requestFramePermissions": []
+}
