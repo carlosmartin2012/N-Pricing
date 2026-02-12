@@ -1,9 +1,107 @@
 import { supabase } from './supabaseClient';
 import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint } from '../types';
 
-// Helper to convert snake_case (DB) to camelCase (TS) and vice-versa if needed
-// For simplicity, we designed the DB schema to match the TS interfaces where possible,
-// but some adjustments (like as_of_date -> asOfDate) might be handled here.
+// --- MAPPING HELPERS ---
+
+const mapDealToDB = (deal: Transaction) => ({
+    id: deal.id || undefined,
+    status: deal.status,
+    client_id: deal.clientId,
+    client_type: deal.clientType,
+    business_unit: deal.businessUnit,
+    funding_business_unit: deal.fundingBusinessUnit,
+    business_line: deal.businessLine,
+    product_type: deal.productType,
+    currency: deal.currency,
+    amount: deal.amount,
+    start_date: deal.startDate,
+    duration_months: deal.durationMonths,
+    amortization: deal.amortization,
+    repricing_freq: deal.repricingFreq,
+    margin_target: deal.marginTarget,
+    behavioural_model_id: deal.behaviouralModelId,
+    risk_weight: deal.riskWeight,
+    capital_ratio: deal.capitalRatio,
+    target_roe: deal.targetROE,
+    operational_cost_bps: deal.operationalCostBps,
+    transition_risk: deal.transitionRisk,
+    physical_risk: deal.physicalRisk,
+    updated_at: new Date().toISOString()
+});
+
+const mapDealFromDB = (row: any): Transaction => ({
+    id: row.id,
+    status: row.status,
+    clientId: row.client_id,
+    clientType: row.client_type,
+    businessUnit: row.business_unit,
+    fundingBusinessUnit: row.funding_business_unit,
+    businessLine: row.business_line,
+    productType: row.product_type,
+    currency: row.currency,
+    amount: row.amount,
+    startDate: row.start_date,
+    durationMonths: row.duration_months,
+    amortization: row.amortization,
+    repricingFreq: row.repricing_freq,
+    marginTarget: row.margin_target,
+    behaviouralModelId: row.behavioural_model_id,
+    riskWeight: row.risk_weight,
+    capitalRatio: row.capital_ratio,
+    targetROE: row.target_roe,
+    operationalCostBps: row.operational_cost_bps,
+    transitionRisk: row.transition_risk,
+    physicalRisk: row.physical_risk
+});
+
+const mapAuditToDB = (entry: any) => ({
+    user_email: entry.userEmail,
+    user_name: entry.userName,
+    action: entry.action,
+    module: entry.module,
+    description: entry.description,
+    details: entry.details,
+    timestamp: entry.timestamp || new Date().toISOString()
+});
+
+const mapAuditFromDB = (row: any): AuditEntry => ({
+    id: row.id,
+    timestamp: row.timestamp,
+    userEmail: row.user_email,
+    userName: row.user_name,
+    action: row.action,
+    module: row.module,
+    description: row.description,
+    details: row.details
+});
+
+const mapModelToDB = (model: BehaviouralModel) => ({
+    id: model.id,
+    name: model.name,
+    type: model.type,
+    nmd_method: model.nmdMethod,
+    description: model.description,
+    core_ratio: model.coreRatio,
+    decay_rate: model.decayRate,
+    beta_factor: model.betaFactor,
+    replication_profile: model.replicationProfile,
+    cpr: model.cpr,
+    penalty_exempt: model.penaltyExempt
+});
+
+const mapModelFromDB = (row: any): BehaviouralModel => ({
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    nmdMethod: row.nmd_method,
+    description: row.description,
+    coreRatio: row.core_ratio,
+    decayRate: row.decay_rate,
+    betaFactor: row.beta_factor,
+    replicationProfile: row.replication_profile,
+    cpr: row.cpr,
+    penaltyExempt: row.penalty_exempt
+});
 
 export const supabaseService = {
     // --- DEALS ---
@@ -17,21 +115,17 @@ export const supabaseService = {
             console.error('Error fetching deals:', error);
             return [];
         }
-        return data as unknown as Transaction[];
+        return (data || []).map(mapDealFromDB);
     },
 
     async upsertDeal(deal: Transaction) {
         const { data, error } = await supabase
             .from('deals')
-            .upsert({
-                ...deal,
-                id: deal.id || undefined, // Let Supabase generate UUID if missing
-                updated_at: new Date().toISOString()
-            })
+            .upsert(mapDealToDB(deal))
             .select();
 
         if (error) console.error('Error saving deal:', error);
-        return data;
+        return data ? mapDealFromDB(data[0]) : null;
     },
 
     async deleteDeal(id: string) {
@@ -54,16 +148,13 @@ export const supabaseService = {
             console.error('Error fetching audit log:', error);
             return [];
         }
-        return data as unknown as AuditEntry[];
+        return (data || []).map(mapAuditFromDB);
     },
 
     async addAuditEntry(entry: Omit<AuditEntry, 'id' | 'timestamp'>) {
         const { error } = await supabase
             .from('audit_log')
-            .insert({
-                ...entry,
-                timestamp: new Date().toISOString()
-            });
+            .insert(mapAuditToDB(entry));
         if (error) console.error('Error adding audit entry:', error);
     },
 
@@ -73,15 +164,22 @@ export const supabaseService = {
             .from('behavioural_models')
             .select('*');
         if (error) return [];
-        return data as unknown as BehaviouralModel[];
+        return (data || []).map(mapModelFromDB);
     },
 
     async saveModel(model: BehaviouralModel) {
-        await supabase.from('behavioural_models').upsert(model);
+        const { error } = await supabase
+            .from('behavioural_models')
+            .upsert(mapModelToDB(model));
+        if (error) console.error('Error saving model:', error);
     },
 
     async deleteModel(id: string) {
-        await supabase.from('behavioural_models').delete().eq('id', id);
+        const { error } = await supabase
+            .from('behavioural_models')
+            .delete()
+            .eq('id', id);
+        if (error) console.error('Error deleting model:', error);
     },
 
     // --- YIELD CURVES ---
@@ -111,6 +209,12 @@ export const supabaseService = {
         return supabase
             .channel('schema-db-changes')
             .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+                // Map the payload data if it exists
+                if (payload.new) {
+                    if (payload.table === 'deals') payload.new = mapDealFromDB(payload.new);
+                    if (payload.table === 'audit_log') payload.new = mapAuditFromDB(payload.new);
+                    if (payload.table === 'behavioural_models') payload.new = mapModelFromDB(payload.new);
+                }
                 onUpdate(payload);
             })
             .subscribe();

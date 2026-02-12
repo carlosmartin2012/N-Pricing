@@ -25,7 +25,8 @@ import { storage } from './utils/storage';
 import { supabaseService } from './utils/supabaseService';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => storage.loadCurrentUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(!!storage.loadCurrentUser());
   const [theme] = useState<'dark'>('dark');
   const setTheme = () => { }; // Fixed: No-op for enforced dark mode
   const [language, setLanguage] = useState<'en' | 'es'>('en');
@@ -48,7 +49,6 @@ const App: React.FC = () => {
   ]));
   const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>(() => storage.loadLocal('n_pricing_behavioural', MOCK_BEHAVIOURAL_MODELS));
   const [users, setUsers] = useState<UserProfile[]>(() => storage.getUsersLocal().length > 0 ? storage.getUsersLocal() : MOCK_USERS);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.loadLocal('n_pricing_approval_matrix', {
     autoApprovalThreshold: 15.0,
@@ -126,6 +126,7 @@ const App: React.FC = () => {
     }
     setCurrentUser(loggedUser);
     setIsAuthenticated(true);
+    storage.saveCurrentUser(loggedUser);
 
     storage.addAuditEntry({
       userEmail: email,
@@ -134,6 +135,12 @@ const App: React.FC = () => {
       module: 'CALCULATOR',
       description: `User ${loggedUser.name} logged into the system.`
     });
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    storage.saveCurrentUser(null);
   };
 
   if (!isAuthenticated) {
@@ -185,6 +192,7 @@ const App: React.FC = () => {
             language={language}
             setLanguage={setLanguage}
             user={currentUser}
+            onLogout={handleLogout}
           />
 
           <main className="flex-1 p-3 md:p-6 overflow-auto relative h-full custom-scrollbar">

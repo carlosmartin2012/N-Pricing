@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
     AUDIT_LOG: 'n_pricing_audit_log',
     CONFIG_RULES: 'n_pricing_rules',
     BEHAVIOURAL: 'n_pricing_behavioural',
+    CURRENT_USER: 'n_pricing_current_user',
 };
 
 export const storage = {
@@ -24,6 +25,16 @@ export const storage = {
         } catch (e) {
             return defaultValue;
         }
+    },
+
+    // --- SESSION CONTEXT ---
+    saveCurrentUser: (user: UserProfile | null) => {
+        if (user) storage.saveLocal(STORAGE_KEYS.CURRENT_USER, user);
+        else localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    },
+
+    loadCurrentUser: (): UserProfile | null => {
+        return storage.loadLocal<UserProfile | null>(STORAGE_KEYS.CURRENT_USER, null);
     },
 
     // --- NEW SUPABASE ASYNC API ---

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Panel } from '../ui/LayoutComponents';
-import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard } from 'lucide-react';
+import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles } from 'lucide-react';
 import { translations, Language } from '../../translations';
 
 // --- Helper Components ---
@@ -67,7 +67,11 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
          configTitle: "System Configuration",
          configDesc: "Admin panel for setting global rules and master data.",
          accountingTitle: "Accounting Ledger",
-         accountingDesc: "Double-entry bookkeeping view of FTP flows between Business Units and Central Treasury."
+         accountingDesc: "Double-entry bookkeeping view of FTP flows between Business Units and Central Treasury.",
+         collabTitle: "Real-Time Collaboration",
+         collabDesc: "N Pricing is a collaborative multi-user platform. All changes are synchronized instantly across all connected users.",
+         realtime: "Broadcast changes in deals, models, and curves to the entire organization as they happen.",
+         centralized: "Single source of truth powered by Supabase, replacing local storage for enterprise-grade reliability."
       },
       es: {
          introTitle: "Bienvenido a N Pricing",
@@ -87,7 +91,11 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
          configTitle: "Configuración del Sistema",
          configDesc: "Panel de administración para establecer reglas globales y datos maestros.",
          accountingTitle: "Libro Contable",
-         accountingDesc: "Vista de contabilidad de doble entrada de los flujos FTP entre Unidades de Negocio y Tesorería Central."
+         accountingDesc: "Vista de contabilidad de doble entrada de los flujos FTP entre Unidades de Negocio y Tesorería Central.",
+         collabTitle: "Colaboración en Tiempo Real",
+         collabDesc: "N Pricing es una plataforma colaborativa multiusuario. Todos los cambios se sincronizan instantáneamente entre todos los usuarios conectados.",
+         realtime: "Difusión de cambios en operaciones, modelos y curvas a toda la organización según ocurren.",
+         centralized: "Fuente única de verdad impulsada por Supabase, reemplazando el almacenamiento local para una fiabilidad empresarial."
       }
    }[language];
 
@@ -99,6 +107,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Contents</h4>
                <nav className="space-y-1">
                   <TocItem targetId="intro" label={t.intro} />
+                  <TocItem targetId="collab" label={manualContent.collabTitle} />
                   <TocItem targetId="calculator" label={t.pricingEngine} />
                   <TocItem targetId="blotter" label={t.dealBlotter} />
                   <TocItem targetId="curves" label={t.yieldCurves} />
@@ -127,6 +136,18 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
 
                   <hr className="border-slate-800" />
 
+                  {/* Collaboration Section */}
+                  <section id="collab" className="space-y-4 pt-4">
+                     <SectionHeader icon={Sparkles} title={manualContent.collabTitle} color="text-cyan-400" />
+                     <p className="text-slate-400">
+                        {manualContent.collabDesc}
+                     </p>
+                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <FeatureCard title="Real-Time Sync" desc={manualContent.realtime} />
+                        <FeatureCard title="Cloud Persistence" desc={manualContent.centralized} />
+                     </ul>
+                  </section>
+
                   {/* Pricing Engine */}
                   <section id="calculator" className="space-y-4 pt-4">
                      <SectionHeader icon={Calculator} title={manualContent.pricingTitle} color="text-emerald-400" />
@@ -150,6 +171,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                      <ul className="list-disc pl-5 space-y-2 text-slate-400 text-sm">
                         <li><strong className="text-slate-200">Search & Filter:</strong> Locate deals by Client Name, ID, or Status.</li>
                         <li><strong className="text-slate-200">CRUD Actions:</strong> Create new deals manually, edit existing terms, or delete records.</li>
+                        <li><strong className="text-slate-200">Shared View:</strong> Changes made by any member of the team appear instantly in your blotter.</li>
                         <li><strong className="text-slate-200">Import/Export:</strong> Bulk upload via CSV/XML and export data for external reporting.</li>
                      </ul>
                   </section>
@@ -165,7 +187,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                         <ul className="space-y-2 text-sm text-slate-400">
                            <li>• Multi-currency support (USD, EUR, GBP, JPY).</li>
                            <li>• <strong>Shock Analysis:</strong> Apply parallel shifts (bps) to analyze pricing impact.</li>
-                           <li>• Historical audit trail of curve snapshots.</li>
+                           <li>• <strong>Centralized History:</strong> Shared audit trail of curve snapshots across the organization.</li>
                         </ul>
                      </div>
                   </section>
@@ -196,6 +218,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                         <li><strong>Master Data:</strong> Manage Client Registry, Business Units, and Product Definitions.</li>
                         <li><strong>ESG:</strong> Configure carbon penalties (Transition Risk) and climate risk add-ons (Physical Risk).</li>
                         <li><strong>Governance:</strong> Set RAROC thresholds for auto-approval vs. committee review.</li>
+                        <li><strong>System Audit:</strong> Full real-time traceability of all user actions in the administrative log.</li>
                      </ul>
                   </section>
 
@@ -221,6 +244,5 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
 };
 
 export default UserManual;
-
 
 

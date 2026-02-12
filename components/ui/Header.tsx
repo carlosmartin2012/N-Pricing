@@ -14,6 +14,7 @@ interface HeaderProps {
     language: Language;
     setLanguage: (lang: Language) => void;
     user: UserProfile | null;
+    onLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
     language,
     setLanguage,
     user,
+    onLogout,
 }) => {
     const t = translations[language];
 
@@ -65,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="text-xs font-bold text-slate-900 dark:text-white">{user?.name || 'Guest User'}</div>
                         <div className="text-[10px] text-slate-500">{user?.role || 'Visitor'} / {user?.department || 'External'}</div>
                     </div>
-                    <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-600 text-xs font-bold text-cyan-600 dark:text-cyan-500">
+                    <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-200 dark:border-slate-600 text-xs font-bold text-cyan-600 dark:text-cyan-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Logout" onClick={onLogout}>
                         {user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'GU'}
                     </div>
                 </div>

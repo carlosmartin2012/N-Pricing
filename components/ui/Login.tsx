@@ -57,14 +57,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     });
 
     return (
-        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 space-y-8">
             {/* Header Logo & Title */}
-            <div className="flex flex-col items-center mb-12">
-                <div className="flex items-center gap-4 mb-2">
-                    <img src="/assets/logo_final.png" alt="Logo" className="w-12 h-12 object-contain mix-blend-screen" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
-                    <h1 className="text-4xl font-bold text-white tracking-tight">{t.pricing}</h1>
+            <div className="flex flex-col items-center">
+                <div className="flex items-center gap-4 mb-3">
+                    <img src="/assets/logo_final.png" alt="Logo" className="w-14 h-14 object-contain mix-blend-screen" onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/48?text=N')} />
+                    <h1 className="text-5xl font-bold text-white tracking-tight">{t.pricing}</h1>
                 </div>
-                <p className="text-slate-400 text-lg">{t.subtitle}</p>
+                <p className="text-slate-400 text-xl font-light italic opacity-80">{t.subtitle}</p>
             </div>
 
             {/* Login Card */}
@@ -105,7 +105,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
             </div>
 
             {/* Footer */}
-            <div className="mt-auto pt-12 text-[10px] text-slate-600 tracking-widest font-medium">
+            <div className="pt-8 text-[10px] text-slate-600 tracking-[0.2em] font-medium uppercase opacity-50">
                 {t.footer}
             </div>
         </div>
