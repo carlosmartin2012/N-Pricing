@@ -32,7 +32,8 @@ export const WHITELISTED_EMAILS = [
   'alejandro.lloveras@nfq.es',
   'gregorio.gonzalo@nfq.es',
   'francisco.herrero@nfq.es',
-  'martin.sanz@nfq.es'
+  'martin.sanz@nfq.es',
+  'roberto.flores@nfq.es'
 ];
 
 export const MOCK_USERS: UserProfile[] = [
@@ -41,6 +42,7 @@ export const MOCK_USERS: UserProfile[] = [
   { id: 'USR-003', name: 'Gregorio Gonzalo', email: 'gregorio.gonzalo@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: 'Never', department: 'Risk Control' },
   { id: 'USR-004', name: 'Francisco Herrero', email: 'francisco.herrero@nfq.es', role: 'Auditor', status: 'Active', lastLogin: 'Never', department: 'Audit' },
   { id: 'USR-005', name: 'Martin Sanz', email: 'martin.sanz@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
+  { id: 'USR-006', name: 'Roberto Flores', email: 'roberto.flores@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Management' },
 ];
 
 export const INITIAL_DEAL: Transaction = {
