@@ -8,10 +8,11 @@ import { WHITELISTED_EMAILS } from '../../constants';
 
 interface LoginProps {
     onLogin: (email: string) => void;
+    whitelistedEmails?: string[];
     language: Language;
 }
 
-export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
+export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, language }) => {
     const t = translations[language];
     const [error, setError] = React.useState<string | null>(null);
 
@@ -38,7 +39,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                 }
 
                 // Check Whitelist
-                if (!WHITELISTED_EMAILS.includes(email)) {
+                const allowed = whitelistedEmails || WHITELISTED_EMAILS;
+                if (!allowed.some(e => e.toLowerCase() === email.toLowerCase())) {
                     setError('Access Denied: Your email is not whitelisted.');
                     return;
                 }

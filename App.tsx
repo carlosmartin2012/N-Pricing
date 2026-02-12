@@ -144,7 +144,7 @@ const App: React.FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} language={language} />;
+    return <Login onLogin={handleLogin} whitelistedEmails={users.map(u => u.email)} language={language} />;
   }
 
   const mainNavItems = [
