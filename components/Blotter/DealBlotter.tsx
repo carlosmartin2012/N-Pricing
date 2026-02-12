@@ -7,6 +7,7 @@ import { MOCK_BEHAVIOURAL_MODELS } from '../../constants';
 import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus } from 'lucide-react';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
+import { translations, Language } from '../../translations';
 
 interface Props {
   deals: Transaction[];
@@ -14,11 +15,13 @@ interface Props {
   products: ProductDefinition[];
   clients: ClientEntity[];
   businessUnits: BusinessUnit[];
+  language: Language;
 }
 
-const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits }) => {
+const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
+  const t = translations[language];
 
   // Drawer States
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -68,7 +71,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   };
 
   const filteredDeals = deals.filter(deal => {
-    // Search now matches ID or Client ID
     const matchesSearch = deal.clientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (deal.id || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'All' || deal.status === filterStatus;
@@ -134,7 +136,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     }
   }
 
-  // Helper to render the full form inside drawers
   const renderDealForm = () => {
     if (!selectedDeal) return null;
     return (
@@ -144,7 +145,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           <div className="text-sm font-mono text-cyan-400">{selectedDeal.id}</div>
         </div>
 
-        {/* Client Section */}
         <div className="space-y-4 border-b border-slate-800 pb-4">
           <h4 className="text-xs font-bold text-slate-400 uppercase">Counterparty</h4>
           <InputGroup label="Client ID">
@@ -177,7 +177,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           </div>
         </div>
 
-        {/* Product Section */}
         <div className="space-y-4 border-b border-slate-800 pb-4">
           <h4 className="text-xs font-bold text-slate-400 uppercase">Product Structure</h4>
           <InputGroup label="Product Definition">
@@ -208,7 +207,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           </InputGroup>
         </div>
 
-        {/* Advanced Section */}
         <div className="space-y-4 border-b border-slate-800 pb-4">
           <h4 className="text-xs font-bold text-slate-400 uppercase">Risk & Capital</h4>
           <div className="grid grid-cols-2 gap-4">
@@ -266,120 +264,117 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   }
 
   return (
-    <Panel title="Transaction Deal Blotter" className="h-full">
-      <div className="flex flex-col h-full">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex flex-wrap gap-4 justify-between items-center">
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative group">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
-              <input
-                type="text"
-                placeholder="Search deals..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 w-64 transition-all"
-              />
-            </div>
-
-            <div className="flex bg-white dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-700 p-0.5">
-              {['All', 'Pending', 'Review', 'Booked', 'Rejected'].map(status => (
-                <button
-                  key={status}
-                  onClick={() => setFilterStatus(status)}
-                  className={`px-3 py-1 text-[10px] uppercase font-bold rounded-sm transition-colors ${filterStatus === status
-                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
+    <Panel
+      title={t.dealBlotter}
+      className="h-full overflow-hidden"
+      actions={
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsImportOpen(true)}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors"
+          >
+            <Upload size={14} /> <span className="hidden sm:inline">Import</span>
+          </button>
+          <button
+            onClick={handleNewDeal}
+            className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs flex items-center gap-1 transition-colors font-bold shadow-lg shadow-cyan-900/20"
+          >
+            <Plus size={14} /> <span className="hidden sm:inline">New Deal</span>
+          </button>
+        </div>
+      }
+    >
+      <div className="flex flex-col h-full bg-slate-50 dark:bg-black">
+        {/* Blotter Toolbar */}
+        <div className="p-3 md:p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white dark:bg-slate-950">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search Client or ID..."
+              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg pl-10 pr-4 py-2 text-xs focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition-all dark:text-white"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={handleNewDeal}
-              className="flex items-center gap-2 px-3 py-1.5 bg-cyan-600 text-white rounded border border-cyan-500 text-xs hover:bg-cyan-500 transition-colors font-bold"
-            >
-              <Plus size={12} /> New Deal
-            </button>
-            <button
-              onClick={() => setIsImportOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-900 rounded text-xs hover:bg-cyan-100 dark:hover:bg-cyan-900/60 transition-colors"
-            >
-              <Upload size={12} /> Import
-            </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-700 text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-              <Download size={12} /> Export
+          <div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            <div className="flex items-center gap-2 shrink-0">
+              <Filter size={14} className="text-slate-400" />
+              <select
+                className="bg-transparent text-xs font-bold text-slate-600 dark:text-slate-400 outline-none border-none py-1 cursor-pointer"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="All">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+            <button className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors shrink-0">
+              <Download size={14} /> Export CSV
             </button>
           </div>
         </div>
 
-        {/* Table Container */}
-        <div className="flex-1 overflow-auto bg-white dark:bg-slate-900 relative">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-950 sticky top-0 z-10 shadow-sm">
-              <tr>
-                <th className="p-3 pl-4 text-[10px] uppercase font-bold text-slate-500 border-b border-r border-slate-200 dark:border-slate-800 w-32">Deal ID</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-r border-slate-200 dark:border-slate-800">Client ID</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-r border-slate-200 dark:border-slate-800 w-24">Product</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-r border-slate-200 dark:border-slate-800 w-24 text-right">Amount</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-r border-slate-200 dark:border-slate-800 w-20 text-right">Target Rate</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-r border-slate-200 dark:border-slate-800 w-28">Start Date</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 dark:border-slate-800 w-28 text-center">Status</th>
-                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-200 dark:border-slate-800 w-20 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 text-xs text-slate-700 dark:text-slate-300">
-              {filteredDeals.map((deal) => (
-                <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 group transition-colors">
-                  <td className="p-3 pl-4 border-r border-slate-100 dark:border-slate-800/50 font-mono text-cyan-600 dark:text-cyan-500/80 group-hover:text-cyan-500 dark:group-hover:text-cyan-400">
-                    {deal.id}
-                  </td>
-                  <td className="p-3 border-r border-slate-100 dark:border-slate-800/50 font-medium text-slate-900 dark:text-slate-200">
-                    {deal.clientId}
-                  </td>
-                  <td className="p-3 border-r border-slate-100 dark:border-slate-800/50">
-                    <div className="flex items-center gap-2">
-                      {deal.productType.includes('LOAN') ? <ArrowUpRight size={12} className="text-emerald-500" /> : <ArrowDownLeft size={12} className="text-amber-500" />}
-                      {deal.productType}
-                    </div>
-                  </td>
-                  <td className="p-3 border-r border-slate-100 dark:border-slate-800/50 text-right font-mono text-slate-900 dark:text-slate-200">
-                    {fmtCurrency(deal.amount, deal.currency)}
-                  </td>
-                  <td className="p-3 border-r border-slate-100 dark:border-slate-800/50 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
-                    {(3.0 + deal.marginTarget).toFixed(2)}%
-                  </td>
-                  <td className="p-3 border-r border-slate-100 dark:border-slate-800/50 text-slate-500 dark:text-slate-400">
-                    {deal.startDate}
-                  </td>
-                  <td className="p-3 border-r border-slate-100 dark:border-slate-800/50 text-center">
-                    <Badge variant={
-                      deal.status === 'Booked' ? 'success' :
-                        deal.status === 'Pending' ? 'warning' :
-                          deal.status === 'Rejected' ? 'danger' : 'default'
-                    }>
-                      {deal.status}
-                    </Badge>
-                  </td>
-                  <td className="p-3 text-center flex justify-center gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => handleEdit(deal)} className="text-slate-400 hover:text-cyan-500"><Edit size={14} /></button>
-                    <button onClick={() => handleDelete(deal)} className="text-slate-400 hover:text-red-500"><Trash2 size={14} /></button>
-                  </td>
-                </tr>
-              ))}
-              {filteredDeals.length === 0 && (
+        <div className="flex-1 overflow-auto custom-scrollbar">
+          <div className="inline-block min-w-full align-middle">
+            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+              <thead className="bg-slate-50/50 dark:bg-slate-900/50 sticky top-0 z-10 backdrop-blur-sm">
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-500">
-                    No deals found matching your criteria.
-                  </td>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">Transaction ID</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider">Client / Type</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Product</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Tenor</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Margin</th>
+                  <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider w-10"></th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-black">
+                {filteredDeals.map((deal) => (
+                  <tr key={deal.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors group">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">{deal.id}</div>
+                      <div className="text-[9px] text-slate-400">{deal.startDate}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="text-xs font-bold text-slate-900 dark:text-slate-200">{deal.clientId}</div>
+                      <div className="text-[10px] text-slate-500">{deal.clientType}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap hidden md:table-cell">
+                      <Badge variant="outline" className="text-[9px] font-bold">{deal.productType}</Badge>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {fmtCurrency(deal.amount, deal.currency)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-center hidden sm:table-cell">
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">{deal.durationMonths}m</span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 hidden lg:table-cell">
+                      +{deal.marginTarget.toFixed(2)}%
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      <Badge variant={
+                        deal.status === 'Approved' ? 'success' :
+                          deal.status === 'Rejected' ? 'danger' : 'warning'
+                      } className="text-[9px]">
+                        {deal.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => handleEdit(deal)} className="p-1 text-slate-400 hover:text-cyan-500 transition-colors"><Edit size={14} /></button>
+                        <button onClick={() => handleDelete(deal)} className="p-1 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Footer Stats */}
@@ -421,7 +416,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           {renderDealForm()}
         </Drawer>
 
-        {/* Import Drawer (Replaced with FileUploadModal) */}
+        {/* Import Drawer (FileUploadModal) */}
         <FileUploadModal
           isOpen={isImportOpen}
           onClose={() => setIsImportOpen(false)}
@@ -431,7 +426,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           templateContent={dealTemplate}
         />
 
-        {/* Delete Confirmation Drawer (Mini) */}
+        {/* Delete Confirmation Drawer */}
         <Drawer
           isOpen={isDeleteOpen}
           onClose={() => setIsDeleteOpen(false)}
@@ -453,7 +448,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
             </p>
           </div>
         </Drawer>
-
       </div>
     </Panel>
   );

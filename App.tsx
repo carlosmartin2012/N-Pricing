@@ -135,9 +135,10 @@ const App: React.FC = () => {
           bottomNavItems={bottomNavItems}
           onOpenConfig={() => setIsConfigModalOpen(true)}
           language={language}
+          onClose={() => setSidebarOpen(false)}
         />
 
-        <div className="flex-1 flex flex-col min-w-0 relative">
+        <div className="flex-1 flex flex-col min-w-0 relative h-full">
 
           <Header
             isSidebarOpen={isSidebarOpen}
@@ -152,14 +153,14 @@ const App: React.FC = () => {
             user={currentUser}
           />
 
-          <main className="flex-1 p-4 md:p-6 overflow-hidden relative">
+          <main className="flex-1 p-3 md:p-6 overflow-auto relative h-full custom-scrollbar">
             <div className="absolute inset-0 pointer-events-none opacity-[0.02]"
               style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
             </div>
 
             {currentView === 'CALCULATOR' && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full relative z-0">
-                <div className="lg:col-span-4 h-full min-h-[500px]">
+              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 min-h-full">
+                <div className="lg:col-span-4 w-full">
                   <DealInputPanel
                     values={dealParams}
                     onChange={handleParamChange}
@@ -173,10 +174,10 @@ const App: React.FC = () => {
                     behaviouralModels={behaviouralModels}
                   />
                 </div>
-                <div className="lg:col-span-4 h-full min-h-[300px]">
+                <div className="lg:col-span-4 w-full">
                   <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
                 </div>
-                <div className="lg:col-span-4 h-full min-h-[500px]">
+                <div className="lg:col-span-4 w-full">
                   <PricingReceipt
                     deal={dealParams}
                     setMatchedMethod={setMatchedMethod}
@@ -201,7 +202,7 @@ const App: React.FC = () => {
 
             {currentView === 'MARKET_DATA' && (
               <div className="h-full relative z-0">
-                <YieldCurvePanel />
+                <YieldCurvePanel language={language} />
               </div>
             )}
 
