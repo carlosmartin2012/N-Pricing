@@ -50,17 +50,14 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
       setDrawerOpen(true);
    };
 
-   const handleSave = () => {
+   const handleSave = async () => {
       if (editingModel && editingModel.id) {
-         // Check if updating or adding
          const exists = models.find(m => m.id === editingModel.id);
-         if (exists) {
-            setModels(models.map(m => m.id === editingModel.id ? editingModel as BehaviouralModel : m));
-         } else {
-            setModels([...models, editingModel as BehaviouralModel]);
-         }
 
-         storage.addAuditEntry({
+         // Update Supabase (Realtime subscription in App.tsx will update local state)
+         await storage.saveBehaviouralModel(editingModel as BehaviouralModel);
+
+         await storage.addAuditEntry({
             userEmail: 'carlos.martin@nfq.es',
             userName: 'Carlos Martin',
             action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
@@ -69,6 +66,20 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
          });
 
          setDrawerOpen(false);
+      }
+   }
+
+   const handleDelete = async (id: string) => {
+      if (window.confirm('Are you sure you want to delete this model?')) {
+         await storage.deleteBehaviouralModel(id);
+
+         await storage.addAuditEntry({
+            userEmail: 'carlos.martin@nfq.es',
+            userName: 'Carlos Martin',
+            action: 'DELETE_MODEL',
+            module: 'BEHAVIOURAL',
+            description: `Deleted behavioural model: ${id}`
+         });
       }
    }
 
@@ -147,7 +158,7 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
                      <div key={model.id} className="bg-slate-950 border border-slate-800 p-4 rounded hover:border-slate-600 transition-colors group relative flex flex-col">
                         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                            <button onClick={() => handleEdit(model)} className="text-slate-400 hover:text-cyan-400"><Edit size={14} /></button>
-                           <button className="text-slate-400 hover:text-red-400"><Trash2 size={14} /></button>
+                           <button onClick={() => handleDelete(model.id)} className="text-slate-400 hover:text-red-400"><Trash2 size={14} /></button>
                         </div>
 
                         <div className="flex items-center gap-2 mb-2">

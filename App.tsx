@@ -22,6 +22,7 @@ import { UserConfigModal } from './components/ui/UserConfigModal';
 import { translations, Language } from './translations';
 
 import { storage } from './utils/storage';
+import { supabaseService } from './utils/supabaseService';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -35,35 +36,68 @@ const App: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   // Persistent States
-  const [clients, setClients] = useState<ClientEntity[]>(() => storage.load('n_pricing_clients', MOCK_CLIENTS));
-  const [products, setProducts] = useState<ProductDefinition[]>(() => storage.load('n_pricing_products', MOCK_PRODUCT_DEFS));
-  const [businessUnits, setBusinessUnits] = useState<BusinessUnit[]>(() => storage.load('n_pricing_business_units', MOCK_BUSINESS_UNITS));
-  const [deals, setDeals] = useState<Transaction[]>(() => storage.getDeals().length > 0 ? storage.getDeals() : MOCK_DEALS);
-  const [rules, setRules] = useState<GeneralRule[]>(() => storage.load('n_pricing_rules', [
+  const [clients, setClients] = useState<ClientEntity[]>(() => storage.loadLocal('n_pricing_clients', MOCK_CLIENTS));
+  const [products, setProducts] = useState<ProductDefinition[]>(() => storage.loadLocal('n_pricing_products', MOCK_PRODUCT_DEFS));
+  const [businessUnits, setBusinessUnits] = useState<BusinessUnit[]>(() => storage.loadLocal('n_pricing_business_units', MOCK_BUSINESS_UNITS));
+  const [deals, setDeals] = useState<Transaction[]>(() => storage.getDealsLocal().length > 0 ? storage.getDealsLocal() : MOCK_DEALS);
+  const [rules, setRules] = useState<GeneralRule[]>(() => storage.loadLocal('n_pricing_rules', [
     { id: 1, businessUnit: 'Commercial Banking', product: 'Commercial Loan', segment: 'Corporate', tenor: '< 1Y', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 10 },
     { id: 2, businessUnit: 'SME / Business', product: 'Commercial Loan', segment: 'SME', tenor: 'Any', baseMethod: 'Rate Card', baseReference: 'USD-SOFR', spreadMethod: 'Grid Pricing', liquidityReference: 'RC-COM-SME-A', strategicSpread: 25 },
     { id: 3, businessUnit: 'Retail Banking', product: 'Term Deposit', segment: 'Retail', tenor: '> 2Y', baseMethod: 'Moving Average', baseReference: 'EUR-ESTR', spreadMethod: 'Fixed Spread', liquidityReference: 'RC-LIQ-EUR-HY', strategicSpread: 0 },
     { id: 4, businessUnit: 'Retail Banking', product: 'Mortgage', segment: 'All', tenor: 'Fixed', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 5 },
   ]));
-  const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>(() => storage.load('n_pricing_behavioural', MOCK_BEHAVIOURAL_MODELS));
-  const [users, setUsers] = useState<UserProfile[]>(() => storage.getUsers().length > 0 ? storage.getUsers() : MOCK_USERS);
+  const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>(() => storage.loadLocal('n_pricing_behavioural', MOCK_BEHAVIOURAL_MODELS));
+  const [users, setUsers] = useState<UserProfile[]>(() => storage.getUsersLocal().length > 0 ? storage.getUsersLocal() : MOCK_USERS);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
-  const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.load('n_pricing_approval_matrix', {
+  const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.loadLocal('n_pricing_approval_matrix', {
     autoApprovalThreshold: 15.0,
     l1Threshold: 10.0,
     l2Threshold: 5.0
   }));
 
-  // Auto-Save effects
-  React.useEffect(() => { storage.saveDeals(deals); }, [deals]);
-  React.useEffect(() => { storage.saveUsers(users); }, [users]);
-  React.useEffect(() => { storage.save('n_pricing_rules', rules); }, [rules]);
-  React.useEffect(() => { storage.save('n_pricing_clients', clients); }, [clients]);
-  React.useEffect(() => { storage.save('n_pricing_products', products); }, [products]);
-  React.useEffect(() => { storage.save('n_pricing_business_units', businessUnits); }, [businessUnits]);
-  React.useEffect(() => { storage.save('n_pricing_approval_matrix', approvalMatrix); }, [approvalMatrix]);
-  React.useEffect(() => { storage.save('n_pricing_behavioural', behaviouralModels); }, [behaviouralModels]);
+  // --- SUPABASE REAL-TIME LIFECYCLE ---
+
+  // 1. Initial Hydration from Supabase
+  React.useEffect(() => {
+    const hydrate = async () => {
+      const dbDeals = await storage.getDeals();
+      if (dbDeals.length > 0) setDeals(dbDeals);
+
+      const dbModels = await storage.getBehaviouralModels();
+      if (dbModels.length > 0) setBehaviouralModels(dbModels);
+    };
+    hydrate();
+  }, []);
+
+  // 2. Real-time Subscription
+  React.useEffect(() => {
+    const channel = supabaseService.subscribeToAll((payload) => {
+      const { table, eventType, new: newRecord, old: oldRecord } = payload;
+
+      if (table === 'deals') {
+        if (eventType === 'INSERT') setDeals(prev => [newRecord as Transaction, ...prev]);
+        if (eventType === 'UPDATE') setDeals(prev => prev.map(d => d.id === newRecord.id ? (newRecord as Transaction) : d));
+        if (eventType === 'DELETE') setDeals(prev => prev.filter(d => d.id !== oldRecord.id));
+      }
+
+      if (table === 'behavioural_models') {
+        if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          setBehaviouralModels(prev => {
+            const exists = prev.find(m => m.id === newRecord.id);
+            return exists ? prev.map(m => m.id === newRecord.id ? (newRecord as BehaviouralModel) : m) : [newRecord as BehaviouralModel, ...prev];
+          });
+        }
+      }
+    });
+
+    return () => { channel.unsubscribe(); };
+  }, []);
+
+  // 3. Local Auto-Save (Backup Only - Removed global Deal Sync to avoid loops)
+  React.useEffect(() => { storage.saveLocal('n_pricing_rules', rules); }, [rules]);
+  React.useEffect(() => { storage.saveLocal('n_pricing_clients', clients); }, [clients]);
+  React.useEffect(() => { storage.saveLocal('n_pricing_approval_matrix', approvalMatrix); }, [approvalMatrix]);
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);

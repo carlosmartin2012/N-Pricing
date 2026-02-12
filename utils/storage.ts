@@ -1,4 +1,5 @@
 import { Transaction, YieldCurvePoint, UserProfile, AuditEntry, BehaviouralModel, GeneralRule } from '../types';
+import { supabaseService } from './supabaseService';
 
 const STORAGE_KEYS = {
     DEALS: 'n_pricing_deals',
@@ -10,42 +11,43 @@ const STORAGE_KEYS = {
 };
 
 export const storage = {
-    // Generic Load/Save
-    save: (key: string, data: any) => {
+    // Legacy Local Storage Fallback
+    saveLocal: (key: string, data: any) => {
         localStorage.setItem(key, JSON.stringify(data));
     },
 
-    load: <T>(key: string, defaultValue: T): T => {
+    loadLocal: <T>(key: string, defaultValue: T): T => {
         const stored = localStorage.getItem(key);
         if (!stored) return defaultValue;
         try {
             return JSON.parse(stored) as T;
         } catch (e) {
-            console.error(`Error parsing storage key ${key}:`, e);
             return defaultValue;
         }
     },
 
-    // Specific Helpers
-    getDeals: () => storage.load<Transaction[]>(STORAGE_KEYS.DEALS, []),
-    saveDeals: (deals: Transaction[]) => storage.save(STORAGE_KEYS.DEALS, deals),
+    // --- NEW SUPABASE ASYNC API ---
+    // These track remote state but we keep the naming similar for easier refactoring
 
-    getCurves: () => storage.load<Record<string, YieldCurvePoint[]>>(STORAGE_KEYS.CURVES, {}),
-    saveCurves: (curves: Record<string, YieldCurvePoint[]>) => storage.save(STORAGE_KEYS.CURVES, curves),
+    getDeals: async () => await supabaseService.fetchDeals(),
+    saveDeal: async (deal: Transaction) => await supabaseService.upsertDeal(deal),
+    deleteDeal: async (id: string) => await supabaseService.deleteDeal(id),
 
-    getUsers: () => storage.load<UserProfile[]>(STORAGE_KEYS.USERS, []),
-    saveUsers: (users: UserProfile[]) => storage.save(STORAGE_KEYS.USERS, users),
+    getAuditLog: async () => await supabaseService.fetchAuditLog(),
+    addAuditEntry: async (entry: Omit<AuditEntry, 'id' | 'timestamp'>) => {
+        await supabaseService.addAuditEntry(entry);
+    },
 
-    getAuditLog: () => storage.load<AuditEntry[]>(STORAGE_KEYS.AUDIT_LOG, []),
-    saveAuditLog: (log: AuditEntry[]) => storage.save(STORAGE_KEYS.AUDIT_LOG, log),
+    getBehaviouralModels: async () => await supabaseService.fetchModels(),
+    saveBehaviouralModel: async (model: BehaviouralModel) => await supabaseService.saveModel(model),
+    deleteBehaviouralModel: async (id: string) => await supabaseService.deleteModel(id),
 
-    addAuditEntry: (entry: Omit<AuditEntry, 'id' | 'timestamp'>) => {
-        const log = storage.getAuditLog();
-        const newEntry: AuditEntry = {
-            ...entry,
-            id: `LOG-${Date.now()}`,
-            timestamp: new Date().toISOString(),
-        };
-        storage.saveAuditLog([newEntry, ...log].slice(0, 1000)); // Keep last 1000 entries
-    }
+    saveCurveSnapshot: async (currency: string, date: string, points: YieldCurvePoint[]) => {
+        await supabaseService.saveCurveSnapshot(currency, date, points);
+    },
+
+    // Compatibility Getters (Synchronous for initial state initialization in App.tsx)
+    // We'll hydrate these from Supabase in a useEffect
+    getDealsLocal: () => storage.loadLocal<Transaction[]>(STORAGE_KEYS.DEALS, []),
+    getUsersLocal: () => storage.loadLocal<UserProfile[]>(STORAGE_KEYS.USERS, []),
 };

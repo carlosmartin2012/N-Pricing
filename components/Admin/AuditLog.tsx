@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { AuditEntry } from '../../types';
 import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 import { Search, Clock, User, Activity, FileText, Filter } from 'lucide-react';
 
 const AuditLog: React.FC = () => {
@@ -9,7 +10,19 @@ const AuditLog: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        setEntries(storage.getAuditLog());
+        const fetch = async () => {
+            const data = await storage.getAuditLog();
+            setEntries(data);
+        };
+        fetch();
+
+        const channel = supabaseService.subscribeToAll((payload) => {
+            if (payload.table === 'audit_log' && payload.eventType === 'INSERT') {
+                setEntries(prev => [payload.new as AuditEntry, ...prev]);
+            }
+        });
+
+        return () => { channel.unsubscribe(); };
     }, []);
 
     const filteredEntries = entries.filter(e =>

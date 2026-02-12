@@ -85,9 +85,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     setIsEditOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    if (selectedDeal && selectedDeal.id) {
-      setDeals(deals.map(d => d.id === selectedDeal.id ? selectedDeal as Transaction : d));
+  const handleSaveEdit = async () => {
+    if (selectedDeal) {
+      await storage.saveDeal(selectedDeal);
       setIsEditOpen(false);
     }
   };
@@ -117,9 +117,10 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     setIsNewOpen(true);
   };
 
-  const handleSaveNew = () => {
+  const handleSaveNew = async () => {
     if (selectedDeal && selectedDeal.clientId) {
-      setDeals([selectedDeal as Transaction, ...deals]);
+      // Local state will be updated via App.tsx subscription
+      await storage.saveDeal(selectedDeal as Transaction);
       setIsNewOpen(false);
     }
   };
@@ -129,9 +130,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     setIsDeleteOpen(true);
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedDeal && selectedDeal.id) {
-      setDeals(deals.filter(d => d.id !== selectedDeal.id));
+      await storage.deleteDeal(selectedDeal.id);
       setIsDeleteOpen(false);
     }
   }
