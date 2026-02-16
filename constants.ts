@@ -45,6 +45,8 @@ export const MOCK_USERS: UserProfile[] = [
   { id: 'USR-004', name: 'Francisco Herrero', email: 'francisco.herrero@nfq.es', role: 'Auditor', status: 'Active', lastLogin: 'Never', department: 'Audit' },
   { id: 'USR-005', name: 'Martin Sanz', email: 'martin.sanz@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
   { id: 'USR-006', name: 'Roberto Flores', email: 'roberto.flores@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Management' },
+  { id: 'USR-007', name: 'Arnau Lopez', email: 'arnau.lopez@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
+  { id: 'USR-008', name: 'Diego Merino', email: 'diego.merino@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Risk Control' },
 ];
 
 export const INITIAL_DEAL: Transaction = {

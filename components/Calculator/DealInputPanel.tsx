@@ -117,7 +117,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                      min="0" max="100000000" step="100000"
                      value={values.amount || 0}
                      onChange={(e) => handleChange(e, 'amount')}
-                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 hover:accent-cyan-400 transition-all mb-3"
+                     className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 hover:accent-cyan-400 transition-all mb-4 mt-2"
                   />
                   <div className="flex justify-end">
                      <TextInput
@@ -143,7 +143,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                      min="0" max="360" step="1"
                      value={values.durationMonths || 0}
                      onChange={(e) => handleChange(e, 'durationMonths')}
-                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all mb-3"
+                     className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all mb-4 mt-2"
                   />
                   <div className="flex gap-2 items-center">
                      <div className="w-1/2">
@@ -182,7 +182,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                      min="0" max="10" step="0.05"
                      value={values.marginTarget || 0}
                      onChange={(e) => handleChange(e, 'marginTarget')}
-                     className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-all mb-3"
+                     className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-all mb-4 mt-2"
                   />
                   <div className="flex gap-2 items-center justify-end">
                      <div className="w-24 relative">

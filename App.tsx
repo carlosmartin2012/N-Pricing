@@ -50,7 +50,17 @@ const App: React.FC = () => {
     { id: 4, businessUnit: 'Retail Banking', product: 'Mortgage', segment: 'All', tenor: 'Fixed', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 5 },
   ]));
   const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>(() => storage.loadLocal('n_pricing_behavioural', MOCK_BEHAVIOURAL_MODELS));
-  const [users, setUsers] = useState<UserProfile[]>(() => storage.getUsersLocal().length > 0 ? storage.getUsersLocal() : MOCK_USERS);
+  const [users, setUsers] = useState<UserProfile[]>(() => {
+    const localUsers = storage.getUsersLocal();
+    // Merge logic: Add MOCK_USERS that are not in local storage
+    const merged = [...localUsers];
+    MOCK_USERS.forEach(mockUser => {
+      if (!merged.some(u => u.email.toLowerCase() === mockUser.email.toLowerCase())) {
+        merged.push(mockUser);
+      }
+    });
+    return merged;
+  });
 
   const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.loadLocal('n_pricing_approval_matrix', {
     autoApprovalThreshold: 15.0,
@@ -206,8 +216,8 @@ const App: React.FC = () => {
             </div>
 
             {currentView === 'CALCULATOR' && (
-              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 min-h-full">
-                <div className="lg:col-span-4 w-full">
+              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 md:gap-8 relative z-0 min-h-full pb-10">
+                <div className="lg:col-span-12 xl:col-span-4 w-full h-full">
                   <DealInputPanel
                     values={dealParams}
                     onChange={handleParamChange}
@@ -221,10 +231,10 @@ const App: React.FC = () => {
                     behaviouralModels={behaviouralModels}
                   />
                 </div>
-                <div className="lg:col-span-4 w-full">
+                <div className="lg:col-span-12 xl:col-span-4 w-full h-full">
                   <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
                 </div>
-                <div className="lg:col-span-4 w-full">
+                <div className="lg:col-span-12 xl:col-span-4 w-full h-full">
                   <PricingReceipt
                     deal={dealParams}
                     setMatchedMethod={setMatchedMethod}
