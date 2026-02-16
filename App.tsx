@@ -70,6 +70,15 @@ const App: React.FC = () => {
 
   const [shocks, setShocks] = useState<PricingShocks>({ interestRate: 0, liquiditySpread: 0 });
 
+  // --- THEME SYNC ---
+  React.useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
   // --- SUPABASE REAL-TIME LIFECYCLE ---
 
   // 1. Initial Hydration from Supabase
@@ -180,210 +189,208 @@ const App: React.FC = () => {
   ];
 
   return (
-    <div className={`${theme === 'dark' ? 'dark' : ''}`}>
-      <div className="flex h-screen bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-200 font-sans selection:bg-cyan-900 selection:text-white overflow-hidden transition-colors duration-300">
+    <div className="flex h-screen bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-200 font-sans selection:bg-cyan-900 selection:text-white overflow-hidden transition-colors duration-300">
 
-        <Sidebar
+      <Sidebar
+        isSidebarOpen={isSidebarOpen}
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        mainNavItems={mainNavItems}
+        bottomNavItems={bottomNavItems}
+        onOpenConfig={() => setIsConfigModalOpen(true)}
+        language={language}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 relative h-full">
+
+        <Header
           isSidebarOpen={isSidebarOpen}
+          setSidebarOpen={setSidebarOpen}
           currentView={currentView}
-          setCurrentView={setCurrentView}
           mainNavItems={mainNavItems}
           bottomNavItems={bottomNavItems}
-          onOpenConfig={() => setIsConfigModalOpen(true)}
+          theme={theme}
+          setTheme={setTheme}
           language={language}
-          onClose={() => setSidebarOpen(false)}
+          setLanguage={setLanguage}
+          user={currentUser}
+          onLogout={handleLogout}
         />
 
-        <div className="flex-1 flex flex-col min-w-0 relative h-full">
+        <main className="flex-1 p-3 md:p-6 overflow-auto relative custom-scrollbar bg-slate-50 dark:bg-black">
+          <div className="absolute inset-x-0 top-0 bottom-0 pointer-events-none opacity-[0.02]"
+            style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+          </div>
 
-          <Header
-            isSidebarOpen={isSidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            currentView={currentView}
-            mainNavItems={mainNavItems}
-            bottomNavItems={bottomNavItems}
-            theme={theme}
-            setTheme={setTheme}
-            language={language}
-            setLanguage={setLanguage}
-            user={currentUser}
-            onLogout={handleLogout}
-          />
-
-          <main className="flex-1 p-3 md:p-6 overflow-auto relative h-full custom-scrollbar bg-slate-50 dark:bg-slate-950">
-            <div className="absolute inset-0 pointer-events-none opacity-[0.02]"
-              style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
-            </div>
-
-            {currentView === 'CALCULATOR' && (
-              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 h-full">
-                <div className="lg:col-span-4 w-full h-full flex flex-col">
-                  <DealInputPanel
-                    values={dealParams}
-                    onChange={handleParamChange}
-                    setDealParams={setDealParams}
-                    deals={deals}
-                    clients={clients}
-                    setClients={setClients}
-                    products={products}
-                    businessUnits={businessUnits}
-                    language={language}
-                    behaviouralModels={behaviouralModels}
-                  />
-                </div>
-                <div className="lg:col-span-4 w-full h-full flex flex-col">
-                  <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
-                </div>
-                <div className="lg:col-span-4 w-full h-full flex flex-col">
-                  <PricingReceipt
-                    deal={dealParams}
-                    setMatchedMethod={setMatchedMethod}
-                    approvalMatrix={approvalMatrix}
-                    language={language}
-                    shocks={shocks}
-                  />
-                </div>
-              </div>
-            )}
-
-            {currentView === 'BLOTTER' && (
-              <div className="h-full relative z-0">
-                <DealBlotter
+          {currentView === 'CALCULATOR' && (
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 h-full">
+              <div className="lg:col-span-4 w-full h-full flex flex-col">
+                <DealInputPanel
+                  values={dealParams}
+                  onChange={handleParamChange}
+                  setDealParams={setDealParams}
                   deals={deals}
-                  setDeals={setDeals}
-                  products={products}
                   clients={clients}
+                  setClients={setClients}
+                  products={products}
                   businessUnits={businessUnits}
                   language={language}
+                  behaviouralModels={behaviouralModels}
                 />
               </div>
-            )}
-
-            {currentView === 'MARKET_DATA' && (
-              <div className="h-full relative z-0">
-                <YieldCurvePanel language={language} />
+              <div className="lg:col-span-4 w-full h-full flex flex-col">
+                <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
               </div>
-            )}
-
-            {currentView === 'BEHAVIOURAL' && (
-              <div className="h-full relative z-0">
-                <BehaviouralModels models={behaviouralModels} setModels={setBehaviouralModels} />
-              </div>
-            )}
-
-            {currentView === 'METHODOLOGY' && (
-              <div className="h-full relative z-0">
-                <MethodologyConfig
-                  mode="METHODOLOGY"
-                  rules={rules}
-                  setRules={setRules}
-                  approvalMatrix={approvalMatrix}
-                  setApprovalMatrix={setApprovalMatrix}
-                  products={products}
-                  setProducts={setProducts}
-                  businessUnits={businessUnits}
-                  setBusinessUnits={setBusinessUnits}
-                  clients={clients}
-                  setClients={setClients}
-                />
-              </div>
-            )}
-
-            {currentView === 'ACCOUNTING' && (
-              <div className="h-full relative z-0">
-                <AccountingLedger />
-              </div>
-            )}
-
-            {currentView === 'CONFIG' && (
-              <div className="h-full relative z-0">
-                <MethodologyConfig
-                  mode="SYS_CONFIG"
-                  rules={rules}
-                  setRules={setRules}
-                  approvalMatrix={approvalMatrix}
-                  setApprovalMatrix={setApprovalMatrix}
-                  products={products}
-                  setProducts={setProducts}
-                  businessUnits={businessUnits}
-                  setBusinessUnits={setBusinessUnits}
-                  clients={clients}
-                  setClients={setClients}
-                />
-              </div>
-            )}
-
-            {currentView === 'USER_MGMT' && (
-              <div className="h-full relative z-0 flex flex-col">
-                <UserManagement users={users} setUsers={setUsers} />
-              </div>
-            )}
-
-            {currentView === 'AUDIT_LOG' && (
-              <div className="h-full relative z-0">
-                <AuditLog />
-              </div>
-            )}
-
-            {currentView === 'MANUAL' && (
-              <div className="h-full relative z-0">
-                <UserManual language={language} />
-              </div>
-            )}
-
-            {currentView === 'AI_LAB' && (
-              <div className="h-full relative z-0 flex flex-col">
-                <GenAIChat
-                  deals={deals}
-                  marketSummary={`USD Overnight: ${MOCK_YIELD_CURVE[0].rate}%`}
-                />
-              </div>
-            )}
-
-            {currentView === 'SHOCKS' && (
-              <div className="h-full relative z-0 flex flex-col">
-                <ShocksDashboard
+              <div className="lg:col-span-4 w-full h-full flex flex-col">
+                <PricingReceipt
                   deal={dealParams}
+                  setMatchedMethod={setMatchedMethod}
                   approvalMatrix={approvalMatrix}
                   language={language}
                   shocks={shocks}
-                  setShocks={setShocks}
                 />
               </div>
-            )}
+            </div>
+          )}
 
-          </main>
+          {currentView === 'BLOTTER' && (
+            <div className="h-full relative z-0">
+              <DealBlotter
+                deals={deals}
+                setDeals={setDeals}
+                products={products}
+                clients={clients}
+                businessUnits={businessUnits}
+                language={language}
+              />
+            </div>
+          )}
 
-          <button
-            onClick={() => setIsAiOpen(true)}
-            className={`fixed bottom-6 right-6 w-12 h-12 bg-cyan-600 hover:bg-cyan-500 text-white rounded-full shadow-[0_0_20px_rgba(8,145,178,0.5)] flex items-center justify-center transition-transform hover:scale-110 z-40 ${isAiOpen ? 'scale-0' : 'scale-100'}`}
-          >
-            <Sparkles size={24} className="animate-pulse" />
-          </button>
+          {currentView === 'MARKET_DATA' && (
+            <div className="h-full relative z-0">
+              <YieldCurvePanel language={language} />
+            </div>
+          )}
 
-          <GeminiAssistant
-            isOpen={isAiOpen}
-            onClose={() => setIsAiOpen(false)}
-            onOpenFullChat={() => {
-              setIsAiOpen(false);
-              setCurrentView('AI_LAB');
-            }}
-            contextData={{
-              activeDeal: dealParams,
-              marketContext: `Current Base USD Yield Curve: ${JSON.stringify(MOCK_YIELD_CURVE.slice(0, 5))}...`
-            }}
-          />
+          {currentView === 'BEHAVIOURAL' && (
+            <div className="h-full relative z-0">
+              <BehaviouralModels models={behaviouralModels} setModels={setBehaviouralModels} />
+            </div>
+          )}
 
-          <UserConfigModal
-            isOpen={isConfigModalOpen}
-            onClose={() => setIsConfigModalOpen(false)}
-            language={language}
-            setLanguage={setLanguage}
-            theme={theme}
-            setTheme={setTheme}
-          />
+          {currentView === 'METHODOLOGY' && (
+            <div className="h-full relative z-0">
+              <MethodologyConfig
+                mode="METHODOLOGY"
+                rules={rules}
+                setRules={setRules}
+                approvalMatrix={approvalMatrix}
+                setApprovalMatrix={setApprovalMatrix}
+                products={products}
+                setProducts={setProducts}
+                businessUnits={businessUnits}
+                setBusinessUnits={setBusinessUnits}
+                clients={clients}
+                setClients={setClients}
+              />
+            </div>
+          )}
 
-        </div>
+          {currentView === 'ACCOUNTING' && (
+            <div className="h-full relative z-0">
+              <AccountingLedger />
+            </div>
+          )}
+
+          {currentView === 'CONFIG' && (
+            <div className="h-full relative z-0">
+              <MethodologyConfig
+                mode="SYS_CONFIG"
+                rules={rules}
+                setRules={setRules}
+                approvalMatrix={approvalMatrix}
+                setApprovalMatrix={setApprovalMatrix}
+                products={products}
+                setProducts={setProducts}
+                businessUnits={businessUnits}
+                setBusinessUnits={setBusinessUnits}
+                clients={clients}
+                setClients={setClients}
+              />
+            </div>
+          )}
+
+          {currentView === 'USER_MGMT' && (
+            <div className="h-full relative z-0 flex flex-col">
+              <UserManagement users={users} setUsers={setUsers} />
+            </div>
+          )}
+
+          {currentView === 'AUDIT_LOG' && (
+            <div className="h-full relative z-0">
+              <AuditLog />
+            </div>
+          )}
+
+          {currentView === 'MANUAL' && (
+            <div className="h-full relative z-0">
+              <UserManual language={language} />
+            </div>
+          )}
+
+          {currentView === 'AI_LAB' && (
+            <div className="h-full relative z-0 flex flex-col">
+              <GenAIChat
+                deals={deals}
+                marketSummary={`USD Overnight: ${MOCK_YIELD_CURVE[0].rate}%`}
+              />
+            </div>
+          )}
+
+          {currentView === 'SHOCKS' && (
+            <div className="h-full relative z-0 flex flex-col">
+              <ShocksDashboard
+                deal={dealParams}
+                approvalMatrix={approvalMatrix}
+                language={language}
+                shocks={shocks}
+                setShocks={setShocks}
+              />
+            </div>
+          )}
+
+        </main>
+
+        <button
+          onClick={() => setIsAiOpen(true)}
+          className={`fixed bottom-6 right-6 w-12 h-12 bg-cyan-600 hover:bg-cyan-500 text-white rounded-full shadow-[0_0_20px_rgba(8,145,178,0.5)] flex items-center justify-center transition-transform hover:scale-110 z-40 ${isAiOpen ? 'scale-0' : 'scale-100'}`}
+        >
+          <Sparkles size={24} className="animate-pulse" />
+        </button>
+
+        <GeminiAssistant
+          isOpen={isAiOpen}
+          onClose={() => setIsAiOpen(false)}
+          onOpenFullChat={() => {
+            setIsAiOpen(false);
+            setCurrentView('AI_LAB');
+          }}
+          contextData={{
+            activeDeal: dealParams,
+            marketContext: `Current Base USD Yield Curve: ${JSON.stringify(MOCK_YIELD_CURVE.slice(0, 5))}...`
+          }}
+        />
+
+        <UserConfigModal
+          isOpen={isConfigModalOpen}
+          onClose={() => setIsConfigModalOpen(false)}
+          language={language}
+          setLanguage={setLanguage}
+          theme={theme}
+          setTheme={setTheme}
+        />
+
       </div>
     </div>
   );

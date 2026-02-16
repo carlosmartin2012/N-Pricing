@@ -3,9 +3,19 @@
 @tailwind utilities;
 
 @layer base {
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    @apply bg-white dark:bg-black transition-colors duration-300;
+  }
+
   body {
     font-family: 'Inter', sans-serif;
-    @apply bg-white text-slate-900 dark:bg-black dark:text-slate-200 transition-colors duration-300;
+    @apply text-slate-900 dark:text-slate-200 overflow-hidden;
   }
 }
 
