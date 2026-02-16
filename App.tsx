@@ -16,13 +16,15 @@ import GeminiAssistant from './components/Intelligence/GeminiAssistant';
 import GenAIChat from './components/Intelligence/GenAIChat';
 import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
-import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap } from 'lucide-react';
 import { Login } from './components/ui/Login';
 import { UserConfigModal } from './components/ui/UserConfigModal';
 import { translations, Language } from './translations';
 
 import { storage } from './utils/storage';
 import { supabaseService } from './utils/supabaseService';
+import ShocksDashboard from './components/Risk/ShocksDashboard';
+import { PricingShocks } from './utils/pricingEngine';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => storage.loadCurrentUser());
@@ -55,6 +57,8 @@ const App: React.FC = () => {
     l1Threshold: 10.0,
     l2Threshold: 5.0
   }));
+
+  const [shocks, setShocks] = useState<PricingShocks>({ interestRate: 0, liquiditySpread: 0 });
 
   // --- SUPABASE REAL-TIME LIFECYCLE ---
 
@@ -154,6 +158,7 @@ const App: React.FC = () => {
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity },
     { id: 'METHODOLOGY', label: t.methodology, icon: GitBranch },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard },
+    { id: 'SHOCKS', label: t.shocks, icon: Zap },
     { id: 'CONFIG', label: t.systemConfig, icon: Settings },
   ];
 
@@ -225,6 +230,7 @@ const App: React.FC = () => {
                     setMatchedMethod={setMatchedMethod}
                     approvalMatrix={approvalMatrix}
                     language={language}
+                    shocks={shocks}
                   />
                 </div>
               </div>
@@ -238,6 +244,7 @@ const App: React.FC = () => {
                   products={products}
                   clients={clients}
                   businessUnits={businessUnits}
+                  language={language}
                 />
               </div>
             )}
@@ -319,6 +326,18 @@ const App: React.FC = () => {
                 <GenAIChat
                   deals={deals}
                   marketSummary={`USD Overnight: ${MOCK_YIELD_CURVE[0].rate}%`}
+                />
+              </div>
+            )}
+
+            {currentView === 'SHOCKS' && (
+              <div className="h-full relative z-0">
+                <ShocksDashboard
+                  deal={dealParams}
+                  approvalMatrix={approvalMatrix}
+                  language={language}
+                  shocks={shocks}
+                  setShocks={setShocks}
                 />
               </div>
             )}

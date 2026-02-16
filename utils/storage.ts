@@ -57,6 +57,14 @@ export const storage = {
         await supabaseService.saveCurveSnapshot(currency, date, points);
     },
 
+    // Yield Curve Persistence (Local for now to fix crash)
+    getCurves: (): Record<string, YieldCurvePoint[]> => {
+        return storage.loadLocal(STORAGE_KEYS.CURVES, {});
+    },
+    saveCurves: (curves: Record<string, YieldCurvePoint[]>) => {
+        storage.saveLocal(STORAGE_KEYS.CURVES, curves);
+    },
+
     // Compatibility Getters (Synchronous for initial state initialization in App.tsx)
     // We'll hydrate these from Supabase in a useEffect
     getDealsLocal: () => storage.loadLocal<Transaction[]>(STORAGE_KEYS.DEALS, []),

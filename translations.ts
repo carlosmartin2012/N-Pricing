@@ -40,6 +40,7 @@ export const translations = {
         systemConfig: 'System Config',
         aiLab: 'N Pricing AI Lab',
         auditLog: 'System Audit',
+        shocks: 'Stress Testing',
 
         // Calculator/Input
         transactionDetails: 'Transaction Details',
@@ -68,6 +69,15 @@ export const translations = {
         approved: 'Approved',
         pending: 'Pending Approval',
         rejected: 'Rejected',
+
+        // Shocks
+        shocksConfig: 'Shocks Configuration',
+        interestRateShock: 'Interest Rate Shock (bps)',
+        liquidityRateShock: 'Liquidity Spread Shock (bps)',
+        baseScenario: 'Base Scenario',
+        shockedScenario: 'Shocked Scenario',
+        impactAnalysis: 'Impact Analysis',
+        applyShocks: 'Apply Shocks',
     },
     es: {
         // General
@@ -108,6 +118,7 @@ export const translations = {
         systemConfig: 'Config. del Sistema',
         aiLab: 'N Pricing AI Lab',
         auditLog: 'Auditoría del Sistema',
+        shocks: 'Stress Testing',
 
         // Calculator/Input
         transactionDetails: 'Detalles de la Operación',
@@ -136,5 +147,14 @@ export const translations = {
         approved: 'Aprobado',
         pending: 'Pendiente de Aprobación',
         rejected: 'Rechazado',
+
+        // Shocks
+        shocksConfig: 'Configuración de Shocks',
+        interestRateShock: 'Shock de Tipos de Interés (pbs)',
+        liquidityRateShock: 'Shock de Spread de Liquidez (pbs)',
+        baseScenario: 'Escenario Base',
+        shockedScenario: 'Escenario Estresado',
+        impactAnalysis: 'Análisis de Impacto',
+        applyShocks: 'Aplicar Shocks',
     }
 };

@@ -33,7 +33,9 @@ export const WHITELISTED_EMAILS = [
   'gregorio.gonzalo@nfq.es',
   'francisco.herrero@nfq.es',
   'martin.sanz@nfq.es',
-  'roberto.flores@nfq.es'
+  'roberto.flores@nfq.es',
+  'arnau.lopez@nfq.es',
+  'diego.merino@nfq.es'
 ];
 
 export const MOCK_USERS: UserProfile[] = [

@@ -1,9 +1,10 @@
 
 import React, { useMemo, useState } from 'react';
 import { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
+import { calculatePricing, PricingShocks } from '../../utils/pricingEngine';
 import { MOCK_BEHAVIOURAL_MODELS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from '../../constants';
 import { Panel, Badge } from '../ui/LayoutComponents';
-import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4 } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap } from 'lucide-react';
 import { translations, Language } from '../../translations';
 
 interface Props {
@@ -11,150 +12,51 @@ interface Props {
    setMatchedMethod: (m: string) => void;
    approvalMatrix: ApprovalMatrixConfig;
    language: Language;
+   shocks?: PricingShocks;
 }
 
-const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatrix, language }) => {
+const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatrix, language, shocks }) => {
    const [showAccounting, setShowAccounting] = useState(false);
+   const [applyShocks, setApplyShocks] = useState(false);
    const t = translations[language];
 
    // SIMULATE REAL-TIME CALCULATION ENGINE
    const result: FTPResult = useMemo(() => {
-      // 0. Empty State Check
-      if (!deal.productType || deal.amount === 0) {
-         setMatchedMethod('-');
-         return {
-            baseRate: 0, liquiditySpread: 0, strategicSpread: 0, optionCost: 0, regulatoryCost: 0, operationalCost: 0, capitalCharge: 0, esgTransitionCharge: 0, esgPhysicalCharge: 0,
-            floorPrice: 0, technicalPrice: 0, targetPrice: 0, totalFTP: 0, finalClientRate: 0, raroc: 0, economicProfit: 0, approvalLevel: 'Rejected',
-            matchedMethodology: 'Matched Maturity' as any, matchReason: '', accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 }
-         };
-      }
-
-      // 1. Base Interest Rate (Interés)
-      let baseRate = 3.0 + (deal.durationMonths * 0.08);
-      if (deal.currency === 'EUR') baseRate -= 1.0;
-      if (deal.currency === 'JPY') baseRate -= 2.5;
-
-      // 2. Liquidity Cost (Funding/Liquidez)
-      // Basic heuristic: Loan usually adds liquidity cost, Deposit provides liquidity benefit (negative cost)
-      // Checking product type string for 'LOAN' or 'DEP' as a heuristic since Transaction types are string IDs like 'LOAN_COMM'
-      let liquidity = deal.productType.includes('LOAN') ? 0.45 : -0.10;
-      if (deal.durationMonths > 36) liquidity += 0.2;
-
-      // 3. Expected Loss (Regulatory Cost / Credit)
-      // Formula: Risk Weight * 1% (Simplified EL)
-      const regulatoryCost = (deal.riskWeight / 100) * 0.85;
-
-      // 4. Operational Cost (Input from Panel)
-      const operationalCost = deal.operationalCostBps / 100;
-
-      // 5. Capital Charge (Cost of Equity)
-      // RWA * CapitalRatio * ROE
-      // We keep this as a % of Notional for the "Technical Price" buildup
-      const capitalCharge = (deal.riskWeight / 100) * (deal.capitalRatio / 100) * deal.targetROE;
-
-      // 6. ESG Adjustment (Split: Transition + Physical)
-      let transCharge = 0;
-      const transRule = MOCK_TRANSITION_GRID.find(r => r.classification === deal.transitionRisk);
-      if (transRule) transCharge = transRule.adjustmentBps / 100;
-
-      let physCharge = 0;
-      const physRule = MOCK_PHYSICAL_GRID.find(r => r.riskLevel === deal.physicalRisk);
-      if (physRule) physCharge = physRule.adjustmentBps / 100;
-
-      // 7. Strategic Spread (Previously Behavioural)
-      // For now we map this from behavioural model ID if present, but in a real system this would come from the Rules Engine look up
-      let strategicSpread = 0;
-      if (deal.behaviouralModelId) {
-         const model = MOCK_BEHAVIOURAL_MODELS.find(m => m.id === deal.behaviouralModelId);
-         if (model) {
-            if (model.type === 'Prepayment_CPR') {
-               strategicSpread = (model.cpr || 0) * 0.05;
-            } else if (model.type === 'NMD_Replication') {
-               strategicSpread = -((model.coreRatio || 50) / 100) * 0.30;
-            }
-         }
-      }
-
-      // --- AGGREGATES ---
-      const ftp = baseRate + liquidity;
-      const floorPrice = ftp + regulatoryCost + operationalCost + transCharge + physCharge + strategicSpread;
-      const technicalPrice = floorPrice + capitalCharge; // Hurdle Price to meet ROE
-
-      // Final Client Rate (Simulated input by user via margin, or solving for it)
-      // Here we assume the Margin Target is ON TOP of FTP, but let's see where it lands relative to Technical Price
-      const finalRate = ftp + deal.marginTarget;
-
-      // RAROC Calculation
-      // Net Income % = Final Rate - Floor Price (All costs except capital charge)
-      const netIncomePct = finalRate - floorPrice;
-
-      // Allocated Capital % (Relative to Notional)
-      // e.g. RiskWeight 100% * CapitalRatio 11.5% = 11.5%
-      const allocatedCapitalPct = (deal.riskWeight / 100) * deal.capitalRatio;
-
-      // RAROC = (Net Income / Allocated Capital)
-      // Both are percentages of Notional, so we can divide them directly.
-      // e.g. 1.5% Income / 11.5% Capital = 13.04% Return on Capital
-      const raroc = allocatedCapitalPct > 0 ? (netIncomePct / allocatedCapitalPct) * 100 : 0;
-
-      // Economic Profit (EVA) = Net Income - (Capital * CostOfEquity/ROE)
-      // Since CostOfEquity is implicit in the TargetROE used for technical price calculation...
-      const economicProfit = netIncomePct - capitalCharge;
-
-      // Governance Dynamic Check
-      let approvalLevel: 'Auto' | 'L1_Manager' | 'L2_Committee' | 'Rejected' = 'Rejected';
-
-      if (raroc >= approvalMatrix.autoApprovalThreshold) {
-         approvalLevel = 'Auto';
-      } else if (raroc >= approvalMatrix.l1Threshold) {
-         approvalLevel = 'L1_Manager';
-      } else if (raroc >= approvalMatrix.l2Threshold) {
-         approvalLevel = 'L2_Committee';
-      } else {
-         approvalLevel = 'Rejected';
-      }
-
-      // Method Selection
-      const method = deal.repricingFreq === 'Fixed' ? 'Matched Maturity' : 'Moving Average';
-      setMatchedMethod(method);
-
-      return {
-         baseRate,
-         liquiditySpread: liquidity,
-         strategicSpread,
-         optionCost: strategicSpread, // Keeping legacy type structure valid
-         regulatoryCost,
-         operationalCost,
-         capitalCharge,
-         esgTransitionCharge: transCharge,
-         esgPhysicalCharge: physCharge,
-
-         floorPrice,
-         technicalPrice,
-         targetPrice: technicalPrice + 0.5, // Arbitrary commercial buffer
-
-         totalFTP: ftp,
-         finalClientRate: finalRate,
-         raroc,
-         economicProfit,
-         approvalLevel,
-
-         matchedMethodology: method as any,
-         matchReason: 'Standard Term Logic',
-         accountingEntry: {
-            source: deal.businessLine,
-            dest: 'Central Treasury',
-            amountDebit: deal.amount * (ftp / 100),
-            amountCredit: deal.amount * (ftp / 100),
-         }
-      };
-   }, [deal, setMatchedMethod, approvalMatrix]);
+      // Use shared pricing engine with optional shocks
+      const activeShocks = (applyShocks && shocks) ? shocks : { interestRate: 0, liquiditySpread: 0 };
+      const baseResult = calculatePricing(deal, approvalMatrix, activeShocks);
+      setMatchedMethod(baseResult.matchedMethodology);
+      return baseResult;
+   }, [deal, setMatchedMethod, approvalMatrix, shocks, applyShocks]);
 
    const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency }).format(n);
 
    return (
       <Panel title={t.pricingResult || "Profitability & Pricing Construction"} className="h-full border-l-4 border-l-cyan-500 bg-white dark:bg-[#0a0a0a]">
          <div className="flex flex-col h-full">
+
+            {/* Shocks Toggle Banner */}
+            {shocks && (shocks.interestRate !== 0 || shocks.liquiditySpread !== 0) && (
+               <div className={`mx-4 mt-4 p-3 rounded-lg border flex items-center justify-between transition-colors ${applyShocks ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}>
+                  <div className="flex items-center gap-2">
+                     <Zap size={16} className={applyShocks ? 'text-amber-500' : 'text-slate-400'} />
+                     <div className="text-xs">
+                        <span className={`font-bold block ${applyShocks ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500'}`}>
+                           {t.shockedScenario || 'Shocked Scenario'}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                           {shocks.interestRate > 0 ? '+' : ''}{shocks.interestRate}bps IR, {shocks.liquiditySpread > 0 ? '+' : ''}{shocks.liquiditySpread}bps Liq.
+                        </span>
+                     </div>
+                  </div>
+                  <button
+                     onClick={() => setApplyShocks(!applyShocks)}
+                     className={`text-[10px] font-bold px-3 py-1 rounded-full transition-colors ${applyShocks ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'}`}
+                  >
+                     {applyShocks ? 'ON' : 'OFF'}
+                  </button>
+               </div>
+            )}
 
             {/* RAROC Scorecard */}
             <div className="p-4 bg-slate-50 dark:bg-black border-b border-slate-200 dark:border-slate-700/50">
