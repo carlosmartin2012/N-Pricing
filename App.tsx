@@ -210,14 +210,14 @@ const App: React.FC = () => {
             onLogout={handleLogout}
           />
 
-          <main className="flex-1 p-3 md:p-6 overflow-auto relative h-full custom-scrollbar">
+          <main className="flex-1 p-3 md:p-6 overflow-auto relative h-full custom-scrollbar bg-slate-50 dark:bg-slate-950">
             <div className="absolute inset-0 pointer-events-none opacity-[0.02]"
               style={{ backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
             </div>
 
             {currentView === 'CALCULATOR' && (
-              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 min-h-full">
-                <div className="lg:col-span-4 w-full">
+              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 h-full">
+                <div className="lg:col-span-4 w-full h-full flex flex-col">
                   <DealInputPanel
                     values={dealParams}
                     onChange={handleParamChange}
@@ -231,10 +231,10 @@ const App: React.FC = () => {
                     behaviouralModels={behaviouralModels}
                   />
                 </div>
-                <div className="lg:col-span-4 w-full">
+                <div className="lg:col-span-4 w-full h-full flex flex-col">
                   <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
                 </div>
-                <div className="lg:col-span-4 w-full">
+                <div className="lg:col-span-4 w-full h-full flex flex-col">
                   <PricingReceipt
                     deal={dealParams}
                     setMatchedMethod={setMatchedMethod}
@@ -314,7 +314,7 @@ const App: React.FC = () => {
             )}
 
             {currentView === 'USER_MGMT' && (
-              <div className="h-full relative z-0">
+              <div className="h-full relative z-0 flex flex-col">
                 <UserManagement users={users} setUsers={setUsers} />
               </div>
             )}
@@ -332,7 +332,7 @@ const App: React.FC = () => {
             )}
 
             {currentView === 'AI_LAB' && (
-              <div className="h-full relative z-0">
+              <div className="h-full relative z-0 flex flex-col">
                 <GenAIChat
                   deals={deals}
                   marketSummary={`USD Overnight: ${MOCK_YIELD_CURVE[0].rate}%`}
@@ -341,7 +341,7 @@ const App: React.FC = () => {
             )}
 
             {currentView === 'SHOCKS' && (
-              <div className="h-full relative z-0">
+              <div className="h-full relative z-0 flex flex-col">
                 <ShocksDashboard
                   deal={dealParams}
                   approvalMatrix={approvalMatrix}

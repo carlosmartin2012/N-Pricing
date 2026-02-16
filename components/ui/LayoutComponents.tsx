@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const Panel: React.FC<{ children: React.ReactNode; className?: string; title?: string }> = ({ children, className = '', title }) => (
-  <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 shadow-lg flex flex-col ${className}`}>
+  <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 shadow-lg flex flex-col h-full ${className}`}>
     {title && (
       <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/30 flex items-center justify-between">
         <h3 className="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">{title}</h3>
