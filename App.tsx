@@ -216,8 +216,8 @@ const App: React.FC = () => {
             </div>
 
             {currentView === 'CALCULATOR' && (
-              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 md:gap-8 relative z-0 min-h-full pb-10">
-                <div className="lg:col-span-12 xl:col-span-4 w-full h-full">
+              <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 min-h-full">
+                <div className="lg:col-span-4 w-full">
                   <DealInputPanel
                     values={dealParams}
                     onChange={handleParamChange}
@@ -231,10 +231,10 @@ const App: React.FC = () => {
                     behaviouralModels={behaviouralModels}
                   />
                 </div>
-                <div className="lg:col-span-12 xl:col-span-4 w-full h-full">
+                <div className="lg:col-span-4 w-full">
                   <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
                 </div>
-                <div className="lg:col-span-12 xl:col-span-4 w-full h-full">
+                <div className="lg:col-span-4 w-full">
                   <PricingReceipt
                     deal={dealParams}
                     setMatchedMethod={setMatchedMethod}
