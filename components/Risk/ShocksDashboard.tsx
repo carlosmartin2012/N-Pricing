@@ -55,7 +55,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                             </div>
                             <input
                                 type="range"
-                                min="-200"
+                                min="-500"
                                 max="500"
                                 step="10"
                                 value={shocks.interestRate}
@@ -63,7 +63,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-cyan-500"
                             />
                             <div className="flex justify-between text-xs text-slate-400 font-mono">
-                                <span>-200 bps</span>
+                                <span>-500 bps</span>
                                 <span>0</span>
                                 <span>+500 bps</span>
                             </div>
@@ -79,7 +79,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                             </div>
                             <input
                                 type="range"
-                                min="0"
+                                min="-500"
                                 max="500"
                                 step="10"
                                 value={shocks.liquiditySpread}
@@ -87,8 +87,8 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-amber-500"
                             />
                             <div className="flex justify-between text-xs text-slate-400 font-mono">
-                                <span>0 bps</span>
-                                <span>+250 bps</span>
+                                <span>-500 bps</span>
+                                <span>0</span>
                                 <span>+500 bps</span>
                             </div>
                         </div>
