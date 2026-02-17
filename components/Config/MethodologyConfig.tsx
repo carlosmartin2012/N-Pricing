@@ -6,6 +6,7 @@ import { MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_FTP_RATE_CARDS } from '.
 import { ApprovalMatrixConfig, ProductDefinition, BusinessUnit, ClientEntity, GeneralRule, FtpRateCard } from '../../types';
 import { Search, Plus, Save, Edit, Settings, Leaf, ShieldCheck, CheckCircle2, AlertTriangle, TrendingUp, XCircle, Database, Briefcase, UserPlus, FileSpreadsheet, Trash2, X, GitBranch, Users, Layers, Building2, Upload } from 'lucide-react';
 import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 
 interface Props {
@@ -97,7 +98,7 @@ const MethodologyConfig: React.FC<Props> = ({
       setDrawerOpen(true);
    };
 
-   const handleSaveRule = () => {
+   const handleSaveRule = async () => {
       if (editingRule.product) {
          let action = '';
          if (editingRule.id === 0) {
@@ -108,6 +109,9 @@ const MethodologyConfig: React.FC<Props> = ({
             setRules(rules.map(r => r.id === editingRule.id ? editingRule as GeneralRule : r));
             action = 'UPDATE_RULE';
          }
+
+         // PERSIST TO SUPABASE
+         await supabaseService.saveRule({ ...editingRule, id: editingRule.id || Math.floor(Math.random() * 10000) } as GeneralRule);
 
          storage.addAuditEntry({
             userEmail: user?.email || 'unknown',
@@ -121,7 +125,7 @@ const MethodologyConfig: React.FC<Props> = ({
       }
    };
 
-   const handleDeleteRule = (id: number) => {
+   const handleDeleteRule = async (id: number) => {
       const rule = rules.find(r => r.id === id);
       setRules(rules.filter(r => r.id !== id));
       storage.addAuditEntry({
@@ -131,6 +135,7 @@ const MethodologyConfig: React.FC<Props> = ({
          module: 'METHODOLOGY',
          description: `Deleted methodology rule ${id} (${rule?.product})`
       });
+      await supabaseService.deleteRule(id);
    };
 
    const handleDownloadRulesTemplate = () => downloadTemplate('METHODOLOGY', 'Methodology_Rules_Template');
@@ -221,7 +226,7 @@ const MethodologyConfig: React.FC<Props> = ({
       setEditingClient({ ...client });
       setDrawerOpen(true);
    }
-   const handleSaveClient = () => {
+   const handleSaveClient = async () => {
       if (editingClient && editingClient.id && editingClient.name && setClients) {
          const exists = clients.find(c => c.id === editingClient.id);
          if (exists) {
@@ -229,11 +234,13 @@ const MethodologyConfig: React.FC<Props> = ({
          } else {
             setClients([...clients, editingClient as ClientEntity]);
          }
+         await supabaseService.saveClient(editingClient as ClientEntity);
          closeDrawer();
       }
    }
-   const handleDeleteClient = (id: string) => {
+   const handleDeleteClient = async (id: string) => {
       if (setClients) setClients(clients.filter(c => c.id !== id));
+      await supabaseService.deleteClient(id);
    }
 
    // --- Handlers for Product Master Data ---
@@ -245,7 +252,7 @@ const MethodologyConfig: React.FC<Props> = ({
       setEditingProduct({ ...prod });
       setDrawerOpen(true);
    }
-   const handleSaveProduct = () => {
+   const handleSaveProduct = async () => {
       if (editingProduct && editingProduct.id && editingProduct.name && setProducts) {
          const exists = products.find(p => p.id === editingProduct.id);
          if (exists) {
@@ -253,11 +260,13 @@ const MethodologyConfig: React.FC<Props> = ({
          } else {
             setProducts([...products, editingProduct as ProductDefinition]);
          }
+         await supabaseService.saveProduct(editingProduct as ProductDefinition);
          closeDrawer();
       }
    }
-   const handleDeleteProduct = (id: string) => {
+   const handleDeleteProduct = async (id: string) => {
       if (setProducts) setProducts(products.filter(p => p.id !== id));
+      await supabaseService.deleteProduct(id);
    }
 
    // --- Handlers for Business Unit Master Data ---
@@ -269,7 +278,7 @@ const MethodologyConfig: React.FC<Props> = ({
       setEditingBU({ ...bu });
       setDrawerOpen(true);
    }
-   const handleSaveBU = () => {
+   const handleSaveBU = async () => {
       if (editingBU && editingBU.id && editingBU.name && setBusinessUnits) {
          const exists = businessUnits.find(b => b.id === editingBU.id);
          if (exists) {
@@ -277,11 +286,13 @@ const MethodologyConfig: React.FC<Props> = ({
          } else {
             setBusinessUnits([...businessUnits, editingBU as BusinessUnit]);
          }
+         await supabaseService.saveBusinessUnit(editingBU as BusinessUnit);
          closeDrawer();
       }
    }
-   const handleDeleteBU = (id: string) => {
+   const handleDeleteBU = async (id: string) => {
       if (setBusinessUnits) setBusinessUnits(businessUnits.filter(b => b.id !== id));
+      await supabaseService.deleteBusinessUnit(id);
    }
 
    // --- Handlers for Governance ---

@@ -148,6 +148,11 @@ export const supabaseService = {
         if (error) console.error('Error saving rule:', error);
     },
 
+    async deleteRule(id: number) {
+        const { error } = await supabase.from('rules').delete().eq('id', id);
+        if (error) console.error('Error deleting rule:', error);
+    },
+
     async fetchClients(): Promise<ClientEntity[]> {
         const { data, error } = await supabase.from('clients').select('*');
         if (error) return [];
@@ -157,6 +162,11 @@ export const supabaseService = {
     async saveClient(client: ClientEntity) {
         const { error } = await supabase.from('clients').upsert(client);
         if (error) console.error('Error saving client:', error);
+    },
+
+    async deleteClient(id: string) {
+        const { error } = await supabase.from('clients').delete().eq('id', id);
+        if (error) console.error('Error deleting client:', error);
     },
 
     async fetchBusinessUnits(): Promise<BusinessUnit[]> {
@@ -170,6 +180,11 @@ export const supabaseService = {
         if (error) console.error('Error saving unit:', error);
     },
 
+    async deleteBusinessUnit(id: string) {
+        const { error } = await supabase.from('business_units').delete().eq('id', id);
+        if (error) console.error('Error deleting unit:', error);
+    },
+
     async fetchProducts(): Promise<ProductDefinition[]> {
         const { data, error } = await supabase.from('products').select('*');
         if (error) return [];
@@ -179,6 +194,11 @@ export const supabaseService = {
     async saveProduct(product: ProductDefinition) {
         const { error } = await supabase.from('products').upsert(product);
         if (error) console.error('Error saving product:', error);
+    },
+
+    async deleteProduct(id: string) {
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (error) console.error('Error deleting product:', error);
     },
 
     // --- USERS & PRESENCE ---
@@ -282,6 +302,24 @@ export const supabaseService = {
         return data;
     },
 
+    // --- SYSTEM CONFIG (Shocks, etc.) ---
+    async fetchShocks(): Promise<any> {
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('value')
+            .eq('key', 'shocks')
+            .single();
+        if (error) return { interestRate: 0, liquiditySpread: 0 };
+        return data.value;
+    },
+
+    async saveShocks(shocks: any) {
+        const { error } = await supabase
+            .from('system_config')
+            .upsert({ key: 'shocks', value: shocks, updated_at: new Date().toISOString() });
+        if (error) console.error('Error saving shocks:', error);
+    },
+
     // --- REALTIME SUBSCRIPTIONS ---
     subscribeToAll(onUpdate: (payload: any) => void) {
         return supabase
@@ -292,6 +330,9 @@ export const supabaseService = {
                     if (payload.table === 'deals') payload.new = mapDealFromDB(payload.new);
                     if (payload.table === 'audit_log') payload.new = mapAuditFromDB(payload.new);
                     if (payload.table === 'behavioural_models') payload.new = mapModelFromDB(payload.new);
+                    if (payload.table === 'system_config' && payload.new) {
+                        payload.new = (payload.new as any).value;
+                    }
                 }
                 onUpdate(payload);
             })

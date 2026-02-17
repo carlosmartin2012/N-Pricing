@@ -87,14 +87,15 @@ const App: React.FC = () => {
   // 1. Initial Hydration from Supabase
   React.useEffect(() => {
     const hydrate = async () => {
-      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers] = await Promise.all([
+      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks] = await Promise.all([
         storage.getDeals(),
         storage.getBehaviouralModels(),
         supabaseService.fetchRules(),
         supabaseService.fetchClients(),
         supabaseService.fetchBusinessUnits(),
         supabaseService.fetchProducts(),
-        supabaseService.fetchUsers()
+        supabaseService.fetchUsers(),
+        supabaseService.fetchShocks()
       ]);
 
       if (dbDeals.length > 0) setDeals(dbDeals);
@@ -104,6 +105,7 @@ const App: React.FC = () => {
       if (dbUnits.length > 0) setBusinessUnits(dbUnits);
       if (dbProducts.length > 0) setProducts(dbProducts);
       if (dbUsers.length > 0) setUsers(dbUsers);
+      if (dbShocks) setShocks(dbShocks);
 
       setIsLoading(false);
     };
@@ -131,6 +133,9 @@ const App: React.FC = () => {
       if (table === 'business_units') updateState(setBusinessUnits);
       if (table === 'products') updateState(setProducts);
       if (table === 'users') updateState(setUsers);
+      if (table === 'system_config' && eventType !== 'DELETE') {
+        setShocks(newRecord);
+      }
     });
 
     return () => { channel.unsubscribe(); };
@@ -154,6 +159,15 @@ const App: React.FC = () => {
   React.useEffect(() => { storage.saveLocal('n_pricing_approval_matrix', approvalMatrix); }, [approvalMatrix]);
   React.useEffect(() => { storage.saveLocal('n_pricing_behavioural', behaviouralModels); }, [behaviouralModels]);
   React.useEffect(() => { storage.saveLocal('n_pricing_deals', deals); }, [deals]);
+
+  // 4. Shocks Persistence (Debounced)
+  React.useEffect(() => {
+    if (isLoading) return;
+    const timer = setTimeout(() => {
+      supabaseService.saveShocks(shocks);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [shocks, isLoading]);
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -216,6 +230,14 @@ const App: React.FC = () => {
           prev: parseFloat(r.Prev || r.prev) || 0
         }));
         await storage.saveCurveSnapshot(currency, new Date().toISOString().split('T')[0], points);
+
+        await storage.addAuditEntry({
+          userEmail: currentUser?.email || 'unknown',
+          userName: currentUser?.name || 'Unknown User',
+          action: 'IMPORT_YIELD_CURVES',
+          module: 'MARKET_DATA',
+          description: `Imported ${points.length} curve points with currency ${currency}`
+        });
         break;
       }
       case 'METHODOLOGY': {
@@ -256,9 +278,19 @@ const App: React.FC = () => {
       }
       case 'SHOCKS': {
         const row = data[0];
-        setShocks({
+        const newShocks = {
           interestRate: parseFloat(row.InterestRateShock || row.interestRateShock) || 0,
           liquiditySpread: parseFloat(row.LiquiditySpreadShock || row.liquiditySpreadShock) || 0
+        };
+        setShocks(newShocks);
+        await supabaseService.saveShocks(newShocks);
+
+        await storage.addAuditEntry({
+          userEmail: currentUser?.email || 'unknown',
+          userName: currentUser?.name || 'Unknown User',
+          action: 'IMPORT_SHOCKS',
+          module: 'SHOCKS',
+          description: `Universal import applied shocks: IR=${newShocks.interestRate}bps, Liq=${newShocks.liquiditySpread}bps`
         });
         break;
       }
