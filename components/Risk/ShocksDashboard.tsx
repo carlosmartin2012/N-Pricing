@@ -5,7 +5,7 @@ import { Transaction, ApprovalMatrixConfig } from '../../types';
 import { calculatePricing, PricingShocks } from '../../utils/pricingEngine';
 import { RefreshCcw, TrendingUp, AlertTriangle, ArrowRight, FileSpreadsheet, Download } from 'lucide-react';
 import { storage } from '../../utils/storage';
-import { downloadTemplate } from '../../utils/excelUtils';
+import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 
 interface Props {
     deal: Transaction;
@@ -32,6 +32,28 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
     const deltaClientRate = shockedResult.finalClientRate - baseResult.finalClientRate;
 
     const handleDownloadTemplate = () => downloadTemplate('STRESS_TESTING', 'Stress_Testing_Template');
+
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            try {
+                const data = await parseExcel(file);
+                if (data.length > 0) {
+                    const firstRow = data[0];
+                    const newShocks: PricingShocks = {
+                        interestRate: parseFloat(firstRow.InterestRateShock || firstRow.interestRateShock) || 0,
+                        liquiditySpread: parseFloat(firstRow.LiquiditySpreadShock || firstRow.liquiditySpreadShock) || 0
+                    };
+                    setShocks(newShocks);
+
+                    alert(`Shocks imported: IR ${newShocks.interestRate}bps, Liq ${newShocks.liquiditySpread}bps`);
+                }
+            } catch (error) {
+                console.error('Error importing shocks:', error);
+                alert('Error al importar shocks. Verifique el formato del archivo.');
+            }
+        }
+    };
 
     React.useEffect(() => {
         if (shocks.interestRate !== 0 || shocks.liquiditySpread !== 0) {
@@ -121,10 +143,19 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                             <button
                                 onClick={handleDownloadTemplate}
                                 className="flex-1 py-2 flex items-center justify-center gap-2 text-sm text-amber-500 hover:text-amber-600 transition-colors border border-amber-200 dark:border-amber-900/50 rounded bg-amber-50/10 dark:bg-amber-950/20"
+                                title="Download Template"
                             >
-                                <Download size={14} />
+                                <FileSpreadsheet size={14} />
                                 Template
                             </button>
+                            <label
+                                className="flex-1 py-2 flex items-center justify-center gap-2 text-sm text-cyan-500 hover:text-cyan-600 transition-colors border border-cyan-200 dark:border-cyan-900/50 rounded bg-cyan-50/10 dark:bg-cyan-950/20 cursor-pointer"
+                                title="Import Excel"
+                            >
+                                <TrendingUp size={14} />
+                                Import
+                                <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleImport} />
+                            </label>
                         </div>
 
                     </div>

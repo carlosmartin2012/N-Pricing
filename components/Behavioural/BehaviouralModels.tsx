@@ -79,6 +79,17 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
 
             await storage.saveBehaviouralModel(finalModel);
 
+            // Optimistic Update: Update local state immediately for better UX
+            setModels(prev => {
+               const existingIndex = prev.findIndex(m => m.id === finalModel.id);
+               if (existingIndex >= 0) {
+                  const next = [...prev];
+                  next[existingIndex] = finalModel;
+                  return next;
+               }
+               return [finalModel, ...prev];
+            });
+
             await storage.addAuditEntry({
                userEmail: user?.email || 'unknown',
                userName: user?.name || 'Unknown User',
@@ -327,6 +338,17 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
             >
                {editingModel && (
                   <div className="space-y-6">
+                     <InputGroup label="Model Type">
+                        <SelectInput
+                           value={editingModel.type}
+                           onChange={(e) => setEditingModel({ ...editingModel, type: e.target.value as any })}
+                        >
+                           <option value="NMD_Replication">NMD (Core & Caterpillar)</option>
+                           <option value="Prepayment_CPR">Prepayment (CPR)</option>
+                        </SelectInput>
+                        <p className="text-[9px] text-slate-500 mt-1">Select the behavioural methodology</p>
+                     </InputGroup>
+
                      <InputGroup label="Model Name">
                         <TextInput
                            value={editingModel.name}
