@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell, Sun, Moon, Languages } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, Languages, Upload } from 'lucide-react';
 import { ViewState, UserProfile } from '../../types';
 import { translations, Language } from '../../translations';
 
@@ -15,6 +15,7 @@ interface HeaderProps {
     setLanguage: (lang: Language) => void;
     user: UserProfile | null;
     onLogout: () => void;
+    onOpenImport: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -29,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
     setLanguage,
     user,
     onLogout,
+    onOpenImport,
 }) => {
     const t = translations[language];
 
@@ -60,6 +62,15 @@ export const Header: React.FC<HeaderProps> = ({
                 <button className="relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <Bell size={18} />
                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-900" />
+                </button>
+
+                <button
+                    onClick={onOpenImport}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md text-[10px] font-bold uppercase transition-all shadow-lg shadow-cyan-900/20"
+                    title="Universal Data Import"
+                >
+                    <Upload size={14} />
+                    <span className="hidden lg:inline">Import Data</span>
                 </button>
 
                 <div className="flex items-center gap-2 md:gap-3 md:pl-6 md:border-l border-slate-200 dark:border-slate-700">

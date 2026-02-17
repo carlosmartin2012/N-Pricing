@@ -60,26 +60,33 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
 
       if (editingModel.id) {
          try {
+            console.log('Attempting to save model:', editingModel);
             const exists = models.find(m => m.id === editingModel.id);
 
-            // Ensure all critical fields are present
+            // Ensure all critical fields are present and valid
             const finalModel: BehaviouralModel = {
                id: editingModel.id,
-               name: editingModel.name,
+               name: editingModel.name.trim(),
                type: (editingModel.type || activeTab) as any,
                nmdMethod: editingModel.nmdMethod || 'Caterpillar',
-               description: editingModel.description,
-               coreRatio: editingModel.coreRatio ?? 50,
-               decayRate: editingModel.decayRate ?? 0,
-               betaFactor: editingModel.betaFactor ?? 0.5,
-               cpr: editingModel.cpr ?? 5,
-               penaltyExempt: editingModel.penaltyExempt ?? 0,
-               replicationProfile: editingModel.replicationProfile || []
+               description: editingModel.description?.trim() || '',
+               coreRatio: isNaN(Number(editingModel.coreRatio)) ? 50 : Number(editingModel.coreRatio),
+               decayRate: isNaN(Number(editingModel.decayRate)) ? 0 : Number(editingModel.decayRate),
+               betaFactor: isNaN(Number(editingModel.betaFactor)) ? 0.5 : Number(editingModel.betaFactor),
+               cpr: isNaN(Number(editingModel.cpr)) ? 5 : Number(editingModel.cpr),
+               penaltyExempt: isNaN(Number(editingModel.penaltyExempt)) ? 0 : Number(editingModel.penaltyExempt),
+               replicationProfile: editingModel.replicationProfile && editingModel.replicationProfile.length > 0
+                  ? editingModel.replicationProfile
+                  : [
+                     { term: '1M', weight: 40, spread: 0 },
+                     { term: '3M', weight: 30, spread: 5 },
+                     { term: '1Y', weight: 30, spread: 10 }
+                  ]
             };
 
             await storage.saveBehaviouralModel(finalModel);
 
-            // Optimistic Update: Update local state immediately for better UX
+            // Optimistic Update
             setModels(prev => {
                const existingIndex = prev.findIndex(m => m.id === finalModel.id);
                if (existingIndex >= 0) {
@@ -95,13 +102,14 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
                userName: user?.name || 'Unknown User',
                action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
                module: 'BEHAVIOURAL',
-               description: `${exists ? 'Updated' : 'Created'} behavioural model: ${editingModel.name}`
+               description: `${exists ? 'Updated' : 'Created'} behavioural model: ${finalModel.name}`
             });
 
+            alert(`Modelo "${finalModel.name}" guardado correctamente.`);
             setDrawerOpen(false);
          } catch (error) {
-            console.error('Error saving model:', error);
-            alert('Fallo al guardar el modelo. Por favor verifique la conexión.');
+            console.error('CRITICAL: Error saving model:', error);
+            alert(`Error al guardar el modelo: ${error instanceof Error ? error.message : 'Unknown error'}`);
          }
       }
    }

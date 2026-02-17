@@ -19,6 +19,7 @@ import { Header } from './components/ui/Header';
 import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap } from 'lucide-react';
 import { Login } from './components/ui/Login';
 import { UserConfigModal } from './components/ui/UserConfigModal';
+import { UniversalImportModal } from './components/ui/UniversalImportModal';
 import { translations, Language } from './translations';
 
 import { storage } from './utils/storage';
@@ -37,6 +38,7 @@ const App: React.FC = () => {
   const [dealParams, setDealParams] = useState<Transaction>(INITIAL_DEAL);
   const [matchedMethod, setMatchedMethod] = useState<string>('Matched Maturity');
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Persistent States
   const [clients, setClients] = useState<ClientEntity[]>(() => storage.loadLocal('n_pricing_clients', MOCK_CLIENTS));
@@ -198,6 +200,92 @@ const App: React.FC = () => {
     storage.saveCurrentUser(null);
   };
 
+  const handleUniversalImport = async (module: string, data: any[]) => {
+    switch (module) {
+      case 'YIELD_CURVES': {
+        // Find currency (assume first found or default to USD)
+        const currency = data[0]?.Currency || data[0]?.currency || 'USD';
+        const points = data.map(r => ({
+          tenor: r.Tenor || r.tenor,
+          rate: parseFloat(r.Rate || r.rate) || 0,
+          prev: parseFloat(r.Prev || r.prev) || 0
+        }));
+        await storage.saveCurveSnapshot(currency, new Date().toISOString().split('T')[0], points);
+        break;
+      }
+      case 'METHODOLOGY': {
+        const rulesToSave = data.map(r => ({
+          id: r.ID || r.id || Math.floor(Math.random() * 10000),
+          businessUnit: r.BusinessUnit || r.businessUnit || 'General',
+          product: r.Product || r.product || 'Unknown',
+          segment: r.Segment || r.segment || 'All',
+          tenor: r.Tenor || r.tenor || 'Any',
+          baseMethod: r.BaseMethod || r.baseMethod || 'Matched Maturity',
+          baseReference: r.BaseReference || r.baseReference || 'USD-SOFR',
+          spreadMethod: r.SpreadMethod || r.spreadMethod || 'Fixed',
+          liquidityReference: r.LiquidityReference || r.liquidityReference || 'Standard',
+          strategicSpread: parseFloat(r.StrategicSpread || r.strategicSpread) || 0
+        }));
+        for (const rule of rulesToSave) {
+          await supabaseService.saveRule(rule as GeneralRule);
+        }
+        break;
+      }
+      case 'BEHAVIOURAL': {
+        const modelsToSave = data.map(r => ({
+          id: r.ID || r.id || `MOD-IMP-${Math.floor(Math.random() * 1000)}`,
+          name: r.Name || r.name || 'Imported Model',
+          type: (r.Type || r.type || 'NMD_Replication') as any,
+          description: r.Description || r.description || '',
+          coreRatio: parseFloat(r.CoreRatio || r.coreRatio) || 50,
+          decayRate: parseFloat(r.DecayRate || r.decayRate) || 0,
+          betaFactor: parseFloat(r.BetaFactor || r.betaFactor) || 0.5,
+          cpr: parseFloat(r.CPR || r.cpr) || 5,
+          penaltyExempt: parseFloat(r.PenaltyExempt || r.penaltyExempt) || 0,
+          replicationProfile: r.ReplicationProfile ? (typeof r.ReplicationProfile === 'string' ? JSON.parse(r.ReplicationProfile) : r.ReplicationProfile) : []
+        }));
+        for (const model of modelsToSave) {
+          await storage.saveBehaviouralModel(model as BehaviouralModel);
+        }
+        break;
+      }
+      case 'SHOCKS': {
+        const row = data[0];
+        setShocks({
+          interestRate: parseFloat(row.InterestRateShock || row.interestRateShock) || 0,
+          liquiditySpread: parseFloat(row.LiquiditySpreadShock || row.liquiditySpreadShock) || 0
+        });
+        break;
+      }
+      case 'DEALS': {
+        const dealsToSave = data.map(r => ({
+          id: r.ID || r.id || r['Transact ID'] || `DL-${Math.floor(Math.random() * 99999)}`,
+          clientId: r.Client || r.clientId || 'Unknown Client',
+          amount: parseFloat(r.Amount || r.amount) || 0,
+          currency: r.Currency || r.currency || 'USD',
+          productType: r.Product || r.productType || 'Loan',
+          startDate: r.Date || r.startDate || new Date().toISOString().split('T')[0],
+          durationMonths: parseInt(r.Duration || r.durationMonths) || 12,
+          status: 'Draft',
+          businessUnit: r.BU || r.businessUnit || 'Retail',
+          marginTarget: parseFloat(r.Margin || r.marginTarget) || 0
+        }));
+        for (const dl of dealsToSave) {
+          await storage.saveDeal(dl as Transaction);
+        }
+        break;
+      }
+    }
+
+    storage.addAuditEntry({
+      userEmail: currentUser?.email || 'unknown',
+      userName: currentUser?.name || 'Unknown User',
+      action: `UNIVERSAL_IMPORT_${module}`,
+      module: 'CONFIG',
+      description: `Universal import performed for ${module} (${data.length} records)`
+    });
+  };
+
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} whitelistedEmails={users.map(u => u.email)} language={language} />;
   }
@@ -248,6 +336,7 @@ const App: React.FC = () => {
           setLanguage={setLanguage}
           user={currentUser}
           onLogout={handleLogout}
+          onOpenImport={() => setIsImportModalOpen(true)}
         />
 
         <main className="flex-1 p-3 md:p-6 overflow-auto relative custom-scrollbar bg-slate-50 dark:bg-black">
@@ -425,6 +514,12 @@ const App: React.FC = () => {
           setLanguage={setLanguage}
           theme={theme}
           setTheme={setTheme}
+        />
+
+        <UniversalImportModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onImport={handleUniversalImport}
         />
 
       </div>

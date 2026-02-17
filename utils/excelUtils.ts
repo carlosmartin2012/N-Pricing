@@ -74,23 +74,37 @@ export const parseExcel = (file: File): Promise<any[]> => {
             const data = e.target?.result;
             const workbook = XLSX.read(data, { type: 'binary' });
 
-            // Try to find data in any sheet, starting with the first
             let allData: any[] = [];
 
             workbook.SheetNames.forEach(sheetName => {
                 const worksheet = workbook.Sheets[sheetName];
+                if (!worksheet) return;
 
-                // Check if it's one of our branded templates (Header in A1)
-                const firstCell = worksheet['A1']?.v;
-                const isBranded = typeof firstCell === 'string' && firstCell.includes('N PRICING SYSTEM');
+                // Robust branding detection: Check first few cells for our branding string
+                let isBranded = false;
+                const brandingMarkers = ['A1', 'A2', 'B1', 'B2'];
+                for (const marker of brandingMarkers) {
+                    const val = worksheet[marker]?.v;
+                    if (typeof val === 'string' && val.includes('N PRICING SYSTEM')) {
+                        isBranded = true;
+                        break;
+                    }
+                }
 
-                // If branded, data starts at row 4 (offset 3)
-                const json = XLSX.utils.sheet_to_json(worksheet, isBranded ? { range: 3 } : {});
+                // If branded, headers are in row 4 (offset 3). Otherwise row 1 (offset 0).
+                const json = XLSX.utils.sheet_to_json(worksheet, {
+                    range: isBranded ? 3 : 0,
+                    defval: null // Ensure missing cells don't shift data
+                });
+
                 if (json.length > 0) {
-                    allData = [...allData, ...json];
+                    // Tag data with sheetName to help disambiguate if needed
+                    const taggedData = json.map((item: any) => ({ ...item, _sheet: sheetName }));
+                    allData = [...allData, ...taggedData];
                 }
             });
 
+            console.log(`Parsed ${allData.length} records from ${workbook.SheetNames.length} sheets.`);
             resolve(allData);
         };
         reader.onerror = (error) => reject(error);
