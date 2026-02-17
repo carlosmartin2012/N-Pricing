@@ -7,12 +7,15 @@ import { storage } from '../../utils/storage';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { YieldCurvePoint } from '../../types';
 import { translations, Language } from '../../translations';
+import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
+import { FileSpreadsheet } from 'lucide-react';
 
 interface Props {
     language: Language;
+    user: any;
 }
 
-const YieldCurvePanel: React.FC<Props> = ({ language }) => {
+const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     const t = translations[language];
     const [currency, setCurrency] = useState('USD');
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -68,8 +71,8 @@ const YieldCurvePanel: React.FC<Props> = ({ language }) => {
         }));
 
         storage.addAuditEntry({
-            userEmail: 'carlos.martin@nfq.es',
-            userName: 'Carlos Martin',
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
             action: 'SAVE_CURVE_SNAPSHOT',
             module: 'MARKET_DATA',
             description: `Saved manual curve snapshot for ${currency} on ${selectedDate}`
@@ -79,21 +82,25 @@ const YieldCurvePanel: React.FC<Props> = ({ language }) => {
     const handleImport = (importedData: any[]) => {
         const key = `${currency}-${selectedDate}`;
         const newCurve: YieldCurvePoint[] = importedData.map(row => ({
-            tenor: row.tenor,
-            rate: parseFloat(row.rate) || 0,
-            prev: parseFloat(row.prev) || 0
+            tenor: row.Tenor || row.tenor,
+            rate: parseFloat(row.Rate || row.rate) || 0,
+            prev: parseFloat(row.Prev || row.prev) || 0
         }));
 
         setCurvesHistory(prev => ({ ...prev, [key]: newCurve }));
         setIsImportOpen(false);
 
         storage.addAuditEntry({
-            userEmail: 'carlos.martin@nfq.es',
-            userName: 'Carlos Martin',
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
             action: 'IMPORT_CURVE',
             module: 'MARKET_DATA',
             description: `Imported ${currency} yield curve for ${selectedDate}`
         });
+    };
+
+    const handleDownloadTemplate = () => {
+        downloadTemplate('YIELD_CURVE', `Yield_Curve_Template_${currency}`);
     };
 
     const curveTemplate = "tenor,rate,prev\nON,5.25,5.20\n1M,5.30,5.28\n1Y,5.10,5.05\n10Y,4.25,4.30";
@@ -171,6 +178,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language }) => {
                                             </button>
                                         ))}
                                     </div>
+                                    <button onClick={handleDownloadTemplate} className="p-1 text-slate-400 hover:text-amber-500 transition-colors" title="Download Template"><FileSpreadsheet size={14} /></button>
                                     <button onClick={handleSaveSnapshot} className="p-1 text-slate-400 hover:text-emerald-500 transition-colors" title="Save Snapshot"><Save size={14} /></button>
                                     <button onClick={() => setIsImportOpen(true)} className="p-1 text-slate-400 hover:text-cyan-500 transition-colors" title="Import Data"><Upload size={14} /></button>
                                 </div>

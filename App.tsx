@@ -84,11 +84,23 @@ const App: React.FC = () => {
   // 1. Initial Hydration from Supabase
   React.useEffect(() => {
     const hydrate = async () => {
-      const dbDeals = await storage.getDeals();
-      if (dbDeals.length > 0) setDeals(dbDeals);
+      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers] = await Promise.all([
+        storage.getDeals(),
+        storage.getBehaviouralModels(),
+        supabaseService.fetchRules(),
+        supabaseService.fetchClients(),
+        supabaseService.fetchBusinessUnits(),
+        supabaseService.fetchProducts(),
+        supabaseService.fetchUsers()
+      ]);
 
-      const dbModels = await storage.getBehaviouralModels();
+      if (dbDeals.length > 0) setDeals(dbDeals);
       if (dbModels.length > 0) setBehaviouralModels(dbModels);
+      if (dbRules.length > 0) setRules(dbRules);
+      if (dbClients.length > 0) setClients(dbClients);
+      if (dbUnits.length > 0) setBusinessUnits(dbUnits);
+      if (dbProducts.length > 0) setProducts(dbProducts);
+      if (dbUsers.length > 0) setUsers(dbUsers);
     };
     hydrate();
   }, []);
@@ -98,24 +110,38 @@ const App: React.FC = () => {
     const channel = supabaseService.subscribeToAll((payload) => {
       const { table, eventType, new: newRecord, old: oldRecord } = payload;
 
-      if (table === 'deals') {
-        if (eventType === 'INSERT') setDeals(prev => [newRecord as Transaction, ...prev]);
-        if (eventType === 'UPDATE') setDeals(prev => prev.map(d => d.id === newRecord.id ? (newRecord as Transaction) : d));
-        if (eventType === 'DELETE') setDeals(prev => prev.filter(d => d.id !== oldRecord.id));
-      }
+      const updateState = (setter: React.Dispatch<React.SetStateAction<any[]>>) => {
+        setter(prev => {
+          if (eventType === 'INSERT') return [newRecord, ...prev];
+          if (eventType === 'UPDATE') return prev.map(item => item.id === newRecord.id ? newRecord : item);
+          if (eventType === 'DELETE') return prev.filter(item => item.id !== oldRecord.id);
+          return prev;
+        });
+      };
 
-      if (table === 'behavioural_models') {
-        if (eventType === 'INSERT' || eventType === 'UPDATE') {
-          setBehaviouralModels(prev => {
-            const exists = prev.find(m => m.id === newRecord.id);
-            return exists ? prev.map(m => m.id === newRecord.id ? (newRecord as BehaviouralModel) : m) : [newRecord as BehaviouralModel, ...prev];
-          });
-        }
-      }
+      if (table === 'deals') updateState(setDeals);
+      if (table === 'behavioural_models') updateState(setBehaviouralModels);
+      if (table === 'rules') updateState(setRules);
+      if (table === 'clients') updateState(setClients);
+      if (table === 'business_units') updateState(setBusinessUnits);
+      if (table === 'products') updateState(setProducts);
+      if (table === 'users') updateState(setUsers);
     });
 
     return () => { channel.unsubscribe(); };
   }, []);
+
+  // 3. Presence Tracking
+  React.useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      const presenceChannel = supabaseService.trackPresence(currentUser.id, {
+        name: currentUser.name,
+        email: currentUser.email,
+        role: currentUser.role
+      });
+      return () => { presenceChannel.unsubscribe(); };
+    }
+  }, [isAuthenticated, currentUser]);
 
   // 3. Local Auto-Save (Backup Only - Removed global Deal Sync to avoid loops)
   React.useEffect(() => { storage.saveLocal('n_pricing_rules', rules); }, [rules]);
@@ -131,25 +157,31 @@ const App: React.FC = () => {
     setDealParams(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleLogin = (email: string) => {
+  const handleLogin = async (email: string) => {
     const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     let loggedUser: UserProfile;
+    const now = new Date().toISOString();
+
     if (user) {
-      loggedUser = user;
+      loggedUser = { ...user, lastLogin: now };
     } else {
       loggedUser = {
-        id: 'USR-TEMP',
+        id: `USR-${Math.floor(Math.random() * 10000)}`,
         name: email.split('@')[0].replace('.', ' '),
         email: email,
         role: 'Trader',
         status: 'Active',
-        lastLogin: new Date().toISOString(),
+        lastLogin: now,
         department: 'General'
       };
     }
+
     setCurrentUser(loggedUser);
     setIsAuthenticated(true);
     storage.saveCurrentUser(loggedUser);
+
+    // Persist user login in Supabase
+    await supabaseService.upsertUser(loggedUser);
 
     storage.addAuditEntry({
       userEmail: email,
@@ -249,6 +281,7 @@ const App: React.FC = () => {
                   approvalMatrix={approvalMatrix}
                   language={language}
                   shocks={shocks}
+                  user={currentUser}
                 />
               </div>
             </div>
@@ -263,19 +296,20 @@ const App: React.FC = () => {
                 clients={clients}
                 businessUnits={businessUnits}
                 language={language}
+                user={currentUser}
               />
             </div>
           )}
 
           {currentView === 'MARKET_DATA' && (
             <div className="h-full relative z-0">
-              <YieldCurvePanel language={language} />
+              <YieldCurvePanel language={language} user={currentUser} />
             </div>
           )}
 
           {currentView === 'BEHAVIOURAL' && (
             <div className="h-full relative z-0">
-              <BehaviouralModels models={behaviouralModels} setModels={setBehaviouralModels} />
+              <BehaviouralModels models={behaviouralModels} setModels={setBehaviouralModels} user={currentUser} />
             </div>
           )}
 
@@ -293,6 +327,7 @@ const App: React.FC = () => {
                 setBusinessUnits={setBusinessUnits}
                 clients={clients}
                 setClients={setClients}
+                user={currentUser}
               />
             </div>
           )}
@@ -356,6 +391,7 @@ const App: React.FC = () => {
                 language={language}
                 shocks={shocks}
                 setShocks={setShocks}
+                user={currentUser}
               />
             </div>
           )}

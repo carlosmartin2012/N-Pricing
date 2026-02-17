@@ -22,7 +22,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
     {
       id: 'welcome',
       role: 'model',
-      content: 'Nexus Prime Neural Link Established. I have full read access to the deal blotter and yield curve definitions. How can I assist with your portfolio analysis today?',
+      content: 'N Pricing Neural Link Established. I have full read access to the deal blotter and yield curve definitions. How can I assist with your portfolio analysis today?',
       timestamp: new Date().toLocaleTimeString()
     }
   ]);
@@ -58,7 +58,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
       const dealCount = deals.length;
 
       const systemPrompt = `
-        You are 'Nexus Prime', a sophisticated Banking AI Chatbot.
+        You are 'N Pricing', a sophisticated Banking AI Chatbot.
         
         GLOBAL DATA CONTEXT:
         - Total Booked Deals: ${dealCount}
@@ -141,7 +141,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
             ))}
           </div>
           <div className="p-4 border-t border-slate-800 text-[10px] text-slate-600 font-mono text-center">
-            Nexus Prime v2.5.1
+            N Pricing v2.5.1
           </div>
         </div>
 
@@ -155,7 +155,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
                 <BrainCircuit size={16} className="text-cyan-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-200">Nexus Prime Chat</h3>
+                <h3 className="text-sm font-bold text-slate-200">N Pricing Chat</h3>
                 <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
                   <span className="text-[10px] text-emerald-500 font-mono">ONLINE • GEMINI-2.5-FLASH</span>
@@ -222,7 +222,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask Nexus Prime about portfolio risks, curves, or specific deal IDs..."
+                placeholder="Ask N Pricing about portfolio risks, curves, or specific deal IDs..."
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-12 pr-12 py-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 shadow-inner font-mono transition-all"
               />
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">

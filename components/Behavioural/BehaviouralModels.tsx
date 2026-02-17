@@ -4,16 +4,18 @@ import { Panel, Badge, InputGroup, TextInput, SelectInput } from '../ui/LayoutCo
 import { Drawer } from '../ui/Drawer';
 import { MOCK_BEHAVIOURAL_MODELS } from '../../constants';
 import { BehaviouralModel, ReplicationTranche } from '../../types';
-import { Search, Plus, Edit, Trash2, Activity, TrendingDown, Layers, BarChart, X, Split, GitMerge } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Activity, TrendingDown, Layers, BarChart, X, Split, GitMerge, FileSpreadsheet, Upload } from 'lucide-react';
+import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 
 import { storage } from '../../utils/storage';
 
 interface Props {
    models: BehaviouralModel[];
    setModels: React.Dispatch<React.SetStateAction<BehaviouralModel[]>>;
+   user: any;
 }
 
-const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
+const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
    const [activeTab, setActiveTab] = useState<'NMD_Replication' | 'Prepayment_CPR'>('NMD_Replication');
 
    const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -58,8 +60,8 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
          await storage.saveBehaviouralModel(editingModel as BehaviouralModel);
 
          await storage.addAuditEntry({
-            userEmail: 'carlos.martin@nfq.es',
-            userName: 'Carlos Martin',
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
             action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
             module: 'BEHAVIOURAL',
             description: `${exists ? 'Updated' : 'Created'} behavioural model: ${editingModel.name}`
@@ -69,13 +71,48 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
       }
    }
 
+   const handleDownloadTemplate = () => {
+      downloadTemplate('BEHAVIOURAL', `Behavioural_Model_Template_${activeTab}`);
+   };
+
+   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+         const data = await parseExcel(file);
+         const newModels: BehaviouralModel[] = data.map(row => ({
+            id: row.ID || row.id || `MOD-IMP-${Math.floor(Math.random() * 1000)}`,
+            name: row.Name || row.name || 'Imported Model',
+            type: (row.Type || row.type || activeTab) as any,
+            description: row.Description || row.description || '',
+            coreRatio: parseFloat(row.CoreRatio || row.coreRatio) || 50,
+            decayRate: parseFloat(row.DecayRate || row.decayRate) || 0,
+            betaFactor: parseFloat(row.BetaFactor || row.betaFactor) || 0.5,
+            cpr: parseFloat(row.CPR || row.cpr) || 5,
+            penaltyExempt: parseFloat(row.PenaltyExempt || row.penaltyExempt) || 0,
+            replicationProfile: row.ReplicationProfile ? JSON.parse(row.ReplicationProfile) : []
+         }));
+
+         for (const model of newModels) {
+            await storage.saveBehaviouralModel(model);
+         }
+
+         await storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: 'IMPORT_MODELS',
+            module: 'BEHAVIOURAL',
+            description: `Imported ${newModels.length} behavioural models from Excel.`
+         });
+      }
+   };
+
    const handleDelete = async (id: string) => {
       if (window.confirm('Are you sure you want to delete this model?')) {
          await storage.deleteBehaviouralModel(id);
 
          await storage.addAuditEntry({
-            userEmail: 'carlos.martin@nfq.es',
-            userName: 'Carlos Martin',
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
             action: 'DELETE_MODEL',
             module: 'BEHAVIOURAL',
             description: `Deleted behavioural model: ${id}`
@@ -143,12 +180,21 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels }) => {
                      className="bg-slate-950 border border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 w-64"
                   />
                </div>
-               <button
-                  onClick={handleAddNew}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/30 text-cyan-400 rounded border border-cyan-800 text-xs hover:bg-cyan-900/50 font-medium"
-               >
-                  <Plus size={12} /> Create Model
-               </button>
+               <div className="flex gap-2">
+                  <button onClick={handleDownloadTemplate} className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-amber-400 rounded border border-slate-700 text-xs hover:bg-slate-700" title="Download Template">
+                     <FileSpreadsheet size={12} /> Template
+                  </button>
+                  <label className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-cyan-400 rounded border border-slate-700 text-xs hover:bg-slate-700 cursor-pointer">
+                     <Upload size={12} /> Import
+                     <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleImport} />
+                  </label>
+                  <button
+                     onClick={handleAddNew}
+                     className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-cyan-400 rounded border border-cyan-800 text-xs hover:bg-cyan-900/50 font-bold"
+                  >
+                     <Plus size={12} /> Create Model
+                  </button>
+               </div>
             </div>
 
             {/* Grid */}

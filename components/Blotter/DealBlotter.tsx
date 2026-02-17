@@ -8,6 +8,7 @@ import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, Mor
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
 import { translations, Language } from '../../translations';
+import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 
 interface Props {
   deals: Transaction[];
@@ -16,9 +17,10 @@ interface Props {
   clients: ClientEntity[];
   businessUnits: BusinessUnit[];
   language: Language;
+  user: any;
 }
 
-const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language }) => {
+const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language, user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const t = translations[language];
@@ -33,42 +35,65 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
   const dealTemplate = "id,clientId,clientType,productType,amount,currency,startDate,durationMonths,marginTarget,riskWeight,capitalRatio,targetROE,operationalCostBps,status\nTRD-90001,CL-1001,Corporate,LOAN_COMM,2500000,USD,2023-10-25,24,2.5,100,11.5,15,45,Pending\nTRD-90002,CL-1002,Corporate,DEP_TERM,500000,EUR,2023-10-25,12,1.2,0,11.5,12,20,Pending";
 
-  const handleImport = (data: any[]) => {
-    const newDeals: Transaction[] = data.map(row => ({
-      id: row.id || `TRD-IMP-${Math.floor(Math.random() * 100000)}`,
-      clientId: row.clientId || 'Unknown',
-      clientType: row.clientType || 'Corporate',
-      productType: row.productType || 'LOAN_COMM',
-      amount: parseFloat(row.amount) || 0,
-      currency: row.currency || 'USD',
-      startDate: row.startDate || new Date().toISOString().split('T')[0],
-      durationMonths: parseFloat(row.durationMonths) || 12,
-      amortization: (row.amortization as any) || 'Bullet',
-      repricingFreq: (row.repricingFreq as any) || 'Fixed',
-      marginTarget: parseFloat(row.marginTarget) || 0,
-      riskWeight: parseFloat(row.riskWeight) || 100,
-      capitalRatio: parseFloat(row.capitalRatio) || 11.5,
-      targetROE: parseFloat(row.targetROE) || 15,
-      operationalCostBps: parseFloat(row.operationalCostBps) || 40,
-      status: (row.status as any) || 'Pending',
-      businessLine: 'Imported',
-      businessUnit: 'BU-001',
-      fundingBusinessUnit: 'BU-900',
-      transitionRisk: 'Neutral',
-      physicalRisk: 'Low'
-    }));
+  const handleImport = async (data: any[]) => {
+    // Check if it's an ID modification import or a full deal import
+    const isIDMod = data[0] && (data[0].NewID !== undefined || data[0].newID !== undefined);
 
-    setDeals(prev => [...newDeals, ...prev]);
+    if (isIDMod) {
+      const updatedDeals = deals.map(deal => {
+        const mod = data.find(row => (row.ID || row.id) === deal.id);
+        if (mod) {
+          return { ...deal, id: mod.NewID || mod.newID };
+        }
+        return deal;
+      });
+      setDeals(updatedDeals);
+      storage.addAuditEntry({
+        userEmail: user?.email || 'unknown',
+        userName: user?.name || 'Unknown User',
+        action: 'BATCH_ID_RENAME',
+        module: 'BLOTTER',
+        description: `Renamed deal IDs via Excel import for multiple transactions.`
+      });
+    } else {
+      const newDeals: Transaction[] = data.map(row => ({
+        id: row.id || row.ID || `TRD-IMP-${Math.floor(Math.random() * 100000)}`,
+        clientId: row.clientId || row.ClientID || 'Unknown',
+        clientType: row.clientType || row.ClientType || 'Corporate',
+        productType: row.productType || row.ProductType || 'LOAN_COMM',
+        amount: parseFloat(row.amount || row.Amount) || 0,
+        currency: row.currency || row.Currency || 'USD',
+        startDate: row.startDate || row.StartDate || new Date().toISOString().split('T')[0],
+        durationMonths: parseFloat(row.durationMonths || row.DurationMonths) || 12,
+        amortization: (row.amortization || row.Amortization || 'Bullet') as any,
+        repricingFreq: (row.repricingFreq || row.RepricingFreq || 'Fixed') as any,
+        marginTarget: parseFloat(row.marginTarget || row.MarginTarget) || 0,
+        riskWeight: parseFloat(row.riskWeight || row.RiskWeight) || 100,
+        capitalRatio: parseFloat(row.capitalRatio || row.CapitalRatio) || 11.5,
+        targetROE: parseFloat(row.targetROE || row.TargetROE) || 15,
+        operationalCostBps: parseFloat(row.operationalCostBps || row.OperationalCostBps) || 40,
+        status: (row.status || row.Status || 'Pending') as any,
+        businessLine: 'Imported',
+        businessUnit: 'BU-001',
+        fundingBusinessUnit: 'BU-900',
+        transitionRisk: 'Neutral',
+        physicalRisk: 'Low'
+      }));
 
-    storage.addAuditEntry({
-      userEmail: 'carlos.martin@nfq.es',
-      userName: 'Carlos Martin',
-      action: 'IMPORT_DEALS',
-      module: 'BLOTTER',
-      description: `Imported ${newDeals.length} deals from CSV batch.`
-    });
+      setDeals(prev => [...newDeals, ...prev]);
+
+      storage.addAuditEntry({
+        userEmail: user?.email || 'unknown',
+        userName: user?.name || 'Unknown User',
+        action: 'IMPORT_DEALS',
+        module: 'BLOTTER',
+        description: `Imported ${newDeals.length} deals from Excel.`
+      });
+    }
     setIsImportOpen(false);
   };
+
+  const handleDownloadTemplate = () => downloadTemplate('DEAL_BLOTTER_IDS', 'Deal_ID_Modification_Template');
 
   const filteredDeals = deals.filter(deal => {
     const matchesSearch = deal.clientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -271,10 +296,17 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       actions={
         <div className="flex gap-2">
           <button
-            onClick={() => setIsImportOpen(true)}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors"
+            onClick={handleDownloadTemplate}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors"
+            title="Download ID Modification Template"
           >
-            <Upload size={14} /> <span className="hidden sm:inline">Import</span>
+            <FileUp size={14} /> <span className="hidden sm:inline">ID Template</span>
+          </button>
+          <button
+            onClick={() => setIsImportOpen(true)}
+            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors"
+          >
+            <Upload size={14} /> <span className="hidden sm:inline">Import Excel</span>
           </button>
           <button
             onClick={handleNewDeal}

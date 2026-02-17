@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint } from '../types';
+import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile } from '../types';
 
 // --- MAPPING HELPERS ---
 
@@ -134,6 +134,82 @@ export const supabaseService = {
             .delete()
             .eq('id', id);
         if (error) console.error('Error deleting deal:', error);
+    },
+
+    // --- SYSTEM CONFIG & MASTER DATA ---
+    async fetchRules(): Promise<GeneralRule[]> {
+        const { data, error } = await supabase.from('rules').select('*');
+        if (error) return [];
+        return data as GeneralRule[];
+    },
+
+    async saveRule(rule: GeneralRule) {
+        const { error } = await supabase.from('rules').upsert(rule);
+        if (error) console.error('Error saving rule:', error);
+    },
+
+    async fetchClients(): Promise<ClientEntity[]> {
+        const { data, error } = await supabase.from('clients').select('*');
+        if (error) return [];
+        return data as ClientEntity[];
+    },
+
+    async saveClient(client: ClientEntity) {
+        const { error } = await supabase.from('clients').upsert(client);
+        if (error) console.error('Error saving client:', error);
+    },
+
+    async fetchBusinessUnits(): Promise<BusinessUnit[]> {
+        const { data, error } = await supabase.from('business_units').select('*');
+        if (error) return [];
+        return data as BusinessUnit[];
+    },
+
+    async saveBusinessUnit(unit: BusinessUnit) {
+        const { error } = await supabase.from('business_units').upsert(unit);
+        if (error) console.error('Error saving unit:', error);
+    },
+
+    async fetchProducts(): Promise<ProductDefinition[]> {
+        const { data, error } = await supabase.from('products').select('*');
+        if (error) return [];
+        return data as ProductDefinition[];
+    },
+
+    async saveProduct(product: ProductDefinition) {
+        const { error } = await supabase.from('products').upsert(product);
+        if (error) console.error('Error saving product:', error);
+    },
+
+    // --- USERS & PRESENCE ---
+    async fetchUsers(): Promise<UserProfile[]> {
+        const { data, error } = await supabase.from('users').select('*');
+        if (error) return [];
+        // Map DB snake_case to CamelCase if necessary, but assuming types match for now
+        return data as UserProfile[];
+    },
+
+    async upsertUser(user: UserProfile) {
+        const { error } = await supabase.from('users').upsert(user);
+        if (error) console.error('Error upserting user:', error);
+    },
+
+    trackPresence(userId: string, userDetails: any) {
+        const room = supabase.channel('online-users');
+        return room
+            .on('presence', { event: 'sync' }, () => {
+                const state = room.presenceState();
+                console.log('Online users:', state);
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await room.track({
+                        id: userId,
+                        online_at: new Date().toISOString(),
+                        ...userDetails
+                    });
+                }
+            });
     },
 
     // --- AUDIT LOG ---

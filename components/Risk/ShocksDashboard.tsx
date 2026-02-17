@@ -3,7 +3,9 @@ import { Panel, Badge } from '../ui/LayoutComponents';
 import { translations, Language } from '../../translations';
 import { Transaction, ApprovalMatrixConfig } from '../../types';
 import { calculatePricing, PricingShocks } from '../../utils/pricingEngine';
-import { RefreshCcw, TrendingUp, AlertTriangle, ArrowRight } from 'lucide-react';
+import { RefreshCcw, TrendingUp, AlertTriangle, ArrowRight, FileSpreadsheet, Download } from 'lucide-react';
+import { storage } from '../../utils/storage';
+import { downloadTemplate } from '../../utils/excelUtils';
 
 interface Props {
     deal: Transaction;
@@ -11,9 +13,10 @@ interface Props {
     language: Language;
     shocks: PricingShocks;
     setShocks: (s: PricingShocks) => void;
+    user: any;
 }
 
-const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shocks, setShocks }) => {
+const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shocks, setShocks, user }) => {
     const t = translations[language];
     // Local state removed, using props now
 
@@ -27,6 +30,20 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
     const deltaFTP = shockedResult.totalFTP - baseResult.totalFTP;
     const deltaRAROC = shockedResult.raroc - baseResult.raroc;
     const deltaClientRate = shockedResult.finalClientRate - baseResult.finalClientRate;
+
+    const handleDownloadTemplate = () => downloadTemplate('STRESS_TESTING', 'Stress_Testing_Template');
+
+    React.useEffect(() => {
+        if (shocks.interestRate !== 0 || shocks.liquiditySpread !== 0) {
+            storage.addAuditEntry({
+                userEmail: user?.email || 'unknown',
+                userName: user?.name || 'Unknown User',
+                action: 'APPLY_SHOCK',
+                module: 'SHOCKS',
+                description: `Applied shocks: IR=${shocks.interestRate}bps, Liq=${shocks.liquiditySpread}bps to deal ${deal.id}`
+            });
+        }
+    }, [shocks, deal.id, user]);
 
     return (
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 h-full">
@@ -93,13 +110,22 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                             </div>
                         </div>
 
-                        <button
-                            onClick={handleReset}
-                            className="w-full py-2 flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800"
-                        >
-                            <RefreshCcw size={14} />
-                            Reset Shocks
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleReset}
+                                className="flex-1 py-2 flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800"
+                            >
+                                <RefreshCcw size={14} />
+                                Reset
+                            </button>
+                            <button
+                                onClick={handleDownloadTemplate}
+                                className="flex-1 py-2 flex items-center justify-center gap-2 text-sm text-amber-500 hover:text-amber-600 transition-colors border border-amber-200 dark:border-amber-900/50 rounded bg-amber-50/10 dark:bg-amber-950/20"
+                            >
+                                <Download size={14} />
+                                Template
+                            </button>
+                        </div>
 
                     </div>
                 </Panel>
