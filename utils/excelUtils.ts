@@ -8,10 +8,16 @@ export const EXCEL_TEMPLATES = {
         { Tenor: '6M', Rate: 0.058 },
         { Tenor: '1Y', Rate: 0.06 }
     ],
-    BEHAVIOURAL: [
-        { Name: 'Retail CASA', Type: 'NMD_Replication', Method: 'Parametric', CoreRatio: 0.8, DecayRate: 0.05, BetaFactor: 0.5 },
-        { Name: 'SME Loans', Type: 'Prepayment_CPR', CPR: 0.1, PenaltyExempt: 0.2 }
-    ],
+    BEHAVIOURAL: {
+        "NMD Models": [
+            { Name: 'Retail CASA', Type: 'NMD_Replication', Method: 'Caterpillar', CoreRatio: 80, BetaFactor: 0.5, Description: 'Standard savings account' },
+            { Name: 'Corporate Current', Type: 'NMD_Replication', Method: 'Caterpillar', CoreRatio: 40, BetaFactor: 0.8, Description: 'Operating accounts' }
+        ],
+        "Prepayment Models": [
+            { Name: 'SME Loans Std', Type: 'Prepayment_CPR', CPR: 5.0, PenaltyExempt: 10, Description: 'Standard SME prepay' },
+            { Name: 'Mortgages Fixed', Type: 'Prepayment_CPR', CPR: 8.0, PenaltyExempt: 0, Description: 'Fixed rate mortgages' }
+        ]
+    },
     METHODOLOGY: [
         { BusinessUnit: 'Retail Banking', Product: 'Mortgage', Segment: 'All', Tenor: 'Fixed', BaseMethod: 'Matched Maturity', BaseReference: 'USD-SOFR', SpreadMethod: 'Curve Lookup', StrategicSpread: 5 }
     ],
@@ -26,10 +32,38 @@ export const EXCEL_TEMPLATES = {
 };
 
 export const downloadTemplate = (templateKey: keyof typeof EXCEL_TEMPLATES, fileName: string) => {
-    const data = EXCEL_TEMPLATES[templateKey];
-    const ws = XLSX.utils.json_to_sheet(data);
+    const templateData = EXCEL_TEMPLATES[templateKey];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Template");
+
+    const branding = [
+        ["N PRICING SYSTEM - OFFICIAL TEMPLATE"],
+        [`Generated on: ${new Date().toLocaleString()}`],
+        []
+    ];
+
+    if (!Array.isArray(templateData)) {
+        // Multi-sheet logic
+        Object.entries(templateData).forEach(([sheetName, data]) => {
+            const ws = XLSX.utils.aoa_to_sheet(branding);
+            XLSX.utils.sheet_add_json(ws, data as any[], { origin: "A4" });
+
+            // Basic column widths
+            const maxWidths = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
+            ws['!cols'] = maxWidths;
+
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+    } else {
+        // Single sheet logic
+        const ws = XLSX.utils.aoa_to_sheet(branding);
+        XLSX.utils.sheet_add_json(ws, templateData, { origin: "A4" });
+
+        const maxWidths = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
+        ws['!cols'] = maxWidths;
+
+        XLSX.utils.book_append_sheet(wb, ws, "Template");
+    }
+
     XLSX.writeFile(wb, `${fileName}.xlsx`);
 };
 
@@ -39,10 +73,25 @@ export const parseExcel = (file: File): Promise<any[]> => {
         reader.onload = (e) => {
             const data = e.target?.result;
             const workbook = XLSX.read(data, { type: 'binary' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const json = XLSX.utils.sheet_to_json(worksheet);
-            resolve(json);
+
+            // Try to find data in any sheet, starting with the first
+            let allData: any[] = [];
+
+            workbook.SheetNames.forEach(sheetName => {
+                const worksheet = workbook.Sheets[sheetName];
+
+                // Check if it's one of our branded templates (Header in A1)
+                const firstCell = worksheet['A1']?.v;
+                const isBranded = typeof firstCell === 'string' && firstCell.includes('N PRICING SYSTEM');
+
+                // If branded, data starts at row 4 (offset 3)
+                const json = XLSX.utils.sheet_to_json(worksheet, isBranded ? { range: 3 } : {});
+                if (json.length > 0) {
+                    allData = [...allData, ...json];
+                }
+            });
+
+            resolve(allData);
         };
         reader.onerror = (error) => reject(error);
         reader.readAsBinaryString(file);

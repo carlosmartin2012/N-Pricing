@@ -53,21 +53,45 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
    };
 
    const handleSave = async () => {
-      if (editingModel && editingModel.id) {
-         const exists = models.find(m => m.id === editingModel.id);
+      if (!editingModel || !editingModel.name || !editingModel.description) {
+         alert('Please provide a name and description for the model.');
+         return;
+      }
 
-         // Update Supabase (Realtime subscription in App.tsx will update local state)
-         await storage.saveBehaviouralModel(editingModel as BehaviouralModel);
+      if (editingModel.id) {
+         try {
+            const exists = models.find(m => m.id === editingModel.id);
 
-         await storage.addAuditEntry({
-            userEmail: user?.email || 'unknown',
-            userName: user?.name || 'Unknown User',
-            action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
-            module: 'BEHAVIOURAL',
-            description: `${exists ? 'Updated' : 'Created'} behavioural model: ${editingModel.name}`
-         });
+            // Ensure all critical fields are present
+            const finalModel: BehaviouralModel = {
+               id: editingModel.id,
+               name: editingModel.name,
+               type: (editingModel.type || activeTab) as any,
+               nmdMethod: editingModel.nmdMethod || 'Caterpillar',
+               description: editingModel.description,
+               coreRatio: editingModel.coreRatio ?? 50,
+               decayRate: editingModel.decayRate ?? 0,
+               betaFactor: editingModel.betaFactor ?? 0.5,
+               cpr: editingModel.cpr ?? 5,
+               penaltyExempt: editingModel.penaltyExempt ?? 0,
+               replicationProfile: editingModel.replicationProfile || []
+            };
 
-         setDrawerOpen(false);
+            await storage.saveBehaviouralModel(finalModel);
+
+            await storage.addAuditEntry({
+               userEmail: user?.email || 'unknown',
+               userName: user?.name || 'Unknown User',
+               action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
+               module: 'BEHAVIOURAL',
+               description: `${exists ? 'Updated' : 'Created'} behavioural model: ${editingModel.name}`
+            });
+
+            setDrawerOpen(false);
+         } catch (error) {
+            console.error('Error saving model:', error);
+            alert('Fallo al guardar el modelo. Por favor verifique la conexión.');
+         }
       }
    }
 
