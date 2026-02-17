@@ -152,15 +152,26 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
 
    const handleDelete = async (id: string) => {
       if (window.confirm('Are you sure you want to delete this model?')) {
-         await storage.deleteBehaviouralModel(id);
+         // Optimistic Update
+         const modelToDelete = models.find(m => m.id === id);
+         setModels(prev => prev.filter(m => m.id !== id));
 
-         await storage.addAuditEntry({
-            userEmail: user?.email || 'unknown',
-            userName: user?.name || 'Unknown User',
-            action: 'DELETE_MODEL',
-            module: 'BEHAVIOURAL',
-            description: `Deleted behavioural model: ${id}`
-         });
+         try {
+            await storage.deleteBehaviouralModel(id);
+
+            await storage.addAuditEntry({
+               userEmail: user?.email || 'unknown',
+               userName: user?.name || 'Unknown User',
+               action: 'DELETE_MODEL',
+               module: 'BEHAVIOURAL',
+               description: `Deleted behavioural model: ${modelToDelete?.name || id}`
+            });
+         } catch (error) {
+            console.error('Error deleting model:', error);
+            // Rollback if failed
+            if (modelToDelete) setModels(prev => [...prev, modelToDelete]);
+            alert('Failed to delete model. Please try again.');
+         }
       }
    }
 

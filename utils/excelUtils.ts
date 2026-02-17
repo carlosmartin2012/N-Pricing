@@ -2,11 +2,10 @@ import * as XLSX from 'xlsx';
 
 export const EXCEL_TEMPLATES = {
     YIELD_CURVE: [
-        { Tenor: '1D', Rate: 0.05 },
-        { Tenor: '1M', Rate: 0.052 },
-        { Tenor: '3M', Rate: 0.055 },
-        { Tenor: '6M', Rate: 0.058 },
-        { Tenor: '1Y', Rate: 0.06 }
+        { Currency: 'USD', Tenor: '1D', Rate: 0.05, Prev: 0.048 },
+        { Currency: 'USD', Tenor: '1M', Rate: 0.052, Prev: 0.051 },
+        { Currency: 'USD', Tenor: '1Y', Rate: 0.06, Prev: 0.059 },
+        { Currency: 'EUR', Tenor: '1M', Rate: 0.035, Prev: 0.034 }
     ],
     BEHAVIOURAL: {
         "NMD Models": [
@@ -43,33 +42,43 @@ export const downloadTemplate = (templateKey: keyof typeof EXCEL_TEMPLATES, file
     const templateData = EXCEL_TEMPLATES[templateKey];
     const wb = XLSX.utils.book_new();
 
+    // 1. Create Instructions Sheet
+    const instructions = [
+        ["N PRICING SYSTEM - DATA IMPORT GUIDE"],
+        [""],
+        ["INSTRUCTIONS:"],
+        ["1. Use the 'Data' sheet to enter your records."],
+        ["2. Ensure all mandatory columns (Row 4) are filled."],
+        ["3. Do not modify the headers in Row 4."],
+        ["4. For Yield Curves, you can include multiple currencies (USD, EUR, etc.) in the 'Currency' column."],
+        ["5. Save as .xlsx or .xls before importing."],
+        [""],
+        ["Module Reference:", templateKey],
+        ["Generated on:", new Date().toLocaleString()]
+    ];
+    const wsIn = XLSX.utils.aoa_to_sheet(instructions);
+    wsIn['!cols'] = [{ wch: 50 }, { wch: 30 }];
+    XLSX.utils.book_append_sheet(wb, wsIn, "READ_ME_FIRST");
+
+    // 2. Create Data Sheets
     const branding = [
         ["N PRICING SYSTEM - OFFICIAL TEMPLATE"],
-        [`Generated on: ${new Date().toLocaleString()}`],
+        ["STATUS: OFFICIAL | MODULE: " + templateKey],
         []
     ];
 
     if (!Array.isArray(templateData)) {
-        // Multi-sheet logic
         Object.entries(templateData).forEach(([sheetName, data]) => {
             const ws = XLSX.utils.aoa_to_sheet(branding);
             XLSX.utils.sheet_add_json(ws, data as any[], { origin: "A4" });
-
-            // Basic column widths
-            const maxWidths = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
-            ws['!cols'] = maxWidths;
-
+            ws['!cols'] = [{ wch: 25 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
             XLSX.utils.book_append_sheet(wb, ws, sheetName);
         });
     } else {
-        // Single sheet logic
         const ws = XLSX.utils.aoa_to_sheet(branding);
         XLSX.utils.sheet_add_json(ws, templateData, { origin: "A4" });
-
-        const maxWidths = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
-        ws['!cols'] = maxWidths;
-
-        XLSX.utils.book_append_sheet(wb, ws, "Template");
+        ws['!cols'] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
+        XLSX.utils.book_append_sheet(wb, ws, "Data");
     }
 
     XLSX.writeFile(wb, `${fileName}.xlsx`);

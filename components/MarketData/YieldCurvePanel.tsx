@@ -32,6 +32,28 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         storage.saveCurves(curvesHistory);
     }, [curvesHistory]);
 
+    // Realtime Sync for Yield Curves
+    useEffect(() => {
+        const subscription = supabaseService.subscribeToAll((payload) => {
+            if (payload.table === 'yield_curves' && payload.eventType === 'INSERT') {
+                const newCurve = payload.new;
+                const currency = newCurve.currency;
+                const date = newCurve.as_of_date;
+                const key = `${currency}-${date}`;
+
+                setCurvesHistory(prev => ({
+                    ...prev,
+                    [key]: newCurve.grid_data.map((pt: any) => ({
+                        tenor: pt.tenor,
+                        rate: pt.rate,
+                        prev: pt.prev || pt.rate
+                    }))
+                }));
+            }
+        });
+        return () => { if (subscription) subscription.unsubscribe(); };
+    }, []);
+
     // Transform mock data based on currency AND date to simulate historical curves
     const data = useMemo(() => {
         let basePoints = curvesHistory[`${currency}-${selectedDate}`];

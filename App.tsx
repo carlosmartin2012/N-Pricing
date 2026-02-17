@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel } from './types';
+import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel, YieldCurvePoint } from './types';
 import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS } from './constants';
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
@@ -231,22 +231,30 @@ const App: React.FC = () => {
   const handleUniversalImport = async (module: string, data: any[]) => {
     switch (module) {
       case 'YIELD_CURVES': {
-        // Find currency (assume first found or default to USD)
-        const currency = data[0]?.Currency || data[0]?.currency || 'USD';
-        const points = data.map(r => ({
-          tenor: r.Tenor || r.tenor,
-          rate: parseFloat(r.Rate || r.rate) || 0,
-          prev: parseFloat(r.Prev || r.prev) || 0
-        }));
-        await storage.saveCurveSnapshot(currency, new Date().toISOString().split('T')[0], points);
+        // Group points by currency for multi-currency import
+        const curves: Record<string, YieldCurvePoint[]> = {};
 
-        await storage.addAuditEntry({
-          userEmail: currentUser?.email || 'unknown',
-          userName: currentUser?.name || 'Unknown User',
-          action: 'IMPORT_YIELD_CURVES',
-          module: 'MARKET_DATA',
-          description: `Imported ${points.length} curve points with currency ${currency}`
+        data.forEach(r => {
+          const cur = r.Currency || r.currency || 'USD';
+          if (!curves[cur]) curves[cur] = [];
+          curves[cur].push({
+            tenor: r.Tenor || r.tenor || '1M',
+            rate: parseFloat(r.Rate || r.rate) || 0,
+            prev: parseFloat(r.Prev || r.prev) || 0
+          });
         });
+
+        for (const [cur, points] of Object.entries(curves)) {
+          await storage.saveCurveSnapshot(cur, new Date().toISOString().split('T')[0], points);
+
+          await storage.addAuditEntry({
+            userEmail: currentUser?.email || 'unknown',
+            userName: currentUser?.name || 'Unknown User',
+            action: 'IMPORT_YIELD_CURVES',
+            module: 'MARKET_DATA',
+            description: `Imported ${points.length} curve points for ${cur}`
+          });
+        }
         break;
       }
       case 'METHODOLOGY': {
