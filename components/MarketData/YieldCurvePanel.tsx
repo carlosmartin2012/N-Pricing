@@ -4,6 +4,7 @@ import { Panel, Badge, TextInput } from '../ui/LayoutComponents';
 import { MOCK_YIELD_CURVE } from '../../constants';
 import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap, Save, Upload, ChevronDown } from 'lucide-react';
 import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { YieldCurvePoint } from '../../types';
 import { translations, Language } from '../../translations';
