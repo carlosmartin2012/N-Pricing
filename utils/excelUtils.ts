@@ -38,9 +38,14 @@ export const REQUIRED_HEADERS = {
     DEALS: ['Amount', 'Currency', 'Product']
 };
 
-export const downloadTemplate = (templateKey: keyof typeof EXCEL_TEMPLATES, fileName: string) => {
-    const templateData = EXCEL_TEMPLATES[templateKey];
+export const downloadTemplate = (templateKey: keyof typeof EXCEL_TEMPLATES | string, fileName: string, liveData?: any) => {
+    const templateData = liveData || (EXCEL_TEMPLATES as any)[templateKey];
     const wb = XLSX.utils.book_new();
+
+    if (!templateData) {
+        console.error("No template data found for:", templateKey);
+        return;
+    }
 
     // 1. Create Instructions Sheet
     const instructions = [

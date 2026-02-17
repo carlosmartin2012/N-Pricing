@@ -142,7 +142,20 @@ const MethodologyConfig: React.FC<Props> = ({
       await supabaseService.deleteRule(id);
    };
 
-   const handleDownloadRulesTemplate = () => downloadTemplate('METHODOLOGY', 'Methodology_Rules_Template');
+   const handleDownloadRulesTemplate = () => {
+      const liveData = rules.map(r => ({
+         BusinessUnit: r.businessUnit,
+         Product: r.product,
+         Segment: r.segment,
+         Tenor: r.tenor,
+         BaseMethod: r.baseMethod,
+         BaseReference: r.baseReference,
+         SpreadMethod: r.spreadMethod,
+         LiquidityReference: r.liquidityReference,
+         StrategicSpread: r.strategicSpread
+      }));
+      downloadTemplate('METHODOLOGY', 'Methodology_Rules_Export', liveData);
+   };
 
    const handleImportRules = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];

@@ -132,7 +132,22 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     };
 
     const handleDownloadTemplate = () => {
-        downloadTemplate('YIELD_CURVE', `Yield_Curve_Template_${currency}`);
+        const liveData: any[] = [];
+        Object.entries(curvesHistory).forEach(([key, points]) => {
+            const cur = key.split('-')[0];
+            (points as YieldCurvePoint[]).forEach(pt => {
+                liveData.push({
+                    Currency: cur,
+                    Tenor: pt.tenor,
+                    Rate: pt.rate,
+                    Prev: pt.prev
+                });
+            });
+        });
+
+        // If no data, use default template
+        const dataToExport = liveData.length > 0 ? liveData : undefined;
+        downloadTemplate('YIELD_CURVE', `Yield_Curve_Data_${currency}`, dataToExport);
     };
 
     const curveTemplate = "tenor,rate,prev\nON,5.25,5.20\n1M,5.30,5.28\n1Y,5.10,5.05\n10Y,4.25,4.30";

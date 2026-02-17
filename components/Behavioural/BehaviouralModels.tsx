@@ -116,7 +116,25 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
    }
 
    const handleDownloadTemplate = () => {
-      downloadTemplate('BEHAVIOURAL', `Behavioural_Model_Template_${activeTab}`);
+      const liveData = {
+         "NMD Models": models.filter(m => m.type === 'NMD_Replication').map(m => ({
+            Name: m.name,
+            Type: m.type,
+            Method: m.nmdMethod,
+            CoreRatio: m.coreRatio,
+            BetaFactor: m.betaFactor,
+            Description: m.description,
+            ReplicationProfile: JSON.stringify(m.replicationProfile)
+         })),
+         "Prepayment Models": models.filter(m => m.type === 'Prepayment_CPR').map(m => ({
+            Name: m.name,
+            Type: m.type,
+            CPR: m.cpr,
+            PenaltyExempt: m.penaltyExempt,
+            Description: m.description
+         }))
+      };
+      downloadTemplate('BEHAVIOURAL', `Behavioural_Models_Export`, liveData);
    };
 
    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
