@@ -36,17 +36,18 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     useEffect(() => {
         const subscription = supabaseService.subscribeToAll((payload) => {
             if (payload.table === 'yield_curves' && payload.eventType === 'INSERT') {
-                const newCurve = payload.new;
-                const currency = newCurve.currency;
-                const date = newCurve.as_of_date;
-                const key = `${currency}-${date}`;
+                const mapped = payload.mapped;
+                if (!mapped) return;
+
+                const { currency: cur, date: d, points: pts } = mapped;
+                const key = `${cur}-${d}`;
 
                 setCurvesHistory(prev => ({
                     ...prev,
-                    [key]: newCurve.grid_data.map((pt: any) => ({
+                    [key]: pts.map((pt: any) => ({
                         tenor: pt.tenor,
-                        rate: pt.rate,
-                        prev: pt.prev || pt.rate
+                        rate: parseFloat(pt.rate) || 0,
+                        prev: parseFloat(pt.prev) || parseFloat(pt.rate) || 0
                     }))
                 }));
             }
@@ -84,6 +85,14 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
             };
         });
     }, [currency, selectedDate, shockBps, curvesHistory]);
+
+    // DEFENSIVE GUARDS: If no data, return a safe minimal set to prevent SVG math crashes
+    const chartData = useMemo(() => {
+        if (!data || data.length < 2) {
+            return [{ tenor: '1M', rate: 0.01, prev: 0.01, baseRate: 0.01, index: 0 }, { tenor: '1Y', rate: 0.01, prev: 0.01, baseRate: 0.01, index: 1 }];
+        }
+        return data;
+    }, [data]);
 
     const handleSaveSnapshot = () => {
         const key = `${currency}-${selectedDate}`;
@@ -128,16 +137,18 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     const curveTemplate = "tenor,rate,prev\nON,5.25,5.20\n1M,5.30,5.28\n1Y,5.10,5.05\n10Y,4.25,4.30";
 
     // Calculations for Chart
-    const minRate = Math.min(...data.map(d => Math.min(d.rate, d.prev))) * 0.9;
-    const maxRate = Math.max(...data.map(d => Math.max(d.rate, d.prev))) * 1.1;
-    const xStep = (width - padding * 2) / (data.length - 1);
+    const minRate = Math.min(...chartData.map(d => Math.min(d.rate, d.prev))) * 0.9;
+    const maxRate = Math.max(...chartData.map(d => Math.max(d.rate, d.prev))) * 1.1;
+    const effectiveMax = maxRate === minRate ? maxRate + 1 : maxRate; // Prevent division by zero
+
+    const xStep = (width - padding * 2) / (Math.max(1, chartData.length - 1));
 
     const getX = (i: number) => padding + i * xStep;
-    const getY = (rate: number) => height - padding - ((rate - minRate) / (maxRate - minRate)) * (height - padding * 2);
+    const getY = (rate: number) => height - padding - ((rate - minRate) / (effectiveMax - minRate)) * (height - padding * 2);
 
-    const points = data.map((d, i) => `${getX(i)},${getY(d.rate)}`).join(' ');
-    const areaPoints = `${getX(0)},${height - padding} ${points} ${getX(data.length - 1)},${height - padding}`;
-    const prevPoints = data.map((d, i) => `${getX(i)},${getY(d.prev)}`).join(' ');
+    const points = chartData.map((d, i) => `${getX(i)},${getY(d.rate)}`).join(' ');
+    const areaPoints = `${getX(0)},${height - padding} ${points} ${getX(chartData.length - 1)},${height - padding}`;
+    const prevPoints = chartData.map((d, i) => `${getX(i)},${getY(d.prev)}`).join(' ');
     const basePoints = data.map((d, i) => `${getX(i)},${getY(d.baseRate)}`).join(' '); // Pre-shock baseline
 
     // Mock Pricing History/Audit Trail

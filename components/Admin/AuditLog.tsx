@@ -20,14 +20,26 @@ const AuditLog: React.FC = () => {
 
         const subscription = supabaseService.subscribeToAll((payload) => {
             if (payload.table === 'audit_log') {
-                console.log('AuditLog: Realtime event receive:', payload.eventType);
+                console.log('AuditLog: Realtime event receive:', payload.eventType, payload.mapped);
                 if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+                    const newEntry = payload.mapped as AuditEntry;
+                    if (!newEntry) return;
+
                     setEntries(prev => {
-                        const newEntry = payload.new as AuditEntry;
-                        // Avoid duplicates if fetch and realtime overlap
-                        if (prev.some(e => e.id === newEntry.id)) return prev;
+                        // Avoid duplicates
+                        if (prev.some(e => e.id === newEntry.id)) {
+                            if (payload.eventType === 'UPDATE') {
+                                return prev.map(e => e.id === newEntry.id ? newEntry : e);
+                            }
+                            return prev;
+                        }
                         return [newEntry, ...prev];
                     });
+                } else if (payload.eventType === 'DELETE') {
+                    const deletedId = payload.old?.id;
+                    if (deletedId) {
+                        setEntries(prev => prev.filter(e => e.id !== deletedId));
+                    }
                 }
             }
         });

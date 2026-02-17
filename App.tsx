@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel, YieldCurvePoint } from './types';
+import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel, YieldCurvePoint, FtpRateCard } from './types';
 import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS } from './constants';
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
@@ -72,6 +72,9 @@ const App: React.FC = () => {
   }));
 
   const [shocks, setShocks] = useState<PricingShocks>({ interestRate: 0, liquiditySpread: 0 });
+  const [ftpRateCards, setFtpRateCards] = useState<FtpRateCard[]>([]);
+  const [transitionGrid, setTransitionGrid] = useState<any[]>([]);
+  const [physicalGrid, setPhysicalGrid] = useState<any[]>([]);
 
   // --- THEME SYNC ---
   React.useEffect(() => {
@@ -87,7 +90,7 @@ const App: React.FC = () => {
   // 1. Initial Hydration from Supabase
   React.useEffect(() => {
     const hydrate = async () => {
-      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks] = await Promise.all([
+      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid] = await Promise.all([
         storage.getDeals(),
         storage.getBehaviouralModels(),
         supabaseService.fetchRules(),
@@ -95,7 +98,10 @@ const App: React.FC = () => {
         supabaseService.fetchBusinessUnits(),
         supabaseService.fetchProducts(),
         supabaseService.fetchUsers(),
-        supabaseService.fetchShocks()
+        supabaseService.fetchShocks(),
+        supabaseService.fetchRateCards(),
+        supabaseService.fetchEsgGrid('transition'),
+        supabaseService.fetchEsgGrid('physical')
       ]);
 
       if (dbDeals.length > 0) setDeals(dbDeals);
@@ -106,6 +112,9 @@ const App: React.FC = () => {
       if (dbProducts.length > 0) setProducts(dbProducts);
       if (dbUsers.length > 0) setUsers(dbUsers);
       if (dbShocks) setShocks(dbShocks);
+      if (dbRateCards) setFtpRateCards(dbRateCards);
+      if (dbTransGrid) setTransitionGrid(dbTransGrid);
+      if (dbPhysGrid) setPhysicalGrid(dbPhysGrid);
 
       setIsLoading(false);
 
@@ -124,13 +133,22 @@ const App: React.FC = () => {
   // 2. Real-time Subscription
   React.useEffect(() => {
     const channel = supabaseService.subscribeToAll((payload) => {
-      const { table, eventType, new: newRecord, old: oldRecord } = payload;
+      const { table, eventType, mapped: mappedRecord, old: oldRecord } = payload;
 
       const updateState = (setter: React.Dispatch<React.SetStateAction<any[]>>) => {
         setter(prev => {
-          if (eventType === 'INSERT') return [newRecord, ...prev];
-          if (eventType === 'UPDATE') return prev.map(item => item.id === newRecord.id ? newRecord : item);
-          if (eventType === 'DELETE') return prev.filter(item => item.id !== oldRecord.id);
+          if (eventType === 'INSERT') {
+            if (!mappedRecord) return prev;
+            return [mappedRecord, ...prev];
+          }
+          if (eventType === 'UPDATE') {
+            if (!mappedRecord) return prev;
+            return prev.map(item => item.id === mappedRecord.id ? mappedRecord : item);
+          }
+          if (eventType === 'DELETE') {
+            const idToRemove = oldRecord?.id;
+            return prev.filter(item => item.id !== idToRemove);
+          }
           return prev;
         });
       };
@@ -143,7 +161,7 @@ const App: React.FC = () => {
       if (table === 'products') updateState(setProducts);
       if (table === 'users') updateState(setUsers);
       if (table === 'system_config' && eventType !== 'DELETE') {
-        setShocks(newRecord);
+        if (mappedRecord) setShocks(mappedRecord);
       }
     });
 
@@ -228,7 +246,9 @@ const App: React.FC = () => {
     storage.saveCurrentUser(null);
   };
 
-  const handleUniversalImport = async (module: string, data: any[]) => {
+  const handleUniversalImport = async (module: string, rawData: any[]) => {
+    // Defensive Filter: Ignore completely empty rows
+    const data = rawData.filter(r => Object.values(r).some(v => v !== null && v !== undefined && v !== ''));
     switch (module) {
       case 'YIELD_CURVES': {
         // Group points by currency for multi-currency import
@@ -484,6 +504,12 @@ const App: React.FC = () => {
                 setBusinessUnits={setBusinessUnits}
                 clients={clients}
                 setClients={setClients}
+                ftpRateCards={ftpRateCards}
+                setFtpRateCards={setFtpRateCards}
+                transitionGrid={transitionGrid}
+                setTransitionGrid={setTransitionGrid}
+                physicalGrid={physicalGrid}
+                setPhysicalGrid={setPhysicalGrid}
                 user={currentUser}
               />
             </div>
@@ -509,6 +535,13 @@ const App: React.FC = () => {
                 setBusinessUnits={setBusinessUnits}
                 clients={clients}
                 setClients={setClients}
+                ftpRateCards={ftpRateCards}
+                setFtpRateCards={setFtpRateCards}
+                transitionGrid={transitionGrid}
+                setTransitionGrid={setTransitionGrid}
+                physicalGrid={physicalGrid}
+                setPhysicalGrid={setPhysicalGrid}
+                user={currentUser}
               />
             </div>
           )}

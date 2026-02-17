@@ -65,13 +65,13 @@ const mapAuditToDB = (entry: any) => ({
 });
 
 const mapAuditFromDB = (row: any): AuditEntry => ({
-    id: row.id,
+    id: row.id || `audit-${Math.random()}`,
     timestamp: row.timestamp || new Date().toISOString(),
     userEmail: row.user_email || 'unknown@system.com',
-    userName: row.user_name || 'System',
+    userName: row.user_name || 'System User',
     action: row.action || 'UNKNOWN_ACTION',
-    module: row.module || 'CALCULATOR',
-    description: row.description || '',
+    module: row.module || 'SYSTEM',
+    description: row.description || 'No description provided',
     details: row.details || {}
 });
 
@@ -361,26 +361,73 @@ export const supabaseService = {
         if (error) console.error('Error saving shocks:', error);
     },
 
+    async fetchRateCards(): Promise<FtpRateCard[]> {
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('value')
+            .eq('key', 'rate_cards')
+            .single();
+        if (error) return [];
+        return data.value;
+    },
+
+    async saveRateCards(cards: FtpRateCard[]) {
+        const { error } = await supabase
+            .from('system_config')
+            .upsert({ key: 'rate_cards', value: cards, updated_at: new Date().toISOString() });
+        if (error) console.error('Error saving rate cards:', error);
+    },
+
+    async fetchEsgGrid(type: 'transition' | 'physical'): Promise<any[]> {
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('value')
+            .eq('key', `${type}_grid`)
+            .single();
+        if (error) return [];
+        return data.value;
+    },
+
+    async saveEsgGrid(type: 'transition' | 'physical', grid: any[]) {
+        const { error } = await supabase
+            .from('system_config')
+            .upsert({ key: `${type}_grid`, value: grid, updated_at: new Date().toISOString() });
+        if (error) console.error('Error saving ESG grid:', error);
+    },
+
     // --- REALTIME SUBSCRIPTIONS ---
     subscribeToAll(onUpdate: (payload: any) => void) {
         return supabase
             .channel('schema-db-changes')
             .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
-                // Map the payload data if it exists
-                if (payload.new) {
-                    if (payload.table === 'deals') payload.new = mapDealFromDB(payload.new);
-                    if (payload.table === 'audit_log') payload.new = mapAuditFromDB(payload.new);
-                    if (payload.table === 'behavioural_models') payload.new = mapModelFromDB(payload.new);
-                    if (payload.table === 'rules') payload.new = mapRuleFromDB(payload.new);
-                    if (payload.table === 'clients') payload.new = mapClientFromDB(payload.new);
-                    if (payload.table === 'products') payload.new = mapProductFromDB(payload.new);
-                    if (payload.table === 'business_units') payload.new = mapBUFromDB(payload.new);
-                    if (payload.table === 'system_config' && payload.new) {
-                        payload.new = (payload.new as any).value;
+                const isDelete = payload.eventType === 'DELETE';
+                const data = isDelete ? payload.old : payload.new;
+
+                if (data) {
+                    if (payload.table === 'deals') data.id = data.id || payload.old?.id; // Ensure ID for deletes
+
+                    // Map the data
+                    if (payload.table === 'deals') data.mapped = mapDealFromDB(data);
+                    if (payload.table === 'audit_log') data.mapped = mapAuditFromDB(data);
+                    if (payload.table === 'behavioural_models') data.mapped = mapModelFromDB(data);
+                    if (payload.table === 'rules') data.mapped = mapRuleFromDB(data);
+                    if (payload.table === 'clients') data.mapped = mapClientFromDB(data);
+                    if (payload.table === 'products') data.mapped = mapProductFromDB(data);
+                    if (payload.table === 'business_units') data.mapped = mapBUFromDB(data);
+                    if (payload.table === 'yield_curves') {
+                        data.mapped = {
+                            currency: data.currency,
+                            date: data.as_of_date,
+                            points: data.grid_data
+                        };
+                    }
+                    if (payload.table === 'system_config' && !isDelete) {
+                        data.mapped = (data as any).value;
                     }
                 }
-                console.log(`Realtime update on ${payload.table}:`, payload.eventType);
-                onUpdate(payload);
+
+                console.log(`Realtime update on ${payload.table}:`, payload.eventType, data?.mapped || data);
+                onUpdate({ ...payload, mapped: data?.mapped });
             })
             .subscribe();
     }

@@ -164,6 +164,7 @@ export type ViewState = 'CALCULATOR' | 'BLOTTER' | 'CONFIG' | 'MARKET_DATA' | 'A
 export interface YieldCurvePoint {
   tenor: string;
   rate: number;
+  prev?: number;
 }
 
 export interface GeneralRule {

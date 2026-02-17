@@ -21,6 +21,12 @@ interface Props {
    setBusinessUnits?: React.Dispatch<React.SetStateAction<BusinessUnit[]>>;
    clients?: ClientEntity[];
    setClients?: React.Dispatch<React.SetStateAction<ClientEntity[]>>;
+   ftpRateCards?: FtpRateCard[];
+   setFtpRateCards?: React.Dispatch<React.SetStateAction<FtpRateCard[]>>;
+   transitionGrid?: any[];
+   setTransitionGrid?: React.Dispatch<React.SetStateAction<any[]>>;
+   physicalGrid?: any[];
+   setPhysicalGrid?: React.Dispatch<React.SetStateAction<any[]>>;
    user: any;
 }
 
@@ -31,6 +37,9 @@ const MethodologyConfig: React.FC<Props> = ({
    products = [], setProducts,
    businessUnits = [], setBusinessUnits,
    clients = [], setClients,
+   ftpRateCards = [], setFtpRateCards,
+   transitionGrid = [], setTransitionGrid,
+   physicalGrid = [], setPhysicalGrid,
    user
 }) => {
    // Determine initial tab based on mode
@@ -39,11 +48,6 @@ const MethodologyConfig: React.FC<Props> = ({
    );
 
    const [esgSubTab, setEsgSubTab] = useState<'TRANSITION' | 'PHYSICAL'>('TRANSITION');
-
-   // Local States for Grids
-   const [transitionGrid, setTransitionGrid] = useState(MOCK_TRANSITION_GRID);
-   const [physicalGrid, setPhysicalGrid] = useState(MOCK_PHYSICAL_GRID);
-   const [ftpRateCards, setFtpRateCards] = useState<FtpRateCard[]>(MOCK_FTP_RATE_CARDS);
 
    const [isDrawerOpen, setDrawerOpen] = useState(false);
 
@@ -184,20 +188,43 @@ const MethodologyConfig: React.FC<Props> = ({
       setDrawerOpen(true);
    }
 
-   const handleSaveRateCard = () => {
+   const handleSaveRateCard = async () => {
       if (editingRateCard && editingRateCard.id) {
+         let newCards;
          const exists = ftpRateCards.find(c => c.id === editingRateCard.id);
          if (exists) {
-            setFtpRateCards(ftpRateCards.map(c => c.id === editingRateCard.id ? editingRateCard as FtpRateCard : c));
+            newCards = ftpRateCards.map(c => c.id === editingRateCard.id ? editingRateCard as FtpRateCard : c);
          } else {
-            setFtpRateCards([...ftpRateCards, editingRateCard as FtpRateCard]);
+            newCards = [...ftpRateCards, editingRateCard as FtpRateCard];
          }
+         setFtpRateCards(newCards);
+         await supabaseService.saveRateCards(newCards);
+
+         storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: exists ? 'UPDATE_RATE_CARD' : 'CREATE_RATE_CARD',
+            module: 'CONFIG',
+            description: `${exists ? 'Updated' : 'Created'} FTP rate card: ${editingRateCard.name} (${editingRateCard.currency})`
+         });
+
          closeDrawer();
       }
    }
 
-   const handleDeleteRateCard = (id: string) => {
-      setFtpRateCards(ftpRateCards.filter(c => c.id !== id));
+   const handleDeleteRateCard = async (id: string) => {
+      const card = ftpRateCards.find(c => c.id === id);
+      const newCards = ftpRateCards.filter(c => c.id !== id);
+      setFtpRateCards(newCards);
+      await supabaseService.saveRateCards(newCards);
+
+      storage.addAuditEntry({
+         userEmail: user?.email || 'unknown',
+         userName: user?.name || 'Unknown User',
+         action: 'DELETE_RATE_CARD',
+         module: 'SYS_CONFIG',
+         description: `Deleted FTP rate card: ${card?.name || id}`
+      });
    };
 
    // --- Handlers for ESG Grid ---
@@ -206,13 +233,28 @@ const MethodologyConfig: React.FC<Props> = ({
       setDrawerOpen(true);
    }
 
-   const handleSaveEsg = () => {
+   const handleSaveEsg = async () => {
       if (editingEsg) {
+         let newGrid;
+         const type = editingEsg.type === 'TRANSITION' ? 'transition' : 'physical';
          if (editingEsg.type === 'TRANSITION') {
-            setTransitionGrid(transitionGrid.map(g => g.id === editingEsg.id ? editingEsg : g));
+            newGrid = transitionGrid.map(g => g.id === editingEsg.id ? editingEsg : g);
+            setTransitionGrid(newGrid);
          } else {
-            setPhysicalGrid(physicalGrid.map(g => g.id === editingEsg.id ? editingEsg : g));
+            newGrid = physicalGrid.map(g => g.id === editingEsg.id ? editingEsg : g);
+            setPhysicalGrid(newGrid);
          }
+
+         await supabaseService.saveEsgGrid(type, newGrid);
+
+         storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: 'UPDATE_ESG_GRID',
+            module: 'SYS_CONFIG',
+            description: `Updated ESG ${type} grid entry: ${editingEsg.classification || editingEsg.riskLevel}`
+         });
+
          closeDrawer();
       }
    }
@@ -235,12 +277,30 @@ const MethodologyConfig: React.FC<Props> = ({
             setClients([...clients, editingClient as ClientEntity]);
          }
          await supabaseService.saveClient(editingClient as ClientEntity);
+
+         storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: exists ? 'UPDATE_CLIENT' : 'CREATE_CLIENT',
+            module: 'METHODOLOGY',
+            description: `${exists ? 'Updated' : 'Created'} client record: ${editingClient.name} (${editingClient.id})`
+         });
+
          closeDrawer();
       }
    }
    const handleDeleteClient = async (id: string) => {
+      const client = clients.find(c => c.id === id);
       if (setClients) setClients(clients.filter(c => c.id !== id));
       await supabaseService.deleteClient(id);
+
+      storage.addAuditEntry({
+         userEmail: user?.email || 'unknown',
+         userName: user?.name || 'Unknown User',
+         action: 'DELETE_CLIENT',
+         module: 'MASTER_DATA',
+         description: `Deleted client record: ${client?.name || id}`
+      });
    }
 
    // --- Handlers for Product Master Data ---
@@ -261,12 +321,30 @@ const MethodologyConfig: React.FC<Props> = ({
             setProducts([...products, editingProduct as ProductDefinition]);
          }
          await supabaseService.saveProduct(editingProduct as ProductDefinition);
+
+         storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: exists ? 'UPDATE_PRODUCT' : 'CREATE_PRODUCT',
+            module: 'METHODOLOGY',
+            description: `${exists ? 'Updated' : 'Created'} product definition: ${editingProduct.name}`
+         });
+
          closeDrawer();
       }
    }
    const handleDeleteProduct = async (id: string) => {
+      const prod = products.find(p => p.id === id);
       if (setProducts) setProducts(products.filter(p => p.id !== id));
       await supabaseService.deleteProduct(id);
+
+      storage.addAuditEntry({
+         userEmail: user?.email || 'unknown',
+         userName: user?.name || 'Unknown User',
+         action: 'DELETE_PRODUCT',
+         module: 'MASTER_DATA',
+         description: `Deleted product definition: ${prod?.name || id}`
+      });
    }
 
    // --- Handlers for Business Unit Master Data ---
@@ -287,12 +365,30 @@ const MethodologyConfig: React.FC<Props> = ({
             setBusinessUnits([...businessUnits, editingBU as BusinessUnit]);
          }
          await supabaseService.saveBusinessUnit(editingBU as BusinessUnit);
+
+         storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: exists ? 'UPDATE_BUSINESS_UNIT' : 'CREATE_BUSINESS_UNIT',
+            module: 'METHODOLOGY',
+            description: `${exists ? 'Updated' : 'Created'} business unit: ${editingBU.name}`
+         });
+
          closeDrawer();
       }
    }
    const handleDeleteBU = async (id: string) => {
+      const bu = businessUnits.find(b => b.id === id);
       if (setBusinessUnits) setBusinessUnits(businessUnits.filter(b => b.id !== id));
       await supabaseService.deleteBusinessUnit(id);
+
+      storage.addAuditEntry({
+         userEmail: user?.email || 'unknown',
+         userName: user?.name || 'Unknown User',
+         action: 'DELETE_BUSINESS_UNIT',
+         module: 'MASTER_DATA',
+         description: `Deleted business unit: ${bu?.name || id}`
+      });
    }
 
    // --- Handlers for Governance ---
