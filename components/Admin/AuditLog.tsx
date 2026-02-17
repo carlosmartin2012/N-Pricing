@@ -3,7 +3,7 @@ import { Panel, Badge } from '../ui/LayoutComponents';
 import { AuditEntry } from '../../types';
 import { storage } from '../../utils/storage';
 import { supabaseService } from '../../utils/supabaseService';
-import { Search, Clock, User, Activity, FileText, Filter } from 'lucide-react';
+import { Search, Clock, User, Activity, FileText, Filter, RefreshCcw } from 'lucide-react';
 
 const AuditLog: React.FC = () => {
     const [entries, setEntries] = useState<AuditEntry[]>([]);
@@ -11,15 +11,23 @@ const AuditLog: React.FC = () => {
 
     useEffect(() => {
         const fetch = async () => {
+            console.log('AuditLog: Fetching entries...');
             const data = await storage.getAuditLog();
+            console.log('AuditLog: Received entries:', data.length);
             setEntries(data);
         };
         fetch();
 
         const subscription = supabaseService.subscribeToAll((payload) => {
             if (payload.table === 'audit_log') {
-                if (payload.eventType === 'INSERT') {
-                    setEntries(prev => [payload.new as AuditEntry, ...prev]);
+                console.log('AuditLog: Realtime event receive:', payload.eventType);
+                if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+                    setEntries(prev => {
+                        const newEntry = payload.new as AuditEntry;
+                        // Avoid duplicates if fetch and realtime overlap
+                        if (prev.some(e => e.id === newEntry.id)) return prev;
+                        return [newEntry, ...prev];
+                    });
                 }
             }
         });
@@ -29,11 +37,15 @@ const AuditLog: React.FC = () => {
         };
     }, []);
 
-    const filteredEntries = entries.filter(e =>
-        e.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        e.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredEntries = entries.filter(e => {
+        const search = searchTerm.toLowerCase();
+        return (
+            (e.action?.toLowerCase() || '').includes(search) ||
+            (e.userEmail?.toLowerCase() || '').includes(search) ||
+            (e.description?.toLowerCase() || '').includes(search) ||
+            (e.module?.toLowerCase() || '').includes(search)
+        );
+    });
 
     return (
         <Panel title="System Audit Log" className="h-full">
@@ -51,6 +63,14 @@ const AuditLog: React.FC = () => {
                         />
                     </div>
                     <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                storage.getAuditLog().then(setEntries);
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-cyan-400 border border-slate-700 rounded text-xs hover:bg-slate-700 transition-colors"
+                        >
+                            <RefreshCcw size={12} /> Sync Now
+                        </button>
                         <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-slate-400 border border-slate-700 rounded text-xs hover:bg-slate-700 transition-colors">
                             <Filter size={12} /> Filter by Module
                         </button>

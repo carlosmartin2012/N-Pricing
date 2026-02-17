@@ -108,6 +108,15 @@ const App: React.FC = () => {
       if (dbShocks) setShocks(dbShocks);
 
       setIsLoading(false);
+
+      // System Bootstrap Audit
+      storage.addAuditEntry({
+        userEmail: currentUser?.email || 'system',
+        userName: currentUser?.name || 'System',
+        action: 'SYSTEM_BOOTSTRAP',
+        module: 'CALCULATOR',
+        description: 'Session hydrated and synchronized with Supabase.'
+      });
     };
     hydrate();
   }, []);
@@ -256,6 +265,13 @@ const App: React.FC = () => {
         for (const rule of rulesToSave) {
           await supabaseService.saveRule(rule as GeneralRule);
         }
+        await storage.addAuditEntry({
+          userEmail: currentUser?.email || 'unknown',
+          userName: currentUser?.name || 'Unknown User',
+          action: 'IMPORT_METHODOLOGY',
+          module: 'METHODOLOGY',
+          description: `Imported ${rulesToSave.length} methodology rules.`
+        });
         break;
       }
       case 'BEHAVIOURAL': {
@@ -274,6 +290,13 @@ const App: React.FC = () => {
         for (const model of modelsToSave) {
           await storage.saveBehaviouralModel(model as BehaviouralModel);
         }
+        await storage.addAuditEntry({
+          userEmail: currentUser?.email || 'unknown',
+          userName: currentUser?.name || 'Unknown User',
+          action: 'IMPORT_BEHAVIOURAL',
+          module: 'BEHAVIOURAL',
+          description: `Imported ${modelsToSave.length} behavioural models.`
+        });
         break;
       }
       case 'SHOCKS': {

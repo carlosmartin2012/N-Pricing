@@ -66,13 +66,13 @@ const mapAuditToDB = (entry: any) => ({
 
 const mapAuditFromDB = (row: any): AuditEntry => ({
     id: row.id,
-    timestamp: row.timestamp,
-    userEmail: row.user_email,
-    userName: row.user_name,
-    action: row.action,
-    module: row.module,
-    description: row.description,
-    details: row.details
+    timestamp: row.timestamp || new Date().toISOString(),
+    userEmail: row.user_email || 'unknown@system.com',
+    userName: row.user_name || 'System',
+    action: row.action || 'UNKNOWN_ACTION',
+    module: row.module || 'CALCULATOR',
+    description: row.description || '',
+    details: row.details || {}
 });
 
 const mapModelToDB = (model: BehaviouralModel) => ({
@@ -102,6 +102,39 @@ const mapModelFromDB = (row: any): BehaviouralModel => ({
     cpr: row.cpr,
     penaltyExempt: row.penalty_exempt
 });
+
+const mapRuleToDB = (rule: GeneralRule) => ({
+    id: rule.id || undefined,
+    business_unit: rule.businessUnit,
+    product: rule.product,
+    segment: rule.segment,
+    tenor: rule.tenor,
+    base_method: rule.baseMethod,
+    base_reference: rule.baseReference,
+    spread_method: rule.spreadMethod,
+    liquidity_reference: rule.liquidityReference,
+    strategic_spread: rule.strategicSpread
+});
+
+const mapRuleFromDB = (row: any): GeneralRule => ({
+    id: row.id,
+    businessUnit: row.business_unit,
+    product: row.product,
+    segment: row.segment,
+    tenor: row.tenor,
+    baseMethod: row.base_method,
+    baseReference: row.base_reference,
+    spreadMethod: row.spread_method,
+    liquidityReference: row.liquidity_reference,
+    strategicSpread: row.strategic_spread
+});
+
+const mapClientToDB = (client: ClientEntity) => ({ ...client }); // Assuming simple mapping for now
+const mapClientFromDB = (row: any): ClientEntity => ({ ...row });
+const mapBUToDB = (bu: BusinessUnit) => ({ ...bu });
+const mapBUFromDB = (row: any): BusinessUnit => ({ ...row });
+const mapProductToDB = (p: ProductDefinition) => ({ ...p });
+const mapProductFromDB = (row: any): ProductDefinition => ({ ...row });
 
 export const supabaseService = {
     // --- DEALS ---
@@ -139,12 +172,15 @@ export const supabaseService = {
     // --- SYSTEM CONFIG & MASTER DATA ---
     async fetchRules(): Promise<GeneralRule[]> {
         const { data, error } = await supabase.from('rules').select('*');
-        if (error) return [];
-        return data as GeneralRule[];
+        if (error) {
+            console.error('Error fetching rules:', error);
+            return [];
+        }
+        return (data || []).map(mapRuleFromDB);
     },
 
     async saveRule(rule: GeneralRule) {
-        const { error } = await supabase.from('rules').upsert(rule);
+        const { error } = await supabase.from('rules').upsert(mapRuleToDB(rule));
         if (error) console.error('Error saving rule:', error);
     },
 
@@ -244,6 +280,7 @@ export const supabaseService = {
             console.error('Error fetching audit log:', error);
             return [];
         }
+        console.log(`Fetched ${data?.length || 0} audit entries from Supabase.`);
         return (data || []).map(mapAuditFromDB);
     },
 
@@ -251,7 +288,11 @@ export const supabaseService = {
         const { error } = await supabase
             .from('audit_log')
             .insert(mapAuditToDB(entry));
-        if (error) console.error('Error adding audit entry:', error);
+        if (error) {
+            console.error('Error adding audit entry:', error);
+        } else {
+            console.log('Successfully added audit entry:', entry.action);
+        }
     },
 
     // --- BEHAVIOURAL MODELS ---
@@ -330,10 +371,15 @@ export const supabaseService = {
                     if (payload.table === 'deals') payload.new = mapDealFromDB(payload.new);
                     if (payload.table === 'audit_log') payload.new = mapAuditFromDB(payload.new);
                     if (payload.table === 'behavioural_models') payload.new = mapModelFromDB(payload.new);
+                    if (payload.table === 'rules') payload.new = mapRuleFromDB(payload.new);
+                    if (payload.table === 'clients') payload.new = mapClientFromDB(payload.new);
+                    if (payload.table === 'products') payload.new = mapProductFromDB(payload.new);
+                    if (payload.table === 'business_units') payload.new = mapBUFromDB(payload.new);
                     if (payload.table === 'system_config' && payload.new) {
                         payload.new = (payload.new as any).value;
                     }
                 }
+                console.log(`Realtime update on ${payload.table}:`, payload.eventType);
                 onUpdate(payload);
             })
             .subscribe();
