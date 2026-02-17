@@ -31,6 +31,14 @@ export const EXCEL_TEMPLATES = {
     ]
 };
 
+export const REQUIRED_HEADERS = {
+    YIELD_CURVES: ['Tenor', 'Rate'],
+    METHODOLOGY: ['BusinessUnit', 'Product', 'Segment', 'Tenor', 'BaseMethod'],
+    BEHAVIOURAL: ['Name', 'Type', 'Description'],
+    SHOCKS: ['InterestRateShock', 'LiquiditySpreadShock'],
+    DEALS: ['Amount', 'Currency', 'Product']
+};
+
 export const downloadTemplate = (templateKey: keyof typeof EXCEL_TEMPLATES, fileName: string) => {
     const templateData = EXCEL_TEMPLATES[templateKey];
     const wb = XLSX.utils.book_new();
