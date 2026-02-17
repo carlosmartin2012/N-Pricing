@@ -34,6 +34,7 @@ const App: React.FC = () => {
   const setTheme = () => { }; // Fixed: No-op for enforced dark mode
   const [language, setLanguage] = useState<'en' | 'es'>('en');
   const [currentView, setCurrentView] = useState<ViewState>('CALCULATOR');
+  const [isLoading, setIsLoading] = useState(true);
 
   const [dealParams, setDealParams] = useState<Transaction>(INITIAL_DEAL);
   const [matchedMethod, setMatchedMethod] = useState<string>('Matched Maturity');
@@ -103,6 +104,8 @@ const App: React.FC = () => {
       if (dbUnits.length > 0) setBusinessUnits(dbUnits);
       if (dbProducts.length > 0) setProducts(dbProducts);
       if (dbUsers.length > 0) setUsers(dbUsers);
+
+      setIsLoading(false);
     };
     hydrate();
   }, []);
@@ -145,10 +148,12 @@ const App: React.FC = () => {
     }
   }, [isAuthenticated, currentUser]);
 
-  // 3. Local Auto-Save (Backup Only - Removed global Deal Sync to avoid loops)
+  // 3. Local Auto-Save (Backup Only)
   React.useEffect(() => { storage.saveLocal('n_pricing_rules', rules); }, [rules]);
   React.useEffect(() => { storage.saveLocal('n_pricing_clients', clients); }, [clients]);
   React.useEffect(() => { storage.saveLocal('n_pricing_approval_matrix', approvalMatrix); }, [approvalMatrix]);
+  React.useEffect(() => { storage.saveLocal('n_pricing_behavioural', behaviouralModels); }, [behaviouralModels]);
+  React.useEffect(() => { storage.saveLocal('n_pricing_deals', deals); }, [deals]);
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);

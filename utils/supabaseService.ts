@@ -244,10 +244,12 @@ export const supabaseService = {
     },
 
     async saveModel(model: BehaviouralModel) {
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('behavioural_models')
-            .upsert(mapModelToDB(model));
+            .upsert(mapModelToDB(model))
+            .select();
         if (error) console.error('Error saving model:', error);
+        return data ? mapModelFromDB(data[0]) : null;
     },
 
     async deleteModel(id: string) {

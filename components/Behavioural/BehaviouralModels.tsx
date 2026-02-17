@@ -84,17 +84,18 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
                   ]
             };
 
-            await storage.saveBehaviouralModel(finalModel);
+            const savedRecord = await storage.saveBehaviouralModel(finalModel);
 
-            // Optimistic Update
+            // Optimistic Update: Use the record returned from database if available
             setModels(prev => {
-               const existingIndex = prev.findIndex(m => m.id === finalModel.id);
+               const recordToUse = savedRecord || finalModel;
+               const existingIndex = prev.findIndex(m => m.id === recordToUse.id);
                if (existingIndex >= 0) {
                   const next = [...prev];
-                  next[existingIndex] = finalModel;
+                  next[existingIndex] = recordToUse;
                   return next;
                }
-               return [finalModel, ...prev];
+               return [recordToUse, ...prev];
             });
 
             await storage.addAuditEntry({

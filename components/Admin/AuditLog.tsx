@@ -16,13 +16,17 @@ const AuditLog: React.FC = () => {
         };
         fetch();
 
-        const channel = supabaseService.subscribeToAll((payload) => {
-            if (payload.table === 'audit_log' && payload.eventType === 'INSERT') {
-                setEntries(prev => [payload.new as AuditEntry, ...prev]);
+        const subscription = supabaseService.subscribeToAll((payload) => {
+            if (payload.table === 'audit_log') {
+                if (payload.eventType === 'INSERT') {
+                    setEntries(prev => [payload.new as AuditEntry, ...prev]);
+                }
             }
         });
 
-        return () => { channel.unsubscribe(); };
+        return () => {
+            if (subscription) subscription.unsubscribe();
+        };
     }, []);
 
     const filteredEntries = entries.filter(e =>
