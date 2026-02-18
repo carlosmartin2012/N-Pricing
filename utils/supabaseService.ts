@@ -24,6 +24,15 @@ const mapDealToDB = (deal: Transaction) => ({
     capital_ratio: deal.capitalRatio,
     target_roe: deal.targetROE,
     operational_cost_bps: deal.operationalCostBps,
+
+    // LCR/NSFR
+    drawn_amount: deal.drawnAmount,
+    undrawn_amount: deal.undrawnAmount,
+    is_committed: deal.isCommitted,
+    lcr_classification: deal.lcrClassification,
+    deposit_type: deal.depositType,
+    behavioral_maturity_override: deal.behavioralMaturityOverride,
+
     transition_risk: deal.transitionRisk,
     physical_risk: deal.physicalRisk,
     updated_at: new Date().toISOString()
@@ -50,6 +59,15 @@ const mapDealFromDB = (row: any): Transaction => ({
     capitalRatio: row.capital_ratio,
     targetROE: row.target_roe,
     operationalCostBps: row.operational_cost_bps,
+
+    // LCR/NSFR
+    drawnAmount: row.drawn_amount,
+    undrawnAmount: row.undrawn_amount,
+    isCommitted: row.is_committed,
+    lcrClassification: row.lcr_classification,
+    depositType: row.deposit_type,
+    behavioralMaturityOverride: row.behavioral_maturity_override,
+
     transitionRisk: row.transition_risk,
     physicalRisk: row.physical_risk
 });

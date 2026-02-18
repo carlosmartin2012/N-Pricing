@@ -69,6 +69,14 @@ export interface Transaction {
   targetROE: number;
   operationalCostBps: number;
 
+  // LCR / NSFR Data
+  drawnAmount?: number;
+  undrawnAmount?: number;
+  isCommitted?: boolean;
+  lcrClassification?: 'Corp_Credit' | 'Corp_Liquidity' | 'IFI_Liquidity' | 'Retail_Stable' | 'Retail_Other';
+  depositType?: 'Operational' | 'Non_Operational';
+  behavioralMaturityOverride?: number;
+
   // ESG
   transitionRisk: 'Brown' | 'Amber' | 'Neutral' | 'Green';
   physicalRisk: 'High' | 'Medium' | 'Low';
@@ -137,6 +145,9 @@ export interface FTPResult {
   strategicSpread: number;
   optionCost: number;
   regulatoryCost: number;
+  lcrCost?: number;
+  nsfrCost?: number;
+  termAdjustment?: number;
   operationalCost: number;
   capitalCharge: number;
   esgTransitionCharge: number;

@@ -110,10 +110,27 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                <WaterfallItem label={t.ftpRate} value={result.totalFTP} highlight />
 
                <div className="pl-2 border-l-2 border-slate-800 ml-1 my-1 space-y-1">
-                  <WaterfallItem label="Expected Loss (Credit)" value={result.regulatoryCost} isAdd color="text-red-300" />
-                  <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-red-300" />
-                  <WaterfallItem label="ESG Transition" value={result.esgTransitionCharge} isAdd color={result.esgTransitionCharge > 0 ? "text-red-300" : "text-emerald-400"} />
-                  <WaterfallItem label="ESG Physical" value={result.esgPhysicalCharge} isAdd color="text-red-300" />
+                  <WaterfallItem label="Expected Loss (Credit)" value={result.regulatoryCost} isAdd color="text-rose-400" />
+
+                  {/* Liquidity & Regulatory Costs */}
+                  <WaterfallItem
+                     label="LCR Buffer Cost"
+                     value={result.lcrCost || 0}
+                     isAdd
+                     color={(result.lcrCost || 0) > 0 ? "text-rose-400" : "text-emerald-400"}
+                     subtext={deal.lcrClassification ? `Class: ${deal.lcrClassification}` : undefined}
+                  />
+                  <WaterfallItem
+                     label="NSFR Optimization"
+                     value={result.nsfrCost || 0}
+                     isAdd
+                     color={(result.nsfrCost || 0) > 0 ? "text-rose-400" : "text-emerald-400"}
+                     subtext={deal.durationMonths > 12 ? 'Long Term Stable Funding' : undefined}
+                  />
+
+                  <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-rose-400" />
+                  <WaterfallItem label="ESG Transition" value={result.esgTransitionCharge} isAdd color={result.esgTransitionCharge > 0 ? "text-rose-400" : "text-emerald-400"} />
+                  <WaterfallItem label="ESG Physical" value={result.esgPhysicalCharge} isAdd color="text-rose-400" />
                </div>
 
                <div className="bg-slate-800/50 p-2 rounded border border-slate-700 my-2">
@@ -127,7 +144,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
                <div className="flex items-center justify-between pt-2">
                   <div className="text-xs text-slate-400">Net Economic Profit</div>
-                  <div className={`font-mono font-bold ${result.economicProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <div className={`font-mono font-bold ${result.economicProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                      {result.economicProfit >= 0 ? '+' : ''}{result.economicProfit.toFixed(2)}%
                   </div>
                </div>

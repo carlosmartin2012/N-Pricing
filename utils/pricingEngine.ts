@@ -1,5 +1,28 @@
 import { Transaction, FTPResult, ApprovalMatrixConfig } from '../types';
 import { MOCK_BEHAVIOURAL_MODELS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from '../constants';
+import { LCR_FACTORS, NSFR_FACTORS } from '../constants/regulations';
+
+// Helper: Linear Interpolation for Liquidity Premium
+const getLiquidityPremium = (months: number): number => {
+    // Simplified Liquidity Curve: 1M=0.10%, 12M=0.45%, 36M=0.65%, 60M=0.85%
+    const curve = [
+        { mm: 1, bps: 10 },
+        { mm: 12, bps: 45 },
+        { mm: 36, bps: 65 },
+        { mm: 60, bps: 85 }
+    ];
+
+    if (months <= 1) return curve[0].bps / 100;
+    if (months >= 60) return curve[3].bps / 100;
+
+    // Find bounding points
+    const upperIndex = curve.findIndex(p => p.mm >= months);
+    const lower = curve[upperIndex - 1];
+    const upper = curve[upperIndex];
+
+    const ratio = (months - lower.mm) / (upper.mm - lower.mm);
+    return (lower.bps + ratio * (upper.bps - lower.bps)) / 100;
+};
 
 export interface PricingShocks {
     interestRate: number; // bps
@@ -39,7 +62,43 @@ export const calculatePricing = (
 
     // 3. Expected Loss (Regulatory Cost / Credit)
     // Formula: Risk Weight * 1% (Simplified EL)
-    const regulatoryCost = (deal.riskWeight / 100) * 0.85;
+    const creditCost = (deal.riskWeight / 100) * 0.85;
+
+    // --- NEW REGULATORY COSTS (LCR / NSFR) ---
+    let lcrCost = 0;
+    let nsfrCost = 0;
+
+    // LCR Cost for Undrawn Lines
+    if (deal.undrawnAmount && deal.undrawnAmount > 0) {
+        // Cost = Undrawn * {0.05 * LP(1Y) + (%LCR - 0.05) * [LP(HQLA) - LP(Refi)]}
+        // Simplified Logic for Demo:
+        const lp1Y = getLiquidityPremium(12);
+        const lpHQLA = 0.15; // Assumption
+        const lpRefi = 0.05; // Assumption
+        const lcrFactor = deal.lcrClassification ? LCR_FACTORS[deal.lcrClassification] : 0.10;
+
+        // Cost applied to the undrawn portion converted to rate impact on the drawn amount if possible, 
+        // OR return as absolute cost. Here we assume pricing is on the total facility or drawn amount.
+        // For rate impact on drawn amount:
+        if (deal.amount > 0) {
+            const costAbs = deal.undrawnAmount * (0.05 * lp1Y + (lcrFactor - 0.05) * (lpHQLA - lpRefi));
+            lcrCost = (costAbs / deal.amount) * 100; // in %
+        }
+    }
+
+    // Operational Deposit Benefit (Negative Cost)
+    if (deal.depositType === 'Operational') {
+        // Benefit: Reduction in spread due to stability
+        lcrCost -= 0.15;
+    }
+
+    // NSFR Cost via Stable Maturity Cap
+    if (deal.durationMonths > NSFR_FACTORS.Stable_Maturity_Cap && deal.productType.includes('LOAN')) {
+        const excessTerm = deal.durationMonths - NSFR_FACTORS.Stable_Maturity_Cap;
+        nsfrCost += excessTerm * 0.02; // 2bps per month of excess term
+    }
+
+    const regulatoryCost = creditCost + lcrCost + nsfrCost;
 
     // 4. Operational Cost (Input from Panel)
     const operationalCost = deal.operationalCostBps / 100;
@@ -113,6 +172,9 @@ export const calculatePricing = (
         strategicSpread,
         optionCost: strategicSpread, // Keeping legacy type structure valid
         regulatoryCost,
+        lcrCost,
+        nsfrCost,
+        termAdjustment: nsfrCost, // Mapping nsfr to term adjustment for now
         operationalCost,
         capitalCharge,
         esgTransitionCharge: transCharge,
