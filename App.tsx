@@ -41,29 +41,14 @@ const App: React.FC = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  // Persistent States
-  const [clients, setClients] = useState<ClientEntity[]>(() => storage.loadLocal('n_pricing_clients', MOCK_CLIENTS));
-  const [products, setProducts] = useState<ProductDefinition[]>(() => storage.loadLocal('n_pricing_products', MOCK_PRODUCT_DEFS));
-  const [businessUnits, setBusinessUnits] = useState<BusinessUnit[]>(() => storage.loadLocal('n_pricing_business_units', MOCK_BUSINESS_UNITS));
-  const [deals, setDeals] = useState<Transaction[]>(() => storage.getDealsLocal().length > 0 ? storage.getDealsLocal() : MOCK_DEALS);
-  const [rules, setRules] = useState<GeneralRule[]>(() => storage.loadLocal('n_pricing_rules', [
-    { id: 1, businessUnit: 'Commercial Banking', product: 'Commercial Loan', segment: 'Corporate', tenor: '< 1Y', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 10 },
-    { id: 2, businessUnit: 'SME / Business', product: 'Commercial Loan', segment: 'SME', tenor: 'Any', baseMethod: 'Rate Card', baseReference: 'USD-SOFR', spreadMethod: 'Grid Pricing', liquidityReference: 'RC-COM-SME-A', strategicSpread: 25 },
-    { id: 3, businessUnit: 'Retail Banking', product: 'Term Deposit', segment: 'Retail', tenor: '> 2Y', baseMethod: 'Moving Average', baseReference: 'EUR-ESTR', spreadMethod: 'Fixed Spread', liquidityReference: 'RC-LIQ-EUR-HY', strategicSpread: 0 },
-    { id: 4, businessUnit: 'Retail Banking', product: 'Mortgage', segment: 'All', tenor: 'Fixed', baseMethod: 'Matched Maturity', baseReference: 'USD-SOFR', spreadMethod: 'Curve Lookup', liquidityReference: 'RC-LIQ-USD-STD', strategicSpread: 5 },
-  ]));
-  const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>(() => storage.loadLocal('n_pricing_behavioural', MOCK_BEHAVIOURAL_MODELS));
-  const [users, setUsers] = useState<UserProfile[]>(() => {
-    const localUsers = storage.getUsersLocal();
-    // Merge logic: Add MOCK_USERS that are not in local storage
-    const merged = [...localUsers];
-    MOCK_USERS.forEach(mockUser => {
-      if (!merged.some(u => u.email.toLowerCase() === mockUser.email.toLowerCase())) {
-        merged.push(mockUser);
-      }
-    });
-    return merged;
-  });
+  // Persistent States — initialized empty; Supabase is the single source of truth
+  const [clients, setClients] = useState<ClientEntity[]>([]);
+  const [products, setProducts] = useState<ProductDefinition[]>([]);
+  const [businessUnits, setBusinessUnits] = useState<BusinessUnit[]>([]);
+  const [deals, setDeals] = useState<Transaction[]>([]);
+  const [rules, setRules] = useState<GeneralRule[]>([]);
+  const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
 
   const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.loadLocal('n_pricing_approval_matrix', {
     autoApprovalThreshold: 15.0,
@@ -104,13 +89,14 @@ const App: React.FC = () => {
         supabaseService.fetchEsgGrid('physical')
       ]);
 
-      if (dbDeals.length > 0) setDeals(dbDeals);
-      if (dbModels.length > 0) setBehaviouralModels(dbModels);
-      if (dbRules.length > 0) setRules(dbRules);
-      if (dbClients.length > 0) setClients(dbClients);
-      if (dbUnits.length > 0) setBusinessUnits(dbUnits);
-      if (dbProducts.length > 0) setProducts(dbProducts);
-      if (dbUsers.length > 0) setUsers(dbUsers);
+      // Always set from DB — if DB is empty, state is empty (no mock fallback)
+      setDeals(dbDeals);
+      setBehaviouralModels(dbModels);
+      setRules(dbRules);
+      setClients(dbClients);
+      setBusinessUnits(dbUnits);
+      setProducts(dbProducts);
+      setUsers(dbUsers);
       if (dbShocks) setShocks(dbShocks);
       if (dbRateCards) setFtpRateCards(dbRateCards);
       if (dbTransGrid) setTransitionGrid(dbTransGrid);
@@ -178,6 +164,36 @@ const App: React.FC = () => {
       });
       return () => { presenceChannel.unsubscribe(); };
     }
+  }, [isAuthenticated, currentUser]);
+
+  // 4. SESSION_END — fires when user closes tab or navigates away
+  React.useEffect(() => {
+    if (!isAuthenticated || !currentUser) return;
+    const handleBeforeUnload = () => {
+      // Use sendBeacon for reliable delivery during page unload
+      const entry = {
+        user_email: currentUser.email,
+        user_name: currentUser.name,
+        action: 'SESSION_END',
+        module: 'AUTH',
+        description: `User ${currentUser.name} closed the application.`,
+        details: {},
+        timestamp: new Date().toISOString()
+      };
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (supabaseUrl && supabaseKey) {
+        navigator.sendBeacon(
+          `${supabaseUrl}/rest/v1/audit_log`,
+          new Blob(
+            [JSON.stringify(entry)],
+            { type: 'application/json' }
+          )
+        );
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isAuthenticated, currentUser]);
 
   // 3. Local Auto-Save (Backup Only)
