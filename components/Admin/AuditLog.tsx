@@ -1,139 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Panel, Badge } from '../ui/LayoutComponents';
-import { AuditEntry } from '../../types';
-import { storage } from '../../utils/storage';
 import { supabaseService } from '../../utils/supabaseService';
-import { Search, Clock, User, Activity, FileText, Filter, RefreshCcw } from 'lucide-react';
+import { AuditEntry } from '../../types';
+import { Activity, RefreshCw } from 'lucide-react';
 
 const AuditLog: React.FC = () => {
-    const [entries, setEntries] = useState<AuditEntry[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [logs, setLogs] = useState<AuditEntry[]>([]);
+    const [status, setStatus] = useState('Conectando...');
+
+    // 1. Carga inicial
+    const fetchLogs = async () => {
+        setStatus('Cargando datos...');
+        const data = await supabaseService.fetchAuditLog();
+        setLogs(data);
+        setStatus('Sincronizado');
+    };
 
     useEffect(() => {
-        const fetch = async () => {
-            console.log('AuditLog: Fetching entries...');
-            const data = await storage.getAuditLog();
-            console.log('AuditLog: Received entries:', data.length);
-            setEntries(data);
-        };
-        fetch();
+        fetchLogs();
 
-        const subscription = supabaseService.subscribeToAll((payload) => {
-            if (payload.table === 'audit_log') {
-                console.log('AuditLog: Realtime event receive:', payload.eventType, payload.mapped);
-                if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-                    const newEntry = payload.mapped as AuditEntry;
-                    if (!newEntry) return;
-
-                    setEntries(prev => {
-                        // Avoid duplicates
-                        if (prev.some(e => e.id === newEntry.id)) {
-                            if (payload.eventType === 'UPDATE') {
-                                return prev.map(e => e.id === newEntry.id ? newEntry : e);
-                            }
-                            return prev;
-                        }
-                        return [newEntry, ...prev];
-                    });
-                } else if (payload.eventType === 'DELETE') {
-                    const deletedId = payload.old?.id;
-                    if (deletedId) {
-                        setEntries(prev => prev.filter(e => e.id !== deletedId));
-                    }
-                }
+        // 2. Suscripción en Tiempo Real (Live)
+        const channel = supabaseService.subscribeToAll((payload) => {
+            if (payload.table === 'audit_log' && payload.eventType === 'INSERT') {
+                const newLog = payload.mapped as AuditEntry;
+                setLogs(prev => [newLog, ...prev]);
+                setStatus('¡Nueva actividad detectada!');
+                setTimeout(() => setStatus('En vivo'), 2000);
             }
         });
 
         return () => {
-            if (subscription) subscription.unsubscribe();
+            if (channel && typeof channel.unsubscribe === 'function') {
+                channel.unsubscribe();
+            }
         };
     }, []);
 
-    const filteredEntries = entries.filter(e => {
-        const search = searchTerm.toLowerCase();
-        return (
-            (e.action?.toLowerCase() || '').includes(search) ||
-            (e.userEmail?.toLowerCase() || '').includes(search) ||
-            (e.description?.toLowerCase() || '').includes(search) ||
-            (e.module?.toLowerCase() || '').includes(search)
-        );
-    });
-
     return (
-        <Panel title="System Audit Log" className="h-full">
-            <div className="flex flex-col h-full bg-slate-900/50">
-                {/* Toolbar */}
-                <div className="p-4 border-b border-slate-700 bg-slate-900 flex justify-between items-center">
-                    <div className="relative group w-1/3">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-500 transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Filter actions, users, or modules..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-slate-950 border border-slate-800 rounded pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 w-full"
-                        />
+        <Panel title="Monitor de Actividad del Sistema (Live)" className="h-full">
+            <div className="flex flex-col h-full bg-slate-900">
+                <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                    <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs">
+                        <Activity size={14} className="animate-pulse" />
+                        {status}
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => {
-                                storage.getAuditLog().then(setEntries);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-cyan-400 border border-slate-700 rounded text-xs hover:bg-slate-700 transition-colors"
-                        >
-                            <RefreshCcw size={12} /> Sync Now
-                        </button>
-                        <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-slate-400 border border-slate-700 rounded text-xs hover:bg-slate-700 transition-colors">
-                            <Filter size={12} /> Filter by Module
-                        </button>
-                    </div>
+                    <button onClick={fetchLogs} className="flex items-center gap-2 px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 text-xs">
+                        <RefreshCw size={12} /> Forzar Recarga
+                    </button>
                 </div>
-
-                {/* Table Header */}
-                <div className="overflow-auto flex-1">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-950 sticky top-0 z-10 shadow-sm">
+                <div className="flex-1 overflow-auto p-4">
+                    <table className="w-full text-left text-xs text-slate-400">
+                        <thead className="text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800 bg-slate-900 sticky top-0">
                             <tr>
-                                <th className="p-3 pl-4 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800 w-44">Timestamp</th>
-                                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800">User</th>
-                                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800 w-40">Action</th>
-                                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800 w-32">Module</th>
-                                <th className="p-3 text-[10px] uppercase font-bold text-slate-500 border-b border-slate-800">Description</th>
+                                <th className="p-3">Hora</th>
+                                <th className="p-3">Usuario</th>
+                                <th className="p-3">Acción</th>
+                                <th className="p-3">Descripción</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800 text-xs text-slate-300">
-                            {filteredEntries.map((e) => (
-                                <tr key={e.id} className="hover:bg-slate-800/50 transition-colors group">
-                                    <td className="p-3 pl-4 font-mono text-slate-500 group-hover:text-slate-400">
-                                        <div className="flex items-center gap-2">
-                                            <Clock size={12} /> {new Date(e.timestamp).toLocaleString()}
-                                        </div>
+                        <tbody className="divide-y divide-slate-800">
+                            {logs.map((log) => (
+                                <tr key={log.id} className="hover:bg-slate-800/50 transition-colors animate-in fade-in slide-in-from-top-2">
+                                    <td className="p-3 font-mono text-slate-500 whitespace-nowrap">
+                                        {new Date(log.timestamp).toLocaleTimeString()}
                                     </td>
-                                    <td className="p-3">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-slate-200">{e.userName}</span>
-                                            <span className="text-[10px] text-slate-500 font-mono">{e.userEmail}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-3">
-                                        <Badge variant="default" className="text-[10px] bg-slate-800 border-slate-700 text-slate-300">
-                                            {e.action}
-                                        </Badge>
-                                    </td>
-                                    <td className="p-3 font-mono text-cyan-500/70">{e.module}</td>
-                                    <td className="p-3 text-slate-400 max-w-xs truncate">{e.description}</td>
+                                    <td className="p-3 text-cyan-400 font-bold">{log.userName}</td>
+                                    <td className="p-3"><Badge variant="default">{log.action}</Badge></td>
+                                    <td className="p-3 text-slate-300">{log.description}</td>
                                 </tr>
                             ))}
-                            {filteredEntries.length === 0 && (
-                                <tr>
-                                    <td colSpan={5} className="p-12 text-center text-slate-500">
-                                        <Activity size={32} className="mx-auto mb-4 opacity-20" />
-                                        No audit logs found.
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
+                    {logs.length === 0 && (
+                        <div className="p-10 text-center opacity-50">Esperando registros de actividad...</div>
+                    )}
                 </div>
             </div>
         </Panel>
