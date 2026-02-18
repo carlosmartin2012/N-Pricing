@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { supabaseService } from '../../utils/supabaseService';
 import { AuditEntry } from '../../types';
-import { Activity, RefreshCw } from 'lucide-react';
+import { Activity, RefreshCw, ShieldCheck } from 'lucide-react';
 
 const AuditLog: React.FC = () => {
     const [logs, setLogs] = useState<AuditEntry[]>([]);
