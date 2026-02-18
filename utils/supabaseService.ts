@@ -429,6 +429,13 @@ export const supabaseService = {
                 console.log(`Realtime update on ${payload.table}:`, payload.eventType, data?.mapped || data);
                 onUpdate({ ...payload, mapped: data?.mapped });
             })
-            .subscribe();
+            .subscribe((status) => {
+                console.log('Supabase Channel Subscription Status:', status);
+                if (status === 'SUBSCRIBED') {
+                    console.log('Successfully connected to Supabase Realtime.');
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error('Error connecting to Supabase Realtime channel.');
+                }
+            });
     }
 };
