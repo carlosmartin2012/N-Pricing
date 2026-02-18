@@ -36,6 +36,19 @@ const AuditLog: React.FC = () => {
         };
     }, []);
 
+    const handleTestEntry = async () => {
+        setStatus('Enviando test...');
+        await supabaseService.addAuditEntry({
+            userEmail: 'test@system.com',
+            userName: 'Probador de Sistema',
+            action: 'TEST_MANUAL',
+            module: 'AUDIT_LOG',
+            description: 'Test manual del usuario para validar permisos de escritura.'
+        });
+        setStatus('Vistazo en vivo');
+        setTimeout(() => setStatus('En vivo'), 2000);
+    };
+
     return (
         <Panel title="Monitor de Actividad del Sistema (Live)" className="h-full">
             <div className="flex flex-col h-full bg-slate-900">
@@ -44,9 +57,14 @@ const AuditLog: React.FC = () => {
                         <Activity size={14} className="animate-pulse" />
                         {status}
                     </div>
-                    <button onClick={fetchLogs} className="flex items-center gap-2 px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 text-xs">
-                        <RefreshCw size={12} /> Forzar Recarga
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={handleTestEntry} className="flex items-center gap-2 px-3 py-1 bg-emerald-900/40 text-emerald-400 border border-emerald-800/50 rounded hover:bg-emerald-800/60 text-xs transition-colors">
+                            <ShieldCheck size={12} /> Generar Evento de Prueba
+                        </button>
+                        <button onClick={fetchLogs} className="flex items-center gap-2 px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 text-xs">
+                            <RefreshCw size={12} /> Forzar Recarga
+                        </button>
+                    </div>
                 </div>
                 <div className="flex-1 overflow-auto p-4">
                     <table className="w-full text-left text-xs text-slate-400">

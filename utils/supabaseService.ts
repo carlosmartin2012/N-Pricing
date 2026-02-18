@@ -290,6 +290,7 @@ export const supabaseService = {
             .insert(mapAuditToDB(entry));
         if (error) {
             console.error('Error adding audit entry:', error);
+            alert(`Error de Supabase (${error.code}): ${error.message}\nVerifique los permisos de la tabla audit_log.`);
         } else {
             console.log('Successfully added audit entry:', entry.action);
         }

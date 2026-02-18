@@ -1,27 +1,29 @@
 -- N PRICING SYSTEM: SUPABASE FIXES
--- This script enables public access to audit_log and ensures Realtime replication.
+-- This script enables public access for 'anon' users to the audit_log and deals tables.
 
--- 1. Eliminar políticas antiguas si existen
+-- 1. Permisos para el rol anónimo (anon)
+-- Supabase usa el rol anon para peticiones sin JWT o con la anon key
+GRANT SELECT, INSERT ON TABLE audit_log TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE deals TO anon;
+GRANT USAGE, SELECT ON SEQUENCE audit_log_id_seq TO anon;
+
+-- 2. Eliminar políticas antiguas si existen
 DROP POLICY IF EXISTS "Enable read access for all users" ON audit_log;
 DROP POLICY IF EXISTS "Enable insert for all users" ON audit_log;
 DROP POLICY IF EXISTS "Audit Insert Public" ON audit_log;
 DROP POLICY IF EXISTS "Audit Select Public" ON audit_log;
-DROP POLICY IF EXISTS "Enable insert for everyone" ON audit_log;
-DROP POLICY IF EXISTS "Enable select for everyone" ON audit_log;
+DROP POLICY IF EXISTS "Public Audit Access" ON audit_log;
 
--- 2. Habilitar RLS pero permitir todo el tráfico público para esta tabla específica
+-- 3. Habilitar RLS pero permitir todo el tráfico para 'anon'
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public Read Audit"
-ON audit_log FOR SELECT
-USING (true);
-
-CREATE POLICY "Public Insert Audit"
-ON audit_log FOR INSERT
+CREATE POLICY "Public Audit Access" 
+ON audit_log FOR ALL 
+TO anon 
+USING (true) 
 WITH CHECK (true);
 
--- 3. Forzar la publicación en Realtime
--- Ensure publication exists
+-- 4. Forzar la publicación en Realtime
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
@@ -29,21 +31,20 @@ BEGIN
     END IF;
 END $$;
 
--- Add table to publication (ignore if already added)
 BEGIN;
     ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS audit_log;
     ALTER PUBLICATION supabase_realtime ADD TABLE audit_log;
 COMMIT;
 
--- Ensure other tables also have public access as backup/pervious request
+-- 5. Asegurar acceso a otras tablas para anon
 ALTER TABLE deals ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public Access Deals" ON deals;
-CREATE POLICY "Public Access Deals" ON deals FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access Deals" ON deals FOR ALL TO anon USING (true) WITH CHECK (true);
 
 ALTER TABLE system_config ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public Access Config" ON system_config;
-CREATE POLICY "Public Access Config" ON system_config FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access Config" ON system_config FOR ALL TO anon USING (true) WITH CHECK (true);
 
 ALTER TABLE yield_curves ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public Access Curves" ON yield_curves;
-CREATE POLICY "Public Access Curves" ON yield_curves FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access Curves" ON yield_curves FOR ALL TO anon USING (true) WITH CHECK (true);
