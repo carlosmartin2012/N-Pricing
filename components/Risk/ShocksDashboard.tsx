@@ -89,6 +89,24 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 step="10"
                                 value={shocks.interestRate}
                                 onChange={(e) => setShocks({ ...shocks, interestRate: Number(e.target.value) })}
+                                onMouseUp={() => {
+                                    storage.addAuditEntry({
+                                        userEmail: user?.email || 'unknown',
+                                        userName: user?.name || 'Unknown User',
+                                        action: 'APPLY_SHOCK',
+                                        module: 'SHOCKS',
+                                        description: `Adjusted Interest Rate shock to ${shocks.interestRate}bps for deal ${deal.id}`
+                                    });
+                                }}
+                                onTouchEnd={() => {
+                                    storage.addAuditEntry({
+                                        userEmail: user?.email || 'unknown',
+                                        userName: user?.name || 'Unknown User',
+                                        action: 'APPLY_SHOCK',
+                                        module: 'SHOCKS',
+                                        description: `Adjusted Interest Rate shock to ${shocks.interestRate}bps for deal ${deal.id}`
+                                    });
+                                }}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-cyan-500"
                             />
                             <div className="flex justify-between text-xs text-slate-400 font-mono">
@@ -113,6 +131,24 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 step="10"
                                 value={shocks.liquiditySpread}
                                 onChange={(e) => setShocks({ ...shocks, liquiditySpread: Number(e.target.value) })}
+                                onMouseUp={() => {
+                                    storage.addAuditEntry({
+                                        userEmail: user?.email || 'unknown',
+                                        userName: user?.name || 'Unknown User',
+                                        action: 'APPLY_SHOCK',
+                                        module: 'SHOCKS',
+                                        description: `Adjusted Liquidity Spread shock to ${shocks.liquiditySpread}bps for deal ${deal.id}`
+                                    });
+                                }}
+                                onTouchEnd={() => {
+                                    storage.addAuditEntry({
+                                        userEmail: user?.email || 'unknown',
+                                        userName: user?.name || 'Unknown User',
+                                        action: 'APPLY_SHOCK',
+                                        module: 'SHOCKS',
+                                        description: `Adjusted Liquidity Spread shock to ${shocks.liquiditySpread}bps for deal ${deal.id}`
+                                    });
+                                }}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-amber-500"
                             />
                             <div className="flex justify-between text-xs text-slate-400 font-mono">

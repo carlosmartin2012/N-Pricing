@@ -65,7 +65,7 @@ const mapAuditToDB = (entry: any) => ({
 });
 
 const mapAuditFromDB = (row: any): AuditEntry => ({
-    id: row.id || `audit-${Math.random()}`,
+    id: String(row.id || `audit-${Math.random()}`),
     timestamp: row.timestamp || new Date().toISOString(),
     userEmail: row.user_email || 'unknown@system.com',
     userName: row.user_name || 'System User',

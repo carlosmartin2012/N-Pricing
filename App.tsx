@@ -194,13 +194,7 @@ const App: React.FC = () => {
     const timer = setTimeout(() => {
       if (JSON.stringify(prevShocks.current) !== JSON.stringify(shocks)) {
         supabaseService.saveShocks(shocks);
-        storage.addAuditEntry({
-          userEmail: currentUser?.email || 'unknown',
-          userName: currentUser?.name || 'Unknown User',
-          action: 'UPDATE_SYSTEM_SHOCKS',
-          module: 'SHOCKS',
-          description: `System-wide shocks updated: IR=${shocks.interestRate}bps, Liq=${shocks.liquiditySpread}bps`
-        });
+        // Audit logging moved back to ShocksDashboard.tsx with onMouseUp to avoid log spamming
         prevShocks.current = shocks;
       }
     }, 2000);
