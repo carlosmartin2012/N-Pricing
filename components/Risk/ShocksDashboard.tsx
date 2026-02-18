@@ -55,17 +55,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
         }
     };
 
-    React.useEffect(() => {
-        if (shocks.interestRate !== 0 || shocks.liquiditySpread !== 0) {
-            storage.addAuditEntry({
-                userEmail: user?.email || 'unknown',
-                userName: user?.name || 'Unknown User',
-                action: 'APPLY_SHOCK',
-                module: 'SHOCKS',
-                description: `Applied shocks: IR=${shocks.interestRate}bps, Liq=${shocks.liquiditySpread}bps to deal ${deal.id}`
-            });
-        }
-    }, [shocks, deal.id, user]);
+    // Audit logging moved to App.tsx for debounced persistence to avoid log spamming
 
     return (
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 h-full">

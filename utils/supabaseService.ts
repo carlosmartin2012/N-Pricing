@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile } from '../types';
+import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard } from '../types';
 
 // --- MAPPING HELPERS ---
 
@@ -404,7 +404,7 @@ export const supabaseService = {
                 const data = isDelete ? payload.old : payload.new;
 
                 if (data) {
-                    if (payload.table === 'deals') data.id = data.id || payload.old?.id; // Ensure ID for deletes
+                    if (payload.table === 'deals') (data as any).id = (data as any).id || (payload.old as any)?.id; // Ensure ID for deletes
 
                     // Map the data
                     if (payload.table === 'deals') data.mapped = mapDealFromDB(data);
@@ -423,6 +423,9 @@ export const supabaseService = {
                     }
                     if (payload.table === 'system_config' && !isDelete) {
                         data.mapped = (data as any).value;
+                    }
+                    if (payload.table === 'audit_log') {
+                        data.mapped = mapAuditFromDB(data);
                     }
                 }
 

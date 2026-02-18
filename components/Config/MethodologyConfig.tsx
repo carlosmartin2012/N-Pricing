@@ -264,7 +264,7 @@ const MethodologyConfig: React.FC<Props> = ({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'UPDATE_ESG_GRID',
-            module: 'SYS_CONFIG',
+            module: 'CONFIG',
             description: `Updated ESG ${type} grid entry: ${editingEsg.classification || editingEsg.riskLevel}`
          });
 
@@ -407,9 +407,18 @@ const MethodologyConfig: React.FC<Props> = ({
    // --- Handlers for Governance ---
    const handleGovernanceChange = (key: keyof ApprovalMatrixConfig, value: string) => {
       if (setApprovalMatrix && approvalMatrix) {
+         const numVal = parseFloat(value);
          setApprovalMatrix({
             ...approvalMatrix,
-            [key]: parseFloat(value)
+            [key]: numVal
+         });
+
+         storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: 'UPDATE_GOVERNANCE',
+            module: 'CONFIG',
+            description: `Updated governance threshold ${key} to ${numVal}%`
          });
       }
    }

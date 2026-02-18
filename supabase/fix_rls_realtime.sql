@@ -40,3 +40,10 @@ ALTER PUBLICATION supabase_realtime ADD TABLE yield_curves;
 ALTER PUBLICATION supabase_realtime ADD TABLE rules;
 ALTER PUBLICATION supabase_realtime ADD TABLE system_config;
 ALTER PUBLICATION supabase_realtime ADD TABLE users;
+
+-- Ensure audit_log is publicly insertable (even if RLS is re-enabled)
+ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY; -- Briefly enable to set policy
+DROP POLICY IF EXISTS "Enable insert for everyone" ON audit_log;
+CREATE POLICY "Enable insert for everyone" ON audit_log FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Enable select for everyone" ON audit_log FOR SELECT TO public USING (true);
+ALTER TABLE audit_log DISABLE ROW LEVEL SECURITY; -- Disable again as requested

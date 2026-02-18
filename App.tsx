@@ -188,13 +188,24 @@ const App: React.FC = () => {
   React.useEffect(() => { storage.saveLocal('n_pricing_deals', deals); }, [deals]);
 
   // 4. Shocks Persistence (Debounced)
+  const prevShocks = React.useRef(shocks);
   React.useEffect(() => {
     if (isLoading) return;
     const timer = setTimeout(() => {
-      supabaseService.saveShocks(shocks);
-    }, 1000);
+      if (JSON.stringify(prevShocks.current) !== JSON.stringify(shocks)) {
+        supabaseService.saveShocks(shocks);
+        storage.addAuditEntry({
+          userEmail: currentUser?.email || 'unknown',
+          userName: currentUser?.name || 'Unknown User',
+          action: 'UPDATE_SYSTEM_SHOCKS',
+          module: 'SHOCKS',
+          description: `System-wide shocks updated: IR=${shocks.interestRate}bps, Liq=${shocks.liquiditySpread}bps`
+        });
+        prevShocks.current = shocks;
+      }
+    }, 2000);
     return () => clearTimeout(timer);
-  }, [shocks, isLoading]);
+  }, [shocks, isLoading, currentUser]);
 
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
