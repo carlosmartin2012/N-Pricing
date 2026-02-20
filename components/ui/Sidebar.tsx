@@ -43,24 +43,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }, []);
 
     const NavButton = ({ item }: { item: NavItem }) => {
-        const isConfig = item.id === 'USER_CONFIG';
+        const isUserConfig = item.id === 'USER_CONFIG';
 
         return (
             <button
                 onClick={() => {
-                    if (isConfig) {
+                    if (isUserConfig) {
                         onOpenConfig();
                     } else {
                         setCurrentView(item.id as ViewState);
                     }
                     if (window.innerWidth < 768) onClose();
                 }}
-                className={`w-full flex items-center px-3 py-3 rounded-md text-sm transition-all ${!isConfig && currentView === item.id
+                className={`w-full flex items-center px-3 py-3 rounded-md text-sm transition-all ${!isUserConfig && currentView === item.id
                     ? 'bg-cyan-50 text-cyan-700 border-l-2 border-cyan-600 dark:bg-slate-900 dark:text-white dark:border-cyan-500'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-500 dark:hover:bg-slate-900 dark:hover:text-slate-300'
                     }`}
             >
-                <item.icon size={20} className={!isConfig && currentView === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-slate-500 dark:text-slate-600'} />
+                <item.icon size={20} className={!isUserConfig && currentView === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-slate-500 dark:text-slate-600'} />
                 {isSidebarOpen && <span className="ml-3 font-medium">{item.label}</span>}
             </button>
         );

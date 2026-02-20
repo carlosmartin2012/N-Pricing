@@ -104,7 +104,7 @@ const App: React.FC = () => {
       setFtpRateCards(dbRateCards && dbRateCards.length > 0 ? dbRateCards : MOCK_FTP_RATE_CARDS);
       setTransitionGrid(dbTransGrid && dbTransGrid.length > 0 ? dbTransGrid : MOCK_TRANSITION_GRID);
       setPhysicalGrid(dbPhysGrid && dbPhysGrid.length > 0 ? dbPhysGrid : MOCK_PHYSICAL_GRID);
-      setYieldCurves(dbYieldCurves && dbYieldCurves.length > 0 ? dbYieldCurves : []); // No mock yield curves state for now, assuming its handled by MethodologyConfig if needed
+      setYieldCurves(dbYieldCurves && dbYieldCurves.length > 0 ? dbYieldCurves : MOCK_YIELD_CURVE);
 
       if (dbShocks) setShocks(dbShocks);
 
@@ -408,7 +408,7 @@ const App: React.FC = () => {
 
   const mainNavItems = [
     { id: 'CALCULATOR', label: t.pricingEngine, icon: Calculator },
-    { id: 'REPORTING', label: 'Reporting', icon: BarChart4 },
+    { id: 'REPORTING', label: 'Reporting ALM', icon: BarChart4 },
     { id: 'BLOTTER', label: t.dealBlotter, icon: FileText },
     { id: 'MARKET_DATA', label: t.yieldCurves, icon: LineChart },
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity },
@@ -514,10 +514,8 @@ const App: React.FC = () => {
           )}
 
           {currentView === 'MARKET_DATA' && (
-            <div className="h-full relative z-0 grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-12 flex flex-col h-full overflow-auto">
-                <LiquidityDashboard />
-              </div>
+            <div className="h-full relative z-0">
+              <YieldCurvePanel />
             </div>
           )}
 
@@ -601,11 +599,6 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {currentView === 'REPORTING' && (
-            <div className="h-full relative z-0">
-              <ReportingDashboard />
-            </div>
-          )}
 
           {currentView === 'AI_LAB' && (
             <div className="h-full relative z-0 flex flex-col">
