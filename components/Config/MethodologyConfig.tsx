@@ -613,11 +613,11 @@ const MethodologyConfig: React.FC<Props> = ({
 
                               <div className="bg-slate-900/50 rounded border border-slate-800/50 p-2">
                                  <div className="flex gap-2 overflow-x-auto pb-1">
-                                    {card.grid.map((pt, i) => (
+                                    {(card.points || []).map((pt, i) => (
                                        <div key={i} className="flex-shrink-0 bg-slate-800 rounded px-2 py-1 text-center min-w-[50px]">
                                           <div className="text-[9px] text-slate-400 font-bold">{pt.tenor}</div>
-                                          <div className={`text-xs font-mono font-bold ${pt.spread >= 0 ? 'text-cyan-400' : 'text-emerald-400'}`}>
-                                             {pt.spread}
+                                          <div className={`text-xs font-mono font-bold ${pt.rate >= 0 ? 'text-cyan-400' : 'text-emerald-400'}`}>
+                                             {pt.rate}
                                           </div>
                                        </div>
                                     ))}

@@ -531,7 +531,7 @@ const App: React.FC = () => {
 
           {currentView === 'MARKET_DATA' && (
             <div className="h-full relative z-0">
-              <YieldCurvePanel />
+              <YieldCurvePanel language={language} user={currentUser} />
             </div>
           )}
 

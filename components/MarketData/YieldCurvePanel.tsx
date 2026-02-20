@@ -77,10 +77,13 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         }
 
         return basePoints.map((pt, i) => {
-            const shockedRate = pt.rate + (shockBps / 100);
+            const rateVal = parseFloat(pt.rate as any) || 0;
+            const prevVal = parseFloat(pt.prev as any) || rateVal;
+            const shockedRate = rateVal + (shockBps / 100);
             return {
                 ...pt,
-                baseRate: pt.rate,
+                baseRate: rateVal,
+                prev: prevVal,
                 rate: Math.max(0.01, shockedRate),
                 index: i
             };
@@ -153,14 +156,15 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     const curveTemplate = "tenor,rate,prev\nON,5.25,5.20\n1M,5.30,5.28\n1Y,5.10,5.05\n10Y,4.25,4.30";
 
     // Calculations for Chart
-    const minRate = Math.min(...chartData.map(d => Math.min(d.rate, d.prev))) * 0.9;
-    const maxRate = Math.max(...chartData.map(d => Math.max(d.rate, d.prev))) * 1.1;
-    const effectiveMax = maxRate === minRate ? maxRate + 1 : maxRate; // Prevent division by zero
+    const minRate = (chartData.length > 0 ? Math.min(...chartData.map(d => Math.min(d.rate, d.prev))) : 0) * 0.9;
+    const maxRate = (chartData.length > 0 ? Math.max(...chartData.map(d => Math.max(d.rate, d.prev))) : 5) * 1.1;
+    const effectiveMax = isNaN(maxRate) || maxRate === minRate ? (isNaN(minRate) ? 5 : minRate + 1) : maxRate; // Prevent division by zero or NaN
+    const finalMin = isNaN(minRate) ? 0 : minRate;
 
     const xStep = (width - padding * 2) / (Math.max(1, chartData.length - 1));
 
     const getX = (i: number) => padding + i * xStep;
-    const getY = (rate: number) => height - padding - ((rate - minRate) / (effectiveMax - minRate)) * (height - padding * 2);
+    const getY = (rate: number) => height - padding - ((rate - finalMin) / (effectiveMax - finalMin)) * (height - padding * 2);
 
     const points = chartData.map((d, i) => `${getX(i)},${getY(d.rate)}`).join(' ');
     const areaPoints = `${getX(0)},${height - padding} ${points} ${getX(chartData.length - 1)},${height - padding}`;
