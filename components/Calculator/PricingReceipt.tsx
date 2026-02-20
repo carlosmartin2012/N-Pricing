@@ -104,7 +104,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
                <WaterfallItem label="Base Interest Rate" value={result.baseRate} />
 
-               {/* Consolidated Liquidity Cost V4.2 */}
+               {/* Consolidated Liquidity Cost V4.3 */}
                <div className="space-y-1 mt-2">
                   <WaterfallItem
                      label={t.liquidityCost || "Liquidity Cost"}
@@ -115,18 +115,18 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                      icon={<Droplets size={12} className="inline mr-1" />}
                   />
 
-                  {/* Indented Breakdown */}
-                  <div className="pl-4 border-l border-slate-700 space-y-1 my-1">
+                  {/* Indented Breakdown - ALM Methodology Mirror */}
+                  <div className="pl-4 border-l border-slate-700/50 space-y-0.5 my-1">
                      <WaterfallItem
                         label="↳ NSFR Optimization (Term Floor)"
                         value={result._liquidityPremiumDetails}
-                        color="text-slate-400"
+                        color="text-slate-500"
                         compact
                      />
                      <WaterfallItem
                         label="↳ LCR Buffer Cost (Contingent)"
                         value={result._clcChargeDetails}
-                        color="text-slate-400"
+                        color="text-slate-500"
                         compact
                      />
                   </div>
@@ -140,6 +140,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
                <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
 
+               {/* Business & Regulatory Costs */}
                <div className="pl-2 border-l-2 border-slate-800 ml-1 mt-2 space-y-1">
                   <WaterfallItem label="Expected Loss (Credit)" value={result.regulatoryCost} isAdd color="text-rose-400" />
                   <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-rose-400" />

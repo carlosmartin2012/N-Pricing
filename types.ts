@@ -243,9 +243,9 @@ export interface GeneralRule {
   product: string;
   segment: string;
   tenor: string;
-  baseMethod: string;
+  baseMethod: string; // V4.3: Supports formula strings
   baseReference?: string; // New: Curve ID for Base
-  spreadMethod: string;
+  spreadMethod: string; // V4.3: Supports formula strings
   liquidityReference?: string; // New: Curve ID for Liquidity
   strategicSpread: number;
 }

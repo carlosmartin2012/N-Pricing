@@ -1,6 +1,4 @@
-
-
-import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData } from './types';
+import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData, GeneralRule } from './types';
 
 export const MOCK_CLIENTS: ClientEntity[] = [
   { id: 'CL-1001', name: 'Acme Corp Industries', type: 'Corporate', segment: 'Large Cap', rating: 'BBB' },
@@ -40,17 +38,12 @@ export const WHITELISTED_EMAILS = [
   'diego.merino@nfq.es',
   'diego.diaz@nfq.es'
 ];
-
+// --- USERS & ROLES ---
 export const MOCK_USERS: UserProfile[] = [
-  { id: 'USR-001', name: 'Carlos Martin', email: 'carlos.martin@nfq.es', role: 'Admin', status: 'Active', lastLogin: '2023-10-24 09:15', department: 'Management' },
-  { id: 'USR-002', name: 'Alejandro Lloveras', email: 'alejandro.lloveras@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
-  { id: 'USR-003', name: 'Gregorio Gonzalo', email: 'gregorio.gonzalo@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: 'Never', department: 'Risk Control' },
-  { id: 'USR-004', name: 'Francisco Herrero', email: 'francisco.herrero@nfq.es', role: 'Auditor', status: 'Active', lastLogin: 'Never', department: 'Audit' },
-  { id: 'USR-005', name: 'Martin Sanz', email: 'martin.sanz@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
-  { id: 'USR-006', name: 'Roberto Flores', email: 'roberto.flores@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Management' },
-  { id: 'USR-007', name: 'Arnau Lopez', email: 'arnau.lopez@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
-  { id: 'USR-008', name: 'Diego Merino', email: 'diego.merino@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Risk Control' },
-  { id: 'USR-009', name: 'Diego Diaz', email: 'diego.diaz@nfq.es', role: 'Trader', status: 'Active', lastLogin: 'Never', department: 'Treasury' },
+  { id: 'usr-001', name: 'Carlos Martín', email: 'carlos.martin@nfq.es', role: 'Admin', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), department: 'Treasury / ALM' },
+  { id: 'usr-002', name: 'Alejandro Lloveras', email: 'alejandro.lloveras@nfq.es', role: 'Trader', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), department: 'Global Markets' },
+  { id: 'usr-003', name: 'Andrés García', email: 'andres.garcia@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), department: 'Risk Control' },
+  { id: 'usr-004', name: 'David G-Zamarreño', email: 'david.gz@nfq.es', role: 'Auditor', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), department: 'Internal Audit' }
 ];
 
 export const INITIAL_DEAL: Transaction = {
@@ -270,6 +263,58 @@ export const MOCK_DEALS: Transaction[] = [
     riskWeight: 20, capitalRatio: 12.0, targetROE: 15, operationalCostBps: 10,
     transitionRisk: 'Neutral', physicalRisk: 'Low',
     description: 'IRS Swap - Cobertura de Tipo de Interés'
+  }
+];
+
+// --- PRICING & METHODOLOGY RULES (V4.3) ---
+export const MOCK_RULES: GeneralRule[] = [
+  {
+    id: 1,
+    businessUnit: 'Commercial Banking',
+    product: 'Commercial Loan',
+    segment: 'Corporate',
+    tenor: '< 12M',
+    baseMethod: 'Matched Maturity',
+    baseReference: 'USD-SOFR',
+    spreadMethod: '50% LP(DTM) + 50% LP(1Y) [NSFR Floor]',
+    liquidityReference: 'USD-LIQ-STD',
+    strategicSpread: 15
+  },
+  {
+    id: 2,
+    businessUnit: 'Retail Banking',
+    product: 'Term Deposit',
+    segment: 'Retail Operational',
+    tenor: 'Any',
+    baseMethod: 'Moving Average',
+    baseReference: 'EUR-ESTR',
+    spreadMethod: '50% LP(BM) + 50% LP[max(1Y, BM)] + 25% CLC',
+    liquidityReference: 'EUR-LIQ-STD',
+    strategicSpread: 5
+  },
+  {
+    id: 3,
+    businessUnit: 'Global Markets',
+    product: 'Secured Repo',
+    segment: 'ECA Qualified',
+    tenor: 'Any',
+    baseMethod: 'Matched Maturity',
+    baseReference: 'USD-SOFR',
+    spreadMethod: '(1-HC)·(sec. LP + ECA adj) + HC·unsec. LP',
+    liquidityReference: 'USD-LIQ-SEC',
+    strategicSpread: 2
+  },
+  {
+    id: 4,
+    businessUnit: 'Commercial Banking',
+    product: 'Mortgage',
+    segment: 'Retail',
+    tenor: '> 5Y',
+    baseMethod: 'Caterpillar (NMD)',
+    baseReference: 'USD-SOFR',
+    spreadMethod: 'Stable Funding LP (Long-Term)',
+    liquidityReference: 'USD-LIQ-STD',
+    strategicSpread: 10
   }
 ];
 

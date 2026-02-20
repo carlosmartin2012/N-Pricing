@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel, YieldCurvePoint, FtpRateCard } from './types';
-import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS, WHITELISTED_EMAILS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from './constants';
+import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS, WHITELISTED_EMAILS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_RULES, MOCK_FTP_RATE_CARDS } from './constants';
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
 import PricingReceipt from './components/Calculator/PricingReceipt';
@@ -93,26 +93,18 @@ const App: React.FC = () => {
         supabaseService.fetchYieldCurves()
       ]);
 
-      // Robust Fallback Logic
+      // Robust Fallback Logic V4.3
       setDeals(dbDeals && dbDeals.length > 0 ? dbDeals : MOCK_DEALS);
       setClients(dbClients && dbClients.length > 0 ? dbClients : MOCK_CLIENTS);
       setUsers(dbUsers && dbUsers.length > 0 ? dbUsers : MOCK_USERS);
       setBehaviouralModels(dbModels && dbModels.length > 0 ? dbModels : MOCK_BEHAVIOURAL_MODELS);
+      setRules(dbRules && dbRules.length > 0 ? dbRules : MOCK_RULES);
       setProducts(dbProducts && dbProducts.length > 0 ? dbProducts : MOCK_PRODUCT_DEFS);
       setBusinessUnits(dbUnits && dbUnits.length > 0 ? dbUnits : MOCK_BUSINESS_UNITS);
-      setFtpRateCards(dbRateCards && dbRateCards.length > 0 ? dbRateCards : []);
+      setFtpRateCards(dbRateCards && dbRateCards.length > 0 ? dbRateCards : MOCK_FTP_RATE_CARDS);
       setTransitionGrid(dbTransGrid && dbTransGrid.length > 0 ? dbTransGrid : MOCK_TRANSITION_GRID);
       setPhysicalGrid(dbPhysGrid && dbPhysGrid.length > 0 ? dbPhysGrid : MOCK_PHYSICAL_GRID);
-      setYieldCurves(dbYieldCurves && dbYieldCurves.length > 0 ? dbYieldCurves : [{ id: 'mock-yc', name: 'Standard Yield Curve', currency: 'USD', points: MOCK_YIELD_CURVE, is_active: true }]);
-
-      if (dbRules && dbRules.length > 0) {
-        setRules(dbRules);
-      }
-
-      // Handle Yield Curves (using local state or setting it if exists)
-      // Note: setYieldCurves was used in previous code but not declared in states. 
-      // I will assume it's part of MethodologyConfig or should be managed if added.
-      // For now, I'll ensure the app doesn't crash by checking if it's used elsewhere.
+      setYieldCurves(dbYieldCurves && dbYieldCurves.length > 0 ? dbYieldCurves : []); // No mock yield curves state for now, assuming its handled by MethodologyConfig if needed
 
       if (dbShocks) setShocks(dbShocks);
 
@@ -422,7 +414,6 @@ const App: React.FC = () => {
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity },
     { id: 'METHODOLOGY', label: t.methodology, icon: GitBranch },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard },
-    { id: 'REPORTING', label: t.reporting, icon: BarChart4 },
     { id: 'SHOCKS', label: t.shocks, icon: Zap },
     { id: 'CONFIG', label: t.systemConfig, icon: Settings },
   ];

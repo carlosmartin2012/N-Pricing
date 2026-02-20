@@ -33,6 +33,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
     const t = translations[language];
 
+    const [latency, setLatency] = React.useState(14);
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setLatency(Math.floor(Math.random() * (28 - 12 + 1)) + 12);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
     const NavButton = ({ item }: { item: NavItem }) => {
         const isConfig = item.id === 'USER_CONFIG';
 
@@ -108,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                 {t.online}
                             </div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-600 mt-1 font-mono">{t.latency}</div>
+                            <div className="text-[10px] text-slate-400 dark:text-slate-600 mt-1 font-mono">{latency}ms latency</div>
                         </div>
                     ) : (
                         <div className="flex justify-center">
