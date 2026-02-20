@@ -229,7 +229,7 @@ export interface FTPResult {
   matchReason: string;
 }
 
-export type ViewState = 'CALCULATOR' | 'BLOTTER' | 'CONFIG' | 'MARKET_DATA' | 'ACCOUNTING' | 'BEHAVIOURAL' | 'MANUAL' | 'USER_MGMT' | 'AI_LAB' | 'METHODOLOGY' | 'AUDIT_LOG' | 'SHOCKS';
+export type ViewState = 'CALCULATOR' | 'BLOTTER' | 'CONFIG' | 'MARKET_DATA' | 'ACCOUNTING' | 'BEHAVIOURAL' | 'MANUAL' | 'USER_MGMT' | 'AI_LAB' | 'METHODOLOGY' | 'AUDIT_LOG' | 'SHOCKS' | 'REPORTING';
 
 export interface YieldCurvePoint {
   tenor: string;

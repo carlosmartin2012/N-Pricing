@@ -156,5 +156,6 @@ export const translations = {
         shockedScenario: 'Escenario Estresado',
         impactAnalysis: 'Análisis de Impacto',
         applyShocks: 'Aplicar Shocks',
+        reporting: 'Reporting ALM',
     }
 };

@@ -104,82 +104,44 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
                <WaterfallItem label="Base Interest Rate" value={result.baseRate} />
 
-               {/* Consolidated Liquidity Cost V3.0 / V4.0 */}
-               <div className="group relative">
+               {/* Consolidated Liquidity Cost V4.2 */}
+               <div className="space-y-1 mt-2">
                   <WaterfallItem
                      label={t.liquidityCost || "Liquidity Cost"}
                      value={result.liquiditySpread}
                      isAdd
-                     color="text-amber-600 dark:text-cyan-400"
+                     color="text-amber-400"
+                     weight="font-mono"
                      icon={<Droplets size={12} className="inline mr-1" />}
                   />
 
-                  {/* V4.0 DEMO TOOLTIP */}
-                  {deal.id?.startsWith('DL-DEMO-') && (
-                     <div className="absolute -left-1 -top-1 w-2 h-2 bg-cyan-500 rounded-full animate-pulse border border-white dark:border-black z-20"></div>
-                  )}
-
-                  {/* Technical Details (Auditor/Expert View) */}
-                  <div className="hidden group-hover:block absolute left-0 top-full z-10 w-full bg-slate-900 border border-slate-700 p-2 rounded shadow-xl animate-in fade-in slide-in-from-top-1">
-                     <div className="text-[9px] uppercase text-slate-500 font-bold mb-1 border-b border-slate-800 pb-1 flex justify-between">
-                        <span>Technical Breakdown</span>
-                        <span className="text-cyan-500 font-mono">V4.0</span>
-                     </div>
-
-                     {/* Demo Context Tooltip */}
-                     {deal.id === 'DL-DEMO-001' && (
-                        <div className="mb-2 p-1.5 bg-cyan-950/30 border border-cyan-900/50 rounded text-[9px] text-cyan-400 italic">
-                           Regulatory Trigger: NSFR Short-Term Floor (1Y) applied due to {"<"} 12M maturity.
-                        </div>
-                     )}
-                     {deal.id === 'DL-DEMO-002' && (
-                        <div className="mb-2 p-1.5 bg-emerald-950/30 border border-emerald-900/50 rounded text-[9px] text-emerald-400 italic">
-                           Segment Incentive: Operational deposit benefit detected (LCR / Balance Split).
-                        </div>
-                     )}
-                     {deal.id === 'DL-DEMO-004' && (
-                        <div className="mb-2 p-1.5 bg-amber-950/30 border border-amber-900/50 rounded text-[9px] text-amber-400 italic">
-                           Massive CLC: Impact from undrawn committed line buffer requirement.
-                        </div>
-                     )}
-
-                     <div className="space-y-1 pl-2 border-l border-slate-700">
-                        <div className="flex justify-between text-[10px]">
-                           <span className="text-slate-400">Liquidity Premium (NSFR)</span>
-                           <span className="font-mono text-amber-500">{result._liquidityPremiumDetails.toFixed(3)}%</span>
-                        </div>
-                        <div className="flex justify-between text-[10px]">
-                           <span className="text-slate-400">CLC Charge (LCR Buffer)</span>
-                           <span className="font-mono text-amber-500">{result._clcChargeDetails.toFixed(3)}%</span>
-                        </div>
-                     </div>
+                  {/* Indented Breakdown */}
+                  <div className="pl-4 border-l border-slate-700 space-y-1 my-1">
+                     <WaterfallItem
+                        label="↳ NSFR Optimization (Term Floor)"
+                        value={result._liquidityPremiumDetails}
+                        color="text-slate-400"
+                        compact
+                     />
+                     <WaterfallItem
+                        label="↳ LCR Buffer Cost (Contingent)"
+                        value={result._clcChargeDetails}
+                        color="text-slate-400"
+                        compact
+                     />
                   </div>
                </div>
 
                <WaterfallItem label="Strategic Spread" value={result.strategicSpread} isAdd color="text-blue-600 dark:text-blue-400" />
 
-               <div className="my-1 border-t border-slate-200 dark:border-slate-800 border-dashed opacity-50"></div>
+               <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
+
                <WaterfallItem label={t.ftpRate} value={result.totalFTP} highlight />
 
-               <div className="pl-2 border-l-2 border-slate-800 ml-1 my-1 space-y-1">
+               <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
+
+               <div className="pl-2 border-l-2 border-slate-800 ml-1 mt-2 space-y-1">
                   <WaterfallItem label="Expected Loss (Credit)" value={result.regulatoryCost} isAdd color="text-rose-400" />
-
-                  {/* Liquidity & Regulatory Costs */}
-                  <WaterfallItem
-                     label="LCR Buffer Cost"
-                     value={result.lcrCost || 0}
-                     isAdd
-                     color={(result.lcrCost || 0) > 0 ? "text-rose-400" : "text-emerald-400"}
-                     subtext={deal.lcrClassification ? `Class: ${deal.lcrClassification}` : undefined}
-                  />
-                  <WaterfallItem
-                     label="NSFR Optimization"
-                     value={result.nsfrCost || 0}
-                     isAdd
-                     color={(result.nsfrCost || 0) > 0 ? "text-rose-400" : "text-emerald-400"}
-                     subtext={deal.durationMonths > 12 ? 'Long Term Stable Funding' : undefined}
-                  />
-
                   <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-rose-400" />
                   <WaterfallItem label="ESG Transition" value={result.esgTransitionCharge} isAdd color={result.esgTransitionCharge > 0 ? "text-rose-400" : "text-emerald-400"} />
                   <WaterfallItem label="ESG Physical" value={result.esgPhysicalCharge} isAdd color="text-rose-400" />
@@ -245,9 +207,10 @@ const WaterfallItem: React.FC<{
    isAdd?: boolean;
    highlight?: boolean;
    color?: string;
+   weight?: string;
    compact?: boolean;
    icon?: React.ReactNode;
-}> = ({ label, value, subtext, isAdd, highlight, color = 'text-slate-200', compact, icon }) => (
+}> = ({ label, value, subtext, isAdd, highlight, color = 'text-slate-200', weight, compact, icon }) => (
    <div className={`flex items-center justify-between ${highlight ? 'py-1' : 'py-0.5'} ${compact ? 'opacity-80' : ''}`}>
       <div>
          <div className={`text-xs ${highlight ? 'font-bold text-white' : 'font-medium text-slate-400'} flex items-center`}>
@@ -256,7 +219,7 @@ const WaterfallItem: React.FC<{
          </div>
          {subtext && <div className="text-[10px] text-slate-600 font-mono">{subtext}</div>}
       </div>
-      <div className={`font-mono font-bold ${color} ${highlight ? 'text-sm' : 'text-xs'}`}>
+      <div className={`${weight || 'font-mono'} font-bold ${color} ${highlight ? 'text-sm' : 'text-xs'}`}>
          {isAdd && value > 0 ? '+' : ''}{value.toFixed(3)}%
       </div>
    </div>

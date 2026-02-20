@@ -373,6 +373,18 @@ export const supabaseService = {
         return data;
     },
 
+    async fetchYieldCurves(): Promise<any[]> {
+        const { data, error } = await supabase
+            .from('yield_curves')
+            .select('*')
+            .order('as_of_date', { ascending: false });
+        if (error) {
+            console.error('Error fetching yield curves:', error);
+            return [];
+        }
+        return data || [];
+    },
+
     // --- SYSTEM CONFIG (Shocks, etc.) ---
     async fetchShocks(): Promise<any> {
         const { data, error } = await supabase

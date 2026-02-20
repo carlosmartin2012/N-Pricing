@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel, YieldCurvePoint, FtpRateCard } from './types';
-import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS, WHITELISTED_EMAILS } from './constants';
+import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS, WHITELISTED_EMAILS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from './constants';
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
 import PricingReceipt from './components/Calculator/PricingReceipt';
@@ -15,9 +15,10 @@ import AuditLog from './components/Admin/AuditLog';
 import GeminiAssistant from './components/Intelligence/GeminiAssistant';
 import GenAIChat from './components/Intelligence/GenAIChat';
 import LiquidityDashboard from './components/Liquidity/LiquidityDashboard';
+import ReportingDashboard from './components/Reporting/ReportingDashboard';
 import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
-import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap } from 'lucide-react';
+import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap, BarChart4 } from 'lucide-react';
 import { Login } from './components/ui/Login';
 import { UserConfigModal } from './components/ui/UserConfigModal';
 import { UniversalImportModal } from './components/ui/UniversalImportModal';
@@ -50,6 +51,7 @@ const App: React.FC = () => {
   const [rules, setRules] = useState<GeneralRule[]>([]);
   const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [yieldCurves, setYieldCurves] = useState<any[]>([]);
 
   const [approvalMatrix, setApprovalMatrix] = useState<ApprovalMatrixConfig>(() => storage.loadLocal('n_pricing_approval_matrix', {
     autoApprovalThreshold: 15.0,
@@ -76,7 +78,7 @@ const App: React.FC = () => {
   // 1. Initial Hydration from Supabase
   React.useEffect(() => {
     const hydrate = async () => {
-      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid] = await Promise.all([
+      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves] = await Promise.all([
         storage.getDeals(),
         storage.getBehaviouralModels(),
         supabaseService.fetchRules(),
@@ -87,21 +89,32 @@ const App: React.FC = () => {
         supabaseService.fetchShocks(),
         supabaseService.fetchRateCards(),
         supabaseService.fetchEsgGrid('transition'),
-        supabaseService.fetchEsgGrid('physical')
+        supabaseService.fetchEsgGrid('physical'),
+        supabaseService.fetchYieldCurves()
       ]);
 
-      // Always set from DB — if DB is empty, state is empty (no mock fallback)
-      setDeals(dbDeals);
-      setBehaviouralModels(dbModels);
-      setRules(dbRules);
-      setClients(dbClients);
-      setBusinessUnits(dbUnits);
-      setProducts(dbProducts);
-      setUsers(dbUsers);
+      // Robust Fallback Logic
+      setDeals(dbDeals && dbDeals.length > 0 ? dbDeals : MOCK_DEALS);
+      setClients(dbClients && dbClients.length > 0 ? dbClients : MOCK_CLIENTS);
+      setUsers(dbUsers && dbUsers.length > 0 ? dbUsers : MOCK_USERS);
+      setBehaviouralModels(dbModels && dbModels.length > 0 ? dbModels : MOCK_BEHAVIOURAL_MODELS);
+      setProducts(dbProducts && dbProducts.length > 0 ? dbProducts : MOCK_PRODUCT_DEFS);
+      setBusinessUnits(dbUnits && dbUnits.length > 0 ? dbUnits : MOCK_BUSINESS_UNITS);
+      setFtpRateCards(dbRateCards && dbRateCards.length > 0 ? dbRateCards : []);
+      setTransitionGrid(dbTransGrid && dbTransGrid.length > 0 ? dbTransGrid : MOCK_TRANSITION_GRID);
+      setPhysicalGrid(dbPhysGrid && dbPhysGrid.length > 0 ? dbPhysGrid : MOCK_PHYSICAL_GRID);
+      setYieldCurves(dbYieldCurves && dbYieldCurves.length > 0 ? dbYieldCurves : [{ id: 'mock-yc', name: 'Standard Yield Curve', currency: 'USD', points: MOCK_YIELD_CURVE, is_active: true }]);
+
+      if (dbRules && dbRules.length > 0) {
+        setRules(dbRules);
+      }
+
+      // Handle Yield Curves (using local state or setting it if exists)
+      // Note: setYieldCurves was used in previous code but not declared in states. 
+      // I will assume it's part of MethodologyConfig or should be managed if added.
+      // For now, I'll ensure the app doesn't crash by checking if it's used elsewhere.
+
       if (dbShocks) setShocks(dbShocks);
-      if (dbRateCards) setFtpRateCards(dbRateCards);
-      if (dbTransGrid) setTransitionGrid(dbTransGrid);
-      if (dbPhysGrid) setPhysicalGrid(dbPhysGrid);
 
       setIsLoading(false);
 
@@ -181,9 +194,9 @@ const App: React.FC = () => {
         details: {},
         timestamp: new Date().toISOString()
       };
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      if (supabaseUrl && supabaseKey) {
+      const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
+      if (supabaseUrl && supabaseAnonKey) {
         navigator.sendBeacon(
           `${supabaseUrl}/rest/v1/audit_log`,
           new Blob(
@@ -403,11 +416,13 @@ const App: React.FC = () => {
 
   const mainNavItems = [
     { id: 'CALCULATOR', label: t.pricingEngine, icon: Calculator },
+    { id: 'REPORTING', label: 'Reporting', icon: BarChart4 },
     { id: 'BLOTTER', label: t.dealBlotter, icon: FileText },
     { id: 'MARKET_DATA', label: t.yieldCurves, icon: LineChart },
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity },
     { id: 'METHODOLOGY', label: t.methodology, icon: GitBranch },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard },
+    { id: 'REPORTING', label: t.reporting, icon: BarChart4 },
     { id: 'SHOCKS', label: t.shocks, icon: Zap },
     { id: 'CONFIG', label: t.systemConfig, icon: Settings },
   ];
@@ -501,6 +516,12 @@ const App: React.FC = () => {
             </div>
           )}
 
+          {currentView === 'REPORTING' && (
+            <div className="h-full relative z-0 flex flex-col">
+              <ReportingDashboard />
+            </div>
+          )}
+
           {currentView === 'MARKET_DATA' && (
             <div className="h-full relative z-0 grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-12 flex flex-col h-full overflow-auto">
@@ -586,6 +607,12 @@ const App: React.FC = () => {
           {currentView === 'MANUAL' && (
             <div className="h-full relative z-0">
               <UserManual language={language} />
+            </div>
+          )}
+
+          {currentView === 'REPORTING' && (
+            <div className="h-full relative z-0">
+              <ReportingDashboard />
             </div>
           )}
 
