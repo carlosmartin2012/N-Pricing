@@ -1,5 +1,5 @@
 import { Transaction, FTPResult, ApprovalMatrixConfig } from '../types';
-import { MOCK_BEHAVIOURAL_MODELS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from '../constants';
+import { MOCK_BEHAVIOURAL_MODELS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_LIQUIDITY_DASHBOARD_DATA } from '../constants';
 import { LCR_FACTORS, NSFR_FACTORS } from '../constants/regulations';
 
 // Helper: Linear Interpolation for Liquidity Premium
@@ -64,7 +64,7 @@ export const calculatePricing = (
         liquidityPremium = (0.5 * lpMaturity) + (0.5 * LP_1Y);
     }
 
-    // b) CLC Charge (LCR Buffer) & Balance Splitting
+    // b) CLC Charge (LCR Buffer) & Balance Splitting - V4.1 Dynamic Logic
     let clcCharge = 0;
     const isLiability = deal.category === 'Liability';
     const isCreditLine = deal.productType === 'CRED_LINE';
@@ -72,7 +72,13 @@ export const calculatePricing = (
 
     if (isLiability || isCreditLine || isOffBalance) {
         const outflowPct = deal.lcrOutflowPct || 0;
-        let baseCLC = (outflowPct / 100) * (LP_1Y - LP_1M);
+
+        // V4.1: Use basis spread from dashboard data (LIBOR - OIS)
+        // Default to 1Y basis (30bps) if not found, or interpolate
+        const basisData = MOCK_LIQUIDITY_DASHBOARD_DATA.basisSpreads;
+        const matchingBasis = basisData.find(b => b.tenor === (deal.durationMonths <= 1 ? '1M' : '1Y'))?.basis || 30;
+
+        let baseCLC = (outflowPct / 100) * (matchingBasis / 100);
 
         // Benefit for Operational Segments (Balance Splitting)
         if (deal.isOperationalSegment) {

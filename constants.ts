@@ -1,5 +1,5 @@
 
-import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve } from './types';
+import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData } from './types';
 
 export const MOCK_CLIENTS: ClientEntity[] = [
   { id: 'CL-1001', name: 'Acme Corp Industries', type: 'Corporate', segment: 'Large Cap', rating: 'BBB' },
@@ -359,3 +359,31 @@ export const MOCK_DEALS: Transaction[] = [
     description: 'CLC Masivo: Committed undrawn line impact.'
   },
 ];
+
+export const MOCK_LIQUIDITY_DASHBOARD_DATA: LiquidityDashboardData = {
+  basisSpreads: [
+    { tenor: 'ON', libor: 5.32, ois: 5.30, basis: 2 },
+    { tenor: '1M', libor: 5.45, ois: 5.35, basis: 10 },
+    { tenor: '3M', libor: 5.62, ois: 5.48, basis: 14 },
+    { tenor: '6M', libor: 5.75, ois: 5.55, basis: 20 },
+    { tenor: '1Y', libor: 5.95, ois: 5.65, basis: 30 },
+  ],
+  fundingCurves: [
+    { tenor: 'ON', secured: 5.25, unsecured: 5.40 },
+    { tenor: '1M', secured: 5.30, unsecured: 5.55 },
+    { tenor: '3M', secured: 5.40, unsecured: 5.75 },
+    { tenor: '1Y', secured: 5.60, unsecured: 6.10 },
+    { tenor: '5Y', secured: 5.85, unsecured: 6.50 },
+  ],
+  clcProfiles: [
+    { profile: 'Retail Stable', cost: 1.5, outflow: 5 },
+    { profile: 'Corp Operational', cost: 7.5, outflow: 25 },
+    { profile: 'Corp Non-Operational', cost: 12.0, outflow: 40 },
+    { profile: 'Financial Inst.', cost: 30.0, outflow: 100 },
+  ],
+  kpis: {
+    hqlaCost: 12.5,
+    nsfrFloorPremium: 8.2,
+    securedBenefit: 45.0
+  }
+};

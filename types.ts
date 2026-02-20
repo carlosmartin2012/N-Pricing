@@ -38,6 +38,38 @@ export interface DualLiquidityCurve {
   points: LiquidityCurvePoint[];
 }
 
+// --- ALM ANALYTICS INTERFACES (V4.1) ---
+
+export interface BasisSpreadPoint {
+  tenor: string;
+  libor: number;
+  ois: number;
+  basis: number; // LIBOR - OIS
+}
+
+export interface FundingPoint {
+  tenor: string;
+  secured: number;
+  unsecured: number;
+}
+
+export interface CLCProfilePoint {
+  profile: string;
+  cost: number; // bps
+  outflow: number; // %
+}
+
+export interface LiquidityDashboardData {
+  basisSpreads: BasisSpreadPoint[];
+  fundingCurves: FundingPoint[];
+  clcProfiles: CLCProfilePoint[];
+  kpis: {
+    hqlaCost: number;
+    nsfrFloorPremium: number;
+    securedBenefit: number;
+  };
+}
+
 export interface UserProfile {
   id: string;
   name: string;
