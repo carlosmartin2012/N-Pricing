@@ -37,15 +37,16 @@ export const SelectInput: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>
   </select>
 );
 
-export const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'success' | 'warning' | 'danger' }> = ({ children, variant = 'default' }) => {
+export const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'success' | 'warning' | 'danger' | 'outline'; className?: string }> = ({ children, variant = 'default', className = '' }) => {
   const colors = {
     default: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600',
     success: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800',
     warning: 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800',
     danger: 'bg-red-50 text-red-600 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-800',
+    outline: 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400',
   };
   return (
-    <span className={`px-2 py-0.5 text-[10px] font-mono border rounded-sm ${colors[variant]}`}>
+    <span className={`px-2 py-0.5 text-[10px] font-mono border rounded-sm ${colors[variant === 'outline' ? 'outline' : variant]} ${className}`}>
       {children}
     </span>
   );

@@ -525,7 +525,13 @@ const App: React.FC = () => {
 
           {currentView === 'REPORTING' && (
             <div className="h-full relative z-0 flex flex-col">
-              <ReportingDashboard />
+              <ReportingDashboard
+                deals={deals}
+                products={products}
+                businessUnits={businessUnits}
+                shocks={shocks}
+                clients={clients}
+              />
             </div>
           )}
 

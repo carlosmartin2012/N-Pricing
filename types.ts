@@ -67,7 +67,14 @@ export interface LiquidityDashboardData {
     hqlaCost: number;
     nsfrFloorPremium: number;
     securedBenefit: number;
+    lcrRatio: number;
+    nsfrRatio: number;
   };
+  history: {
+    date: string;
+    lcr: number;
+    nsfr: number;
+  }[];
 }
 
 export interface UserProfile {

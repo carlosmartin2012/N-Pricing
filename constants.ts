@@ -340,6 +340,14 @@ export const MOCK_LIQUIDITY_DASHBOARD_DATA: LiquidityDashboardData = {
   kpis: {
     hqlaCost: 12.5,
     nsfrFloorPremium: 8.2,
-    securedBenefit: 45.0
-  }
+    securedBenefit: 45.0,
+    lcrRatio: 135.4,
+    nsfrRatio: 112.8,
+  },
+  history: [
+    { date: '2023-08', lcr: 128.2, nsfr: 108.5 },
+    { date: '2023-09', lcr: 130.5, nsfr: 109.2 },
+    { date: '2023-10', lcr: 132.8, nsfr: 110.8 },
+    { date: '2023-11', lcr: 135.4, nsfr: 112.8 },
+  ]
 };
