@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction, ViewState, ApprovalMatrixConfig, ClientEntity, ProductDefinition, BusinessUnit, GeneralRule, UserProfile, BehaviouralModel, YieldCurvePoint, FtpRateCard } from './types';
-import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS } from './constants';
+import { INITIAL_DEAL, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_DEALS, MOCK_USERS, MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS, WHITELISTED_EMAILS } from './constants';
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
 import PricingReceipt from './components/Calculator/PricingReceipt';
@@ -397,7 +397,8 @@ const App: React.FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} whitelistedEmails={users.map(u => u.email)} language={language} />;
+    const combinedWhitelist = [...new Set([...users.map(u => u.email), ...WHITELISTED_EMAILS])];
+    return <Login onLogin={handleLogin} whitelistedEmails={combinedWhitelist} language={language} />;
   }
 
   const mainNavItems = [
