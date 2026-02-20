@@ -46,6 +46,23 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
       }
    };
 
+   const handleProductSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedId = e.target.value;
+      const product = products.find(p => p.id === selectedId);
+      if (product) {
+         onChange('productType', product.id);
+         onChange('category', product.category);
+         // Set default outflow for liabilities
+         if (product.category === 'Liability') {
+            onChange('lcrOutflowPct', 100);
+         } else if (product.id === 'CRED_LINE') {
+            onChange('lcrOutflowPct', 10);
+         } else {
+            onChange('lcrOutflowPct', 0);
+         }
+      }
+   };
+
    const handleClientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const selectedId = e.target.value;
       const client = clients.find(c => c.id === selectedId);
@@ -227,7 +244,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                            </InputGroup>
                         </div>
                         <InputGroup label="Product Type">
-                           <SelectInput value={values.productType} onChange={(e) => handleChange(e, 'productType')}>
+                           <SelectInput value={values.productType} onChange={handleProductSelect}>
                               {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.category})</option>)}
                            </SelectInput>
                         </InputGroup>
@@ -261,6 +278,9 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                         </InputGroup>
                         <InputGroup label="Op Cost (bps)">
                            <TextInput type="number" value={values.operationalCostBps} onChange={(e) => handleChange(e, 'operationalCostBps')} />
+                        </InputGroup>
+                        <InputGroup label="LCR Outflow (%)">
+                           <TextInput type="number" value={values.lcrOutflowPct || 0} onChange={(e) => handleChange(e, 'lcrOutflowPct')} />
                         </InputGroup>
                      </div>
 

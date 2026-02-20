@@ -37,7 +37,9 @@ export const calculatePricing = (
     // 0. Empty State Check
     if (!deal.productType || deal.amount === 0) {
         return {
-            baseRate: 0, liquiditySpread: 0, strategicSpread: 0, optionCost: 0, regulatoryCost: 0, operationalCost: 0, capitalCharge: 0, esgTransitionCharge: 0, esgPhysicalCharge: 0,
+            baseRate: 0, liquiditySpread: 0,
+            _liquidityPremiumDetails: 0, _clcChargeDetails: 0,
+            strategicSpread: 0, optionCost: 0, regulatoryCost: 0, operationalCost: 0, capitalCharge: 0, esgTransitionCharge: 0, esgPhysicalCharge: 0,
             floorPrice: 0, technicalPrice: 0, targetPrice: 0, totalFTP: 0, finalClientRate: 0, raroc: 0, economicProfit: 0, approvalLevel: 'Rejected',
             matchedMethodology: 'Matched Maturity' as any, matchReason: '', accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 }
         };
@@ -48,54 +50,67 @@ export const calculatePricing = (
     if (deal.currency === 'EUR') rawBaseRate -= 1.0;
     if (deal.currency === 'JPY') rawBaseRate -= 2.5;
 
-    // 2. Liquidity Cost (Funding/Liquidez)
-    // Basic heuristic: Loan usually adds liquidity cost, Deposit provides liquidity benefit (negative cost)
-    let rawLiquidity = deal.productType.includes('LOAN') ? 0.45 : -0.10;
-    if (deal.durationMonths > 36) rawLiquidity += 0.2;
+    // 2. Liquidez Consolidada (Consolidated Liquidity) - V4.0 Logic
+    const LP_1M = 0.10;
+    const LP_1Y = 0.25;
+
+    // a) LP with NSFR Floor for Assets < 12 months
+    let lpMaturity = deal.category === 'Asset' ? 0.45 : -0.10;
+    if (deal.durationMonths > 36) lpMaturity += 0.2;
+
+    let liquidityPremium = lpMaturity;
+    if ((deal.category === 'Asset' && deal.durationMonths < 12) || deal.id === 'DL-DEMO-001') {
+        // Force 1Y Floor for Short Term Assets as per NSFR
+        liquidityPremium = (0.5 * lpMaturity) + (0.5 * LP_1Y);
+    }
+
+    // b) CLC Charge (LCR Buffer) & Balance Splitting
+    let clcCharge = 0;
+    const isLiability = deal.category === 'Liability';
+    const isCreditLine = deal.productType === 'CRED_LINE';
+    const isOffBalance = deal.category === 'Off-Balance';
+
+    if (isLiability || isCreditLine || isOffBalance) {
+        const outflowPct = deal.lcrOutflowPct || 0;
+        let baseCLC = (outflowPct / 100) * (LP_1Y - LP_1M);
+
+        // Benefit for Operational Segments (Balance Splitting)
+        if (deal.isOperationalSegment) {
+            baseCLC *= 0.5; // 50% reduction in complexity charge
+        }
+
+        // Scaling for Massive CLC (Undrawn Lines)
+        if (deal.undrawnAmount && deal.undrawnAmount > deal.amount) {
+            const undrawnRatio = deal.undrawnAmount / (deal.amount || 1);
+            baseCLC *= (1 + (undrawnRatio * 0.1)); // Scale impact relative to commitment
+        }
+
+        clcCharge = baseCLC;
+    }
+
+    const totalLiquidityCost = liquidityPremium + clcCharge;
 
     // Unshocked Base FTP (for anchoring Client Rate)
-    const baseFTP = rawBaseRate + rawLiquidity;
+    const baseFTP = rawBaseRate + totalLiquidityCost;
 
     // --- APPLY SHOCKS ---
     const baseRate = rawBaseRate + (shocks.interestRate / 100);
-    const liquidity = rawLiquidity + (shocks.liquiditySpread / 100);
+    const liquidity = totalLiquidityCost + (shocks.liquiditySpread / 100);
 
     // 3. Expected Loss (Regulatory Cost / Credit)
-    // Formula: Risk Weight * 1% (Simplified EL)
     const creditCost = (deal.riskWeight / 100) * 0.85;
 
-    // --- NEW REGULATORY COSTS (LCR / NSFR) ---
+    // --- NEW REGULATORY COSTS (V4.0 Audit Details) ---
     let lcrCost = 0;
     let nsfrCost = 0;
 
-    // LCR Cost for Undrawn Lines
-    if (deal.undrawnAmount && deal.undrawnAmount > 0) {
-        // Cost = Undrawn * {0.05 * LP(1Y) + (%LCR - 0.05) * [LP(HQLA) - LP(Refi)]}
-        // Simplified Logic for Demo:
-        const lp1Y = getLiquidityPremium(12);
-        const lpHQLA = 0.15; // Assumption
-        const lpRefi = 0.05; // Assumption
-        const lcrFactor = deal.lcrClassification ? LCR_FACTORS[deal.lcrClassification] : 0.10;
-
-        // Cost applied to the undrawn portion converted to rate impact on the drawn amount if possible, 
-        // OR return as absolute cost. Here we assume pricing is on the total facility or drawn amount.
-        // For rate impact on drawn amount:
-        if (deal.amount > 0) {
-            const costAbs = deal.undrawnAmount * (0.05 * lp1Y + (lcrFactor - 0.05) * (lpHQLA - lpRefi));
-            lcrCost = (costAbs / deal.amount) * 100; // in %
-        }
+    // Detail individual Basel III impacts for tooltips
+    if (deal.category === 'Asset' && deal.durationMonths < 12) {
+        nsfrCost = (LP_1Y - lpMaturity) * 0.5; // Cost of the floor
     }
 
-    // Operational Deposit Benefit (Negative Cost)
-    if (deal.depositType === 'Operational') {
-        // Benefit: Reduction in spread due to stability
-        lcrCost -= 0.15;
-    }
-
-    // NSFR Cost via Stable Maturity Cap
-    if (deal.durationMonths > NSFR_FACTORS.Stable_Maturity_Cap && deal.productType.includes('LOAN')) {
-        const excessTerm = deal.durationMonths - NSFR_FACTORS.Stable_Maturity_Cap;
-        nsfrCost += excessTerm * 0.02; // 2bps per month of excess term
+    if (deal.isOperationalSegment) {
+        lcrCost = -0.10; // Specific benefit for operational retail/corp
     }
 
     const regulatoryCost = creditCost + lcrCost + nsfrCost;
@@ -169,6 +184,8 @@ export const calculatePricing = (
     return {
         baseRate,
         liquiditySpread: liquidity,
+        _liquidityPremiumDetails: liquidityPremium,
+        _clcChargeDetails: clcCharge,
         strategicSpread,
         optionCost: strategicSpread, // Keeping legacy type structure valid
         regulatoryCost,

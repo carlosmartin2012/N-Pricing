@@ -22,6 +22,22 @@ export interface BusinessUnit {
   code: string;
 }
 
+// Unify FtpRateCard (remove duplicate)
+
+// --- LIQUIDITY CURVE INTERFACES (V4.0) ---
+
+export interface LiquidityCurvePoint {
+  tenor: string;
+  wholesaleSpread: number; // Market spread (bps)
+  termLP: number;          // Managed spread with floors (bps)
+}
+
+export interface DualLiquidityCurve {
+  currency: string;
+  lastUpdate: string;
+  points: LiquidityCurvePoint[];
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -50,6 +66,7 @@ export interface Transaction {
 
   // Product
   productType: string;
+  category: 'Asset' | 'Liability' | 'Off-Balance';
   currency: string;
   amount: number;
 
@@ -68,10 +85,12 @@ export interface Transaction {
   capitalRatio: number;
   targetROE: number;
   operationalCostBps: number;
+  lcrOutflowPct?: number;
+  isOperationalSegment?: boolean; // V4.0: For deposit split logic
 
   // LCR / NSFR Data
   drawnAmount?: number;
-  undrawnAmount?: number;
+  undrawnAmount?: number; // V4.0: For credit line CLC (This field already existed, adding comment)
   isCommitted?: boolean;
   lcrClassification?: 'Corp_Credit' | 'Corp_Liquidity' | 'IFI_Liquidity' | 'Retail_Stable' | 'Retail_Other';
   depositType?: 'Operational' | 'Non_Operational';
@@ -80,6 +99,12 @@ export interface Transaction {
   // ESG
   transitionRisk: 'Brown' | 'Amber' | 'Neutral' | 'Green';
   physicalRisk: 'High' | 'Medium' | 'Low';
+
+  // Audit Results (Internal/Persisted)
+  liquiditySpread?: number;
+  _liquidityPremiumDetails?: number;
+  _clcChargeDetails?: number;
+  description?: string; // V4.0: For demo identification
 }
 
 export interface ReplicationTranche {
@@ -136,12 +161,14 @@ export interface FtpRateCard {
   name: string;
   type: 'Liquidity' | 'Basis' | 'Commercial' | 'Credit';
   currency: string;
-  grid: { tenor: string; spread: number }[];
+  points: YieldCurvePoint[];
 }
 
 export interface FTPResult {
   baseRate: number;
   liquiditySpread: number;
+  _liquidityPremiumDetails: number;
+  _clcChargeDetails: number;
   strategicSpread: number;
   optionCost: number;
   regulatoryCost: number;

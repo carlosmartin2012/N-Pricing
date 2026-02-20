@@ -4,7 +4,7 @@ import { Panel, Badge, TextInput, InputGroup, SelectInput } from '../ui/LayoutCo
 import { Drawer } from '../ui/Drawer';
 import { MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_FTP_RATE_CARDS } from '../../constants';
 import { ApprovalMatrixConfig, ProductDefinition, BusinessUnit, ClientEntity, GeneralRule, FtpRateCard } from '../../types';
-import { Search, Plus, Save, Edit, Settings, Leaf, ShieldCheck, CheckCircle2, AlertTriangle, TrendingUp, XCircle, Database, Briefcase, UserPlus, FileSpreadsheet, Trash2, X, GitBranch, Users, Layers, Building2, Upload } from 'lucide-react';
+import { Search, Plus, Save, Edit, Settings, Leaf, ShieldCheck, CheckCircle2, AlertTriangle, TrendingUp, XCircle, Database, Briefcase, UserPlus, FileSpreadsheet, Trash2, X, GitBranch, Users, Layers, Building2, Upload, RefreshCw } from 'lucide-react';
 import { storage } from '../../utils/storage';
 import { supabaseService } from '../../utils/supabaseService';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
@@ -48,6 +48,25 @@ const MethodologyConfig: React.FC<Props> = ({
    );
 
    const [esgSubTab, setEsgSubTab] = useState<'TRANSITION' | 'PHYSICAL'>('TRANSITION');
+   const [isSeedingDb, setIsSeedingDb] = useState(false);
+
+   const handleSeedDatabase = async () => {
+      if (!window.confirm('¿Restaurar todos los datos de fábrica? Esto sobrescribirá los datos existentes en la base de datos.')) return;
+      setIsSeedingDb(true);
+      try {
+         const result = await supabaseService.seedDatabase();
+         if (result.success) {
+            alert('✅ Datos restaurados correctamente. La página se recargará.');
+            window.location.reload();
+         } else {
+            alert(`⚠️ Seed completado con errores:\n${result.errors.join('\n')}`);
+         }
+      } catch (e: any) {
+         alert(`❌ Error inesperado: ${e.message}`);
+      } finally {
+         setIsSeedingDb(false);
+      }
+   };
 
    const [isDrawerOpen, setDrawerOpen] = useState(false);
 

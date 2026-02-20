@@ -72,6 +72,8 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         capitalRatio: parseFloat(row.capitalRatio || row.CapitalRatio) || 11.5,
         targetROE: parseFloat(row.targetROE || row.TargetROE) || 15,
         operationalCostBps: parseFloat(row.operationalCostBps || row.OperationalCostBps) || 40,
+        lcrOutflowPct: parseFloat(row.lcrOutflowPct || row.LCROutflowPct) || 0,
+        category: (row.category || row.Category || 'Asset') as any,
         status: (row.status || row.Status || 'Pending') as any,
         businessLine: 'Imported',
         businessUnit: 'BU-001',
@@ -247,6 +249,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
             </InputGroup>
             <InputGroup label="Op Cost (bps)">
               <TextInput type="number" value={selectedDeal.operationalCostBps} onChange={(e) => setSelectedDeal({ ...selectedDeal, operationalCostBps: parseFloat(e.target.value) })} />
+            </InputGroup>
+            <InputGroup label="LCR Outflow (%)">
+              <TextInput type="number" value={selectedDeal.lcrOutflowPct || 0} onChange={(e) => setSelectedDeal({ ...selectedDeal, lcrOutflowPct: parseFloat(e.target.value) })} />
             </InputGroup>
           </div>
         </div>

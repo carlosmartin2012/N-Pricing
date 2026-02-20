@@ -4,7 +4,7 @@ import { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
 import { calculatePricing, PricingShocks } from '../../utils/pricingEngine';
 import { MOCK_BEHAVIOURAL_MODELS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from '../../constants';
 import { Panel, Badge } from '../ui/LayoutComponents';
-import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap, Droplets } from 'lucide-react';
 import { translations, Language } from '../../translations';
 
 interface Props {
@@ -103,7 +103,59 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                <div className="text-[10px] uppercase text-slate-500 font-bold mb-2">Price Construction</div>
 
                <WaterfallItem label="Base Interest Rate" value={result.baseRate} />
-               <WaterfallItem label={t.liquidityCost} value={result.liquiditySpread} isAdd color="text-amber-600 dark:text-amber-400" />
+
+               {/* Consolidated Liquidity Cost V3.0 / V4.0 */}
+               <div className="group relative">
+                  <WaterfallItem
+                     label={t.liquidityCost || "Liquidity Cost"}
+                     value={result.liquiditySpread}
+                     isAdd
+                     color="text-amber-600 dark:text-cyan-400"
+                     icon={<Droplets size={12} className="inline mr-1" />}
+                  />
+
+                  {/* V4.0 DEMO TOOLTIP */}
+                  {deal.id?.startsWith('DL-DEMO-') && (
+                     <div className="absolute -left-1 -top-1 w-2 h-2 bg-cyan-500 rounded-full animate-pulse border border-white dark:border-black z-20"></div>
+                  )}
+
+                  {/* Technical Details (Auditor/Expert View) */}
+                  <div className="hidden group-hover:block absolute left-0 top-full z-10 w-full bg-slate-900 border border-slate-700 p-2 rounded shadow-xl animate-in fade-in slide-in-from-top-1">
+                     <div className="text-[9px] uppercase text-slate-500 font-bold mb-1 border-b border-slate-800 pb-1 flex justify-between">
+                        <span>Technical Breakdown</span>
+                        <span className="text-cyan-500 font-mono">V4.0</span>
+                     </div>
+
+                     {/* Demo Context Tooltip */}
+                     {deal.id === 'DL-DEMO-001' && (
+                        <div className="mb-2 p-1.5 bg-cyan-950/30 border border-cyan-900/50 rounded text-[9px] text-cyan-400 italic">
+                           Regulatory Trigger: NSFR Short-Term Floor (1Y) applied due to {"<"} 12M maturity.
+                        </div>
+                     )}
+                     {deal.id === 'DL-DEMO-002' && (
+                        <div className="mb-2 p-1.5 bg-emerald-950/30 border border-emerald-900/50 rounded text-[9px] text-emerald-400 italic">
+                           Segment Incentive: Operational deposit benefit detected (LCR / Balance Split).
+                        </div>
+                     )}
+                     {deal.id === 'DL-DEMO-004' && (
+                        <div className="mb-2 p-1.5 bg-amber-950/30 border border-amber-900/50 rounded text-[9px] text-amber-400 italic">
+                           Massive CLC: Impact from undrawn committed line buffer requirement.
+                        </div>
+                     )}
+
+                     <div className="space-y-1 pl-2 border-l border-slate-700">
+                        <div className="flex justify-between text-[10px]">
+                           <span className="text-slate-400">Liquidity Premium (NSFR)</span>
+                           <span className="font-mono text-amber-500">{result._liquidityPremiumDetails.toFixed(3)}%</span>
+                        </div>
+                        <div className="flex justify-between text-[10px]">
+                           <span className="text-slate-400">CLC Charge (LCR Buffer)</span>
+                           <span className="font-mono text-amber-500">{result._clcChargeDetails.toFixed(3)}%</span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
                <WaterfallItem label="Strategic Spread" value={result.strategicSpread} isAdd color="text-blue-600 dark:text-blue-400" />
 
                <div className="my-1 border-t border-slate-200 dark:border-slate-800 border-dashed opacity-50"></div>
@@ -194,10 +246,14 @@ const WaterfallItem: React.FC<{
    highlight?: boolean;
    color?: string;
    compact?: boolean;
-}> = ({ label, value, subtext, isAdd, highlight, color = 'text-slate-200', compact }) => (
+   icon?: React.ReactNode;
+}> = ({ label, value, subtext, isAdd, highlight, color = 'text-slate-200', compact, icon }) => (
    <div className={`flex items-center justify-between ${highlight ? 'py-1' : 'py-0.5'} ${compact ? 'opacity-80' : ''}`}>
       <div>
-         <div className={`text-xs ${highlight ? 'font-bold text-white' : 'font-medium text-slate-400'}`}>{label}</div>
+         <div className={`text-xs ${highlight ? 'font-bold text-white' : 'font-medium text-slate-400'} flex items-center`}>
+            {icon && icon}
+            {label}
+         </div>
          {subtext && <div className="text-[10px] text-slate-600 font-mono">{subtext}</div>}
       </div>
       <div className={`font-mono font-bold ${color} ${highlight ? 'text-sm' : 'text-xs'}`}>

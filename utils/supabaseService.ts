@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient';
 import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard } from '../types';
+import { MOCK_DEALS, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_BEHAVIOURAL_MODELS, MOCK_USERS, MOCK_YIELD_CURVE } from '../constants';
 
 // --- MAPPING HELPERS ---
 
@@ -24,8 +25,10 @@ const mapDealToDB = (deal: Transaction) => ({
     capital_ratio: deal.capitalRatio,
     target_roe: deal.targetROE,
     operational_cost_bps: deal.operationalCostBps,
+    lcr_outflow_pct: deal.lcrOutflowPct,
+    category: deal.category,
 
-    // LCR/NSFR
+    // LCR/NSFR (New Baseline)
     drawn_amount: deal.drawnAmount,
     undrawn_amount: deal.undrawnAmount,
     is_committed: deal.isCommitted,
@@ -35,6 +38,9 @@ const mapDealToDB = (deal: Transaction) => ({
 
     transition_risk: deal.transitionRisk,
     physical_risk: deal.physicalRisk,
+    liquidity_spread: deal.liquiditySpread,
+    _liquidity_premium_details: deal._liquidityPremiumDetails,
+    _clc_charge_details: deal._clcChargeDetails,
     updated_at: new Date().toISOString()
 });
 
@@ -59,8 +65,10 @@ const mapDealFromDB = (row: any): Transaction => ({
     capitalRatio: row.capital_ratio,
     targetROE: row.target_roe,
     operationalCostBps: row.operational_cost_bps,
+    lcrOutflowPct: row.lcr_outflow_pct,
+    category: row.category,
 
-    // LCR/NSFR
+    // LCR/NSFR (New Baseline)
     drawnAmount: row.drawn_amount,
     undrawnAmount: row.undrawn_amount,
     isCommitted: row.is_committed,
@@ -69,7 +77,10 @@ const mapDealFromDB = (row: any): Transaction => ({
     behavioralMaturityOverride: row.behavioral_maturity_override,
 
     transitionRisk: row.transition_risk,
-    physicalRisk: row.physical_risk
+    physicalRisk: row.physical_risk,
+    liquiditySpread: row.liquidity_spread,
+    _liquidityPremiumDetails: row._liquidity_premium_details,
+    _clcChargeDetails: row._clc_charge_details
 });
 
 const mapAuditToDB = (entry: any) => ({
@@ -459,5 +470,104 @@ export const supabaseService = {
                     console.error('Error connecting to Supabase Realtime channel.');
                 }
             });
+    },
+
+    // --- DATABASE SEEDING ---
+    async seedDatabase(): Promise<{ success: boolean; errors: string[] }> {
+        const errors: string[] = [];
+        console.log('🌱 Starting database seed...');
+
+        // 1. Seed Clients
+        const { error: clientsErr } = await supabase.from('clients').upsert(MOCK_CLIENTS);
+        if (clientsErr) errors.push(`clients: ${clientsErr.message}`);
+        else console.log('✅ Clients seeded');
+
+        // 2. Seed Products
+        const { error: productsErr } = await supabase.from('products').upsert(MOCK_PRODUCT_DEFS);
+        if (productsErr) errors.push(`products: ${productsErr.message}`);
+        else console.log('✅ Products seeded');
+
+        // 3. Seed Business Units
+        const { error: buErr } = await supabase.from('business_units').upsert(MOCK_BUSINESS_UNITS);
+        if (buErr) errors.push(`business_units: ${buErr.message}`);
+        else console.log('✅ Business Units seeded');
+
+        // 4. Seed Users
+        const { error: usersErr } = await supabase.from('users').upsert(MOCK_USERS);
+        if (usersErr) errors.push(`users: ${usersErr.message}`);
+        else console.log('✅ Users seeded');
+
+        // 5. Seed Behavioural Models (map camelCase → snake_case)
+        const mappedModels = MOCK_BEHAVIOURAL_MODELS.map(m => ({
+            id: m.id,
+            name: m.name,
+            type: m.type,
+            nmd_method: m.nmdMethod,
+            description: m.description,
+            core_ratio: m.coreRatio,
+            decay_rate: m.decayRate,
+            beta_factor: m.betaFactor,
+            replication_profile: m.replicationProfile,
+            cpr: m.cpr,
+            penalty_exempt: m.penaltyExempt
+        }));
+        const { error: modelsErr } = await supabase.from('behavioural_models').upsert(mappedModels);
+        if (modelsErr) errors.push(`behavioural_models: ${modelsErr.message}`);
+        else console.log('✅ Behavioural Models seeded');
+
+        // 6. Seed Deals (map camelCase → snake_case)
+        const mappedDeals = MOCK_DEALS.map(d => ({
+            id: d.id,
+            status: d.status,
+            client_id: d.clientId,
+            client_type: d.clientType,
+            business_unit: d.businessUnit,
+            funding_business_unit: d.fundingBusinessUnit,
+            business_line: d.businessLine,
+            product_type: d.productType,
+            currency: d.currency,
+            amount: d.amount,
+            start_date: d.startDate,
+            duration_months: d.durationMonths,
+            amortization: d.amortization,
+            repricing_freq: d.repricingFreq,
+            margin_target: d.marginTarget,
+            behavioural_model_id: d.behaviouralModelId,
+            risk_weight: d.riskWeight,
+            capital_ratio: d.capitalRatio,
+            target_roe: d.targetROE,
+            operational_cost_bps: d.operationalCostBps,
+            lcr_outflow_pct: d.lcrOutflowPct,
+            category: d.category,
+            transition_risk: d.transitionRisk,
+            physical_risk: d.physicalRisk,
+            updated_at: new Date().toISOString()
+        }));
+        const { error: dealsErr } = await supabase.from('deals').upsert(mappedDeals);
+        if (dealsErr) errors.push(`deals: ${dealsErr.message}`);
+        else console.log('✅ Deals seeded');
+
+        // 7. Seed Default Rules
+        const defaultRules = [
+            { id: 1, business_unit: 'Commercial Banking', product: 'Commercial Loan', segment: 'Corporate', tenor: '< 1Y', base_method: 'Matched Maturity', base_reference: 'USD-SOFR', spread_method: 'Curve Lookup', liquidity_reference: 'RC-LIQ-USD-STD', strategic_spread: 10 },
+            { id: 2, business_unit: 'SME / Business', product: 'Commercial Loan', segment: 'SME', tenor: 'Any', base_method: 'Rate Card', base_reference: 'USD-SOFR', spread_method: 'Grid Pricing', liquidity_reference: 'RC-COM-SME-A', strategic_spread: 25 },
+            { id: 3, business_unit: 'Retail Banking', product: 'Term Deposit', segment: 'Retail', tenor: '> 2Y', base_method: 'Moving Average', base_reference: 'EUR-ESTR', spread_method: 'Fixed Spread', liquidity_reference: 'RC-LIQ-EUR-HY', strategic_spread: 0 },
+            { id: 4, business_unit: 'Retail Banking', product: 'Mortgage', segment: 'All', tenor: 'Fixed', base_method: 'Matched Maturity', base_reference: 'USD-SOFR', spread_method: 'Curve Lookup', liquidity_reference: 'RC-LIQ-USD-STD', strategic_spread: 5 },
+        ];
+        const { error: rulesErr } = await supabase.from('rules').upsert(defaultRules);
+        if (rulesErr) errors.push(`rules: ${rulesErr.message}`);
+        else console.log('✅ Rules seeded');
+
+        // 8. Seed Yield Curve snapshot
+        const { error: curveErr } = await supabase.from('yield_curves').insert({
+            currency: 'USD',
+            as_of_date: new Date().toISOString().split('T')[0],
+            grid_data: MOCK_YIELD_CURVE
+        });
+        if (curveErr) errors.push(`yield_curves: ${curveErr.message}`);
+        else console.log('✅ Yield Curve seeded');
+
+        console.log(errors.length === 0 ? '🎉 Seed complete!' : `⚠️ Seed finished with errors: ${errors.join(', ')}`);
+        return { success: errors.length === 0, errors };
     }
 };

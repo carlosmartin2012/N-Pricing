@@ -14,6 +14,7 @@ import UserManagement from './components/Admin/UserManagement';
 import AuditLog from './components/Admin/AuditLog';
 import GeminiAssistant from './components/Intelligence/GeminiAssistant';
 import GenAIChat from './components/Intelligence/GenAIChat';
+import LiquidityCurvesDashboard from './components/Analytics/LiquidityCurvesDashboard';
 import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
 import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap } from 'lucide-react';
@@ -500,8 +501,13 @@ const App: React.FC = () => {
           )}
 
           {currentView === 'MARKET_DATA' && (
-            <div className="h-full relative z-0">
-              <YieldCurvePanel language={language} user={currentUser} />
+            <div className="h-full relative z-0 grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-8 flex flex-col h-full">
+                <LiquidityCurvesDashboard currency={dealParams.currency} />
+              </div>
+              <div className="lg:col-span-4 flex flex-col h-full">
+                <YieldCurvePanel language={language} user={currentUser} />
+              </div>
             </div>
           )}
 
