@@ -75,40 +75,56 @@ const App: React.FC = () => {
 
   // --- SUPABASE REAL-TIME LIFECYCLE ---
 
-  // 1. Initial Hydration from Supabase
+  // 1. Initial Hydration from Supabase (V5.0: Demo-First Strategy)
   React.useEffect(() => {
     const hydrate = async () => {
-      const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves] = await Promise.all([
-        storage.getDeals(),
-        storage.getBehaviouralModels(),
-        supabaseService.fetchRules(),
-        supabaseService.fetchClients(),
-        supabaseService.fetchBusinessUnits(),
-        supabaseService.fetchProducts(),
-        supabaseService.fetchUsers(),
-        supabaseService.fetchShocks(),
-        supabaseService.fetchRateCards(),
-        supabaseService.fetchEsgGrid('transition'),
-        supabaseService.fetchEsgGrid('physical'),
-        supabaseService.fetchYieldCurves()
-      ]);
+      // Step A: Immediate injection of MOCK data to prevent loading lags
+      setDeals(MOCK_DEALS);
+      setClients(MOCK_CLIENTS);
+      setUsers(MOCK_USERS);
+      setBehaviouralModels(MOCK_BEHAVIOURAL_MODELS);
+      setRules(MOCK_RULES);
+      setProducts(MOCK_PRODUCT_DEFS);
+      setBusinessUnits(MOCK_BUSINESS_UNITS);
+      setFtpRateCards(MOCK_FTP_RATE_CARDS);
+      setTransitionGrid(MOCK_TRANSITION_GRID);
+      setPhysicalGrid(MOCK_PHYSICAL_GRID);
+      setYieldCurves(MOCK_YIELD_CURVE);
 
-      // Robust Fallback Logic V4.3
-      setDeals(dbDeals && dbDeals.length > 0 ? dbDeals : MOCK_DEALS);
-      setClients(dbClients && dbClients.length > 0 ? dbClients : MOCK_CLIENTS);
-      setUsers(dbUsers && dbUsers.length > 0 ? dbUsers : MOCK_USERS);
-      setBehaviouralModels(dbModels && dbModels.length > 0 ? dbModels : MOCK_BEHAVIOURAL_MODELS);
-      setRules(dbRules && dbRules.length > 0 ? dbRules : MOCK_RULES);
-      setProducts(dbProducts && dbProducts.length > 0 ? dbProducts : MOCK_PRODUCT_DEFS);
-      setBusinessUnits(dbUnits && dbUnits.length > 0 ? dbUnits : MOCK_BUSINESS_UNITS);
-      setFtpRateCards(dbRateCards && dbRateCards.length > 0 ? dbRateCards : MOCK_FTP_RATE_CARDS);
-      setTransitionGrid(dbTransGrid && dbTransGrid.length > 0 ? dbTransGrid : MOCK_TRANSITION_GRID);
-      setPhysicalGrid(dbPhysGrid && dbPhysGrid.length > 0 ? dbPhysGrid : MOCK_PHYSICAL_GRID);
-      setYieldCurves(dbYieldCurves && dbYieldCurves.length > 0 ? dbYieldCurves : MOCK_YIELD_CURVE);
+      setIsLoading(false); // Enable UI immediately
 
-      if (dbShocks) setShocks(dbShocks);
+      // Step B: Background Sync with Supabase (if available)
+      try {
+        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves] = await Promise.all([
+          storage.getDeals(),
+          storage.getBehaviouralModels(),
+          supabaseService.fetchRules(),
+          supabaseService.fetchClients(),
+          supabaseService.fetchBusinessUnits(),
+          supabaseService.fetchProducts(),
+          supabaseService.fetchUsers(),
+          supabaseService.fetchShocks(),
+          supabaseService.fetchRateCards(),
+          supabaseService.fetchEsgGrid('transition'),
+          supabaseService.fetchEsgGrid('physical'),
+          supabaseService.fetchYieldCurves()
+        ]);
 
-      setIsLoading(false);
+        if (dbDeals && dbDeals.length > 0) setDeals(dbDeals);
+        if (dbModels && dbModels.length > 0) setBehaviouralModels(dbModels);
+        if (dbRules && dbRules.length > 0) setRules(dbRules);
+        if (dbClients && dbClients.length > 0) setClients(dbClients);
+        if (dbUnits && dbUnits.length > 0) setBusinessUnits(dbUnits);
+        if (dbProducts && dbProducts.length > 0) setProducts(dbProducts);
+        if (dbUsers && dbUsers.length > 0) setUsers(dbUsers);
+        if (dbShocks) setShocks(dbShocks);
+        if (dbRateCards && dbRateCards.length > 0) setFtpRateCards(dbRateCards);
+        if (dbTransGrid && dbTransGrid.length > 0) setTransitionGrid(dbTransGrid);
+        if (dbPhysGrid && dbPhysGrid.length > 0) setPhysicalGrid(dbPhysGrid);
+        if (dbYieldCurves && dbYieldCurves.length > 0) setYieldCurves(dbYieldCurves);
+      } catch (err) {
+        console.warn("Supabase background sync failed, staying on MOCK data.", err);
+      }
 
       // System Bootstrap Audit
       storage.addAuditEntry({
@@ -116,7 +132,7 @@ const App: React.FC = () => {
         userName: currentUser?.name || 'System',
         action: 'SYSTEM_BOOTSTRAP',
         module: 'CALCULATOR',
-        description: 'Session hydrated and synchronized with Supabase.'
+        description: 'Demo Mocks Hydrated. Background Supabase sync initiated.'
       });
     };
     hydrate();

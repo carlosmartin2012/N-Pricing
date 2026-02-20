@@ -26,25 +26,22 @@ export const MOCK_BUSINESS_UNITS: BusinessUnit[] = [
   { id: 'BU-900', name: 'Central Treasury (ALM)', code: 'ALM' },
 ];
 
-// --- MANAGEMENT & TREASURY WHITE LIST (V4.2) ---
-export const WHITELISTED_EMAILS = [
-  'carlos.martin@nfq.es',
-  'alejandro.lloveras@nfq.es',
-  'gregorio.gonzalo@nfq.es',
-  'francisco.herrero@nfq.es',
-  'martin.sanz@nfq.es',
-  'roberto.flores@nfq.es',
-  'arnau.lopez@nfq.es',
-  'diego.merino@nfq.es',
-  'diego.diaz@nfq.es'
-];
-// --- USERS & ROLES ---
+// --- MANAGEMENT & TREASURY WHITE LIST (V5.0) ---
+const getRecentDate = (hoursAgo: number) => new Date(Date.now() - 1000 * 60 * 60 * hoursAgo).toISOString();
+
 export const MOCK_USERS: UserProfile[] = [
-  { id: 'usr-001', name: 'Carlos Martín', email: 'carlos.martin@nfq.es', role: 'Admin', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), department: 'Treasury / ALM' },
-  { id: 'usr-002', name: 'Alejandro Lloveras', email: 'alejandro.lloveras@nfq.es', role: 'Trader', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), department: 'Global Markets' },
-  { id: 'usr-003', name: 'Andrés García', email: 'andres.garcia@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), department: 'Risk Control' },
-  { id: 'usr-004', name: 'David G-Zamarreño', email: 'david.gz@nfq.es', role: 'Auditor', status: 'Active', lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), department: 'Internal Audit' }
+  { id: 'usr-001', name: 'Carlos Martín', email: 'carlos.martin@nfq.es', role: 'Admin', status: 'Active', lastLogin: getRecentDate(0.5), department: 'Treasury / ALM' },
+  { id: 'usr-002', name: 'Alejandro Lloveras', email: 'alejandro.lloveras@nfq.es', role: 'Trader', status: 'Active', lastLogin: getRecentDate(1.2), department: 'Global Markets' },
+  { id: 'usr-003', name: 'Gregorio Gonzalo', email: 'gregorio.gonzalo@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: getRecentDate(2.5), department: 'Risk Control' },
+  { id: 'usr-004', name: 'Francisco Herrero', email: 'f.herrero@nfq.es', role: 'Admin', status: 'Active', lastLogin: getRecentDate(4), department: 'Treasury / ALM' },
+  { id: 'usr-005', name: 'Martin Sanz', email: 'martin.sanz@nfq.es', role: 'Trader', status: 'Active', lastLogin: getRecentDate(0.2), department: 'Global Markets' },
+  { id: 'usr-006', name: 'Roberto Flores', email: 'roberto.flores@nfq.es', role: 'Auditor', status: 'Active', lastLogin: getRecentDate(24), department: 'Internal Audit' },
+  { id: 'usr-007', name: 'Arnau Lopez', email: 'arnau.lopez@nfq.es', role: 'Risk_Manager', status: 'Active', lastLogin: getRecentDate(5), department: 'Risk Control' },
+  { id: 'usr-008', name: 'Diego Merino', email: 'diego.merino@nfq.es', role: 'Trader', status: 'Active', lastLogin: getRecentDate(1), department: 'Global Markets' },
+  { id: 'usr-009', name: 'Diego Diaz', email: 'diego.diaz@nfq.es', role: 'Admin', status: 'Active', lastLogin: getRecentDate(3), department: 'Treasury / ALM' },
 ];
+
+export const WHITELISTED_EMAILS = MOCK_USERS.map(u => u.email);
 
 export const INITIAL_DEAL: Transaction = {
   clientId: 'CL-1001',
@@ -155,6 +152,7 @@ export const MOCK_YIELD_CURVE = [
   { tenor: '5Y', rate: 4.50, prev: 4.55 },
   { tenor: '7Y', rate: 4.40, prev: 4.42 },
   { tenor: '10Y', rate: 4.25, prev: 4.30 },
+  { tenor: '20Y', rate: 4.15, prev: 4.20 },
   { tenor: '30Y', rate: 4.10, prev: 4.15 },
 ];
 
@@ -266,7 +264,7 @@ export const MOCK_DEALS: Transaction[] = [
   }
 ];
 
-// --- PRICING & METHODOLOGY RULES (V4.3) ---
+// --- PRICING & METHODOLOGY RULES (V5.0) ---
 export const MOCK_RULES: GeneralRule[] = [
   {
     id: 1,

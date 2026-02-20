@@ -98,37 +98,33 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                </div>
             </div>
 
-            {/* Pricing Waterfall */}
+            {/* Pricing Waterfall V5.0: ALM Hierarchical Rigor */}
             <div className="flex-1 p-4 space-y-1 overflow-auto bg-white dark:bg-[#050505]">
-               <div className="text-[10px] uppercase text-slate-500 font-bold mb-2">Price Construction</div>
+               <div className="text-[10px] uppercase text-slate-500 font-bold mb-2 tracking-widest">Pricing Construction Flow</div>
 
-               <WaterfallItem label="Base Interest Rate" value={result.baseRate} />
+               <WaterfallItem label="Base Risk-Free Rate (Matched)" value={result.baseRate} color="text-slate-300" />
 
-               {/* Consolidated Liquidity Cost V4.3 */}
-               <div className="space-y-1 mt-2">
+               {/* Consolidated Liquidity Module */}
+               <div className="mt-3 mb-1 pt-2 border-t border-slate-800/50">
                   <WaterfallItem
-                     label={t.liquidityCost || "Liquidity Cost"}
+                     label={t.liquidityCost || "Total Liquidity Spread"}
                      value={result.liquiditySpread}
                      isAdd
                      color="text-amber-400"
-                     weight="font-mono"
-                     icon={<Droplets size={12} className="inline mr-1" />}
+                     weight="font-mono font-bold"
+                     icon={<Droplets size={12} className="inline mr-2 text-amber-600" />}
                   />
 
-                  {/* Indented Breakdown - ALM Methodology Mirror */}
-                  <div className="pl-4 border-l border-slate-700/50 space-y-0.5 my-1">
-                     <WaterfallItem
-                        label="↳ NSFR Optimization (Term Floor)"
-                        value={result._liquidityPremiumDetails}
-                        color="text-slate-500"
-                        compact
-                     />
-                     <WaterfallItem
-                        label="↳ LCR Buffer Cost (Contingent)"
-                        value={result._clcChargeDetails}
-                        color="text-slate-500"
-                        compact
-                     />
+                  {/* Indented Methodological Breakdown */}
+                  <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-800 pl-3">
+                     <div className="flex justify-between items-center text-[10px] text-slate-500">
+                        <span>NSFR Optimization (Term Floor)</span>
+                        <span className="font-mono">+{result._liquidityPremiumDetails.toFixed(3)}%</span>
+                     </div>
+                     <div className="flex justify-between items-center text-[10px] text-slate-500">
+                        <span>LCR Buffer Cost (Contingent)</span>
+                        <span className="font-mono">+{result._clcChargeDetails.toFixed(3)}%</span>
+                     </div>
                   </div>
                </div>
 
@@ -137,8 +133,6 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
 
                <WaterfallItem label={t.ftpRate} value={result.totalFTP} highlight />
-
-               <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
 
                {/* Business & Regulatory Costs */}
                <div className="pl-2 border-l-2 border-slate-800 ml-1 mt-2 space-y-1">
@@ -197,7 +191,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
             </div>
 
          </div>
-      </Panel>
+      </Panel >
    );
 };
 
