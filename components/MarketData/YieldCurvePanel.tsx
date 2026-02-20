@@ -1,262 +1,368 @@
 
-import React, { useState, useMemo } from 'react';
-import { LineChart, Save, Download, Upload, TrendingUp, TrendingDown, RefreshCw, Layers, History, Globe } from 'lucide-react';
-import { Panel, Badge, Button } from '../ui/LayoutComponents';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Panel, Badge, TextInput } from '../ui/LayoutComponents';
 import { MOCK_YIELD_CURVE } from '../../constants';
+import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap, Save, Upload, ChevronDown } from 'lucide-react';
 import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
+import { FileUploadModal } from '../ui/FileUploadModal';
+import { YieldCurvePoint } from '../../types';
+import { translations, Language } from '../../translations';
+import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
+import { FileSpreadsheet } from 'lucide-react';
 
-export const YieldCurvePanel: React.FC = () => {
+interface Props {
+    language: Language;
+    user: any;
+}
+
+const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
+    const t = translations[language];
     const [currency, setCurrency] = useState('USD');
-    const [shockBps, setShockBps] = useState(0);
-    const [history, setHistory] = useState(() => storage.loadLocal(`yield_history_${currency}`, []));
+    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [shockBps, setShockBps] = useState<number>(0);
+    const [isImportOpen, setIsImportOpen] = useState(false);
+    const [curvesHistory, setCurvesHistory] = useState<Record<string, YieldCurvePoint[]>>(() => storage.getCurves());
 
-    const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CHF'];
-
-    // Calculate Shocked Curve
-    const activeCurve = useMemo(() => {
-        return MOCK_YIELD_CURVE.map(p => ({
-            ...p,
-            rate: p.rate + (shockBps / 100),
-            original: p.rate
-        }));
-    }, [shockBps]);
-
-    const handleSaveSnapshot = () => {
-        const snapshot = {
-            id: Date.now(),
-            timestamp: new Date().toISOString(),
-            currency,
-            shock: shockBps,
-            points: activeCurve
-        };
-        const newHistory = [snapshot, ...history].slice(0, 10);
-        setHistory(newHistory);
-        storage.saveLocal(`yield_history_${currency}`, newHistory);
-        storage.addAuditEntry({
-            userEmail: 'system',
-            userName: 'System',
-            action: 'SAVE_YIELD_SNAPSHOT',
-            module: 'MARKET_DATA',
-            description: `Saved ${currency} curve snapshot with ${shockBps}bps shock.`
-        });
-    };
-
-    // SVG Chart Dimensions
     const width = 800;
     const height = 300;
     const padding = 40;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
 
-    const maxRate = Math.max(...activeCurve.map(p => p.rate), 6);
-    const minRate = Math.min(...activeCurve.map(p => p.rate), 0);
-    const range = maxRate - minRate;
+    // Sync History to Storage
+    useEffect(() => {
+        storage.saveCurves(curvesHistory);
+    }, [curvesHistory]);
 
-    const getX = (index: number, total: number) => padding + (index * chartWidth / (total - 1));
-    const getY = (rate: number) => height - padding - ((rate - minRate) * chartHeight / range);
+    // Realtime Sync for Yield Curves
+    useEffect(() => {
+        const subscription = supabaseService.subscribeToAll((payload) => {
+            if (payload.table === 'yield_curves' && payload.eventType === 'INSERT') {
+                const mapped = payload.mapped;
+                if (!mapped) return;
 
-    const points = activeCurve.map((p, i) => `${getX(i, activeCurve.length)},${getY(p.rate)}`).join(' ');
-    const originalPoints = activeCurve.map((p, i) => `${getX(i, activeCurve.length)},${getY(p.original)}`).join(' ');
+                const { currency: cur, date: d, points: pts } = mapped;
+                const key = `${cur}-${d}`;
+
+                setCurvesHistory(prev => ({
+                    ...prev,
+                    [key]: pts.map((pt: any) => ({
+                        tenor: pt.tenor,
+                        rate: parseFloat(pt.rate) || 0,
+                        prev: parseFloat(pt.prev) || parseFloat(pt.rate) || 0
+                    }))
+                }));
+            }
+        });
+        return () => { if (subscription) subscription.unsubscribe(); };
+    }, []);
+
+    // Transform mock data based on currency AND date to simulate historical curves
+    const data = useMemo(() => {
+        let basePoints = curvesHistory[`${currency}-${selectedDate}`];
+
+        if (!basePoints) {
+            // Fallback to MOCK + pseudo-random if no snapshot exists
+            let modifier = 0;
+            if (currency === 'EUR') modifier = -1.5;
+            if (currency === 'GBP') modifier = 0.5;
+            if (currency === 'JPY') modifier = -4.0;
+            const dateNum = selectedDate.split('-').reduce((a, b) => a + parseInt(b), 0);
+            const dateMod = (dateNum % 5) * 0.1;
+
+            basePoints = MOCK_YIELD_CURVE.map(pt => ({
+                tenor: pt.tenor,
+                rate: Math.max(0.1, pt.rate + modifier + dateMod),
+                prev: Math.max(0.1, pt.prev + modifier)
+            }));
+        }
+
+        return basePoints.map((pt, i) => {
+            const shockedRate = pt.rate + (shockBps / 100);
+            return {
+                ...pt,
+                baseRate: pt.rate,
+                rate: Math.max(0.01, shockedRate),
+                index: i
+            };
+        });
+    }, [currency, selectedDate, shockBps, curvesHistory]);
+
+    // DEFENSIVE GUARDS: If no data, return a safe minimal set to prevent SVG math crashes
+    const chartData = useMemo(() => {
+        if (!data || data.length < 2) {
+            return [{ tenor: '1M', rate: 0.01, prev: 0.01, baseRate: 0.01, index: 0 }, { tenor: '1Y', rate: 0.01, prev: 0.01, baseRate: 0.01, index: 1 }];
+        }
+        return data;
+    }, [data]);
+
+    const handleSaveSnapshot = () => {
+        const key = `${currency}-${selectedDate}`;
+        setCurvesHistory(prev => ({
+            ...prev,
+            [key]: data.map(d => ({ tenor: d.tenor, rate: d.baseRate, prev: d.prev })) // Save pre-shock
+        }));
+
+        storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: 'SAVE_CURVE_SNAPSHOT',
+            module: 'MARKET_DATA',
+            description: `Saved manual curve snapshot for ${currency} on ${selectedDate}`
+        });
+    };
+
+    const handleImport = (importedData: any[]) => {
+        const key = `${currency}-${selectedDate}`;
+        const newCurve: YieldCurvePoint[] = importedData.map(row => ({
+            tenor: row.Tenor || row.tenor,
+            rate: parseFloat(row.Rate || row.rate) || 0,
+            prev: parseFloat(row.Prev || row.prev) || 0
+        }));
+
+        setCurvesHistory(prev => ({ ...prev, [key]: newCurve }));
+        setIsImportOpen(false);
+
+        storage.addAuditEntry({
+            userEmail: user?.email || 'unknown',
+            userName: user?.name || 'Unknown User',
+            action: 'IMPORT_CURVE',
+            module: 'MARKET_DATA',
+            description: `Imported ${currency} yield curve for ${selectedDate}`
+        });
+    };
+
+    const handleDownloadTemplate = () => {
+        const liveData: any[] = [];
+        Object.entries(curvesHistory).forEach(([key, points]) => {
+            const cur = key.split('-')[0];
+            (points as YieldCurvePoint[]).forEach(pt => {
+                liveData.push({
+                    Currency: cur,
+                    Tenor: pt.tenor,
+                    Rate: pt.rate,
+                    Prev: pt.prev
+                });
+            });
+        });
+
+        // If no data, use default template
+        const dataToExport = liveData.length > 0 ? liveData : undefined;
+        downloadTemplate('YIELD_CURVE', `Yield_Curve_Data_${currency}`, dataToExport);
+    };
+
+    const curveTemplate = "tenor,rate,prev\nON,5.25,5.20\n1M,5.30,5.28\n1Y,5.10,5.05\n10Y,4.25,4.30";
+
+    // Calculations for Chart
+    const minRate = Math.min(...chartData.map(d => Math.min(d.rate, d.prev))) * 0.9;
+    const maxRate = Math.max(...chartData.map(d => Math.max(d.rate, d.prev))) * 1.1;
+    const effectiveMax = maxRate === minRate ? maxRate + 1 : maxRate; // Prevent division by zero
+
+    const xStep = (width - padding * 2) / (Math.max(1, chartData.length - 1));
+
+    const getX = (i: number) => padding + i * xStep;
+    const getY = (rate: number) => height - padding - ((rate - minRate) / (effectiveMax - minRate)) * (height - padding * 2);
+
+    const points = chartData.map((d, i) => `${getX(i)},${getY(d.rate)}`).join(' ');
+    const areaPoints = `${getX(0)},${height - padding} ${points} ${getX(chartData.length - 1)},${height - padding}`;
+    const prevPoints = chartData.map((d, i) => `${getX(i)},${getY(d.prev)}`).join(' ');
+    const basePoints = data.map((d, i) => `${getX(i)},${getY(d.baseRate)}`).join(' '); // Pre-shock baseline
+
+    // Mock Pricing History/Audit Trail
+    const pricingVersions = [
+        { id: 'v1.0.4', date: '2023-10-24 14:00', user: 'System', curve: 'EOD Final' },
+        { id: 'v1.0.3', date: '2023-10-24 12:30', user: 'A. Chen', curve: 'Intraday Snap' },
+        { id: 'v1.0.2', date: '2023-10-24 09:15', user: 'System', curve: 'Morning Open' },
+        { id: 'v1.0.1', date: '2023-10-23 18:00', user: 'System', curve: 'EOD Final' },
+    ];
 
     return (
-        <div className="flex flex-col h-full space-y-4">
-            <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="flex items-center gap-6">
-                    <div className="space-y-1">
-                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider flex items-center gap-1">
-                            <Globe size={10} /> Market Currency
-                        </span>
-                        <div className="flex gap-1">
-                            {currencies.map(c => (
-                                <button
-                                    key={c}
-                                    onClick={() => setCurrency(c)}
-                                    className={`px-3 py-1 rounded text-xs font-bold transition-all ${currency === c ? 'bg-emerald-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200'}`}
-                                >
-                                    {c}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
-
-                    <div className="space-y-1">
-                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider flex items-center gap-1">
-                            <RefreshCw size={10} /> Parallel Shock (bps)
-                        </span>
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="range"
-                                min="-200"
-                                max="200"
-                                step="5"
-                                value={shockBps}
-                                onChange={(e) => setShockBps(parseInt(e.target.value))}
-                                className="w-48 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                            />
-                            <span className={`font-mono font-bold text-sm ${shockBps > 0 ? 'text-red-500' : shockBps < 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                {shockBps > 0 ? '+' : ''}{shockBps}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setShockBps(0)} className="gap-2">
-                        <RefreshCw size={14} /> Reset
-                    </Button>
-                    <Button variant="primary" size="sm" onClick={handleSaveSnapshot} className="gap-2">
-                        <Save size={14} /> Snapshot
-                    </Button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-12 gap-4 flex-1">
-                <Panel title={`${currency} Yield Curve Analysis (IRRBB)`} className="col-span-8 h-full bg-white dark:bg-[#0a0a0a]">
-                    <div className="relative w-full h-[320px] mt-4">
-                        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
-                            {/* Grid Lines */}
-                            {[0, 1, 2, 3, 4, 5].map(i => {
-                                const val = minRate + (i * range / 5);
-                                const y = getY(val);
-                                return (
-                                    <g key={i}>
-                                        <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#1e293b" strokeWidth="0.5" strokeDasharray="4 2" />
-                                        <text x={padding - 10} y={y} fill="#64748b" fontSize="10" textAnchor="end" alignmentBaseline="middle" className="font-mono">
-                                            {val.toFixed(1)}%
-                                        </text>
-                                    </g>
-                                );
-                            })}
-
-                            {/* Tenor Labels */}
-                            {activeCurve.map((p, i) => (
-                                <text key={i} x={getX(i, activeCurve.length)} y={height - padding + 20} fill="#64748b" fontSize="10" textAnchor="middle" className="font-mono">
-                                    {p.tenor}
-                                </text>
-                            ))}
-
-                            {/* Base Curve (Dashed) */}
-                            <polyline
-                                fill="none"
-                                stroke="#334155"
-                                strokeWidth="1.5"
-                                strokeDasharray="4 4"
-                                points={originalPoints}
-                            />
-
-                            {/* Active Curve Area */}
-                            <path
-                                d={`M ${padding},${height - padding} ${activeCurve.map((p, i) => `L ${getX(i, activeCurve.length)},${getY(p.rate)}`).join(' ')} L ${width - padding},${height - padding} Z`}
-                                fill="url(#curveGradient)"
-                                className="opacity-20"
-                            />
-
-                            {/* Active Line */}
-                            <polyline
-                                fill="none"
-                                stroke="#10b981"
-                                strokeWidth="2.5"
-                                strokeLinejoin="round"
-                                strokeLinecap="round"
-                                points={points}
-                                className="drop-shadow-lg"
-                            />
-
-                            {/* Points */}
-                            {activeCurve.map((p, i) => (
-                                <circle
-                                    key={i}
-                                    cx={getX(i, activeCurve.length)}
-                                    cy={getY(p.rate)}
-                                    r="4"
-                                    fill="#10b981"
-                                    className="hover:r-6 transition-all cursor-crosshair"
-                                />
-                            ))}
-
-                            <defs>
-                                <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#10b981" />
-                                    <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-4 gap-4">
-                        <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-800">
-                            <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Overnight</span>
-                            <span className="text-xl font-mono font-bold text-emerald-500">{activeCurve[0].rate.toFixed(3)}%</span>
-                        </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-800">
-                            <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">1Y Rate</span>
-                            <span className="text-xl font-mono font-bold text-emerald-500">{activeCurve[4].rate.toFixed(3)}%</span>
-                        </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-800">
-                            <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">10Y Rate</span>
-                            <span className="text-xl font-mono font-bold text-emerald-500">{activeCurve[9].rate.toFixed(3)}%</span>
-                        </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-800">
-                            <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">30Y Rate</span>
-                            <span className="text-xl font-mono font-bold text-emerald-500">{activeCurve[11].rate.toFixed(3)}%</span>
-                        </div>
-                    </div>
-                </Panel>
-
-                <Panel title="Snapshot Governance" className="col-span-4 h-full bg-white dark:bg-[#0a0a0a]">
-                    <div className="space-y-4">
-                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2 flex items-center gap-2">
-                            <History size={12} /> Audit Trail
-                        </div>
-
-                        {history.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-slate-500 border-2 border-dashed border-slate-800 rounded-xl">
-                                <Layers size={32} className="mb-2 opacity-20" />
-                                <span className="text-xs">No historical snapshots</span>
-                            </div>
-                        ) : (
-                            <div className="space-y-2 max-h-[400px] overflow-auto pr-2 custom-scrollbar">
-                                {history.map((snap: any) => (
-                                    <div key={snap.id} className="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-emerald-500/50 transition-colors group">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs font-bold font-mono">{snap.currency}</span>
-                                                    <Badge variant={snap.shock === 0 ? 'default' : 'warning'}>
-                                                        {snap.shock > 0 ? '+' : ''}{snap.shock}bps
-                                                    </Badge>
-                                                </div>
-                                                <span className="text-[10px] text-slate-500 block mt-1">
-                                                    {new Date(snap.timestamp).toLocaleString()}
-                                                </span>
-                                            </div>
-                                            <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-emerald-500/20 rounded transition-all text-emerald-500">
-                                                <Download size={14} />
-                                            </button>
-                                        </div>
+        <div className="flex flex-col xl:grid xl:grid-cols-3 gap-4 md:gap-6 h-full min-h-0 overflow-auto custom-scrollbar">
+            {/* Chart Section */}
+            <div className="xl:col-span-2 flex flex-col min-h-[500px] xl:min-h-0">
+                <Panel
+                    title={`${t.yieldCurves} (${currency})`}
+                    className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white/50 dark:bg-slate-950/50"
+                >
+                    <div className="flex flex-col xl:flex-row h-full min-h-0">
+                        {/* Main Chart Area */}
+                        <div className="flex-1 flex flex-col min-h-[300px] xl:min-h-0 border-b xl:border-b-0 xl:border-r border-slate-200 dark:border-slate-800 relative">
+                            {/* SVG Chart Toolbar */}
+                            <div className="h-10 border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex items-center px-4 justify-between shrink-0">
+                                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 md:pb-0">
+                                    {/* Shock Input */}
+                                    <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-900/50 shrink-0">
+                                        <Zap size={12} className="text-amber-500" />
+                                        <input
+                                            type="number"
+                                            value={shockBps}
+                                            onChange={(e) => setShockBps(parseFloat(e.target.value))}
+                                            className="bg-transparent border-none text-[10px] text-amber-600 dark:text-amber-400 w-8 text-center focus:ring-0 font-bold"
+                                        />
+                                        <span className="text-[9px] text-amber-500 uppercase font-bold">bps</span>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                    <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1 shrink-0"></div>
+                                    {/* Date Picker */}
+                                    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded shrink-0">
+                                        <Calendar size={12} className="text-slate-400" />
+                                        <input
+                                            type="date"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            className="bg-transparent border-none text-[10px] text-slate-700 dark:text-slate-300 w-24 focus:ring-0 font-mono"
+                                        />
+                                    </div>
+                                </div>
 
-                        <div className="pt-4 border-t border-slate-800">
-                            <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-                                <span className="text-[10px] text-slate-400 uppercase font-bold block mb-2">Import / Export Hub</span>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Button variant="outline" size="sm" className="w-full text-[10px] py-1">
-                                        <Upload size={12} className="mr-1" /> JSON/CSV
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="w-full text-[10px] py-1">
-                                        <Download size={12} className="mr-1" /> EXCEL
-                                    </Button>
+                                <div className="flex items-center gap-2 shrink-0 ml-2">
+                                    <div className="flex bg-slate-200 dark:bg-slate-800 p-0.5 rounded">
+                                        {['USD', 'EUR', 'GBP', 'JPY'].map(c => (
+                                            <button
+                                                key={c}
+                                                onClick={() => setCurrency(c)}
+                                                className={`text-[9px] font-bold px-2 py-0.5 rounded transition-all ${currency === c
+                                                    ? 'bg-white dark:bg-slate-600 text-cyan-600 dark:text-cyan-400 shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                            >
+                                                {c}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button onClick={handleDownloadTemplate} className="p-1 text-slate-400 hover:text-amber-500 transition-colors" title="Download Template"><FileSpreadsheet size={14} /></button>
+                                    <button onClick={handleSaveSnapshot} className="p-1 text-slate-400 hover:text-emerald-500 transition-colors" title="Save Snapshot"><Save size={14} /></button>
+                                    <button onClick={() => setIsImportOpen(true)} className="p-1 text-slate-400 hover:text-cyan-500 transition-colors" title="Import Data"><Upload size={14} /></button>
                                 </div>
                             </div>
+
+                            <div className="flex-1 w-full p-4 overflow-hidden flex items-center justify-center bg-white dark:bg-black/20">
+                                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full max-h-[300px] overflow-visible">
+                                    {/* Grid Lines */}
+                                    {[0, 0.25, 0.5, 0.75, 1].map((tick) => {
+                                        const y = padding + tick * (height - 2 * padding);
+                                        const val = maxRate - tick * (maxRate - minRate);
+                                        return (
+                                            <g key={tick}>
+                                                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" strokeDasharray="4 4" />
+                                                <text x={padding - 10} y={y + 3} textAnchor="end" className="fill-slate-400 dark:fill-slate-600" fontSize="10" fontFamily="monospace">{val.toFixed(2)}%</text>
+                                            </g>
+                                        );
+                                    })}
+                                    <polygon points={areaPoints} fill="url(#curveGradient)" />
+                                    <polyline points={prevPoints} fill="none" stroke="#64748b" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.4" />
+                                    {shockBps !== 0 && (
+                                        <polyline points={basePoints} fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 2" opacity="0.3" />
+                                    )}
+                                    <polyline points={points} fill="none" stroke={shockBps !== 0 ? '#fbbf24' : '#22d3ee'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                    {data.map((d, i) => (
+                                        <g key={i} className="group">
+                                            <circle cx={getX(i)} cy={getY(d.rate)} r="4" className="fill-white dark:fill-slate-900" stroke={shockBps !== 0 ? '#fbbf24' : '#22d3ee'} strokeWidth="2" />
+                                            <text x={getX(i)} y={height - 10} textAnchor="middle" className="fill-slate-400 dark:fill-slate-500" fontSize="10" fontWeight="bold" fontFamily="monospace">{d.tenor}</text>
+                                        </g>
+                                    ))}
+                                    <defs>
+                                        <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.15" />
+                                            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <div className="h-8 border-t border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 flex items-center px-4 justify-between text-[10px] text-slate-500 shrink-0 font-mono">
+                                <div className="flex gap-4">
+                                    <span className="flex items-center gap-1.5"><div className={`w-3 h-0.5 rounded-full ${shockBps !== 0 ? 'bg-amber-400' : 'bg-cyan-500'}`}></div> {curvesHistory[`${currency}-${selectedDate}`] ? 'PERSISTED' : 'REALTIME'}</span>
+                                    <span className="flex items-center gap-1.5"><div className="w-3 h-0.5 border border-slate-400 border-dashed"></div> PREV CLOSE</span>
+                                </div>
+                                <div className="hidden sm:block">CURRENCY: {currency} | AS OF: {selectedDate}</div>
+                            </div>
+                        </div>
+
+                        {/* Historical Snapshots List */}
+                        <div className="w-full xl:w-64 flex flex-col bg-white dark:bg-black/30 shrink-0">
+                            <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between">
+                                <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Saved Snapshots</span>
+                                <History size={14} className="text-slate-400" />
+                            </div>
+                            <div className="overflow-auto max-h-[150px] xl:max-h-none xl:flex-1 custom-scrollbar">
+                                {Object.keys(curvesHistory).filter(k => k.startsWith(currency)).length === 0 ? (
+                                    <div className="p-8 text-center text-[10px] text-slate-500 uppercase font-bold opacity-30">No snapshots</div>
+                                ) : (
+                                    Object.keys(curvesHistory).filter(k => k.startsWith(currency)).map((k, i) => (
+                                        <div
+                                            key={i}
+                                            onClick={() => setSelectedDate(k.split('-').slice(1).join('-'))}
+                                            className={`p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer flex items-center justify-between transition-colors ${selectedDate === k.split('-').slice(1).join('-') ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <FileCheck size={14} className="text-emerald-500" />
+                                                <span className="text-xs font-mono dark:text-slate-300">{k.split('-').slice(1).join('-')}</span>
+                                            </div>
+                                            <ChevronDown size={12} className="text-slate-400 -rotate-90" />
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     </div>
                 </Panel>
             </div>
+
+            {/* Rates Table Section */}
+            <div className="flex flex-col h-full min-h-[400px] xl:min-h-0">
+                <Panel title="Market Rates Breakdown" className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                    <div className="p-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center shrink-0">
+                        <span className="text-[10px] uppercase text-slate-500 font-bold">Tenor Spot Rates</span>
+                        <Badge variant="outline" className="text-[9px]">{currency}</Badge>
+                    </div>
+                    <div className="flex-1 overflow-auto custom-scrollbar">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-100 dark:bg-slate-900 sticky top-0 z-10">
+                                <tr>
+                                    <th className="p-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider pl-4">Term</th>
+                                    <th className="p-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider text-right">Yield</th>
+                                    <th className="p-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider text-right pr-4">Chg</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-xs">
+                                {data.map((d) => {
+                                    const change = d.rate - d.prev;
+                                    const isPos = change >= 0;
+                                    return (
+                                        <tr key={d.tenor} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                            <td className="p-2 pl-4 font-bold text-slate-700 dark:text-slate-300">{d.tenor}</td>
+                                            <td className="p-2 text-right font-bold text-cyan-600 dark:text-cyan-400">{d.rate.toFixed(3)}%</td>
+                                            <td className={`p-2 pr-4 text-right flex items-center justify-end gap-1 ${isPos ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                {Math.abs(change * 100).toFixed(1)}
+                                                {isPos ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* Simplified Audit Feed */}
+                    <div className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-3">
+                        <div className="text-[9px] uppercase font-bold text-slate-400 mb-2">Version Audit Trail</div>
+                        <div className="space-y-2">
+                            {pricingVersions.slice(0, 3).map(v => (
+                                <div key={v.id} className="flex justify-between items-center text-[10px]">
+                                    <span className="text-slate-600 dark:text-slate-400">{v.date}</span>
+                                    <span className="font-bold text-slate-700 dark:text-slate-300">{v.id}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Panel>
+            </div>
+
+            <FileUploadModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+                onUpload={handleImport}
+                title={`Import ${currency} Curve`}
+                templateName="yield_curve_template.csv"
+                templateContent={curveTemplate}
+            />
         </div>
     );
 };
