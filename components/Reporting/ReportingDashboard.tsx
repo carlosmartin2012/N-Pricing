@@ -6,6 +6,7 @@ import {
 import {
     MOCK_LIQUIDITY_DASHBOARD_DATA,
     MOCK_LIQUIDITY_CURVES,
+    MOCK_BEHAVIOURAL_MODELS,
     INITIAL_DEAL
 } from '../../constants';
 import { Panel, Badge } from '../ui/LayoutComponents';
@@ -24,7 +25,7 @@ interface ReportingDashboardProps {
     shocks: { interestRate: number; liquiditySpread: number };
 }
 
-type SubTab = 'OVERVIEW' | 'FUNDING_CURVES';
+type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS';
 
 const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
     deals,
@@ -166,6 +167,12 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                             className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'FUNDING_CURVES' ? 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             Funding Curves
+                        </button>
+                        <button
+                            onClick={() => setActiveSubTab('BEHAVIOUR_FOCUS')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'BEHAVIOUR_FOCUS' ? 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            Behaviour Focus
                         </button>
                     </nav>
                 </div>
@@ -369,7 +376,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                                 </div>
                             </div>
                         </>
-                    ) : (
+                    ) : activeSubTab === 'FUNDING_CURVES' ? (
                         <>
                             {/* Funding Curves Main View */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -448,6 +455,87 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                                 </div>
                             </div>
                         </>
+                    ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {MOCK_BEHAVIOURAL_MODELS.map((model) => {
+                                const buckets = ['ON', '1M', '3M', '6M', '12M', '2Y', '4Y', '6Y', '10Y', '>10Y'];
+                                const data = buckets.map(bucket => {
+                                    let ftp = 0;
+                                    const tenorToMonths: Record<string, number> = {
+                                        'ON': 0, '1M': 1, '3M': 3, '6M': 6, '12M': 12, '2Y': 24, '4Y': 48, '6Y': 72, '10Y': 120, '>10Y': 240
+                                    };
+
+                                    if (model.type === 'NMD_Replication') {
+                                        const profile = model.replicationProfile || [];
+                                        const coreRatio = (model.coreRatio || 50) / 100;
+                                        const beta = model.betaFactor || 0.5;
+
+                                        const baseFTP = 25 + (tenorToMonths[bucket] * 0.5);
+                                        const spread = profile.find(p => p.term === bucket)?.spread || 0;
+                                        const weight = profile.find(p => p.term === bucket)?.weight || 0;
+
+                                        ftp = (baseFTP + spread) * (weight / 100) * coreRatio * (1 - beta);
+                                        if (weight === 0) ftp = baseFTP * 0.8 * coreRatio;
+                                    } else {
+                                        const baseFTP = 35 + (tenorToMonths[bucket] * 0.8);
+                                        const cprImpact = (model.cpr || 5) * 2;
+                                        ftp = baseFTP + cprImpact;
+                                    }
+
+                                    return { bucket, ftp: parseFloat(ftp.toFixed(2)) };
+                                });
+
+                                return (
+                                    <div key={model.id} className="bg-[#0f172a]/40 border border-white/10 p-6 rounded-2xl flex flex-col gap-4">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-white uppercase">{model.name}</h4>
+                                                <Badge variant="outline" className={`text-[8px] mt-1 ${model.type === 'NMD_Replication' ? 'border-purple-500 text-purple-400' : 'border-amber-500 text-amber-400'}`}>
+                                                    {model.type === 'NMD_Replication' ? 'NMD REPLICATION' : 'PREPAYMENT CPR'}
+                                                </Badge>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-[9px] text-slate-500 font-mono italic">ID: {model.id}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="h-[220px] w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <AreaChart data={data}>
+                                                    <defs>
+                                                        <linearGradient id={`colorFtp-${model.id}`} x1="0" y1="0" x2="0" y2="1">
+                                                            <stop offset="5%" stopColor={model.type === 'NMD_Replication' ? "#a855f7" : "#f59e0b"} stopOpacity={0.3} />
+                                                            <stop offset="95%" stopColor={model.type === 'NMD_Replication' ? "#a855f7" : "#f59e0b"} stopOpacity={0} />
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                                    <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                                                    <Tooltip contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '10px' }} />
+                                                    <Area type="monotone" dataKey="ftp" stroke={model.type === 'NMD_Replication' ? "#a855f7" : "#f59e0b"} strokeWidth={2} fill={`url(#colorFtp-${model.id})`} />
+                                                </AreaChart>
+                                            </ResponsiveContainer>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5">
+                                            {model.type === 'NMD_Replication' ? (
+                                                <>
+                                                    <div className="text-center"><div className="text-[8px] text-slate-500 uppercase">Core</div><div className="text-xs font-mono font-bold text-white">{model.coreRatio}%</div></div>
+                                                    <div className="text-center"><div className="text-[8px] text-slate-500 uppercase">Beta</div><div className="text-xs font-mono font-bold text-white">{model.betaFactor}</div></div>
+                                                    <div className="text-center"><div className="text-[8px] text-slate-500 uppercase">Tranches</div><div className="text-xs font-mono font-bold text-white">{model.replicationProfile?.length || 0}</div></div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="text-center"><div className="text-[8px] text-slate-500 uppercase">CPR</div><div className="text-xs font-mono font-bold text-white">{model.cpr}%</div></div>
+                                                    <div className="text-center"><div className="text-[8px] text-slate-500 uppercase">Exempt</div><div className="text-xs font-mono font-bold text-white">{model.penaltyExempt}%</div></div>
+                                                    <div className="text-center"><div className="text-[8px] text-slate-500 uppercase">Method</div><div className="text-xs font-mono font-bold text-white uppercase italic">Standard</div></div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     )}
                 </div>
             </div>

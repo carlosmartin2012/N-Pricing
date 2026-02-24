@@ -259,9 +259,20 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-slate-400 uppercase">Behavioural & ESG</h4>
           <InputGroup label="Behavioural Model">
-            <SelectInput value={selectedDeal.behaviouralModelId || ''} onChange={(e) => setSelectedDeal({ ...selectedDeal, behaviouralModelId: e.target.value })}>
+            <SelectInput
+              value={selectedDeal.behaviouralModelId || ''}
+              onChange={(e) => setSelectedDeal({ ...selectedDeal, behaviouralModelId: e.target.value })}
+            >
               <option value="">-- None --</option>
-              {MOCK_BEHAVIOURAL_MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+              {MOCK_BEHAVIOURAL_MODELS
+                .filter(m =>
+                  (selectedDeal.category === 'Liability' && m.type === 'NMD_Replication') ||
+                  (selectedDeal.category === 'Asset' && m.type === 'Prepayment_CPR') ||
+                  !selectedDeal.category // Fallback
+                )
+                .map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
             </SelectInput>
           </InputGroup>
           <div className="grid grid-cols-2 gap-4">
@@ -367,6 +378,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                   <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider">Amount</th>
                   <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Tenor</th>
                   <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Margin</th>
+                  <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Model</th>
                   <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
                   <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider w-10"></th>
                 </tr>
@@ -393,6 +405,11 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 hidden lg:table-cell">
                       +{deal.marginTarget.toFixed(2)}%
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap hidden xl:table-cell">
+                      <div className="text-[10px] text-slate-500 max-w-[120px] truncate">
+                        {MOCK_BEHAVIOURAL_MODELS.find(m => m.id === deal.behaviouralModelId)?.name || '-'}
+                      </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       <Badge variant={
