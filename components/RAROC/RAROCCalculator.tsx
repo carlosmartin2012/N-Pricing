@@ -4,24 +4,11 @@ import {
     Zap, Info, Settings
 } from 'lucide-react';
 import { Panel, Badge } from '../ui/LayoutComponents';
+import { RAROCInputs } from '../../types';
 
-interface RAROCInputs {
-    transactionId: string;
-    loanAmt: number;
-    osAmt: number;
-    ead: number;
-    interestRate: number;
-    interestSpread: number;
-    cofRate: number;
-    rwa: number;
-    ecl: number;
-    feeIncome: number;
-    operatingCostPct: number;
-    riskFreeRate: number;
-    opRiskCapitalCharge: number;
-    minRegCapitalReq: number;
-    hurdleRate: number;
-    pillar2CapitalCharge: number;
+interface RAROCCalculatorProps {
+    externalInputs: RAROCInputs | null;
+    onUpdateExternal: (inputs: RAROCInputs) => void;
 }
 
 const INITIAL_INPUTS: RAROCInputs = {
@@ -43,11 +30,26 @@ const INITIAL_INPUTS: RAROCInputs = {
     pillar2CapitalCharge: 1.5
 };
 
-const RAROCCalculator: React.FC = () => {
-    const [inputs, setInputs] = useState<RAROCInputs>(INITIAL_INPUTS);
+const RAROCCalculator: React.FC<RAROCCalculatorProps> = ({ externalInputs, onUpdateExternal }) => {
+    const [inputs, setInputs] = useState<RAROCInputs>(externalInputs || INITIAL_INPUTS);
 
+    // Sync with external updates (e.g. from other users via Supabase)
+    React.useEffect(() => {
+        if (externalInputs && JSON.stringify(externalInputs) !== JSON.stringify(inputs)) {
+            setInputs(externalInputs);
+        }
+    }, [externalInputs]);
+
+    // Local change handler with debounce
     const handleInputChange = (key: keyof RAROCInputs, value: any) => {
-        setInputs(prev => ({ ...prev, [key]: value }));
+        const nextInputs = { ...inputs, [key]: value };
+        setInputs(nextInputs);
+
+        // Debounce external update
+        const timer = setTimeout(() => {
+            onUpdateExternal(nextInputs);
+        }, 1000);
+        return () => clearTimeout(timer);
     };
 
     const results = useMemo(() => {

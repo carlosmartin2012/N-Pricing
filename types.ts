@@ -236,6 +236,25 @@ export interface FTPResult {
   matchReason: string;
 }
 
+export interface RAROCInputs {
+  transactionId: string;
+  loanAmt: number;
+  osAmt: number;
+  ead: number;
+  interestRate: number;
+  interestSpread: number;
+  cofRate: number;
+  rwa: number;
+  ecl: number;
+  feeIncome: number;
+  operatingCostPct: number;
+  riskFreeRate: number;
+  opRiskCapitalCharge: number;
+  minRegCapitalReq: number;
+  hurdleRate: number;
+  pillar2CapitalCharge: number;
+}
+
 export type ViewState = 'CALCULATOR' | 'BLOTTER' | 'CONFIG' | 'MARKET_DATA' | 'ACCOUNTING' | 'BEHAVIOURAL' | 'MANUAL' | 'USER_MGMT' | 'AI_LAB' | 'METHODOLOGY' | 'AUDIT_LOG' | 'SHOCKS' | 'REPORTING' | 'RAROC';
 
 export interface YieldCurvePoint {

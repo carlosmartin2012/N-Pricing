@@ -64,6 +64,7 @@ const App: React.FC = () => {
   const [ftpRateCards, setFtpRateCards] = useState<FtpRateCard[]>([]);
   const [transitionGrid, setTransitionGrid] = useState<any[]>([]);
   const [physicalGrid, setPhysicalGrid] = useState<any[]>([]);
+  const [rarocInputs, setRarocInputs] = useState<RAROCInputs | null>(null);
 
   // --- THEME SYNC ---
   React.useEffect(() => {
@@ -96,7 +97,7 @@ const App: React.FC = () => {
 
       // Step B: Background Sync with Supabase (if available)
       try {
-        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves] = await Promise.all([
+        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc] = await Promise.all([
           storage.getDeals(),
           storage.getBehaviouralModels(),
           supabaseService.fetchRules(),
@@ -108,7 +109,8 @@ const App: React.FC = () => {
           supabaseService.fetchRateCards(),
           supabaseService.fetchEsgGrid('transition'),
           supabaseService.fetchEsgGrid('physical'),
-          supabaseService.fetchYieldCurves()
+          supabaseService.fetchYieldCurves(),
+          supabaseService.fetchRarocInputs()
         ]);
 
         if (dbDeals && dbDeals.length > 0) setDeals(dbDeals);
@@ -123,6 +125,7 @@ const App: React.FC = () => {
         if (dbTransGrid && dbTransGrid.length > 0) setTransitionGrid(dbTransGrid);
         if (dbPhysGrid && dbPhysGrid.length > 0) setPhysicalGrid(dbPhysGrid);
         if (dbYieldCurves && dbYieldCurves.length > 0) setYieldCurves(dbYieldCurves);
+        if (dbRaroc) setRarocInputs(dbRaroc);
       } catch (err) {
         console.warn("Supabase background sync failed, staying on MOCK data.", err);
       }
@@ -170,7 +173,11 @@ const App: React.FC = () => {
       if (table === 'products') updateState(setProducts);
       if (table === 'users') updateState(setUsers);
       if (table === 'system_config' && eventType !== 'DELETE') {
-        if (mappedRecord) setShocks(mappedRecord);
+        if (mappedRecord) {
+          const configKey = (payload as any).config_key;
+          if (configKey === 'shocks') setShocks(mappedRecord);
+          if (configKey === 'raroc_inputs') setRarocInputs(mappedRecord);
+        }
       }
     });
 
@@ -539,7 +546,13 @@ const App: React.FC = () => {
 
           {currentView === 'RAROC' && (
             <div className="h-full relative z-0">
-              <RAROCCalculator />
+              <RAROCCalculator
+                externalInputs={rarocInputs}
+                onUpdateExternal={(inputs) => {
+                  setRarocInputs(inputs);
+                  supabaseService.saveRarocInputs(inputs);
+                }}
+              />
             </div>
           )}
 

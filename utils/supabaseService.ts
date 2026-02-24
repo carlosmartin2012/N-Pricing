@@ -437,6 +437,24 @@ export const supabaseService = {
         if (error) console.error('Error saving ESG grid:', error);
     },
 
+    // --- RAROC SESSION PERSISTENCE ---
+    async fetchRarocInputs(): Promise<any | null> {
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('value')
+            .eq('key', 'raroc_inputs')
+            .single();
+        if (error) return null;
+        return data.value;
+    },
+
+    async saveRarocInputs(inputs: any) {
+        const { error } = await supabase
+            .from('system_config')
+            .upsert({ key: 'raroc_inputs', value: inputs, updated_at: new Date().toISOString() });
+        if (error) console.error('Error saving RAROC inputs:', error);
+    },
+
     // --- REALTIME SUBSCRIPTIONS ---
     subscribeToAll(onUpdate: (payload: any) => void) {
         return supabase
@@ -465,6 +483,8 @@ export const supabaseService = {
                     }
                     if (payload.table === 'system_config' && !isDelete) {
                         data.mapped = (data as any).value;
+                        // Special handling for keys to help App.tsx distinguish
+                        (data as any).config_key = (data as any).key;
                     }
                     if (payload.table === 'audit_log') {
                         data.mapped = mapAuditFromDB(data);
