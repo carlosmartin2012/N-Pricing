@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
-    Calculator, Receipt, TrendingUp, AlertCircle,
-    ArrowRight, DollarSign, PieChart, Shield,
-    Zap, Activity, Info
+    Calculator, TrendingUp, DollarSign, PieChart, Shield,
+    Zap, Info, Settings
 } from 'lucide-react';
 import { Panel, Badge } from '../ui/LayoutComponents';
 
