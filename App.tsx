@@ -16,9 +16,10 @@ import GeminiAssistant from './components/Intelligence/GeminiAssistant';
 import GenAIChat from './components/Intelligence/GenAIChat';
 import LiquidityDashboard from './components/Liquidity/LiquidityDashboard';
 import ReportingDashboard from './components/Reporting/ReportingDashboard';
+import RAROCCalculator from './components/RAROC/RAROCCalculator';
 import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
-import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap, BarChart4 } from 'lucide-react';
+import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, ShieldCheck, Zap, BarChart4, Percent } from 'lucide-react';
 import { Login } from './components/ui/Login';
 import { UserConfigModal } from './components/ui/UserConfigModal';
 import { UniversalImportModal } from './components/ui/UniversalImportModal';
@@ -428,6 +429,7 @@ const App: React.FC = () => {
     { id: 'BLOTTER', label: t.dealBlotter, icon: FileText },
     { id: 'MARKET_DATA', label: t.yieldCurves, icon: LineChart },
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity },
+    { id: 'RAROC', label: 'RAROC Terminal', icon: Percent },
     { id: 'METHODOLOGY', label: t.methodology, icon: GitBranch },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard },
     { id: 'SHOCKS', label: t.shocks, icon: Zap },
@@ -532,6 +534,12 @@ const App: React.FC = () => {
                 shocks={shocks}
                 clients={clients}
               />
+            </div>
+          )}
+
+          {currentView === 'RAROC' && (
+            <div className="h-full relative z-0">
+              <RAROCCalculator />
             </div>
           )}
 
