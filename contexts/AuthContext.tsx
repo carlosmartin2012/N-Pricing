@@ -2,14 +2,12 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { UserProfile } from '../types';
 import { storage } from '../utils/storage';
 import { supabaseService } from '../utils/supabaseService';
-import { WHITELISTED_EMAILS } from '../constants';
 
 interface AuthContextType {
   currentUser: UserProfile | null;
   isAuthenticated: boolean;
   handleLogin: (email: string, users: UserProfile[]) => Promise<void>;
   handleLogout: () => void;
-  combinedWhitelist: (users: UserProfile[]) => string[];
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -57,13 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     storage.saveCurrentUser(null);
   }, []);
 
-  const combinedWhitelist = useCallback(
-    (users: UserProfile[]) => [...new Set([...users.map(u => u.email), ...WHITELISTED_EMAILS])],
-    []
-  );
-
   return (
-    <AuthContext.Provider value={{ currentUser, isAuthenticated, handleLogin, handleLogout, combinedWhitelist }}>
+    <AuthContext.Provider value={{ currentUser, isAuthenticated, handleLogin, handleLogout }}>
       {children}
     </AuthContext.Provider>
   );

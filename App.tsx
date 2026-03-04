@@ -36,7 +36,7 @@ import { supabaseService } from './utils/supabaseService';
 import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, Zap, BarChart4, Percent, ShieldCheck, BrainCircuit, TrendingUp } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { currentUser, isAuthenticated, handleLogin, handleLogout, combinedWhitelist } = useAuth();
+  const { currentUser, isAuthenticated, handleLogin, handleLogout } = useAuth();
   const data = useData();
   const ui = useUI();
   const handleUniversalImport = useUniversalImport();
@@ -62,7 +62,6 @@ const AppContent: React.FC = () => {
     return (
       <Login
         onLogin={(email: string) => handleLogin(email, data.users)}
-        whitelistedEmails={combinedWhitelist(data.users)}
         language={ui.language}
       />
     );

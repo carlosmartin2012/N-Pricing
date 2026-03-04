@@ -1,10 +1,7 @@
 import React from 'react';
 import { translations, Language } from '../../translations';
-import { Sidebar } from './Sidebar';
 
 import { useGoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { WHITELISTED_EMAILS } from '../../constants';
 
 interface LoginProps {
     onLogin: (email: string) => void;
@@ -16,7 +13,7 @@ const DEMO_USER = 'demo';
 const DEMO_PASS = 'nfq@1234';
 const DEMO_EMAIL = 'demo@nfq.es';
 
-export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, language }) => {
+export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     const t = translations[language];
     const [error, setError] = React.useState<string | null>(null);
     const [username, setUsername] = React.useState('');
@@ -36,11 +33,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, langua
                 const email = userInfo.email;
 
                 if (!email) { setError('Could not retrieve email.'); return; }
-                if (!email.endsWith('@nfq.es')) { setError('Access Restricted: Only @nfq.es emails are allowed.'); return; }
 
-                const allowed = whitelistedEmails || WHITELISTED_EMAILS;
-                if (!allowed.some(e => e.toLowerCase() === email.toLowerCase())) {
-                    setError('Access Denied: Your email is not whitelisted.');
+                // Only domain check — any @nfq.es user is allowed
+                if (!email.endsWith('@nfq.es')) {
+                    setError('Access Restricted: Only @nfq.es emails are allowed.');
                     return;
                 }
 
