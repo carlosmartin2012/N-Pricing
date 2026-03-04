@@ -17,6 +17,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, langua
     const [error, setError] = React.useState<string | null>(null);
 
     const login = useGoogleLogin({
+        flow: 'implicit',
+        prompt: 'select_account',
+        hint: '',
+        hosted_domain: 'nfq.es',
         onSuccess: async (tokenResponse) => {
             try {
                 // Fetch user info using the access token

@@ -50,7 +50,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
     setIsThinking(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: "AIzaSyDLrMQyW7N8u01xtwCRWHZHCQa5136ejmY" });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
       // Calculate some quick stats to feed the context
       const totalVolume = deals.reduce((acc, d) => acc + d.amount, 0);

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Panel, Badge, TextInput, InputGroup, SelectInput } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { Transaction, ProductDefinition, ClientEntity, BusinessUnit } from '../../types';
@@ -9,6 +9,7 @@ import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
+import { getAvailableActions, isDealEditable, getStatusColor, formatStatus, type DealStatus, type UserRole } from '../../utils/dealWorkflow';
 
 interface Props {
   deals: Transaction[];
@@ -293,9 +294,16 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           <SelectInput
             value={selectedDeal.status}
             onChange={(e) => setSelectedDeal({ ...selectedDeal, status: e.target.value as any })}
-            className={selectedDeal.status === 'Booked' ? 'text-emerald-400' : selectedDeal.status === 'Rejected' ? 'text-red-400' : 'text-amber-400'}
+            className={
+              selectedDeal.status === 'Booked' || selectedDeal.status === 'Approved' ? 'text-emerald-400' :
+              selectedDeal.status === 'Rejected' ? 'text-red-400' :
+              selectedDeal.status === 'Draft' ? 'text-slate-400' : 'text-amber-400'
+            }
           >
+            <option value="Draft">Draft</option>
             <option value="Pending">Pending</option>
+            <option value="Pending_Approval">Pending Approval</option>
+            <option value="Approved">Approved</option>
             <option value="Booked">Booked</option>
             <option value="Rejected">Rejected</option>
             <option value="Review">Review</option>
@@ -356,9 +364,13 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                 onChange={(e) => setFilterStatus(e.target.value)}
               >
                 <option value="All">All Status</option>
+                <option value="Draft">Draft</option>
                 <option value="Pending">Pending</option>
+                <option value="Pending_Approval">Pending Approval</option>
                 <option value="Approved">Approved</option>
+                <option value="Booked">Booked</option>
                 <option value="Rejected">Rejected</option>
+                <option value="Review">Review</option>
               </select>
             </div>
             <button className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors shrink-0">
@@ -413,10 +425,11 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       <Badge variant={
-                        deal.status === 'Approved' ? 'success' :
-                          deal.status === 'Rejected' ? 'danger' : 'warning'
+                        deal.status === 'Booked' || deal.status === 'Approved' ? 'success' :
+                          deal.status === 'Rejected' ? 'danger' :
+                          deal.status === 'Draft' ? 'outline' : 'warning'
                       } className="text-[9px]">
-                        {deal.status}
+                        {formatStatus(deal.status || 'Draft')}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
@@ -432,12 +445,8 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           </div>
         </div>
 
-        {/* Footer Stats */}
-        <div className="p-2 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-500 flex gap-6 justify-end font-mono">
-          <div>TOTAL VOL: <span className="text-slate-300">$125.4M</span></div>
-          <div>AVG RATE: <span className="text-slate-300">5.12%</span></div>
-          <div>ROWS: <span className="text-slate-300">{filteredDeals.length}</span></div>
-        </div>
+        {/* Footer Stats — dynamically computed */}
+        <BlotterFooter deals={filteredDeals} />
 
         {/* --- DRAWERS --- */}
 
@@ -505,6 +514,34 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         </Drawer>
       </div>
     </Panel>
+  );
+};
+
+/** Dynamic blotter footer with computed stats */
+const BlotterFooter: React.FC<{ deals: Transaction[] }> = ({ deals }) => {
+  const stats = useMemo(() => {
+    const totalVolume = deals.reduce((sum, d) => sum + (d.amount || 0), 0);
+    const avgMargin = deals.length > 0
+      ? deals.reduce((sum, d) => sum + (d.marginTarget || 0), 0) / deals.length
+      : 0;
+    const bookedCount = deals.filter(d => d.status === 'Booked').length;
+    return { totalVolume, avgMargin, bookedCount };
+  }, [deals]);
+
+  const fmtVol = (v: number) => {
+    if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
+    if (v >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
+    if (v >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
+    return `$${v.toFixed(0)}`;
+  };
+
+  return (
+    <div className="p-2 border-t border-slate-800 bg-slate-950 text-[10px] text-slate-500 flex gap-6 justify-end font-mono">
+      <div>TOTAL VOL: <span className="text-slate-300">{fmtVol(stats.totalVolume)}</span></div>
+      <div>AVG MARGIN: <span className="text-slate-300">{stats.avgMargin.toFixed(2)}%</span></div>
+      <div>BOOKED: <span className="text-emerald-400">{stats.bookedCount}</span></div>
+      <div>ROWS: <span className="text-slate-300">{deals.length}</span></div>
+    </div>
   );
 };
 

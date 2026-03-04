@@ -25,7 +25,11 @@ interface ReportingDashboardProps {
     shocks: { interestRate: number; liquiditySpread: number };
 }
 
-type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS';
+import MaturityLadder from './MaturityLadder';
+import CurrencyGap from './CurrencyGap';
+import NIISensitivity from './NIISensitivity';
+
+type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS' | 'MATURITY_LADDER' | 'CURRENCY_GAP' | 'NII_SENSITIVITY';
 
 const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
     deals,
@@ -173,6 +177,25 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                             className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'BEHAVIOUR_FOCUS' ? 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             Behaviour Focus
+                        </button>
+                        <div className="h-4 w-[1px] bg-white/10 mx-1" />
+                        <button
+                            onClick={() => setActiveSubTab('MATURITY_LADDER')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'MATURITY_LADDER' ? 'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            Maturity Ladder
+                        </button>
+                        <button
+                            onClick={() => setActiveSubTab('CURRENCY_GAP')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'CURRENCY_GAP' ? 'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            Currency Gap
+                        </button>
+                        <button
+                            onClick={() => setActiveSubTab('NII_SENSITIVITY')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'NII_SENSITIVITY' ? 'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            NII / IRRBB
                         </button>
                     </nav>
                 </div>
@@ -455,6 +478,12 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                                 </div>
                             </div>
                         </>
+                    ) : activeSubTab === 'MATURITY_LADDER' ? (
+                        <MaturityLadder deals={deals} />
+                    ) : activeSubTab === 'CURRENCY_GAP' ? (
+                        <CurrencyGap deals={deals} />
+                    ) : activeSubTab === 'NII_SENSITIVITY' ? (
+                        <NIISensitivity deals={deals} />
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {MOCK_BEHAVIOURAL_MODELS.map((model) => {

@@ -34,6 +34,7 @@ export interface LiquidityCurvePoint {
 
 export interface DualLiquidityCurve {
   currency: string;
+  curveType?: 'unsecured' | 'secured'; // Gap 8: secured vs unsecured LP
   lastUpdate: string;
   points: LiquidityCurvePoint[];
 }
@@ -118,6 +119,15 @@ export interface Transaction {
   // Economics
   marginTarget: number;
   behaviouralModelId?: string;
+  ead?: number;                    // Gap 16: Exposure at Default (separate from amount)
+  feeIncome?: number;              // Gap 6: annual fee income for RAROC
+
+  // Repricing (Gap 15)
+  repricingMonths?: number;        // months until next repricing (RM) — distinct from DTM
+
+  // Collateral (Gap 8)
+  collateralType?: 'None' | 'Sovereign' | 'Corporate' | 'Cash' | 'Real_Estate';
+  haircutPct?: number;             // collateral haircut % for secured LP
 
   // Regulatory & Capital
   riskWeight: number;
@@ -126,6 +136,7 @@ export interface Transaction {
   operationalCostBps: number;
   lcrOutflowPct?: number;
   isOperationalSegment?: boolean; // V4.0: For deposit split logic
+  depositStability?: 'Stable' | 'Semi_Stable' | 'Non_Stable'; // Gap 14: deposit classification
 
   // LCR / NSFR Data
   drawnAmount?: number;
@@ -234,6 +245,14 @@ export interface FTPResult {
   };
   matchedMethodology: MethodologyType;
   matchReason: string;
+  // V5.0: Granular FTP decomposition
+  irrbbCharge?: number;            // IRRBB component (base rate %)
+  liquidityCharge?: number;        // LP component (%)
+  liquidityRecharge?: number;      // LR buffer allocation (%)
+  capitalIncome?: number;          // income from regulatory capital
+  formulaUsed?: string;            // formula string applied (for display)
+  behavioralMaturityUsed?: number; // effective BM used for interpolation
+  incentivisationAdj?: number;     // subsidy/incentive adjustment (%)
 }
 
 export interface RAROCInputs {
@@ -263,6 +282,16 @@ export interface YieldCurvePoint {
   prev?: number;
 }
 
+export type FormulaBaseRateKey = 'DTM' | 'BM' | 'RM' | 'MIN_BM_RM';
+export type FormulaLPType = 'LP_DTM' | 'LP_BM' | '50_50_DTM_1Y' | 'SECURED_LP' | 'BLENDED';
+
+export interface FormulaSpec {
+  baseRateKey: FormulaBaseRateKey;
+  lpFormula: FormulaLPType;
+  lpCurveType?: 'unsecured' | 'secured';
+  sign?: 1 | -1; // +1 for assets, -1 for deposits
+}
+
 export interface GeneralRule {
   id: number;
   businessUnit: string; // Pivot Axis
@@ -274,6 +303,33 @@ export interface GeneralRule {
   spreadMethod: string; // V4.3: Supports formula strings
   liquidityReference?: string; // New: Curve ID for Liquidity
   strategicSpread: number;
+  formulaSpec?: FormulaSpec; // V5.0: Product-specific formula specification
+}
+
+// --- V5.0: ALM CONFIG TYPES ---
+
+export interface IncentivisationRule {
+  id: string;
+  productType: string;
+  segment: string;
+  subsidyBps: number;       // negative = discount
+  validFrom: string;
+  validTo: string;
+  maxVolume?: number;
+  description: string;
+}
+
+export interface SDRConfig {
+  stableDepositRatio: number;    // 0-1
+  sdrFloor: number;              // minimum SDR for benefit
+  sdrImpactMultiplier: number;   // how much SDR reduces LP
+  externalFundingPct: number;    // for blended LP curve
+}
+
+export interface LRConfig {
+  totalBufferCostBps: number;           // total HQLA cost to allocate
+  riskAppetiteAddon: number;            // multiplier (e.g. 1.3)
+  buAllocations: Record<string, number>; // BU id -> allocation weight
 }
 
 export interface AuditEntry {

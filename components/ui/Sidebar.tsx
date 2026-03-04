@@ -4,10 +4,11 @@ import { Logo } from '../ui/Logo';
 import { LucideIcon } from 'lucide-react';
 import { translations, Language } from '../../translations';
 
-interface NavItem {
+export interface NavItem {
     id: string;
     label: string;
     icon: LucideIcon;
+    section?: string; // Section header to show before this item
 }
 
 interface SidebarProps {
@@ -55,16 +56,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }
                     if (window.innerWidth < 768) onClose();
                 }}
-                className={`w-full flex items-center px-3 py-3 rounded-md text-sm transition-all ${!isUserConfig && currentView === item.id
+                className={`w-full flex items-center px-3 py-2.5 rounded-md text-sm transition-all ${!isUserConfig && currentView === item.id
                     ? 'bg-cyan-50 text-cyan-700 border-l-2 border-cyan-600 dark:bg-slate-900 dark:text-white dark:border-cyan-500'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-500 dark:hover:bg-slate-900 dark:hover:text-slate-300'
                     }`}
             >
-                <item.icon size={20} className={!isUserConfig && currentView === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-slate-500 dark:text-slate-600'} />
+                <item.icon size={18} className={!isUserConfig && currentView === item.id ? 'text-cyan-600 dark:text-cyan-500' : 'text-slate-500 dark:text-slate-600'} />
                 {isSidebarOpen && <span className="ml-3 font-medium">{item.label}</span>}
             </button>
         );
     };
+
+    const SectionHeader = ({ title }: { title: string }) => {
+        if (!isSidebarOpen) {
+            return <div className="my-2 mx-3 h-px bg-slate-200 dark:bg-slate-800" />;
+        }
+        return (
+            <div className="mt-4 mb-1 px-3">
+                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-600">
+                    {title}
+                </span>
+            </div>
+        );
+    };
+
+    // Track which sections we've already rendered
+    let lastSection: string | undefined;
 
     return (
         <>
@@ -77,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <div className={`
-                ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full md:translate-x-0'} 
+                ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full md:translate-x-0'}
                 ${isSidebarOpen ? 'fixed md:relative' : 'fixed md:relative'}
                 h-full bg-white dark:bg-black border-r border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col z-20 shadow-2xl overflow-hidden
             `}>
@@ -91,16 +108,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* Main Menu */}
-                <nav className="flex-1 p-2 space-y-1 mt-4 overflow-y-auto scrollbar-thin">
-                    {mainNavItems.map((item) => (
-                        <div key={item.id}>
-                            <NavButton item={item} />
-                        </div>
-                    ))}
+                <nav className="flex-1 p-2 space-y-0.5 mt-2 overflow-y-auto scrollbar-thin">
+                    {mainNavItems.map((item) => {
+                        const showSection = item.section && item.section !== lastSection;
+                        if (item.section) lastSection = item.section;
+                        return (
+                            <div key={item.id}>
+                                {showSection && <SectionHeader title={item.section!} />}
+                                <NavButton item={item} />
+                            </div>
+                        );
+                    })}
                 </nav>
 
-                {/* Bottom Menu (User & Manual) */}
-                <div className="p-2 border-t border-slate-100 dark:border-slate-900 space-y-1">
+                {/* Bottom Menu */}
+                <div className="p-2 border-t border-slate-100 dark:border-slate-900 space-y-0.5">
                     {bottomNavItems.map((item) => (
                         <div key={item.id}>
                             <NavButton item={item} />
@@ -109,15 +131,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* System Status Footer */}
-                <div className="p-4 border-t border-slate-100 dark:border-slate-900">
+                <div className="p-3 border-t border-slate-100 dark:border-slate-900">
                     {isSidebarOpen ? (
-                        <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded border border-slate-100 dark:border-slate-800/50">
-                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">{t.systemStatus}</div>
-                            <div className="flex items-center gap-2 text-xs text-emerald-500 font-mono">
+                        <div className="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded border border-slate-100 dark:border-slate-800/50">
+                            <div className="text-[9px] text-slate-500 uppercase font-bold mb-1">{t.systemStatus}</div>
+                            <div className="flex items-center gap-2 text-[10px] text-emerald-500 font-mono">
                                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                 {t.online}
                             </div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-600 mt-1 font-mono">{latency}ms latency</div>
+                            <div className="text-[9px] text-slate-400 dark:text-slate-600 mt-0.5 font-mono">{latency}ms latency</div>
                         </div>
                     ) : (
                         <div className="flex justify-center">

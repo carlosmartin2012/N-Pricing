@@ -20,8 +20,8 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
     const t = translations[language];
     // Local state removed, using props now
 
-    const baseResult = useMemo(() => calculatePricing(deal, approvalMatrix, { interestRate: 0, liquiditySpread: 0 }), [deal, approvalMatrix]);
-    const shockedResult = useMemo(() => calculatePricing(deal, approvalMatrix, shocks), [deal, approvalMatrix, shocks]);
+    const baseResult = useMemo(() => calculatePricing(deal, approvalMatrix, undefined, { interestRate: 0, liquiditySpread: 0 }), [deal, approvalMatrix]);
+    const shockedResult = useMemo(() => calculatePricing(deal, approvalMatrix, undefined, shocks), [deal, approvalMatrix, shocks]);
 
     const handleReset = () => {
         setShocks({ interestRate: 0, liquiditySpread: 0 });
@@ -155,6 +155,29 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 <span>-500 bps</span>
                                 <span>0</span>
                                 <span>+500 bps</span>
+                            </div>
+                        </div>
+
+                        {/* Predefined Scenarios */}
+                        <div className="space-y-2">
+                            <div className="text-[10px] text-slate-500 uppercase font-bold">Quick Scenarios</div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                                {[
+                                    { label: 'Parallel +200', ir: 200, liq: 0 },
+                                    { label: 'Parallel -200', ir: -200, liq: 0 },
+                                    { label: 'Steepener', ir: 100, liq: 50 },
+                                    { label: 'Flattener', ir: -50, liq: -25 },
+                                    { label: 'Liq. Crisis', ir: 50, liq: 200 },
+                                    { label: 'Risk-Off', ir: -100, liq: 150 },
+                                ].map(s => (
+                                    <button
+                                        key={s.label}
+                                        onClick={() => setShocks({ interestRate: s.ir, liquiditySpread: s.liq })}
+                                        className="py-1.5 px-2 text-[10px] font-mono text-slate-400 hover:text-white border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left"
+                                    >
+                                        {s.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 

@@ -43,7 +43,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
     setIsThinking(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: "AIzaSyDLrMQyW7N8u01xtwCRWHZHCQa5136ejmY" });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
       // Construct a context-aware system instruction
       const systemInstruction = `

@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard } from '../types';
+import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard, FTPResult } from '../types';
 import { MOCK_DEALS, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_BEHAVIOURAL_MODELS, MOCK_USERS, MOCK_YIELD_CURVE } from '../constants';
 
 // --- MAPPING HELPERS ---
@@ -599,7 +599,119 @@ export const supabaseService = {
         if (curveErr) errors.push(`yield_curves: ${curveErr.message}`);
         else console.log('✅ Yield Curve seeded');
 
-        console.log(errors.length === 0 ? '🎉 Seed complete!' : `⚠️ Seed finished with errors: ${errors.join(', ')}`);
+        console.log(errors.length === 0 ? 'Seed complete!' : `Seed finished with errors: ${errors.join(', ')}`);
         return { success: errors.length === 0, errors };
-    }
+    },
+
+    // --- DEAL VERSIONING ---
+    async createDealVersion(dealId: string, version: number, snapshot: Transaction, pricingResult: FTPResult | null, changedBy: string, reason?: string) {
+        const { error } = await supabase
+            .from('deal_versions')
+            .insert({
+                deal_id: dealId,
+                version,
+                snapshot: JSON.parse(JSON.stringify(snapshot)),
+                pricing_result: pricingResult ? JSON.parse(JSON.stringify(pricingResult)) : null,
+                changed_by: changedBy,
+                change_reason: reason || null,
+            });
+        if (error) console.error('Error creating deal version:', error);
+    },
+
+    async fetchDealVersions(dealId: string): Promise<any[]> {
+        const { data, error } = await supabase
+            .from('deal_versions')
+            .select('*')
+            .eq('deal_id', dealId)
+            .order('version', { ascending: false });
+        if (error) {
+            console.error('Error fetching deal versions:', error);
+            return [];
+        }
+        return data || [];
+    },
+
+    // --- DEAL WORKFLOW ---
+    async transitionDeal(dealId: string, newStatus: string, userEmail: string, pricingSnapshot?: FTPResult) {
+        const updateData: any = {
+            status: newStatus,
+            updated_at: new Date().toISOString(),
+        };
+
+        if (newStatus === 'Approved') {
+            updateData.approved_by = userEmail;
+            updateData.approved_at = new Date().toISOString();
+        }
+
+        if (newStatus === 'Pending_Approval' && pricingSnapshot) {
+            updateData.pricing_snapshot = JSON.parse(JSON.stringify(pricingSnapshot));
+            updateData.locked_at = new Date().toISOString();
+            updateData.locked_by = userEmail;
+        }
+
+        if (newStatus === 'Booked') {
+            updateData.locked_at = new Date().toISOString();
+            updateData.locked_by = userEmail;
+        }
+
+        if (newStatus === 'Draft' || newStatus === 'Rejected') {
+            updateData.locked_at = null;
+            updateData.locked_by = null;
+            updateData.approved_by = null;
+            updateData.approved_at = null;
+        }
+
+        const { data, error } = await supabase
+            .from('deals')
+            .update(updateData)
+            .eq('id', dealId)
+            .select();
+
+        if (error) {
+            console.error('Error transitioning deal:', error);
+            return null;
+        }
+        return data ? mapDealFromDB(data[0]) : null;
+    },
+
+    // --- PAGINATED QUERIES ---
+    async fetchDealsPaginated(page: number = 1, pageSize: number = 50): Promise<{ data: Transaction[]; total: number }> {
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data, error, count } = await supabase
+            .from('deals')
+            .select('*', { count: 'exact' })
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        if (error) {
+            console.error('Error fetching paginated deals:', error);
+            return { data: [], total: 0 };
+        }
+        return {
+            data: (data || []).map(mapDealFromDB),
+            total: count || 0,
+        };
+    },
+
+    async fetchAuditLogPaginated(page: number = 1, pageSize: number = 100): Promise<{ data: AuditEntry[]; total: number }> {
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data, error, count } = await supabase
+            .from('audit_log')
+            .select('*', { count: 'exact' })
+            .order('timestamp', { ascending: false })
+            .range(from, to);
+
+        if (error) {
+            console.error('Error fetching paginated audit log:', error);
+            return { data: [], total: 0 };
+        }
+        return {
+            data: (data || []).map(mapAuditFromDB),
+            total: count || 0,
+        };
+    },
 };

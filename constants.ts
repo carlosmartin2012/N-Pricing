@@ -1,4 +1,4 @@
-import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData, GeneralRule } from './types';
+import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData, GeneralRule, IncentivisationRule, SDRConfig, LRConfig } from './types';
 
 export const MOCK_CLIENTS: ClientEntity[] = [
   { id: 'CL-1001', name: 'Acme Corp Industries', type: 'Corporate', segment: 'Large Cap', rating: 'BBB' },
@@ -127,8 +127,10 @@ export const MOCK_BEHAVIOURAL_MODELS: BehaviouralModel[] = [
 ];
 
 export const MOCK_LIQUIDITY_CURVES: DualLiquidityCurve[] = [
+  // USD Unsecured (default)
   {
     currency: 'USD',
+    curveType: 'unsecured',
     lastUpdate: new Date().toISOString(),
     points: [
       { tenor: 'ON', wholesaleSpread: 5, termLP: 15 },
@@ -137,9 +139,61 @@ export const MOCK_LIQUIDITY_CURVES: DualLiquidityCurve[] = [
       { tenor: '6M', wholesaleSpread: 20, termLP: 25 },
       { tenor: '1Y', wholesaleSpread: 25, termLP: 30 },
       { tenor: '2Y', wholesaleSpread: 35, termLP: 40 },
+      { tenor: '3Y', wholesaleSpread: 42, termLP: 48 },
       { tenor: '5Y', wholesaleSpread: 50, termLP: 55 },
+      { tenor: '10Y', wholesaleSpread: 55, termLP: 59 },
     ]
-  }
+  },
+  // USD Secured (Gap 8: repos, covered bonds)
+  {
+    currency: 'USD',
+    curveType: 'secured',
+    lastUpdate: new Date().toISOString(),
+    points: [
+      { tenor: 'ON', wholesaleSpread: 2, termLP: 5 },
+      { tenor: '1M', wholesaleSpread: 5, termLP: 10 },
+      { tenor: '3M', wholesaleSpread: 8, termLP: 12 },
+      { tenor: '6M', wholesaleSpread: 10, termLP: 15 },
+      { tenor: '1Y', wholesaleSpread: 15, termLP: 20 },
+      { tenor: '2Y', wholesaleSpread: 20, termLP: 28 },
+      { tenor: '3Y', wholesaleSpread: 25, termLP: 33 },
+      { tenor: '5Y', wholesaleSpread: 30, termLP: 38 },
+      { tenor: '10Y', wholesaleSpread: 33, termLP: 41 },
+    ]
+  },
+  // EUR Unsecured (Gap 10)
+  {
+    currency: 'EUR',
+    curveType: 'unsecured',
+    lastUpdate: new Date().toISOString(),
+    points: [
+      { tenor: 'ON', wholesaleSpread: 3, termLP: 10 },
+      { tenor: '1M', wholesaleSpread: 8, termLP: 15 },
+      { tenor: '3M', wholesaleSpread: 12, termLP: 18 },
+      { tenor: '6M', wholesaleSpread: 16, termLP: 22 },
+      { tenor: '1Y', wholesaleSpread: 22, termLP: 28 },
+      { tenor: '2Y', wholesaleSpread: 32, termLP: 38 },
+      { tenor: '3Y', wholesaleSpread: 40, termLP: 45 },
+      { tenor: '5Y', wholesaleSpread: 48, termLP: 52 },
+      { tenor: '10Y', wholesaleSpread: 52, termLP: 56 },
+    ]
+  },
+  // GBP Unsecured (Gap 10)
+  {
+    currency: 'GBP',
+    curveType: 'unsecured',
+    lastUpdate: new Date().toISOString(),
+    points: [
+      { tenor: 'ON', wholesaleSpread: 4, termLP: 12 },
+      { tenor: '1M', wholesaleSpread: 9, termLP: 17 },
+      { tenor: '3M', wholesaleSpread: 14, termLP: 20 },
+      { tenor: '6M', wholesaleSpread: 18, termLP: 24 },
+      { tenor: '1Y', wholesaleSpread: 24, termLP: 32 },
+      { tenor: '2Y', wholesaleSpread: 34, termLP: 42 },
+      { tenor: '5Y', wholesaleSpread: 48, termLP: 56 },
+      { tenor: '10Y', wholesaleSpread: 54, termLP: 60 },
+    ]
+  },
 ];
 
 export const MOCK_YIELD_CURVE = [
@@ -277,7 +331,8 @@ export const MOCK_RULES: GeneralRule[] = [
     baseReference: 'USD-SOFR',
     spreadMethod: '50% LP(DTM) + 50% LP(1Y) [NSFR Floor]',
     liquidityReference: 'USD-LIQ-STD',
-    strategicSpread: 15
+    strategicSpread: 15,
+    formulaSpec: { baseRateKey: 'DTM', lpFormula: '50_50_DTM_1Y', sign: 1 },
   },
   {
     id: 2,
@@ -289,7 +344,8 @@ export const MOCK_RULES: GeneralRule[] = [
     baseReference: 'EUR-ESTR',
     spreadMethod: '50% LP(BM) + 50% LP[max(1Y, BM)] + 25% CLC',
     liquidityReference: 'EUR-LIQ-STD',
-    strategicSpread: 5
+    strategicSpread: 5,
+    formulaSpec: { baseRateKey: 'BM', lpFormula: 'LP_BM', sign: -1 },
   },
   {
     id: 3,
@@ -301,7 +357,8 @@ export const MOCK_RULES: GeneralRule[] = [
     baseReference: 'USD-SOFR',
     spreadMethod: '(1-HC)·(sec. LP + ECA adj) + HC·unsec. LP',
     liquidityReference: 'USD-LIQ-SEC',
-    strategicSpread: 2
+    strategicSpread: 2,
+    formulaSpec: { baseRateKey: 'DTM', lpFormula: 'SECURED_LP', lpCurveType: 'secured', sign: 1 },
   },
   {
     id: 4,
@@ -313,7 +370,34 @@ export const MOCK_RULES: GeneralRule[] = [
     baseReference: 'USD-SOFR',
     spreadMethod: 'Stable Funding LP (Long-Term)',
     liquidityReference: 'USD-LIQ-STD',
-    strategicSpread: 10
+    strategicSpread: 10,
+    formulaSpec: { baseRateKey: 'BM', lpFormula: 'LP_BM', sign: 1 },
+  },
+  {
+    id: 5,
+    businessUnit: 'Commercial Banking',
+    product: 'Commercial Loan',
+    segment: 'Corporate',
+    tenor: '> 12M',
+    baseMethod: 'Matched Maturity',
+    baseReference: 'USD-SOFR',
+    spreadMethod: 'BR[min(BM,RM)] + LP(BM)',
+    liquidityReference: 'USD-LIQ-STD',
+    strategicSpread: 12,
+    formulaSpec: { baseRateKey: 'MIN_BM_RM', lpFormula: 'LP_BM', sign: 1 },
+  },
+  {
+    id: 6,
+    businessUnit: 'Retail Banking',
+    product: 'Current Account',
+    segment: 'Retail',
+    tenor: 'Any',
+    baseMethod: 'Caterpillar (NMD)',
+    baseReference: 'EUR-ESTR',
+    spreadMethod: 'LP(BM) — NMD Replication',
+    liquidityReference: 'EUR-LIQ-STD',
+    strategicSpread: 3,
+    formulaSpec: { baseRateKey: 'BM', lpFormula: 'LP_BM', sign: -1 },
   }
 ];
 
@@ -352,3 +436,55 @@ export const MOCK_LIQUIDITY_DASHBOARD_DATA: LiquidityDashboardData = {
     { date: '2023-11', lcr: 135.4, nsfr: 112.8 },
   ]
 };
+
+// --- SDR, LR & INCENTIVISATION CONFIG (V5.0) ---
+
+export const MOCK_SDR_CONFIG: SDRConfig = {
+  stableDepositRatio: 0.72,     // 72% of deposits classified stable
+  sdrFloor: 0.50,               // minimum SDR for benefit to kick in
+  sdrImpactMultiplier: 0.30,    // how much SDR above floor reduces LP
+  externalFundingPct: 0.35,     // 35% external / 65% internal for blended LP
+};
+
+export const MOCK_LR_CONFIG: LRConfig = {
+  totalBufferCostBps: 20.52,        // total HQLA buffer cost (bps)
+  riskAppetiteAddon: 1.30,          // 30% risk appetite addon
+  buAllocations: {
+    'BU-001': 0.40,                 // Commercial Banking 40%
+    'BU-002': 0.25,                 // Retail Banking 25%
+    'BU-003': 0.15,                 // SME / Business 15%
+    'BU-004': 0.10,                 // Wealth Management 10%
+    'BU-900': 0.10,                 // Central Treasury 10%
+  },
+};
+
+export const MOCK_INCENTIVISATION_RULES: IncentivisationRule[] = [
+  {
+    id: 'INC-001',
+    productType: 'LOAN_MORT',
+    segment: 'Retail',
+    subsidyBps: -5,
+    validFrom: '2024-01-01',
+    validTo: '2024-12-31',
+    maxVolume: 500000000,
+    description: 'Green mortgage incentive — reduced LP for energy-efficient homes',
+  },
+  {
+    id: 'INC-002',
+    productType: 'LOAN_COMM',
+    segment: 'SME',
+    subsidyBps: -3,
+    validFrom: '2024-01-01',
+    validTo: '2024-06-30',
+    description: 'SME new production subsidy — strategic growth segment',
+  },
+  {
+    id: 'INC-003',
+    productType: 'DEP_TERM',
+    segment: 'Retail',
+    subsidyBps: 2,
+    validFrom: '2024-01-01',
+    validTo: '2024-12-31',
+    description: 'Term deposit retention premium — stable funding incentive',
+  },
+];

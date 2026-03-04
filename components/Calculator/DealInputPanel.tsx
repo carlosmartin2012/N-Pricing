@@ -284,6 +284,64 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                         </InputGroup>
                      </div>
 
+                     {/* V5.0: Advanced Deal Parameters */}
+                     {(values.category === 'Liability') && (
+                        <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-800/50">
+                           <InputGroup label="Deposit Stability">
+                              <SelectInput value={values.depositStability || ''} onChange={(e) => handleChange(e, 'depositStability')}>
+                                 <option value="">Auto-classify</option>
+                                 <option value="Stable">Stable</option>
+                                 <option value="Semi_Stable">Semi-Stable</option>
+                                 <option value="Non_Stable">Non-Stable</option>
+                              </SelectInput>
+                           </InputGroup>
+                           <InputGroup label="Operational Deposit">
+                              <SelectInput value={values.isOperationalSegment ? 'true' : 'false'} onChange={(e) => onChange('isOperationalSegment', e.target.value === 'true')}>
+                                 <option value="false">No</option>
+                                 <option value="true">Yes</option>
+                              </SelectInput>
+                           </InputGroup>
+                        </div>
+                     )}
+
+                     <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-800/50">
+                        <InputGroup label="EAD (Exposure at Default)">
+                           <TextInput type="number" value={values.ead || ''} onChange={(e) => handleChange(e, 'ead')} placeholder="= Amount if blank" />
+                        </InputGroup>
+                        <InputGroup label="Fee Income (annual)">
+                           <TextInput type="number" value={values.feeIncome || ''} onChange={(e) => handleChange(e, 'feeIncome')} placeholder="0" />
+                        </InputGroup>
+                        <InputGroup label="Repricing Months (RM)">
+                           <TextInput type="number" value={values.repricingMonths ?? ''} onChange={(e) => handleChange(e, 'repricingMonths')} placeholder="Auto from freq" />
+                        </InputGroup>
+                        <InputGroup label="Repricing Frequency">
+                           <SelectInput value={values.repricingFreq} onChange={(e) => handleChange(e, 'repricingFreq')}>
+                              <option value="Daily">Daily</option>
+                              <option value="Monthly">Monthly</option>
+                              <option value="Quarterly">Quarterly</option>
+                              <option value="Fixed">Fixed</option>
+                           </SelectInput>
+                        </InputGroup>
+                     </div>
+
+                     {/* Collateral (for secured LP) */}
+                     {values.category === 'Asset' && (
+                        <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-800/50">
+                           <InputGroup label="Collateral Type">
+                              <SelectInput value={values.collateralType || 'None'} onChange={(e) => handleChange(e, 'collateralType')}>
+                                 <option value="None">None (Unsecured)</option>
+                                 <option value="Sovereign">Sovereign</option>
+                                 <option value="Corporate">Corporate Bonds</option>
+                                 <option value="Cash">Cash</option>
+                                 <option value="Real_Estate">Real Estate</option>
+                              </SelectInput>
+                           </InputGroup>
+                           <InputGroup label="Haircut (%)">
+                              <TextInput type="number" value={values.haircutPct || 0} onChange={(e) => handleChange(e, 'haircutPct')} />
+                           </InputGroup>
+                        </div>
+                     )}
+
                      {/* ESG & Behavioural */}
                      <div className="grid grid-cols-2 gap-4">
                         <InputGroup label="Transition Risk">

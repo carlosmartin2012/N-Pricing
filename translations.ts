@@ -78,6 +78,13 @@ export const translations = {
         shockedScenario: 'Shocked Scenario',
         impactAnalysis: 'Impact Analysis',
         applyShocks: 'Apply Shocks',
+        reporting: 'Reporting ALM',
+        rarocTerminal: 'RAROC Terminal',
+        liquidityDashboard: 'Liquidity Dashboard',
+        syncStatus: 'Sync Status',
+        syncMock: 'Demo Data',
+        syncLive: 'Live Data',
+        syncError: 'Sync Error',
     },
     es: {
         // General
@@ -157,5 +164,11 @@ export const translations = {
         impactAnalysis: 'Análisis de Impacto',
         applyShocks: 'Aplicar Shocks',
         reporting: 'Reporting ALM',
+        rarocTerminal: 'Terminal RAROC',
+        liquidityDashboard: 'Panel de Liquidez',
+        syncStatus: 'Estado de Sincronización',
+        syncMock: 'Datos Demo',
+        syncLive: 'Datos en Vivo',
+        syncError: 'Error de Sincronización',
     }
 };

@@ -1,11 +1,12 @@
 
 import React, { useMemo, useState } from 'react';
 import { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
-import { calculatePricing, PricingShocks } from '../../utils/pricingEngine';
-import { MOCK_BEHAVIOURAL_MODELS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID } from '../../constants';
+import { calculatePricing, PricingShocks, PricingContext } from '../../utils/pricingEngine';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap, Droplets } from 'lucide-react';
 import { translations, Language } from '../../translations';
+import { useData } from '../../contexts/DataContext';
+import { MOCK_YIELD_CURVE, MOCK_LIQUIDITY_CURVES, MOCK_FTP_RATE_CARDS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_BEHAVIOURAL_MODELS, MOCK_CLIENTS } from '../../constants';
 
 interface Props {
    deal: Transaction;
@@ -19,15 +20,27 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
    const [showAccounting, setShowAccounting] = useState(false);
    const [applyShocks, setApplyShocks] = useState(false);
    const t = translations[language];
+   const data = useData();
 
-   // SIMULATE REAL-TIME CALCULATION ENGINE
+   const pricingContext: PricingContext = useMemo(() => ({
+      yieldCurve: data.yieldCurves?.length ? data.yieldCurves : MOCK_YIELD_CURVE,
+      liquidityCurves: MOCK_LIQUIDITY_CURVES,
+      rules: data.rules,
+      rateCards: data.ftpRateCards?.length ? data.ftpRateCards : MOCK_FTP_RATE_CARDS,
+      transitionGrid: data.transitionGrid?.length ? data.transitionGrid : MOCK_TRANSITION_GRID,
+      physicalGrid: data.physicalGrid?.length ? data.physicalGrid : MOCK_PHYSICAL_GRID,
+      behaviouralModels: data.behaviouralModels?.length ? data.behaviouralModels : MOCK_BEHAVIOURAL_MODELS,
+      clients: data.clients?.length ? data.clients : MOCK_CLIENTS,
+      products: data.products,
+      businessUnits: data.businessUnits,
+   }), [data.yieldCurves, data.rules, data.ftpRateCards, data.transitionGrid, data.physicalGrid, data.behaviouralModels, data.clients, data.products, data.businessUnits]);
+
    const result: FTPResult = useMemo(() => {
-      // Use shared pricing engine with optional shocks
       const activeShocks = (applyShocks && shocks) ? shocks : { interestRate: 0, liquiditySpread: 0 };
-      const baseResult = calculatePricing(deal, approvalMatrix, activeShocks);
+      const baseResult = calculatePricing(deal, approvalMatrix, pricingContext, activeShocks);
       setMatchedMethod(baseResult.matchedMethodology);
       return baseResult;
-   }, [deal, setMatchedMethod, approvalMatrix, shocks, applyShocks]);
+   }, [deal, setMatchedMethod, approvalMatrix, pricingContext, shocks, applyShocks]);
 
    const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency }).format(n);
 
@@ -100,9 +113,20 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
             {/* Pricing Waterfall V5.0: ALM Hierarchical Rigor */}
             <div className="flex-1 p-4 space-y-1 overflow-auto bg-white dark:bg-[#050505]">
+               {/* Formula Badge */}
+               {result.formulaUsed && (
+                  <div className="mb-3 p-2 bg-indigo-950/30 border border-indigo-800/50 rounded-lg">
+                     <div className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mb-1">Applied Formula</div>
+                     <div className="text-xs text-indigo-300 font-mono">{result.formulaUsed}</div>
+                     {result.behavioralMaturityUsed != null && result.behavioralMaturityUsed !== deal.durationMonths && (
+                        <div className="text-[10px] text-indigo-500 mt-1">BM={Math.round(result.behavioralMaturityUsed)}M vs DTM={deal.durationMonths}M</div>
+                     )}
+                  </div>
+               )}
+
                <div className="text-[10px] uppercase text-slate-500 font-bold mb-2 tracking-widest">Pricing Construction Flow</div>
 
-               <WaterfallItem label="Base Risk-Free Rate (Matched)" value={result.baseRate} color="text-slate-300" />
+               <WaterfallItem label="IRRBB — Base Rate" value={result.baseRate} color="text-slate-300" />
 
                {/* Consolidated Liquidity Module */}
                <div className="mt-3 mb-1 pt-2 border-t border-slate-800/50">
@@ -115,20 +139,42 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                      icon={<Droplets size={12} className="inline mr-2 text-amber-600" />}
                   />
 
-                  {/* Indented Methodological Breakdown */}
+                  {/* Indented Breakdown: LP + CLC + NSFR + LR */}
                   <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-800 pl-3">
                      <div className="flex justify-between items-center text-[10px] text-slate-500">
-                        <span>NSFR Optimization (Term Floor)</span>
-                        <span className="font-mono">+{result._liquidityPremiumDetails.toFixed(3)}%</span>
+                        <span>Liquidity Premium (LP)</span>
+                        <span className="font-mono">{result._liquidityPremiumDetails >= 0 ? '+' : ''}{result._liquidityPremiumDetails.toFixed(3)}%</span>
                      </div>
                      <div className="flex justify-between items-center text-[10px] text-slate-500">
-                        <span>LCR Buffer Cost (Contingent)</span>
+                        <span>LCR Buffer Cost (CLC)</span>
                         <span className="font-mono">+{result._clcChargeDetails.toFixed(3)}%</span>
                      </div>
+                     {(result.nsfrCost != null && result.nsfrCost !== 0) && (
+                        <div className="flex justify-between items-center text-[10px] text-slate-500">
+                           <span>NSFR {result.nsfrCost < 0 ? 'Benefit' : 'Charge'}</span>
+                           <span className="font-mono">{result.nsfrCost >= 0 ? '+' : ''}{result.nsfrCost.toFixed(3)}%</span>
+                        </div>
+                     )}
+                     {(result.liquidityRecharge != null && result.liquidityRecharge !== 0) && (
+                        <div className="flex justify-between items-center text-[10px] text-purple-400">
+                           <span>Liquidity Recharge (LR)</span>
+                           <span className="font-mono">+{result.liquidityRecharge.toFixed(3)}%</span>
+                        </div>
+                     )}
                   </div>
                </div>
 
                <WaterfallItem label="Strategic Spread" value={result.strategicSpread} isAdd color="text-blue-600 dark:text-blue-400" />
+
+               {/* Incentivisation */}
+               {(result.incentivisationAdj != null && result.incentivisationAdj !== 0) && (
+                  <WaterfallItem
+                     label="Incentivisation Adj."
+                     value={result.incentivisationAdj}
+                     isAdd
+                     color={result.incentivisationAdj < 0 ? "text-emerald-400" : "text-rose-400"}
+                  />
+               )}
 
                <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
 
@@ -148,7 +194,13 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                      <span>+ Cost of Capital (Hurdle)</span>
                      <span>+{result.capitalCharge.toFixed(2)}%</span>
                   </div>
-                  <WaterfallItem label="Technical Price (ROE 15%)" value={result.technicalPrice} highlight color="text-cyan-300" />
+                  {(result.capitalIncome != null && result.capitalIncome > 0) && (
+                     <div className="flex items-center justify-between text-[10px] text-emerald-500 pl-2 mt-0.5">
+                        <span>- Capital Income (Risk-Free)</span>
+                        <span className="font-mono">-{result.capitalIncome.toFixed(3)}%</span>
+                     </div>
+                  )}
+                  <WaterfallItem label={`Technical Price (ROE ${deal.targetROE}%)`} value={result.technicalPrice} highlight color="text-cyan-300" />
                </div>
 
                <div className="flex items-center justify-between pt-2">

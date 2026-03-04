@@ -1,12 +1,15 @@
 {
   "name": "n-pricing",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,css}\""
   },
   "dependencies": {
     "@google/genai": "^1.40.0",
@@ -16,16 +19,24 @@
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-is": "^19.2.4",
     "recharts": "^3.7.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "postcss": "^8.4.47",
+    "prettier": "^3.8.1",
     "tailwindcss": "^3.4.14",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "typescript-eslint": "^8.56.1",
+    "vite": "^6.2.0",
+    "vitest": "^4.0.18"
   }
 }
