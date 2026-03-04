@@ -40,6 +40,7 @@ export const MOCK_USERS: UserProfile[] = [
   { id: 'usr-008', name: 'Diego Merino', email: 'diego.merino@nfq.es', role: 'Trader', status: 'Active', lastLogin: getRecentDate(1), department: 'Global Markets' },
   { id: 'usr-009', name: 'Diego Diaz', email: 'diego.diaz@nfq.es', role: 'Admin', status: 'Active', lastLogin: getRecentDate(3), department: 'Treasury / ALM' },
   { id: 'usr-010', name: 'Alin Marin', email: 'alin.marin@nfq.es', role: 'Admin', status: 'Active', lastLogin: getRecentDate(0), department: 'IT / Development' },
+  { id: 'usr-demo', name: 'Demo User', email: 'demo@nfq.es', role: 'Admin', status: 'Active', lastLogin: getRecentDate(0), department: 'Demo' },
 ];
 
 export const WHITELISTED_EMAILS = MOCK_USERS.map(u => u.email);

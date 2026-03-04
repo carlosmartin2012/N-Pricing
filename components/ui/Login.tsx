@@ -12,9 +12,15 @@ interface LoginProps {
     language: Language;
 }
 
+const DEMO_USER = 'demo';
+const DEMO_PASS = 'nfq@1234';
+const DEMO_EMAIL = 'demo@nfq.es';
+
 export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, language }) => {
     const t = translations[language];
     const [error, setError] = React.useState<string | null>(null);
+    const [username, setUsername] = React.useState('');
+    const [password, setPassword] = React.useState('');
 
     const login = useGoogleLogin({
         flow: 'implicit',
@@ -23,26 +29,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, langua
         hosted_domain: 'nfq.es',
         onSuccess: async (tokenResponse) => {
             try {
-                // Fetch user info using the access token
                 const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
                 const userInfo = await userInfoResponse.json();
-
                 const email = userInfo.email;
 
-                if (!email) {
-                    setError('Could not retrieve email.');
-                    return;
-                }
+                if (!email) { setError('Could not retrieve email.'); return; }
+                if (!email.endsWith('@nfq.es')) { setError('Access Restricted: Only @nfq.es emails are allowed.'); return; }
 
-                // Check Domain
-                if (!email.endsWith('@nfq.es')) {
-                    setError('Access Restricted: Only @nfq.es emails are allowed.');
-                    return;
-                }
-
-                // Check Whitelist
                 const allowed = whitelistedEmails || WHITELISTED_EMAILS;
                 if (!allowed.some(e => e.toLowerCase() === email.toLowerCase())) {
                     setError('Access Denied: Your email is not whitelisted.');
@@ -51,16 +46,23 @@ export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, langua
 
                 setError(null);
                 onLogin(email);
-
             } catch (err) {
                 console.error(err);
                 setError('Authentication failed.');
             }
         },
-        onError: () => {
-            setError('Login Failed');
-        },
+        onError: () => { setError('Login Failed'); },
     });
+
+    const handleDemoLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (username === DEMO_USER && password === DEMO_PASS) {
+            setError(null);
+            onLogin(DEMO_EMAIL);
+        } else {
+            setError('Invalid credentials.');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 space-y-8">
@@ -75,10 +77,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, langua
 
             {/* Login Card */}
             <div className="w-full max-w-md bg-[#111111] border border-white/5 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                <div className="flex flex-col items-center mt-10">
+                <div className="flex flex-col items-center mt-6">
+                    {/* Google OAuth */}
                     <button
                         onClick={() => login()}
-                        className="w-full bg-white text-black rounded-full py-4 px-6 flex items-center justify-between hover:bg-slate-100 transition-colors mb-6"
+                        className="w-full bg-white text-black rounded-full py-4 px-6 flex items-center justify-between hover:bg-slate-100 transition-colors"
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center overflow-hidden">
@@ -96,13 +99,44 @@ export const Login: React.FC<LoginProps> = ({ onLogin, whitelistedEmails, langua
                         </svg>
                     </button>
 
+                    {/* Divider */}
+                    <div className="w-full flex items-center gap-3 my-5">
+                        <div className="flex-1 h-px bg-white/10"></div>
+                        <span className="text-xs text-slate-500 uppercase tracking-wider">or</span>
+                        <div className="flex-1 h-px bg-white/10"></div>
+                    </div>
+
+                    {/* Demo Login Form */}
+                    <form onSubmit={handleDemoLogin} className="w-full space-y-3">
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                        />
+                        <button
+                            type="submit"
+                            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl py-3 text-sm font-semibold transition-colors"
+                        >
+                            Sign In
+                        </button>
+                    </form>
+
                     {error && (
-                        <div className="mb-6 p-3 bg-red-900/30 border border-red-800 rounded text-red-200 text-xs text-center w-full">
+                        <div className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded text-red-200 text-xs text-center w-full">
                             {error}
                         </div>
                     )}
 
-                    <div className="w-full h-px bg-white/5 mb-8"></div>
+                    <div className="w-full h-px bg-white/5 mt-5 mb-4"></div>
 
                     <div className="text-[10px] text-slate-500 text-center leading-relaxed max-w-[280px]">
                         {t.agree} <a href="#" className="underline">{t.terms}</a> {t.and} <a href="#" className="underline">{t.privacy}</a>
