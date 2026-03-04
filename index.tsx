@@ -51,19 +51,11 @@ if (!googleClientId) {
   console.warn('VITE_GOOGLE_CLIENT_ID not set. Google OAuth will not work.');
 }
 
-/** Wrap children with GoogleOAuthProvider only when client ID is available */
-const MaybeGoogleOAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  if (googleClientId) {
-    return <GoogleOAuthProvider clientId={googleClientId}>{children}</GoogleOAuthProvider>;
-  }
-  return <>{children}</>;
-};
-
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <RootErrorBoundary>
-      <MaybeGoogleOAuth>
+      <GoogleOAuthProvider clientId={googleClientId || 'NOT_CONFIGURED'}>
         <AuthProvider>
           <DataProvider>
             <UIProvider>
@@ -71,7 +63,7 @@ root.render(
             </UIProvider>
           </DataProvider>
         </AuthProvider>
-      </MaybeGoogleOAuth>
+      </GoogleOAuthProvider>
     </RootErrorBoundary>
   </React.StrictMode>
 );
