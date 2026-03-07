@@ -138,7 +138,9 @@ export function interpolateRateCard(
   if (upperIdx <= 0) return points[0].rate;
   const lower = points[upperIdx - 1];
   const upper = points[upperIdx];
-  const ratio = (targetMonths - lower.months) / (upper.months - lower.months);
+  const denom = upper.months - lower.months;
+  if (denom === 0) return upper.rate;
+  const ratio = (targetMonths - lower.months) / denom;
   return lower.rate + ratio * (upper.rate - lower.rate);
 }
 

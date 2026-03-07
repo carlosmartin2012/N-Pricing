@@ -13,6 +13,16 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       build: {
         sourcemap: true,
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'vendor-react': ['react', 'react-dom'],
+              'vendor-charts': ['recharts'],
+              'vendor-supabase': ['@supabase/supabase-js'],
+              'vendor-xlsx': ['xlsx'],
+            },
+          },
+        },
       },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),

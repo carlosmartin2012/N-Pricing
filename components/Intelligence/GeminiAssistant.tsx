@@ -82,7 +82,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
       setMessages(prev => [...prev, { id: modelMsgId, role: 'model', text: '' }]);
 
       for await (const chunk of response) {
-        const text = chunk.text();
+        const text = chunk.text;
         if (text) {
           fullText += text;
           setMessages(prev =>

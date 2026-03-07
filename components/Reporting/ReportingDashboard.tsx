@@ -235,7 +235,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                                         <Calculator className="w-4 h-4 text-cyan-500" /> Contract Simulation
                                     </h3>
                                     {isModified && (
-                                        <button onClick={() => selectedDealId ? setSelectedDealId('') || setSelectedDealId(selectedDealId) : setScenarioDeal(INITIAL_DEAL)} className="text-[10px] text-rose-400 hover:text-rose-300 flex items-center gap-1 font-bold">
+                                        <button onClick={() => { if (selectedDealId) { const id = selectedDealId; setSelectedDealId(''); setTimeout(() => setSelectedDealId(id), 0); } else { setScenarioDeal(INITIAL_DEAL); } }} className="text-[10px] text-rose-400 hover:text-rose-300 flex items-center gap-1 font-bold">
                                             <RefreshCw className="w-3 h-3" /> RESET
                                         </button>
                                     )}

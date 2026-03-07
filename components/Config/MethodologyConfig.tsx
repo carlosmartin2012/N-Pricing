@@ -71,25 +71,39 @@ const MethodologyConfig: React.FC<Props> = ({
       }
    };
 
+   const colorMap: Record<string, { border: string; text: string }> = {
+      cyan: { border: 'border-cyan-500', text: 'text-cyan-500' },
+      violet: { border: 'border-violet-500', text: 'text-violet-500' },
+      amber: { border: 'border-amber-500', text: 'text-amber-500' },
+      emerald: { border: 'border-emerald-500', text: 'text-emerald-500' },
+      rose: { border: 'border-rose-500', text: 'text-rose-500' },
+      blue: { border: 'border-blue-500', text: 'text-blue-500' },
+      indigo: { border: 'border-indigo-500', text: 'text-indigo-500' },
+      orange: { border: 'border-orange-500', text: 'text-orange-500' },
+   };
+
    const tabButton = (
       tab: typeof activeTab,
       label: string,
       Icon: React.FC<any>,
       color: string
-   ) => (
-      <button
-         onClick={() => setActiveTab(tab)}
-         className={`px-6 py-3 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
-            activeTab === tab
-               ? `border-${color}-500 text-white bg-slate-800/50`
-               : 'border-transparent text-slate-500 hover:text-slate-300'
-         }`}
-      >
-         <div className="flex items-center gap-2">
-            <Icon size={14} className={`text-${color}-500`} /> {label}
-         </div>
-      </button>
-   );
+   ) => {
+      const colors = colorMap[color] || colorMap.cyan;
+      return (
+         <button
+            onClick={() => setActiveTab(tab)}
+            className={`px-6 py-3 text-xs font-bold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap ${
+               activeTab === tab
+                  ? `${colors.border} text-white bg-slate-800/50`
+                  : 'border-transparent text-slate-500 hover:text-slate-300'
+            }`}
+         >
+            <div className="flex items-center gap-2">
+               <Icon size={14} className={colors.text} /> {label}
+            </div>
+         </button>
+      );
+   };
 
    return (
       <Panel title={mode === 'METHODOLOGY' ? "Methodology & Rules Engine" : "System Configuration & Master Data"} className="h-full">

@@ -54,8 +54,8 @@ export function calculateRAROC(inputs: RAROCInputs): RAROCResult {
   const opRiskCapital = ead * (opRiskCapitalCharge / 100);
   const totalRegCapital = creditRiskCapital + pillar2Capital + opRiskCapital;
 
-  // Capital income (return on regulatory capital at risk-free rate)
-  const capitalIncome = rwa * (minRegCapitalReq / 100) * (riskFreeRate / 100);
+  // Capital income (return on total regulatory capital at risk-free rate)
+  const capitalIncome = totalRegCapital * (riskFreeRate / 100);
 
   // Risk-adjusted return
   const riskAdjustedReturn = grossRevenue - costOfFunds - ecl - operatingCost + capitalIncome;

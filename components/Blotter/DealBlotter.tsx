@@ -115,7 +115,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
   const handleSaveEdit = async () => {
     if (selectedDeal) {
-      await storage.saveDeal(selectedDeal);
+      await storage.saveDeal(selectedDeal as Transaction);
       setIsEditOpen(false);
     }
   };

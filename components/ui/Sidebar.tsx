@@ -100,11 +100,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             `}>
                 <div className="h-16 flex items-center px-4 border-b border-slate-100 dark:border-slate-900">
                     <Logo className="w-8 h-8 mr-3 shrink-0" />
-                    {(isSidebarOpen || !isSidebarOpen) && (
-                        <span className={`font-bold text-xl tracking-tight text-slate-900 dark:text-white transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100' : 'hidden md:opacity-0 w-0'}`}>
-                            Pricing
-                        </span>
-                    )}
+                    <span className={`font-bold text-xl tracking-tight text-slate-900 dark:text-white transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100' : 'hidden md:opacity-0 w-0'}`}>
+                        Pricing
+                    </span>
                 </div>
 
                 {/* Main Menu */}
