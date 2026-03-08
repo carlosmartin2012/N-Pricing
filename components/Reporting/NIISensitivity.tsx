@@ -91,7 +91,7 @@ const NIISensitivity: React.FC<Props> = ({ deals }) => {
             <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}M`} />
             <Tooltip
               contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }}
-              formatter={(val: number) => fmtM(val)}
+              formatter={(val: any) => fmtM(Number(val))}
             />
             <ReferenceLine y={data.find(d => d.isBase)?.nii || 0} stroke="#475569" strokeDasharray="3 3" />
             <Bar dataKey="nii" name="Net Interest Income" radius={[4, 4, 0, 0]}>

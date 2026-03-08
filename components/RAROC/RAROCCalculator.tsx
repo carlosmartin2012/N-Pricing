@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import {
     Calculator, TrendingUp, DollarSign, PieChart, Shield,
     Zap, Info, Settings
@@ -41,16 +41,16 @@ const RAROCCalculator: React.FC<RAROCCalculatorProps> = ({ externalInputs, onUpd
     }, [externalInputs]);
 
     // Local change handler with debounce
-    const handleInputChange = (key: keyof RAROCInputs, value: any) => {
+    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const handleInputChange = useCallback((key: keyof RAROCInputs, value: any) => {
         const nextInputs = { ...inputs, [key]: value };
         setInputs(nextInputs);
 
-        // Debounce external update
-        const timer = setTimeout(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
             onUpdateExternal(nextInputs);
         }, 1000);
-        return () => clearTimeout(timer);
-    };
+    }, [inputs, onUpdateExternal]);
 
     const results = useMemo(() => {
         // Calculations
@@ -59,11 +59,12 @@ const RAROCCalculator: React.FC<RAROCCalculatorProps> = ({ externalInputs, onUpd
         const operatingCost = (inputs.operatingCostPct / 100) * inputs.osAmt;
 
         const creditRiskRegCapital = inputs.rwa * (inputs.minRegCapitalReq / 100);
-        const incomeFromCapital = inputs.rwa * (inputs.minRegCapitalReq / 100) * (inputs.riskFreeRate / 100);
 
         const totalRegCapital = creditRiskRegCapital +
             (inputs.pillar2CapitalCharge / 100 * inputs.ead) +
             (inputs.opRiskCapitalCharge / 100 * inputs.ead);
+
+        const incomeFromCapital = totalRegCapital * (inputs.riskFreeRate / 100);
 
         const riskAdjustedReturn = grossRevenue - inputs.ecl - costOfFunds - operatingCost + incomeFromCapital;
 

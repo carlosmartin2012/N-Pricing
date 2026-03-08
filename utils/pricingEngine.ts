@@ -121,7 +121,9 @@ export function interpolateYieldCurve(curve: YieldCurvePoint[], targetMonths: nu
 
   const lower = points[upperIdx - 1];
   const upper = points[upperIdx];
-  const ratio = (targetMonths - lower.months) / (upper.months - lower.months);
+  const denom = upper.months - lower.months;
+  if (denom === 0) return upper.rate;
+  const ratio = (targetMonths - lower.months) / denom;
   return lower.rate + ratio * (upper.rate - lower.rate);
 }
 
@@ -202,7 +204,9 @@ function calculateBlendedLP(
 
   const lower = smoothedPoints[upperIdx - 1];
   const upper = smoothedPoints[upperIdx];
-  const ratio = (targetMonths - lower.months) / (upper.months - lower.months);
+  const denom = upper.months - lower.months;
+  if (denom === 0) return upper.lp;
+  const ratio = (targetMonths - lower.months) / denom;
   return lower.lp + ratio * (upper.lp - lower.lp);
 }
 
@@ -263,7 +267,9 @@ function interpolateFromZeros(zeros: { months: number; rate: number }[], targetM
 
   const lower = zeros[upperIdx - 1];
   const upper = zeros[upperIdx];
-  const ratio = (targetMonths - lower.months) / (upper.months - lower.months);
+  const denom = upper.months - lower.months;
+  if (denom === 0) return upper.rate;
+  const ratio = (targetMonths - lower.months) / denom;
   return lower.rate + ratio * (upper.rate - lower.rate);
 }
 
@@ -699,8 +705,8 @@ export const calculatePricing = (
     });
 
     // Undrawn scaling for credit lines
-    if (deal.undrawnAmount && deal.undrawnAmount > deal.amount) {
-      const undrawnRatio = deal.undrawnAmount / (deal.amount || 1);
+    if (deal.undrawnAmount && deal.amount > 0 && deal.undrawnAmount > deal.amount) {
+      const undrawnRatio = deal.undrawnAmount / deal.amount;
       clcCharge *= (1 + undrawnRatio * PC.UNDRAWN_CLC_SCALE);
     }
   }

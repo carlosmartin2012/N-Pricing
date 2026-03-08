@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { Transaction, ViewState } from './types';
 import { INITIAL_DEAL, MOCK_YIELD_CURVE } from './constants';
 import { useAuth } from './contexts/AuthContext';
@@ -8,29 +8,39 @@ import { useSupabaseSync } from './hooks/useSupabaseSync';
 import { useUniversalImport } from './hooks/useUniversalImport';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
-// Component imports
+// Critical path (always loaded)
 import DealInputPanel from './components/Calculator/DealInputPanel';
 import MethodologyVisualizer from './components/Calculator/MethodologyVisualizer';
 import PricingReceipt from './components/Calculator/PricingReceipt';
-import MethodologyConfig from './components/Config/MethodologyConfig';
-import DealBlotter from './components/Blotter/DealBlotter';
-import YieldCurvePanel from './components/MarketData/YieldCurvePanel';
-import AccountingLedger from './components/Accounting/AccountingLedger';
-import BehaviouralModels from './components/Behavioural/BehaviouralModels';
-import UserManual from './components/Docs/UserManual';
-import UserManagement from './components/Admin/UserManagement';
-import AuditLog from './components/Admin/AuditLog';
-import GeminiAssistant from './components/Intelligence/GeminiAssistant';
-import GenAIChat from './components/Intelligence/GenAIChat';
-import LiquidityDashboard from './components/Liquidity/LiquidityDashboard';
-import ReportingDashboard from './components/Reporting/ReportingDashboard';
-import RAROCCalculator from './components/RAROC/RAROCCalculator';
-import ShocksDashboard from './components/Risk/ShocksDashboard';
 import { Sidebar } from './components/ui/Sidebar';
 import { Header } from './components/ui/Header';
 import { Login } from './components/ui/Login';
 import { UserConfigModal } from './components/ui/UserConfigModal';
 import { UniversalImportModal } from './components/ui/UniversalImportModal';
+
+// Lazy-loaded views (code-split)
+const MethodologyConfig = React.lazy(() => import('./components/Config/MethodologyConfig'));
+const DealBlotter = React.lazy(() => import('./components/Blotter/DealBlotter'));
+const YieldCurvePanel = React.lazy(() => import('./components/MarketData/YieldCurvePanel'));
+const AccountingLedger = React.lazy(() => import('./components/Accounting/AccountingLedger'));
+const BehaviouralModels = React.lazy(() => import('./components/Behavioural/BehaviouralModels'));
+const UserManual = React.lazy(() => import('./components/Docs/UserManual'));
+const UserManagement = React.lazy(() => import('./components/Admin/UserManagement'));
+const AuditLog = React.lazy(() => import('./components/Admin/AuditLog'));
+const GeminiAssistant = React.lazy(() => import('./components/Intelligence/GeminiAssistant'));
+const GenAIChat = React.lazy(() => import('./components/Intelligence/GenAIChat'));
+const ReportingDashboard = React.lazy(() => import('./components/Reporting/ReportingDashboard'));
+const RAROCCalculator = React.lazy(() => import('./components/RAROC/RAROCCalculator'));
+const ShocksDashboard = React.lazy(() => import('./components/Risk/ShocksDashboard'));
+
+const ViewLoader: React.FC = () => (
+  <div className="flex items-center justify-center h-full">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+      <span className="text-xs text-slate-500 font-mono">Loading module...</span>
+    </div>
+  </div>
+);
 
 import { supabaseService } from './utils/supabaseService';
 import { Calculator, LineChart, FileText, Settings, Activity, BookOpen, Users, Sparkles, GitBranch, LayoutDashboard, Zap, BarChart4, Percent, ShieldCheck, BrainCircuit, TrendingUp } from 'lucide-react';
@@ -129,6 +139,7 @@ const AppContent: React.FC = () => {
           />
 
           <ErrorBoundary>
+           <Suspense fallback={<ViewLoader />}>
             {ui.currentView === 'CALCULATOR' && (
               <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 md:gap-6 relative z-0 h-full">
                 <div className="lg:col-span-4 w-full h-full flex flex-col">
@@ -146,7 +157,7 @@ const AppContent: React.FC = () => {
                   <PricingReceipt
                     deal={dealParams} setMatchedMethod={setMatchedMethod}
                     approvalMatrix={data.approvalMatrix} language={ui.language}
-                    shocks={data.shocks} user={currentUser}
+                    shocks={data.shocks}
                   />
                 </div>
               </div>
@@ -177,7 +188,7 @@ const AppContent: React.FC = () => {
                   externalInputs={data.rarocInputs}
                   onUpdateExternal={(inputs) => {
                     data.setRarocInputs(inputs);
-                    supabaseService.saveRarocInputs(inputs);
+                    supabaseService.saveRarocInputs(inputs).catch(console.error);
                   }}
                 />
               </div>
@@ -244,6 +255,7 @@ const AppContent: React.FC = () => {
                 />
               </div>
             )}
+           </Suspense>
           </ErrorBoundary>
         </main>
 
@@ -254,15 +266,17 @@ const AppContent: React.FC = () => {
           <Sparkles size={24} className="animate-pulse" />
         </button>
 
-        <GeminiAssistant
-          isOpen={ui.isAiOpen}
-          onClose={() => ui.setIsAiOpen(false)}
-          onOpenFullChat={() => { ui.setIsAiOpen(false); ui.setCurrentView('AI_LAB'); }}
-          contextData={{
-            activeDeal: dealParams,
-            marketContext: `Current Base USD Yield Curve: ${JSON.stringify(MOCK_YIELD_CURVE.slice(0, 5))}...`,
-          }}
-        />
+        <Suspense fallback={null}>
+          <GeminiAssistant
+            isOpen={ui.isAiOpen}
+            onClose={() => ui.setIsAiOpen(false)}
+            onOpenFullChat={() => { ui.setIsAiOpen(false); ui.setCurrentView('AI_LAB'); }}
+            contextData={{
+              activeDeal: dealParams,
+              marketContext: `Current Base USD Yield Curve: ${JSON.stringify(MOCK_YIELD_CURVE.slice(0, 5))}...`,
+            }}
+          />
+        </Suspense>
 
         <UserConfigModal
           isOpen={ui.isConfigModalOpen}

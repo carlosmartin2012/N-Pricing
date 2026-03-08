@@ -155,7 +155,7 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, setFtpRateCards, user }) 
                   <div className="mt-4">
                      <div className="flex justify-between items-center mb-2">
                         <label className="text-[10px] font-bold text-slate-500 uppercase">Grid Points (Tenor / Spread)</label>
-                        <button onClick={() => setEditingRateCard({ ...editingRateCard, grid: [...(editingRateCard as any).grid!, { tenor: '1Y', spread: 0 }] })} className="text-xs text-cyan-400 hover:text-white flex items-center gap-1"><Plus size={10} /> Add</button>
+                        <button onClick={() => setEditingRateCard({ ...editingRateCard, grid: [...((editingRateCard as any)?.grid || []), { tenor: '1Y', spread: 0 }] } as any)} className="text-xs text-cyan-400 hover:text-white flex items-center gap-1"><Plus size={10} /> Add</button>
                      </div>
                      <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                         {(editingRateCard as any).grid?.map((pt: any, i: number) => (

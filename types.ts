@@ -91,7 +91,7 @@ export interface UserProfile {
 // Unified Transaction Interface (used for both Pricing Calculator and Blotter)
 export interface Transaction {
   id?: string; // Optional for new deals in calculator before saving
-  status?: 'Booked' | 'Pending' | 'Rejected' | 'Review';
+  status?: 'Draft' | 'Booked' | 'Pending' | 'Pending_Approval' | 'Approved' | 'Rejected' | 'Review';
   desk?: string; // usually businessLine
 
   // Client Data

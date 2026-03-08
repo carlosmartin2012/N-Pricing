@@ -62,7 +62,7 @@ const CurrencyGap: React.FC<Props> = ({ deals }) => {
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }: any) => `${name || ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
                 labelLine={{ stroke: '#475569' }}
               >
                 {pieData.map((_, idx) => (
@@ -71,7 +71,7 @@ const CurrencyGap: React.FC<Props> = ({ deals }) => {
               </Pie>
               <Tooltip
                 contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }}
-                formatter={(val: number) => fmtM(val)}
+                formatter={(val: any) => fmtM(Number(val))}
               />
             </PieChart>
           </ResponsiveContainer>

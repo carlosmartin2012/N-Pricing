@@ -85,6 +85,7 @@ export const translations = {
         syncMock: 'Demo Data',
         syncLive: 'Live Data',
         syncError: 'Sync Error',
+        pricingSimulationEngine: 'Pricing Simulation Engine',
     },
     es: {
         // General
@@ -170,5 +171,6 @@ export const translations = {
         syncMock: 'Datos Demo',
         syncLive: 'Datos en Vivo',
         syncError: 'Error de Sincronización',
+        pricingSimulationEngine: 'Motor de Simulación de Pricing',
     }
 };

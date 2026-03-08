@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { translations, Language } from '../../translations';
 import { Transaction, ApprovalMatrixConfig } from '../../types';
@@ -18,7 +18,20 @@ interface Props {
 
 const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shocks, setShocks, user }) => {
     const t = translations[language];
-    // Local state removed, using props now
+    const auditTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+    const logShockAudit = useCallback((type: string, value: number) => {
+        if (auditTimerRef.current) clearTimeout(auditTimerRef.current);
+        auditTimerRef.current = setTimeout(() => {
+            storage.addAuditEntry({
+                userEmail: user?.email || 'unknown',
+                userName: user?.name || 'Unknown User',
+                action: 'APPLY_SHOCK',
+                module: 'SHOCKS',
+                description: `Adjusted ${type} shock to ${value}bps for deal ${deal.id}`
+            });
+        }, 500);
+    }, [user, deal.id]);
 
     const baseResult = useMemo(() => calculatePricing(deal, approvalMatrix, undefined, { interestRate: 0, liquiditySpread: 0 }), [deal, approvalMatrix]);
     const shockedResult = useMemo(() => calculatePricing(deal, approvalMatrix, undefined, shocks), [deal, approvalMatrix, shocks]);
@@ -88,24 +101,10 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 max="500"
                                 step="10"
                                 value={shocks.interestRate}
-                                onChange={(e) => setShocks({ ...shocks, interestRate: Number(e.target.value) })}
-                                onMouseUp={() => {
-                                    storage.addAuditEntry({
-                                        userEmail: user?.email || 'unknown',
-                                        userName: user?.name || 'Unknown User',
-                                        action: 'APPLY_SHOCK',
-                                        module: 'SHOCKS',
-                                        description: `Adjusted Interest Rate shock to ${shocks.interestRate}bps for deal ${deal.id}`
-                                    });
-                                }}
-                                onTouchEnd={() => {
-                                    storage.addAuditEntry({
-                                        userEmail: user?.email || 'unknown',
-                                        userName: user?.name || 'Unknown User',
-                                        action: 'APPLY_SHOCK',
-                                        module: 'SHOCKS',
-                                        description: `Adjusted Interest Rate shock to ${shocks.interestRate}bps for deal ${deal.id}`
-                                    });
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    setShocks({ ...shocks, interestRate: val });
+                                    logShockAudit('Interest Rate', val);
                                 }}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-cyan-500"
                             />
@@ -130,24 +129,10 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
                                 max="500"
                                 step="10"
                                 value={shocks.liquiditySpread}
-                                onChange={(e) => setShocks({ ...shocks, liquiditySpread: Number(e.target.value) })}
-                                onMouseUp={() => {
-                                    storage.addAuditEntry({
-                                        userEmail: user?.email || 'unknown',
-                                        userName: user?.name || 'Unknown User',
-                                        action: 'APPLY_SHOCK',
-                                        module: 'SHOCKS',
-                                        description: `Adjusted Liquidity Spread shock to ${shocks.liquiditySpread}bps for deal ${deal.id}`
-                                    });
-                                }}
-                                onTouchEnd={() => {
-                                    storage.addAuditEntry({
-                                        userEmail: user?.email || 'unknown',
-                                        userName: user?.name || 'Unknown User',
-                                        action: 'APPLY_SHOCK',
-                                        module: 'SHOCKS',
-                                        description: `Adjusted Liquidity Spread shock to ${shocks.liquiditySpread}bps for deal ${deal.id}`
-                                    });
+                                onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    setShocks({ ...shocks, liquiditySpread: val });
+                                    logShockAudit('Liquidity Spread', val);
                                 }}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-amber-500"
                             />

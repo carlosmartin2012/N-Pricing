@@ -83,20 +83,32 @@ export const useUniversalImport = () => {
         break;
       }
       case 'DEALS': {
-        const dealsToSave = data.map(r => ({
+        const dealsToSave: Transaction[] = data.map(r => ({
           id: r.ID || r.id || r['Transact ID'] || generateId('DL'),
           clientId: r.Client || r.clientId || 'Unknown Client',
+          clientType: r.ClientType || r.clientType || 'Corporate',
           amount: parseFloat(r.Amount || r.amount) || 0,
           currency: r.Currency || r.currency || 'USD',
-          productType: r.Product || r.productType || 'Loan',
+          productType: r.Product || r.productType || 'LOAN_COMM',
+          category: (r.Category || r.category || 'Asset') as 'Asset' | 'Liability' | 'Off-Balance',
           startDate: r.Date || r.startDate || new Date().toISOString().split('T')[0],
           durationMonths: parseInt(r.Duration || r.durationMonths) || 12,
+          amortization: (r.Amortization || r.amortization || 'Bullet') as 'Bullet' | 'French' | 'Linear',
+          repricingFreq: (r.RepricingFreq || r.repricingFreq || 'Fixed') as 'Daily' | 'Monthly' | 'Quarterly' | 'Fixed',
           status: 'Draft' as const,
-          businessUnit: r.BU || r.businessUnit || 'Retail',
+          businessUnit: r.BU || r.businessUnit || 'BU-001',
+          fundingBusinessUnit: r.FundingBU || r.fundingBusinessUnit || 'BU-900',
+          businessLine: r.BusinessLine || r.businessLine || 'Imported',
           marginTarget: parseFloat(r.Margin || r.marginTarget) || 0,
+          riskWeight: parseFloat(r.RiskWeight || r.riskWeight) || 100,
+          capitalRatio: parseFloat(r.CapitalRatio || r.capitalRatio) || 11.5,
+          targetROE: parseFloat(r.TargetROE || r.targetROE) || 15,
+          operationalCostBps: parseFloat(r.OpCost || r.operationalCostBps) || 40,
+          transitionRisk: (r.TransitionRisk || r.transitionRisk || 'Neutral') as 'Brown' | 'Amber' | 'Neutral' | 'Green',
+          physicalRisk: (r.PhysicalRisk || r.physicalRisk || 'Low') as 'High' | 'Medium' | 'Low',
         }));
         for (const dl of dealsToSave) {
-          await storage.saveDeal(dl as Transaction);
+          await storage.saveDeal(dl);
         }
         break;
       }
