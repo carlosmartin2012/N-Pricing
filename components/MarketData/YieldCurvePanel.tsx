@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Panel, Badge, TextInput } from '../ui/LayoutComponents';
 import { MOCK_YIELD_CURVE } from '../../constants';
-import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap, Save, Upload, ChevronDown } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap, Save, Upload, ChevronDown, Database } from 'lucide-react';
 import { storage } from '../../utils/storage';
 import { supabaseService } from '../../utils/supabaseService';
 import { FileUploadModal } from '../ui/FileUploadModal';
@@ -10,6 +10,7 @@ import { YieldCurvePoint } from '../../types';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 import { FileSpreadsheet } from 'lucide-react';
+import { useData } from '../../contexts/DataContext';
 
 interface Props {
     language: Language;
@@ -18,15 +19,45 @@ interface Props {
 
 const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     const t = translations[language];
+    const appData = useData();
     const [currency, setCurrency] = useState('USD');
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [shockBps, setShockBps] = useState<number>(0);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [curvesHistory, setCurvesHistory] = useState<Record<string, YieldCurvePoint[]>>(() => storage.getCurves());
+    const [curveVersions, setCurveVersions] = useState<{ id: string; date: string; user: string; curve: string }[]>([]);
 
     const width = 800;
     const height = 300;
     const padding = 40;
+
+    // Load curve history from Supabase on mount and when currency changes
+    useEffect(() => {
+        supabaseService.fetchCurveHistory(currency)
+            .then((history: any[]) => {
+                if (!history?.length) return;
+                const mapped: Record<string, YieldCurvePoint[]> = {};
+                const versions: typeof curveVersions = [];
+                history.forEach((h: any) => {
+                    const key = `${h.currency}-${h.as_of_date || h.asOfDate || 'unknown'}`;
+                    const pts = (h.grid_data || h.gridData || []).map((p: any) => ({
+                        tenor: p.tenor,
+                        rate: parseFloat(p.rate) || 0,
+                        prev: parseFloat(p.prev || p.rate) || 0,
+                    }));
+                    mapped[key] = pts;
+                    versions.push({
+                        id: `v${h.id}`,
+                        date: h.created_at || h.createdAt || h.as_of_date || '',
+                        user: 'System',
+                        curve: `${h.currency} ${h.as_of_date || ''}`,
+                    });
+                });
+                setCurvesHistory(prev => ({ ...prev, ...mapped }));
+                setCurveVersions(versions.slice(0, 10));
+            })
+            .catch(() => {});
+    }, [currency]);
 
     // Sync History to Storage
     useEffect(() => {
@@ -98,23 +129,42 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         return data;
     }, [data]);
 
-    const handleSaveSnapshot = () => {
+    const handleSaveSnapshot = async () => {
         const key = `${currency}-${selectedDate}`;
+        const snapshotPoints = chartData.map(d => ({ tenor: d.tenor, rate: d.baseRate, prev: d.prev }));
+
         setCurvesHistory(prev => ({
             ...prev,
-            [key]: data.map(d => ({ tenor: d.tenor, rate: d.baseRate, prev: d.prev })) // Save pre-shock
+            [key]: snapshotPoints
         }));
+
+        // Persist to Supabase
+        await storage.saveCurveSnapshot(currency, selectedDate, snapshotPoints);
+
+        // Update active yield curve in DataContext if it's the current date
+        const today = new Date().toISOString().split('T')[0];
+        if (selectedDate === today || currency === 'USD') {
+            appData.setYieldCurves(snapshotPoints);
+        }
+
+        // Add to version list
+        setCurveVersions(prev => [{
+            id: `v${Date.now().toString(36)}`,
+            date: new Date().toISOString().slice(0, 16).replace('T', ' '),
+            user: user?.name || 'Unknown',
+            curve: `${currency} ${selectedDate}`,
+        }, ...prev].slice(0, 10));
 
         storage.addAuditEntry({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'SAVE_CURVE_SNAPSHOT',
             module: 'MARKET_DATA',
-            description: `Saved manual curve snapshot for ${currency} on ${selectedDate}`
+            description: `Saved ${currency} curve snapshot for ${selectedDate} to Supabase`
         });
     };
 
-    const handleImport = (importedData: any[]) => {
+    const handleImport = async (importedData: any[]) => {
         const key = `${currency}-${selectedDate}`;
         const newCurve: YieldCurvePoint[] = importedData.map(row => ({
             tenor: row.Tenor || row.tenor,
@@ -125,12 +175,16 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         setCurvesHistory(prev => ({ ...prev, [key]: newCurve }));
         setIsImportOpen(false);
 
+        // Persist to Supabase and update active curve
+        await storage.saveCurveSnapshot(currency, selectedDate, newCurve);
+        appData.setYieldCurves(newCurve);
+
         storage.addAuditEntry({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'IMPORT_CURVE',
             module: 'MARKET_DATA',
-            description: `Imported ${currency} yield curve for ${selectedDate}`
+            description: `Imported ${currency} yield curve for ${selectedDate} (${newCurve.length} tenors)`
         });
     };
 
@@ -171,13 +225,8 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     const prevPoints = chartData.map((d, i) => `${getX(i)},${getY(d.prev)}`).join(' ');
     const basePoints = data.map((d, i) => `${getX(i)},${getY(d.baseRate)}`).join(' '); // Pre-shock baseline
 
-    // Mock Pricing History/Audit Trail
-    const pricingVersions = [
-        { id: 'v1.0.4', date: '2023-10-24 14:00', user: 'System', curve: 'EOD Final' },
-        { id: 'v1.0.3', date: '2023-10-24 12:30', user: 'A. Chen', curve: 'Intraday Snap' },
-        { id: 'v1.0.2', date: '2023-10-24 09:15', user: 'System', curve: 'Morning Open' },
-        { id: 'v1.0.1', date: '2023-10-23 18:00', user: 'System', curve: 'EOD Final' },
-    ];
+    // Real curve version history (loaded from Supabase + local saves)
+    const pricingVersions = curveVersions;
 
     return (
         <div className="flex flex-col xl:grid xl:grid-cols-3 gap-4 md:gap-6 h-full min-h-0 overflow-auto custom-scrollbar">
