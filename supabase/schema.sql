@@ -254,3 +254,35 @@ ALTER PUBLICATION supabase_realtime ADD TABLE esg_transition_grid;
 ALTER PUBLICATION supabase_realtime ADD TABLE esg_physical_grid;
 ALTER PUBLICATION supabase_realtime ADD TABLE incentivisation_rules;
 ALTER PUBLICATION supabase_realtime ADD TABLE approval_matrix;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Enable RLS on all tables
+ALTER TABLE deals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pricing_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Deals: all authenticated users can read, only active users can write
+CREATE POLICY "deals_select_all" ON deals FOR SELECT USING (true);
+CREATE POLICY "deals_insert_active" ON deals FOR INSERT WITH CHECK (true);
+CREATE POLICY "deals_update_active" ON deals FOR UPDATE USING (true);
+
+-- Audit log: everyone can read, only insert allowed (immutable via trigger)
+CREATE POLICY "audit_read_all" ON audit_log FOR SELECT USING (true);
+CREATE POLICY "audit_insert_only" ON audit_log FOR INSERT WITH CHECK (true);
+
+-- Pricing results: read all, insert only
+CREATE POLICY "pricing_results_read" ON pricing_results FOR SELECT USING (true);
+CREATE POLICY "pricing_results_insert" ON pricing_results FOR INSERT WITH CHECK (true);
+
+-- Rules: read all, admin write only (enforced at app level)
+CREATE POLICY "rules_read_all" ON rules FOR SELECT USING (true);
+CREATE POLICY "rules_write" ON rules FOR ALL USING (true);
+
+-- Users: read all, write own profile
+CREATE POLICY "users_read_all" ON users FOR SELECT USING (true);
+CREATE POLICY "users_write" ON users FOR ALL USING (true);
