@@ -385,6 +385,37 @@ export const supabaseService = {
         return data || [];
     },
 
+    // --- LIQUIDITY CURVES ---
+    async fetchLiquidityCurves(): Promise<any[]> {
+        try {
+            const { data } = await supabase
+                .from('liquidity_curves')
+                .select('*')
+                .order('created_at', { ascending: false });
+            return (data || []).map((c: any) => ({
+                currency: c.currency,
+                curveType: c.curve_type,
+                lastUpdate: c.last_update,
+                points: c.points || [],
+            }));
+        } catch (e) {
+            console.warn('[Supabase] fetchLiquidityCurves failed:', e);
+            return [];
+        }
+    },
+
+    async saveLiquidityCurves(curves: any[]): Promise<void> {
+        try {
+            await supabase.from('system_config').upsert({
+                key: 'liquidity_curves',
+                value: curves,
+                updated_at: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn('[Supabase] saveLiquidityCurves failed:', e);
+        }
+    },
+
     // --- SYSTEM CONFIG (Shocks, etc.) ---
     async fetchShocks(): Promise<any> {
         const { data, error } = await supabase

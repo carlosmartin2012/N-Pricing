@@ -174,6 +174,16 @@ CREATE TABLE IF NOT EXISTS rate_cards (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 12b. LIQUIDITY CURVES TABLE
+CREATE TABLE IF NOT EXISTS liquidity_curves (
+    id BIGSERIAL PRIMARY KEY,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    curve_type TEXT DEFAULT 'unsecured' CHECK (curve_type IN ('unsecured', 'secured')),
+    last_update DATE DEFAULT CURRENT_DATE,
+    points JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 12. ESG TRANSITION GRID TABLE
 CREATE TABLE IF NOT EXISTS esg_transition_grid (
     id SERIAL PRIMARY KEY,
@@ -250,6 +260,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE clients;
 ALTER PUBLICATION supabase_realtime ADD TABLE products;
 ALTER PUBLICATION supabase_realtime ADD TABLE business_units;
 ALTER PUBLICATION supabase_realtime ADD TABLE rate_cards;
+ALTER PUBLICATION supabase_realtime ADD TABLE liquidity_curves;
 ALTER PUBLICATION supabase_realtime ADD TABLE esg_transition_grid;
 ALTER PUBLICATION supabase_realtime ADD TABLE esg_physical_grid;
 ALTER PUBLICATION supabase_realtime ADD TABLE incentivisation_rules;

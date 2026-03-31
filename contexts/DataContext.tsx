@@ -25,6 +25,8 @@ interface DataContextType {
   setUsers: React.Dispatch<React.SetStateAction<UserProfile[]>>;
   yieldCurves: any[];
   setYieldCurves: React.Dispatch<React.SetStateAction<any[]>>;
+  liquidityCurves: any[];
+  setLiquidityCurves: React.Dispatch<React.SetStateAction<any[]>>;
 
   // Config data
   approvalMatrix: ApprovalMatrixConfig;
@@ -58,6 +60,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [yieldCurves, setYieldCurves] = useState<any[]>([]);
+  const [liquidityCurves, setLiquidityCurves] = useState<any[]>([]);
 
   const [approvalMatrix, setApprovalMatrixState] = useState<ApprovalMatrixConfig>(() =>
     storage.loadLocal('n_pricing_approval_matrix', {
@@ -90,6 +93,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         behaviouralModels, setBehaviouralModels,
         users, setUsers,
         yieldCurves, setYieldCurves,
+        liquidityCurves, setLiquidityCurves,
         approvalMatrix, setApprovalMatrix,
         shocks, setShocks,
         ftpRateCards, setFtpRateCards,

@@ -4,7 +4,6 @@ import {
     ResponsiveContainer, AreaChart, Area, BarChart, Bar, Cell, ComposedChart
 } from 'recharts';
 import {
-    MOCK_LIQUIDITY_CURVES,
     INITIAL_DEAL
 } from '../../constants';
 import { Panel, Badge } from '../ui/LayoutComponents';
@@ -155,7 +154,8 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
 
         const nsfr = ((portfolioMetrics.asf + dealASF) / ((portfolioMetrics.rsf || 1) + dealRSF)) * 100;
 
-        const lpPoints = MOCK_LIQUIDITY_CURVES[0].points;
+        const liqCurves = contextData.liquidityCurves;
+        const lpPoints = liqCurves?.[0]?.points || [];
         const duration = scenarioDeal.durationMonths || 1;
         const lpValue = duration <= 1 ? lpPoints[0].termLP :
             duration >= 60 ? lpPoints[lpPoints.length - 1].termLP :
@@ -206,11 +206,13 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
 
     // Graph Data - Funding Curves
     const fundingCurveData = useMemo(() => {
-        const basePoints = MOCK_LIQUIDITY_CURVES[0].points;
+        const liqCurves = contextData.liquidityCurves;
+        if (!liqCurves?.length || !liqCurves[0]?.points?.length) return [];
+        const basePoints = liqCurves[0].points;
         const currencyFactor = selectedCurrency === 'EUR' ? 0.8 : 1.0;
         const collateralSpread = collateralType === 'Unsecured' ? 15 : 0;
 
-        return basePoints.map(p => {
+        return basePoints.map((p: any) => {
             const wholesaleShifted = (p.wholesaleSpread + collateralSpread + curveShift) * currencyFactor;
             const lpShifted = (p.termLP + collateralSpread + curveShift) * currencyFactor;
 
@@ -531,11 +533,11 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                                     <div className="bg-[#0f172a]/40 border border-white/10 p-6 rounded-2xl">
                                         <h5 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4">Summary Yield/Spread</h5>
                                         <div className="space-y-4">
-                                            {[
-                                                { label: 'Spread at 1Y', base: fundingCurveData[4].lp, sim: fundingCurveData[4].simLP },
-                                                { label: 'Spread at 5Y', base: fundingCurveData.find(d => d.tenor === '5Y')?.lp || 0, sim: fundingCurveData.find(d => d.tenor === '5Y')?.simLP || 0 },
-                                                { label: 'Current Slope (ON-5Y)', base: (fundingCurveData.find(d => d.tenor === '5Y')?.lp || 0) - fundingCurveData[0].lp, sim: (fundingCurveData.find(d => d.tenor === '5Y')?.simLP || 0) - fundingCurveData[0].simLP }
-                                            ].map((item, i) => (
+                                            {(fundingCurveData.length > 4 ? [
+                                                { label: 'Spread at 1Y', base: fundingCurveData[4]?.lp || 0, sim: fundingCurveData[4]?.simLP || 0 },
+                                                { label: 'Spread at 5Y', base: fundingCurveData.find((d: any) => d.tenor === '5Y')?.lp || 0, sim: fundingCurveData.find((d: any) => d.tenor === '5Y')?.simLP || 0 },
+                                                { label: 'Current Slope (ON-5Y)', base: (fundingCurveData.find((d: any) => d.tenor === '5Y')?.lp || 0) - (fundingCurveData[0]?.lp || 0), sim: (fundingCurveData.find((d: any) => d.tenor === '5Y')?.simLP || 0) - (fundingCurveData[0]?.simLP || 0) }
+                                            ] : [{ label: 'No curve data', base: 0, sim: 0 }]).map((item, i) => (
                                                 <div key={i} className="flex flex-col gap-1">
                                                     <div className="text-[10px] text-slate-500 font-bold">{item.label}</div>
                                                     <div className="flex items-center justify-between">

@@ -4,7 +4,6 @@ import { Building2 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { Transaction } from '../../types';
-import { MOCK_YIELD_CURVE, MOCK_LIQUIDITY_CURVES, MOCK_FTP_RATE_CARDS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_BEHAVIOURAL_MODELS, MOCK_CLIENTS } from '../../constants';
 
 interface LedgerEntry {
   id: string;
@@ -32,14 +31,14 @@ const AccountingLedger: React.FC = () => {
 
   // Build pricing context from data
   const pricingContext = useMemo(() => ({
-    yieldCurve: data.yieldCurves?.length ? data.yieldCurves : MOCK_YIELD_CURVE,
-    liquidityCurves: MOCK_LIQUIDITY_CURVES,
+    yieldCurve: data.yieldCurves,
+    liquidityCurves: data.liquidityCurves,
     rules: data.rules,
-    rateCards: data.ftpRateCards?.length ? data.ftpRateCards : MOCK_FTP_RATE_CARDS,
-    transitionGrid: data.transitionGrid?.length ? data.transitionGrid : MOCK_TRANSITION_GRID,
-    physicalGrid: data.physicalGrid?.length ? data.physicalGrid : MOCK_PHYSICAL_GRID,
-    behaviouralModels: data.behaviouralModels?.length ? data.behaviouralModels : MOCK_BEHAVIOURAL_MODELS,
-    clients: data.clients?.length ? data.clients : MOCK_CLIENTS,
+    rateCards: data.ftpRateCards,
+    transitionGrid: data.transitionGrid,
+    physicalGrid: data.physicalGrid,
+    behaviouralModels: data.behaviouralModels,
+    clients: data.clients,
     products: data.products,
     businessUnits: data.businessUnits,
   }), [data]);

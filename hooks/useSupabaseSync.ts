@@ -5,6 +5,7 @@ import {
   MOCK_DEALS, MOCK_CLIENTS, MOCK_USERS, MOCK_BEHAVIOURAL_MODELS,
   MOCK_RULES, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS,
   MOCK_FTP_RATE_CARDS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_YIELD_CURVE,
+  MOCK_LIQUIDITY_CURVES,
 } from '../constants';
 import { storage } from '../utils/storage';
 import { supabaseService } from '../utils/supabaseService';
@@ -23,7 +24,7 @@ export const useSupabaseSync = () => {
     const hydrate = async () => {
       try {
         // Step A: Try Supabase first
-        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc, dbApprovalMatrix] = await Promise.all([
+        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc, dbApprovalMatrix, dbLiqCurves] = await Promise.all([
           storage.getDeals(),
           storage.getBehaviouralModels(),
           supabaseService.fetchRules(),
@@ -38,6 +39,7 @@ export const useSupabaseSync = () => {
           supabaseService.fetchYieldCurves(),
           supabaseService.fetchRarocInputs(),
           supabaseService.fetchApprovalMatrix(),
+          supabaseService.fetchLiquidityCurves(),
         ]);
 
         // Use Supabase data if available, otherwise fall back to mocks
@@ -53,6 +55,7 @@ export const useSupabaseSync = () => {
         data.setTransitionGrid(dbTransGrid?.length ? dbTransGrid : MOCK_TRANSITION_GRID);
         data.setPhysicalGrid(dbPhysGrid?.length ? dbPhysGrid : MOCK_PHYSICAL_GRID);
         data.setYieldCurves(dbYieldCurves?.length ? dbYieldCurves : MOCK_YIELD_CURVE);
+        data.setLiquidityCurves(dbLiqCurves?.length ? dbLiqCurves : MOCK_LIQUIDITY_CURVES);
         if (dbRaroc) data.setRarocInputs(dbRaroc);
         if (dbApprovalMatrix) data.setApprovalMatrix(dbApprovalMatrix);
 
@@ -72,6 +75,7 @@ export const useSupabaseSync = () => {
         data.setTransitionGrid(MOCK_TRANSITION_GRID);
         data.setPhysicalGrid(MOCK_PHYSICAL_GRID);
         data.setYieldCurves(MOCK_YIELD_CURVE);
+        data.setLiquidityCurves(MOCK_LIQUIDITY_CURVES);
         data.setSyncStatus('error');
       }
 

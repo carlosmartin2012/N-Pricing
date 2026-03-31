@@ -9,7 +9,6 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabaseService } from '../../utils/supabaseService';
 import { storage } from '../../utils/storage';
-import { MOCK_LIQUIDITY_CURVES } from '../../constants';
 
 interface Props {
    deal: Transaction;
@@ -32,7 +31,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
    const pricingContext: PricingContext = useMemo(() => ({
       yieldCurve: data.yieldCurves,
-      liquidityCurves: MOCK_LIQUIDITY_CURVES,
+      liquidityCurves: data.liquidityCurves,
       rules: data.rules,
       rateCards: data.ftpRateCards,
       transitionGrid: data.transitionGrid,
