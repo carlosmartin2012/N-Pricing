@@ -714,4 +714,166 @@ export const supabaseService = {
             total: count || 0,
         };
     },
+
+    // --- PRICING RESULTS ---
+    async savePricingResult(dealId: string, result: any, dealSnapshot: any, calculatedBy: string): Promise<void> {
+        try {
+            // Get current version count
+            const { count } = await supabase
+                .from('pricing_results')
+                .select('*', { count: 'exact', head: true })
+                .eq('deal_id', dealId);
+
+            await supabase.from('pricing_results').insert({
+                deal_id: dealId,
+                version: (count || 0) + 1,
+                base_rate: result.baseRate,
+                liquidity_spread: result.liquiditySpread,
+                strategic_spread: result.strategicSpread,
+                option_cost: result.optionCost,
+                regulatory_cost: result.regulatoryCost,
+                lcr_cost: result.lcrCost || 0,
+                nsfr_cost: result.nsfrCost || 0,
+                operational_cost: result.operationalCost,
+                capital_charge: result.capitalCharge,
+                esg_transition_charge: result.esgTransitionCharge,
+                esg_physical_charge: result.esgPhysicalCharge,
+                floor_price: result.floorPrice,
+                technical_price: result.technicalPrice,
+                target_price: result.targetPrice,
+                total_ftp: result.totalFTP,
+                final_client_rate: result.finalClientRate,
+                raroc: result.raroc,
+                economic_profit: result.economicProfit,
+                approval_level: result.approvalLevel,
+                matched_methodology: result.matchedMethodology,
+                match_reason: result.matchReason,
+                formula_used: result.formulaUsed || null,
+                behavioral_maturity_used: result.behavioralMaturityUsed || null,
+                incentivisation_adj: result.incentivisationAdj || null,
+                capital_income: result.capitalIncome || null,
+                calculated_by: calculatedBy,
+                deal_snapshot: dealSnapshot
+            });
+        } catch (e) {
+            console.warn('[Supabase] savePricingResult failed:', e);
+        }
+    },
+
+    async fetchPricingHistory(dealId: string): Promise<any[]> {
+        try {
+            const { data } = await supabase
+                .from('pricing_results')
+                .select('*')
+                .eq('deal_id', dealId)
+                .order('version', { ascending: false });
+            return data || [];
+        } catch (e) {
+            console.warn('[Supabase] fetchPricingHistory failed:', e);
+            return [];
+        }
+    },
+
+    // --- APPROVAL MATRIX ---
+    async saveApprovalMatrix(config: any): Promise<void> {
+        try {
+            await supabase.from('system_config').upsert({
+                key: 'approval_matrix',
+                value: config,
+                updated_at: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn('[Supabase] saveApprovalMatrix failed:', e);
+        }
+    },
+
+    async fetchApprovalMatrix(): Promise<any | null> {
+        try {
+            const { data } = await supabase
+                .from('system_config')
+                .select('value')
+                .eq('key', 'approval_matrix')
+                .single();
+            return data?.value || null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    // --- INCENTIVISATION RULES ---
+    async saveIncentivisationRules(rules: any[]): Promise<void> {
+        try {
+            await supabase.from('system_config').upsert({
+                key: 'incentivisation_rules',
+                value: rules,
+                updated_at: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn('[Supabase] saveIncentivisationRules failed:', e);
+        }
+    },
+
+    async fetchIncentivisationRules(): Promise<any[]> {
+        try {
+            const { data } = await supabase
+                .from('system_config')
+                .select('value')
+                .eq('key', 'incentivisation_rules')
+                .single();
+            return (data?.value as any[]) || [];
+        } catch (e) {
+            return [];
+        }
+    },
+
+    // --- ALM CONFIGS (SDR / LR) ---
+    async saveSdrConfig(config: any): Promise<void> {
+        try {
+            await supabase.from('system_config').upsert({
+                key: 'sdr_config',
+                value: config,
+                updated_at: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn('[Supabase] saveSdrConfig failed:', e);
+        }
+    },
+
+    async fetchSdrConfig(): Promise<any | null> {
+        try {
+            const { data } = await supabase
+                .from('system_config')
+                .select('value')
+                .eq('key', 'sdr_config')
+                .single();
+            return data?.value || null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    async saveLrConfig(config: any): Promise<void> {
+        try {
+            await supabase.from('system_config').upsert({
+                key: 'lr_config',
+                value: config,
+                updated_at: new Date().toISOString()
+            });
+        } catch (e) {
+            console.warn('[Supabase] saveLrConfig failed:', e);
+        }
+    },
+
+    async fetchLrConfig(): Promise<any | null> {
+        try {
+            const { data } = await supabase
+                .from('system_config')
+                .select('value')
+                .eq('key', 'lr_config')
+                .single();
+            return data?.value || null;
+        } catch (e) {
+            return null;
+        }
+    },
 };

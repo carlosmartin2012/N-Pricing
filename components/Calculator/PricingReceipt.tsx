@@ -1,11 +1,14 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
 import { calculatePricing, PricingShocks, PricingContext } from '../../utils/pricingEngine';
 import { Panel, Badge } from '../ui/LayoutComponents';
-import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap, Droplets } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap, Droplets, Save, FilePlus, Check } from 'lucide-react';
 import { translations, Language } from '../../translations';
 import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabaseService } from '../../utils/supabaseService';
+import { storage } from '../../utils/storage';
 import { MOCK_YIELD_CURVE, MOCK_LIQUIDITY_CURVES, MOCK_FTP_RATE_CARDS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_BEHAVIOURAL_MODELS, MOCK_CLIENTS } from '../../constants';
 
 interface Props {
@@ -14,13 +17,18 @@ interface Props {
    approvalMatrix: ApprovalMatrixConfig;
    language: Language;
    shocks?: PricingShocks;
+   onDealSaved?: (deal: Transaction) => void;
 }
 
-const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatrix, language, shocks }) => {
+const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatrix, language, shocks, onDealSaved }) => {
    const [showAccounting, setShowAccounting] = useState(false);
    const [applyShocks, setApplyShocks] = useState(false);
+   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+   const [dealSaveStatus, setDealSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
    const t = translations[language];
    const data = useData();
+   const { currentUser } = useAuth();
 
    const pricingContext: PricingContext = useMemo(() => ({
       yieldCurve: data.yieldCurves?.length ? data.yieldCurves : MOCK_YIELD_CURVE,
@@ -41,6 +49,52 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
       setMatchedMethod(baseResult.matchedMethodology);
       return baseResult;
    }, [deal, setMatchedMethod, approvalMatrix, pricingContext, shocks, applyShocks]);
+
+   // Auto-save pricing result to Supabase (debounced 3s after calculation stabilizes)
+   useEffect(() => {
+      if (!deal.id || !currentUser) return;
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+      autoSaveTimer.current = setTimeout(() => {
+         supabaseService.savePricingResult(deal.id!, result, deal, currentUser.email)
+            .then(() => { setSaveStatus('saved'); setTimeout(() => setSaveStatus('idle'), 2000); })
+            .catch(() => {});
+      }, 3000);
+      return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+   }, [result, deal.id, currentUser]);
+
+   // Save as new deal in blotter
+   const handleSaveAsDeal = useCallback(async () => {
+      if (!currentUser) return;
+      setDealSaveStatus('saving');
+      const newDeal: Transaction = {
+         ...deal,
+         id: deal.id || `DL-${Date.now().toString(36).toUpperCase()}`,
+         status: result.approvalLevel === 'Auto' ? 'Approved' : 'Pending_Approval',
+         liquiditySpread: result.liquiditySpread,
+         _liquidityPremiumDetails: result._liquidityPremiumDetails,
+         _clcChargeDetails: result._clcChargeDetails,
+      };
+      try {
+         await storage.saveDeal(newDeal);
+         data.setDeals(prev => {
+            const exists = prev.find(d => d.id === newDeal.id);
+            return exists ? prev.map(d => d.id === newDeal.id ? newDeal : d) : [...prev, newDeal];
+         });
+         await supabaseService.savePricingResult(newDeal.id!, result, newDeal, currentUser.email);
+         await storage.addAuditEntry({
+            userEmail: currentUser.email,
+            userName: currentUser.name,
+            action: 'DEAL_SAVED_FROM_CALCULATOR',
+            module: 'CALCULATOR',
+            description: `Deal ${newDeal.id} saved with RAROC ${result.raroc.toFixed(2)}% — ${result.approvalLevel}`,
+         });
+         setDealSaveStatus('saved');
+         onDealSaved?.(newDeal);
+         setTimeout(() => setDealSaveStatus('idle'), 3000);
+      } catch (e) {
+         setDealSaveStatus('idle');
+      }
+   }, [deal, result, currentUser, data, onDealSaved]);
 
    const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency }).format(n);
 
@@ -209,6 +263,27 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                      {result.economicProfit >= 0 ? '+' : ''}{result.economicProfit.toFixed(2)}%
                   </div>
                </div>
+            </div>
+
+            {/* Save as Deal + Auto-save indicator */}
+            <div className="border-t border-slate-700 bg-slate-900 p-3 flex items-center gap-2">
+               <button
+                  onClick={handleSaveAsDeal}
+                  disabled={dealSaveStatus === 'saving'}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                     dealSaveStatus === 'saved'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                  }`}
+               >
+                  {dealSaveStatus === 'saved' ? <Check size={14} /> : dealSaveStatus === 'saving' ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <FilePlus size={14} />}
+                  {dealSaveStatus === 'saved' ? 'Deal Saved to Blotter' : dealSaveStatus === 'saving' ? 'Saving...' : 'Save as Deal'}
+               </button>
+               {saveStatus === 'saved' && (
+                  <div className="flex items-center gap-1 text-[10px] text-emerald-500">
+                     <Save size={10} /> Auto-saved
+                  </div>
+               )}
             </div>
 
             {/* Accounting Toggle */}

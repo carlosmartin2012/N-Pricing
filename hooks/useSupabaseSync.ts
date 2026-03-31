@@ -38,7 +38,7 @@ export const useSupabaseSync = () => {
 
       // Step B: Background Supabase sync
       try {
-        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc] = await Promise.all([
+        const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc, dbApprovalMatrix] = await Promise.all([
           storage.getDeals(),
           storage.getBehaviouralModels(),
           supabaseService.fetchRules(),
@@ -52,6 +52,7 @@ export const useSupabaseSync = () => {
           supabaseService.fetchEsgGrid('physical'),
           supabaseService.fetchYieldCurves(),
           supabaseService.fetchRarocInputs(),
+          supabaseService.fetchApprovalMatrix(),
         ]);
 
         if (dbDeals?.length) data.setDeals(dbDeals);
@@ -67,6 +68,7 @@ export const useSupabaseSync = () => {
         if (dbPhysGrid?.length) data.setPhysicalGrid(dbPhysGrid);
         if (dbYieldCurves?.length) data.setYieldCurves(dbYieldCurves);
         if (dbRaroc) data.setRarocInputs(dbRaroc);
+        if (dbApprovalMatrix) data.setApprovalMatrix(dbApprovalMatrix);
         data.setSyncStatus('synced');
       } catch (err) {
         console.warn('Supabase background sync failed, staying on MOCK data.', err);
@@ -155,11 +157,61 @@ export const useSupabaseSync = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isAuthenticated, currentUser]);
 
-  // 5. Local Auto-Save
+  // 5. Local + Supabase Auto-Save (Debounced)
   useEffect(() => { storage.saveLocal('n_pricing_rules', data.rules); }, [data.rules]);
   useEffect(() => { storage.saveLocal('n_pricing_clients', data.clients); }, [data.clients]);
   useEffect(() => { storage.saveLocal('n_pricing_behavioural', data.behaviouralModels); }, [data.behaviouralModels]);
   useEffect(() => { storage.saveLocal('n_pricing_deals', data.deals); }, [data.deals]);
+
+  // 5b. Config persistence to Supabase (debounced)
+  const prevRateCards = useRef(data.ftpRateCards);
+  const prevTransGrid = useRef(data.transitionGrid);
+  const prevPhysGrid = useRef(data.physicalGrid);
+  const prevApproval = useRef(data.approvalMatrix);
+
+  useEffect(() => {
+    if (data.isLoading) return;
+    const timer = setTimeout(() => {
+      if (JSON.stringify(prevRateCards.current) !== JSON.stringify(data.ftpRateCards)) {
+        supabaseService.saveRateCards(data.ftpRateCards);
+        prevRateCards.current = data.ftpRateCards;
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [data.ftpRateCards, data.isLoading]);
+
+  useEffect(() => {
+    if (data.isLoading) return;
+    const timer = setTimeout(() => {
+      if (JSON.stringify(prevTransGrid.current) !== JSON.stringify(data.transitionGrid)) {
+        supabaseService.saveEsgGrid('transition', data.transitionGrid);
+        prevTransGrid.current = data.transitionGrid;
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [data.transitionGrid, data.isLoading]);
+
+  useEffect(() => {
+    if (data.isLoading) return;
+    const timer = setTimeout(() => {
+      if (JSON.stringify(prevPhysGrid.current) !== JSON.stringify(data.physicalGrid)) {
+        supabaseService.saveEsgGrid('physical', data.physicalGrid);
+        prevPhysGrid.current = data.physicalGrid;
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [data.physicalGrid, data.isLoading]);
+
+  useEffect(() => {
+    if (data.isLoading) return;
+    const timer = setTimeout(() => {
+      if (JSON.stringify(prevApproval.current) !== JSON.stringify(data.approvalMatrix)) {
+        supabaseService.saveApprovalMatrix(data.approvalMatrix);
+        prevApproval.current = data.approvalMatrix;
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [data.approvalMatrix, data.isLoading]);
 
   // 6. Shocks Persistence (Debounced)
   useEffect(() => {

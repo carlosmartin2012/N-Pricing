@@ -158,6 +158,9 @@ const AppContent: React.FC = () => {
                     deal={dealParams} setMatchedMethod={setMatchedMethod}
                     approvalMatrix={data.approvalMatrix} language={ui.language}
                     shocks={data.shocks}
+                    onDealSaved={(savedDeal) => {
+                      setDealParams(savedDeal);
+                    }}
                   />
                 </div>
               </div>
