@@ -1,15 +1,15 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Panel, Badge, TextInput, InputGroup, SelectInput } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { Transaction, ProductDefinition, ClientEntity, BusinessUnit } from '../../types';
 import { MOCK_BEHAVIOURAL_MODELS } from '../../constants';
-import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus } from 'lucide-react';
+import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus, CheckCircle2, XCircle, Send, BookOpen, RotateCcw, Clock } from 'lucide-react';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
-import { getAvailableActions, isDealEditable, getStatusColor, formatStatus, type DealStatus, type UserRole } from '../../utils/dealWorkflow';
+import { getAvailableActions, isDealEditable, getStatusColor, formatStatus, executeTransition, type DealStatus, type UserRole, type WorkflowAction } from '../../utils/dealWorkflow';
 
 interface Props {
   deals: Transaction[];
@@ -84,6 +84,8 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       }));
 
       setDeals(prev => [...newDeals, ...prev]);
+      // Persist imported deals to Supabase
+      await Promise.all(newDeals.map(d => storage.saveDeal(d)));
 
       storage.addAuditEntry({
         userEmail: user?.email || 'unknown',
@@ -108,14 +110,56 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   const fmtCurrency = (val: number, ccy: string) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: ccy, maximumFractionDigits: 0 }).format(val);
 
+  // Workflow action handler
+  const handleWorkflowAction = useCallback(async (deal: Transaction, action: WorkflowAction) => {
+    const userRole = (user?.role || 'Trader') as UserRole;
+    const result = executeTransition(deal, action.to, userRole, user?.email || 'unknown');
+
+    if (!result.success) {
+      return; // Transition not allowed
+    }
+
+    const updatedDeal = { ...deal, status: result.newStatus as any };
+    await storage.saveDeal(updatedDeal);
+    setDeals(prev => prev.map(d => d.id === deal.id ? updatedDeal : d));
+
+    await storage.addAuditEntry({
+      userEmail: user?.email || 'unknown',
+      userName: user?.name || 'Unknown',
+      action: `WORKFLOW_${action.to.toUpperCase()}`,
+      module: 'BLOTTER',
+      description: `Deal ${deal.id}: ${action.from} → ${action.to} by ${user?.name || 'unknown'} (${userRole})`,
+    });
+  }, [user, setDeals]);
+
+  const getActionIcon = (label: string) => {
+    if (label.includes('Submit')) return <Send size={12} />;
+    if (label.includes('Approve')) return <CheckCircle2 size={12} />;
+    if (label.includes('Reject')) return <XCircle size={12} />;
+    if (label.includes('Book')) return <BookOpen size={12} />;
+    if (label.includes('Rework') || label.includes('Re-submit')) return <RotateCcw size={12} />;
+    return <Clock size={12} />;
+  };
+
+  const getActionColor = (to: string) => {
+    if (to === 'Approved') return 'bg-emerald-600 hover:bg-emerald-500 text-white';
+    if (to === 'Rejected') return 'bg-red-600 hover:bg-red-500 text-white';
+    if (to === 'Booked') return 'bg-cyan-600 hover:bg-cyan-500 text-white';
+    if (to === 'Pending_Approval') return 'bg-amber-600 hover:bg-amber-500 text-white';
+    return 'bg-slate-600 hover:bg-slate-500 text-white';
+  };
+
   const handleEdit = (deal: Transaction) => {
+    if (!isDealEditable(deal) && user?.role !== 'Admin') return;
     setSelectedDeal({ ...deal });
     setIsEditOpen(true);
   };
 
   const handleSaveEdit = async () => {
     if (selectedDeal) {
-      await storage.saveDeal(selectedDeal as Transaction);
+      const updated = selectedDeal as Transaction;
+      await storage.saveDeal(updated);
+      setDeals(prev => prev.map(d => d.id === updated.id ? updated : d));
       setIsEditOpen(false);
     }
   };
@@ -147,8 +191,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
   const handleSaveNew = async () => {
     if (selectedDeal && selectedDeal.clientId) {
-      // Local state will be updated via App.tsx subscription
-      await storage.saveDeal(selectedDeal as Transaction);
+      const newDeal = { ...selectedDeal, status: 'Draft' } as Transaction;
+      await storage.saveDeal(newDeal);
+      setDeals(prev => [newDeal, ...prev]);
       setIsNewOpen(false);
     }
   };
@@ -290,25 +335,13 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           </div>
         </div>
 
-        <InputGroup label="Workflow Status">
-          <SelectInput
-            value={selectedDeal.status}
-            onChange={(e) => setSelectedDeal({ ...selectedDeal, status: e.target.value as any })}
-            className={
-              selectedDeal.status === 'Booked' || selectedDeal.status === 'Approved' ? 'text-emerald-400' :
-              selectedDeal.status === 'Rejected' ? 'text-red-400' :
-              selectedDeal.status === 'Draft' ? 'text-slate-400' : 'text-amber-400'
-            }
-          >
-            <option value="Draft">Draft</option>
-            <option value="Pending">Pending</option>
-            <option value="Pending_Approval">Pending Approval</option>
-            <option value="Approved">Approved</option>
-            <option value="Booked">Booked</option>
-            <option value="Rejected">Rejected</option>
-            <option value="Review">Review</option>
-          </SelectInput>
-        </InputGroup>
+        <div className="space-y-2">
+          <h4 className="text-xs font-bold text-slate-400 uppercase">Workflow Status</h4>
+          <div className={`p-3 rounded border text-xs font-bold uppercase tracking-wider text-center ${getStatusColor(selectedDeal.status || 'Draft')}`}>
+            {formatStatus(selectedDeal.status || 'Draft')}
+          </div>
+          <p className="text-[10px] text-slate-600">Status is managed via workflow actions in the blotter table.</p>
+        </div>
       </div>
     );
   }
@@ -392,6 +425,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                   <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden lg:table-cell">Margin</th>
                   <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden xl:table-cell">Model</th>
                   <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Actions</th>
                   <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-500 uppercase tracking-wider w-10"></th>
                 </tr>
               </thead>
@@ -432,9 +466,34 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                         {formatStatus(deal.status || 'Draft')}
                       </Badge>
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-center hidden md:table-cell">
+                      <div className="flex items-center justify-center gap-1 flex-wrap">
+                        {getAvailableActions(deal.status || 'Draft', (user?.role || 'Trader') as UserRole).map((action) => (
+                          <button
+                            key={action.to}
+                            onClick={() => handleWorkflowAction(deal, action)}
+                            className={`px-2 py-1 rounded text-[9px] font-bold flex items-center gap-1 transition-colors ${getActionColor(action.to)}`}
+                            title={`${action.label} (requires ${action.requiredRoles.join('/')})`}
+                          >
+                            {getActionIcon(action.label)}
+                            {action.label}
+                          </button>
+                        ))}
+                        {getAvailableActions(deal.status || 'Draft', (user?.role || 'Trader') as UserRole).length === 0 && (
+                          <span className="text-[9px] text-slate-600">No actions</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleEdit(deal)} className="p-1 text-slate-400 hover:text-cyan-500 transition-colors"><Edit size={14} /></button>
+                        <button
+                          onClick={() => handleEdit(deal)}
+                          className={`p-1 transition-colors ${isDealEditable(deal) || user?.role === 'Admin' ? 'text-slate-400 hover:text-cyan-500' : 'text-slate-700 cursor-not-allowed'}`}
+                          disabled={!isDealEditable(deal) && user?.role !== 'Admin'}
+                          title={isDealEditable(deal) ? 'Edit deal' : 'Deal is locked'}
+                        >
+                          <Edit size={14} />
+                        </button>
                         <button onClick={() => handleDelete(deal)} className="p-1 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                       </div>
                     </td>
