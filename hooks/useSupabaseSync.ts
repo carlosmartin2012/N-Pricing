@@ -18,26 +18,11 @@ export const useSupabaseSync = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const prevShocks = useRef(data.shocks);
 
-  // 1. Initial Hydration (Demo-First Strategy)
+  // 1. Initial Hydration (Supabase-First, Mock-Fallback Strategy)
   useEffect(() => {
     const hydrate = async () => {
-      // Step A: Immediate MOCK injection
-      data.setDeals(MOCK_DEALS);
-      data.setClients(MOCK_CLIENTS);
-      data.setUsers(MOCK_USERS);
-      data.setBehaviouralModels(MOCK_BEHAVIOURAL_MODELS);
-      data.setRules(MOCK_RULES);
-      data.setProducts(MOCK_PRODUCT_DEFS);
-      data.setBusinessUnits(MOCK_BUSINESS_UNITS);
-      data.setFtpRateCards(MOCK_FTP_RATE_CARDS);
-      data.setTransitionGrid(MOCK_TRANSITION_GRID);
-      data.setPhysicalGrid(MOCK_PHYSICAL_GRID);
-      data.setYieldCurves(MOCK_YIELD_CURVE);
-      data.setIsLoading(false);
-      data.setSyncStatus('mock');
-
-      // Step B: Background Supabase sync
       try {
+        // Step A: Try Supabase first
         const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc, dbApprovalMatrix] = await Promise.all([
           storage.getDeals(),
           storage.getBehaviouralModels(),
@@ -55,32 +40,49 @@ export const useSupabaseSync = () => {
           supabaseService.fetchApprovalMatrix(),
         ]);
 
-        if (dbDeals?.length) data.setDeals(dbDeals);
-        if (dbModels?.length) data.setBehaviouralModels(dbModels);
-        if (dbRules?.length) data.setRules(dbRules);
-        if (dbClients?.length) data.setClients(dbClients);
-        if (dbUnits?.length) data.setBusinessUnits(dbUnits);
-        if (dbProducts?.length) data.setProducts(dbProducts);
-        if (dbUsers?.length) data.setUsers(dbUsers);
+        // Use Supabase data if available, otherwise fall back to mocks
+        data.setDeals(dbDeals?.length ? dbDeals : MOCK_DEALS);
+        data.setBehaviouralModels(dbModels?.length ? dbModels : MOCK_BEHAVIOURAL_MODELS);
+        data.setRules(dbRules?.length ? dbRules : MOCK_RULES);
+        data.setClients(dbClients?.length ? dbClients : MOCK_CLIENTS);
+        data.setBusinessUnits(dbUnits?.length ? dbUnits : MOCK_BUSINESS_UNITS);
+        data.setProducts(dbProducts?.length ? dbProducts : MOCK_PRODUCT_DEFS);
+        data.setUsers(dbUsers?.length ? dbUsers : MOCK_USERS);
         if (dbShocks) data.setShocks(dbShocks);
-        if (dbRateCards?.length) data.setFtpRateCards(dbRateCards);
-        if (dbTransGrid?.length) data.setTransitionGrid(dbTransGrid);
-        if (dbPhysGrid?.length) data.setPhysicalGrid(dbPhysGrid);
-        if (dbYieldCurves?.length) data.setYieldCurves(dbYieldCurves);
+        data.setFtpRateCards(dbRateCards?.length ? dbRateCards : MOCK_FTP_RATE_CARDS);
+        data.setTransitionGrid(dbTransGrid?.length ? dbTransGrid : MOCK_TRANSITION_GRID);
+        data.setPhysicalGrid(dbPhysGrid?.length ? dbPhysGrid : MOCK_PHYSICAL_GRID);
+        data.setYieldCurves(dbYieldCurves?.length ? dbYieldCurves : MOCK_YIELD_CURVE);
         if (dbRaroc) data.setRarocInputs(dbRaroc);
         if (dbApprovalMatrix) data.setApprovalMatrix(dbApprovalMatrix);
-        data.setSyncStatus('synced');
+
+        const hasRemoteData = [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts].some(d => d?.length);
+        data.setSyncStatus(hasRemoteData ? 'synced' : 'mock');
       } catch (err) {
-        console.warn('Supabase background sync failed, staying on MOCK data.', err);
+        // Step B: Full mock fallback on Supabase failure
+        console.warn('Supabase sync failed, loading mock data.', err);
+        data.setDeals(MOCK_DEALS);
+        data.setClients(MOCK_CLIENTS);
+        data.setUsers(MOCK_USERS);
+        data.setBehaviouralModels(MOCK_BEHAVIOURAL_MODELS);
+        data.setRules(MOCK_RULES);
+        data.setProducts(MOCK_PRODUCT_DEFS);
+        data.setBusinessUnits(MOCK_BUSINESS_UNITS);
+        data.setFtpRateCards(MOCK_FTP_RATE_CARDS);
+        data.setTransitionGrid(MOCK_TRANSITION_GRID);
+        data.setPhysicalGrid(MOCK_PHYSICAL_GRID);
+        data.setYieldCurves(MOCK_YIELD_CURVE);
         data.setSyncStatus('error');
       }
+
+      data.setIsLoading(false);
 
       storage.addAuditEntry({
         userEmail: currentUser?.email || 'system',
         userName: currentUser?.name || 'System',
         action: 'SYSTEM_BOOTSTRAP',
         module: 'CALCULATOR',
-        description: 'Demo Mocks Hydrated. Background Supabase sync initiated.',
+        description: `Data hydrated. Status: ${data.syncStatus}.`,
       });
     };
     hydrate();

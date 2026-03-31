@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Panel, Badge, TextInput, InputGroup, SelectInput } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { Transaction, ProductDefinition, ClientEntity, BusinessUnit } from '../../types';
-import { MOCK_BEHAVIOURAL_MODELS } from '../../constants';
+import { useData } from '../../contexts/DataContext';
 import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus, CheckCircle2, XCircle, Send, BookOpen, RotateCcw, Clock, Copy } from 'lucide-react';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
@@ -22,6 +22,7 @@ interface Props {
 }
 
 const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language, user }) => {
+  const { behaviouralModels } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const t = translations[language];
@@ -330,7 +331,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
               onChange={(e) => setSelectedDeal({ ...selectedDeal, behaviouralModelId: e.target.value })}
             >
               <option value="">-- None --</option>
-              {MOCK_BEHAVIOURAL_MODELS
+              {behaviouralModels
                 .filter(m =>
                   (selectedDeal.category === 'Liability' && m.type === 'NMD_Replication') ||
                   (selectedDeal.category === 'Asset' && m.type === 'Prepayment_CPR') ||
@@ -474,7 +475,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap hidden xl:table-cell">
                       <div className="text-[10px] text-slate-500 max-w-[120px] truncate">
-                        {MOCK_BEHAVIOURAL_MODELS.find(m => m.id === deal.behaviouralModelId)?.name || '-'}
+                        {behaviouralModels.find(m => m.id === deal.behaviouralModelId)?.name || '-'}
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-center">

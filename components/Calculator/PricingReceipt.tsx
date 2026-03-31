@@ -9,7 +9,7 @@ import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabaseService } from '../../utils/supabaseService';
 import { storage } from '../../utils/storage';
-import { MOCK_YIELD_CURVE, MOCK_LIQUIDITY_CURVES, MOCK_FTP_RATE_CARDS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_BEHAVIOURAL_MODELS, MOCK_CLIENTS } from '../../constants';
+import { MOCK_LIQUIDITY_CURVES } from '../../constants';
 
 interface Props {
    deal: Transaction;
@@ -31,14 +31,14 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
    const { currentUser } = useAuth();
 
    const pricingContext: PricingContext = useMemo(() => ({
-      yieldCurve: data.yieldCurves?.length ? data.yieldCurves : MOCK_YIELD_CURVE,
+      yieldCurve: data.yieldCurves,
       liquidityCurves: MOCK_LIQUIDITY_CURVES,
       rules: data.rules,
-      rateCards: data.ftpRateCards?.length ? data.ftpRateCards : MOCK_FTP_RATE_CARDS,
-      transitionGrid: data.transitionGrid?.length ? data.transitionGrid : MOCK_TRANSITION_GRID,
-      physicalGrid: data.physicalGrid?.length ? data.physicalGrid : MOCK_PHYSICAL_GRID,
-      behaviouralModels: data.behaviouralModels?.length ? data.behaviouralModels : MOCK_BEHAVIOURAL_MODELS,
-      clients: data.clients?.length ? data.clients : MOCK_CLIENTS,
+      rateCards: data.ftpRateCards,
+      transitionGrid: data.transitionGrid,
+      physicalGrid: data.physicalGrid,
+      behaviouralModels: data.behaviouralModels,
+      clients: data.clients,
       products: data.products,
       businessUnits: data.businessUnits,
    }), [data.yieldCurves, data.rules, data.ftpRateCards, data.transitionGrid, data.physicalGrid, data.behaviouralModels, data.clients, data.products, data.businessUnits]);

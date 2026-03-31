@@ -5,10 +5,10 @@ import {
 } from 'recharts';
 import {
     MOCK_LIQUIDITY_CURVES,
-    MOCK_BEHAVIOURAL_MODELS,
     INITIAL_DEAL
 } from '../../constants';
 import { Panel, Badge } from '../ui/LayoutComponents';
+import { useData } from '../../contexts/DataContext';
 import {
     Activity, ShieldCheck, TrendingUp, BarChart4, Droplets,
     Target, Shield, Search, RefreshCw, AlertCircle, Info, ChevronRight, Calculator,
@@ -37,6 +37,9 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
     clients,
     shocks
 }) => {
+    const contextData = useData();
+    const behaviouralModels = contextData.behaviouralModels;
+
     // Tab state
     const [activeSubTab, setActiveSubTab] = useState<SubTab>('OVERVIEW');
 
@@ -573,7 +576,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                         <NIISensitivity deals={deals} />
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {MOCK_BEHAVIOURAL_MODELS.map((model) => {
+                            {behaviouralModels.map((model) => {
                                 const buckets = ['ON', '1M', '3M', '6M', '12M', '2Y', '4Y', '6Y', '10Y', '>10Y'];
                                 const data = buckets.map(bucket => {
                                     let ftp = 0;
