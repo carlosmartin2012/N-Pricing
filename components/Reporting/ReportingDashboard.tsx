@@ -26,8 +26,211 @@ interface ReportingDashboardProps {
 import MaturityLadder from './MaturityLadder';
 import CurrencyGap from './CurrencyGap';
 import NIISensitivity from './NIISensitivity';
+import { calculatePricing } from '../../utils/pricingEngine';
+import { MOCK_LIQUIDITY_CURVES } from '../../constants';
 
-type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS' | 'MATURITY_LADDER' | 'CURRENCY_GAP' | 'NII_SENSITIVITY';
+/** P&L Attribution: decompose margin into rate / spread / volume components */
+const PnlAttribution: React.FC<{
+    deals: Transaction[];
+    products: any[];
+    businessUnits: any[];
+    clients: any[];
+    contextData: any;
+}> = ({ deals, products, businessUnits, clients, contextData }) => {
+    const bookedDeals = deals.filter(d => d.status === 'Booked' || d.status === 'Approved');
+    const attribution = useMemo(() => {
+        const ctx = {
+            yieldCurve: contextData.yieldCurves,
+            liquidityCurves: contextData.liquidityCurves?.length ? contextData.liquidityCurves : MOCK_LIQUIDITY_CURVES,
+            rules: contextData.rules,
+            rateCards: contextData.ftpRateCards,
+            transitionGrid: contextData.transitionGrid,
+            physicalGrid: contextData.physicalGrid,
+            behaviouralModels: contextData.behaviouralModels,
+            clients, products, businessUnits,
+        };
+        return bookedDeals.map(deal => {
+            const r = calculatePricing(deal, contextData.approvalMatrix, ctx);
+            const nii = deal.amount * (r.finalClientRate / 100);
+            const ftpCost = deal.amount * (r.totalFTP / 100);
+            const creditCost = deal.amount * (r.regulatoryCost / 100);
+            const opCost = deal.amount * (r.operationalCost / 100);
+            const capitalCost = deal.amount * (r.capitalCharge / 100);
+            const netMargin = nii - ftpCost;
+            const buName = businessUnits.find((b: any) => b.id === deal.businessUnit)?.name || deal.businessUnit;
+            return {
+                id: deal.id, buName, product: deal.productType, amount: deal.amount, currency: deal.currency,
+                nii, ftpCost, creditCost, opCost, capitalCost, netMargin,
+                raroc: r.raroc, approvalLevel: r.approvalLevel,
+            };
+        });
+    }, [bookedDeals, contextData, clients, products, businessUnits]);
+
+    const totals = useMemo(() => ({
+        nii: attribution.reduce((s, a) => s + a.nii, 0),
+        ftpCost: attribution.reduce((s, a) => s + a.ftpCost, 0),
+        creditCost: attribution.reduce((s, a) => s + a.creditCost, 0),
+        opCost: attribution.reduce((s, a) => s + a.opCost, 0),
+        capitalCost: attribution.reduce((s, a) => s + a.capitalCost, 0),
+        netMargin: attribution.reduce((s, a) => s + a.netMargin, 0),
+    }), [attribution]);
+
+    const fmtM = (v: number) => `$${(v / 1e6).toFixed(2)}M`;
+
+    return (
+        <div className="space-y-6">
+            {/* Summary KPIs */}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                {[
+                    { label: 'Gross NII', value: totals.nii, color: 'text-emerald-400' },
+                    { label: 'FTP Cost', value: -totals.ftpCost, color: 'text-amber-400' },
+                    { label: 'Credit Cost', value: -totals.creditCost, color: 'text-red-400' },
+                    { label: 'Op. Cost', value: -totals.opCost, color: 'text-red-400' },
+                    { label: 'Capital Cost', value: -totals.capitalCost, color: 'text-red-400' },
+                    { label: 'Net Margin', value: totals.netMargin, color: totals.netMargin >= 0 ? 'text-cyan-400' : 'text-red-400' },
+                ].map(kpi => (
+                    <div key={kpi.label} className="bg-[#0f172a]/40 border border-white/10 p-4 rounded-xl">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">{kpi.label}</div>
+                        <div className={`text-lg font-mono font-bold ${kpi.color}`}>{fmtM(kpi.value)}</div>
+                    </div>
+                ))}
+            </div>
+            {/* Detail table */}
+            <div className="overflow-auto">
+                <table className="w-full text-xs">
+                    <thead><tr className="text-[10px] text-slate-500 uppercase border-b border-slate-800">
+                        <th className="py-2 text-left pl-2">Deal</th>
+                        <th className="py-2 text-left">BU</th>
+                        <th className="py-2 text-right">NII</th>
+                        <th className="py-2 text-right">FTP Cost</th>
+                        <th className="py-2 text-right">Net Margin</th>
+                        <th className="py-2 text-right">RAROC</th>
+                        <th className="py-2 text-right pr-2">Approval</th>
+                    </tr></thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                        {attribution.map(a => (
+                            <tr key={a.id} className="hover:bg-slate-900/30">
+                                <td className="py-1.5 pl-2 font-mono text-cyan-400">{a.id}</td>
+                                <td className="py-1.5 text-slate-400">{a.buName}</td>
+                                <td className="py-1.5 text-right font-mono text-emerald-400">{fmtM(a.nii)}</td>
+                                <td className="py-1.5 text-right font-mono text-amber-400">{fmtM(a.ftpCost)}</td>
+                                <td className={`py-1.5 text-right font-mono font-bold ${a.netMargin >= 0 ? 'text-cyan-400' : 'text-red-400'}`}>{fmtM(a.netMargin)}</td>
+                                <td className={`py-1.5 text-right font-mono ${a.raroc >= 15 ? 'text-emerald-400' : a.raroc > 0 ? 'text-amber-400' : 'text-red-400'}`}>{a.raroc.toFixed(1)}%</td>
+                                <td className="py-1.5 text-right pr-2 text-[10px] font-bold">{a.approvalLevel}</td>
+                            </tr>
+                        ))}
+                        {attribution.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-slate-600">No booked deals</td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+/** Executive Dashboard: KPIs consolidados del portfolio */
+const ExecutiveDashboard: React.FC<{
+    deals: Transaction[];
+    products: any[];
+    businessUnits: any[];
+    portfolioMetrics: any;
+    portfolioByBU: any[];
+}> = ({ deals, products, businessUnits, portfolioMetrics, portfolioByBU }) => {
+    const bookedDeals = deals.filter(d => d.status === 'Booked' || d.status === 'Approved');
+    const totalVolume = bookedDeals.reduce((s, d) => s + (d.amount || 0), 0);
+    const avgMargin = bookedDeals.length > 0 ? bookedDeals.reduce((s, d) => s + (d.marginTarget || 0), 0) / bookedDeals.length : 0;
+
+    const byProduct = useMemo(() => {
+        const map: Record<string, { volume: number; count: number }> = {};
+        bookedDeals.forEach(d => {
+            const p = d.productType || 'Unknown';
+            if (!map[p]) map[p] = { volume: 0, count: 0 };
+            map[p].volume += d.amount || 0;
+            map[p].count++;
+        });
+        return Object.entries(map).map(([p, v]) => ({
+            product: products.find((pr: any) => pr.id === p)?.name || p,
+            ...v,
+        })).sort((a, b) => b.volume - a.volume);
+    }, [bookedDeals, products]);
+
+    const byCurrency = useMemo(() => {
+        const map: Record<string, number> = {};
+        bookedDeals.forEach(d => { map[d.currency] = (map[d.currency] || 0) + (d.amount || 0); });
+        return Object.entries(map).sort((a, b) => b[1] - a[1]);
+    }, [bookedDeals]);
+
+    const fmtM = (v: number) => {
+        if (Math.abs(v) >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
+        if (Math.abs(v) >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
+        return `$${(v / 1e3).toFixed(0)}K`;
+    };
+
+    return (
+        <div className="space-y-8">
+            {/* Top KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {[
+                    { label: 'Total Portfolio', value: fmtM(totalVolume), sub: `${bookedDeals.length} deals`, color: 'text-white' },
+                    { label: 'Avg Margin', value: `${avgMargin.toFixed(2)}%`, sub: 'target spread', color: 'text-emerald-400' },
+                    { label: 'LCR Ratio', value: `${portfolioMetrics.lcr.toFixed(1)}%`, sub: portfolioMetrics.lcr > 100 ? 'COMPLIANT' : 'AT RISK', color: portfolioMetrics.lcr > 100 ? 'text-emerald-400' : 'text-red-400' },
+                    { label: 'NSFR Ratio', value: `${portfolioMetrics.nsfr.toFixed(1)}%`, sub: portfolioMetrics.nsfr > 100 ? 'COMPLIANT' : 'AT RISK', color: portfolioMetrics.nsfr > 100 ? 'text-emerald-400' : 'text-red-400' },
+                    { label: 'Currencies', value: `${byCurrency.length}`, sub: byCurrency.map(c => c[0]).join(', '), color: 'text-cyan-400' },
+                ].map(kpi => (
+                    <div key={kpi.label} className="bg-[#0f172a]/40 border border-white/10 p-5 rounded-xl">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-2">{kpi.label}</div>
+                        <div className={`text-2xl font-mono font-bold ${kpi.color}`}>{kpi.value}</div>
+                        <div className="text-[10px] text-slate-600 mt-1">{kpi.sub}</div>
+                    </div>
+                ))}
+            </div>
+            {/* Portfolio by BU and Product */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-[#0f172a]/30 border border-white/5 p-6 rounded-2xl">
+                    <h4 className="text-sm font-bold text-white mb-4 uppercase">Volume by Business Unit</h4>
+                    <div className="space-y-3">
+                        {portfolioByBU.map((bu: any) => {
+                            const pct = totalVolume > 0 ? (bu.volume / totalVolume) * 100 : 0;
+                            return (
+                                <div key={bu.bu} className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-300 font-bold">{bu.buName}</span>
+                                        <span className="text-slate-400 font-mono">{fmtM(bu.volume)} ({pct.toFixed(0)}%)</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${pct}%` }} />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {portfolioByBU.length === 0 && <div className="text-center py-4 text-slate-600 text-xs">No booked deals</div>}
+                    </div>
+                </div>
+                <div className="bg-[#0f172a]/30 border border-white/5 p-6 rounded-2xl">
+                    <h4 className="text-sm font-bold text-white mb-4 uppercase">Volume by Product</h4>
+                    <div className="space-y-3">
+                        {byProduct.map(p => {
+                            const pct = totalVolume > 0 ? (p.volume / totalVolume) * 100 : 0;
+                            return (
+                                <div key={p.product} className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-300 font-bold">{p.product}</span>
+                                        <span className="text-slate-400 font-mono">{fmtM(p.volume)} ({p.count} deals)</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-purple-500 rounded-full" style={{ width: `${pct}%` }} />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {byProduct.length === 0 && <div className="text-center py-4 text-slate-600 text-xs">No booked deals</div>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS' | 'MATURITY_LADDER' | 'CURRENCY_GAP' | 'NII_SENSITIVITY' | 'PNL_ATTRIBUTION' | 'EXECUTIVE';
 
 const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
     deals,
@@ -278,6 +481,19 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                             className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'NII_SENSITIVITY' ? 'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             NII / IRRBB
+                        </button>
+                        <div className="h-4 w-[1px] bg-white/10 mx-1" />
+                        <button
+                            onClick={() => setActiveSubTab('PNL_ATTRIBUTION')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'PNL_ATTRIBUTION' ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            P&L Attribution
+                        </button>
+                        <button
+                            onClick={() => setActiveSubTab('EXECUTIVE')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'EXECUTIVE' ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            Executive
                         </button>
                     </nav>
                 </div>
@@ -576,6 +792,10 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                         <CurrencyGap deals={deals} />
                     ) : activeSubTab === 'NII_SENSITIVITY' ? (
                         <NIISensitivity deals={deals} />
+                    ) : activeSubTab === 'PNL_ATTRIBUTION' ? (
+                        <PnlAttribution deals={deals} products={products} businessUnits={businessUnits} clients={clients} contextData={contextData} />
+                    ) : activeSubTab === 'EXECUTIVE' ? (
+                        <ExecutiveDashboard deals={deals} products={products} businessUnits={businessUnits} portfolioMetrics={portfolioMetrics} portfolioByBU={portfolioByBU} />
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {behaviouralModels.map((model) => {
