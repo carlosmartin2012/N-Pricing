@@ -4,11 +4,13 @@ import { Panel, Badge, TextInput, InputGroup, SelectInput } from '../ui/LayoutCo
 import { Drawer } from '../ui/Drawer';
 import { Transaction, ProductDefinition, ClientEntity, BusinessUnit } from '../../types';
 import { useData } from '../../contexts/DataContext';
-import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus, CheckCircle2, XCircle, Send, BookOpen, RotateCcw, Clock, Copy } from 'lucide-react';
+import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus, CheckCircle2, XCircle, Send, BookOpen, RotateCcw, Clock, Copy, RefreshCw } from 'lucide-react';
+import { batchReprice } from '../../utils/pricingEngine';
+import { MOCK_LIQUIDITY_CURVES } from '../../constants';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
 import { translations, Language } from '../../translations';
-import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
+import { downloadTemplate, parseExcel, exportDealsToExcel } from '../../utils/excelUtils';
 import { getAvailableActions, isDealEditable, getStatusColor, formatStatus, executeTransition, type DealStatus, type UserRole, type WorkflowAction } from '../../utils/dealWorkflow';
 
 interface Props {
@@ -22,7 +24,8 @@ interface Props {
 }
 
 const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language, user }) => {
-  const { behaviouralModels } = useData();
+  const data = useData();
+  const { behaviouralModels } = data;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const t = translations[language];
@@ -169,6 +172,38 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       description: `Cloned deal ${deal.id} → ${clonedDeal.id}`,
     });
   }, [user, setDeals]);
+
+  // Batch repricing
+  const [isRepricing, setIsRepricing] = useState(false);
+  const [repriceCount, setRepriceCount] = useState(0);
+  const handleBatchReprice = useCallback(async () => {
+    setIsRepricing(true);
+    const ctx = {
+      yieldCurve: data.yieldCurves,
+      liquidityCurves: data.liquidityCurves?.length ? data.liquidityCurves : MOCK_LIQUIDITY_CURVES,
+      rules: data.rules,
+      rateCards: data.ftpRateCards,
+      transitionGrid: data.transitionGrid,
+      physicalGrid: data.physicalGrid,
+      behaviouralModels: data.behaviouralModels,
+      clients,
+      products,
+      businessUnits,
+    };
+    const results = batchReprice(deals, data.approvalMatrix, ctx);
+    setRepriceCount(results.size);
+    exportDealsToExcel(deals, results);
+
+    await storage.addAuditEntry({
+      userEmail: user?.email || 'unknown',
+      userName: user?.name || 'Unknown',
+      action: 'BATCH_REPRICE',
+      module: 'BLOTTER',
+      description: `Batch repriced ${results.size} deals and exported to Excel`,
+    });
+    setIsRepricing(false);
+    setTimeout(() => setRepriceCount(0), 3000);
+  }, [deals, user, data, clients, products, businessUnits]);
 
   const handleEdit = (deal: Transaction) => {
     if (!isDealEditable(deal) && user?.role !== 'Admin') return;
@@ -387,6 +422,18 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
             <Upload size={14} /> <span className="hidden sm:inline">Import Excel</span>
           </button>
           <button
+            onClick={handleBatchReprice}
+            disabled={isRepricing}
+            className={`px-3 py-1.5 rounded border text-xs flex items-center gap-1 transition-colors font-bold ${
+              repriceCount > 0
+                ? 'bg-emerald-900/30 border-emerald-700 text-emerald-400'
+                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-400'
+            }`}
+          >
+            <RefreshCw size={14} className={isRepricing ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">{repriceCount > 0 ? `${repriceCount} Repriced` : 'Batch Reprice'}</span>
+          </button>
+          <button
             onClick={handleNewDeal}
             className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs flex items-center gap-1 transition-colors font-bold shadow-lg shadow-cyan-900/20"
           >
@@ -447,7 +494,13 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
               }}
               className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors shrink-0"
             >
-              <Download size={14} /> Export CSV
+              <Download size={14} /> CSV
+            </button>
+            <button
+              onClick={() => exportDealsToExcel(filteredDeals)}
+              className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors shrink-0"
+            >
+              <Download size={14} /> Excel
             </button>
           </div>
         </div>

@@ -89,6 +89,52 @@ export const downloadTemplate = (templateKey: keyof typeof EXCEL_TEMPLATES | str
     XLSX.writeFile(wb, `${fileName}.xlsx`);
 };
 
+/**
+ * Export deals to a formatted Excel file with FTP results.
+ */
+export const exportDealsToExcel = (deals: any[], results?: Map<string, any>) => {
+    const wb = XLSX.utils.book_new();
+
+    const rows = deals.map(d => {
+        const r = results?.get(d.id);
+        return {
+            'Deal ID': d.id,
+            'Client': d.clientId,
+            'Type': d.clientType,
+            'Product': d.productType,
+            'Category': d.category,
+            'Amount': d.amount,
+            'Currency': d.currency,
+            'Tenor (M)': d.durationMonths,
+            'Start Date': d.startDate,
+            'Margin Target': d.marginTarget,
+            'Status': d.status || 'Draft',
+            'BU': d.businessUnit,
+            'Risk Weight': d.riskWeight,
+            'Capital Ratio': d.capitalRatio,
+            'Target ROE': d.targetROE,
+            'Transition Risk': d.transitionRisk,
+            'Physical Risk': d.physicalRisk,
+            // FTP Results (if available)
+            ...(r ? {
+                'Base Rate': r.baseRate?.toFixed(4),
+                'Liquidity Spread': r.liquiditySpread?.toFixed(4),
+                'Total FTP': r.totalFTP?.toFixed(4),
+                'Final Client Rate': r.finalClientRate?.toFixed(4),
+                'RAROC': r.raroc?.toFixed(2),
+                'Economic Profit': r.economicProfit?.toFixed(4),
+                'Approval Level': r.approvalLevel,
+                'Methodology': r.matchedMethodology,
+            } : {}),
+        };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = rows.length > 0 ? Object.keys(rows[0]).map(() => ({ wch: 16 })) : [];
+    XLSX.utils.book_append_sheet(wb, ws, 'Deals');
+    XLSX.writeFile(wb, `N-Pricing_Portfolio_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
 export const parseExcel = (file: File): Promise<any[]> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();

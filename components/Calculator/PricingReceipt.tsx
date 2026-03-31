@@ -3,7 +3,7 @@ import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react'
 import { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
 import { calculatePricing, PricingShocks, PricingContext } from '../../utils/pricingEngine';
 import { Panel, Badge } from '../ui/LayoutComponents';
-import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap, Droplets, Save, FilePlus, Check } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, TrendingUp, BarChart4, Zap, Droplets, Save, FilePlus, Check, FileDown } from 'lucide-react';
 import { translations, Language } from '../../translations';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -94,6 +94,54 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
          setDealSaveStatus('idle');
       }
    }, [deal, result, currentUser, data, onDealSaved]);
+
+   // Generate printable pricing receipt (PDF-ready)
+   const handleExportReceipt = useCallback(() => {
+      const clientName = data.clients.find(c => c.id === deal.clientId)?.name || deal.clientId;
+      const html = `<!DOCTYPE html><html><head><title>Pricing Receipt — ${deal.id || 'New Deal'}</title>
+<style>body{font-family:monospace;max-width:700px;margin:40px auto;color:#1e293b;font-size:12px}
+h1{font-size:18px;border-bottom:2px solid #0891b2;padding-bottom:8px;color:#0891b2}
+h2{font-size:14px;margin-top:20px;color:#334155}
+.row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dotted #e2e8f0}
+.row.highlight{font-weight:bold;background:#f0f9ff;padding:6px 4px}
+.badge{display:inline-block;padding:4px 12px;border-radius:4px;font-weight:bold;font-size:11px}
+.auto{background:#d1fae5;color:#065f46}.l1{background:#fef3c7;color:#92400e}.l2{background:#fed7aa;color:#9a3412}.rej{background:#fecaca;color:#991b1b}
+.footer{margin-top:30px;text-align:center;color:#94a3b8;font-size:10px}
+@media print{body{margin:20px}}</style></head><body>
+<h1>N Pricing — FTP Pricing Receipt</h1>
+<div class="row"><span>Deal ID</span><span><b>${deal.id || 'Unsaved'}</b></span></div>
+<div class="row"><span>Client</span><span>${clientName} (${deal.clientType})</span></div>
+<div class="row"><span>Product</span><span>${deal.productType} — ${deal.category}</span></div>
+<div class="row"><span>Amount</span><span>${new Intl.NumberFormat('en-US', {style:'currency',currency:deal.currency}).format(deal.amount)}</span></div>
+<div class="row"><span>Tenor</span><span>${deal.durationMonths}M ${deal.amortization} ${deal.repricingFreq}</span></div>
+<h2>Pricing Construction</h2>
+<div class="row"><span>IRRBB Base Rate</span><span>${result.baseRate.toFixed(3)}%</span></div>
+<div class="row"><span>Liquidity Spread</span><span>${result.liquiditySpread >= 0?'+':''}${result.liquiditySpread.toFixed(3)}%</span></div>
+<div class="row"><span>  └ LP</span><span>${result._liquidityPremiumDetails.toFixed(3)}%</span></div>
+<div class="row"><span>  └ CLC (LCR)</span><span>+${result._clcChargeDetails.toFixed(3)}%</span></div>
+${result.nsfrCost ? `<div class="row"><span>  └ NSFR</span><span>${result.nsfrCost.toFixed(3)}%</span></div>` : ''}
+<div class="row"><span>Strategic Spread</span><span>${result.strategicSpread.toFixed(3)}%</span></div>
+${result.incentivisationAdj ? `<div class="row"><span>Incentivisation</span><span>${result.incentivisationAdj.toFixed(3)}%</span></div>` : ''}
+<div class="row highlight"><span>Total FTP</span><span>${result.totalFTP.toFixed(3)}%</span></div>
+<div class="row"><span>Expected Loss</span><span>+${result.regulatoryCost.toFixed(3)}%</span></div>
+<div class="row"><span>Operational Cost</span><span>+${result.operationalCost.toFixed(3)}%</span></div>
+<div class="row"><span>ESG Transition</span><span>${result.esgTransitionCharge.toFixed(3)}%</span></div>
+<div class="row"><span>ESG Physical</span><span>${result.esgPhysicalCharge.toFixed(3)}%</span></div>
+<div class="row highlight"><span>Floor Price</span><span>${result.floorPrice.toFixed(3)}%</span></div>
+<div class="row"><span>Capital Charge</span><span>+${result.capitalCharge.toFixed(3)}%</span></div>
+<div class="row highlight"><span>Technical Price</span><span>${result.technicalPrice.toFixed(3)}%</span></div>
+<h2>RAROC & Governance</h2>
+<div class="row highlight"><span>RAROC</span><span>${result.raroc.toFixed(2)}%</span></div>
+<div class="row"><span>Economic Profit</span><span>${result.economicProfit >= 0?'+':''}${result.economicProfit.toFixed(2)}%</span></div>
+<div class="row"><span>Final Client Rate</span><span><b>${result.finalClientRate.toFixed(2)}%</b></span></div>
+<div class="row"><span>Approval</span><span class="badge ${result.approvalLevel==='Auto'?'auto':result.approvalLevel==='L1_Manager'?'l1':result.approvalLevel==='L2_Committee'?'l2':'rej'}">${result.approvalLevel}</span></div>
+${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${result.formulaUsed}</span></div>` : ''}
+<div class="row"><span>Methodology</span><span>${result.matchedMethodology}</span></div>
+<div class="footer">Generated by N Pricing Platform — ${new Date().toLocaleString()}<br>Calculated by ${currentUser?.name || 'System'}</div>
+</body></html>`;
+      const w = window.open('', '_blank');
+      if (w) { w.document.write(html); w.document.close(); w.print(); }
+   }, [deal, result, currentUser, data.clients]);
 
    const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency }).format(n);
 
@@ -277,6 +325,13 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
                >
                   {dealSaveStatus === 'saved' ? <Check size={14} /> : dealSaveStatus === 'saving' ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <FilePlus size={14} />}
                   {dealSaveStatus === 'saved' ? 'Deal Saved to Blotter' : dealSaveStatus === 'saving' ? 'Saving...' : 'Save as Deal'}
+               </button>
+               <button
+                  onClick={handleExportReceipt}
+                  className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors"
+                  title="Print / Save as PDF"
+               >
+                  <FileDown size={14} /> PDF
                </button>
                {saveStatus === 'saved' && (
                   <div className="flex items-center gap-1 text-[10px] text-emerald-500">
