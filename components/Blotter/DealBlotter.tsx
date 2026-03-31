@@ -4,7 +4,7 @@ import { Panel, Badge, TextInput, InputGroup, SelectInput } from '../ui/LayoutCo
 import { Drawer } from '../ui/Drawer';
 import { Transaction, ProductDefinition, ClientEntity, BusinessUnit } from '../../types';
 import { MOCK_BEHAVIOURAL_MODELS } from '../../constants';
-import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus, CheckCircle2, XCircle, Send, BookOpen, RotateCcw, Clock } from 'lucide-react';
+import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, MoreHorizontal, Edit, Trash2, Upload, FileUp, Plus, CheckCircle2, XCircle, Send, BookOpen, RotateCcw, Clock, Copy } from 'lucide-react';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { storage } from '../../utils/storage';
 import { translations, Language } from '../../translations';
@@ -148,6 +148,26 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     if (to === 'Pending_Approval') return 'bg-amber-600 hover:bg-amber-500 text-white';
     return 'bg-slate-600 hover:bg-slate-500 text-white';
   };
+
+  // Clone deal handler
+  const handleCloneDeal = useCallback(async (deal: Transaction) => {
+    const clonedDeal: Transaction = {
+      ...deal,
+      id: `TRD-${Date.now().toString(36).toUpperCase()}`,
+      status: 'Draft',
+      startDate: new Date().toISOString().split('T')[0],
+      description: `Clone of ${deal.id}`,
+    };
+    await storage.saveDeal(clonedDeal);
+    setDeals(prev => [clonedDeal, ...prev]);
+    await storage.addAuditEntry({
+      userEmail: user?.email || 'unknown',
+      userName: user?.name || 'Unknown',
+      action: 'DEAL_CLONED',
+      module: 'BLOTTER',
+      description: `Cloned deal ${deal.id} → ${clonedDeal.id}`,
+    });
+  }, [user, setDeals]);
 
   const handleEdit = (deal: Transaction) => {
     if (!isDealEditable(deal) && user?.role !== 'Admin') return;
@@ -485,7 +505,14 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleCloneDeal(deal)}
+                          className="p-1 text-slate-400 hover:text-amber-500 transition-colors"
+                          title="Clone deal"
+                        >
+                          <Copy size={14} />
+                        </button>
                         <button
                           onClick={() => handleEdit(deal)}
                           className={`p-1 transition-colors ${isDealEditable(deal) || user?.role === 'Admin' ? 'text-slate-400 hover:text-cyan-500' : 'text-slate-700 cursor-not-allowed'}`}

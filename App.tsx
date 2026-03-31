@@ -245,7 +245,14 @@ const AppContent: React.FC = () => {
 
             {ui.currentView === 'AI_LAB' && (
               <div className="h-full relative z-0 flex flex-col">
-                <GenAIChat deals={data.deals} marketSummary={`USD Overnight: ${MOCK_YIELD_CURVE[0].rate}%`} />
+                <GenAIChat deals={data.deals} marketSummary={(() => {
+                  const curves = data.yieldCurves?.length ? data.yieldCurves : MOCK_YIELD_CURVE;
+                  const bookedDeals = data.deals.filter(d => d.status === 'Booked' || d.status === 'Approved');
+                  const totalVol = bookedDeals.reduce((s, d) => s + (d.amount || 0), 0);
+                  const avgMargin = bookedDeals.length > 0 ? bookedDeals.reduce((s, d) => s + (d.marginTarget || 0), 0) / bookedDeals.length : 0;
+                  return `Yield Curve: ${curves.map(c => `${c.tenor}:${c.rate}%`).slice(0, 6).join(', ')}... | Portfolio: ${bookedDeals.length} booked deals, $${(totalVol / 1e6).toFixed(1)}M volume, ${avgMargin.toFixed(2)}% avg margin`;
+                })()
+                } />
               </div>
             )}
 
@@ -276,7 +283,7 @@ const AppContent: React.FC = () => {
             onOpenFullChat={() => { ui.setIsAiOpen(false); ui.setCurrentView('AI_LAB'); }}
             contextData={{
               activeDeal: dealParams,
-              marketContext: `Current Base USD Yield Curve: ${JSON.stringify(MOCK_YIELD_CURVE.slice(0, 5))}...`,
+              marketContext: `Active Yield Curve: ${(data.yieldCurves?.length ? data.yieldCurves : MOCK_YIELD_CURVE).map(c => `${c.tenor}:${c.rate}%`).slice(0, 7).join(', ')} | Portfolio: ${data.deals.filter(d => d.status === 'Booked').length} booked deals`,
             }}
           />
         </Suspense>
