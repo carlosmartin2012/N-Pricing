@@ -427,7 +427,26 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
                 <option value="Review">Review</option>
               </select>
             </div>
-            <button className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors shrink-0">
+            <button
+              onClick={() => {
+                const headers = ['ID','Client','Type','Product','Amount','Currency','Tenor','Margin','Status','BU','StartDate','RiskWeight'];
+                const rows = filteredDeals.map(d => [
+                  d.id, d.clientId, d.clientType, d.productType,
+                  d.amount, d.currency, `${d.durationMonths}M`,
+                  d.marginTarget?.toFixed(2), d.status || 'Draft',
+                  d.businessUnit, d.startDate, d.riskWeight
+                ].join(','));
+                const csv = [headers.join(','), ...rows].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `N-Pricing_Deals_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 transition-colors shrink-0"
+            >
               <Download size={14} /> Export CSV
             </button>
           </div>
