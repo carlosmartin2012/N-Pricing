@@ -269,6 +269,26 @@ ALTER PUBLICATION supabase_realtime ADD TABLE approval_matrix;
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ═══════════════════════════════════════════════════════════════════════════
+--
+-- SECURITY NOTE: These policies use USING (true) which allows all operations
+-- for any user with the anon key. This is suitable for development/demo.
+--
+-- FOR PRODUCTION, replace with auth-based policies:
+--   CREATE POLICY "deals_select" ON deals FOR SELECT
+--     USING (auth.role() = 'authenticated');
+--   CREATE POLICY "deals_insert" ON deals FOR INSERT
+--     WITH CHECK (auth.role() = 'authenticated');
+--   CREATE POLICY "deals_update" ON deals FOR UPDATE
+--     USING (auth.uid()::text = created_by OR auth.jwt()->>'role' = 'Admin');
+--   CREATE POLICY "audit_insert" ON audit_log FOR INSERT
+--     WITH CHECK (auth.role() = 'authenticated');
+--   CREATE POLICY "audit_no_delete" ON audit_log FOR DELETE USING (false);
+--
+-- Also consider:
+--   - Adding a `created_by` column to deals for ownership-based filtering
+--   - Using Supabase Auth (not anon key) for authenticated users
+--   - Revoking DELETE on pricing_results and audit_log at role level
+-- ═══════════════════════════════════════════════════════════════════════════
 
 -- Enable RLS on all tables
 ALTER TABLE deals ENABLE ROW LEVEL SECURITY;
@@ -286,14 +306,14 @@ CREATE POLICY "deals_update_active" ON deals FOR UPDATE USING (true);
 CREATE POLICY "audit_read_all" ON audit_log FOR SELECT USING (true);
 CREATE POLICY "audit_insert_only" ON audit_log FOR INSERT WITH CHECK (true);
 
--- Pricing results: read all, insert only
+-- Pricing results: read all, insert only (no updates/deletes)
 CREATE POLICY "pricing_results_read" ON pricing_results FOR SELECT USING (true);
 CREATE POLICY "pricing_results_insert" ON pricing_results FOR INSERT WITH CHECK (true);
 
--- Rules: read all, admin write only (enforced at app level)
+-- Rules: read all, write controlled at app level
 CREATE POLICY "rules_read_all" ON rules FOR SELECT USING (true);
 CREATE POLICY "rules_write" ON rules FOR ALL USING (true);
 
--- Users: read all, write own profile
+-- Users: read all, write controlled at app level
 CREATE POLICY "users_read_all" ON users FOR SELECT USING (true);
 CREATE POLICY "users_write" ON users FOR ALL USING (true);

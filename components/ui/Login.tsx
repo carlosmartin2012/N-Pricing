@@ -9,9 +9,9 @@ interface LoginProps {
     language: Language;
 }
 
-const DEMO_USER = 'demo';
-const DEMO_PASS = 'nfq@1234';
-const DEMO_EMAIL = 'demo@nfq.es';
+const DEMO_USER = import.meta.env.VITE_DEMO_USER || '';
+const DEMO_PASS = import.meta.env.VITE_DEMO_PASS || '';
+const DEMO_EMAIL = import.meta.env.VITE_DEMO_EMAIL || '';
 
 export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     const t = translations[language];
@@ -95,14 +95,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                         </svg>
                     </button>
 
-                    {/* Divider */}
+                    {/* Demo Login Form — only shown when VITE_DEMO_USER is configured */}
+                    {DEMO_USER && DEMO_PASS && (<>
                     <div className="w-full flex items-center gap-3 my-5">
                         <div className="flex-1 h-px bg-white/10"></div>
                         <span className="text-xs text-slate-500 uppercase tracking-wider">or</span>
                         <div className="flex-1 h-px bg-white/10"></div>
                     </div>
 
-                    {/* Demo Login Form */}
                     <form onSubmit={handleDemoLogin} className="w-full space-y-3">
                         <input
                             type="text"
@@ -125,6 +125,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                             Sign In
                         </button>
                     </form>
+                    </>)}
 
                     {error && (
                         <div className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded text-red-200 text-xs text-center w-full">

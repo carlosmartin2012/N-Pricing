@@ -153,10 +153,18 @@ export const useSupabaseSync = () => {
       const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
       const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
       if (supabaseUrl && supabaseAnonKey) {
-        navigator.sendBeacon(
-          `${supabaseUrl}/rest/v1/audit_log`,
-          new Blob([JSON.stringify(entry)], { type: 'application/json' })
-        );
+        // Use fetch with keepalive instead of sendBeacon to include auth headers
+        fetch(`${supabaseUrl}/rest/v1/audit_log`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify(entry),
+          keepalive: true, // ensures request completes even after page unload
+        }).catch(() => {}); // fire-and-forget
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
