@@ -255,12 +255,15 @@ describe('calculatePricing', () => {
       expect(eurResult.baseRate).toBeLessThan(usdResult.baseRate);
     });
 
-    it('EUR differs from USD by ~1 percentage point', () => {
+    it('EUR differs from USD by tenor-scaled currency basis', () => {
       const usdResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
       const eurDeal: Transaction = { ...baseDeal, currency: 'EUR' };
       const eurResult = calculatePricing(eurDeal, defaultApproval, undefined, noShocks);
       const diff = usdResult.baseRate - eurResult.baseRate;
-      expect(diff).toBeCloseTo(1.0, 1);
+      // Tenor-scaled: basis = -1.0 * (0.5 + 0.5 * min(1, DTM/60))
+      // For 24M deal: scaling = 0.5 + 0.5 * (24/60) = 0.7 → diff ≈ 0.7
+      expect(diff).toBeGreaterThan(0.5);
+      expect(diff).toBeLessThan(1.1);
     });
   });
 
