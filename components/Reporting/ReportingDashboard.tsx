@@ -803,6 +803,8 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                         <PnlAttribution deals={deals} products={products} businessUnits={businessUnits} clients={clients} contextData={contextData} />
                     ) : activeSubTab === 'EXECUTIVE' ? (
                         <ExecutiveDashboard deals={deals} products={products} businessUnits={businessUnits} portfolioMetrics={portfolioMetrics} portfolioByBU={portfolioByBU} />
+                    ) : activeSubTab === 'PRICING_ANALYTICS' ? (
+                        <PricingAnalytics deals={deals} businessUnits={businessUnits} products={products} clients={clients} />
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {behaviouralModels.map((model) => {
