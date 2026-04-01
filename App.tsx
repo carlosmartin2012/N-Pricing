@@ -56,8 +56,14 @@ const AppContent: React.FC = () => {
 
   // Theme sync
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+    if (ui.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
+  }, [ui.theme]);
 
   // Local calculator state
   const [dealParams, setDealParams] = useState<Transaction>(INITIAL_DEAL);
@@ -101,7 +107,7 @@ const AppContent: React.FC = () => {
     { id: 'MANUAL', label: ui.t.manual, icon: BookOpen },
   ];
 
-  const setTheme = () => {};
+  const setTheme = ui.setTheme;
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 dark:bg-black dark:text-slate-200 font-sans selection:bg-cyan-900 selection:text-white overflow-hidden transition-colors duration-300">

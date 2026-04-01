@@ -304,6 +304,31 @@ export interface GeneralRule {
   liquidityReference?: string; // New: Curve ID for Liquidity
   strategicSpread: number;
   formulaSpec?: FormulaSpec; // V5.0: Product-specific formula specification
+  version?: number;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+  isActive?: boolean;
+}
+
+export interface RuleVersion {
+  id: number;
+  ruleId: number;
+  version: number;
+  businessUnit: string;
+  product: string;
+  segment: string;
+  tenor: string;
+  baseMethod: string;
+  baseReference?: string;
+  spreadMethod: string;
+  liquidityReference?: string;
+  strategicSpread: number;
+  formulaSpec?: FormulaSpec;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  changedBy?: string;
+  changeReason?: string;
+  createdAt: string;
 }
 
 // --- V5.0: ALM CONFIG TYPES ---

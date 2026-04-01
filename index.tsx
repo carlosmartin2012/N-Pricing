@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { UIProvider } from './contexts/UIContext';
+import { ToastProvider } from './components/ui/Toast';
 
 /** Top-level error boundary that shows a visible crash report instead of black screen */
 class RootErrorBoundary extends React.Component<
@@ -55,15 +56,17 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <RootErrorBoundary>
-      <GoogleOAuthProvider clientId={googleClientId || 'NOT_CONFIGURED'}>
-        <AuthProvider>
-          <DataProvider>
-            <UIProvider>
-              <App />
-            </UIProvider>
-          </DataProvider>
-        </AuthProvider>
-      </GoogleOAuthProvider>
+      <ToastProvider>
+        <GoogleOAuthProvider clientId={googleClientId || 'NOT_CONFIGURED'}>
+          <AuthProvider>
+            <DataProvider>
+              <UIProvider>
+                <App />
+              </UIProvider>
+            </DataProvider>
+          </AuthProvider>
+        </GoogleOAuthProvider>
+      </ToastProvider>
     </RootErrorBoundary>
   </React.StrictMode>
 );

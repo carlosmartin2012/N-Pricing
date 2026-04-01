@@ -56,6 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }
                     if (window.innerWidth < 768) onClose();
                 }}
+                aria-current={!isUserConfig && currentView === item.id ? 'page' : undefined}
                 className={`w-full flex items-center px-3 py-2.5 rounded-md text-sm transition-all ${!isUserConfig && currentView === item.id
                     ? 'bg-cyan-50 text-cyan-700 border-l-2 border-cyan-600 dark:bg-slate-900 dark:text-white dark:border-cyan-500'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-500 dark:hover:bg-slate-900 dark:hover:text-slate-300'
@@ -106,7 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* Main Menu */}
-                <nav className="flex-1 p-2 space-y-0.5 mt-2 overflow-y-auto scrollbar-thin">
+                <nav role="navigation" aria-label="Main navigation" className="flex-1 p-2 space-y-0.5 mt-2 overflow-y-auto scrollbar-thin">
                     {mainNavItems.map((item) => {
                         const showSection = item.section && item.section !== lastSection;
                         if (item.section) lastSection = item.section;

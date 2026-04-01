@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/ui/Toast';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('sync');
 import {
   MOCK_DEALS, MOCK_CLIENTS, MOCK_USERS, MOCK_BEHAVIOURAL_MODELS,
   MOCK_RULES, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS,
@@ -17,6 +21,7 @@ import { supabaseService } from '../utils/supabaseService';
 export const useSupabaseSync = () => {
   const data = useData();
   const { currentUser, isAuthenticated } = useAuth();
+  const { addToast } = useToast();
   const prevShocks = useRef(data.shocks);
 
   // 1. Initial Hydration (Supabase-First, Mock-Fallback Strategy)
@@ -63,7 +68,8 @@ export const useSupabaseSync = () => {
         data.setSyncStatus(hasRemoteData ? 'synced' : 'mock');
       } catch (err) {
         // Step B: Full mock fallback on Supabase failure
-        console.warn('Supabase sync failed, loading mock data.', err);
+        log.warn('Supabase sync failed, loading mock data', { error: String(err) });
+        addToast('warning', 'Could not connect to server. Using offline demo data.');
         data.setDeals(MOCK_DEALS);
         data.setClients(MOCK_CLIENTS);
         data.setUsers(MOCK_USERS);
@@ -95,33 +101,40 @@ export const useSupabaseSync = () => {
 
   // 2. Real-time Subscription
   useEffect(() => {
-    const channel = supabaseService.subscribeToAll((payload: any) => {
-      const { table, eventType, mapped: mappedRecord, old: oldRecord } = payload;
+    let channel: ReturnType<typeof supabaseService.subscribeToAll> | null = null;
 
-      const updateState = (setter: React.Dispatch<React.SetStateAction<any[]>>) => {
-        setter((prev: any[]) => {
-          if (eventType === 'INSERT') return mappedRecord ? [mappedRecord, ...prev] : prev;
-          if (eventType === 'UPDATE') return mappedRecord ? prev.map((item: any) => item.id === mappedRecord.id ? mappedRecord : item) : prev;
-          if (eventType === 'DELETE') return prev.filter((item: any) => item.id !== oldRecord?.id);
-          return prev;
-        });
-      };
+    try {
+      channel = supabaseService.subscribeToAll((payload: any) => {
+        const { table, eventType, mapped: mappedRecord, old: oldRecord } = payload;
 
-      if (table === 'deals') updateState(data.setDeals);
-      if (table === 'behavioural_models') updateState(data.setBehaviouralModels);
-      if (table === 'rules') updateState(data.setRules);
-      if (table === 'clients') updateState(data.setClients);
-      if (table === 'business_units') updateState(data.setBusinessUnits);
-      if (table === 'products') updateState(data.setProducts);
-      if (table === 'users') updateState(data.setUsers);
-      if (table === 'system_config' && eventType !== 'DELETE' && mappedRecord) {
-        const configKey = (payload as any).config_key;
-        if (configKey === 'shocks') data.setShocks(mappedRecord);
-        if (configKey === 'raroc_inputs') data.setRarocInputs(mappedRecord);
-      }
-    });
+        const updateState = (setter: React.Dispatch<React.SetStateAction<any[]>>) => {
+          setter((prev: any[]) => {
+            if (eventType === 'INSERT') return mappedRecord ? [mappedRecord, ...prev] : prev;
+            if (eventType === 'UPDATE') return mappedRecord ? prev.map((item: any) => item.id === mappedRecord.id ? mappedRecord : item) : prev;
+            if (eventType === 'DELETE') return prev.filter((item: any) => item.id !== oldRecord?.id);
+            return prev;
+          });
+        };
 
-    return () => { channel.unsubscribe(); };
+        if (table === 'deals') updateState(data.setDeals);
+        if (table === 'behavioural_models') updateState(data.setBehaviouralModels);
+        if (table === 'rules') updateState(data.setRules);
+        if (table === 'clients') updateState(data.setClients);
+        if (table === 'business_units') updateState(data.setBusinessUnits);
+        if (table === 'products') updateState(data.setProducts);
+        if (table === 'users') updateState(data.setUsers);
+        if (table === 'system_config' && eventType !== 'DELETE' && mappedRecord) {
+          const configKey = (payload as any).config_key;
+          if (configKey === 'shocks') data.setShocks(mappedRecord);
+          if (configKey === 'raroc_inputs') data.setRarocInputs(mappedRecord);
+        }
+      });
+    } catch (err) {
+      console.error('Failed to set up realtime subscription:', err);
+      addToast('error', 'Realtime sync unavailable. Changes from other users will not appear.');
+    }
+
+    return () => { channel?.unsubscribe(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

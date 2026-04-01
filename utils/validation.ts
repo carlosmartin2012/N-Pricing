@@ -1,4 +1,7 @@
 import { Transaction } from '../types';
+import { createLogger } from './logger';
+
+const log = createLogger('validation');
 
 export interface ValidationError {
   field: string;
@@ -101,13 +104,13 @@ export async function safeSupabaseCall<T>(
     const { data, error } = await operation();
     if (error) {
       const msg = `${context || 'Supabase'}: ${error.message || error.code || 'Unknown error'}`;
-      console.error(msg, error);
+      log.error(msg, { context, code: error.code });
       return { data: fallback, error: msg };
     }
     return { data: data ?? fallback, error: null };
   } catch (err: any) {
     const msg = `${context || 'Supabase'}: ${err.message || 'Network error'}`;
-    console.error(msg, err);
+    log.error(msg, { context }, err instanceof Error ? err : new Error(String(err)));
     return { data: fallback, error: msg };
   }
 }

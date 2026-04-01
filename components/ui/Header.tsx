@@ -40,9 +40,9 @@ export const Header: React.FC<HeaderProps> = ({
         (currentView === 'AI_LAB' ? t.aiLab : t.pricingEngine);
 
     return (
-        <header className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 transition-colors duration-300">
+        <header role="banner" className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 transition-colors duration-300">
             <div className="flex items-center gap-2 md:gap-4">
-                <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-1">
+                <button onClick={() => setSidebarOpen(!isSidebarOpen)} aria-label="Toggle sidebar menu" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-1">
                     <Menu size={20} />
                 </button>
 
@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="text-xs font-mono text-cyan-600 dark:text-cyan-400 font-bold">{t.live}</span>
                 </div>
 
-                <button className="relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                <button aria-label="Notifications" className="relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                     <Bell size={18} />
                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-900" />
                 </button>

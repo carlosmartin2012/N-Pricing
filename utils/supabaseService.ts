@@ -1,6 +1,9 @@
 import { supabase } from './supabaseClient';
-import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard, FTPResult } from '../types';
+import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, RuleVersion, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard, FTPResult } from '../types';
 import { MOCK_DEALS, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_BEHAVIOURAL_MODELS, MOCK_USERS, MOCK_YIELD_CURVE } from '../constants';
+import { createLogger } from './logger';
+
+const log = createLogger('supabase');
 
 // --- MAPPING HELPERS ---
 
@@ -158,6 +161,27 @@ const mapRuleFromDB = (row: any): GeneralRule => ({
     strategicSpread: row.strategic_spread
 });
 
+const mapRuleVersionFromDB = (row: any): RuleVersion => ({
+    id: row.id,
+    ruleId: row.rule_id,
+    version: row.version,
+    businessUnit: row.business_unit,
+    product: row.product,
+    segment: row.segment,
+    tenor: row.tenor,
+    baseMethod: row.base_method,
+    baseReference: row.base_reference,
+    spreadMethod: row.spread_method,
+    liquidityReference: row.liquidity_reference,
+    strategicSpread: row.strategic_spread,
+    formulaSpec: row.formula_spec,
+    effectiveFrom: row.effective_from,
+    effectiveTo: row.effective_to,
+    changedBy: row.changed_by,
+    changeReason: row.change_reason,
+    createdAt: row.created_at,
+});
+
 const mapClientToDB = (client: ClientEntity) => ({ ...client }); // Assuming simple mapping for now
 const mapClientFromDB = (row: any): ClientEntity => ({ ...row });
 const mapBUToDB = (bu: BusinessUnit) => ({ ...bu });
@@ -174,7 +198,7 @@ export const supabaseService = {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching deals:', error);
+            log.error('Error fetching deals', { code: error.code }, error);
             return [];
         }
         return (data || []).map(mapDealFromDB);
@@ -186,7 +210,7 @@ export const supabaseService = {
             .upsert(mapDealToDB(deal))
             .select();
 
-        if (error) console.error('Error saving deal:', error);
+        if (error) log.error('Error saving deal', { code: error.code });
         return data ? mapDealFromDB(data[0]) : null;
     },
 
@@ -195,14 +219,14 @@ export const supabaseService = {
             .from('deals')
             .delete()
             .eq('id', id);
-        if (error) console.error('Error deleting deal:', error);
+        if (error) log.error('Error deleting deal', { code: error.code });
     },
 
     // --- SYSTEM CONFIG & MASTER DATA ---
     async fetchRules(): Promise<GeneralRule[]> {
         const { data, error } = await supabase.from('rules').select('*');
         if (error) {
-            console.error('Error fetching rules:', error);
+            log.error('Error fetching rules', { code: error.code });
             return [];
         }
         return (data || []).map(mapRuleFromDB);
@@ -210,12 +234,85 @@ export const supabaseService = {
 
     async saveRule(rule: GeneralRule) {
         const { error } = await supabase.from('rules').upsert(mapRuleToDB(rule));
-        if (error) console.error('Error saving rule:', error);
+        if (error) log.error('Error saving rule', { code: error.code });
     },
 
     async deleteRule(id: number) {
         const { error } = await supabase.from('rules').delete().eq('id', id);
-        if (error) console.error('Error deleting rule:', error);
+        if (error) log.error('Error deleting rule', { code: error.code });
+    },
+
+    // --- RULE VERSIONING ---
+    async fetchRuleVersions(ruleId: number): Promise<RuleVersion[]> {
+        const { data, error } = await supabase
+            .from('rule_versions')
+            .select('*')
+            .eq('rule_id', ruleId)
+            .order('version', { ascending: false });
+
+        if (error) {
+            log.error('Error fetching rule versions', { code: error.code });
+            return [];
+        }
+        return (data || []).map(mapRuleVersionFromDB);
+    },
+
+    async createRuleVersion(
+        ruleId: number,
+        ruleData: Partial<GeneralRule>,
+        changedBy: string,
+        changeReason: string,
+    ): Promise<void> {
+        try {
+            // 1. Get current max version for this rule_id
+            const { data: existing } = await supabase
+                .from('rule_versions')
+                .select('version')
+                .eq('rule_id', ruleId)
+                .order('version', { ascending: false })
+                .limit(1);
+
+            const currentMaxVersion = existing && existing.length > 0 ? existing[0].version : 0;
+            const newVersion = currentMaxVersion + 1;
+            const today = new Date().toISOString().split('T')[0];
+
+            // 2. Set effective_to = today on the current active version
+            if (currentMaxVersion > 0) {
+                const { error: updateError } = await supabase
+                    .from('rule_versions')
+                    .update({ effective_to: today })
+                    .eq('rule_id', ruleId)
+                    .eq('version', currentMaxVersion);
+
+                if (updateError) log.error('Error closing previous rule version', { code: updateError.code });
+            }
+
+            // 3. Insert new version with version = max + 1, effective_from = today
+            const { error: insertError } = await supabase
+                .from('rule_versions')
+                .insert({
+                    rule_id: ruleId,
+                    version: newVersion,
+                    business_unit: ruleData.businessUnit,
+                    product: ruleData.product,
+                    segment: ruleData.segment,
+                    tenor: ruleData.tenor,
+                    base_method: ruleData.baseMethod,
+                    base_reference: ruleData.baseReference,
+                    spread_method: ruleData.spreadMethod,
+                    liquidity_reference: ruleData.liquidityReference,
+                    strategic_spread: ruleData.strategicSpread ?? 0,
+                    formula_spec: ruleData.formulaSpec ?? null,
+                    effective_from: today,
+                    effective_to: null,
+                    changed_by: changedBy,
+                    change_reason: changeReason,
+                });
+
+            if (insertError) log.error('Error creating rule version', { code: insertError.code });
+        } catch (e) {
+            log.warn('createRuleVersion failed', { error: String(e) });
+        }
     },
 
     async fetchClients(): Promise<ClientEntity[]> {
@@ -226,12 +323,12 @@ export const supabaseService = {
 
     async saveClient(client: ClientEntity) {
         const { error } = await supabase.from('clients').upsert(client);
-        if (error) console.error('Error saving client:', error);
+        if (error) log.error('Error saving client', { code: error.code });
     },
 
     async deleteClient(id: string) {
         const { error } = await supabase.from('clients').delete().eq('id', id);
-        if (error) console.error('Error deleting client:', error);
+        if (error) log.error('Error deleting client', { code: error.code });
     },
 
     async fetchBusinessUnits(): Promise<BusinessUnit[]> {
@@ -242,12 +339,12 @@ export const supabaseService = {
 
     async saveBusinessUnit(unit: BusinessUnit) {
         const { error } = await supabase.from('business_units').upsert(unit);
-        if (error) console.error('Error saving unit:', error);
+        if (error) log.error('Error saving unit', { code: error.code });
     },
 
     async deleteBusinessUnit(id: string) {
         const { error } = await supabase.from('business_units').delete().eq('id', id);
-        if (error) console.error('Error deleting unit:', error);
+        if (error) log.error('Error deleting unit', { code: error.code });
     },
 
     async fetchProducts(): Promise<ProductDefinition[]> {
@@ -258,12 +355,12 @@ export const supabaseService = {
 
     async saveProduct(product: ProductDefinition) {
         const { error } = await supabase.from('products').upsert(product);
-        if (error) console.error('Error saving product:', error);
+        if (error) log.error('Error saving product', { code: error.code });
     },
 
     async deleteProduct(id: string) {
         const { error } = await supabase.from('products').delete().eq('id', id);
-        if (error) console.error('Error deleting product:', error);
+        if (error) log.error('Error deleting product', { code: error.code });
     },
 
     // --- USERS & PRESENCE ---
@@ -276,7 +373,7 @@ export const supabaseService = {
 
     async upsertUser(user: UserProfile) {
         const { error } = await supabase.from('users').upsert(user);
-        if (error) console.error('Error upserting user:', error);
+        if (error) log.error('Error upserting user', { code: error.code });
     },
 
     trackPresence(userId: string, userDetails: any) {
@@ -284,7 +381,7 @@ export const supabaseService = {
         return room
             .on('presence', { event: 'sync' }, () => {
                 const state = room.presenceState();
-                console.log('Online users:', state);
+                log.debug('Online users updated', { userCount: Object.keys(state).length });
             })
             .subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
@@ -306,10 +403,10 @@ export const supabaseService = {
             .limit(100);
 
         if (error) {
-            console.error('Error fetching audit log:', error);
+            log.error('Error fetching audit log', { code: error.code });
             return [];
         }
-        console.log(`Fetched ${data?.length || 0} audit entries from Supabase.`);
+        log.info('Fetched audit entries', { count: data?.length || 0 });
         return (data || []).map(mapAuditFromDB);
     },
 
@@ -318,10 +415,10 @@ export const supabaseService = {
             .from('audit_log')
             .insert(mapAuditToDB(entry));
         if (error) {
-            console.error('Error adding audit entry:', error);
+            log.error('Error adding audit entry', { code: error.code, message: error.message });
             alert(`Error de Supabase (${error.code}): ${error.message}\nVerifique los permisos de la tabla audit_log.`);
         } else {
-            console.log('Successfully added audit entry:', entry.action);
+            log.info('Successfully added audit entry', { action: entry.action });
         }
     },
 
@@ -339,7 +436,7 @@ export const supabaseService = {
             .from('behavioural_models')
             .upsert(mapModelToDB(model))
             .select();
-        if (error) console.error('Error saving model:', error);
+        if (error) log.error('Error saving model', { code: error.code });
         return data ? mapModelFromDB(data[0]) : null;
     },
 
@@ -348,7 +445,7 @@ export const supabaseService = {
             .from('behavioural_models')
             .delete()
             .eq('id', id);
-        if (error) console.error('Error deleting model:', error);
+        if (error) log.error('Error deleting model', { code: error.code });
     },
 
     // --- YIELD CURVES ---
@@ -360,7 +457,7 @@ export const supabaseService = {
                 as_of_date: date,
                 grid_data: points
             });
-        if (error) console.error('Error saving curve snapshot:', error);
+        if (error) log.error('Error saving curve snapshot', { code: error.code });
     },
 
     async fetchCurveHistory(currency: string): Promise<any[]> {
@@ -379,7 +476,7 @@ export const supabaseService = {
             .select('*')
             .order('as_of_date', { ascending: false });
         if (error) {
-            console.error('Error fetching yield curves:', error);
+            log.error('Error fetching yield curves', { code: error.code });
             return [];
         }
         return data || [];
@@ -399,7 +496,7 @@ export const supabaseService = {
                 points: c.points || [],
             }));
         } catch (e) {
-            console.warn('[Supabase] fetchLiquidityCurves failed:', e);
+            log.warn('fetchLiquidityCurves failed', { error: String(e) });
             return [];
         }
     },
@@ -412,7 +509,7 @@ export const supabaseService = {
                 updated_at: new Date().toISOString()
             });
         } catch (e) {
-            console.warn('[Supabase] saveLiquidityCurves failed:', e);
+            log.warn('saveLiquidityCurves failed', { error: String(e) });
         }
     },
 
@@ -431,7 +528,7 @@ export const supabaseService = {
         const { error } = await supabase
             .from('system_config')
             .upsert({ key: 'shocks', value: shocks, updated_at: new Date().toISOString() });
-        if (error) console.error('Error saving shocks:', error);
+        if (error) log.error('Error saving shocks', { code: error.code });
     },
 
     async fetchRateCards(): Promise<FtpRateCard[]> {
@@ -448,7 +545,7 @@ export const supabaseService = {
         const { error } = await supabase
             .from('system_config')
             .upsert({ key: 'rate_cards', value: cards, updated_at: new Date().toISOString() });
-        if (error) console.error('Error saving rate cards:', error);
+        if (error) log.error('Error saving rate cards', { code: error.code });
     },
 
     async fetchEsgGrid(type: 'transition' | 'physical'): Promise<any[]> {
@@ -465,7 +562,7 @@ export const supabaseService = {
         const { error } = await supabase
             .from('system_config')
             .upsert({ key: `${type}_grid`, value: grid, updated_at: new Date().toISOString() });
-        if (error) console.error('Error saving ESG grid:', error);
+        if (error) log.error('Error saving ESG grid', { code: error.code, type });
     },
 
     // --- RAROC SESSION PERSISTENCE ---
@@ -483,7 +580,7 @@ export const supabaseService = {
         const { error } = await supabase
             .from('system_config')
             .upsert({ key: 'raroc_inputs', value: inputs, updated_at: new Date().toISOString() });
-        if (error) console.error('Error saving RAROC inputs:', error);
+        if (error) log.error('Error saving RAROC inputs', { code: error.code });
     },
 
     // --- REALTIME SUBSCRIPTIONS ---
@@ -522,15 +619,15 @@ export const supabaseService = {
                     }
                 }
 
-                console.log(`Realtime update on ${payload.table}:`, payload.eventType, data?.mapped || data);
+                log.debug(`Realtime update on ${payload.table}`, { eventType: payload.eventType });
                 onUpdate({ ...payload, mapped: data?.mapped });
             })
             .subscribe((status) => {
-                console.log('Supabase Channel Subscription Status:', status);
+                log.info('Supabase Channel Subscription Status', { status });
                 if (status === 'SUBSCRIBED') {
-                    console.log('Successfully connected to Supabase Realtime.');
+                    log.info('Successfully connected to Supabase Realtime');
                 } else if (status === 'CHANNEL_ERROR') {
-                    console.error('Error connecting to Supabase Realtime channel.');
+                    log.error('Error connecting to Supabase Realtime channel');
                 }
             });
     },
@@ -538,27 +635,27 @@ export const supabaseService = {
     // --- DATABASE SEEDING ---
     async seedDatabase(): Promise<{ success: boolean; errors: string[] }> {
         const errors: string[] = [];
-        console.log('🌱 Starting database seed...');
+        log.info('Starting database seed');
 
         // 1. Seed Clients
         const { error: clientsErr } = await supabase.from('clients').upsert(MOCK_CLIENTS);
         if (clientsErr) errors.push(`clients: ${clientsErr.message}`);
-        else console.log('✅ Clients seeded');
+        else log.info('Clients seeded');
 
         // 2. Seed Products
         const { error: productsErr } = await supabase.from('products').upsert(MOCK_PRODUCT_DEFS);
         if (productsErr) errors.push(`products: ${productsErr.message}`);
-        else console.log('✅ Products seeded');
+        else log.info('Products seeded');
 
         // 3. Seed Business Units
         const { error: buErr } = await supabase.from('business_units').upsert(MOCK_BUSINESS_UNITS);
         if (buErr) errors.push(`business_units: ${buErr.message}`);
-        else console.log('✅ Business Units seeded');
+        else log.info('Business Units seeded');
 
         // 4. Seed Users
         const { error: usersErr } = await supabase.from('users').upsert(MOCK_USERS);
         if (usersErr) errors.push(`users: ${usersErr.message}`);
-        else console.log('✅ Users seeded');
+        else log.info('Users seeded');
 
         // 5. Seed Behavioural Models (map camelCase → snake_case)
         const mappedModels = MOCK_BEHAVIOURAL_MODELS.map(m => ({
@@ -576,7 +673,7 @@ export const supabaseService = {
         }));
         const { error: modelsErr } = await supabase.from('behavioural_models').upsert(mappedModels);
         if (modelsErr) errors.push(`behavioural_models: ${modelsErr.message}`);
-        else console.log('✅ Behavioural Models seeded');
+        else log.info('Behavioural Models seeded');
 
         // 6. Seed Deals (map camelCase → snake_case)
         const mappedDeals = MOCK_DEALS.map(d => ({
@@ -608,7 +705,7 @@ export const supabaseService = {
         }));
         const { error: dealsErr } = await supabase.from('deals').upsert(mappedDeals);
         if (dealsErr) errors.push(`deals: ${dealsErr.message}`);
-        else console.log('✅ Deals seeded');
+        else log.info('Deals seeded');
 
         // 7. Seed Default Rules
         const defaultRules = [
@@ -619,7 +716,7 @@ export const supabaseService = {
         ];
         const { error: rulesErr } = await supabase.from('rules').upsert(defaultRules);
         if (rulesErr) errors.push(`rules: ${rulesErr.message}`);
-        else console.log('✅ Rules seeded');
+        else log.info('Rules seeded');
 
         // 8. Seed Yield Curve snapshot
         const { error: curveErr } = await supabase.from('yield_curves').insert({
@@ -628,9 +725,9 @@ export const supabaseService = {
             grid_data: MOCK_YIELD_CURVE
         });
         if (curveErr) errors.push(`yield_curves: ${curveErr.message}`);
-        else console.log('✅ Yield Curve seeded');
+        else log.info('Yield Curve seeded');
 
-        console.log(errors.length === 0 ? 'Seed complete!' : `Seed finished with errors: ${errors.join(', ')}`);
+        log.info(errors.length === 0 ? 'Seed complete' : 'Seed finished with errors', { errors });
         return { success: errors.length === 0, errors };
     },
 
@@ -646,7 +743,7 @@ export const supabaseService = {
                 changed_by: changedBy,
                 change_reason: reason || null,
             });
-        if (error) console.error('Error creating deal version:', error);
+        if (error) log.error('Error creating deal version', { code: error.code });
     },
 
     async fetchDealVersions(dealId: string): Promise<any[]> {
@@ -656,7 +753,7 @@ export const supabaseService = {
             .eq('deal_id', dealId)
             .order('version', { ascending: false });
         if (error) {
-            console.error('Error fetching deal versions:', error);
+            log.error('Error fetching deal versions', { code: error.code });
             return [];
         }
         return data || [];
@@ -699,7 +796,7 @@ export const supabaseService = {
             .select();
 
         if (error) {
-            console.error('Error transitioning deal:', error);
+            log.error('Error transitioning deal', { code: error.code });
             return null;
         }
         return data ? mapDealFromDB(data[0]) : null;
@@ -717,7 +814,7 @@ export const supabaseService = {
             .range(from, to);
 
         if (error) {
-            console.error('Error fetching paginated deals:', error);
+            log.error('Error fetching paginated deals', { code: error.code });
             return { data: [], total: 0 };
         }
         return {
@@ -737,7 +834,7 @@ export const supabaseService = {
             .range(from, to);
 
         if (error) {
-            console.error('Error fetching paginated audit log:', error);
+            log.error('Error fetching paginated audit log', { code: error.code });
             return { data: [], total: 0 };
         }
         return {
@@ -787,7 +884,7 @@ export const supabaseService = {
                 deal_snapshot: dealSnapshot
             });
         } catch (e) {
-            console.warn('[Supabase] savePricingResult failed:', e);
+            log.warn('savePricingResult failed', { error: String(e) });
         }
     },
 
@@ -800,7 +897,7 @@ export const supabaseService = {
                 .order('version', { ascending: false });
             return data || [];
         } catch (e) {
-            console.warn('[Supabase] fetchPricingHistory failed:', e);
+            log.warn('fetchPricingHistory failed', { error: String(e) });
             return [];
         }
     },
@@ -814,7 +911,7 @@ export const supabaseService = {
                 updated_at: new Date().toISOString()
             });
         } catch (e) {
-            console.warn('[Supabase] saveApprovalMatrix failed:', e);
+            log.warn('saveApprovalMatrix failed', { error: String(e) });
         }
     },
 
@@ -840,7 +937,7 @@ export const supabaseService = {
                 updated_at: new Date().toISOString()
             });
         } catch (e) {
-            console.warn('[Supabase] saveIncentivisationRules failed:', e);
+            log.warn('saveIncentivisationRules failed', { error: String(e) });
         }
     },
 
@@ -866,7 +963,7 @@ export const supabaseService = {
                 updated_at: new Date().toISOString()
             });
         } catch (e) {
-            console.warn('[Supabase] saveSdrConfig failed:', e);
+            log.warn('saveSdrConfig failed', { error: String(e) });
         }
     },
 
@@ -891,7 +988,7 @@ export const supabaseService = {
                 updated_at: new Date().toISOString()
             });
         } catch (e) {
-            console.warn('[Supabase] saveLrConfig failed:', e);
+            log.warn('saveLrConfig failed', { error: String(e) });
         }
     },
 

@@ -15,7 +15,7 @@ Motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. Calcul
 | Build | Vite 6.2 (code-splitting con React.lazy) |
 | Estado | React Context API (3 providers: Auth, Data, UI) + localStorage fallback |
 | Backend | Supabase (PostgreSQL 15+, Realtime, RLS) |
-| Testing | Vitest 4.0 |
+| Testing | Vitest 4.0 (unit), Playwright (E2E) |
 | IA | Google Generative AI (@google/genai — Gemini) |
 | Auth | Google OAuth (@react-oauth/google) + demo login |
 | Charts | Recharts 3.7 |
@@ -31,6 +31,7 @@ npm run build        # Build de producción
 npm run test         # Tests unitarios (vitest run)
 npm run lint         # ESLint
 npm run format       # Prettier
+npm run test:e2e     # Tests E2E (Playwright, requiere dev server)
 ```
 
 ## Estructura del proyecto
@@ -50,7 +51,8 @@ npm run format       # Prettier
 ├── hooks/
 │   ├── useSupabaseSync.ts            # Hydration Supabase-first → mock fallback + realtime
 │   ├── useUniversalImport.ts         # Import masivo Excel/CSV
-│   └── useAudit.ts                   # Escritura en audit_log
+│   ├── useAudit.ts                   # Escritura en audit_log
+│   └── useBatchPricing.ts            # Batch pricing con Web Workers
 │
 ├── utils/
 │   ├── pricingEngine.ts              # ⭐ Motor FTP principal (~900 líneas, 16 gaps)
@@ -65,8 +67,19 @@ npm run format       # Prettier
 │   ├── excelUtils.ts                 # Export Excel branded
 │   ├── pricingConstants.ts           # Tablas regulatorias (LCR outflow, NSFR factors)
 │   ├── generateId.ts                 # UUID generator
+│   ├── pricingWorker.ts              # Web Worker para batch pricing
+│   ├── logger.ts                     # Structured logging (dev: all, prod: warn+error)
+│   ├── seedData.ts                   # Fuente única de datos mock/seed
+│   ├── pricing/                      # Módulos del motor de pricing (descompuesto)
+│   │   ├── curveUtils.ts             # Interpolación de curvas, bootstrap zero coupon
+│   │   ├── liquidityEngine.ts        # LP, LCR, NSFR, LR, SDR
+│   │   ├── formulaEngine.ts          # Fórmulas por producto, credit cost, behavioural
+│   │   └── index.ts                  # Re-exports
 │   └── __tests__/
-│       └── pricingEngine.test.ts     # Tests del motor de pricing (~550 líneas)
+│       ├── pricingEngine.test.ts     # Tests del motor de pricing
+│       ├── ruleMatchingEngine.test.ts # Tests del motor de reglas
+│       ├── dealWorkflow.test.ts      # Tests de workflow de deals
+│       └── validation.test.ts        # Tests de validación
 │
 ├── components/
 │   ├── Calculator/                   # DealInputPanel, MethodologyVisualizer, PricingReceipt
@@ -85,7 +98,20 @@ npm run format       # Prettier
 │
 ├── supabase/
 │   ├── schema.sql                    # Schema V1 (legacy)
-│   └── schema_v2.sql                 # Schema V2 (producción): 16 tablas, RLS, triggers
+│   ├── schema_v2.sql                 # Schema V2 (producción): 16 tablas, RLS, triggers
+│   ├── migrations/
+│   │   ├── 001_rule_versioning.sql   # Versionado de reglas
+│   │   └── 002_multi_tenant.sql      # Soporte multi-tenant
+│   └── functions/
+│       └── pricing/index.ts          # Edge Function scaffold para pricing server-side
+│
+├── e2e/                              # Tests E2E (Playwright)
+│   └── example.spec.ts
+├── playwright.config.ts
+│
+├── docs/
+│   ├── pricing-methodology.md        # Documentación funcional de los 16 gaps
+│   └── supabase-setup.md             # Guía de setup de Supabase
 │
 ├── public/assets/                    # Logos
 ├── .github/workflows/ci.yml         # CI: build + test + lint

@@ -7,7 +7,8 @@ interface UIContextType {
   setCurrentView: (view: ViewState) => void;
   language: Language;
   setLanguage: React.Dispatch<React.SetStateAction<Language>>;
-  theme: 'dark';
+  theme: 'dark' | 'light';
+  setTheme: React.Dispatch<React.SetStateAction<'dark' | 'light'>>;
   t: (typeof translations)['en'];
   isSidebarOpen: boolean;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,7 +30,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
 
-  const theme = 'dark' as const;
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const t = translations[language];
 
   return (
@@ -37,7 +38,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       value={{
         currentView, setCurrentView,
         language, setLanguage,
-        theme, t,
+        theme, setTheme, t,
         isSidebarOpen, setSidebarOpen,
         isImportModalOpen, setIsImportModalOpen,
         isConfigModalOpen, setIsConfigModalOpen,

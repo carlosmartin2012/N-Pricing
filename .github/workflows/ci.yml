@@ -30,3 +30,11 @@ jobs:
 
       - name: Build
         run: npx vite build
+
+      - name: Install Playwright (E2E)
+        run: npx playwright install --with-deps chromium
+        if: github.event_name == 'pull_request'
+
+      - name: Run E2E tests
+        run: npx playwright test
+        if: github.event_name == 'pull_request'
