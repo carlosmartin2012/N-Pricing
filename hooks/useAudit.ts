@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { storage } from '../utils/storage';
+import { supabaseService } from '../utils/supabaseService';
 import { ViewState } from '../types';
 
 interface AuditOptions {
@@ -12,7 +12,7 @@ interface AuditOptions {
 export const useAudit = (user: { email?: string; name?: string } | null) => {
   const logAudit = useCallback(
     (opts: AuditOptions) => {
-      storage.addAuditEntry({
+      supabaseService.addAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown User',
         action: opts.action,

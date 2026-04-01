@@ -32,6 +32,7 @@ const GenAIChat = React.lazy(() => import('./components/Intelligence/GenAIChat')
 const ReportingDashboard = React.lazy(() => import('./components/Reporting/ReportingDashboard'));
 const RAROCCalculator = React.lazy(() => import('./components/RAROC/RAROCCalculator'));
 const ShocksDashboard = React.lazy(() => import('./components/Risk/ShocksDashboard'));
+const PricingComparison = React.lazy(() => import('./components/Calculator/PricingComparison'));
 
 const ViewLoader: React.FC = () => (
   <div className="flex items-center justify-center h-full">
@@ -168,6 +169,11 @@ const AppContent: React.FC = () => {
                       setDealParams(savedDeal);
                     }}
                   />
+                </div>
+                <div className="lg:col-span-12 w-full">
+                  <Suspense fallback={<ViewLoader />}>
+                    <PricingComparison baseDeal={dealParams} approvalMatrix={data.approvalMatrix} />
+                  </Suspense>
                 </div>
               </div>
             )}

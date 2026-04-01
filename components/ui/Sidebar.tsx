@@ -48,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         return (
             <button
+                data-testid={`nav-${item.id}`}
                 onClick={() => {
                     if (isUserConfig) {
                         onOpenConfig();
@@ -94,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 />
             )}
 
-            <div className={`
+            <div data-testid="sidebar" className={`
                 ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full md:translate-x-0'}
                 ${isSidebarOpen ? 'fixed md:relative' : 'fixed md:relative'}
                 h-full bg-white dark:bg-black border-r border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col z-20 shadow-2xl overflow-hidden

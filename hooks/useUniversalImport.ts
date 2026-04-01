@@ -3,7 +3,6 @@ import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudit } from './useAudit';
 import { GeneralRule, BehaviouralModel, YieldCurvePoint, Transaction } from '../types';
-import { storage } from '../utils/storage';
 import { supabaseService } from '../utils/supabaseService';
 import { generateId } from '../utils/generateId';
 
@@ -28,7 +27,7 @@ export const useUniversalImport = () => {
           });
         });
         for (const [cur, points] of Object.entries(curves)) {
-          await storage.saveCurveSnapshot(cur, new Date().toISOString().split('T')[0], points);
+          await supabaseService.saveCurveSnapshot(cur, new Date().toISOString().split('T')[0], points);
           logAudit({ action: 'IMPORT_YIELD_CURVES', module: 'MARKET_DATA', description: `Imported ${points.length} curve points for ${cur}` });
         }
         break;
@@ -66,7 +65,7 @@ export const useUniversalImport = () => {
           replicationProfile: r.ReplicationProfile ? (typeof r.ReplicationProfile === 'string' ? JSON.parse(r.ReplicationProfile) : r.ReplicationProfile) : [],
         }));
         for (const model of modelsToSave) {
-          await storage.saveBehaviouralModel(model as BehaviouralModel);
+          await supabaseService.saveModel(model as BehaviouralModel);
         }
         logAudit({ action: 'IMPORT_BEHAVIOURAL', module: 'BEHAVIOURAL', description: `Imported ${modelsToSave.length} behavioural models.` });
         break;
@@ -108,7 +107,7 @@ export const useUniversalImport = () => {
           physicalRisk: (r.PhysicalRisk || r.physicalRisk || 'Low') as 'High' | 'Medium' | 'Low',
         }));
         for (const dl of dealsToSave) {
-          await storage.saveDeal(dl);
+          await supabaseService.upsertDeal(dl);
         }
         break;
       }

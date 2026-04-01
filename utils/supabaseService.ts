@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, RuleVersion, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard, FTPResult } from '../types';
+import { Transaction, AuditEntry, BehaviouralModel, YieldCurvePoint, GeneralRule, RuleVersion, ClientEntity, BusinessUnit, ProductDefinition, UserProfile, FtpRateCard, FTPResult, DealComment, Notification } from '../types';
 import { MOCK_DEALS, MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_BEHAVIOURAL_MODELS, MOCK_USERS, MOCK_YIELD_CURVE } from '../constants';
 import { createLogger } from './logger';
 
@@ -468,6 +468,43 @@ export const supabaseService = {
             .order('as_of_date', { ascending: false });
         if (error) return [];
         return data;
+    },
+
+    // --- YIELD CURVE HISTORY (for Moving Average FTP) ---
+    async fetchCurveHistoryByIdAndMonths(curveId: string, months: number = 12): Promise<{ date: string; points: YieldCurvePoint[] }[]> {
+        const cutoff = new Date();
+        cutoff.setMonth(cutoff.getMonth() - months);
+        const cutoffStr = cutoff.toISOString().split('T')[0];
+
+        const { data, error } = await supabase
+            .from('yield_curve_history')
+            .select('snapshot_date, points')
+            .eq('curve_id', curveId)
+            .gte('snapshot_date', cutoffStr)
+            .order('snapshot_date', { ascending: false });
+
+        if (error) {
+            log.error('Error fetching curve history', { code: error.code, curveId });
+            return [];
+        }
+
+        return (data || []).map((row: any) => ({
+            date: row.snapshot_date,
+            points: row.points as YieldCurvePoint[],
+        }));
+    },
+
+    async saveCurveHistorySnapshot(curveId: string, currency: string, date: string, points: YieldCurvePoint[]): Promise<void> {
+        const { error } = await supabase
+            .from('yield_curve_history')
+            .upsert(
+                { curve_id: curveId, currency, snapshot_date: date, points },
+                { onConflict: 'curve_id,snapshot_date' },
+            );
+
+        if (error) {
+            log.error('Error saving curve history snapshot', { code: error.code, curveId, date });
+        }
     },
 
     async fetchYieldCurves(): Promise<any[]> {
@@ -1003,5 +1040,100 @@ export const supabaseService = {
         } catch (e) {
             return null;
         }
+    },
+
+    // --- DEAL COMMENTS ---
+    async fetchDealComments(dealId: string): Promise<DealComment[]> {
+        const { data, error } = await supabase
+            .from('deal_comments')
+            .select('*')
+            .eq('deal_id', dealId)
+            .order('created_at', { ascending: false });
+        if (error) {
+            log.error('Error fetching deal comments', { code: error.code });
+            return [];
+        }
+        return (data || []).map((row: any): DealComment => ({
+            id: row.id,
+            dealId: row.deal_id,
+            userEmail: row.user_email,
+            userName: row.user_name,
+            action: row.action,
+            comment: row.comment,
+            createdAt: row.created_at,
+        }));
+    },
+
+    async addDealComment(dealId: string, userEmail: string, userName: string, action: string, comment: string): Promise<void> {
+        const { error } = await supabase
+            .from('deal_comments')
+            .insert({
+                deal_id: dealId,
+                user_email: userEmail,
+                user_name: userName,
+                action,
+                comment,
+            });
+        if (error) log.error('Error adding deal comment', { code: error.code });
+    },
+
+    // --- NOTIFICATIONS ---
+    async fetchNotifications(email: string): Promise<Notification[]> {
+        const { data, error } = await supabase
+            .from('notifications')
+            .select('*')
+            .eq('recipient_email', email)
+            .order('created_at', { ascending: false })
+            .limit(50);
+        if (error) {
+            log.error('Error fetching notifications', { code: error.code });
+            return [];
+        }
+        return (data || []).map((row: any): Notification => ({
+            id: row.id,
+            recipientEmail: row.recipient_email,
+            senderEmail: row.sender_email,
+            type: row.type,
+            title: row.title,
+            message: row.message,
+            dealId: row.deal_id,
+            isRead: row.is_read,
+            createdAt: row.created_at,
+        }));
+    },
+
+    async markNotificationRead(id: number): Promise<void> {
+        const { error } = await supabase
+            .from('notifications')
+            .update({ is_read: true })
+            .eq('id', id);
+        if (error) log.error('Error marking notification read', { code: error.code });
+    },
+
+    async createNotification(recipient: string, sender: string, type: string, title: string, message: string, dealId?: string): Promise<void> {
+        const { error } = await supabase
+            .from('notifications')
+            .insert({
+                recipient_email: recipient,
+                sender_email: sender,
+                type,
+                title,
+                message,
+                deal_id: dealId || null,
+            });
+        if (error) log.error('Error creating notification', { code: error.code });
+    },
+
+    async getUnreadCount(email: string): Promise<number> {
+        const { count, error } = await supabase
+            .from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('recipient_email', email)
+            .eq('is_read', false);
+        if (error) {
+            log.error('Error getting unread count', { code: error.code });
+            return 0;
+        }
+        return count || 0;
     },
 };

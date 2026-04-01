@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Panel, Badge, TextInput } from '../ui/LayoutComponents';
 import { MOCK_YIELD_CURVE } from '../../constants';
 import { RefreshCw, TrendingUp, TrendingDown, Calendar, History, FileCheck, Zap, Save, Upload, ChevronDown, Database } from 'lucide-react';
-import { storage } from '../../utils/storage';
+import { localCache } from '../../utils/localCache';
 import { supabaseService } from '../../utils/supabaseService';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { YieldCurvePoint } from '../../types';
@@ -24,7 +24,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [shockBps, setShockBps] = useState<number>(0);
     const [isImportOpen, setIsImportOpen] = useState(false);
-    const [curvesHistory, setCurvesHistory] = useState<Record<string, YieldCurvePoint[]>>(() => storage.getCurves());
+    const [curvesHistory, setCurvesHistory] = useState<Record<string, YieldCurvePoint[]>>(() => localCache.getCurves());
     const [curveVersions, setCurveVersions] = useState<{ id: string; date: string; user: string; curve: string }[]>([]);
 
     const width = 800;
@@ -61,7 +61,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
 
     // Sync History to Storage
     useEffect(() => {
-        storage.saveCurves(curvesHistory);
+        localCache.saveCurves(curvesHistory);
     }, [curvesHistory]);
 
     // Realtime Sync for Yield Curves
@@ -139,7 +139,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         }));
 
         // Persist to Supabase
-        await storage.saveCurveSnapshot(currency, selectedDate, snapshotPoints);
+        await supabaseService.saveCurveSnapshot(currency, selectedDate, snapshotPoints);
 
         // Update active yield curve in DataContext if it's the current date
         const today = new Date().toISOString().split('T')[0];
@@ -155,7 +155,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
             curve: `${currency} ${selectedDate}`,
         }, ...prev].slice(0, 10));
 
-        storage.addAuditEntry({
+        supabaseService.addAuditEntry({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'SAVE_CURVE_SNAPSHOT',
@@ -176,10 +176,10 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         setIsImportOpen(false);
 
         // Persist to Supabase and update active curve
-        await storage.saveCurveSnapshot(currency, selectedDate, newCurve);
+        await supabaseService.saveCurveSnapshot(currency, selectedDate, newCurve);
         appData.setYieldCurves(newCurve);
 
-        storage.addAuditEntry({
+        supabaseService.addAuditEntry({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'IMPORT_CURVE',

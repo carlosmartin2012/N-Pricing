@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { supabase } from '../../utils/supabaseClient';
-import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 import { AuditEntry } from '../../types';
 import { Activity, RefreshCw, ShieldCheck, Wifi, WifiOff } from 'lucide-react';
 
@@ -78,7 +78,7 @@ const AuditLog: React.FC = () => {
 
     const handleTestEntry = async () => {
         setStatusMsg('Enviando prueba...');
-        await storage.addAuditEntry({
+        await supabaseService.addAuditEntry({
             action: 'TEST_CONNECTION',
             module: 'AUDIT_LOG',
             description: 'Prueba manual de escritura desde el Monitor de Actividad.',

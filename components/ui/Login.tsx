@@ -61,7 +61,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     };
 
     return (
-        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 space-y-8">
+        <div data-testid="login-page" className="min-h-screen bg-black flex flex-col items-center justify-center p-6 space-y-8">
             {/* Header Logo & Title */}
             <div className="flex flex-col items-center">
                 <div className="flex items-center gap-4 mb-3">
@@ -76,6 +76,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                 <div className="flex flex-col items-center mt-6">
                     {/* Google OAuth */}
                     <button
+                        data-testid="google-login-btn"
                         onClick={() => login()}
                         className="w-full bg-white text-black rounded-full py-4 px-6 flex items-center justify-between hover:bg-slate-100 transition-colors"
                     >
@@ -105,6 +106,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
 
                     <form onSubmit={handleDemoLogin} className="w-full space-y-3">
                         <input
+                            data-testid="demo-username"
                             type="text"
                             placeholder="Username"
                             value={username}
@@ -112,6 +114,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
                         />
                         <input
+                            data-testid="demo-password"
                             type="password"
                             placeholder="Password"
                             value={password}
@@ -119,6 +122,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
                         />
                         <button
+                            data-testid="demo-login-btn"
                             type="submit"
                             className="w-full bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl py-3 text-sm font-semibold transition-colors"
                         >
@@ -128,7 +132,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                     </>)}
 
                     {error && (
-                        <div className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded text-red-200 text-xs text-center w-full">
+                        <div data-testid="login-error" className="mt-4 p-3 bg-red-900/30 border border-red-800 rounded text-red-200 text-xs text-center w-full">
                             {error}
                         </div>
                     )}

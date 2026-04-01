@@ -83,7 +83,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
 
    return (
       <Panel title={t.pricingSimulationEngine || "Pricing Simulation Engine"} className="h-full dark:bg-[#0a0a0a]">
-         <div className="flex flex-col h-full text-slate-900 dark:text-slate-200">
+         <div data-testid="deal-input-panel" className="flex flex-col h-full text-slate-900 dark:text-slate-200">
 
             {/* 1. TOP: Deal Selector & Context (Always Visible) */}
             <div className="p-4 bg-white dark:bg-black border-b border-slate-200 dark:border-slate-800">
@@ -138,6 +138,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                   />
                   <div className="flex justify-end">
                      <TextInput
+                        data-testid="input-amount"
                         type="number"
                         value={values.amount || ''}
                         onChange={(e) => handleChange(e, 'amount')}
@@ -176,6 +177,7 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                      </div>
                      <div className="w-1/2">
                         <TextInput
+                           data-testid="input-duration"
                            type="number"
                            value={values.durationMonths || ''}
                            onChange={(e) => handleChange(e, 'durationMonths')}
@@ -237,19 +239,19 @@ const DealInputPanel: React.FC<Props> = ({ values, onChange, setDealParams, deal
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-slate-800/50">
                         <div className="col-span-1 md:col-span-2">
                            <InputGroup label="Select Client ID">
-                              <SelectInput value={values.clientId} onChange={handleClientSelect} className="font-bold text-slate-200">
+                              <SelectInput data-testid="input-client" value={values.clientId} onChange={handleClientSelect} className="font-bold text-slate-200">
                                  <option value="">-- Select Client --</option>
                                  {clients.map(c => <option key={c.id} value={c.id}>{c.id} - {c.name}</option>)}
                               </SelectInput>
                            </InputGroup>
                         </div>
                         <InputGroup label="Product Type">
-                           <SelectInput value={values.productType} onChange={handleProductSelect}>
+                           <SelectInput data-testid="input-product" value={values.productType} onChange={handleProductSelect}>
                               {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.category})</option>)}
                            </SelectInput>
                         </InputGroup>
                         <InputGroup label="Currency">
-                           <SelectInput value={values.currency} onChange={(e) => handleChange(e, 'currency')}>
+                           <SelectInput data-testid="input-currency" value={values.currency} onChange={(e) => handleChange(e, 'currency')}>
                               <option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option>
                            </SelectInput>
                         </InputGroup>

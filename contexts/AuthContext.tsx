@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { UserProfile } from '../types';
-import { storage } from '../utils/storage';
+import { localCache } from '../utils/localCache';
 import { supabaseService } from '../utils/supabaseService';
 
 const SESSION_TIMEOUT_MS = 8 * 60 * 60 * 1000; // 8 hours
@@ -18,10 +18,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => storage.loadCurrentUser());
-  const [isAuthenticated, setIsAuthenticated] = useState(!!storage.loadCurrentUser());
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => localCache.loadCurrentUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localCache.loadCurrentUser());
   const [sessionExpiresAt, setSessionExpiresAt] = useState<number | null>(() => {
-    const stored = storage.loadLocal<number | null>('n_pricing_session_expires', null);
+    const stored = localCache.loadLocal<number | null>('n_pricing_session_expires', null);
     if (stored && stored > Date.now()) return stored;
     return null;
   });
@@ -77,11 +77,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(loggedUser);
     setIsAuthenticated(true);
     setSessionExpiresAt(expiresAt);
-    storage.saveCurrentUser(loggedUser);
-    storage.saveLocal('n_pricing_session_expires', expiresAt);
+    localCache.saveCurrentUser(loggedUser);
+    localCache.saveLocal('n_pricing_session_expires', expiresAt);
     await supabaseService.upsertUser(loggedUser);
 
-    storage.addAuditEntry({
+    supabaseService.addAuditEntry({
       userEmail: email,
       userName: loggedUser.name,
       action: 'LOGIN',
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleLogout = useCallback(() => {
     if (currentUser) {
-      storage.addAuditEntry({
+      supabaseService.addAuditEntry({
         userEmail: currentUser.email,
         userName: currentUser.name,
         action: 'LOGOUT',
@@ -103,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(null);
     setIsAuthenticated(false);
     setSessionExpiresAt(null);
-    storage.saveCurrentUser(null);
-    storage.saveLocal('n_pricing_session_expires', null);
+    localCache.saveCurrentUser(null);
+    localCache.saveLocal('n_pricing_session_expires', null);
   }, [currentUser]);
 
   // Role check utility

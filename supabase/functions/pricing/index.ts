@@ -19,12 +19,12 @@
  *   "shocks": { interestRate: number, liquiditySpread: number }
  * }
  *
- * NOTE: This is a scaffold. The actual pricingEngine.ts logic needs to be
- * bundled for Deno runtime (Supabase Edge Functions use Deno, not Node).
- * The recommended approach is:
- * 1. Extract pure calculation logic into an isomorphic module (no browser APIs)
- * 2. Bundle with esbuild for Deno compatibility
- * 3. Load market data from Supabase tables instead of mocks
+ * Build the pricing bundle before deploying:
+ *   node supabase/functions/pricing/build.mjs
+ *
+ * This creates pricingBundle.js with the isomorphic pricing engine.
+ * Then deploy:
+ *   supabase functions deploy pricing
  */
 
 // @ts-nocheck — Deno imports not available in Node/Vite context

@@ -5,7 +5,7 @@ import {
   ApprovalMatrixConfig, RAROCInputs,
 } from '../types';
 import { PricingShocks } from '../utils/pricingEngine';
-import { storage } from '../utils/storage';
+import { localCache } from '../utils/localCache';
 
 interface DataContextType {
   // Core domain data
@@ -63,7 +63,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [liquidityCurves, setLiquidityCurves] = useState<any[]>([]);
 
   const [approvalMatrix, setApprovalMatrixState] = useState<ApprovalMatrixConfig>(() =>
-    storage.loadLocal('n_pricing_approval_matrix', {
+    localCache.loadLocal('n_pricing_approval_matrix', {
       autoApprovalThreshold: 15.0,
       l1Threshold: 10.0,
       l2Threshold: 5.0,
@@ -71,7 +71,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
   const setApprovalMatrix = useCallback((config: ApprovalMatrixConfig) => {
     setApprovalMatrixState(config);
-    storage.saveLocal('n_pricing_approval_matrix', config);
+    localCache.saveLocal('n_pricing_approval_matrix', config);
   }, []);
 
   const [shocks, setShocks] = useState<PricingShocks>({ interestRate: 0, liquiditySpread: 0 });

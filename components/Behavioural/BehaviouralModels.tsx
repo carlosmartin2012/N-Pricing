@@ -7,7 +7,7 @@ import { BehaviouralModel, ReplicationTranche } from '../../types';
 import { Search, Plus, Edit, Trash2, Activity, TrendingDown, Layers, BarChart, X, Split, GitMerge, FileSpreadsheet, Upload } from 'lucide-react';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 
-import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 
 interface Props {
    models: BehaviouralModel[];
@@ -84,7 +84,7 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
                   ]
             };
 
-            const savedRecord = await storage.saveBehaviouralModel(finalModel);
+            const savedRecord = await supabaseService.saveModel(finalModel);
 
             // Optimistic Update: Use the record returned from database if available
             setModels(prev => {
@@ -98,7 +98,7 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
                return [recordToUse, ...prev];
             });
 
-            await storage.addAuditEntry({
+            await supabaseService.addAuditEntry({
                userEmail: user?.email || 'unknown',
                userName: user?.name || 'Unknown User',
                action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
@@ -155,10 +155,10 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
          }));
 
          for (const model of newModels) {
-            await storage.saveBehaviouralModel(model);
+            await supabaseService.saveModel(model);
          }
 
-         await storage.addAuditEntry({
+         await supabaseService.addAuditEntry({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'IMPORT_MODELS',
@@ -175,9 +175,9 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
          setModels(prev => prev.filter(m => m.id !== id));
 
          try {
-            await storage.deleteBehaviouralModel(id);
+            await supabaseService.deleteModel(id);
 
-            await storage.addAuditEntry({
+            await supabaseService.addAuditEntry({
                userEmail: user?.email || 'unknown',
                userName: user?.name || 'Unknown User',
                action: 'DELETE_MODEL',

@@ -8,7 +8,8 @@ import { translations, Language } from '../../translations';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabaseService } from '../../utils/supabaseService';
-import { storage } from '../../utils/storage';
+import { exportPricingPDF } from '../../utils/pdfExport';
+// storage eliminated: use supabaseService directly
 
 interface Props {
    deal: Transaction;
@@ -74,13 +75,13 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
          _clcChargeDetails: result._clcChargeDetails,
       };
       try {
-         await storage.saveDeal(newDeal);
+         await supabaseService.upsertDeal(newDeal);
          data.setDeals(prev => {
             const exists = prev.find(d => d.id === newDeal.id);
             return exists ? prev.map(d => d.id === newDeal.id ? newDeal : d) : [...prev, newDeal];
          });
          await supabaseService.savePricingResult(newDeal.id!, result, newDeal, currentUser.email);
-         await storage.addAuditEntry({
+         await supabaseService.addAuditEntry({
             userEmail: currentUser.email,
             userName: currentUser.name,
             action: 'DEAL_SAVED_FROM_CALCULATOR',
@@ -100,59 +101,17 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
       return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
    };
 
-   // Generate printable pricing receipt (PDF-ready)
+   // Generate printable pricing receipt (PDF-ready) via dedicated utility
    const handleExportReceipt = useCallback(() => {
-      const clientName = sanitize(data.clients.find(c => c.id === deal.clientId)?.name || deal.clientId);
-      const html = `<!DOCTYPE html><html><head><title>Pricing Receipt — ${deal.id || 'New Deal'}</title>
-<style>body{font-family:monospace;max-width:700px;margin:40px auto;color:#1e293b;font-size:12px}
-h1{font-size:18px;border-bottom:2px solid #0891b2;padding-bottom:8px;color:#0891b2}
-h2{font-size:14px;margin-top:20px;color:#334155}
-.row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dotted #e2e8f0}
-.row.highlight{font-weight:bold;background:#f0f9ff;padding:6px 4px}
-.badge{display:inline-block;padding:4px 12px;border-radius:4px;font-weight:bold;font-size:11px}
-.auto{background:#d1fae5;color:#065f46}.l1{background:#fef3c7;color:#92400e}.l2{background:#fed7aa;color:#9a3412}.rej{background:#fecaca;color:#991b1b}
-.footer{margin-top:30px;text-align:center;color:#94a3b8;font-size:10px}
-@media print{body{margin:20px}}</style></head><body>
-<h1>N Pricing — FTP Pricing Receipt</h1>
-<div class="row"><span>Deal ID</span><span><b>${sanitize(deal.id) || 'Unsaved'}</b></span></div>
-<div class="row"><span>Client</span><span>${clientName} (${sanitize(deal.clientType)})</span></div>
-<div class="row"><span>Product</span><span>${sanitize(deal.productType)} — ${sanitize(deal.category)}</span></div>
-<div class="row"><span>Amount</span><span>${new Intl.NumberFormat('en-US', {style:'currency',currency:deal.currency}).format(deal.amount)}</span></div>
-<div class="row"><span>Tenor</span><span>${deal.durationMonths}M ${sanitize(deal.amortization)} ${sanitize(deal.repricingFreq)}</span></div>
-<h2>Pricing Construction</h2>
-<div class="row"><span>IRRBB Base Rate</span><span>${result.baseRate.toFixed(3)}%</span></div>
-<div class="row"><span>Liquidity Spread</span><span>${result.liquiditySpread >= 0?'+':''}${result.liquiditySpread.toFixed(3)}%</span></div>
-<div class="row"><span>  └ LP</span><span>${result._liquidityPremiumDetails.toFixed(3)}%</span></div>
-<div class="row"><span>  └ CLC (LCR)</span><span>+${result._clcChargeDetails.toFixed(3)}%</span></div>
-${result.nsfrCost ? `<div class="row"><span>  └ NSFR</span><span>${result.nsfrCost.toFixed(3)}%</span></div>` : ''}
-<div class="row"><span>Strategic Spread</span><span>${result.strategicSpread.toFixed(3)}%</span></div>
-${result.incentivisationAdj ? `<div class="row"><span>Incentivisation</span><span>${result.incentivisationAdj.toFixed(3)}%</span></div>` : ''}
-<div class="row highlight"><span>Total FTP</span><span>${result.totalFTP.toFixed(3)}%</span></div>
-<div class="row"><span>Expected Loss</span><span>+${result.regulatoryCost.toFixed(3)}%</span></div>
-<div class="row"><span>Operational Cost</span><span>+${result.operationalCost.toFixed(3)}%</span></div>
-<div class="row"><span>ESG Transition</span><span>${result.esgTransitionCharge.toFixed(3)}%</span></div>
-<div class="row"><span>ESG Physical</span><span>${result.esgPhysicalCharge.toFixed(3)}%</span></div>
-<div class="row highlight"><span>Floor Price</span><span>${result.floorPrice.toFixed(3)}%</span></div>
-<div class="row"><span>Capital Charge</span><span>+${result.capitalCharge.toFixed(3)}%</span></div>
-<div class="row highlight"><span>Technical Price</span><span>${result.technicalPrice.toFixed(3)}%</span></div>
-<h2>RAROC & Governance</h2>
-<div class="row highlight"><span>RAROC</span><span>${result.raroc.toFixed(2)}%</span></div>
-<div class="row"><span>Economic Profit</span><span>${result.economicProfit >= 0?'+':''}${result.economicProfit.toFixed(2)}%</span></div>
-<div class="row"><span>Final Client Rate</span><span><b>${result.finalClientRate.toFixed(2)}%</b></span></div>
-<div class="row"><span>Approval</span><span class="badge ${result.approvalLevel==='Auto'?'auto':result.approvalLevel==='L1_Manager'?'l1':result.approvalLevel==='L2_Committee'?'l2':'rej'}">${result.approvalLevel}</span></div>
-${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(result.formulaUsed)}</span></div>` : ''}
-<div class="row"><span>Methodology</span><span>${sanitize(result.matchedMethodology)}</span></div>
-<div class="footer">Generated by N Pricing Platform — ${sanitize(new Date().toLocaleString())}<br>Calculated by ${sanitize(currentUser?.name || 'System')}</div>
-</body></html>`;
-      const w = window.open('', '_blank');
-      if (w) { w.document.write(html); w.document.close(); w.print(); }
-   }, [deal, result, currentUser, data.clients]);
+      const clientName = data.clients.find(c => c.id === deal.clientId)?.name || deal.clientId;
+      exportPricingPDF(deal, result, clientName);
+   }, [deal, result, data.clients]);
 
    const fmtCurrency = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency }).format(n);
 
    return (
       <Panel title={t.pricingResult || "Profitability & Pricing Construction"} className="h-full border-l-4 border-l-cyan-500 bg-white dark:bg-[#0a0a0a]">
-         <div className="flex flex-col h-full">
+         <div data-testid="pricing-receipt" className="flex flex-col h-full">
 
             {/* Shocks Toggle Banner */}
             {shocks && (shocks.interestRate !== 0 || shocks.liquiditySpread !== 0) && (
@@ -182,7 +141,7 @@ ${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(re
                <div className="flex justify-between items-start mb-3">
                   <div>
                      <h4 className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Projected RAROC</h4>
-                     <div className={`text-3xl font-mono font-bold tracking-tight ${result.raroc >= approvalMatrix.autoApprovalThreshold ? 'text-emerald-600 dark:text-emerald-400' : result.raroc > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-red-500'}`}>
+                     <div data-testid="receipt-raroc" className={`text-3xl font-mono font-bold tracking-tight ${result.raroc >= approvalMatrix.autoApprovalThreshold ? 'text-emerald-600 dark:text-emerald-400' : result.raroc > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-red-500'}`}>
                         {result.raroc.toFixed(2)}%
                      </div>
                      <div className="text-[10px] text-slate-500">Target {deal.targetROE}%</div>
@@ -190,7 +149,7 @@ ${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(re
 
                   <div className="text-right">
                      <h4 className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">{t.customerRate}</h4>
-                     <div className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+                     <div data-testid="receipt-final-rate" className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
                         {result.finalClientRate.toFixed(2)}%
                      </div>
                      <div className="text-[10px] text-slate-500">All-in Price</div>
@@ -198,7 +157,7 @@ ${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(re
                </div>
 
                {/* Approval Matrix Badge */}
-               <div className={`flex items-center gap-2 p-2 rounded border ${result.approvalLevel === 'Auto' ? 'bg-emerald-950/30 border-emerald-900 text-emerald-400' :
+               <div data-testid="receipt-approval" className={`flex items-center gap-2 p-2 rounded border ${result.approvalLevel === 'Auto' ? 'bg-emerald-950/30 border-emerald-900 text-emerald-400' :
                   result.approvalLevel === 'L1_Manager' ? 'bg-amber-950/30 border-amber-900 text-amber-400' :
                      result.approvalLevel === 'L2_Committee' ? 'bg-orange-950/30 border-orange-900 text-orange-400' :
                         'bg-red-950/30 border-red-900 text-red-400'
@@ -232,7 +191,7 @@ ${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(re
 
                <div className="text-[10px] uppercase text-slate-500 font-bold mb-2 tracking-widest">Pricing Construction Flow</div>
 
-               <WaterfallItem label="IRRBB — Base Rate" value={result.baseRate} color="text-slate-300" />
+               <div data-testid="receipt-base-rate"><WaterfallItem label="IRRBB — Base Rate" value={result.baseRate} color="text-slate-300" /></div>
 
                {/* Consolidated Liquidity Module */}
                <div className="mt-3 mb-1 pt-2 border-t border-slate-800/50">
@@ -284,7 +243,7 @@ ${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(re
 
                <div className="my-2 border-t border-slate-200 dark:border-slate-800 border-dotted opacity-60"></div>
 
-               <WaterfallItem label={t.ftpRate} value={result.totalFTP} highlight />
+               <div data-testid="receipt-total-ftp"><WaterfallItem label={t.ftpRate} value={result.totalFTP} highlight /></div>
 
                {/* Business & Regulatory Costs */}
                <div className="pl-2 border-l-2 border-slate-800 ml-1 mt-2 space-y-1">
@@ -320,6 +279,7 @@ ${result.formulaUsed ? `<div class="row"><span>Formula</span><span>${sanitize(re
             {/* Save as Deal + Auto-save indicator */}
             <div className="border-t border-slate-700 bg-slate-900 p-3 flex items-center gap-2">
                <button
+                  data-testid="save-deal-btn"
                   onClick={handleSaveAsDeal}
                   disabled={dealSaveStatus === 'saving'}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${

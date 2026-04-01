@@ -86,6 +86,10 @@ export const translations = {
         syncLive: 'Live Data',
         syncError: 'Sync Error',
         pricingSimulationEngine: 'Pricing Simulation Engine',
+        compareScenarios: 'Compare Scenarios',
+        addScenario: 'Add Scenario',
+        baseCase: 'Base Case',
+        delta: 'Delta',
     },
     es: {
         // General
@@ -172,5 +176,9 @@ export const translations = {
         syncLive: 'Datos en Vivo',
         syncError: 'Error de Sincronización',
         pricingSimulationEngine: 'Motor de Simulación de Pricing',
+        compareScenarios: 'Comparar Escenarios',
+        addScenario: 'Añadir Escenario',
+        baseCase: 'Caso Base',
+        delta: 'Delta',
     }
 };

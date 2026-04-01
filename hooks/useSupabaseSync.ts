@@ -11,7 +11,7 @@ import {
   MOCK_FTP_RATE_CARDS, MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_YIELD_CURVE,
   MOCK_LIQUIDITY_CURVES,
 } from '../constants';
-import { storage } from '../utils/storage';
+import { localCache } from '../utils/localCache';
 import { supabaseService } from '../utils/supabaseService';
 
 /**
@@ -30,8 +30,8 @@ export const useSupabaseSync = () => {
       try {
         // Step A: Try Supabase first
         const [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts, dbUsers, dbShocks, dbRateCards, dbTransGrid, dbPhysGrid, dbYieldCurves, dbRaroc, dbApprovalMatrix, dbLiqCurves] = await Promise.all([
-          storage.getDeals(),
-          storage.getBehaviouralModels(),
+          supabaseService.fetchDeals(),
+          supabaseService.fetchModels(),
           supabaseService.fetchRules(),
           supabaseService.fetchClients(),
           supabaseService.fetchBusinessUnits(),
@@ -87,7 +87,7 @@ export const useSupabaseSync = () => {
 
       data.setIsLoading(false);
 
-      storage.addAuditEntry({
+      supabaseService.addAuditEntry({
         userEmail: currentUser?.email || 'system',
         userName: currentUser?.name || 'System',
         action: 'SYSTEM_BOOTSTRAP',
@@ -185,10 +185,10 @@ export const useSupabaseSync = () => {
   }, [isAuthenticated, currentUser]);
 
   // 5. Local + Supabase Auto-Save (Debounced)
-  useEffect(() => { storage.saveLocal('n_pricing_rules', data.rules); }, [data.rules]);
-  useEffect(() => { storage.saveLocal('n_pricing_clients', data.clients); }, [data.clients]);
-  useEffect(() => { storage.saveLocal('n_pricing_behavioural', data.behaviouralModels); }, [data.behaviouralModels]);
-  useEffect(() => { storage.saveLocal('n_pricing_deals', data.deals); }, [data.deals]);
+  useEffect(() => { localCache.saveLocal('n_pricing_rules', data.rules); }, [data.rules]);
+  useEffect(() => { localCache.saveLocal('n_pricing_clients', data.clients); }, [data.clients]);
+  useEffect(() => { localCache.saveLocal('n_pricing_behavioural', data.behaviouralModels); }, [data.behaviouralModels]);
+  useEffect(() => { localCache.saveLocal('n_pricing_deals', data.deals); }, [data.deals]);
 
   // 5b. Config persistence to Supabase (debounced)
   const prevRateCards = useRef(data.ftpRateCards);

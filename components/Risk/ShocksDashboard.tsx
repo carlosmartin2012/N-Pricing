@@ -4,7 +4,7 @@ import { translations, Language } from '../../translations';
 import { Transaction, ApprovalMatrixConfig } from '../../types';
 import { calculatePricing, PricingShocks } from '../../utils/pricingEngine';
 import { RefreshCcw, TrendingUp, AlertTriangle, ArrowRight, FileSpreadsheet, Download } from 'lucide-react';
-import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 
 interface Props {
@@ -23,7 +23,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal, approvalMatrix, language, shoc
     const logShockAudit = useCallback((type: string, value: number) => {
         if (auditTimerRef.current) clearTimeout(auditTimerRef.current);
         auditTimerRef.current = setTimeout(() => {
-            storage.addAuditEntry({
+            supabaseService.addAuditEntry({
                 userEmail: user?.email || 'unknown',
                 userName: user?.name || 'Unknown User',
                 action: 'APPLY_SHOCK',

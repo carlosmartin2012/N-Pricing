@@ -159,20 +159,35 @@ export function calculateMovingAverageFTP(
   yieldCurve: YieldCurvePoint[],
   targetMonths: number,
   windowMonths: number = 12,
+  historicalRates?: { date: string; rate: number }[],
 ): number {
-  // Use current curve points as proxy for historical rates
-  // In production, this would use stored historical curve snapshots
   const currentRate = interpolateYieldCurve(yieldCurve, targetMonths);
 
-  // Simulate moving average with exponential decay over the window
-  // Decay factor: more recent periods weighted higher
+  // Use real historical data if available
+  if (historicalRates && historicalRates.length > 0) {
+    const sorted = [...historicalRates].sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    let weightedSum = 0;
+    let totalWeight = 0;
+
+    for (let i = 0; i < sorted.length; i++) {
+      const weight = Math.exp(-0.05 * i);
+      weightedSum += weight * sorted[i].rate;
+      totalWeight += weight;
+    }
+
+    return totalWeight > 0 ? weightedSum / totalWeight : currentRate;
+  }
+
+  // Fallback: simulate with current curve (existing behavior)
   const periods = Math.max(1, Math.floor(windowMonths));
   let weightedSum = 0;
   let totalWeight = 0;
 
   for (let i = 0; i < periods; i++) {
-    const weight = Math.exp(-0.05 * i); // exponential decay
-    // Simulate historical rate as current rate ± seasonal variation
+    const weight = Math.exp(-0.05 * i);
     const historicalRate = currentRate + (Math.sin(i * 0.5) * 0.1);
     weightedSum += weight * historicalRate;
     totalWeight += weight;

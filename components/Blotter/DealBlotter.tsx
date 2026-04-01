@@ -8,7 +8,7 @@ import { Search, Filter, Download, ChevronDown, ArrowUpRight, ArrowDownLeft, Mor
 import { batchReprice } from '../../utils/pricingEngine';
 import { MOCK_LIQUIDITY_CURVES } from '../../constants';
 import { FileUploadModal } from '../ui/FileUploadModal';
-import { storage } from '../../utils/storage';
+import { supabaseService } from '../../utils/supabaseService';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, parseExcel, exportDealsToExcel } from '../../utils/excelUtils';
 import { getAvailableActions, isDealEditable, getStatusColor, formatStatus, executeTransition, type DealStatus, type UserRole, type WorkflowAction } from '../../utils/dealWorkflow';
@@ -53,7 +53,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         return deal;
       });
       setDeals(updatedDeals);
-      storage.addAuditEntry({
+      supabaseService.addAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown User',
         action: 'BATCH_ID_RENAME',
@@ -89,9 +89,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
       setDeals(prev => [...newDeals, ...prev]);
       // Persist imported deals to Supabase
-      await Promise.all(newDeals.map(d => storage.saveDeal(d)));
+      await Promise.all(newDeals.map(d => supabaseService.upsertDeal(d)));
 
-      storage.addAuditEntry({
+      supabaseService.addAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown User',
         action: 'IMPORT_DEALS',
@@ -124,10 +124,10 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     }
 
     const updatedDeal = { ...deal, status: result.newStatus as any };
-    await storage.saveDeal(updatedDeal);
+    await supabaseService.upsertDeal(updatedDeal);
     setDeals(prev => prev.map(d => d.id === deal.id ? updatedDeal : d));
 
-    await storage.addAuditEntry({
+    await supabaseService.addAuditEntry({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown',
       action: `WORKFLOW_${action.to.toUpperCase()}`,
@@ -162,9 +162,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       startDate: new Date().toISOString().split('T')[0],
       description: `Clone of ${deal.id}`,
     };
-    await storage.saveDeal(clonedDeal);
+    await supabaseService.upsertDeal(clonedDeal);
     setDeals(prev => [clonedDeal, ...prev]);
-    await storage.addAuditEntry({
+    await supabaseService.addAuditEntry({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown',
       action: 'DEAL_CLONED',
@@ -194,7 +194,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     setRepriceCount(results.size);
     exportDealsToExcel(deals, results);
 
-    await storage.addAuditEntry({
+    await supabaseService.addAuditEntry({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown',
       action: 'BATCH_REPRICE',
@@ -214,7 +214,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   const handleSaveEdit = async () => {
     if (selectedDeal) {
       const updated = selectedDeal as Transaction;
-      await storage.saveDeal(updated);
+      await supabaseService.upsertDeal(updated);
       setDeals(prev => prev.map(d => d.id === updated.id ? updated : d));
       setIsEditOpen(false);
     }
@@ -248,7 +248,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   const handleSaveNew = async () => {
     if (selectedDeal && selectedDeal.clientId) {
       const newDeal = { ...selectedDeal, status: 'Draft' } as Transaction;
-      await storage.saveDeal(newDeal);
+      await supabaseService.upsertDeal(newDeal);
       setDeals(prev => [newDeal, ...prev]);
       setIsNewOpen(false);
     }
@@ -261,7 +261,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
   const confirmDelete = async () => {
     if (selectedDeal && selectedDeal.id) {
-      await storage.deleteDeal(selectedDeal.id);
+      await supabaseService.deleteDeal(selectedDeal.id);
       setIsDeleteOpen(false);
     }
   }

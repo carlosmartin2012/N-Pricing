@@ -26,6 +26,7 @@ interface ReportingDashboardProps {
 import MaturityLadder from './MaturityLadder';
 import CurrencyGap from './CurrencyGap';
 import NIISensitivity from './NIISensitivity';
+import PricingAnalytics from './PricingAnalytics';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { MOCK_LIQUIDITY_CURVES } from '../../constants';
 
@@ -230,7 +231,7 @@ const ExecutiveDashboard: React.FC<{
     );
 };
 
-type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS' | 'MATURITY_LADDER' | 'CURRENCY_GAP' | 'NII_SENSITIVITY' | 'PNL_ATTRIBUTION' | 'EXECUTIVE';
+type SubTab = 'OVERVIEW' | 'FUNDING_CURVES' | 'BEHAVIOUR_FOCUS' | 'MATURITY_LADDER' | 'CURRENCY_GAP' | 'NII_SENSITIVITY' | 'PNL_ATTRIBUTION' | 'EXECUTIVE' | 'PRICING_ANALYTICS';
 
 const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
     deals,
@@ -494,6 +495,12 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({
                             className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'EXECUTIVE' ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             Executive
+                        </button>
+                        <button
+                            onClick={() => setActiveSubTab('PRICING_ANALYTICS')}
+                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeSubTab === 'PRICING_ANALYTICS' ? 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'text-slate-500 hover:text-slate-300'}`}
+                        >
+                            Pricing Analytics
                         </button>
                     </nav>
                 </div>

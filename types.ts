@@ -367,3 +367,25 @@ export interface AuditEntry {
   description: string;
   details?: any;
 }
+
+export interface DealComment {
+  id: number;
+  dealId: string;
+  userEmail: string;
+  userName?: string;
+  action: 'COMMENT' | 'APPROVE' | 'REJECT' | 'SUBMIT' | 'REWORK';
+  comment: string;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: number;
+  recipientEmail: string;
+  senderEmail?: string;
+  type: 'APPROVAL_REQUEST' | 'APPROVED' | 'REJECTED' | 'COMMENT';
+  title: string;
+  message?: string;
+  dealId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
