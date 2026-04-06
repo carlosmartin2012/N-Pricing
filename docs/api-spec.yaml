@@ -1,0 +1,246 @@
+openapi: 3.0.3
+info:
+  title: N-Pricing FTP API
+  description: |
+    Server-side Funds Transfer Pricing API.
+    Calculates internal transfer rates, RAROC, and regulatory costs.
+  version: 1.0.0
+  contact:
+    name: N-Pricing Team
+
+servers:
+  - url: https://{project-ref}.supabase.co/functions/v1
+    description: Supabase Edge Functions
+
+security:
+  - bearerAuth: []
+
+paths:
+  /pricing:
+    post:
+      summary: Price a single deal
+      description: Calculate FTP for a single transaction
+      operationId: priceSingleDeal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PricingRequest'
+      responses:
+        '200':
+          description: Pricing result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FTPResult'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /pricing/batch:
+    post:
+      summary: Price multiple deals
+      description: Batch pricing for portfolio repricing
+      operationId: priceBatchDeals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchPricingRequest'
+      responses:
+        '200':
+          description: Batch pricing results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchPricingResponse'
+
+  /pricing/scenarios:
+    post:
+      summary: Compare pricing scenarios
+      description: Price a deal under multiple shock scenarios
+      operationId: compareScenarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioRequest'
+      responses:
+        '200':
+          description: Scenario comparison
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PricingRequest:
+      type: object
+      required: [deal, approvalMatrix]
+      properties:
+        deal:
+          $ref: '#/components/schemas/Transaction'
+        approvalMatrix:
+          $ref: '#/components/schemas/ApprovalMatrix'
+        shocks:
+          $ref: '#/components/schemas/PricingShocks'
+
+    BatchPricingRequest:
+      type: object
+      required: [deals, approvalMatrix]
+      properties:
+        deals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+          maxItems: 10000
+        approvalMatrix:
+          $ref: '#/components/schemas/ApprovalMatrix'
+        shocks:
+          $ref: '#/components/schemas/PricingShocks'
+
+    BatchPricingResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              dealId:
+                type: string
+              result:
+                $ref: '#/components/schemas/FTPResult'
+        count:
+          type: integer
+
+    ScenarioRequest:
+      type: object
+      required: [deal, approvalMatrix, scenarios]
+      properties:
+        deal:
+          $ref: '#/components/schemas/Transaction'
+        approvalMatrix:
+          $ref: '#/components/schemas/ApprovalMatrix'
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              shocks:
+                $ref: '#/components/schemas/PricingShocks'
+              overrides:
+                type: object
+
+    ScenarioResponse:
+      type: object
+      properties:
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              result:
+                $ref: '#/components/schemas/FTPResult'
+              deltaVsBase:
+                type: object
+
+    Transaction:
+      type: object
+      required: [clientId, productType, category, currency, amount, durationMonths]
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        clientType:
+          type: string
+          enum: [Corporate, Retail, SME, Institution, Gov]
+        productType:
+          type: string
+        category:
+          type: string
+          enum: [Asset, Liability, Off-Balance]
+        currency:
+          type: string
+        amount:
+          type: number
+          minimum: 0
+        durationMonths:
+          type: integer
+          minimum: 1
+          maximum: 360
+        marginTarget:
+          type: number
+        riskWeight:
+          type: number
+        capitalRatio:
+          type: number
+        targetROE:
+          type: number
+        transitionRisk:
+          type: string
+          enum: [Brown, Amber, Neutral, Green]
+        physicalRisk:
+          type: string
+          enum: [High, Medium, Low]
+
+    ApprovalMatrix:
+      type: object
+      properties:
+        autoApprovalThreshold:
+          type: number
+        l1Threshold:
+          type: number
+        l2Threshold:
+          type: number
+
+    PricingShocks:
+      type: object
+      properties:
+        interestRate:
+          type: number
+          description: Basis points shock to interest rates
+        liquiditySpread:
+          type: number
+          description: Basis points shock to liquidity spreads
+
+    FTPResult:
+      type: object
+      properties:
+        baseRate:
+          type: number
+        liquiditySpread:
+          type: number
+        regulatoryCost:
+          type: number
+        capitalCharge:
+          type: number
+        totalFTP:
+          type: number
+        finalClientRate:
+          type: number
+        raroc:
+          type: number
+        economicProfit:
+          type: number
+        approvalLevel:
+          type: string
+          enum: [Auto, L1_Manager, L2_Committee, Rejected]
+        matchedMethodology:
+          type: string

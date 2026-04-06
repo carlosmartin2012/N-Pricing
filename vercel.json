@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "rm -rf node_modules/.vite && npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "npm install --legacy-peer-deps",
+  "build": {
+    "env": {
+      "VERCEL_FORCE_NO_BUILD_CACHE": "1",
+      "VITE_GOOGLE_CLIENT_ID": "769861722464-3lp7tg5rc7t806qh95npgvcmo1mdpjbn.apps.googleusercontent.com"
+    }
+  }
+}

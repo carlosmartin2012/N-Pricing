@@ -1,0 +1,11 @@
+{
+  "description": "Bundle size budgets for CI. Sizes in bytes.",
+  "maxTotalSize": 3000000,
+  "defaultMaxChunkSize": 100000,
+  "overrides": {
+    "index": 450000,
+    "xlsx": 450000,
+    "CategoricalChart": 320000,
+    "vendor-supabase": 200000
+  }
+}
