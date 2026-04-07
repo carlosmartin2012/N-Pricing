@@ -75,8 +75,14 @@ router.post('/entities', async (req, res) => {
 // --- Entity Users ---
 router.get('/entity-users', async (req, res) => {
   try {
-    const { entity_id, user_id } = req.query;
-    if (entity_id) {
+    const { entity_id, user_id, email } = req.query;
+    if (email) {
+      // Look up entity-users by user email (join with users table)
+      res.json(await query(
+        'SELECT eu.* FROM entity_users eu JOIN users u ON u.id=eu.user_id WHERE u.email=$1',
+        [email],
+      ));
+    } else if (entity_id) {
       res.json(await query('SELECT * FROM entity_users WHERE entity_id=$1', [entity_id]));
     } else if (user_id) {
       res.json(await query('SELECT * FROM entity_users WHERE user_id=$1', [user_id]));

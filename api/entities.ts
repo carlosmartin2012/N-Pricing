@@ -58,6 +58,13 @@ export async function listEntityUsers(entityId?: string): Promise<EntityUser[]> 
   } catch { return []; }
 }
 
+export async function getUserEntities(email: string): Promise<EntityUser[]> {
+  try {
+    const rows = await apiGet<Record<string, unknown>[]>(`/entities/entity-users?email=${encodeURIComponent(email)}`);
+    return rows.map(mapEntityUserFromDB);
+  } catch { return []; }
+}
+
 export async function upsertEntityUser(entityUser: Partial<EntityUser>): Promise<void> {
   await apiPost('/entities/entity-users', entityUser);
 }

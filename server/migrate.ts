@@ -335,6 +335,26 @@ CREATE TABLE IF NOT EXISTS report_runs (
 
 -- Seed default system config
 INSERT INTO system_config (key, value) VALUES ('shocks', '{"interestRate": 0, "liquiditySpread": 0}') ON CONFLICT (key) DO NOTHING;
+
+-- Seed default group
+INSERT INTO groups (id, name, short_code, country, base_currency, config, is_active)
+VALUES ('00000000-0000-0000-0000-000000000001', 'NFQ Advisory Group', 'NFQ', 'ES', 'EUR', '{}', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Seed default entity
+INSERT INTO entities (id, group_id, name, legal_name, short_code, country, base_currency, timezone, approval_matrix, sdr_config, lr_config, is_active)
+VALUES ('00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001', 'NFQ Spain', 'NFQ Advisory S.L.', 'NFQ-ES', 'ES', 'EUR', 'Europe/Madrid', '{}', '{}', '{}', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Seed demo user
+INSERT INTO users (id, name, email, role, status)
+VALUES ('00000000-0000-0000-0000-000000000100', 'Demo User', 'demo@nfq.es', 'Trader', 'active')
+ON CONFLICT (id) DO NOTHING;
+
+-- Link demo user to default entity
+INSERT INTO entity_users (entity_id, user_id, role, is_primary_entity)
+VALUES ('00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000100', 'Trader', true)
+ON CONFLICT (entity_id, user_id) DO NOTHING;
 `;
 
 export async function runMigrations(): Promise<void> {
