@@ -10,7 +10,7 @@ interface Props {
 
 export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollRef }) => {
   return (
-    <div className="flex-1 space-y-6 overflow-y-auto p-6">
+    <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto p-6">
       {messages.map((message) => (
         <div key={message.id} className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
           {message.role === 'model' && (
@@ -77,7 +77,6 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
         </div>
       )}
 
-      <div ref={scrollRef} />
     </div>
   );
 };

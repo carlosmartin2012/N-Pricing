@@ -47,9 +47,10 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
     [sessions, activeSessionId]
   );
 
-  // Auto-scroll to bottom — block:'nearest' prevents scrolling the outer page
+  // Scroll the message list container to its bottom — avoids scrolling the outer page
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [activeSession?.messages, isThinking]);
 
   useEffect(() => {

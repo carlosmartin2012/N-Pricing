@@ -45,9 +45,10 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
     portfolioSnapshots: data.portfolioSnapshots,
   });
 
-  // Auto-scroll to bottom — block:'nearest' prevents scrolling the outer page
+  // Scroll the message container to its bottom — avoids scrolling the outer page
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const el = messagesEndRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
   const handleSend = async () => {
@@ -198,7 +199,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+        <div ref={messagesEndRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
               <div
@@ -244,7 +245,6 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
