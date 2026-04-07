@@ -1,87 +1,101 @@
 import type { BusinessUnit, ClientEntity, ProductDefinition, UserProfile } from '../../types';
 import { mapBUFromDB, mapClientFromDB, mapProductFromDB } from './mappers';
-import { log, supabase } from './shared';
+import { apiGet, apiPost, apiDelete } from '../apiFetch';
+import { log } from './shared';
 
 export const masterDataService = {
   async fetchClients(): Promise<ClientEntity[]> {
-    const { data, error } = await supabase.from('clients').select('*');
-    if (error) return [];
-    return (data || []).map(mapClientFromDB);
+    try {
+      const rows = await apiGet<Record<string, unknown>[]>('/config/clients');
+      return rows.map(mapClientFromDB);
+    } catch { return []; }
   },
 
   async saveClient(client: ClientEntity) {
-    const { error } = await supabase.from('clients').upsert(client);
-    if (error) log.error('Error saving client', { code: error.code });
+    try {
+      await apiPost('/config/clients', client);
+    } catch (err) {
+      log.error('Error saving client', { error: String(err) });
+    }
   },
 
   async deleteClient(id: string) {
-    const { error } = await supabase.from('clients').delete().eq('id', id);
-    if (error) log.error('Error deleting client', { code: error.code });
+    try {
+      await apiDelete(`/config/clients/${id}`);
+    } catch (err) {
+      log.error('Error deleting client', { error: String(err) });
+    }
   },
 
   async fetchBusinessUnits(): Promise<BusinessUnit[]> {
-    const { data, error } = await supabase.from('business_units').select('*');
-    if (error) return [];
-    return (data || []).map(mapBUFromDB);
+    try {
+      const rows = await apiGet<Record<string, unknown>[]>('/config/business-units');
+      return rows.map(mapBUFromDB);
+    } catch { return []; }
   },
 
   async saveBusinessUnit(unit: BusinessUnit) {
-    const { error } = await supabase.from('business_units').upsert(unit);
-    if (error) log.error('Error saving unit', { code: error.code });
+    try {
+      await apiPost('/config/business-units', unit);
+    } catch (err) {
+      log.error('Error saving unit', { error: String(err) });
+    }
   },
 
   async deleteBusinessUnit(id: string) {
-    const { error } = await supabase.from('business_units').delete().eq('id', id);
-    if (error) log.error('Error deleting unit', { code: error.code });
+    try {
+      await apiDelete(`/config/business-units/${id}`);
+    } catch (err) {
+      log.error('Error deleting unit', { error: String(err) });
+    }
   },
 
   async fetchProducts(): Promise<ProductDefinition[]> {
-    const { data, error } = await supabase.from('products').select('*');
-    if (error) return [];
-    return (data || []).map(mapProductFromDB);
+    try {
+      const rows = await apiGet<Record<string, unknown>[]>('/config/products');
+      return rows.map(mapProductFromDB);
+    } catch { return []; }
   },
 
   async saveProduct(product: ProductDefinition) {
-    const { error } = await supabase.from('products').upsert(product);
-    if (error) log.error('Error saving product', { code: error.code });
+    try {
+      await apiPost('/config/products', product);
+    } catch (err) {
+      log.error('Error saving product', { error: String(err) });
+    }
   },
 
   async deleteProduct(id: string) {
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) log.error('Error deleting product', { code: error.code });
+    try {
+      await apiDelete(`/config/products/${id}`);
+    } catch (err) {
+      log.error('Error deleting product', { error: String(err) });
+    }
   },
 
   async fetchUsers(): Promise<UserProfile[]> {
-    const { data, error } = await supabase.from('users').select('*');
-    if (error) return [];
-    return (data || []) as UserProfile[];
+    try {
+      return await apiGet<UserProfile[]>('/config/users');
+    } catch { return []; }
   },
 
   async upsertUser(user: UserProfile) {
-    const { error } = await supabase.from('users').upsert(user);
-    if (error) log.error('Error upserting user', { code: error.code });
+    try {
+      await apiPost('/config/users', user);
+    } catch (err) {
+      log.error('Error upserting user', { error: String(err) });
+    }
   },
 
   async deleteUser(id: string) {
-    const { error } = await supabase.from('users').delete().eq('id', id);
-    if (error) log.error('Error deleting user', { code: error.code });
+    try {
+      await apiDelete(`/config/users/${id}`);
+    } catch (err) {
+      log.error('Error deleting user', { error: String(err) });
+    }
   },
 
-  trackPresence(userId: string, userDetails: any) {
-    const room = supabase.channel('online-users');
-    return room
-      .on('presence', { event: 'sync' }, () => {
-        const state = room.presenceState();
-        log.debug('Online users updated', { userCount: Object.keys(state).length });
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await room.track({
-            id: userId,
-            online_at: new Date().toISOString(),
-            ...userDetails,
-          });
-        }
-      });
+  trackPresence(_userId: string, _userDetails: unknown) {
+    return { unsubscribe: () => {} };
   },
 };

@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently --names \"vite,api\" \"vite\" \"tsx server/index.ts\"",
+    "dev:vite": "vite",
+    "dev:api": "tsx server/index.ts",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

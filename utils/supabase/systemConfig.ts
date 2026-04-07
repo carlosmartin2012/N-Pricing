@@ -1,38 +1,21 @@
-import { log, nowIso, supabase } from './shared';
+import { apiGet, apiPost } from '../apiFetch';
+import { log } from './shared';
 
-export async function fetchSystemConfigValue<T>(
-  key: string,
-  fallback: T,
-): Promise<T> {
+export async function fetchSystemConfigValue<T>(key: string, fallback: T): Promise<T> {
   try {
-    const { data, error } = await supabase
-      .from('system_config')
-      .select('value')
-      .eq('key', key)
-      .single();
-
-    if (error) return fallback;
-    return (data?.value as T) ?? fallback;
-  } catch (error) {
-    log.warn('fetchSystemConfigValue failed', { key, error: String(error) });
+    const result = await apiGet<{ value: T }>(`/config/system-config/${key}`);
+    if (result.value === null || result.value === undefined) return fallback;
+    return result.value;
+  } catch (err) {
+    log.warn('fetchSystemConfigValue failed', { key, error: String(err) });
     return fallback;
   }
 }
 
-export async function saveSystemConfigValue(
-  key: string,
-  value: unknown,
-  operation: string,
-): Promise<void> {
+export async function saveSystemConfigValue(key: string, value: unknown, operation: string): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('system_config')
-      .upsert({ key, value, updated_at: nowIso() });
-
-    if (error) {
-      log.error(`${operation} failed`, { key, code: error.code });
-    }
-  } catch (error) {
-    log.warn(`${operation} failed`, { key, error: String(error) });
+    await apiPost(`/config/system-config/${key}`, { value });
+  } catch (err) {
+    log.warn(`${operation} failed`, { key, error: String(err) });
   }
 }

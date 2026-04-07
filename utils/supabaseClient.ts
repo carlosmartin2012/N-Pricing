@@ -1,37 +1,38 @@
-import { createClient } from '@supabase/supabase-js';
+// Supabase replaced with local Express + PostgreSQL backend.
+// isSupabaseConfigured = true so existing hooks continue to use the API layer.
+export const isSupabaseConfigured = true;
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const fallbackSupabaseUrl = 'https://offline-mode.supabase.co';
-const fallbackSupabaseAnonKey = 'offline-demo-key';
+// No-op supabase object — only used for legacy code paths that haven't been
+// fully migrated. All real data access goes through utils/apiFetch.ts.
+const noop = () => noopClient;
+const noopAsync = async () => ({ data: null, error: null, count: null });
 
-// Supabase disabled — app runs fully on local seed data.
-// Re-enable when DB has seeded data and RLS policies allow anonymous read access.
-// Original: export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
-export const isSupabaseConfigured = false;
+const noopChain: Record<string, unknown> = new Proxy({}, {
+  get(_target, prop) {
+    if (prop === 'then') return undefined;
+    if (['select', 'insert', 'update', 'upsert', 'delete', 'eq', 'neq', 'gt', 'lt',
+         'gte', 'lte', 'in', 'is', 'or', 'order', 'limit', 'range', 'single', 'head',
+         'returns', 'filter', 'match'].includes(String(prop))) {
+      return () => noopChain;
+    }
+    return noopAsync;
+  },
+});
 
-if (!isSupabaseConfigured) {
-    console.warn('Supabase credentials missing. Realtime features will be disabled.');
+function makeTable() {
+  return () => noopChain;
 }
 
-export const supabase = createClient(
-    supabaseUrl || fallbackSupabaseUrl,
-    supabaseAnonKey || fallbackSupabaseAnonKey,
-    {
-        auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false,
-        },
-        realtime: {
-            params: {
-                eventsPerSecond: 2,
-            },
-        },
-        global: {
-            headers: {
-                'x-client-info': 'n-pricing/1.0',
-            },
-        },
-    }
-);
+const noopChannel = {
+  on: () => noopChannel,
+  subscribe: (_cb?: (status: string) => void) => { _cb?.('SUBSCRIBED'); return noopChannel; },
+  unsubscribe: () => {},
+  track: async () => {},
+  presenceState: () => ({}),
+};
+
+export const supabase = {
+  from: makeTable(),
+  channel: (_name: string) => noopChannel,
+  removeChannel: () => {},
+} as unknown as import('@supabase/supabase-js').SupabaseClient;

@@ -4,11 +4,6 @@ import { log } from './shared';
 
 export type AuditWriteEntry = Omit<AuditEntry, 'id'>;
 
-interface AuditTransportConfig {
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-}
-
 export interface AuditWriteResult {
   ok: boolean;
   errorMessage?: string;
@@ -18,68 +13,23 @@ export function buildAuditInsertPayload(entry: AuditWriteEntry) {
   return mapAuditToDB(entry);
 }
 
-export function resolveAuditTransportConfig(
-  overrides: AuditTransportConfig = {},
-) {
-  const supabaseUrl = overrides.supabaseUrl ?? import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = overrides.supabaseAnonKey ?? import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return null;
-  }
-
-  return {
-    supabaseUrl,
-    supabaseAnonKey,
-  };
-}
-
-export async function sendAuditEntryKeepalive(
-  entry: AuditWriteEntry,
-  overrides: AuditTransportConfig = {},
-): Promise<AuditWriteResult> {
-  const config = resolveAuditTransportConfig(overrides);
-  if (!config) {
-    return {
-      ok: false,
-      errorMessage: 'Supabase audit endpoint is not configured.',
-    };
-  }
-
+export async function sendAuditEntryKeepalive(entry: AuditWriteEntry): Promise<AuditWriteResult> {
   try {
-    const response = await fetch(`${config.supabaseUrl}/rest/v1/audit_log`, {
+    const payload = buildAuditInsertPayload(entry);
+    const response = await fetch('/api/audit', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': config.supabaseAnonKey,
-        'Authorization': `Bearer ${config.supabaseAnonKey}`,
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify(buildAuditInsertPayload(entry)),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
       keepalive: true,
     });
-
     if (!response.ok) {
-      const errorMessage = `Audit keepalive failed (${response.status}).`;
-      log.warn('Audit keepalive request failed', {
-        action: entry.action,
-        status: response.status,
-      });
-      return {
-        ok: false,
-        errorMessage,
-      };
+      const msg = `Audit keepalive failed (${response.status})`;
+      log.warn('Audit keepalive failed', { action: entry.action, status: response.status });
+      return { ok: false, errorMessage: msg };
     }
-
     return { ok: true };
-  } catch (error) {
-    log.warn('Audit keepalive transport failed', {
-      action: entry.action,
-      error: String(error),
-    });
-    return {
-      ok: false,
-      errorMessage: String(error),
-    };
+  } catch (err) {
+    log.warn('Audit keepalive transport failed', { action: entry.action, error: String(err) });
+    return { ok: false, errorMessage: String(err) };
   }
 }

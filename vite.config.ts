@@ -11,6 +11,18 @@ export default defineConfig(({ mode }) => {
         port: 5000,
         host: '0.0.0.0',
         allowedHosts: true,
+        proxy: {
+          '/api': {
+            target: 'http://localhost:3001',
+            changeOrigin: true,
+            bypass(req) {
+              const url = req.url ?? '';
+              if (/\.(tsx?|jsx?|css|json|png|svg|ico|woff2?)(\?.*)?$/.test(url)) {
+                return url;
+              }
+            },
+          },
+        },
       },
       plugins: [
         react(),

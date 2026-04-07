@@ -1,114 +1,48 @@
-/**
- * API layer — Deals (CRUD + workflow transitions)
- *
- * Wraps Supabase calls for the `deals` table with typed inputs/outputs
- * and consistent error handling via `safeSupabaseCall`.
- */
-
 import type { FTPResult, Transaction } from '../types';
-import { safeSupabaseCall } from '../utils/validation';
-import { supabase, nowIso } from '../utils/supabase/shared';
+import { apiGet, apiPost, apiPatch, apiDelete } from '../utils/apiFetch';
 import { mapDealFromDB, mapDealToDB } from './mappers';
 
-// ---------------------------------------------------------------------------
-// Core CRUD
-// ---------------------------------------------------------------------------
-
-/** Fetch all deals, ordered by most-recently created first. Optionally filter by entity. */
 export async function listDeals(entityId?: string): Promise<Transaction[]> {
-  const { data } = await safeSupabaseCall(
-    async () => {
-      let query = supabase.from('deals').select('*').order('created_at', { ascending: false });
-      if (entityId) {
-        query = query.eq('entity_id', entityId);
-      }
-      return query;
-    },
-    [],
-    'listDeals',
-  );
-  return (data as Record<string, unknown>[]).map(mapDealFromDB);
+  const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
+  const rows = await apiGet<Record<string, unknown>[]>(`/deals${qs}`);
+  return rows.map(mapDealFromDB);
 }
 
-/** Insert or update a single deal. Returns the persisted deal or `null` on error. */
 export async function upsertDeal(deal: Transaction): Promise<Transaction | null> {
-  const { data, error } = await safeSupabaseCall(
-    async () => supabase.from('deals').upsert(mapDealToDB(deal)).select(),
-    null,
-    'upsertDeal',
-  );
-  if (error || !data) return null;
-  const rows = data as Record<string, unknown>[];
-  return rows.length > 0 ? mapDealFromDB(rows[0]) : null;
+  try {
+    const row = await apiPost<Record<string, unknown>>('/deals/upsert', mapDealToDB(deal));
+    return row ? mapDealFromDB(row) : null;
+  } catch { return null; }
 }
 
-/**
- * Update a deal with optimistic locking.
- * Returns the updated deal, or throws if version conflict.
- */
 export async function updateDealWithLock(
   deal: Transaction,
   expectedVersion: number,
 ): Promise<{ deal: Transaction | null; conflict: boolean; serverVersion?: Transaction }> {
-  // Attempt update with version check
-  const { data, error } = await safeSupabaseCall(
-    async () =>
-      supabase
-        .from('deals')
-        .update(mapDealToDB(deal))
-        .eq('id', deal.id)
-        .eq('version', expectedVersion)
-        .select(),
-    null,
-    'updateDealWithLock',
-  );
-
-  if (error) return { deal: null, conflict: false };
-
-  const rows = data as Record<string, unknown>[] | null;
-  if (!rows || rows.length === 0) {
-    // Version mismatch — fetch current server version
-    const { data: currentData } = await safeSupabaseCall(
-      async () => supabase.from('deals').select('*').eq('id', deal.id).single(),
-      null,
-      'fetchConflictDeal',
+  try {
+    const result = await apiPatch<{ conflict: boolean; deal: Record<string, unknown> | null; serverVersion?: Record<string, unknown> }>(
+      `/deals/${deal.id}/lock-update`,
+      { deal: mapDealToDB(deal), expectedVersion },
     );
-    const serverDeal = currentData ? mapDealFromDB(currentData as Record<string, unknown>) : undefined;
-    return { deal: null, conflict: true, serverVersion: serverDeal };
-  }
-
-  return { deal: mapDealFromDB(rows[0]), conflict: false };
+    return {
+      deal: result.deal ? mapDealFromDB(result.deal) : null,
+      conflict: result.conflict,
+      serverVersion: result.serverVersion ? mapDealFromDB(result.serverVersion) : undefined,
+    };
+  } catch { return { deal: null, conflict: false }; }
 }
 
-/** Delete a deal by id. */
 export async function deleteDeal(id: string): Promise<void> {
-  await safeSupabaseCall(
-    async () => supabase.from('deals').delete().eq('id', id),
-    null,
-    'deleteDeal',
-  );
+  await apiDelete(`/deals/${id}`);
 }
 
-/** Batch upsert multiple deals. Returns the persisted deals. */
 export async function batchUpsertDeals(deals: Transaction[]): Promise<Transaction[]> {
   if (deals.length === 0) return [];
-
-  const { data, error } = await safeSupabaseCall(
-    async () =>
-      supabase
-        .from('deals')
-        .upsert(deals.map(mapDealToDB))
-        .select(),
-    null,
-    'batchUpsertDeals',
-  );
-  if (error || !data) return [];
-  return (data as Record<string, unknown>[]).map(mapDealFromDB);
+  try {
+    const rows = await apiPost<Record<string, unknown>[]>('/deals/batch-upsert', deals.map(mapDealToDB));
+    return rows.map(mapDealFromDB);
+  } catch { return []; }
 }
-
-// ---------------------------------------------------------------------------
-// Pagination
-// ---------------------------------------------------------------------------
 
 export interface PaginatedDeals {
   data: Transaction[];
@@ -133,121 +67,42 @@ export interface DealSummary {
   createdAt: string;
 }
 
-/**
- * Cursor-based pagination for deals.
- * Uses (created_at, id) as cursor for stable ordering.
- */
 export async function listDealsCursor(
-  options: {
-    limit?: number;
-    cursor?: string;
-    entityId?: string;
-  } = {},
+  options: { limit?: number; cursor?: string; entityId?: string } = {},
 ): Promise<PaginatedResult<Transaction>> {
   const { limit = 50, cursor, entityId } = options;
-
-  const { data, error } = await safeSupabaseCall(
-    async () => {
-      let query = supabase
-        .from('deals')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .order('id', { ascending: false })
-        .limit(limit + 1); // Fetch one extra to check hasMore
-
-      if (entityId) {
-        query = query.eq('entity_id', entityId);
-      }
-
-      if (cursor) {
-        // Cursor format: base64 of "created_at|id"
-        const decoded = atob(cursor);
-        const [cursorDate, cursorId] = decoded.split('|');
-        query = query.or(
-          `created_at.lt.${cursorDate},and(created_at.eq.${cursorDate},id.lt.${cursorId})`,
-        );
-      }
-
-      return query;
-    },
-    [],
-    'listDealsCursor',
-  );
-
-  if (error || !data) return { data: [], cursor: null, hasMore: false };
-
-  const rows = data as Record<string, unknown>[];
-  const hasMore = rows.length > limit;
-  const pageRows = hasMore ? rows.slice(0, limit) : rows;
-  const deals = pageRows.map(mapDealFromDB);
-
-  let nextCursor: string | null = null;
-  if (hasMore && pageRows.length > 0) {
-    const lastRow = pageRows[pageRows.length - 1];
-    nextCursor = btoa(`${lastRow.created_at}|${lastRow.id}`);
-  }
-
-  return { data: deals, cursor: nextCursor, hasMore };
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cursor) params.set('cursor', cursor);
+  if (entityId) params.set('entity_id', entityId);
+  try {
+    const result = await apiGet<{ data: Record<string, unknown>[]; cursor: string | null; hasMore: boolean }>(`/deals/cursor?${params}`);
+    return { data: result.data.map(mapDealFromDB), cursor: result.cursor, hasMore: result.hasMore };
+  } catch { return { data: [], cursor: null, hasMore: false }; }
 }
 
-/** Fetch deals with minimal columns for list views. */
 export async function listDealsLight(entityId?: string): Promise<DealSummary[]> {
-  const { data } = await safeSupabaseCall(
-    async () => {
-      let query = supabase
-        .from('deals')
-        .select('id, status, client_id, product_type, amount, currency, entity_id, created_at')
-        .order('created_at', { ascending: false });
-      if (entityId) query = query.eq('entity_id', entityId);
-      return query;
-    },
-    [],
-    'listDealsLight',
-  );
-  return (data as any[]).map((row) => ({
-    id: row.id,
-    status: row.status,
-    clientId: row.client_id,
-    productType: row.product_type,
-    amount: row.amount,
-    currency: row.currency,
-    entityId: row.entity_id,
-    createdAt: row.created_at,
-  }));
+  const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
+  try {
+    const rows = await apiGet<Record<string, unknown>[]>(`/deals/light${qs}`);
+    return rows.map((row) => ({
+      id: String(row.id),
+      status: String(row.status ?? ''),
+      clientId: String(row.client_id ?? ''),
+      productType: String(row.product_type ?? ''),
+      amount: Number(row.amount ?? 0),
+      currency: String(row.currency ?? 'USD'),
+      entityId: row.entity_id ? String(row.entity_id) : undefined,
+      createdAt: String(row.created_at ?? ''),
+    }));
+  } catch { return []; }
 }
 
-/** Fetch a paginated slice of deals. */
-export async function listDealsPaginated(
-  page: number = 1,
-  pageSize: number = 50,
-): Promise<PaginatedDeals> {
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  const { data, error } = await safeSupabaseCall(
-    async () =>
-      supabase
-        .from('deals')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(from, to),
-    null,
-    'listDealsPaginated',
-  );
-
-  if (error || !data) return { data: [], total: 0 };
-
-  // Supabase returns count alongside data when { count: 'exact' } is used.
-  const result = data as Record<string, unknown>[] & { count?: number };
-  return {
-    data: (Array.isArray(result) ? result : []).map(mapDealFromDB),
-    total: (result as unknown as { count?: number }).count ?? 0,
-  };
+export async function listDealsPaginated(page: number = 1, pageSize: number = 50): Promise<PaginatedDeals> {
+  try {
+    const result = await apiGet<{ data: Record<string, unknown>[]; total: number }>(`/deals/paginated?page=${page}&pageSize=${pageSize}`);
+    return { data: result.data.map(mapDealFromDB), total: result.total };
+  } catch { return { data: [], total: 0 }; }
 }
-
-// ---------------------------------------------------------------------------
-// Workflow transitions
-// ---------------------------------------------------------------------------
 
 export interface TransitionOptions {
   dealId: string;
@@ -256,54 +111,17 @@ export interface TransitionOptions {
   pricingSnapshot?: FTPResult;
 }
 
-/** Transition a deal to a new status (Draft, Pending_Approval, Approved, ...). */
 export async function transitionDeal(opts: TransitionOptions): Promise<Transaction | null> {
-  const { dealId, newStatus, userEmail, pricingSnapshot } = opts;
-
-  const updateData: Record<string, unknown> = {
-    status: newStatus,
-    updated_at: nowIso(),
-  };
-
-  if (newStatus === 'Approved') {
-    updateData.approved_by = userEmail;
-    updateData.approved_at = nowIso();
-  }
-
-  if (newStatus === 'Pending_Approval' && pricingSnapshot) {
-    updateData.pricing_snapshot = JSON.parse(JSON.stringify(pricingSnapshot));
-    updateData.locked_at = nowIso();
-    updateData.locked_by = userEmail;
-  }
-
-  if (newStatus === 'Booked') {
-    updateData.locked_at = nowIso();
-    updateData.locked_by = userEmail;
-  }
-
-  if (newStatus === 'Draft' || newStatus === 'Rejected') {
-    updateData.locked_at = null;
-    updateData.locked_by = null;
-    updateData.approved_by = null;
-    updateData.approved_at = null;
-  }
-
-  const { data, error } = await safeSupabaseCall(
-    async () => supabase.from('deals').update(updateData).eq('id', dealId).select(),
-    null,
-    'transitionDeal',
-  );
-
-  if (error || !data) return null;
-  const rows = data as Record<string, unknown>[];
-  return rows.length > 0 ? mapDealFromDB(rows[0]) : null;
+  try {
+    const row = await apiPatch<Record<string, unknown>>(`/deals/${opts.dealId}/transition`, {
+      newStatus: opts.newStatus,
+      userEmail: opts.userEmail,
+      pricingSnapshot: opts.pricingSnapshot,
+    });
+    return row ? mapDealFromDB(row) : null;
+  } catch { return null; }
 }
 
-// ---------------------------------------------------------------------------
-// Deal versions
-// ---------------------------------------------------------------------------
-
-/** Create a point-in-time version snapshot of a deal. */
 export async function createDealVersion(
   dealId: string,
   version: number,
@@ -312,32 +130,13 @@ export async function createDealVersion(
   changedBy: string,
   reason?: string,
 ): Promise<void> {
-  await safeSupabaseCall(
-    async () =>
-      supabase.from('deal_versions').insert({
-        deal_id: dealId,
-        version,
-        snapshot: JSON.parse(JSON.stringify(snapshot)),
-        pricing_result: pricingResult ? JSON.parse(JSON.stringify(pricingResult)) : null,
-        changed_by: changedBy,
-        change_reason: reason || null,
-      }),
-    null,
-    'createDealVersion',
-  );
+  try {
+    await apiPost(`/deals/${dealId}/versions`, { version, snapshot, pricingResult, changedBy, changeReason: reason });
+  } catch { /* silent */ }
 }
 
-/** Fetch all versions of a deal, most-recent first. */
 export async function listDealVersions(dealId: string): Promise<Record<string, unknown>[]> {
-  const { data } = await safeSupabaseCall(
-    async () =>
-      supabase
-        .from('deal_versions')
-        .select('*')
-        .eq('deal_id', dealId)
-        .order('version', { ascending: false }),
-    [],
-    'listDealVersions',
-  );
-  return (data ?? []) as Record<string, unknown>[];
+  try {
+    return await apiGet<Record<string, unknown>[]>(`/deals/${dealId}/versions`);
+  } catch { return []; }
 }
