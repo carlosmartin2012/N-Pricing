@@ -13,7 +13,7 @@ Motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. Calcul
 | Frontend | React 19.2, TypeScript 5.8, Tailwind CSS 3 |
 | Iconos | Lucide React |
 | Build | Vite 6.2 + vite-plugin-pwa |
-| Estado | React Context API (Auth, Data, UI, Governance, MarketData) |
+| Estado | React Context API (Auth, Data, UI, Governance, MarketData, Entity, Walkthrough) |
 | Data fetching | @tanstack/react-query 5 |
 | Formularios | react-hook-form 7 |
 | Virtualización | @tanstack/react-virtual 3 |
@@ -33,7 +33,7 @@ npm run dev          # Servidor desarrollo (Vite HMR)
 npm run build        # Build producción (PWA incluido)
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
-npm run test         # Vitest (192 tests, 18 suites)
+npm run test         # Vitest (328 tests, 26 archivos, 67 suites)
 npm run test:e2e     # Playwright (4 specs)
 npm run verify:full  # lint + typecheck + test + build + e2e
 npm run check:sync   # Validar seed↔schema sync
@@ -48,17 +48,20 @@ npm run format       # Prettier
 App.tsx                    # Shell principal, lazy loading, routing
 appNavigation.ts           # Definición de navegación (14 vistas)
 appSummaries.ts            # Resúmenes por módulo
-types.ts                   # 52+ tipos/interfaces de dominio
+types.ts                   # 64+ tipos/interfaces de dominio
 translations.ts            # i18n (en/es, ~534 keys)
 index.tsx                  # Entry point React
 index.css                  # Estilos globales + Tailwind
 
 api/                       # Capa API centralizada (Supabase CRUD)
-  index.ts                 # Re-exports: deals, marketData, config, audit
+  index.ts                 # Re-exports: deals, marketData, config, audit, entities, reportSchedules, observability
   deals.ts                 # Operaciones CRUD de deals
   marketData.ts            # Curvas y datos de mercado
   config.ts                # Configuración
   audit.ts                 # Audit logging
+  entities.ts              # Gestión de entidades
+  reportSchedules.ts       # Programación de reportes
+  observability.ts         # Observabilidad y métricas
   mappers.ts               # snake_case ↔ camelCase
 
 constants/
@@ -70,6 +73,8 @@ contexts/
   UIContext.tsx             # Vista activa, idioma, tema, modales
   GovernanceContext.tsx     # Workflow de aprobación y governance
   MarketDataContext.tsx     # Estado de datos de mercado
+  EntityContext.tsx         # Gestión multi-entidad
+  WalkthroughContext.tsx    # Guía interactiva / onboarding
 
 hooks/
   useAudit.ts              # Hook de auditoría
@@ -107,7 +112,7 @@ components/
   ui/                      # Shared: Sidebar, Header, Drawer, Toast, ErrorBoundary, etc.
 
 utils/
-  pricingEngine.ts         # Motor FTP principal (16 gaps)
+  pricingEngine.ts         # Motor FTP principal (19 gaps)
   rarocEngine.ts           # Motor RAROC
   ruleMatchingEngine.ts    # Matching deals → reglas por scoring
   pricingContext.ts         # Contexto de pricing
@@ -142,13 +147,13 @@ utils/
     deals.ts, mappers.ts, market.ts, marketDataIngestionService.ts,
     masterData.ts, methodologyService.ts, monitoring.ts,
     portfolioReportingService.ts, rules.ts, shared.ts, systemConfig.ts
-  __tests__/               # 16 suites, 192 tests
+  __tests__/               # 26 archivos, 67 suites, 328 tests
 
 supabase/
   schema.sql               # Schema v1 (legacy)
   schema_v2.sql            # Schema principal de referencia
   fix_rls_realtime.sql     # Fixes de RLS
-  migrations/              # 9 migraciones secuenciales
+  migrations/              # 14 migraciones secuenciales
   functions/pricing/       # Edge Function (Deno)
 
 e2e/                       # 4 specs Playwright
@@ -163,7 +168,7 @@ scripts/
 
 docs/
   api-spec.yaml            # Especificación API
-  pricing-methodology.md   # Metodología FTP (16 gaps)
+  pricing-methodology.md   # Metodología FTP (19 gaps)
   supabase-setup.md        # Guía de setup Supabase
 ```
 
@@ -175,7 +180,7 @@ docs/
 - `UIContext` controla vista activa, idioma, tema y modales.
 - `GovernanceContext` gestiona flujos de aprobación y governance de cambios metodológicos.
 - `MarketDataContext` centraliza el estado de curvas y datos de mercado.
-- `api/` proporciona una capa CRUD centralizada sobre Supabase con mappers snake_case↔camelCase.
+- `api/` proporciona una capa CRUD centralizada (9 módulos: deals, marketData, config, audit, entities, reportSchedules, observability, mappers, index) sobre Supabase con mappers snake_case↔camelCase.
 - `hooks/queries/` usa React Query para data fetching con cache, invalidación y query keys centralizadas.
 - `hooks/supabaseSync/` descompone la hidratación en: initial hydration, realtime sync, config persistence y presence.
 - `useSupabaseSync` hidrata desde Supabase y hace fallback a seed/mock data cuando no hay conexión.
@@ -236,6 +241,9 @@ El motor cubre, entre otros, estos bloques:
 - Incentivisation.
 - SDR modulation.
 - ESG transition y physical.
+- Greenium / Movilización (descuento por formato green).
+- DNSH Capital Discount (reducción capital por cumplimiento DNSH).
+- ESG Pillar I / ISF (Infrastructure Supporting Factor, Art. 501a CRR2).
 - RAROC y economic profit.
 
 ## Vistas y navegación
@@ -261,7 +269,7 @@ User Configuration, User Management, System Audit, User Manual.
 
 ## Testing
 
-- **Unit**: Vitest 4 — 18 suites, 192 tests. Colocados en `utils/__tests__/` y `components/*/__tests__/`.
+- **Unit**: Vitest 4 — 26 archivos, 67 suites, 328 tests. Colocados en `utils/__tests__/` y `components/*/__tests__/`.
 - **E2E**: Playwright 1.59 — 4 specs (auth, navigation, pricing flow, example).
 - **Component**: Storybook 8.6 — stories en `*.stories.tsx` junto al componente.
 - Para cálculos financieros usar `toBeCloseTo`.
@@ -272,7 +280,7 @@ User Configuration, User Management, System Audit, User Manual.
 ## Base de datos y Supabase
 
 - `supabase/schema_v2.sql` es la referencia principal de schema.
-- 9 migraciones secuenciales en `supabase/migrations/`.
+- 14 migraciones secuenciales en `supabase/migrations/`.
 - `api/` es la capa CRUD centralizada — usar `api/mappers.ts` para conversión snake_case↔camelCase.
 - Servicios detallados en `utils/supabase/` (15 módulos: deals, market, config, audit, approval, etc.).
 - Si cambias contratos de datos, revisar: `types.ts`, `api/mappers.ts`, servicios en `utils/supabase/`.
@@ -290,7 +298,7 @@ User Configuration, User Management, System Audit, User Manual.
 ## Áreas sensibles
 
 - `pricingEngine.ts` + `utils/pricing/`: cualquier cambio puede impactar calculator, reporting, shocks, accounting y tests.
-- `types.ts`: 52+ tipos exportados, cambios pequeños pueden tener mucho alcance.
+- `types.ts`: 64+ tipos exportados, cambios pequeños pueden tener mucho alcance.
 - `useSupabaseSync.ts` + `hooks/supabaseSync/`: tocar con cuidado para no romper fallback offline.
 - `api/mappers.ts`: errores en mapeo afectan toda la persistencia.
 - `GovernanceContext.tsx`: flujos de aprobación dependen de este contexto.

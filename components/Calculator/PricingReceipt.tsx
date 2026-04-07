@@ -51,7 +51,8 @@ interface Props {
 const VALIDATION_FAILED_RESULT: FTPResult = {
   baseRate: 0, liquiditySpread: 0, _liquidityPremiumDetails: 0, _clcChargeDetails: 0,
   strategicSpread: 0, optionCost: 0, regulatoryCost: 0, operationalCost: 0, capitalCharge: 0,
-  esgTransitionCharge: 0, esgPhysicalCharge: 0, floorPrice: 0, technicalPrice: 0, targetPrice: 0,
+  esgTransitionCharge: 0, esgPhysicalCharge: 0, esgGreeniumAdj: 0, esgDnshCapitalAdj: 0, esgPillar1Adj: 0,
+  floorPrice: 0, technicalPrice: 0, targetPrice: 0,
   totalFTP: 0, finalClientRate: 0, raroc: 0, economicProfit: 0,
   approvalLevel: 'Rejected', matchedMethodology: '' as any, matchReason: '',
   accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 },
@@ -600,6 +601,15 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
               formula={t.tooltip_formula_esgTransition}
             />
             <WaterfallItem label="ESG Physical" value={result.esgPhysicalCharge} isAdd color="text-rose-400" formula={t.tooltip_formula_esgPhysical} />
+            {result.esgGreeniumAdj != null && result.esgGreeniumAdj !== 0 && (
+              <WaterfallItem
+                label="Greenium / Movilización"
+                value={result.esgGreeniumAdj}
+                isAdd
+                color="text-emerald-400"
+                formula={t.tooltip_formula_esgGreenium}
+              />
+            )}
           </div>
 
           <div className="bg-slate-800/50 p-2 rounded border border-slate-700 my-2">
@@ -618,6 +628,18 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
               <div className="flex items-center justify-between text-[10px] text-emerald-500 pl-2 mt-0.5">
                 <span>- Capital Income (Risk-Free)</span>
                 <span className="font-mono">-{result.capitalIncome.toFixed(3)}%</span>
+              </div>
+            )}
+            {result.esgDnshCapitalAdj != null && result.esgDnshCapitalAdj > 0 && (
+              <div className="flex items-center justify-between text-[10px] text-emerald-500 pl-2 mt-0.5">
+                <span>- DNSH Capital Discount</span>
+                <span className="font-mono">-{result.esgDnshCapitalAdj.toFixed(3)}%</span>
+              </div>
+            )}
+            {result.esgPillar1Adj != null && result.esgPillar1Adj > 0 && (
+              <div className="flex items-center justify-between text-[10px] text-emerald-500 pl-2 mt-0.5">
+                <span>- ISF Pillar I (Art. 501a)</span>
+                <span className="font-mono">-{result.esgPillar1Adj.toFixed(3)}%</span>
               </div>
             )}
             <WaterfallItem

@@ -31,6 +31,13 @@ export const DEAL_TRANSITION_RISK_OPTIONS: Transaction['transitionRisk'][] = [
   'Brown',
 ];
 export const DEAL_PHYSICAL_RISK_OPTIONS: Transaction['physicalRisk'][] = ['Low', 'Medium', 'High'];
+export const DEAL_GREEN_FORMAT_OPTIONS: NonNullable<Transaction['greenFormat']>[] = [
+  'None',
+  'Green_Bond',
+  'Green_Loan',
+  'Sustainability_Linked',
+  'Social_Bond',
+];
 export const DEAL_COLLATERAL_OPTIONS: NonNullable<Transaction['collateralType']>[] = [
   'None',
   'Sovereign',

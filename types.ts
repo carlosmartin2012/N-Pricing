@@ -167,6 +167,9 @@ export interface Transaction {
   // ESG
   transitionRisk: 'Brown' | 'Amber' | 'Neutral' | 'Green';
   physicalRisk: 'High' | 'Medium' | 'Low';
+  greenFormat?: 'Green_Bond' | 'Green_Loan' | 'Sustainability_Linked' | 'Social_Bond' | 'None';
+  dnshCompliant?: boolean;
+  isfEligible?: boolean; // Infrastructure Supporting Factor (CRR2 Art. 501a)
 
   // Optimistic locking
   version?: number;
@@ -227,6 +230,14 @@ export interface PhysicalRateCard {
   description: string;
 }
 
+export interface GreeniumRateCard {
+  id: number;
+  greenFormat: 'Green_Bond' | 'Green_Loan' | 'Sustainability_Linked' | 'Social_Bond';
+  sector: string;
+  adjustmentBps: number; // negative = discount (incentive)
+  description: string;
+}
+
 export interface FtpRateCard {
   id: string;
   name: string;
@@ -278,6 +289,9 @@ export interface FTPResult {
   capitalCharge: number;
   esgTransitionCharge: number;
   esgPhysicalCharge: number;
+  esgGreeniumAdj?: number;       // Gap 17: Greenium/Movilización discount (negative = incentive)
+  esgDnshCapitalAdj?: number;    // Gap 18: DNSH capital charge discount
+  esgPillar1Adj?: number;        // Gap 19: ISF / ESG Pillar I overlay on capital
   floorPrice: number;
   technicalPrice: number;
   targetPrice: number;

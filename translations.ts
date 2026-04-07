@@ -127,6 +127,9 @@ export const translations = {
         haircut: 'Haircut (%)',
         transitionRisk: 'Transition Risk',
         physicalRisk: 'Physical Risk',
+        greenFormat: 'Green Format',
+        dnshCompliant: 'DNSH Compliant',
+        isfEligible: 'ISF Eligible (Art. 501a)',
         behaviouralModel: 'Behavioural Model',
         noneOption: '-- None --',
 
@@ -456,6 +459,7 @@ export const translations = {
         tooltip_calc_collateral: 'Collateral type affects secured vs. unsecured LP curve selection and haircut application.',
         tooltip_calc_transitionRisk: 'ESG transition risk classification (Brown/Amber/Neutral/Green). Adds a spread from the Transition grid.',
         tooltip_calc_physicalRisk: 'Physical climate risk level (High/Medium/Low). Adds a spread from the Physical Risk grid.',
+        tooltip_calc_greenFormat: 'Green instrument format (Green Bond, Green Loan, Sustainability-Linked, Social Bond). Applies a Greenium discount in bps.',
 
         // ── Tooltips: pricing waterfall formulas ────────────────────
         tooltip_formula_baseRate: 'Interpolated from the yield curve at deal tenor, plus cross-currency basis if applicable.',
@@ -467,6 +471,7 @@ export const translations = {
         tooltip_formula_capitalIncome: 'Capital income credited back when equity funds part of the asset. Offsets capital charge.',
         tooltip_formula_esgTransition: 'Lookup TransitionGrid by classification. Brown assets incur the highest penalty.',
         tooltip_formula_esgPhysical: 'Lookup PhysicalGrid by risk level. High physical risk adds a climate surcharge.',
+        tooltip_formula_esgGreenium: 'Greenium discount from GreeniumGrid by instrument format. Green Bonds get the deepest discount.',
         tooltip_formula_optionCost: 'Prepayment option cost derived from CPR model. Higher CPR = higher option cost.',
         tooltip_formula_floorPrice: 'Sum of all cost components. Minimum rate to break even before capital allocation.',
         tooltip_formula_technicalPrice: 'Floor Price + Capital Charge. Minimum rate to meet the ROE target.',
@@ -534,7 +539,7 @@ export const translations = {
         glossary_clc: 'CLC (Cost of Liquid Credit): LCR buffer cost charged for liquidity-consuming products.',
         glossary_nmd: 'NMD (Non-Maturing Deposits): Deposits with no contractual maturity (current accounts, savings). Modelled via replication portfolios.',
         glossary_cpr: 'CPR (Constant Prepayment Rate): Annual rate at which borrowers prepay loans early. Affects WAL and option cost.',
-        glossary_esg: 'ESG: Environmental, Social, and Governance factors. Transition risk = carbon exposure; Physical risk = climate hazards.',
+        glossary_esg: 'ESG: Environmental, Social, and Governance factors. Transition risk = carbon exposure; Physical risk = climate hazards; Greenium = discount for green-format instruments; DNSH = Do No Significant Harm capital discount; ISF = Infrastructure Supporting Factor (Art. 501a CRR2).',
 
         // ── Anejo IX Credit Risk ────────────────────────────────────
         tooltip_formula_anejoCreditCost: 'Expected Loss per Anejo IX (Circular 6/2021). Stage 1 coverage % applied to net exposure after guarantee haircuts.',
@@ -686,6 +691,9 @@ export const translations = {
         haircut: 'Recorte (%)',
         transitionRisk: 'Riesgo de Transición',
         physicalRisk: 'Riesgo Físico',
+        greenFormat: 'Formato Green',
+        dnshCompliant: 'Cumple DNSH',
+        isfEligible: 'ISF Elegible (Art. 501a)',
         behaviouralModel: 'Modelo de Comportamiento',
         noneOption: '-- Ninguno --',
 
@@ -1015,6 +1023,7 @@ export const translations = {
         tooltip_calc_collateral: 'El tipo de garantía afecta a la selección de curva LP asegurada vs. no asegurada y la aplicación de haircut.',
         tooltip_calc_transitionRisk: 'Clasificación de riesgo de transición ESG (Brown/Amber/Neutral/Green). Añade un spread de la tabla de Transición.',
         tooltip_calc_physicalRisk: 'Nivel de riesgo físico climático (Alto/Medio/Bajo). Añade un spread de la tabla de Riesgo Físico.',
+        tooltip_calc_greenFormat: 'Formato de instrumento green (Green Bond, Green Loan, Sustainability-Linked, Social Bond). Aplica descuento Greenium en pbs.',
 
         // ── Tooltips: pricing waterfall formulas ────────────────────
         tooltip_formula_baseRate: 'Interpolado de la curva de tipos al plazo de la operación, más basis de divisa cruzada si aplica.',
@@ -1026,6 +1035,7 @@ export const translations = {
         tooltip_formula_capitalIncome: 'Ingreso de capital acreditado cuando el equity financia parte del activo. Compensa el cargo de capital.',
         tooltip_formula_esgTransition: 'Búsqueda en TransitionGrid por clasificación. Activos brown incurren la mayor penalización.',
         tooltip_formula_esgPhysical: 'Búsqueda en PhysicalGrid por nivel de riesgo. Alto riesgo físico añade recargo climático.',
+        tooltip_formula_esgGreenium: 'Descuento Greenium de GreeniumGrid por formato de instrumento. Green Bonds obtienen el mayor descuento.',
         tooltip_formula_optionCost: 'Coste de opción de prepago derivado del modelo CPR. Mayor CPR = mayor coste de opción.',
         tooltip_formula_floorPrice: 'Suma de todos los componentes de coste. Tasa mínima para punto de equilibrio antes de asignación de capital.',
         tooltip_formula_technicalPrice: 'Precio Suelo + Cargo de Capital. Tasa mínima para alcanzar el objetivo de ROE.',
@@ -1093,7 +1103,7 @@ export const translations = {
         glossary_clc: 'CLC (Cost of Liquid Credit): Coste del buffer LCR cargado a productos que consumen liquidez.',
         glossary_nmd: 'NMD (Non-Maturing Deposits): Depósitos sin vencimiento contractual (cuentas corrientes, ahorro). Se modelizan mediante carteras de réplica.',
         glossary_cpr: 'CPR (Constant Prepayment Rate): Tasa anual a la que los prestatarios prepagan préstamos anticipadamente. Afecta WAL y coste de opción.',
-        glossary_esg: 'ESG: Factores Ambientales, Sociales y de Gobernanza. Riesgo de transición = exposición al carbono; Riesgo físico = peligros climáticos.',
+        glossary_esg: 'ESG: Factores Ambientales, Sociales y de Gobernanza. Riesgo de transición = exposición al carbono; Riesgo físico = peligros climáticos; Greenium = descuento para instrumentos green; DNSH = descuento de capital Do No Significant Harm; ISF = Infrastructure Supporting Factor (Art. 501a CRR2).',
 
         // ── Anejo IX Riesgo de Crédito ──────────────────────────────
         tooltip_formula_anejoCreditCost: 'Pérdida Esperada según Anejo IX (Circular 6/2021). Cobertura Stage 1 % aplicada sobre exposición neta tras recortes de garantía.',

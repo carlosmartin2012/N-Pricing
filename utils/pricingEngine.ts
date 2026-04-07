@@ -1,7 +1,7 @@
 import {
   Transaction, FTPResult, ApprovalMatrixConfig,
   YieldCurvePoint, DualLiquidityCurve, GeneralRule, FtpRateCard,
-  TransitionRateCard, PhysicalRateCard, BehaviouralModel,
+  TransitionRateCard, PhysicalRateCard, GreeniumRateCard, BehaviouralModel,
   ClientEntity, ProductDefinition, BusinessUnit,
   IncentivisationRule, SDRConfig, LRConfig,
 } from '../types';
@@ -9,7 +9,7 @@ import { PRICING_CONSTANTS as PC, TENOR_MONTHS } from './pricingConstants';
 import { matchDealToRule } from './ruleMatchingEngine';
 import { calculateRAROC, buildRAROCInputsFromDeal } from './rarocEngine';
 import {
-  MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID,
+  MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_GREENIUM_GRID,
   MOCK_LIQUIDITY_CURVES,
   MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS,
   MOCK_FTP_RATE_CARDS, MOCK_CLIENTS,
@@ -52,6 +52,7 @@ export interface PricingContext {
   clients: ClientEntity[];
   products: ProductDefinition[];
   businessUnits: BusinessUnit[];
+  greeniumGrid: GreeniumRateCard[];
   // V5.0
   sdrConfig?: SDRConfig;
   lrConfig?: LRConfig;
@@ -138,7 +139,7 @@ const EMPTY_RESULT: FTPResult = {
   _liquidityPremiumDetails: 0, _clcChargeDetails: 0,
   strategicSpread: 0, optionCost: 0, regulatoryCost: 0,
   operationalCost: 0, capitalCharge: 0,
-  esgTransitionCharge: 0, esgPhysicalCharge: 0,
+  esgTransitionCharge: 0, esgPhysicalCharge: 0, esgGreeniumAdj: 0, esgDnshCapitalAdj: 0, esgPillar1Adj: 0,
   floorPrice: 0, technicalPrice: 0, targetPrice: 0,
   totalFTP: 0, finalClientRate: 0,
   raroc: 0, economicProfit: 0, approvalLevel: 'Rejected',
@@ -167,6 +168,7 @@ export const calculatePricing = (
   const rateCards = context?.rateCards?.length ? context.rateCards : MOCK_FTP_RATE_CARDS;
   const transGrid = context?.transitionGrid?.length ? context.transitionGrid : MOCK_TRANSITION_GRID;
   const physGrid = context?.physicalGrid?.length ? context.physicalGrid : MOCK_PHYSICAL_GRID;
+  const greenGrid = context?.greeniumGrid?.length ? context.greeniumGrid : MOCK_GREENIUM_GRID;
   const models = context?.behaviouralModels?.length ? context.behaviouralModels : MOCK_BEHAVIOURAL_MODELS;
   const clients = context?.clients?.length ? context.clients : MOCK_CLIENTS;
   const rules = context?.rules || [];
@@ -309,6 +311,32 @@ export const calculatePricing = (
   const physRule = physGrid.find(r => r.riskLevel === deal.physicalRisk);
   if (physRule) physCharge = physRule.adjustmentBps / 100;
 
+  // ── 13b. Greenium / Movilización (Gap 17) ────────────────────────────
+  // Strategic ESG discount for deals with verified green/sustainable format
+  let greeniumAdj = 0;
+  if (deal.greenFormat && deal.greenFormat !== 'None') {
+    const greenRule = greenGrid.find(r => r.greenFormat === deal.greenFormat);
+    if (greenRule) greeniumAdj = greenRule.adjustmentBps / 100; // negative = discount
+  }
+
+  // ── 13c. DNSH Capital Discount (Gap 18) ──────────────────────────────
+  // Deals compliant with Do No Significant Harm get a capital charge reduction
+  let dnshCapitalAdj = 0;
+  if (deal.dnshCompliant) {
+    dnshCapitalAdj = capitalCharge * (1 - PC.DNSH_CAPITAL_DISCOUNT_FACTOR);
+  }
+
+  // ── 13d. ESG Pillar I — ISF Overlay (Gap 19) ────────────────────────
+  // Infrastructure Supporting Factor: CRR2 Art. 501a reduces RW by 25%
+  // for qualifying infrastructure/project finance exposures
+  let pillar1Adj = 0;
+  if (deal.isfEligible) {
+    // ISF reduces the effective risk weight, which lowers the capital charge
+    const isfCapitalCharge = (deal.riskWeight * PC.ISF_RW_FACTOR / 100) * (deal.capitalRatio / 100)
+      * Math.max(0, deal.targetROE - riskFreeRate);
+    pillar1Adj = capitalCharge - isfCapitalCharge; // positive = reduction
+  }
+
   // ── 14. Strategic Spread (Rule-based + Behavioural) ───────────────────────
   const ruleSpread = ruleMatch.strategicSpreadBps / 100;
   const behaviouralSpread = calculateBehaviouralSpread(deal, models);
@@ -319,8 +347,9 @@ export const calculatePricing = (
 
   // ── Aggregates ────────────────────────────────────────────────────────────
   const floorPrice = ftp + regulatoryCost + operationalCost + transCharge + physCharge
-    + strategicSpread + liquidityRecharge + incentivisationAdj;
-  const technicalPrice = floorPrice + capitalCharge;
+    + greeniumAdj + strategicSpread + liquidityRecharge + incentivisationAdj;
+  const effectiveCapitalCharge = capitalCharge - dnshCapitalAdj - pillar1Adj;
+  const technicalPrice = floorPrice + effectiveCapitalCharge;
   const finalRate = ftp + deal.marginTarget;
 
   // ── RAROC (Gap 6 — full formula) ──────────────────────────────────────────
@@ -366,6 +395,9 @@ export const calculatePricing = (
     capitalCharge,
     esgTransitionCharge: transCharge,
     esgPhysicalCharge: physCharge,
+    esgGreeniumAdj: greeniumAdj,
+    esgDnshCapitalAdj: dnshCapitalAdj,
+    esgPillar1Adj: pillar1Adj,
     floorPrice,
     technicalPrice,
     targetPrice: technicalPrice + PC.TARGET_PRICE_BUFFER,

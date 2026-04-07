@@ -62,7 +62,7 @@ export function getMetricValue(
   key: MetricRow['key'],
 ): number | string {
   if (key === 'esgTotal') {
-    return (result.esgTransitionCharge || 0) + (result.esgPhysicalCharge || 0);
+    return (result.esgTransitionCharge || 0) + (result.esgPhysicalCharge || 0) + (result.esgGreeniumAdj || 0);
   }
 
   if (key === 'approvalLevel') {

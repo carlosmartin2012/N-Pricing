@@ -8,17 +8,17 @@
 **Scope**: `utils/pricingEngine.ts`, `utils/pricing/`, `utils/pricingConstants.ts`, `utils/ruleMatchingEngine.ts`, `utils/rarocEngine.ts`
 
 **Reglas**:
-- Nunca modificar la fórmula FTP sin entender los 16 gaps (ver CLAUDE.md y `docs/pricing-methodology.md`)
+- Nunca modificar la fórmula FTP sin entender los 19 gaps (ver CLAUDE.md y `docs/pricing-methodology.md`)
 - Cada gap tiene dependencias cruzadas — cambiar uno puede afectar otros
 - El motor está modularizado: `utils/pricing/curveUtils.ts`, `formulaEngine.ts`, `liquidityEngine.ts`
-- Siempre ejecutar `npm run test` tras cualquier cambio — 64 tests cubren interpolación, tenors, regulatory tables y el cálculo completo
+- Siempre ejecutar `npm run test` tras cualquier cambio — 328 tests cubren interpolación, tenors, regulatory tables, RAROC, deal workflow, governance, credit risk y el cálculo completo
 - Las tablas regulatorias (LCR outflow, NSFR ASF/RSF) están en `pricingConstants.ts` — son estándar de Basilea III, no inventar valores
 - Constantes regulatorias adicionales en `constants/regulations.ts`
 - Si añades un nuevo gap, documentarlo con el patrón `// Gap N: descripción` y añadir test
 - RAROC engine (`rarocEngine.ts`) consume outputs del pricing engine — cambios en FTP pueden afectar RAROC
 
 ### 2. Agente de UI/Componentes
-**Scope**: `components/` (122 archivos), `App.tsx`, `contexts/UIContext.tsx`
+**Scope**: `components/` (111 archivos), `App.tsx`, `contexts/UIContext.tsx`
 
 **Reglas**:
 - Tailwind CSS utility-first, tema dark por defecto — diseño NFQ Meridian Obsidian
@@ -37,11 +37,11 @@
 
 **Reglas**:
 - Schema de referencia: `supabase/schema_v2.sql` (ignorar schema.sql, es legacy)
-- 9 migraciones en `supabase/migrations/` — ejecutar en orden
+- 14 migraciones en `supabase/migrations/` — ejecutar en orden
 - Capa API centralizada en `api/` — usar `api/mappers.ts` para snake_case↔camelCase
 - Servicios especializados en `utils/supabase/`: deals, market, config, audit, approval, masterData, rules, monitoring, etc.
 - Toda nueva tabla necesita: RLS policies, realtime habilitado, suscripción en `hooks/supabaseSync/useRealtimeSync.ts`
-- Los tipos TypeScript (`types.ts`, 52+ interfaces) deben reflejar exactamente las columnas de la tabla
+- Los tipos TypeScript (`types.ts`, 64+ interfaces) deben reflejar exactamente las columnas de la tabla
 - Sync descompuesto en `hooks/supabaseSync/`: hydration, realtime, config persistence, presence
 - React Query wrappers en `hooks/queries/` — usar query keys de `queryKeys.ts`
 - Usar `safeSupabaseCall()` wrapper para manejo de errores
@@ -49,22 +49,22 @@
 - Edge Function de pricing en `supabase/functions/pricing/` (Deno runtime)
 
 ### 4. Agente de Testing
-**Scope**: `utils/__tests__/` (16 suites), `components/*/__tests__/`, `e2e/` (4 specs)
+**Scope**: `utils/__tests__/` (23 archivos), `components/*/__tests__/` (3 archivos), `e2e/` (4 specs)
 
 **Reglas**:
-- **Unit**: Vitest 4 (no Jest) — 192 tests en 18 suites
+- **Unit**: Vitest 4 (no Jest) — 328 tests en 67 suites, 26 archivos
 - **E2E**: Playwright 1.59 — 4 specs (auth, navigation, pricing flow, example)
 - **Component**: Storybook 8.6 — stories junto al componente
 - Tests colocados en `__tests__/` junto al módulo
 - Patrón de test existente: describe → it → expect con datos inline
-- Suites ya cubiertas: pricingEngine (64 tests), ruleMatchingEngine (16), validation (15), dealWorkflow (18), RAROC metrics (14), blotter toolbar (10), pricing scenarios (15)
+- Suites ya cubiertas: pricingEngine, ruleMatchingEngine, validation, dealWorkflow, RAROC metrics, blotter toolbar, pricing scenarios, creditRiskEngine, entityScoping, conflictDetection, governanceWorkflows, auditTransport, pagination, offlineStore, aiGrounding, genAIChatUtils, regulatoryExport, accountingLedgerUtils, committeeDossierUtils, marketDataSourcesUtils, portfolioSnapshotsUtils, userManagementUtils, aiAnalytics, metrics, auditLogUtils
 - Prioridades de cobertura pendiente:
   1. `portfolioAnalytics.ts` — agregaciones
   2. `utils/pricing/` — motor modularizado (curveUtils, formulaEngine, liquidityEngine)
   3. `api/mappers.ts` — conversión snake_case↔camelCase
   4. Más component tests (solo 3 componentes tienen tests)
 - No mockear Supabase en tests unitarios — testear lógica pura
-- Config vitest en `vite.config.ts` (jsdom environment, setup-dom.ts)
+- Config vitest en `vite.config.ts` (node environment, setup-dom.ts)
 
 ### 5. Agente de Seguridad
 **Scope**: Transversal

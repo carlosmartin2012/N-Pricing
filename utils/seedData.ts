@@ -2,7 +2,7 @@
 
 export { MOCK_GROUPS, MOCK_ENTITIES, MOCK_ENTITY_USERS, DEFAULT_ENTITY_ID, DEFAULT_GROUP_ID } from './seedData.entities';
 
-import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData, GeneralRule, IncentivisationRule, SDRConfig, LRConfig } from '../types';
+import { Transaction, BehaviouralModel, TransitionRateCard, PhysicalRateCard, GreeniumRateCard, ClientEntity, ProductDefinition, BusinessUnit, FtpRateCard, UserProfile, DualLiquidityCurve, LiquidityDashboardData, GeneralRule, IncentivisationRule, SDRConfig, LRConfig } from '../types';
 
 export const MOCK_CLIENTS: ClientEntity[] = [
   { id: 'CL-1001', name: 'Acme Corp Industries', type: 'Corporate', segment: 'Large Cap', rating: 'BBB' },
@@ -110,6 +110,13 @@ export const MOCK_PHYSICAL_GRID: PhysicalRateCard[] = [
   { id: 101, riskLevel: 'High', locationType: 'Coastal / Flood Zone', adjustmentBps: 20, description: 'Insurance Premium Equiv. (Acute Risk)' },
   { id: 102, riskLevel: 'Medium', locationType: 'Water Stress Area', adjustmentBps: 8, description: 'Operational continuity risk' },
   { id: 103, riskLevel: 'Low', locationType: 'Standard Zone', adjustmentBps: 0, description: 'No significant climate exposure' },
+];
+
+export const MOCK_GREENIUM_GRID: GreeniumRateCard[] = [
+  { id: 201, greenFormat: 'Green_Bond', sector: 'All', adjustmentBps: -20, description: 'EU Green Bond Standard — full taxonomy alignment discount' },
+  { id: 202, greenFormat: 'Green_Loan', sector: 'All', adjustmentBps: -15, description: 'Green Loan Principles (LMA) — verified use of proceeds' },
+  { id: 203, greenFormat: 'Sustainability_Linked', sector: 'All', adjustmentBps: -10, description: 'Sustainability-Linked Loan — KPI-based margin ratchet' },
+  { id: 204, greenFormat: 'Social_Bond', sector: 'All', adjustmentBps: -8, description: 'Social Bond Principles — affordable housing/healthcare' },
 ];
 
 export const MOCK_FTP_RATE_CARDS: FtpRateCard[] = [

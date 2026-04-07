@@ -13,7 +13,7 @@ Tasa Cliente = FTP + Margen Comercial
 FTP = Tasa Base + Prima de Liquidez + Costes Regulatorios + Ajustes
 ```
 
-## 2. Los 16 Componentes (Gaps)
+## 2. Los 19 Componentes (Gaps)
 
 ### Gap 1: Seleccion de Formula por Producto
 
@@ -238,11 +238,15 @@ Se usa en el calculo RAROC para capital regulatorio.
 11. Coste operacional (bps)
 12. Capital charge: RW × K% × (ROE - Rf)
 13. Ajustes ESG (transition + physical grids)
+13b. Greenium / Movilizacion (Gap 17)
+13c. DNSH Capital Discount (Gap 18)
+13d. ISF Pillar I Overlay (Gap 19)
 14. Strategic spread (regla + conductual)
 15. Incentivacion (Gap 11)
 16. Agregar:
-    - FloorPrice = FTP + Credit + OpCost + ESG + Strategic + LR + Incentive
-    - TechnicalPrice = FloorPrice + CapitalCharge
+    - FloorPrice = FTP + Credit + OpCost + ESG + Greenium + Strategic + LR + Incentive
+    - EffectiveCapitalCharge = CapitalCharge - DNSHAdj - ISFAdj
+    - TechnicalPrice = FloorPrice + EffectiveCapitalCharge
     - TargetPrice = TechnicalPrice + Buffer
     - FinalClientRate = FTP + MarginTarget
 17. Calcular RAROC y nivel de aprobacion
@@ -309,3 +313,53 @@ Condiciones de tenor soportadas: `<12M`, `>36M`, `12-36M`, `Any`.
 | Low | 0 bps |
 | Medium | +5 bps |
 | High | +15 a +20 bps |
+
+### Gap 17: Greenium / Movilizacion
+
+Descuento estrategico para operaciones con formato green verificado. Se busca en la GreeniumGrid por tipo de formato:
+
+| Formato | Ajuste tipico |
+|---------|--------------|
+| Green Bond (EU GBS) | -20 bps |
+| Green Loan (LMA GLP) | -15 bps |
+| Sustainability-Linked | -10 bps |
+| Social Bond | -8 bps |
+
+```
+GreeniumAdj = GreeniumGrid[greenFormat].adjustmentBps / 100
+```
+
+El ajuste es negativo (incentivo) y se suma al floor price, reduciendo el coste total.
+
+**Referencia**: Marcos Rodriguez — los bps de descuento por formato Green ya son practica de mercado estandar.
+
+### Gap 18: Descuento de Capital DNSH
+
+Reduccion del capital charge para operaciones que cumplen el principio DNSH (Do No Significant Harm) del Reglamento de Taxonomia (Art. 17):
+
+```
+DNSHCapitalAdj = CapitalCharge × (1 - DNSH_CAPITAL_DISCOUNT_FACTOR)
+EffectiveCapitalCharge = CapitalCharge - DNSHCapitalAdj
+```
+
+- `DNSH_CAPITAL_DISCOUNT_FACTOR`: 0.85 (descuento del 15% sobre el capital charge)
+- Solo se aplica si `dnshCompliant = true`
+
+**Referencia**: Martin Sanz — descuentos en cost of capital por cumplimiento DNSH.
+
+### Gap 19: ESG Pillar I — Infrastructure Supporting Factor
+
+El ISF (Art. 501a CRR2) permite reducir la ponderacion de riesgo en un 25% para exposiciones de infraestructura que cumplan criterios de elegibilidad:
+
+```
+ISF_RW_Factor = 0.75
+ISF_CapitalCharge = (RW × ISF_RW_Factor / 100) × K% × max(0, ROE − Rf)
+Pillar1Adj = CapitalCharge - ISF_CapitalCharge
+```
+
+**Criterios de elegibilidad** (simplificados):
+- Operaciones de Project Finance o infraestructura
+- Activos que generan flujos predecibles
+- Deal marcado como `isfEligible = true`
+
+**Referencia**: Marcos Rodriguez — impacto de overlays en rating / modelos IRB (fisico, transicion, ambiental) + medidas Pillar I ESG (ej. ISF en Project Finance).

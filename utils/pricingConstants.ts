@@ -64,4 +64,11 @@ export const PRICING_CONSTANTS = {
 
   // Default fallback credit params
   DEFAULT_CREDIT_RATING: 'BBB',
+
+  // ── ESG Gaps 17–19 ─────────────────────────────────────────────────────
+  // Gap 18: DNSH capital discount — multiplier on capitalCharge (e.g. 0.85 = 15% reduction)
+  DNSH_CAPITAL_DISCOUNT_FACTOR: 0.85,
+
+  // Gap 19: Infrastructure Supporting Factor (CRR2 Art. 501a) — multiplier on RW
+  ISF_RW_FACTOR: 0.75,
 };

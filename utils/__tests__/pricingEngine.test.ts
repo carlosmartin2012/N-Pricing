@@ -564,3 +564,134 @@ describe('bootstrapZeroRates', () => {
     expect(Math.abs(zero5Y.rate - par5Y.rate)).toBeLessThan(1); // reasonable divergence
   });
 });
+
+// ---------------------------------------------------------------------------
+// Gap 17: Greenium / Movilización
+// ---------------------------------------------------------------------------
+
+describe('Gap 17 — Greenium / Movilización', () => {
+  it('applies greenium discount for Green Bond format', () => {
+    const deal: Transaction = {
+      ...baseDeal,
+      greenFormat: 'Green_Bond',
+      transitionRisk: 'Green',
+    };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgGreeniumAdj).toBeDefined();
+    expect(result.esgGreeniumAdj!).toBeLessThan(0); // discount = negative
+    expect(result.esgGreeniumAdj!).toBeCloseTo(-0.20, 2); // -20 bps from mock grid
+  });
+
+  it('applies smaller discount for Sustainability-Linked format', () => {
+    const deal: Transaction = {
+      ...baseDeal,
+      greenFormat: 'Sustainability_Linked',
+    };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgGreeniumAdj!).toBeCloseTo(-0.10, 2); // -10 bps
+  });
+
+  it('no greenium for None format', () => {
+    const deal: Transaction = {
+      ...baseDeal,
+      greenFormat: 'None',
+    };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgGreeniumAdj).toBe(0);
+  });
+
+  it('no greenium when greenFormat is undefined', () => {
+    const result = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
+    expect(result.esgGreeniumAdj).toBe(0);
+  });
+
+  it('greenium reduces floor price vs baseline', () => {
+    const baseline = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
+    const greenDeal: Transaction = { ...baseDeal, greenFormat: 'Green_Bond' };
+    const greenResult = calculatePricing(greenDeal, defaultApproval, undefined, noShocks);
+    expect(greenResult.floorPrice).toBeLessThan(baseline.floorPrice);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Gap 18: DNSH Capital Discount
+// ---------------------------------------------------------------------------
+
+describe('Gap 18 — DNSH Capital Discount', () => {
+  it('applies capital discount when DNSH compliant', () => {
+    const deal: Transaction = { ...baseDeal, dnshCompliant: true };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgDnshCapitalAdj).toBeDefined();
+    expect(result.esgDnshCapitalAdj!).toBeGreaterThan(0); // positive = reduction
+  });
+
+  it('no capital discount when not DNSH compliant', () => {
+    const deal: Transaction = { ...baseDeal, dnshCompliant: false };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgDnshCapitalAdj).toBe(0);
+  });
+
+  it('DNSH discount reduces technical price vs baseline', () => {
+    const baseline = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
+    const dnshDeal: Transaction = { ...baseDeal, dnshCompliant: true };
+    const dnshResult = calculatePricing(dnshDeal, defaultApproval, undefined, noShocks);
+    expect(dnshResult.technicalPrice).toBeLessThan(baseline.technicalPrice);
+  });
+
+  it('DNSH discount is 15% of capital charge', () => {
+    const deal: Transaction = { ...baseDeal, dnshCompliant: true };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    // DNSH_CAPITAL_DISCOUNT_FACTOR = 0.85, so discount = capitalCharge × 0.15
+    expect(result.esgDnshCapitalAdj!).toBeCloseTo(result.capitalCharge * 0.15, 4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Gap 19: ESG Pillar I — Infrastructure Supporting Factor
+// ---------------------------------------------------------------------------
+
+describe('Gap 19 — ISF / ESG Pillar I Overlay', () => {
+  it('applies ISF reduction when eligible', () => {
+    const deal: Transaction = { ...baseDeal, isfEligible: true, productType: 'PROJ_FINANCE' };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgPillar1Adj).toBeDefined();
+    expect(result.esgPillar1Adj!).toBeGreaterThan(0); // positive = reduction
+  });
+
+  it('ISF reduces technical price vs baseline', () => {
+    const baseline = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
+    const isfDeal: Transaction = { ...baseDeal, isfEligible: true };
+    const isfResult = calculatePricing(isfDeal, defaultApproval, undefined, noShocks);
+    expect(isfResult.technicalPrice).toBeLessThan(baseline.technicalPrice);
+  });
+
+  it('ISF reduces risk weight by 25% (factor 0.75)', () => {
+    const deal: Transaction = { ...baseDeal, isfEligible: true, riskWeight: 100 };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    // ISF capital charge uses RW × 0.75, so savings = 25% of capital charge
+    expect(result.esgPillar1Adj!).toBeCloseTo(result.capitalCharge * 0.25, 4);
+  });
+
+  it('no ISF adjustment when not eligible', () => {
+    const deal: Transaction = { ...baseDeal, isfEligible: false };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgPillar1Adj).toBe(0);
+  });
+
+  it('ISF + DNSH + Greenium stack correctly', () => {
+    const deal: Transaction = {
+      ...baseDeal,
+      greenFormat: 'Green_Bond',
+      dnshCompliant: true,
+      isfEligible: true,
+    };
+    const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
+    expect(result.esgGreeniumAdj!).toBeLessThan(0);
+    expect(result.esgDnshCapitalAdj!).toBeGreaterThan(0);
+    expect(result.esgPillar1Adj!).toBeGreaterThan(0);
+
+    // All three should reduce technical price vs baseline
+    const baseline = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
+    expect(result.technicalPrice).toBeLessThan(baseline.technicalPrice);
+  });
+});
