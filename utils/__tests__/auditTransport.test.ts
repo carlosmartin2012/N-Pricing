@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   buildAuditInsertPayload,
-  resolveAuditTransportConfig,
   sendAuditEntryKeepalive,
 } from '../supabase/auditTransport';
 
@@ -16,7 +15,7 @@ const auditEntry = {
 };
 
 describe('auditTransport', () => {
-  it('builds the REST payload expected by Supabase audit_log', () => {
+  it('builds the REST payload expected by the audit_log endpoint', () => {
     expect(buildAuditInsertPayload(auditEntry)).toEqual({
       user_email: 'ana@nfq.es',
       user_name: 'Ana Lopez',
@@ -28,24 +27,17 @@ describe('auditTransport', () => {
     });
   });
 
-  it('returns null config when Supabase credentials are missing', () => {
-    expect(resolveAuditTransportConfig({ supabaseUrl: '', supabaseAnonKey: '' })).toBeNull();
-  });
-
-  it('posts keepalive audit events with the mapped payload', async () => {
+  it('posts keepalive audit events to the API endpoint', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     const originalFetch = globalThis.fetch;
     globalThis.fetch = fetchMock;
 
     try {
-      const result = await sendAuditEntryKeepalive(auditEntry, {
-        supabaseUrl: 'https://nfq.supabase.co',
-        supabaseAnonKey: 'anon-key',
-      });
+      const result = await sendAuditEntryKeepalive(auditEntry);
 
       expect(result.ok).toBe(true);
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      expect(fetchMock.mock.calls[0]?.[0]).toBe('https://nfq.supabase.co/rest/v1/audit_log');
+      expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/audit');
       expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
         method: 'POST',
         keepalive: true,

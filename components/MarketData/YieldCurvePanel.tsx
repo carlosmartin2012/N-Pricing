@@ -80,7 +80,8 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
 
   // Realtime Sync for Yield Curves
   useEffect(() => {
-    const subscription = supabaseService.subscribeToAll((payload) => {
+    const subscription = supabaseService.subscribeToAll((rawPayload) => {
+      const payload = rawPayload as { table: string; eventType: string; mapped?: { currency: string; date: string; points: { tenor: string; rate: string; prev: string }[] } };
       if (payload.table === 'yield_curves' && payload.eventType === 'INSERT') {
         const mapped = payload.mapped;
         if (!mapped) return;

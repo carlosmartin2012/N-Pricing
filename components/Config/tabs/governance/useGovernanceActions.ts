@@ -288,8 +288,8 @@ export function useGovernanceActions({
         await supabaseService.saveEsgGrid('physical', nextPhysicalGrid);
         appliedRequest = applied.request;
       } else if (request.target === 'GREENIUM_GRID') {
-        const applied = applyMethodologyChangeRequestToCollection(request, data.greeniumGrid, { actorEmail: user.email, actorName: user.name });
-        nextGreeniumGrid = applied.items;
+        const applied = applyMethodologyChangeRequestToCollection(request, data.greeniumGrid as unknown as Parameters<typeof applyMethodologyChangeRequestToCollection>[1], { actorEmail: user.email, actorName: user.name });
+        nextGreeniumGrid = applied.items as unknown as typeof data.greeniumGrid;
         await supabaseService.saveEsgGrid('greenium', nextGreeniumGrid);
         appliedRequest = applied.request;
       } else if (request.target === 'APPROVAL_MATRIX') {
@@ -346,8 +346,8 @@ export function useGovernanceActions({
         await supabaseService.saveEsgGrid('physical', nextPhysicalGrid);
         rolledBackRequest = rolledBack.request;
       } else if (request.target === 'GREENIUM_GRID') {
-        const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.greeniumGrid, { actorEmail: user.email, actorName: user.name });
-        nextGreeniumGrid = rolledBack.items;
+        const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.greeniumGrid as unknown as Parameters<typeof rollbackMethodologyChangeRequestToCollection>[1], { actorEmail: user.email, actorName: user.name });
+        nextGreeniumGrid = rolledBack.items as unknown as typeof data.greeniumGrid;
         await supabaseService.saveEsgGrid('greenium', nextGreeniumGrid);
         rolledBackRequest = rolledBack.request;
       } else if (request.target === 'APPROVAL_MATRIX') {

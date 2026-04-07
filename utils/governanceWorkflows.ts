@@ -237,7 +237,7 @@ export function buildBulkRuleImportChangeRequest({
 }
 
 export function buildConfigChangeOperation<T extends { id: string | number }>(
-  entityType: 'RATE_CARD' | 'TRANSITION_GRID' | 'PHYSICAL_GRID',
+  entityType: 'RATE_CARD' | 'TRANSITION_GRID' | 'PHYSICAL_GRID' | 'GREENIUM_GRID',
   action: MethodologyChangeAction,
   {
     currentItem,

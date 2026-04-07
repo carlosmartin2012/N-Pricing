@@ -74,7 +74,6 @@ export function useSaveCurveHistorySnapshot() {
       points: YieldCurvePoint[];
     }) =>
       marketDataApi.saveCurveHistorySnapshot(
-        params.curveId,
         params.currency,
         params.date,
         params.points,

@@ -202,7 +202,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
       }
 
       for (const au of assignedUsers) {
-        await entitiesApi.upsertEntityUser(entity.id, au.userId, au.role, au.isPrimary);
+        await entitiesApi.upsertEntityUser({ entityId: entity.id, userId: au.userId, role: au.role, isPrimaryEntity: au.isPrimary });
       }
 
       if (currentUser?.email) {

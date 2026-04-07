@@ -4,7 +4,6 @@ export const isSupabaseConfigured = true;
 
 // No-op supabase object — only used for legacy code paths that haven't been
 // fully migrated. All real data access goes through utils/apiFetch.ts.
-const noop = () => noopClient;
 const noopAsync = async () => ({ data: null, error: null, count: null });
 
 const noopChain: Record<string, unknown> = new Proxy({}, {

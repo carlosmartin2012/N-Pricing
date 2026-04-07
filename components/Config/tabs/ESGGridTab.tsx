@@ -45,7 +45,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
     setEditingEsg(null);
   };
 
-  const handleEditEsg = (item: TransitionRateCard | PhysicalRateCard) => {
+  const handleEditEsg = (item: TransitionRateCard | PhysicalRateCard | GreeniumRateCard) => {
     setEditingEsg(createEditableEsgEntry(esgSubTab, item));
     setDrawerOpen(true);
   };
