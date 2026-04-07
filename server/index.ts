@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { runMigrations } from './migrate';
 import dealsRouter from './routes/deals';
 import auditRouter from './routes/audit';
@@ -9,10 +11,16 @@ import entitiesRouter from './routes/entities';
 import reportSchedulesRouter from './routes/reportSchedules';
 import authRouter from './routes/auth';
 
-const app = express();
-const PORT = 3001;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const IS_PROD = process.env.NODE_ENV === 'production';
+const PORT = parseInt(process.env.PORT ?? (IS_PROD ? '5000' : '3001'), 10);
 
-app.use(cors({ origin: true }));
+const app = express();
+
+if (!IS_PROD) {
+  app.use(cors({ origin: true }));
+}
+
 app.use(express.json({ limit: '10mb' }));
 
 app.use('/api/deals', dealsRouter);
@@ -27,11 +35,19 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
 });
 
+if (IS_PROD) {
+  const distDir = path.resolve(__dirname, '..', 'dist');
+  app.use(express.static(distDir));
+  app.get('/{*path}', (_req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'));
+  });
+}
+
 async function main() {
   try {
     await runMigrations();
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[server] API running on http://0.0.0.0:${PORT}`);
+      console.log(`[server] Running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
     });
   } catch (err) {
     console.error('[server] Failed to start:', err);
