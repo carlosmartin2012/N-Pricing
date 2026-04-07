@@ -7,7 +7,7 @@
   "build": {
     "env": {
       "VERCEL_FORCE_NO_BUILD_CACHE": "1",
-      "VITE_GOOGLE_CLIENT_ID": "769861722464-3lp7tg5rc7t806qh95npgvcmo1mdpjbn.apps.googleusercontent.com"
+      "VITE_GOOGLE_CLIENT_ID": "655770399950-5urs5vun75q59gffv0o0fu18rpivnb86.apps.googleusercontent.com"
     }
   }
 }

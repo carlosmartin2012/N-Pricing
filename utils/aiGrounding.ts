@@ -103,6 +103,63 @@ export function buildDossierGroundedContext({
   };
 }
 
+function formatPct(value: number | undefined): string {
+  return value != null ? `${value.toFixed(3)}%` : 'N/A';
+}
+
+function buildPricingResultSummary(dossier: PricingDossier): string {
+  const r = dossier.pricingResult;
+  const deal = dossier.dealSnapshot;
+  if (!r) return '';
+
+  const lines = [
+    '',
+    'PRICING RESULT (Waterfall Breakdown):',
+    `- Base Rate (IRRBB): ${formatPct(r.baseRate)}`,
+    `- Liquidity Spread (total): ${formatPct(r.liquiditySpread)}`,
+    `  - Liquidity Premium: ${formatPct(r._liquidityPremiumDetails)}`,
+    `  - CLC/LCR Charge: ${formatPct(r._clcChargeDetails)}`,
+    `  - NSFR Charge: ${formatPct(r.nsfrCost)}`,
+    `- Strategic Spread: ${formatPct(r.strategicSpread)}`,
+    `- Credit Cost (Anejo IX): ${formatPct(r.regulatoryCost)}`,
+    `- Operational Cost: ${formatPct(r.operationalCost)}`,
+    `- Capital Charge: ${formatPct(r.capitalCharge)}`,
+    `- ESG Transition Charge: ${formatPct(r.esgTransitionCharge)}`,
+    `- ESG Physical Charge: ${formatPct(r.esgPhysicalCharge)}`,
+    `- Floor Price: ${formatPct(r.floorPrice)}`,
+    `- Technical Price: ${formatPct(r.technicalPrice)}`,
+    `- Target Price: ${formatPct(r.targetPrice)}`,
+    `- Total FTP: ${formatPct(r.totalFTP)}`,
+    `- Final Client Rate: ${formatPct(r.finalClientRate)}`,
+    `- Commercial Margin Target: ${formatPct(deal.marginTarget)}`,
+    '',
+    'RAROC & APPROVAL:',
+    `- RAROC: ${r.raroc != null ? `${(r.raroc * 100).toFixed(2)}%` : 'N/A'}`,
+    `- Economic Profit: ${r.economicProfit != null ? r.economicProfit.toFixed(0) : 'N/A'}`,
+    `- Approval Level: ${r.approvalLevel}`,
+    `- Matched Methodology: ${r.matchedMethodology}`,
+    r.formulaUsed ? `- Formula Used: ${r.formulaUsed}` : '',
+    r.behavioralMaturityUsed ? `- Behavioral Maturity Used: ${r.behavioralMaturityUsed.toFixed(1)} months` : '',
+    r.incentivisationAdj ? `- Incentivisation Adjustment: ${formatPct(r.incentivisationAdj)}` : '',
+    '',
+    'CREDIT RISK (Anejo IX):',
+    `- Anejo Segment: ${r.anejoSegment || 'Not classified'}`,
+    `- Regulatory Cost (annual): ${formatPct(r.regulatoryCost)}`,
+    '',
+    'DEAL PARAMETERS:',
+    `- Product: ${deal.productType} (${deal.category})`,
+    `- Client Type: ${deal.clientType}`,
+    `- Amount: ${deal.amount?.toLocaleString('es-ES')} ${deal.currency}`,
+    `- Duration: ${deal.durationMonths} months`,
+    `- Repricing: ${deal.repricingFreq}`,
+    `- Risk Weight: ${deal.riskWeight}%`,
+    `- Collateral: ${deal.collateralType || 'None'}`,
+    `- ESG Transition: ${deal.transitionRisk}, Physical: ${deal.physicalRisk}`,
+  ];
+
+  return lines.filter(Boolean).join('\n');
+}
+
 export function buildGroundingSummary({
   groundedContext,
   dossier,
@@ -123,7 +180,7 @@ export function buildGroundingSummary({
   const snapshot = portfolioSnapshots.find((item) => item.id === groundedContext.portfolioSnapshotId);
   const sources = marketDataSources.filter((source) => groundedContext.marketDataSourceIds?.includes(source.id));
 
-  return [
+  const lines = [
     'GROUNDING CONTEXT:',
     `- Methodology Version: ${methodologyLabel}`,
     dossier ? `- Pricing Dossier: ${dossier.id} (${dossier.status})` : '- Pricing Dossier: none resolved',
@@ -135,11 +192,22 @@ export function buildGroundingSummary({
     groundedContext.evidenceIds.length
       ? `- Evidence IDs: ${groundedContext.evidenceIds.join(', ')}`
       : '- Evidence IDs: none',
+  ];
+
+  if (dossier?.pricingResult) {
+    lines.push(buildPricingResultSummary(dossier));
+  }
+
+  lines.push(
     'INSTRUCTIONS:',
     '- Explain pricing and risk only using the grounded artifacts above when applicable.',
     '- If the prompt asks for facts outside that grounding, say which artifact is missing.',
     '- When you reference a governed artifact, cite its ID inline.',
-  ].join('\n');
+    '- When pricing result data is available, use actual numbers to explain the waterfall, RAROC, and approval level.',
+    '- For counteroffer suggestions, use the floor price and technical price as reference bounds.',
+  );
+
+  return lines.join('\n');
 }
 
 export function resolveChatGrounding({

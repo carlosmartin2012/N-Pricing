@@ -96,8 +96,8 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
     setIsThinking(false);
   };
 
-  const handleSendMessage = async () => {
-    const trimmedInput = input.trim();
+  const handleSendMessage = async (overrideInput?: string) => {
+    const trimmedInput = (overrideInput ?? input).trim();
     if (!trimmedInput || !activeSession) {
       return;
     }

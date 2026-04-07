@@ -4,10 +4,12 @@ import type { Transaction } from '../../types';
 import type { Language } from '../../translations';
 import { translations } from '../../translations';
 import { SelectInput, TextInput } from '../ui/LayoutComponents';
+import { TooltipTrigger } from '../ui/Tooltip';
 import { DEAL_AMORTIZATION_OPTIONS, formatDealAmount, type DealFieldChange } from './dealInputPanelUtils';
 
 interface DealLeverCardProps {
   label: string;
+  tooltip?: string;
   accentClassName: string;
   displayValue: string;
   rangeMin: number;
@@ -20,6 +22,7 @@ interface DealLeverCardProps {
 
 const DealLeverCard: React.FC<DealLeverCardProps> = ({
   label,
+  tooltip,
   accentClassName,
   displayValue,
   rangeMin,
@@ -31,7 +34,10 @@ const DealLeverCard: React.FC<DealLeverCardProps> = ({
 }) => (
   <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-3">
     <div className="mb-3 flex items-center justify-between">
-      <label className="nfq-label text-[10px]">{label}</label>
+      <label className="nfq-label text-[10px] flex items-center">
+        {label}
+        {tooltip && <TooltipTrigger content={tooltip} size={11} />}
+      </label>
       <span className={`rounded px-2 py-0.5 text-xs font-mono font-bold ${accentClassName}`}>
         {displayValue}
       </span>
@@ -69,13 +75,14 @@ export const DealLeversPanel: React.FC<Props> = ({
   const t = translations[language];
 
   return (
-    <div className="relative flex-1 space-y-6 overflow-y-auto p-4 custom-scrollbar">
+    <div data-tour="deal-levers" className="relative flex-1 space-y-6 overflow-y-auto p-4 custom-scrollbar">
       <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-5">
         <Sliders size={120} />
       </div>
 
       <DealLeverCard
         label={t.principalAmount}
+        tooltip={t.tooltip_calc_amount}
         accentClassName="bg-cyan-500/10 text-cyan-400"
         displayValue={formatDealAmount(values.amount, values.currency)}
         rangeMin={0}
@@ -99,6 +106,7 @@ export const DealLeversPanel: React.FC<Props> = ({
 
       <DealLeverCard
         label={t.tenor}
+        tooltip={t.tooltip_calc_tenor}
         accentClassName="bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)]"
         displayValue={`${values.durationMonths || 0}m`}
         rangeMin={0}
@@ -109,6 +117,10 @@ export const DealLeversPanel: React.FC<Props> = ({
       >
         <div className="flex items-center gap-2">
           <div className="w-1/2">
+            <span className="mb-1 flex items-center text-[9px] text-[color:var(--nfq-text-muted)] font-mono uppercase tracking-wider">
+              {t.amortization}
+              <TooltipTrigger content={t.tooltip_calc_amortization} size={11} />
+            </span>
             <SelectInput
               value={values.amortization}
               onChange={(event) => onFieldInputChange(event, 'amortization')}
@@ -138,6 +150,7 @@ export const DealLeversPanel: React.FC<Props> = ({
 
       <DealLeverCard
         label={t.targetMargin}
+        tooltip={t.tooltip_calc_marginTarget}
         accentClassName="bg-emerald-500/10 text-emerald-400"
         displayValue={`+${Number(values.marginTarget || 0).toFixed(2)}%`}
         rangeMin={0}

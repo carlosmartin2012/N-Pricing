@@ -1,7 +1,8 @@
 import React from 'react';
 import { Panel } from '../ui/LayoutComponents';
-import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles } from 'lucide-react';
+import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles, Compass, BookA } from 'lucide-react';
 import { translations, Language } from '../../translations';
+import { useWalkthrough } from '../../contexts/WalkthroughContext';
 
 // --- Helper Components ---
 
@@ -47,11 +48,12 @@ interface UserManualProps {
 const UserManual: React.FC<UserManualProps> = ({ language }) => {
    // Fallback configuration if translations are missing or partial
    const t = translations[language] || translations['en'];
+   const { startTour } = useWalkthrough();
 
    const manualContent = {
       en: {
          introTitle: "Welcome to N Pricing",
-         introDesc: "The N Pricing Engine is a high-performance calculation platform designed for modern commercial banking. It enables Treasury and Commercial desks to accurately price liquidity, credit risk, and option costs in real-time, bridging the gap between centralized ALM strategy and front-office execution.",
+         introDesc: "The N Pricing Engine is a high-performance calculation platform designed for modern commercial banking. It enables Treasury and Commercial desks to accurately price liquidity, credit risk, and option costs in real-time, bridging the gap between centralized FTP strategy and front-office execution.",
          pricingTitle: "Pricing Engine & Calculation",
          pricingDesc: "The core of the application. This module allows users to structure new deals or calculate pricing for existing products.",
          inputs: "Configure Amount, Tenor, Product Type, and Spread Targets via industrial sliders.",
@@ -75,7 +77,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
       },
       es: {
          introTitle: "Bienvenido a N Pricing",
-         introDesc: "El Motor N Pricing es una plataforma de cálculo de alto rendimiento diseñada para la banca comercial moderna. Permite a las mesas de Tesorería y Comercial estimar con precisión la liquidez, el riesgo de crédito y los costes de opción en tiempo real, cerrando la brecha entre la estrategia ALM centralizada y la ejecución del front-office.",
+         introDesc: "El Motor N Pricing es una plataforma de cálculo de alto rendimiento diseñada para la banca comercial moderna. Permite a las mesas de Tesorería y Comercial estimar con precisión la liquidez, el riesgo de crédito y los costes de opción en tiempo real, cerrando la brecha entre la estrategia FTP centralizada y la ejecución del front-office.",
          pricingTitle: "Motor de Pricing y Cálculo",
          pricingDesc: "El núcleo de la aplicación. Este módulo permite estructurar nuevas operaciones o calcular precios para productos existentes.",
          inputs: "Configure Importe, Plazo, Tipo de Producto y Objetivos de Spread mediante deslizadores industriales.",
@@ -114,6 +116,8 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                   <TocItem targetId="behavioural" label={t.behaviouralModels} />
                   <TocItem targetId="config" label={t.systemConfig} />
                   <TocItem targetId="accounting" label={t.accountingLedger} />
+                  <TocItem targetId="formulas" label={t.manual_formulasTitle} />
+                  <TocItem targetId="glossary" label={t.manual_glossaryTitle} />
                </nav>
             </div>
 
@@ -133,6 +137,22 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                         {manualContent.introDesc}
                      </p>
                   </section>
+
+                  {/* Start Guided Tour */}
+                  <button
+                     onClick={() => startTour('main-tour')}
+                     className="w-full flex items-center gap-3 rounded-xl bg-[var(--nfq-accent)]/10 border border-[var(--nfq-accent)]/20 px-4 py-3 text-left transition-colors hover:bg-[var(--nfq-accent)]/20"
+                  >
+                     <Compass size={20} className="text-[var(--nfq-accent)] shrink-0" />
+                     <div>
+                        <span className="text-sm font-semibold text-slate-200">{t.walkthrough_startTour}</span>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                           {language === 'es'
+                              ? 'Recorrido interactivo por las funcionalidades principales de N-Pricing'
+                              : 'Interactive walkthrough of N-Pricing main features'}
+                        </p>
+                     </div>
+                  </button>
 
                   <hr className="border-slate-800" />
 
@@ -232,6 +252,89 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                         <p className="text-xs font-mono text-slate-300">
                            <strong>T-Account Visualizer:</strong> Click any transaction row to see the breakdown of Debits and Credits across the Commercial Unit and the ALM Desk.
                         </p>
+                     </div>
+                  </section>
+
+                  {/* Pricing Formulas */}
+                  <section id="formulas" className="space-y-4 pt-4">
+                     <SectionHeader icon={Calculator} title={t.manual_formulasTitle} color="text-amber-400" />
+                     <p className="text-slate-400">
+                        {t.manual_formulasIntro}
+                     </p>
+                     <div className="overflow-x-auto rounded-lg border border-slate-800">
+                        <table className="w-full text-sm">
+                           <thead>
+                              <tr className="border-b border-slate-800 bg-slate-900/80">
+                                 <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-slate-500">
+                                    {language === 'es' ? 'Componente' : 'Component'}
+                                 </th>
+                                 <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-slate-500">
+                                    {language === 'es' ? 'Fórmula' : 'Formula'}
+                                 </th>
+                              </tr>
+                           </thead>
+                           <tbody className="divide-y divide-slate-800/50">
+                              {([
+                                 ['Base Rate', t.tooltip_formula_baseRate],
+                                 ['Liquidity Premium', t.tooltip_formula_liquidityPremium],
+                                 ['LCR Buffer (CLC)', t.tooltip_formula_clcCharge],
+                                 ['NSFR Charge', t.tooltip_formula_nsfrCharge],
+                                 ['Strategic Spread', t.tooltip_formula_strategicSpread],
+                                 ['Capital Charge', t.tooltip_formula_capitalCharge],
+                                 ['Capital Income', t.tooltip_formula_capitalIncome],
+                                 ['ESG Transition', t.tooltip_formula_esgTransition],
+                                 ['ESG Physical', t.tooltip_formula_esgPhysical],
+                                 ['Option Cost', t.tooltip_formula_optionCost],
+                                 ['Floor Price', t.tooltip_formula_floorPrice],
+                                 ['Technical Price', t.tooltip_formula_technicalPrice],
+                                 ['RAROC', t.tooltip_formula_raroc],
+                              ] as const).map(([component, formula]) => (
+                                 <tr key={component} className="hover:bg-slate-900/40 transition-colors">
+                                    <td className="px-4 py-2.5 text-slate-300 font-medium whitespace-nowrap">{component}</td>
+                                    <td className="px-4 py-2.5 font-mono text-xs text-slate-400 leading-relaxed">{formula}</td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </table>
+                     </div>
+                  </section>
+
+                  {/* Glossary */}
+                  <section id="glossary" className="space-y-4 pt-4">
+                     <SectionHeader icon={BookA} title={t.manual_glossaryTitle} color="text-purple-400" />
+                     <p className="text-slate-400">
+                        {t.manual_glossaryIntro}
+                     </p>
+                     <div className="space-y-3">
+                        {([
+                           t.glossary_dtm,
+                           t.glossary_rm,
+                           t.glossary_bm,
+                           t.glossary_ftp,
+                           t.glossary_raroc,
+                           t.glossary_lcr,
+                           t.glossary_nsfr,
+                           t.glossary_lp,
+                           t.glossary_clc,
+                           t.glossary_nmd,
+                           t.glossary_cpr,
+                           t.glossary_esg,
+                        ] as string[]).map((entry) => {
+                           const colonIdx = entry.indexOf(':');
+                           const term = colonIdx > -1 ? entry.slice(0, colonIdx) : entry;
+                           const definition = colonIdx > -1 ? entry.slice(colonIdx + 1).trim() : '';
+                           return (
+                              <div
+                                 key={term}
+                                 className="bg-slate-900/60 border border-slate-800/60 rounded-lg px-4 py-3"
+                              >
+                                 <dt className="font-mono text-sm font-bold text-slate-200 tracking-wide">{term}</dt>
+                                 {definition && (
+                                    <dd className="text-xs text-slate-400 mt-1 leading-relaxed">{definition}</dd>
+                                 )}
+                              </div>
+                           );
+                        })}
                      </div>
                   </section>
 

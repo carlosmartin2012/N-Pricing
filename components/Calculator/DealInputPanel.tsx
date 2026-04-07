@@ -119,7 +119,7 @@ const DealInputPanel: React.FC<Props> = ({
 
   return (
     <Panel title={t.pricingSimulationEngine || 'Pricing Simulation Engine'} className="h-full">
-      <div data-testid="deal-input-panel" className="flex h-full flex-col text-[color:var(--nfq-text-primary)]">
+      <div data-testid="deal-input-panel" data-tour="deal-input" className="flex h-full flex-col text-[color:var(--nfq-text-primary)]">
         <DealScenarioSelector
           values={values}
           deals={deals}
@@ -138,6 +138,7 @@ const DealInputPanel: React.FC<Props> = ({
 
         <div className="border-t border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]">
           <button
+            data-tour="deal-config-toggle"
             onClick={() => setShowConfig((currentValue) => !currentValue)}
             className="flex w-full items-center justify-between p-3 text-xs text-[color:var(--nfq-text-secondary)] transition-colors hover:bg-[var(--nfq-bg-highest)] hover:text-[color:var(--nfq-text-primary)]"
           >

@@ -43,6 +43,8 @@ const BehaviourFocusDashboard = React.lazy(() => import('./BehaviourFocusDashboa
 const FundingCurvesDashboard = React.lazy(() => import('./FundingCurvesDashboard'));
 const OverviewDashboard = React.lazy(() => import('./OverviewDashboard'));
 const PnlAttribution = React.lazy(() => import('./PnlAttribution'));
+const VintageAnalysis = React.lazy(() => import('./VintageAnalysis'));
+const BacktestingDashboard = React.lazy(() => import('./BacktestingDashboard'));
 
 interface ReportingDashboardProps {
   deals: Transaction[];
@@ -183,7 +185,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
           <div className="flex items-center gap-2 shrink-0">
             <BarChart4 className="text-cyan-400 w-5 h-5" />
             <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">
-              Liquidity Risk Terminal <span className="text-slate-500 font-normal">v4.6</span>
+              FTP Analytics <span className="text-slate-500 font-normal">v4.6</span>
             </h2>
           </div>
           <div className="hidden xl:block h-4 w-[1px] bg-white/10" />
@@ -442,7 +444,15 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--nfq-bg-root)] p-8 space-y-8">
           <Suspense fallback={<LoadingSpinner />}>
             {activeSubTab === 'OVERVIEW' ? (
-              <OverviewDashboard metrics={metrics} lcrHistory={lcrHistory} portfolioByBU={portfolioByBU} />
+              <OverviewDashboard
+                metrics={metrics}
+                lcrHistory={lcrHistory}
+                portfolioByBU={portfolioByBU}
+                deals={deals}
+                products={products}
+                businessUnits={businessUnits}
+                clients={clients}
+              />
             ) : activeSubTab === 'FUNDING_CURVES' ? (
               <FundingCurvesDashboard
                 selectedCurrency={selectedCurrency}
@@ -480,6 +490,20 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
                 snapshots={contextData.portfolioSnapshots}
                 onSnapshotsChange={contextData.setPortfolioSnapshots}
                 currentUser={currentUser}
+              />
+            ) : activeSubTab === 'VINTAGE' ? (
+              <VintageAnalysis
+                deals={deals}
+                products={products}
+                businessUnits={businessUnits}
+                clients={clients}
+              />
+            ) : activeSubTab === 'BACKTEST' ? (
+              <BacktestingDashboard
+                deals={deals}
+                products={products}
+                businessUnits={businessUnits}
+                clients={clients}
               />
             ) : (
               <BehaviourFocusDashboard behaviouralModels={behaviouralModels} />

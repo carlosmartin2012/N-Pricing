@@ -36,9 +36,8 @@ import {
   applyProductFormula,
   calculateBehaviouralSpread,
   lookupIncentivisation,
-  calculateCreditCost,
-  getClientRating,
 } from './pricing/formulaEngine';
+import { calculateFullCreditRisk } from './pricing/creditRiskEngine';
 
 // ─── Pricing Context ────────────────────────────────────────────────────────
 
@@ -266,11 +265,29 @@ export const calculatePricing = (
   const liquidity = totalLiquidityCost + (shocks.liquiditySpread / 100);
   const ftp = baseRate + liquidity;
 
-  // ── 10. Credit Cost (PD × LGD from rating) ────────────────────────────────
-  const clientRating = getClientRating(deal.clientId, clients);
-  const creditCost = calculateCreditCost(clientRating);
-
-  const regulatoryCost = creditCost;
+  // ── 10. Credit Cost (Anejo IX) ─────────────────────────────────────────────
+  const anejoResult = calculateFullCreditRisk({
+    productType: deal.productType,
+    clientType: deal.clientType,
+    amount: deal.amount,
+    ltvPct: deal.haircutPct ? deal.haircutPct / 100 : 0,
+    collateralType: deal.collateralType || 'None',
+    collateralValue: deal.collateralType && deal.collateralType !== 'None' && deal.haircutPct && deal.haircutPct > 0
+      ? deal.amount / (deal.haircutPct / 100)
+      : 0,
+    durationMonths: deal.durationMonths,
+    guaranteeType: deal.guaranteeType,
+    appraisalAgeMonths: deal.appraisalAgeMonths,
+    publicGuaranteePct: deal.publicGuaranteePct,
+    undrawnAmount: deal.undrawnAmount,
+    ccfType: deal.ccfType,
+    utilizationRate: deal.utilizationRate,
+    mode: deal.creditRiskMode,
+    externalPd12m: deal.externalPd12m,
+    externalLgd: deal.externalLgd,
+    externalEad: deal.externalEad,
+  });
+  const regulatoryCost = anejoResult.creditCostAnnualPct / 100;
 
   // ── 11. Operational Cost ──────────────────────────────────────────────────
   const operationalCost = deal.operationalCostBps / 100;
@@ -312,8 +329,8 @@ export const calculatePricing = (
   rarocInputs.cofRate = ftp;
   rarocInputs.interestRate = finalRate;
   rarocInputs.interestSpread = finalRate - ftp;
-  // ECL from credit cost * EAD
-  rarocInputs.ecl = (creditCost / 100) * rarocInputs.ead;
+  // ECL from Anejo IX credit cost × EAD
+  rarocInputs.ecl = (regulatoryCost / 100) * rarocInputs.ead;
 
   const rarocResult = calculateRAROC(rarocInputs);
   const raroc = rarocResult.raroc;
@@ -373,6 +390,7 @@ export const calculatePricing = (
     formulaUsed: formulaResult.formulaUsed,
     behavioralMaturityUsed: tenors.bm,
     incentivisationAdj,
+    anejoSegment: anejoResult.anejoSegment,
   };
 };
 

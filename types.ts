@@ -152,6 +152,18 @@ export interface Transaction {
   depositType?: 'Operational' | 'Non_Operational';
   behavioralMaturityOverride?: number;
 
+  // Credit Risk / Anejo IX inputs (Sprint 2-5)
+  guaranteeType?: 'MORTGAGE' | 'FINANCIAL_PLEDGE' | 'PERSONAL_GUARANTEE' | 'PUBLIC_GUARANTEE' | 'NONE';
+  appraisalAgeMonths?: number;
+  publicGuaranteePct?: number;
+  ccfType?: string;
+  utilizationRate?: number;
+  // Mirror mode (external IFRS 9 params)
+  creditRiskMode?: 'native' | 'mirror';
+  externalPd12m?: number;
+  externalLgd?: number;
+  externalEad?: number;
+
   // ESG
   transitionRisk: 'Brown' | 'Amber' | 'Neutral' | 'Green';
   physicalRisk: 'High' | 'Medium' | 'Low';
@@ -223,6 +235,34 @@ export interface FtpRateCard {
   points: YieldCurvePoint[];
 }
 
+// ── Credit Risk (Anejo IX) ────────────────────────────────────────────────
+export interface CreditRiskResult {
+  anejoSegment: string;
+  stage: 1 | 2 | 3;
+  grossExposure: number;
+  effectiveGuarantee: number;
+  netExposure: number;
+  coveragePct: number;
+  el12m: number;
+  creditCostAnnualPct: number;
+  // Forward-looking & migration (Sprint 3)
+  day1Provision?: number;
+  elLifetime?: number;
+  migrationCostAnnual?: number;
+  pMigrateS2?: number;
+  pMigrateS3?: number;
+  scenarioWeightedCoveragePct?: number;
+  // Sprint 4: Capital Engine integration params
+  capitalParams?: {
+    pd: number;           // PD floor-adjusted (min 0.03% = 0.0003 per CRR3)
+    lgd: number;          // LGD for IRB (decimal)
+    ead: number;          // Exposure at default
+    maturityYears: number;
+    exposureClass: string; // Maps to CapitalEngine's ExposureClass
+  };
+  mode?: 'native' | 'mirror';
+}
+
 export interface FTPResult {
   baseRate: number;
   liquiditySpread: number;
@@ -262,6 +302,7 @@ export interface FTPResult {
   formulaUsed?: string; // formula string applied (for display)
   behavioralMaturityUsed?: number; // effective BM used for interpolation
   incentivisationAdj?: number; // subsidy/incentive adjustment (%)
+  anejoSegment?: string; // Anejo IX segment classification
 }
 
 export interface RAROCInputs {

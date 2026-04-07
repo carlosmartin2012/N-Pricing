@@ -12,7 +12,7 @@ describe('genAIChatUtils', () => {
 
     expect(session.messages).toHaveLength(1);
     expect(session.messages[0].role).toBe('model');
-    expect(session.messages[0].content).toContain('N Pricing Neural Link Established');
+    expect(session.messages[0].content).toContain('N-Pricing Copilot ready');
   });
 
   it('builds compact session titles from the first prompt', () => {

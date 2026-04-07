@@ -1,18 +1,22 @@
 import React from 'react';
 import type { RAROCInputs } from '../../types';
+import { useUI } from '../../contexts/UIContext';
+import { TooltipTrigger } from '../ui/Tooltip';
 import type { EditableRarocField, NumericFieldType, RarocInputSectionConfig } from './rarocCalculatorUtils';
 
 interface FieldProps {
   label: string;
   value: number;
   type: NumericFieldType;
+  tooltip?: string;
   onChange: (value: number) => void;
 }
 
-const RAROCInputField: React.FC<FieldProps> = ({ label, value, type, onChange }) => (
+const RAROCInputField: React.FC<FieldProps> = ({ label, value, type, tooltip, onChange }) => (
   <div className="flex flex-col gap-1.5">
-    <label className="nfq-label text-[9px]">
+    <label className="nfq-label text-[9px] flex items-center">
       {label}
+      {tooltip && <TooltipTrigger content={tooltip} size={11} />}
     </label>
     <div className="group relative">
       <input
@@ -34,7 +38,20 @@ interface Props {
   onChange: (key: EditableRarocField, value: number) => void;
 }
 
+function getFieldTooltip(key: EditableRarocField, t: ReturnType<typeof useUI>['t']): string | undefined {
+  switch (key) {
+    case 'feeIncome': return t.tooltip_raroc_annualFee;
+    case 'cofRate': return t.tooltip_raroc_costOfFunds;
+    case 'operatingCostPct': return t.tooltip_raroc_operatingCost;
+    case 'ecl': return t.tooltip_raroc_expectedLoss;
+    case 'hurdleRate': return t.tooltip_raroc_hurdleRate;
+    default: return undefined;
+  }
+}
+
 export const RAROCInputSection: React.FC<Props> = ({ section, inputs, onChange }) => {
+  const { t } = useUI();
+
   return (
     <div className="space-y-3">
       <div className="border-b border-white/5 pb-2">
@@ -53,6 +70,7 @@ export const RAROCInputSection: React.FC<Props> = ({ section, inputs, onChange }
             label={field.label}
             value={inputs[field.key]}
             type={field.type}
+            tooltip={getFieldTooltip(field.key, t)}
             onChange={(value) => onChange(field.key, value)}
           />
         ))}

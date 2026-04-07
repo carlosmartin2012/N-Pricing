@@ -1,5 +1,4 @@
 import React from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
 import { ArrowRight, LockKeyhole, ShieldCheck } from 'lucide-react';
 import { translations, Language } from '../../translations';
 import { Logo } from './Logo';
@@ -20,39 +19,24 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-  const login = useGoogleLogin({
-    flow: 'implicit',
-    prompt: 'select_account',
-    hosted_domain: 'nfq.es',
-    onSuccess: async (tokenResponse) => {
-      try {
-        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const userInfo = await userInfoResponse.json();
-        const email = userInfo.email;
+  const handleGoogleLogin = () => {
+    // Google OAuth disabled — use demo credentials or configure Google Cloud Console
+    setError('Google Sign-In is being configured. Please use demo credentials below.');
+  };
 
-        if (!email) {
-          setError('Could not retrieve email.');
-          return;
-        }
+  // Google credential response handler placeholder
+  const handleCredentialResponse = (_response: unknown) => {
+    // Placeholder — Google OAuth not loaded
+    setError('Google Sign-In not available. Use demo credentials.');
+  };
 
-        if (!email.endsWith('@nfq.es')) {
-          setError('Access Restricted: Only @nfq.es emails are allowed.');
-          return;
-        }
+  // Compatibility shim
+  const login = handleGoogleLogin;
+  void handleCredentialResponse;
 
-        setError(null);
-        onLogin(email);
-      } catch (err) {
-        console.error(err);
-        setError('Authentication failed.');
-      }
-    },
-    onError: () => {
-      setError('Login Failed');
-    },
-  });
+  const [showFallbackLogin, setShowFallbackLogin] = React.useState(false);
+  void showFallbackLogin;
+  void setShowFallbackLogin;
 
   const handleDemoLogin = (event: React.FormEvent) => {
     event.preventDefault();
@@ -167,11 +151,20 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                     </div>
                     <div className="text-left">
                       <div className="text-sm font-semibold tracking-[-0.01em]">Continue with your NFQ account</div>
-                      <div className="text-xs text-slate-500">Google OAuth</div>
+                      <div className="text-xs text-slate-500">Google OAuth (coming soon)</div>
                     </div>
                   </div>
                   <ArrowRight size={18} />
                 </button>
+
+                {false && (
+                  <button
+                    onClick={() => {}}
+                    className="mt-2 w-full rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-xs text-cyan-400 transition hover:bg-cyan-500/20"
+                  >
+                    Popup blocked? Try alternative Sign-In method
+                  </button>
+                )}
 
                 {DEMO_USER && DEMO_PASS && (
                   <>

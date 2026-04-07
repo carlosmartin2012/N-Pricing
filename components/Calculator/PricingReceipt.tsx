@@ -1,11 +1,13 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
+import { Transaction, FTPResult, ApprovalMatrixConfig, type CreditRiskResult } from '../../types';
 import { calculatePricing, DEFAULT_PRICING_SHOCKS, PricingShocks } from '../../utils/pricingEngine';
 import { validateDeal, type ValidationError } from '../../utils/validation';
 import { Panel, Badge } from '../ui/LayoutComponents';
+import { TooltipTrigger } from '../ui/Tooltip';
 import { AccessibleLiveRegion } from '../ui/AccessibleLiveRegion';
 import {
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   CheckCircle2,
   AlertTriangle,
@@ -25,6 +27,7 @@ import { usePricingContext } from '../../hooks/usePricingContext';
 import { supabaseService } from '../../utils/supabaseService';
 import { exportPricingPDF } from '../../utils/pdfExport';
 import { findLatestPortfolioSnapshotForDeal } from '../../utils/aiGrounding';
+import { calculateFullCreditRisk } from '../../utils/pricing/creditRiskEngine';
 import {
   buildApprovalTaskForPricingDossier,
   buildPricingDossier,
@@ -56,6 +59,7 @@ const VALIDATION_FAILED_RESULT: FTPResult = {
 
 const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatrix, language, shocks, onDealSaved }) => {
   const [showAccounting, setShowAccounting] = useState(false);
+  const [showCreditDetail, setShowCreditDetail] = useState(false);
   const [applyShocks, setApplyShocks] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [dealSaveStatus, setDealSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -80,6 +84,37 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
     setMatchedMethod(baseResult.matchedMethodology);
     return baseResult;
   }, [deal, setMatchedMethod, approvalMatrix, pricingContext, activeScenarioShocks, validationErrors]);
+
+  // Full credit risk detail from Anejo IX engine
+  const creditDetail: CreditRiskResult | null = useMemo(() => {
+    if (validationErrors.length > 0) return null;
+    try {
+      return calculateFullCreditRisk({
+        productType: deal.productType,
+        clientType: deal.clientType,
+        amount: deal.amount,
+        ltvPct: deal.haircutPct ? deal.haircutPct / 100 : 0,
+        collateralType: deal.collateralType || 'None',
+        collateralValue:
+          deal.collateralType && deal.collateralType !== 'None' && deal.haircutPct && deal.haircutPct > 0
+            ? deal.amount / (deal.haircutPct / 100)
+            : 0,
+        durationMonths: deal.durationMonths,
+        guaranteeType: deal.guaranteeType,
+        appraisalAgeMonths: deal.appraisalAgeMonths,
+        publicGuaranteePct: deal.publicGuaranteePct,
+        undrawnAmount: deal.undrawnAmount,
+        ccfType: deal.ccfType,
+        utilizationRate: deal.utilizationRate,
+        mode: deal.creditRiskMode,
+        externalPd12m: deal.externalPd12m,
+        externalLgd: deal.externalLgd,
+        externalEad: deal.externalEad,
+      });
+    } catch {
+      return null;
+    }
+  }, [deal, validationErrors]);
 
   // Auto-save pricing result to Supabase (debounced 3s after calculation stabilizes)
   useEffect(() => {
@@ -302,7 +337,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
         )}
 
         {/* RAROC Scorecard */}
-        <div className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+        <div data-tour="receipt-raroc" className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="flex justify-between items-start mb-3">
             <div>
               <h4 className="nfq-label">Projected RAROC</h4>
@@ -374,7 +409,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
           </div>
 
           <div data-testid="receipt-base-rate">
-            <WaterfallItem label="IRRBB — Base Rate" value={result.baseRate} color="text-slate-300" />
+            <WaterfallItem label="IRRBB — Base Rate" value={result.baseRate} color="text-slate-300" formula={t.tooltip_formula_baseRate} />
           </div>
 
           {/* Consolidated Liquidity Module */}
@@ -386,6 +421,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
               color="text-amber-400"
               weight="font-mono font-bold"
               icon={<Droplets size={12} className="inline mr-2 text-amber-600" />}
+              formula={t.tooltip_formula_liquidityPremium}
             />
 
             {/* Indented Breakdown: LP + CLC + NSFR + LR */}
@@ -424,6 +460,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
             value={result.strategicSpread}
             isAdd
             color="text-blue-600 dark:text-blue-400"
+            formula={t.tooltip_formula_strategicSpread}
           />
 
           {/* Incentivisation */}
@@ -444,15 +481,125 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
 
           {/* Business & Regulatory Costs */}
           <div className="pl-2 border-l-2 border-slate-800 ml-1 mt-2 space-y-1">
-            <WaterfallItem label="Expected Loss (Credit)" value={result.regulatoryCost} isAdd color="text-rose-400" />
+            <WaterfallItem
+              label={`${t.anejo_creditProvision}${result.anejoSegment ? ` · ${result.anejoSegment.replace(/_/g, ' ')}` : ''}`}
+              value={result.regulatoryCost}
+              isAdd
+              color="text-rose-400"
+              formula={t.tooltip_formula_anejoCreditCost}
+            />
+
+            {/* Collapsible Credit Risk Detail (Anejo IX) */}
+            {creditDetail && (
+              <div className="ml-2 mt-1">
+                <button
+                  onClick={() => setShowCreditDetail(!showCreditDetail)}
+                  className="flex items-center gap-1.5 text-[10px] text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-widest font-bold"
+                >
+                  {showCreditDetail ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  {t.creditRiskDetail}
+                </button>
+
+                {showCreditDetail && (
+                  <div className="mt-1.5 bg-slate-900/50 border border-slate-800 rounded-lg p-3 space-y-3 animate-in fade-in slide-in-from-top-2">
+                    {/* Segment & Mode */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-slate-500">{t.anejo_segment}</div>
+                        <div className="font-mono text-xs text-slate-300">{creditDetail.anejoSegment.replace(/_/g, ' ')}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditMode}</div>
+                        <div className="font-mono text-xs text-slate-300">
+                          {creditDetail.mode === 'mirror' ? t.creditModeMirror : t.creditModeNative}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditCoverage}</div>
+                        <div className="font-mono text-xs text-slate-300">{creditDetail.coveragePct.toFixed(3)}%</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditScenarioWeighted}</div>
+                        <div className="font-mono text-xs text-slate-300">
+                          {creditDetail.scenarioWeightedCoveragePct != null
+                            ? `${creditDetail.scenarioWeightedCoveragePct.toFixed(3)}%`
+                            : '—'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Provision & Migration */}
+                    <div className="border-t border-slate-800 pt-2 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditDay1Provision}</span>
+                        <span className="font-mono text-xs text-slate-300">
+                          {creditDetail.day1Provision != null
+                            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency, maximumFractionDigits: 0 }).format(creditDetail.day1Provision)
+                            : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditMigrationCost}</span>
+                        <span className="font-mono text-xs text-slate-300">
+                          {creditDetail.migrationCostAnnual != null
+                            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency, maximumFractionDigits: 0 }).format(creditDetail.migrationCostAnnual)
+                            : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditProbS2}</span>
+                        <span className="font-mono text-xs text-slate-300">
+                          {creditDetail.pMigrateS2 != null ? `${(creditDetail.pMigrateS2 * 100).toFixed(2)}%` : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditProbS3}</span>
+                        <span className="font-mono text-xs text-slate-300">
+                          {creditDetail.pMigrateS3 != null ? `${(creditDetail.pMigrateS3 * 100).toFixed(2)}%` : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest text-slate-500">{t.creditELLifetime} ({Math.round(deal.durationMonths / 12)}yr)</span>
+                        <span className="font-mono text-xs text-slate-300">
+                          {creditDetail.elLifetime != null
+                            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency, maximumFractionDigits: 0 }).format(creditDetail.elLifetime)
+                            : '—'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Capital Params */}
+                    {creditDetail.capitalParams && (
+                      <div className="border-t border-slate-800 pt-2">
+                        <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">{t.creditCapitalParams}</div>
+                        <div className="font-mono text-[11px] text-slate-400 leading-relaxed">
+                          <span>PD: {(creditDetail.capitalParams.pd * 100).toFixed(2)}%</span>
+                          <span className="mx-2 text-slate-600">|</span>
+                          <span>LGD: {(creditDetail.capitalParams.lgd * 100).toFixed(0)}%</span>
+                          <span className="mx-2 text-slate-600">|</span>
+                          <span>EAD: {new Intl.NumberFormat('en-US', { style: 'currency', currency: deal.currency, maximumFractionDigits: 0 }).format(creditDetail.capitalParams.ead)}</span>
+                        </div>
+                        <div className="font-mono text-[11px] text-slate-400 mt-0.5">
+                          <span>Exposure Class: {creditDetail.capitalParams.exposureClass}</span>
+                          <span className="mx-2 text-slate-600">|</span>
+                          <span>Maturity: {creditDetail.capitalParams.maturityYears.toFixed(1)}yr</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-rose-400" />
             <WaterfallItem
               label="ESG Transition"
               value={result.esgTransitionCharge}
               isAdd
               color={result.esgTransitionCharge > 0 ? 'text-rose-400' : 'text-emerald-400'}
+              formula={t.tooltip_formula_esgTransition}
             />
-            <WaterfallItem label="ESG Physical" value={result.esgPhysicalCharge} isAdd color="text-rose-400" />
+            <WaterfallItem label="ESG Physical" value={result.esgPhysicalCharge} isAdd color="text-rose-400" formula={t.tooltip_formula_esgPhysical} />
           </div>
 
           <div className="bg-slate-800/50 p-2 rounded border border-slate-700 my-2">
@@ -461,6 +608,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
               value={result.floorPrice}
               highlight
               color="text-slate-300"
+              formula={t.tooltip_formula_floorPrice}
             />
             <div className="flex items-center justify-between text-[10px] text-slate-500 pl-2 mt-1">
               <span>+ Cost of Capital (Hurdle)</span>
@@ -477,6 +625,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
               value={result.technicalPrice}
               highlight
               color="text-cyan-300"
+              formula={t.tooltip_formula_technicalPrice}
             />
           </div>
 
@@ -490,7 +639,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
         </div>
 
         {/* Save as Deal + Auto-save indicator */}
-        <div className="border-t border-slate-700 bg-slate-900 p-3 flex items-center gap-2">
+        <div data-tour="save-deal" className="border-t border-slate-700 bg-slate-900 p-3 flex items-center gap-2">
           <button
             data-testid="save-deal-btn"
             onClick={handleSaveAsDeal}
@@ -573,12 +722,14 @@ const WaterfallItem: React.FC<{
   weight?: string;
   compact?: boolean;
   icon?: React.ReactNode;
-}> = ({ label, value, subtext, isAdd, highlight, color = 'text-slate-200', weight, compact, icon }) => (
+  formula?: string;
+}> = ({ label, value, subtext, isAdd, highlight, color = 'text-slate-200', weight, compact, icon, formula }) => (
   <div className={`flex items-center justify-between ${highlight ? 'py-1' : 'py-0.5'} ${compact ? 'opacity-80' : ''}`}>
     <div>
       <div className={`text-xs ${highlight ? 'font-bold text-white' : 'font-medium text-slate-400'} flex items-center`}>
         {icon && icon}
         {label}
+        {formula && <TooltipTrigger content={formula} variant="formula" placement="right" size={11} />}
       </div>
       {subtext && <div className="text-[10px] text-slate-600 font-mono">{subtext}</div>}
     </div>

@@ -98,7 +98,7 @@ const MethodologyConfig: React.FC<Props> = ({
       title={mode === 'METHODOLOGY' ? 'Methodology & Rules Engine' : 'System Configuration & Master Data'}
       className="h-full"
     >
-      <div className="flex flex-col h-full">
+      <div data-tour="config-panel" className="flex flex-col h-full">
         <MethodologyTabNavigation mode={mode} activeTab={activeTab} onChange={setActiveTab} />
 
         {tabContent[activeTab]}

@@ -34,7 +34,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const t = translations[language];
   const [latency, setLatency] = React.useState(14);
-
   React.useEffect(() => {
     const interval = window.setInterval(() => {
       setLatency(Math.floor(Math.random() * (28 - 12 + 1)) + 12);
@@ -50,9 +49,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <button
         data-testid={`nav-${item.id}`}
         onClick={() => {
+          console.log('[NAV] Clicked:', item.id, 'isUserConfig:', isUserConfig);
           if (isUserConfig) {
             onOpenConfig();
           } else {
+            console.log('[NAV] Setting view to:', item.id);
             setCurrentView(item.id as ViewState);
           }
           if (window.innerWidth < 768) onClose();
@@ -130,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Main navigation */}
-        <nav role="navigation" aria-label="Main navigation" className="flex-1 overflow-y-auto px-2">
+        <nav role="navigation" aria-label="Main navigation" data-tour="sidebar-nav" className="flex-1 overflow-y-auto px-2">
           <div className="space-y-0.5">
             {mainNavItems.map((item) => {
               const showSection = item.section && item.section !== lastSection;

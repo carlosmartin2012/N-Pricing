@@ -65,11 +65,11 @@ export const CalculatorWorkspace: React.FC<Props> = ({
           />
         </div>
 
-        <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
+        <div data-tour="methodology-panel" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
           <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
         </div>
 
-        <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
+        <div data-tour="pricing-receipt" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
           <PricingReceipt
             deal={dealParams}
             setMatchedMethod={setMatchedMethod}

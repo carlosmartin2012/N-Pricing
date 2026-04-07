@@ -40,7 +40,7 @@ test.describe('Main Navigation Items', () => {
     { testId: 'nav-SHOCKS', label: 'Stress Testing' },
     { testId: 'nav-BLOTTER', label: 'Deal Blotter' },
     { testId: 'nav-ACCOUNTING', label: 'Accounting Ledger' },
-    { testId: 'nav-REPORTING', label: 'ALM Reporting' },
+    { testId: 'nav-REPORTING', label: 'FTP Analytics' },
     { testId: 'nav-MARKET_DATA', label: 'Yield Curves' },
     { testId: 'nav-METHODOLOGY', label: 'Rules & Config' },
     { testId: 'nav-BEHAVIOURAL', label: 'Behavioural Models' },
@@ -82,11 +82,11 @@ test.describe('View Switching', () => {
     await expect(header.getByText('Deal Blotter')).toBeVisible({ timeout: 5_000 });
   });
 
-  test('navigating to ALM Reporting loads the reporting dashboard', async ({ page }) => {
+  test('navigating to FTP Analytics loads the reporting dashboard', async ({ page }) => {
     await page.getByTestId('nav-REPORTING').click();
 
     const header = page.getByTestId('header');
-    await expect(header.getByText('ALM Reporting')).toBeVisible({ timeout: 5_000 });
+    await expect(header.getByText('FTP Analytics')).toBeVisible({ timeout: 5_000 });
   });
 
   test('navigating to Yield Curves loads the market data view', async ({ page }) => {

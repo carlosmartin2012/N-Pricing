@@ -234,7 +234,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
   const pricingVersions = curveVersions;
 
   return (
-    <div className="flex flex-col xl:grid xl:grid-cols-3 gap-4 md:gap-6 h-full min-h-0 overflow-auto custom-scrollbar">
+    <div data-tour="market-data-panel" className="flex flex-col xl:grid xl:grid-cols-3 gap-4 md:gap-6 h-full min-h-0 overflow-auto custom-scrollbar">
       {/* Chart Section */}
       <div className="xl:col-span-2 flex flex-col min-h-[300px] md:min-h-[500px] xl:min-h-0">
         <YieldCurveWorkspace

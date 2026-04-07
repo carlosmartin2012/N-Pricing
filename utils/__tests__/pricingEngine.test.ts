@@ -427,14 +427,20 @@ describe('calculatePricing', () => {
     });
   });
 
-  // ── Credit cost ──
-  describe('credit cost by rating', () => {
-    it('lower-rated client has higher credit cost', () => {
-      const bbbDeal: Transaction = { ...baseDeal, clientId: 'CL-1001' };
-      const bDeal: Transaction = { ...baseDeal, clientId: 'CL-2001' };
-      const bbbResult = calculatePricing(bbbDeal, defaultApproval, undefined, noShocks);
-      const bResult = calculatePricing(bDeal, defaultApproval, undefined, noShocks);
-      expect(bResult.regulatoryCost).toBeGreaterThan(bbbResult.regulatoryCost);
+  // ── Credit cost (Anejo IX) ──
+  describe('credit cost by Anejo IX segment', () => {
+    it('consumer segment has higher credit cost than corporate', () => {
+      const corpDeal: Transaction = { ...baseDeal, productType: 'Commercial Loan', clientType: 'Corporate' };
+      const consumerDeal: Transaction = { ...baseDeal, productType: 'Consumer Loan', clientType: 'Retail' };
+      const corpResult = calculatePricing(corpDeal, defaultApproval, undefined, noShocks);
+      const consumerResult = calculatePricing(consumerDeal, defaultApproval, undefined, noShocks);
+      // Consumer coverage (1.8%) > Corporate coverage (0.6%)
+      expect(consumerResult.regulatoryCost).toBeGreaterThan(corpResult.regulatoryCost);
+    });
+
+    it('classifies deal into Anejo IX segment', () => {
+      const result = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
+      expect(result.anejoSegment).toBeDefined();
     });
   });
 

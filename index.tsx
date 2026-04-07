@@ -4,13 +4,13 @@ import App from './App';
 import './index.css';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './contexts/AuthContext';
 import { EntityProvider } from './contexts/EntityContext';
 import { MarketDataProvider } from './contexts/MarketDataContext';
 import { GovernanceProvider } from './contexts/GovernanceContext';
 import { DataProvider } from './contexts/DataContext';
 import { UIProvider } from './contexts/UIContext';
+import { WalkthroughProvider } from './contexts/WalkthroughContext';
 import { ToastProvider } from './components/ui/Toast';
 import { errorTracker } from './utils/errorTracking';
 
@@ -85,6 +85,13 @@ window.onunhandledrejection = (event: PromiseRejectionEvent) => {
   errorTracker.captureException(error, { module: 'unhandledrejection' });
 };
 
+// DEBUG: Raw click listener BEFORE React renders - captures ALL clicks
+document.addEventListener('click', (e) => {
+  const t = e.target as HTMLElement;
+  console.log('%c[CLICK]', 'color:lime;font-weight:bold', t.tagName, t.closest('button')?.getAttribute('data-testid') || t.className?.toString().slice(0,40));
+}, true);
+console.log('%c[BOOT] Debug click listener installed', 'color:lime;font-weight:bold');
+
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
 
@@ -99,21 +106,21 @@ root.render(
     <RootErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          <GoogleOAuthProvider clientId={googleClientId || 'NOT_CONFIGURED'}>
             <AuthProvider>
               <EntityProvider>
               <MarketDataProvider>
                 <GovernanceProvider>
                   <DataProvider>
                     <UIProvider>
-                      <App />
+                      <WalkthroughProvider>
+                        <App />
+                      </WalkthroughProvider>
                     </UIProvider>
                   </DataProvider>
                 </GovernanceProvider>
               </MarketDataProvider>
               </EntityProvider>
             </AuthProvider>
-          </GoogleOAuthProvider>
         </ToastProvider>
       </QueryClientProvider>
     </RootErrorBoundary>

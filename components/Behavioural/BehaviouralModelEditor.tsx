@@ -9,6 +9,7 @@ import type {
   BehaviouralModel,
   ReplicationTranche,
 } from '../../types';
+import { useUI } from '../../contexts/UIContext';
 
 interface Props {
   editingModel: Partial<BehaviouralModel>;
@@ -26,7 +27,10 @@ const BehaviouralModelEditor: React.FC<Props> = ({
   onTrancheChange,
   onAddTranche,
   onRemoveTranche,
-}) => (
+}) => {
+  const { t } = useUI();
+
+  return (
   <div className="space-y-6">
     <InputGroup label="Model Type">
       <SelectInput
@@ -64,7 +68,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
               <Activity size={12} /> Core & Sensitivity
             </h5>
             <div className="grid grid-cols-2 gap-4">
-              <InputGroup label="Core Ratio (%)">
+              <InputGroup label="Core Ratio (%)" tooltip={t.tooltip_behav_coreRatio}>
                 <div className="relative">
                   <TextInput
                     type="number"
@@ -76,7 +80,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                 </div>
                 <p className="mt-1 text-[9px] text-slate-500">Stable volume portion</p>
               </InputGroup>
-              <InputGroup label="Beta Factor (0-1)">
+              <InputGroup label="Beta Factor (0-1)" tooltip={t.tooltip_behav_betaFactor}>
                 <TextInput
                   type="number"
                   step="0.05"
@@ -163,14 +167,14 @@ const BehaviouralModelEditor: React.FC<Props> = ({
       ) : (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <InputGroup label="Constant Prep. Rate (CPR %)">
+            <InputGroup label="Constant Prep. Rate (CPR %)" tooltip={t.tooltip_behav_cpr}>
               <TextInput
                 type="number"
                 value={editingModel.cpr}
                 onChange={(event) => onChange({ cpr: Number(event.target.value) || 0 })}
               />
             </InputGroup>
-            <InputGroup label="Penalty Free Allowance (%)">
+            <InputGroup label="Penalty Free Allowance (%)" tooltip={t.tooltip_behav_penaltyFree}>
               <TextInput
                 type="number"
                 value={editingModel.penaltyExempt}
@@ -189,6 +193,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 export default BehaviouralModelEditor;

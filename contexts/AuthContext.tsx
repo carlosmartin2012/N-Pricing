@@ -102,6 +102,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     logAuthEvent(loggedUser, 'LOGIN', `User ${loggedUser.name} logged into the system.`);
 
+    // Clean up Google Identity Services to prevent COOP polling and overlay injection
+    try {
+      const goog = (window as any).google;
+      if (goog?.accounts?.id) {
+        goog.accounts.id.cancel();
+        goog.accounts.id.disableAutoSelect();
+      }
+      // Remove any Google-injected One Tap iframe/overlay
+      document.getElementById('credential_picker_container')?.remove();
+      document.getElementById('credential_picker_iframe')?.remove();
+      // Remove the GIS script tag to stop all background polling
+      document.querySelectorAll('script[src*="accounts.google.com/gsi"]').forEach(s => s.remove());
+    } catch { /* ignore cleanup errors */ }
+
     // Wire user context into error tracker
     errorTracker.setUser({
       id: loggedUser.id,

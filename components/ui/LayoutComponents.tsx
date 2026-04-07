@@ -1,4 +1,5 @@
 import React from 'react';
+import { TooltipTrigger } from './Tooltip';
 
 interface PanelProps {
   children: React.ReactNode;
@@ -41,14 +42,18 @@ export const Panel: React.FC<PanelProps> = ({
   </section>
 );
 
-export const InputGroup: React.FC<{ label: string; children: React.ReactNode; hint?: string }> = ({
+export const InputGroup: React.FC<{ label: string; children: React.ReactNode; hint?: string; tooltip?: string }> = ({
   label,
   children,
   hint,
+  tooltip,
 }) => (
   <label className="mb-5 flex flex-col gap-2.5">
     <div className="flex items-baseline justify-between gap-4">
-      <span className="nfq-label">{label}</span>
+      <span className="nfq-label flex items-center">
+        {label}
+        {tooltip && <TooltipTrigger content={tooltip} size={12} />}
+      </span>
       {hint && <span className="text-[11px] text-[color:var(--nfq-text-faint)]">{hint}</span>}
     </div>
     {children}

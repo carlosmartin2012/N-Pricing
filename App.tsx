@@ -14,6 +14,7 @@ import { UniversalImportModal } from './components/ui/UniversalImportModal';
 import { UserConfigModal } from './components/ui/UserConfigModal';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { SkipNav } from './components/ui/SkipNav';
+import { WalkthroughOverlay } from './components/ui/WalkthroughOverlay';
 import { useAuth } from './contexts/AuthContext';
 import { useData } from './contexts/DataContext';
 import { useUI } from './contexts/UIContext';
@@ -79,6 +80,24 @@ const AppContent: React.FC = () => {
       void loadUserEntities(currentUser.email);
     }
   }, [currentUser?.email, loadUserEntities]);
+
+  // DEBUG: Raw DOM click listener to diagnose sidebar navigation issue
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest('button[data-testid^="nav-"]');
+      if (button) {
+        console.log('[DEBUG-DOM] Click reached nav button:', button.getAttribute('data-testid'));
+        console.log('[DEBUG-DOM] target:', target.tagName, target.className.slice(0, 50));
+      }
+      const sidebar = target.closest('[data-testid="sidebar"]');
+      if (sidebar && !button) {
+        console.log('[DEBUG-DOM] Click in sidebar but NOT on button. Target:', target.tagName, target.className.slice(0, 80));
+      }
+    };
+    document.addEventListener('click', handler, true); // capture phase
+    return () => document.removeEventListener('click', handler, true);
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.accent = 'cyan';
@@ -396,6 +415,8 @@ const AppContent: React.FC = () => {
           onClose={() => ui.setIsImportModalOpen(false)}
           onImport={handleUniversalImport}
         />
+
+        <WalkthroughOverlay language={ui.language} />
       </div>
     </div>
   );

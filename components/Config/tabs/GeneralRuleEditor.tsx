@@ -4,6 +4,7 @@ import {
   SelectInput,
   TextInput,
 } from '../../ui/LayoutComponents';
+import { TooltipTrigger } from '../../ui/Tooltip';
 import type {
   BusinessUnit,
   FormulaBaseRateKey,
@@ -11,6 +12,7 @@ import type {
   FtpRateCard,
   GeneralRule,
 } from '../../../types';
+import { useUI } from '../../../contexts/UIContext';
 import {
   AVAILABLE_BASE_CURVES,
   GENERAL_RULE_PRODUCT_OPTIONS,
@@ -38,6 +40,8 @@ const GeneralRuleEditor: React.FC<Props> = ({
   ftpRateCards,
   onChange,
 }) => {
+  const { t } = useUI();
+
   const updateFormulaSpec = (updates: Partial<NonNullable<GeneralRule['formulaSpec']>>) => {
     onChange({
       formulaSpec: {
@@ -90,7 +94,7 @@ const GeneralRuleEditor: React.FC<Props> = ({
         </SelectInput>
       </InputGroup>
 
-      <InputGroup label="Tenor Logic">
+      <InputGroup label="Tenor Logic" tooltip={t.tooltip_config_tenorLogic}>
         <SelectInput
           value={editingRule.tenor}
           onChange={(event) => onChange({ tenor: event.target.value })}
@@ -104,7 +108,7 @@ const GeneralRuleEditor: React.FC<Props> = ({
       </InputGroup>
 
       <div className="my-4 rounded border border-slate-800 bg-slate-900 p-3">
-        <h5 className="mb-2 text-[10px] font-bold uppercase text-slate-500">Base Method</h5>
+        <h5 className="mb-2 flex items-center text-[10px] font-bold uppercase text-slate-500">Base Method<TooltipTrigger content={t.tooltip_config_baseMethod} size={11} /></h5>
         <div className="mb-3 space-y-2">
           {['Matched Maturity', 'Rate Card', 'Moving Average'].map(method => (
             <label key={method} className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
@@ -187,7 +191,7 @@ const GeneralRuleEditor: React.FC<Props> = ({
             </SelectInput>
           </InputGroup>
 
-          <InputGroup label="LP Formula">
+          <InputGroup label="LP Formula" tooltip={t.tooltip_config_lpFormula}>
             <SelectInput
               value={editingRule.formulaSpec?.lpFormula || DEFAULT_FORMULA_SPEC.lpFormula}
               onChange={(event) => updateFormulaSpec({ lpFormula: event.target.value as FormulaLPType })}
@@ -222,7 +226,7 @@ const GeneralRuleEditor: React.FC<Props> = ({
         </div>
       </div>
 
-      <InputGroup label="Strategic Spread (bps)">
+      <InputGroup label="Strategic Spread (bps)" tooltip={t.tooltip_config_strategicSpread}>
         <TextInput
           type="number"
           value={editingRule.strategicSpread}

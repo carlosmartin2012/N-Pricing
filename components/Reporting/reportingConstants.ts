@@ -8,7 +8,9 @@ export type SubTab =
   | 'PNL_ATTRIBUTION'
   | 'EXECUTIVE'
   | 'PRICING_ANALYTICS'
-  | 'PORTFOLIO_SNAPSHOTS';
+  | 'PORTFOLIO_SNAPSHOTS'
+  | 'VINTAGE'
+  | 'BACKTEST';
 
 export interface TabDefinition {
   key: SubTab;
@@ -20,22 +22,24 @@ export interface TabDefinition {
 /** Grouped tab bar definitions — order matches the original rendering. */
 export const TAB_GROUPS: TabDefinition[][] = [
   [
-    { key: 'OVERVIEW', label: 'Overview', activeColor: 'cyan' },
+    { key: 'OVERVIEW', label: 'FTP Overview', activeColor: 'cyan' },
     { key: 'FUNDING_CURVES', label: 'Funding Curves', activeColor: 'cyan' },
-    { key: 'BEHAVIOUR_FOCUS', label: 'Behaviour Focus', activeColor: 'cyan' },
+    { key: 'BEHAVIOUR_FOCUS', label: 'Behavioural Impact', activeColor: 'cyan' },
   ],
   [
-    { key: 'MATURITY_LADDER', label: 'Maturity Ladder', activeColor: 'emerald' },
-    { key: 'CURRENCY_GAP', label: 'Currency Gap', activeColor: 'emerald' },
-    { key: 'NII_SENSITIVITY', label: 'NII / IRRBB', activeColor: 'emerald' },
+    { key: 'MATURITY_LADDER', label: 'Pipeline Repricing', activeColor: 'emerald' },
+    { key: 'CURRENCY_GAP', label: 'FTP by Currency', activeColor: 'emerald' },
+    { key: 'NII_SENSITIVITY', label: 'Pricing Drift', activeColor: 'emerald' },
   ],
   [
-    { key: 'PNL_ATTRIBUTION', label: 'P&L Attribution', activeColor: 'purple' },
+    { key: 'PNL_ATTRIBUTION', label: 'FTP Attribution', activeColor: 'purple' },
     { key: 'EXECUTIVE', label: 'Executive', activeColor: 'purple' },
   ],
   [
     { key: 'PRICING_ANALYTICS', label: 'Pricing Analytics', activeColor: 'cyan' },
-    { key: 'PORTFOLIO_SNAPSHOTS', label: 'Portfolio Snapshots', activeColor: 'cyan' },
+    { key: 'PORTFOLIO_SNAPSHOTS', label: 'Scenario Repricing', activeColor: 'cyan' },
+    { key: 'VINTAGE', label: 'Vintage Analysis', activeColor: 'purple' },
+    { key: 'BACKTEST', label: 'Model Backtest', activeColor: 'purple' },
   ],
 ];
 
