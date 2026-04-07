@@ -1,4 +1,4 @@
-import type { GeneralRule, TransitionRateCard, PhysicalRateCard, IncentivisationRule, SDRConfig, LRConfig, DualLiquidityCurve } from '../types';
+import type { GeneralRule, TransitionRateCard, PhysicalRateCard, GreeniumRateCard, IncentivisationRule, SDRConfig, LRConfig, DualLiquidityCurve } from '../types';
 
 interface ExportableConfig {
   version: string;
@@ -6,6 +6,7 @@ interface ExportableConfig {
   rules: GeneralRule[];
   transitionGrid: TransitionRateCard[];
   physicalGrid: PhysicalRateCard[];
+  greeniumGrid?: GreeniumRateCard[];
   incentivisationRules?: IncentivisationRule[];
   sdrConfig?: SDRConfig;
   lrConfig?: LRConfig;

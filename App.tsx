@@ -297,6 +297,8 @@ const AppContent: React.FC = () => {
                         setTransitionGrid={data.setTransitionGrid}
                         physicalGrid={data.physicalGrid}
                         setPhysicalGrid={data.setPhysicalGrid}
+                        greeniumGrid={data.greeniumGrid}
+                        setGreeniumGrid={data.setGreeniumGrid}
                         user={currentUser}
                       />
                     </div>

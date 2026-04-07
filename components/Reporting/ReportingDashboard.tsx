@@ -83,6 +83,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
           ftpRateCards: contextData.ftpRateCards,
           transitionGrid: contextData.transitionGrid,
           physicalGrid: contextData.physicalGrid,
+          greeniumGrid: contextData.greeniumGrid,
           behaviouralModels: contextData.behaviouralModels,
         },
         {

@@ -45,6 +45,10 @@ export function useConfigPersistence(data: DataContextType) {
     (nextValue: DataContextType['physicalGrid']) => supabaseService.saveEsgGrid('physical', nextValue),
     []
   );
+  const saveGreeniumGrid = useCallback(
+    (nextValue: DataContextType['greeniumGrid']) => supabaseService.saveEsgGrid('greenium', nextValue),
+    []
+  );
 
   useEffect(() => {
     localCache.saveLocal('n_pricing_rules', data.rules);
@@ -78,6 +82,12 @@ export function useConfigPersistence(data: DataContextType) {
     value: data.physicalGrid,
     isLoading: data.isLoading,
     save: savePhysicalGrid,
+  });
+
+  useDebouncedRemotePersistence({
+    value: data.greeniumGrid,
+    isLoading: data.isLoading,
+    save: saveGreeniumGrid,
   });
 
   useDebouncedRemotePersistence({

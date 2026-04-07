@@ -57,6 +57,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
         ftpRateCards: contextData.ftpRateCards,
         transitionGrid: contextData.transitionGrid,
         physicalGrid: contextData.physicalGrid,
+        greeniumGrid: contextData.greeniumGrid,
         behaviouralModels: contextData.behaviouralModels,
       }, {
         clients,

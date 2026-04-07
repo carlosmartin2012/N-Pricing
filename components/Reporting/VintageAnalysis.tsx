@@ -109,6 +109,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
           ftpRateCards: contextData.ftpRateCards,
           transitionGrid: contextData.transitionGrid,
           physicalGrid: contextData.physicalGrid,
+          greeniumGrid: contextData.greeniumGrid,
           behaviouralModels: contextData.behaviouralModels,
         },
         { clients, products, businessUnits },

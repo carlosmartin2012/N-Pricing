@@ -16,6 +16,7 @@ type PricingContextData = Pick<
   | 'ftpRateCards'
   | 'liquidityCurves'
   | 'physicalGrid'
+  | 'greeniumGrid'
   | 'rules'
   | 'transitionGrid'
   | 'yieldCurves'
@@ -39,6 +40,7 @@ const PnlAttribution: React.FC<Props> = React.memo(({ deals, products, businessU
       ftpRateCards: contextData.ftpRateCards,
       transitionGrid: contextData.transitionGrid,
       physicalGrid: contextData.physicalGrid,
+      greeniumGrid: contextData.greeniumGrid,
       behaviouralModels: contextData.behaviouralModels,
     }, { clients, products, businessUnits }),
     [

@@ -126,6 +126,9 @@ function buildPricingResultSummary(dossier: PricingDossier): string {
     `- Capital Charge: ${formatPct(r.capitalCharge)}`,
     `- ESG Transition Charge: ${formatPct(r.esgTransitionCharge)}`,
     `- ESG Physical Charge: ${formatPct(r.esgPhysicalCharge)}`,
+    r.esgGreeniumAdj ? `- ESG Greenium Discount: ${formatPct(r.esgGreeniumAdj)}` : '',
+    r.esgDnshCapitalAdj ? `- DNSH Capital Discount: ${formatPct(r.esgDnshCapitalAdj)}` : '',
+    r.esgPillar1Adj ? `- ISF Pillar I Adjustment: ${formatPct(r.esgPillar1Adj)}` : '',
     `- Floor Price: ${formatPct(r.floorPrice)}`,
     `- Technical Price: ${formatPct(r.technicalPrice)}`,
     `- Target Price: ${formatPct(r.targetPrice)}`,
@@ -154,7 +157,7 @@ function buildPricingResultSummary(dossier: PricingDossier): string {
     `- Repricing: ${deal.repricingFreq}`,
     `- Risk Weight: ${deal.riskWeight}%`,
     `- Collateral: ${deal.collateralType || 'None'}`,
-    `- ESG Transition: ${deal.transitionRisk}, Physical: ${deal.physicalRisk}`,
+    `- ESG Transition: ${deal.transitionRisk}, Physical: ${deal.physicalRisk}${deal.greenFormat && deal.greenFormat !== 'None' ? `, Green Format: ${deal.greenFormat}` : ''}${deal.dnshCompliant ? ', DNSH: Compliant' : ''}${deal.isfEligible ? ', ISF: Eligible' : ''}`,
   ];
 
   return lines.filter(Boolean).join('\n');

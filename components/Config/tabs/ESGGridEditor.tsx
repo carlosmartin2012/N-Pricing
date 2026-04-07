@@ -16,12 +16,14 @@ const ESGGridEditor: React.FC<Props> = ({
   onChange,
 }) => (
   <div className="space-y-4">
-    <InputGroup label={editingEsg.type === 'TRANSITION' ? 'Classification' : 'Risk Level'}>
+    <InputGroup label={editingEsg.type === 'TRANSITION' ? 'Classification' : editingEsg.type === 'GREENIUM' ? 'Green Format' : 'Risk Level'}>
       <SelectInput
-        value={editingEsg.type === 'TRANSITION' ? editingEsg.classification : editingEsg.riskLevel}
+        value={editingEsg.type === 'TRANSITION' ? editingEsg.classification : editingEsg.type === 'GREENIUM' ? editingEsg.greenFormat : editingEsg.riskLevel}
         onChange={(event) => onChange(
           editingEsg.type === 'TRANSITION'
             ? { ...editingEsg, classification: event.target.value as typeof editingEsg.classification }
+            : editingEsg.type === 'GREENIUM'
+            ? { ...editingEsg, greenFormat: event.target.value as typeof editingEsg.greenFormat }
             : { ...editingEsg, riskLevel: event.target.value as typeof editingEsg.riskLevel },
         )}
       >
@@ -31,6 +33,13 @@ const ESGGridEditor: React.FC<Props> = ({
             <option value="Neutral">Neutral</option>
             <option value="Amber">Amber</option>
             <option value="Brown">Brown</option>
+          </>
+        ) : editingEsg.type === 'GREENIUM' ? (
+          <>
+            <option value="Green_Bond">Green Bond</option>
+            <option value="Green_Loan">Green Loan</option>
+            <option value="Sustainability_Linked">Sustainability-Linked</option>
+            <option value="Social_Bond">Social Bond</option>
           </>
         ) : (
           <>
@@ -42,11 +51,13 @@ const ESGGridEditor: React.FC<Props> = ({
       </SelectInput>
     </InputGroup>
 
-    <InputGroup label={editingEsg.type === 'TRANSITION' ? 'Sector' : 'Location / Asset Type'}>
+    <InputGroup label={editingEsg.type === 'TRANSITION' ? 'Sector' : editingEsg.type === 'GREENIUM' ? 'Sector' : 'Location / Asset Type'}>
       <TextInput
-        value={editingEsg.type === 'TRANSITION' ? editingEsg.sector : editingEsg.locationType}
+        value={editingEsg.type === 'TRANSITION' ? editingEsg.sector : editingEsg.type === 'GREENIUM' ? editingEsg.sector : editingEsg.locationType}
         onChange={(event) => onChange(
           editingEsg.type === 'TRANSITION'
+            ? { ...editingEsg, sector: event.target.value }
+            : editingEsg.type === 'GREENIUM'
             ? { ...editingEsg, sector: event.target.value }
             : { ...editingEsg, locationType: event.target.value },
         )}

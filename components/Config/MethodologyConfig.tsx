@@ -35,6 +35,8 @@ interface Props {
   setTransitionGrid?: React.Dispatch<React.SetStateAction<any[]>>;
   physicalGrid?: any[];
   setPhysicalGrid?: React.Dispatch<React.SetStateAction<any[]>>;
+  greeniumGrid?: any[];
+  setGreeniumGrid?: React.Dispatch<React.SetStateAction<any[]>>;
   user: ConfigUser;
 }
 
@@ -55,6 +57,8 @@ const MethodologyConfig: React.FC<Props> = ({
   setTransitionGrid,
   physicalGrid = [],
   setPhysicalGrid,
+  greeniumGrid = [],
+  setGreeniumGrid,
   user,
 }) => {
   const [activeTab, setActiveTab] = useState<MethodologyTabId>(mode === 'SYS_CONFIG' ? 'RATE_CARDS' : 'GENERAL');
@@ -75,6 +79,8 @@ const MethodologyConfig: React.FC<Props> = ({
         setTransitionGrid={setTransitionGrid!}
         physicalGrid={physicalGrid}
         setPhysicalGrid={setPhysicalGrid!}
+        greeniumGrid={greeniumGrid}
+        setGreeniumGrid={setGreeniumGrid!}
         user={user}
       />
     ),

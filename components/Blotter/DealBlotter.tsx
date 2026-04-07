@@ -398,6 +398,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
           ftpRateCards: data.ftpRateCards,
           transitionGrid: data.transitionGrid,
           physicalGrid: data.physicalGrid,
+          greeniumGrid: data.greeniumGrid,
           behaviouralModels: data.behaviouralModels,
         },
         {

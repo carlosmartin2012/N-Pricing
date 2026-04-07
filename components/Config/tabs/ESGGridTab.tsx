@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { useAudit } from '../../../hooks/useAudit';
 import { useData } from '../../../contexts/DataContext';
 import { supabaseService } from '../../../utils/supabaseService';
-import type { PhysicalRateCard, TransitionRateCard } from '../../../types';
+import type { GreeniumRateCard, PhysicalRateCard, TransitionRateCard } from '../../../types';
 import {
   buildApprovalTaskForMethodologyChange,
   buildConfigChangeOperation,
@@ -28,10 +28,12 @@ interface Props {
   setTransitionGrid: React.Dispatch<React.SetStateAction<TransitionRateCard[]>>;
   physicalGrid: PhysicalRateCard[];
   setPhysicalGrid: React.Dispatch<React.SetStateAction<PhysicalRateCard[]>>;
+  greeniumGrid: GreeniumRateCard[];
+  setGreeniumGrid: React.Dispatch<React.SetStateAction<GreeniumRateCard[]>>;
   user: ConfigUser;
 }
 
-const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => {
+const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGrid, user }) => {
   const data = useData();
   const logAudit = useAudit(user);
   const [esgSubTab, setEsgSubTab] = useState<EsgSubTab>('TRANSITION');
@@ -55,13 +57,13 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => 
 
   const handleSaveEsg = async () => {
     if (editingEsg) {
-      const type = editingEsg.type === 'TRANSITION' ? 'transition' : 'physical';
-      const target = editingEsg.type === 'TRANSITION' ? 'TRANSITION_GRID' : 'PHYSICAL_GRID';
-      const nextItem = toPersistedEsgEntry(editingEsg) as TransitionRateCard | PhysicalRateCard;
-      const currentGrid = editingEsg.type === 'TRANSITION' ? transitionGrid : physicalGrid;
+      const type = editingEsg.type === 'TRANSITION' ? 'transition' : editingEsg.type === 'GREENIUM' ? 'greenium' : 'physical';
+      const target = editingEsg.type === 'TRANSITION' ? 'TRANSITION_GRID' : editingEsg.type === 'GREENIUM' ? 'GREENIUM_GRID' : 'PHYSICAL_GRID';
+      const nextItem = toPersistedEsgEntry(editingEsg) as TransitionRateCard | PhysicalRateCard | GreeniumRateCard;
+      const currentGrid = editingEsg.type === 'TRANSITION' ? transitionGrid : editingEsg.type === 'GREENIUM' ? greeniumGrid : physicalGrid;
       const existing = currentGrid.find((item) => item.id === nextItem.id);
       const request = buildMethodologyChangeRequest({
-        title: `${existing ? 'Update' : 'Create'} ${editingEsg.type === 'TRANSITION' ? 'transition' : 'physical'} ESG entry`,
+        title: `${existing ? 'Update' : 'Create'} ${type} ESG entry`,
         reason: `${existing ? 'Update' : 'Create'} ESG ${type} entry ${String(nextItem.id)}`,
         action: existing ? 'UPDATE' : 'CREATE',
         userEmail: user?.email || 'unknown',
@@ -87,7 +89,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => 
       logAudit({
         action: existing ? 'SUBMIT_ESG_UPDATE' : 'SUBMIT_ESG_CREATE',
         module: 'SYS_CONFIG',
-        description: `${existing ? 'Submitted update' : 'Submitted creation'} for ESG ${type} entry: ${editingEsg.type === 'TRANSITION' ? editingEsg.classification : editingEsg.riskLevel}`,
+        description: `${existing ? 'Submitted update' : 'Submitted creation'} for ESG ${type} entry: ${editingEsg.type === 'TRANSITION' ? editingEsg.classification : editingEsg.type === 'GREENIUM' ? editingEsg.greenFormat : editingEsg.riskLevel}`,
         details: {
           changeRequestId: request.id,
           approvalTaskId: approvalTask.id,
@@ -100,9 +102,10 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => 
     }
   };
 
+  const targetMap: Record<EsgSubTab, string> = { TRANSITION: 'TRANSITION_GRID', PHYSICAL: 'PHYSICAL_GRID', GREENIUM: 'GREENIUM_GRID' };
   const pendingRequests = data.methodologyChangeRequests.filter(
     (request) =>
-      [esgSubTab === 'TRANSITION' ? 'TRANSITION_GRID' : 'PHYSICAL_GRID'].includes(request.target) &&
+      request.target === targetMap[esgSubTab] &&
       ['Pending_Review', 'Approved'].includes(request.status)
   ).length;
 
@@ -128,6 +131,12 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => 
         >
           Physical Risk (Climate)
         </button>
+        <button
+          onClick={() => setEsgSubTab('GREENIUM')}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'GREENIUM' ? 'bg-slate-800 text-teal-400 border-b-2 border-teal-500' : 'text-slate-500 hover:text-slate-300'}`}
+        >
+          Greenium / Movilización
+        </button>
       </div>
 
       {/* ESG Toolbar */}
@@ -135,6 +144,8 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => 
         <div className="text-[10px] text-slate-500">
           {esgSubTab === 'TRANSITION'
             ? 'Penalties for high-carbon, incentives for green. Changes now flow through governance.'
+            : esgSubTab === 'GREENIUM'
+            ? 'Greenium discounts for verified green-format instruments. Changes flow through governance.'
             : 'Premiums for asset location risk exposure. Changes now flow through governance.'}
         </div>
         <button
@@ -148,7 +159,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, user }) => 
       {/* ESG Grids */}
       <ESGGridTable
         esgSubTab={esgSubTab}
-        items={esgSubTab === 'TRANSITION' ? transitionGrid : physicalGrid}
+        items={esgSubTab === 'TRANSITION' ? transitionGrid : esgSubTab === 'GREENIUM' ? greeniumGrid : physicalGrid}
         onEdit={handleEditEsg}
       />
 

@@ -236,7 +236,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                         <li><strong>Strategic Spreads:</strong> Apply commercial incentives (negative spread) or risk penalties (positive spread) per rule.</li>
                         <li><strong>FTP Curves:</strong> Manage Liquidity Premia and Credit Spreads.</li>
                         <li><strong>Master Data:</strong> Manage Client Registry, Business Units, and Product Definitions.</li>
-                        <li><strong>ESG:</strong> Configure carbon penalties (Transition Risk) and climate risk add-ons (Physical Risk).</li>
+                        <li><strong>ESG:</strong> Configure carbon penalties (Transition Risk), climate risk add-ons (Physical Risk), and Greenium discounts for green-format instruments. DNSH compliance and ISF eligibility flags are set per deal.</li>
                         <li><strong>Governance:</strong> Set RAROC thresholds for auto-approval vs. committee review.</li>
                         <li><strong>System Audit:</strong> Full real-time traceability of all user actions in the administrative log.</li>
                      </ul>
@@ -284,6 +284,7 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
                                  ['Capital Income', t.tooltip_formula_capitalIncome],
                                  ['ESG Transition', t.tooltip_formula_esgTransition],
                                  ['ESG Physical', t.tooltip_formula_esgPhysical],
+                                 ['Greenium', t.tooltip_formula_esgGreenium],
                                  ['Option Cost', t.tooltip_formula_optionCost],
                                  ['Floor Price', t.tooltip_formula_floorPrice],
                                  ['Technical Price', t.tooltip_formula_technicalPrice],

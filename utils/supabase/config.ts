@@ -28,11 +28,11 @@ export const configService = {
     await saveSystemConfigValue('rate_cards', cards, 'saveRateCards');
   },
 
-  async fetchEsgGrid(type: 'transition' | 'physical'): Promise<any[]> {
+  async fetchEsgGrid(type: 'transition' | 'physical' | 'greenium'): Promise<any[]> {
     return fetchSystemConfigValue(`${type}_grid`, []);
   },
 
-  async saveEsgGrid(type: 'transition' | 'physical', grid: any[]) {
+  async saveEsgGrid(type: 'transition' | 'physical' | 'greenium', grid: any[]) {
     await saveSystemConfigValue(`${type}_grid`, grid, `saveEsgGrid:${type}`);
   },
 

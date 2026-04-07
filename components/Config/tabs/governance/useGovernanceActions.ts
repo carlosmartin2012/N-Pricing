@@ -88,7 +88,7 @@ export function useGovernanceActions({
   const buildVersionConfigSeed = useCallback(
     (
       overrides?: Partial<
-        Pick<typeof data, 'ftpRateCards' | 'transitionGrid' | 'physicalGrid'> & {
+        Pick<typeof data, 'ftpRateCards' | 'transitionGrid' | 'physicalGrid' | 'greeniumGrid'> & {
           approvalMatrix: ApprovalMatrixConfig;
         }
       >
@@ -96,9 +96,10 @@ export function useGovernanceActions({
       ftpRateCards: overrides?.ftpRateCards ?? data.ftpRateCards,
       transitionGrid: overrides?.transitionGrid ?? data.transitionGrid,
       physicalGrid: overrides?.physicalGrid ?? data.physicalGrid,
+      greeniumGrid: overrides?.greeniumGrid ?? data.greeniumGrid,
       approvalMatrix: overrides?.approvalMatrix ?? approvalMatrixDraft ?? approvalMatrix ?? null,
     }),
-    [approvalMatrix, approvalMatrixDraft, data.ftpRateCards, data.transitionGrid, data.physicalGrid]
+    [approvalMatrix, approvalMatrixDraft, data.ftpRateCards, data.transitionGrid, data.physicalGrid, data.greeniumGrid]
   );
 
   const handleSubmitApprovalMatrixChange = useCallback(async () => {
@@ -189,6 +190,7 @@ export function useGovernanceActions({
         rateCards: typeof data.ftpRateCards;
         transitionGrid: typeof data.transitionGrid;
         physicalGrid: typeof data.physicalGrid;
+        greeniumGrid: typeof data.greeniumGrid;
         approvalMatrix: ApprovalMatrixConfig | null;
       }
     ) => {
@@ -213,6 +215,7 @@ export function useGovernanceActions({
           ftpRateCards: nextState.rateCards,
           transitionGrid: nextState.transitionGrid,
           physicalGrid: nextState.physicalGrid,
+          greeniumGrid: nextState.greeniumGrid,
           approvalMatrix: nextState.approvalMatrix || approvalMatrixDraft || approvalMatrix || undefined,
         }),
       });
@@ -222,6 +225,7 @@ export function useGovernanceActions({
       data.setFtpRateCards(nextState.rateCards);
       data.setTransitionGrid(nextState.transitionGrid);
       data.setPhysicalGrid(nextState.physicalGrid);
+      data.setGreeniumGrid(nextState.greeniumGrid);
       if (nextState.approvalMatrix) {
         setApprovalMatrixDraft(nextState.approvalMatrix);
       }
@@ -259,6 +263,7 @@ export function useGovernanceActions({
       let nextRateCards = data.ftpRateCards;
       let nextTransitionGrid = data.transitionGrid;
       let nextPhysicalGrid = data.physicalGrid;
+      let nextGreeniumGrid = data.greeniumGrid;
       let nextApprovalMatrix = approvalMatrixDraft ?? approvalMatrix ?? null;
       let appliedRequest: MethodologyChangeRequest;
 
@@ -282,6 +287,11 @@ export function useGovernanceActions({
         nextPhysicalGrid = applied.items;
         await supabaseService.saveEsgGrid('physical', nextPhysicalGrid);
         appliedRequest = applied.request;
+      } else if (request.target === 'GREENIUM_GRID') {
+        const applied = applyMethodologyChangeRequestToCollection(request, data.greeniumGrid, { actorEmail: user.email, actorName: user.name });
+        nextGreeniumGrid = applied.items;
+        await supabaseService.saveEsgGrid('greenium', nextGreeniumGrid);
+        appliedRequest = applied.request;
       } else if (request.target === 'APPROVAL_MATRIX') {
         const proposedApprovalMatrix = request.operations[0]?.proposedSnapshot as ApprovalMatrixConfig | undefined;
         if (!proposedApprovalMatrix || !setApprovalMatrix) return;
@@ -295,7 +305,7 @@ export function useGovernanceActions({
       }
 
       await finalizeGovernanceChange(appliedRequest, request.id, 'Completed', 'APPLY_METHOD_CHANGE', `Applied ${request.id}: ${request.reason}`, {
-        rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, approvalMatrix: nextApprovalMatrix,
+        rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, greeniumGrid: nextGreeniumGrid, approvalMatrix: nextApprovalMatrix,
       });
     },
     [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
@@ -311,6 +321,7 @@ export function useGovernanceActions({
       let nextRateCards = data.ftpRateCards;
       let nextTransitionGrid = data.transitionGrid;
       let nextPhysicalGrid = data.physicalGrid;
+      let nextGreeniumGrid = data.greeniumGrid;
       let nextApprovalMatrix = approvalMatrixDraft ?? approvalMatrix ?? null;
       let rolledBackRequest: MethodologyChangeRequest;
 
@@ -334,6 +345,11 @@ export function useGovernanceActions({
         nextPhysicalGrid = rolledBack.items;
         await supabaseService.saveEsgGrid('physical', nextPhysicalGrid);
         rolledBackRequest = rolledBack.request;
+      } else if (request.target === 'GREENIUM_GRID') {
+        const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.greeniumGrid, { actorEmail: user.email, actorName: user.name });
+        nextGreeniumGrid = rolledBack.items;
+        await supabaseService.saveEsgGrid('greenium', nextGreeniumGrid);
+        rolledBackRequest = rolledBack.request;
       } else if (request.target === 'APPROVAL_MATRIX') {
         const currentApprovalMatrix = request.operations[0]?.currentSnapshot as ApprovalMatrixConfig | undefined;
         if (!currentApprovalMatrix || !setApprovalMatrix) return;
@@ -347,7 +363,7 @@ export function useGovernanceActions({
       }
 
       await finalizeGovernanceChange(rolledBackRequest, request.id, 'Rolled_Back', 'ROLLBACK_METHOD_CHANGE', `Rollback ${request.id}: ${request.reason}`, {
-        rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, approvalMatrix: nextApprovalMatrix,
+        rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, greeniumGrid: nextGreeniumGrid, approvalMatrix: nextApprovalMatrix,
       });
     },
     [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]

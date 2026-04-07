@@ -6,6 +6,7 @@ import type {
   DualLiquidityCurve,
   FtpRateCard,
   GeneralRule,
+  GreeniumRateCard,
   PhysicalRateCard,
   ProductDefinition,
   TransitionRateCard,
@@ -20,6 +21,7 @@ interface PricingContextSource {
   ftpRateCards: FtpRateCard[];
   transitionGrid: TransitionRateCard[];
   physicalGrid: PhysicalRateCard[];
+  greeniumGrid?: GreeniumRateCard[];
   behaviouralModels: BehaviouralModel[];
 }
 
@@ -52,6 +54,7 @@ export function buildPricingContext(
     rateCards: source.ftpRateCards,
     transitionGrid: source.transitionGrid,
     physicalGrid: source.physicalGrid,
+    greeniumGrid: source.greeniumGrid ?? [],
     behaviouralModels: source.behaviouralModels,
     clients: entities.clients,
     products: entities.products,

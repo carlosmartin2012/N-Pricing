@@ -5,6 +5,7 @@ import type {
   FtpRateCard,
   TransitionRateCard,
   PhysicalRateCard,
+  GreeniumRateCard,
   BehaviouralModel,
   MarketDataSource,
 } from '../types';
@@ -20,6 +21,8 @@ export interface MarketDataContextType {
   setTransitionGrid: React.Dispatch<React.SetStateAction<TransitionRateCard[]>>;
   physicalGrid: PhysicalRateCard[];
   setPhysicalGrid: React.Dispatch<React.SetStateAction<PhysicalRateCard[]>>;
+  greeniumGrid: GreeniumRateCard[];
+  setGreeniumGrid: React.Dispatch<React.SetStateAction<GreeniumRateCard[]>>;
   behaviouralModels: BehaviouralModel[];
   setBehaviouralModels: React.Dispatch<React.SetStateAction<BehaviouralModel[]>>;
   marketDataSources: MarketDataSource[];
@@ -34,6 +37,7 @@ export const MarketDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [ftpRateCards, setFtpRateCards] = useState<FtpRateCard[]>([]);
   const [transitionGrid, setTransitionGrid] = useState<TransitionRateCard[]>([]);
   const [physicalGrid, setPhysicalGrid] = useState<PhysicalRateCard[]>([]);
+  const [greeniumGrid, setGreeniumGrid] = useState<GreeniumRateCard[]>([]);
   const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>([]);
   const [marketDataSources, setMarketDataSources] = useState<MarketDataSource[]>([]);
 
@@ -50,6 +54,8 @@ export const MarketDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setTransitionGrid,
         physicalGrid,
         setPhysicalGrid,
+        greeniumGrid,
+        setGreeniumGrid,
         behaviouralModels,
         setBehaviouralModels,
         marketDataSources,

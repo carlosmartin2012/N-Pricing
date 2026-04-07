@@ -15,6 +15,7 @@ export function usePricingContext() {
           ftpRateCards: data.ftpRateCards,
           transitionGrid: data.transitionGrid,
           physicalGrid: data.physicalGrid,
+          greeniumGrid: data.greeniumGrid,
           behaviouralModels: data.behaviouralModels,
         },
         {
@@ -30,6 +31,7 @@ export function usePricingContext() {
       data.ftpRateCards,
       data.transitionGrid,
       data.physicalGrid,
+      data.greeniumGrid,
       data.behaviouralModels,
       data.clients,
       data.products,

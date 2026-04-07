@@ -447,6 +447,7 @@ export type MethodologyChangeTarget =
   | 'RATE_CARD'
   | 'TRANSITION_GRID'
   | 'PHYSICAL_GRID'
+  | 'GREENIUM_GRID'
   | 'APPROVAL_MATRIX'
   | 'CAPITAL';
 
