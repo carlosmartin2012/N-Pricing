@@ -45,9 +45,9 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
     portfolioSnapshots: data.portfolioSnapshots,
   });
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom — block:'nearest' prevents scrolling the outer page
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages]);
 
   const handleSend = async () => {

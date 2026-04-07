@@ -47,8 +47,9 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
     [sessions, activeSessionId]
   );
 
+  // Auto-scroll to bottom — block:'nearest' prevents scrolling the outer page
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [activeSession?.messages, isThinking]);
 
   useEffect(() => {
