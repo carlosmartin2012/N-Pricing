@@ -30,3 +30,10 @@ storybook-static
 *.sw?
 .vercel
 .superpowers/
+
+# Replit auto-attached assets (screenshots, uploads from chat)
+attached_assets/
+
+# OAuth / API credential files — never commit these
+client_secret*.json
+*_credentials.json
