@@ -87,7 +87,13 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                 <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#475569', fontSize: 9 }}
+                  domain={['auto', 'auto']}
+                  tickFormatter={(v: number) => `${v.toFixed(0)}`}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'var(--nfq-bg-elevated)',

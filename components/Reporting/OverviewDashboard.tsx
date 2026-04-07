@@ -141,16 +141,24 @@ const OverviewDashboard: React.FC<Props> = ({
       { name: 'Margin', value: wMargin, color: WATERFALL_COLORS.margin },
     ];
 
-    // Build waterfall chart data: each bar starts where the previous one ended
+    // Build waterfall chart data.
+    // For Recharts stacked bars, negative components need special treatment:
+    // the invisible base bar must start at the lower endpoint so the visible
+    // bar always rises upward (Recharts cannot render downward-going stacked bars).
     let cumulative = 0;
     const chartData = components.map(c => {
-      const base = cumulative;
+      const before = cumulative;
       cumulative += c.value;
+      const after = cumulative;
+      const isNegative = c.value < 0;
       return {
         name: c.name,
-        base: Number((base * 100).toFixed(2)),
-        value: Number((c.value * 100).toFixed(2)),
-        color: c.color,
+        // base = lower of the two endpoints so the visible bar always goes up
+        base: Number(((isNegative ? after : before) * 100).toFixed(2)),
+        value: Number((Math.abs(c.value) * 100).toFixed(2)),
+        rawValue: Number((c.value * 100).toFixed(2)),
+        color: isNegative ? '#f43f5e' : c.color,
+        isNegative,
       };
     });
 
@@ -233,7 +241,11 @@ const OverviewDashboard: React.FC<Props> = ({
                   />
                   <Tooltip
                     contentStyle={tooltipStyleWaterfall}
-                    formatter={(value) => typeof value === 'number' ? `${value.toFixed(2)} bps` : `${value ?? '-'}`}
+                    formatter={(value, name, props) => {
+                      if (name === 'base') return null;
+                      const raw = props.payload?.rawValue ?? value;
+                      return [`${typeof raw === 'number' ? raw.toFixed(2) : raw} bps`];
+                    }}
                   />
                   {/* Invisible base bar for waterfall stacking */}
                   <Bar dataKey="base" stackId="waterfall" fill="transparent" />
@@ -255,7 +267,7 @@ const OverviewDashboard: React.FC<Props> = ({
                     style={{ backgroundColor: entry.color }}
                   />
                   <span className="text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
-                    {entry.name}: {entry.value.toFixed(1)} bps
+                    {entry.name}: {entry.rawValue >= 0 ? '+' : ''}{entry.rawValue.toFixed(1)} bps
                   </span>
                 </div>
               ))}
