@@ -34,6 +34,7 @@
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "google-auth-library": "^10.6.2",
     "idb-keyval": "^6.2.2",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.563.0",

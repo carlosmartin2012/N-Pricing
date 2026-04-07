@@ -42,3 +42,4 @@ externalPort = 80
 [userenv.shared]
 VITE_DEMO_USER = "demo"
 VITE_DEMO_EMAIL = "demo@nfq.es"
+VITE_GOOGLE_CLIENT_ID = "655770399950-5urs5vun75q59gffv0o0fu18rpivnb86.apps.googleusercontent.com"

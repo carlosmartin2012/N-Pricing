@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowRight, LockKeyhole, ShieldCheck } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight, LockKeyhole, Loader2, ShieldCheck } from 'lucide-react';
 import { translations, Language } from '../../translations';
 import { Logo } from './Logo';
 
@@ -12,31 +12,133 @@ interface LoginProps {
 const DEMO_USER = import.meta.env.VITE_DEMO_USER || '';
 const DEMO_PASS = import.meta.env.VITE_DEMO_PASS || '';
 const DEMO_EMAIL = import.meta.env.VITE_DEMO_EMAIL || '';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
+let _gisInitialized = false;
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: Record<string, unknown>) => void;
+          prompt: (momentListener?: (n: GoogleNotification) => void) => void;
+          renderButton: (parent: HTMLElement, options: Record<string, unknown>) => void;
+          cancel: () => void;
+          disableAutoSelect: () => void;
+        };
+      };
+    };
+  }
+}
+
+interface GoogleNotification {
+  isNotDisplayed: () => boolean;
+  isSkippedMoment: () => boolean;
+  isDismissedMoment: () => boolean;
+  getNotDisplayedReason: () => string;
+}
 
 export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
   const t = translations[language];
-  const [error, setError] = React.useState<string | null>(null);
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [gisReady, setGisReady] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showFallbackBtn, setShowFallbackBtn] = useState(false);
+  const fallbackRef = useRef<HTMLDivElement>(null);
 
-  const handleGoogleLogin = () => {
-    // Google OAuth disabled — use demo credentials or configure Google Cloud Console
-    setError('Google Sign-In is being configured. Please use demo credentials below.');
+  const handleCredentialResponse = async (response: { credential: string }) => {
+    setGoogleLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json() as { email?: string; name?: string; error?: string };
+      if (!res.ok || !data.email) {
+        throw new Error(data.error || 'Google authentication failed');
+      }
+      onLogin(data.email);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google Sign-In failed. Please try demo access.');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
-  // Google credential response handler placeholder
-  const handleCredentialResponse = (_response: unknown) => {
-    // Placeholder — Google OAuth not loaded
-    setError('Google Sign-In not available. Use demo credentials.');
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+
+    const initGis = () => {
+      if (!window.google?.accounts?.id || _gisInitialized) return;
+      _gisInitialized = true;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        itp_support: true,
+      });
+      setGisReady(true);
+    };
+
+    let scriptEl: HTMLScriptElement | null = null;
+    if (window.google?.accounts?.id) {
+      initGis();
+    } else {
+      scriptEl = document.querySelector<HTMLScriptElement>('script[src*="accounts.google.com/gsi"]');
+      scriptEl?.addEventListener('load', initGis, { once: true });
+    }
+
+    return () => {
+      scriptEl?.removeEventListener('load', initGis);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (showFallbackBtn && fallbackRef.current && window.google?.accounts?.id && GOOGLE_CLIENT_ID) {
+      fallbackRef.current.innerHTML = '';
+      window.google.accounts.id.renderButton(fallbackRef.current, {
+        theme: 'filled_black',
+        size: 'large',
+        type: 'standard',
+        shape: 'pill',
+        text: 'continue_with',
+        width: String(fallbackRef.current.offsetWidth || 360),
+        logo_alignment: 'left',
+      });
+    }
+  }, [showFallbackBtn]);
+
+  const handleGoogleClick = () => {
+    if (!GOOGLE_CLIENT_ID) {
+      setError('Google Sign-In is not configured.');
+      return;
+    }
+    if (!gisReady || !window.google?.accounts?.id) {
+      setError('Google Sign-In is loading. Please try again in a moment.');
+      return;
+    }
+
+    setError(null);
+    setGoogleLoading(true);
+
+    window.google.accounts.id.prompt((notification: GoogleNotification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        setShowFallbackBtn(true);
+        setGoogleLoading(false);
+      }
+    });
+
+    setTimeout(() => {
+      setGoogleLoading(false);
+    }, 3000);
   };
-
-  // Compatibility shim
-  const login = handleGoogleLogin;
-  void handleCredentialResponse;
-
-  const [showFallbackLogin, setShowFallbackLogin] = React.useState(false);
-  void showFallbackLogin;
-  void setShowFallbackLogin;
 
   const handleDemoLogin = (event: React.FormEvent) => {
     event.preventDefault();
@@ -78,30 +180,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
             <div className="mt-12 grid max-w-3xl grid-cols-3 gap-4">
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
                 <div className="nfq-label">Governance</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">
-                  M/C
-                </div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">
-                  Maker-checker workflows and live methodology traceability.
-                </div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">M/C</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Maker-checker workflows and live methodology traceability.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
                 <div className="nfq-label">Decisioning</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">
-                  RAROC
-                </div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">
-                  FTP, risk, ESG and accounting under one controlled flow.
-                </div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">RAROC</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">FTP, risk, ESG and accounting under one controlled flow.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
                 <div className="nfq-label">Evidence</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">
-                  AI
-                </div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">
-                  Grounded dossiers, committee packs and governed export trails.
-                </div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">AI</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Grounded dossiers, committee packs and governed export trails.</div>
               </div>
             </div>
           </div>
@@ -109,21 +199,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
           <div className="grid max-w-3xl grid-cols-3 gap-6 text-sm text-[color:var(--nfq-text-secondary)]">
             <div>
               <div className="nfq-label">Pricing stack</div>
-              <p className="mt-3 leading-6">
-                Matched maturity, moving average, rate cards and zero discount methodologies.
-              </p>
+              <p className="mt-3 leading-6">Matched maturity, moving average, rate cards and zero discount methodologies.</p>
             </div>
             <div>
               <div className="nfq-label">Portfolio view</div>
-              <p className="mt-3 leading-6">
-                Snapshots, shocks, reporting and accounting views operating in the same shell.
-              </p>
+              <p className="mt-3 leading-6">Snapshots, shocks, reporting and accounting views operating in the same shell.</p>
             </div>
             <div>
               <div className="nfq-label">Visual posture</div>
-              <p className="mt-3 leading-6">
-                Tonal layering, restrained chrome and machine-grade data typography throughout.
-              </p>
+              <p className="mt-3 leading-6">Tonal layering, restrained chrome and machine-grade data typography throughout.</p>
             </div>
           </div>
         </section>
@@ -140,33 +224,42 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
               </p>
 
               <div className="mt-8 space-y-4">
-                <button
-                  data-testid="google-login-btn"
-                  onClick={() => login()}
-                  className="flex w-full items-center justify-between rounded-[22px] bg-white px-5 py-4 text-black transition-colors hover:bg-slate-100"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
-                      <img src="https://www.google.com/favicon.ico" alt="Google" className="h-6 w-6" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-sm font-semibold tracking-[-0.01em]">Continue with your NFQ account</div>
-                      <div className="text-xs text-slate-500">Google OAuth (coming soon)</div>
-                    </div>
-                  </div>
-                  <ArrowRight size={18} />
-                </button>
 
-                {false && (
+                {GOOGLE_CLIENT_ID && !showFallbackBtn && (
                   <button
-                    onClick={() => {}}
-                    className="mt-2 w-full rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-xs text-cyan-400 transition hover:bg-cyan-500/20"
+                    data-testid="google-login-btn"
+                    onClick={handleGoogleClick}
+                    disabled={googleLoading}
+                    className="flex w-full items-center justify-between rounded-[22px] bg-white px-5 py-4 text-black transition-colors hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Popup blocked? Try alternative Sign-In method
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
+                        {googleLoading
+                          ? <Loader2 size={22} className="animate-spin text-slate-500" />
+                          : <img src="https://www.google.com/favicon.ico" alt="Google" className="h-6 w-6" />
+                        }
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-semibold tracking-[-0.01em]">Continue with your NFQ account</div>
+                        <div className="text-xs text-slate-500">
+                          {gisReady ? 'Sign in with Google' : 'Loading Google Sign-In…'}
+                        </div>
+                      </div>
+                    </div>
+                    <ArrowRight size={18} />
                   </button>
                 )}
 
-                {DEMO_USER && DEMO_PASS && (
+                {GOOGLE_CLIENT_ID && showFallbackBtn && (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-xs text-[color:var(--nfq-text-secondary)]">
+                      Use the button below to sign in with Google:
+                    </p>
+                    <div ref={fallbackRef} className="w-full" />
+                  </div>
+                )}
+
+                {(DEMO_USER && DEMO_PASS) && (
                   <>
                     <div className="flex items-center gap-3">
                       <div className="h-px flex-1 bg-[color:var(--nfq-border-ghost)]" />
@@ -179,6 +272,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                         data-testid="demo-username"
                         type="text"
                         placeholder="Username"
+                        autoComplete="username"
                         value={username}
                         onChange={(event) => setUsername(event.target.value)}
                         className="nfq-input-field"
@@ -187,6 +281,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                         data-testid="demo-password"
                         type="password"
                         placeholder="Password"
+                        autoComplete="current-password"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
                         className="nfq-input-field"
@@ -218,25 +313,17 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                       <ShieldCheck size={18} />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
-                        Workspace posture
-                      </div>
-                      <div className="text-xs text-[color:var(--nfq-text-secondary)]">
-                        Pricing, governance and evidence shell
-                      </div>
+                      <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Workspace posture</div>
+                      <div className="text-xs text-[color:var(--nfq-text-secondary)]">Pricing, governance and evidence shell</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="text-center text-[11px] leading-5 text-[color:var(--nfq-text-muted)]">
                   {t.agree}{' '}
-                  <a href="#" className="underline underline-offset-4">
-                    {t.terms}
-                  </a>{' '}
+                  <a href="#" className="underline underline-offset-4">{t.terms}</a>{' '}
                   {t.and}{' '}
-                  <a href="#" className="underline underline-offset-4">
-                    {t.privacy}
-                  </a>
+                  <a href="#" className="underline underline-offset-4">{t.privacy}</a>
                 </div>
               </div>
             </div>

@@ -7,6 +7,7 @@ import configRouter from './routes/config';
 import marketDataRouter from './routes/marketData';
 import entitiesRouter from './routes/entities';
 import reportSchedulesRouter from './routes/reportSchedules';
+import authRouter from './routes/auth';
 
 const app = express();
 const PORT = 3001;
@@ -20,6 +21,7 @@ app.use('/api/config', configRouter);
 app.use('/api/market-data', marketDataRouter);
 app.use('/api/entities', entitiesRouter);
 app.use('/api/report-schedules', reportSchedulesRouter);
+app.use('/api/auth', authRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
