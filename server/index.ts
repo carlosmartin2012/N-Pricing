@@ -11,8 +11,11 @@ import entitiesRouter from './routes/entities';
 import reportSchedulesRouter from './routes/reportSchedules';
 import authRouter from './routes/auth';
 
+import fs from 'fs';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const IS_PROD = process.env.NODE_ENV === 'production';
+const distDir = path.resolve(__dirname, '..', 'dist');
+const IS_PROD = !!process.env.PORT && fs.existsSync(path.join(distDir, 'index.html'));
 const PORT = parseInt(process.env.PORT ?? (IS_PROD ? '5000' : '3001'), 10);
 
 const app = express();
@@ -36,7 +39,6 @@ app.get('/api/health', (_req, res) => {
 });
 
 if (IS_PROD) {
-  const distDir = path.resolve(__dirname, '..', 'dist');
   app.use(express.static(distDir));
   app.get('/{*path}', (_req, res) => {
     res.sendFile(path.join(distDir, 'index.html'));
