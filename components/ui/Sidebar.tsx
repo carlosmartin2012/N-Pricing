@@ -11,6 +11,74 @@ export interface NavItem {
   section?: string;
 }
 
+interface NavButtonProps {
+  item: NavItem;
+  currentView: ViewState;
+  isSidebarOpen: boolean;
+  setCurrentView: (view: ViewState) => void;
+  onOpenConfig: () => void;
+  onClose: () => void;
+}
+
+const NavButton: React.FC<NavButtonProps> = ({
+  item,
+  currentView,
+  isSidebarOpen,
+  setCurrentView,
+  onOpenConfig,
+  onClose,
+}) => {
+  const isUserConfig = item.id === 'USER_CONFIG';
+  const isActive = !isUserConfig && currentView === item.id;
+
+  return (
+    <button
+      data-testid={`nav-${item.id}`}
+      onClick={() => {
+        if (isUserConfig) {
+          onOpenConfig();
+        } else {
+          setCurrentView(item.id as ViewState);
+        }
+        if (window.innerWidth < 768) onClose();
+      }}
+      aria-current={isActive ? 'page' : undefined}
+      className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
+        isActive
+          ? 'text-[color:var(--nfq-text-primary)]'
+          : 'text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] hover:bg-[color:rgba(255,255,255,0.03)]'
+      }`}
+    >
+      {isActive && (
+        <span
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-6 rounded-full bg-[var(--nfq-accent)]"
+          aria-hidden="true"
+        />
+      )}
+      <span
+        className={`flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-200 ${
+          isActive
+            ? 'text-[color:var(--nfq-accent)]'
+            : 'text-[color:var(--nfq-text-muted)] group-hover:text-[color:var(--nfq-text-secondary)]'
+        }`}
+      >
+        <item.icon size={18} />
+      </span>
+      {isSidebarOpen && (
+        <span
+          className={`flex-1 truncate text-left text-[14px] font-medium tracking-normal transition-colors duration-200 ${
+            isActive
+              ? 'text-[color:var(--nfq-text-primary)]'
+              : 'text-[color:var(--nfq-text-secondary)]'
+          }`}
+        >
+          {item.label}
+        </span>
+      )}
+    </button>
+  );
+};
+
 interface SidebarProps {
   isSidebarOpen: boolean;
   currentView: ViewState;
@@ -34,67 +102,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const t = translations[language];
   const [latency, setLatency] = React.useState(14);
+
   React.useEffect(() => {
     const interval = window.setInterval(() => {
       setLatency(Math.floor(Math.random() * (28 - 12 + 1)) + 12);
     }, 3000);
     return () => window.clearInterval(interval);
   }, []);
-
-  const NavButton = ({ item }: { item: NavItem }) => {
-    const isUserConfig = item.id === 'USER_CONFIG';
-    const isActive = !isUserConfig && currentView === item.id;
-
-    return (
-      <button
-        data-testid={`nav-${item.id}`}
-        onClick={() => {
-          console.log('[NAV] Clicked:', item.id, 'isUserConfig:', isUserConfig);
-          if (isUserConfig) {
-            onOpenConfig();
-          } else {
-            console.log('[NAV] Setting view to:', item.id);
-            setCurrentView(item.id as ViewState);
-          }
-          if (window.innerWidth < 768) onClose();
-        }}
-        aria-current={isActive ? 'page' : undefined}
-        className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
-          isActive
-            ? 'text-[color:var(--nfq-text-primary)]'
-            : 'text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] hover:bg-[color:rgba(255,255,255,0.03)]'
-        }`}
-      >
-        {/* Left accent pill for active item */}
-        {isActive && (
-          <span
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-6 rounded-full bg-[var(--nfq-accent)]"
-            aria-hidden="true"
-          />
-        )}
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center transition-colors duration-200 ${
-            isActive
-              ? 'text-[color:var(--nfq-accent)]'
-              : 'text-[color:var(--nfq-text-muted)] group-hover:text-[color:var(--nfq-text-secondary)]'
-          }`}
-        >
-          <item.icon size={18} />
-        </span>
-        {isSidebarOpen && (
-          <span
-            className={`flex-1 truncate text-left text-[14px] font-medium tracking-normal transition-colors duration-200 ${
-              isActive
-                ? 'text-[color:var(--nfq-text-primary)]'
-                : 'text-[color:var(--nfq-text-secondary)]'
-            }`}
-          >
-            {item.label}
-          </span>
-        )}
-      </button>
-    );
-  };
 
   let lastSection: string | undefined;
 
@@ -147,17 +161,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {showSection && !isSidebarOpen && (
                     <div className="my-4" />
                   )}
-                  <NavButton item={item} />
+                  <NavButton
+                    item={item}
+                    currentView={currentView}
+                    isSidebarOpen={isSidebarOpen}
+                    setCurrentView={setCurrentView}
+                    onOpenConfig={onOpenConfig}
+                    onClose={onClose}
+                  />
                 </div>
               );
             })}
           </div>
         </nav>
 
-        {/* Bottom navigation -- separated by spacing, not a card */}
+        {/* Bottom navigation */}
         <nav aria-label="Utility navigation" className="mt-6 px-2 pb-2 space-y-0.5">
           {bottomNavItems.map((item) => (
-            <NavButton key={item.id} item={item} />
+            <NavButton
+              key={item.id}
+              item={item}
+              currentView={currentView}
+              isSidebarOpen={isSidebarOpen}
+              setCurrentView={setCurrentView}
+              onOpenConfig={onOpenConfig}
+              onClose={onClose}
+            />
           ))}
         </nav>
 

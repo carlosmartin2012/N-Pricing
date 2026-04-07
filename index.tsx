@@ -85,12 +85,6 @@ window.onunhandledrejection = (event: PromiseRejectionEvent) => {
   errorTracker.captureException(error, { module: 'unhandledrejection' });
 };
 
-// DEBUG: Raw click listener BEFORE React renders - captures ALL clicks
-document.addEventListener('click', (e) => {
-  const t = e.target as HTMLElement;
-  console.log('%c[CLICK]', 'color:lime;font-weight:bold', t.tagName, t.closest('button')?.getAttribute('data-testid') || t.className?.toString().slice(0,40));
-}, true);
-console.log('%c[BOOT] Debug click listener installed', 'color:lime;font-weight:bold');
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
