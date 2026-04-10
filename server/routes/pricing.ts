@@ -132,4 +132,140 @@ router.post('/delegation-check', async (req, res) => {
   }
 });
 
+// ─── Phase 2 endpoints ────────────────────────────────────────────────
+
+/**
+ * POST /api/pricing/fit-nss-curve
+ *
+ * Fit a Nelson-Siegel-Svensson model to observed (t, rate) points.
+ * Body: { observations: Array<{t, rate}>, tau1?, tau2?, evaluateAt?: number[] }
+ * Returns: { params, rmse, converged, evaluated?: Array<{t, rate}> }
+ */
+router.post('/fit-nss-curve', async (req, res) => {
+  try {
+    const { fitNSSLinear, nssYield } = await import(
+      '../../utils/pricing/nelsonSiegelSvensson'
+    );
+    const { observations, tau1, tau2, evaluateAt } = req.body ?? {};
+
+    if (!Array.isArray(observations)) {
+      return res.status(400).json({ error: 'observations array required' });
+    }
+
+    const fit = fitNSSLinear(observations, tau1, tau2);
+    const evaluated = Array.isArray(evaluateAt)
+      ? evaluateAt.map((t: number) => ({ t, rate: nssYield(fit.params, t) }))
+      : undefined;
+
+    res.json({ ...fit, evaluated });
+  } catch (err) {
+    console.error('[pricing] fit-nss-curve error', err);
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+/**
+ * POST /api/pricing/expost-compare
+ *
+ * Compare expected vs realized RAROC with full P&L attribution.
+ * Body: { expected: ExpectedRaroc, performance: RealizedPerformance, threshold?: number }
+ */
+router.post('/expost-compare', async (req, res) => {
+  try {
+    const { compareExpectedVsRealized } = await import(
+      '../../utils/pricing/expostRaroc'
+    );
+    const { expected, performance, threshold } = req.body ?? {};
+
+    if (!expected || !performance) {
+      return res.status(400).json({ error: 'expected and performance required' });
+    }
+
+    const result = compareExpectedVsRealized(expected, performance, threshold);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+/**
+ * POST /api/pricing/expost-systematic
+ *
+ * Detect systematic underpricing in a list of comparisons.
+ * Body: { comparisons: ExPostComparisonResult[], minObservations?: number }
+ */
+router.post('/expost-systematic', async (req, res) => {
+  try {
+    const { detectSystematicUnderpricing } = await import(
+      '../../utils/pricing/expostRaroc'
+    );
+    const { comparisons, minObservations } = req.body ?? {};
+
+    if (!Array.isArray(comparisons)) {
+      return res.status(400).json({ error: 'comparisons array required' });
+    }
+
+    const alerts = detectSystematicUnderpricing(comparisons, minObservations);
+    res.json({ alerts });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+/**
+ * POST /api/pricing/portfolio-review
+ *
+ * Run the full portfolio review agent over a list of deals+results.
+ * Body: { portfolio: Array<{deal, result}>, asOfDate?: string }
+ */
+router.post('/portfolio-review', async (req, res) => {
+  try {
+    const { runPortfolioReview } = await import(
+      '../../utils/pricing/portfolioReviewAgent'
+    );
+    const { portfolio, asOfDate } = req.body ?? {};
+
+    if (!Array.isArray(portfolio)) {
+      return res.status(400).json({ error: 'portfolio array required' });
+    }
+
+    const result = runPortfolioReview(portfolio, asOfDate);
+    res.json(result);
+  } catch (err) {
+    console.error('[pricing] portfolio-review error', err);
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+/**
+ * POST /api/pricing/mrm-backtest
+ *
+ * Run a backtest for a model (PD/LGD/behavioral).
+ * Body: { category: 'PD'|'LGD'|'BEHAVIORAL', modelId: string, observations: BacktestObservation[] }
+ */
+router.post('/mrm-backtest', async (req, res) => {
+  try {
+    const { backtestPDModel, backtestLGDModel, backtestBehavioralModel } =
+      await import('../../utils/pricing/modelInventory');
+    const { category, modelId, observations } = req.body ?? {};
+
+    if (!modelId || !Array.isArray(observations)) {
+      return res.status(400).json({ error: 'modelId and observations required' });
+    }
+
+    let result;
+    if (category === 'PD') {
+      result = backtestPDModel(modelId, observations);
+    } else if (category === 'LGD') {
+      result = backtestLGDModel(modelId, observations);
+    } else {
+      result = backtestBehavioralModel(modelId, category ?? 'OTHER', observations);
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 export default router;
