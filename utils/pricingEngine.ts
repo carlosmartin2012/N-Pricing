@@ -38,6 +38,12 @@ import {
   lookupIncentivisation,
 } from './pricing/formulaEngine';
 import { calculateFullCreditRisk } from './pricing/creditRiskEngine';
+import { assessCreditLifecycle } from './pricing/creditLifecycle';
+import { calculateAdditionalFTPCharges } from './pricing/additionalCharges';
+import {
+  calculateCapitalWithOutputFloor,
+  calculateBufferedCapitalCharge,
+} from './pricing/capitalEngineCRR3';
 
 // ─── Pricing Context ────────────────────────────────────────────────────────
 
@@ -259,8 +265,20 @@ export const calculatePricing = (
   // ── 9. Liquidity Recharge (Gap 3) ─────────────────────────────────────────
   const liquidityRecharge = calculateLiquidityRecharge(deal, lrConfig);
 
+  // ── 9b. CSRBB + Contingent Liquidity (Gaps 20, 21) ────────────────────────
+  // CSRBB: credit spread risk on asset-side banking book exposures.
+  // Contingent Liquidity: term charge for undrawn commitments.
+  const additionalCharges = calculateAdditionalFTPCharges(deal, deal.clientRating);
+  const csrbbCharge = additionalCharges.csrbb.chargePct;
+  const contingentLiquidityCharge = additionalCharges.contingentLiquidity.chargePct;
+
   // ── Total Liquidity Cost ──────────────────────────────────────────────────
-  const totalLiquidityCost = liquidityPremium + clcCharge + nsfrCharge;
+  const totalLiquidityCost =
+    liquidityPremium +
+    clcCharge +
+    nsfrCharge +
+    csrbbCharge +
+    contingentLiquidityCharge;
 
   // ── Apply Shocks ──────────────────────────────────────────────────────────
   const baseRate = rawBaseRate + (shocks.interestRate / 100);
@@ -289,15 +307,62 @@ export const calculatePricing = (
     externalLgd: deal.externalLgd,
     externalEad: deal.externalEad,
   });
-  const regulatoryCost = anejoResult.creditCostAnnualPct / 100;
+
+  // ── 10b. IFRS 9 Lifecycle Overlay (stage 2/3 triggers lifetime EL) ────────
+  const capParams = anejoResult.capitalParams;
+  const lifecycleResult = capParams
+    ? assessCreditLifecycle(
+        capParams.pd,
+        capParams.lgd,
+        capParams.ead,
+        deal.durationMonths,
+        {
+          pdMultiplier: deal.pdMultiplier,
+          daysPastDue: deal.daysPastDue,
+          isRefinanced: deal.isRefinanced,
+          isWatchlist: deal.isWatchlist,
+          isForborne: deal.isForborne,
+        },
+        deal.ifrs9Stage,
+      )
+    : null;
+
+  // Stage-aware regulatory cost: stage 1 keeps Anejo IX annualized cost;
+  // stage 2/3 uses lifetime EL amortized over remaining duration.
+  const regulatoryCost =
+    lifecycleResult && lifecycleResult.stage !== 1
+      ? lifecycleResult.annualCostPct / 100
+      : anejoResult.creditCostAnnualPct / 100;
 
   // ── 11. Operational Cost ──────────────────────────────────────────────────
   const operationalCost = deal.operationalCostBps / 100;
 
-  // ── 12. Capital Charge ────────────────────────────────────────────────────
-  const allocatedCapitalPerUnit = (deal.riskWeight / 100) * (deal.capitalRatio / 100);
+  // ── 12. Capital Charge (CRR3 output floor + Basel III buffer stack) ───────
   const riskFreeRate = interpolateYieldCurve(yieldCurve, 0);
-  const capitalCharge = allocatedCapitalPerUnit * Math.max(0, deal.targetROE - riskFreeRate);
+
+  // Derive SA RWA if not provided explicitly
+  const rwaStandardized = deal.rwaStandardized ?? (deal.riskWeight / 100) * deal.amount;
+
+  const capitalCalc = calculateCapitalWithOutputFloor({
+    ead: deal.amount,
+    rwaStandardized,
+    rwaIrb: deal.rwaIrb,
+    year: new Date().getFullYear(),
+    buffers: {
+      pillar1: deal.capitalRatio, // legacy field used as P1 minimum
+    },
+    isGSII: deal.isGSII,
+    isOSII: deal.isOSII,
+  });
+
+  const allocatedCapitalPerUnit =
+    deal.amount > 0 ? capitalCalc.totalCapitalRequired / deal.amount : 0;
+  const capitalCharge = calculateBufferedCapitalCharge(
+    capitalCalc,
+    deal.amount,
+    deal.targetROE,
+    riskFreeRate,
+  );
 
   // Capital income (Gap 6): return on allocated capital at risk-free rate
   const capitalIncome = allocatedCapitalPerUnit * riskFreeRate;
@@ -328,13 +393,12 @@ export const calculatePricing = (
 
   // ── 13d. ESG Pillar I — ISF Overlay (Gap 19) ────────────────────────
   // Infrastructure Supporting Factor: CRR2 Art. 501a reduces RW by 25%
-  // for qualifying infrastructure/project finance exposures
+  // for qualifying infrastructure/project finance exposures.
+  // Since the capital charge scales linearly with effective RWA, ISF reduction
+  // equals capitalCharge × (1 - ISF_RW_FACTOR) = 25% when factor is 0.75.
   let pillar1Adj = 0;
   if (deal.isfEligible) {
-    // ISF reduces the effective risk weight, which lowers the capital charge
-    const isfCapitalCharge = (deal.riskWeight * PC.ISF_RW_FACTOR / 100) * (deal.capitalRatio / 100)
-      * Math.max(0, deal.targetROE - riskFreeRate);
-    pillar1Adj = capitalCharge - isfCapitalCharge; // positive = reduction
+    pillar1Adj = capitalCharge * (1 - PC.ISF_RW_FACTOR);
   }
 
   // ── 14. Strategic Spread (Rule-based + Behavioural) ───────────────────────
@@ -423,6 +487,23 @@ export const calculatePricing = (
     behavioralMaturityUsed: tenors.bm,
     incentivisationAdj,
     anejoSegment: anejoResult.anejoSegment,
+
+    // ── Phase 1: additional FTP charges (Gaps 20, 21) ──
+    csrbbCost: csrbbCharge,
+    contingentLiquidityCost: contingentLiquidityCharge,
+
+    // ── Phase 1: CRR3 capital diagnostics ──
+    effectiveRwa: capitalCalc.effectiveRwa,
+    outputFloorBinding: capitalCalc.outputFloorBinding,
+    outputFloorFactor: capitalCalc.outputFloorFactor,
+    totalCapitalRatio: capitalCalc.totalCapitalRatio,
+    capitalBuffersBreakdown: capitalCalc.buffersBreakdown,
+
+    // ── Phase 1: IFRS 9 / SICR diagnostics ──
+    ifrs9StageUsed: lifecycleResult?.stage,
+    sicrTriggered: lifecycleResult?.sicrResult.triggered,
+    sicrReasons: lifecycleResult?.sicrResult.reasons,
+    lifetimeEL: lifecycleResult?.elLifetime,
   };
 };
 

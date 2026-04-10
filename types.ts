@@ -179,6 +179,23 @@ export interface Transaction {
   _liquidityPremiumDetails?: number;
   _clcChargeDetails?: number;
   description?: string; // V4.0: For demo identification
+
+  // ── Phase 1 extensions — CRR3 Capital Engine ──
+  rwaStandardized?: number;   // SA RWA (% × amount when not provided explicitly)
+  rwaIrb?: number;            // IRB RWA if bank is IRB-authorized
+  isGSII?: boolean;           // G-SII surcharge applies
+  isOSII?: boolean;           // O-SII surcharge applies
+
+  // ── Phase 1 extensions — IFRS 9 / Anejo IX Lifecycle ──
+  ifrs9Stage?: 1 | 2 | 3;     // Explicit stage override (if omitted, derived via SICR)
+  pdMultiplier?: number;      // Current 12m PD vs origination PD — ratio for SICR
+  daysPastDue?: number;       // SICR / default trigger
+  isRefinanced?: boolean;     // Refinanced under financial difficulties
+  isWatchlist?: boolean;      // Internal watchlist flag
+  isForborne?: boolean;       // Forborne exposure
+
+  // ── Phase 1 extensions — Credit rating (for CSRBB) ──
+  clientRating?: string;      // AAA/AA/A/BBB/BB/B/CCC/D
 }
 
 export interface ReplicationTranche {
@@ -317,6 +334,31 @@ export interface FTPResult {
   behavioralMaturityUsed?: number; // effective BM used for interpolation
   incentivisationAdj?: number; // subsidy/incentive adjustment (%)
   anejoSegment?: string; // Anejo IX segment classification
+
+  // ── Phase 1 extensions — Additional FTP charges (Gaps 20, 21) ──
+  csrbbCost?: number;                // Gap 20: Credit Spread Risk Banking Book (%)
+  contingentLiquidityCost?: number;  // Gap 21: Contingent liquidity for undrawn commitments (%)
+
+  // ── Phase 1 extensions — CRR3 Capital diagnostics ──
+  effectiveRwa?: number;             // Max(IRB, outputFloor × SA)
+  outputFloorBinding?: boolean;      // True if CRR3 output floor binds
+  outputFloorFactor?: number;        // Phase-in % for the calculation year
+  totalCapitalRatio?: number;        // Full buffered requirement (% RWA)
+  capitalBuffersBreakdown?: {
+    pillar1: number;
+    pillar2Requirement: number;
+    conservationBuffer: number;
+    countercyclicalBuffer: number;
+    systemicRiskBuffer: number;
+    sifiBuffer: number;
+    managementBuffer: number;
+  };
+
+  // ── Phase 1 extensions — IFRS 9 / SICR diagnostics ──
+  ifrs9StageUsed?: 1 | 2 | 3;        // Stage applied in pricing (from SICR or override)
+  sicrTriggered?: boolean;           // True if SICR detected
+  sicrReasons?: string[];            // SICR trigger reasons (audit trail)
+  lifetimeEL?: number;               // Lifetime EL when stage 2/3
 }
 
 export interface RAROCInputs {
