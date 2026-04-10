@@ -196,6 +196,16 @@ export interface Transaction {
 
   // ── Phase 1 extensions — Credit rating (for CSRBB) ──
   clientRating?: string;      // AAA/AA/A/BBB/BB/B/CCC/D
+
+  // ── Phase 1 R2 extensions — Delegation engine ──
+  ltvPct?: number;            // LTV % for delegation matrix
+  submittedByRole?: string;   // Manager role submitting the deal
+
+  // ── Phase 1 R2 extensions — Cross-bonuses (bonificaciones cruzadas) ──
+  crossBonusAttachments?: Array<{
+    ruleId: string;
+    overrideProbability?: number;
+  }>;
 }
 
 export interface ReplicationTranche {
@@ -359,6 +369,16 @@ export interface FTPResult {
   sicrTriggered?: boolean;           // True if SICR detected
   sicrReasons?: string[];            // SICR trigger reasons (audit trail)
   lifetimeEL?: number;               // Lifetime EL when stage 2/3
+
+  // ── Phase 1 R2 extensions — Cross-bonuses ──
+  crossBonusDiscountPct?: number;    // Total expected rate discount (%)
+  crossBonusNpvIncome?: number;      // NPV of attached-product income (€)
+  crossBonusNetAdjPct?: number;      // Net adjustment (% of loan)
+
+  // ── Phase 1 R2 extensions — Delegation engine ──
+  delegationTier?: 'AUTO' | 'MANAGER_L1' | 'MANAGER_L2' | 'RISK_COMMITTEE' | 'EXECUTIVE_COMMITTEE';
+  delegationRuleId?: string | null;
+  delegationRuleLabel?: string;
 }
 
 export interface RAROCInputs {

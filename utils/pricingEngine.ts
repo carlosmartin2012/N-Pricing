@@ -44,6 +44,11 @@ import {
   calculateCapitalWithOutputFloor,
   calculateBufferedCapitalCharge,
 } from './pricing/capitalEngineCRR3';
+import { calculateCrossBonusAdjustment } from './pricing/crossBonuses';
+import {
+  resolveDelegation,
+  tierToLegacyApprovalLevel,
+} from './pricing/delegationEngine';
 
 // ─── Pricing Context ────────────────────────────────────────────────────────
 
@@ -343,14 +348,29 @@ export const calculatePricing = (
   // Derive SA RWA if not provided explicitly
   const rwaStandardized = deal.rwaStandardized ?? (deal.riskWeight / 100) * deal.amount;
 
+  // CRR3 full buffer stack only applies when the deal opts in by providing
+  // rwaIrb (IRB-authorized bank) OR explicit SIFI flags. Otherwise fall back
+  // to legacy single-ratio mode: capitalRatio is the total capital requirement.
+  const useFullBufferStack = deal.rwaIrb != null || deal.isGSII || deal.isOSII;
+
   const capitalCalc = calculateCapitalWithOutputFloor({
     ead: deal.amount,
     rwaStandardized,
     rwaIrb: deal.rwaIrb,
     year: new Date().getFullYear(),
-    buffers: {
-      pillar1: deal.capitalRatio, // legacy field used as P1 minimum
-    },
+    buffers: useFullBufferStack
+      ? { pillar1: deal.capitalRatio }
+      : {
+          // Legacy mode: capitalRatio is the only charge, zero out everything else
+          pillar1: deal.capitalRatio,
+          pillar2Requirement: 0,
+          conservationBuffer: 0,
+          countercyclicalBuffer: 0,
+          systemicRiskBuffer: 0,
+          gSIIBuffer: 0,
+          oSIIBuffer: 0,
+          managementBuffer: 0,
+        },
     isGSII: deal.isGSII,
     isOSII: deal.isOSII,
   });
@@ -409,12 +429,23 @@ export const calculatePricing = (
   // ── 15. Incentivisation (Gap 11) ──────────────────────────────────────────
   const incentivisationAdj = lookupIncentivisation(deal, incRules);
 
+  // ── 15b. Cross-bonuses (bonificaciones cruzadas, spec §M5) ────────────────
+  const crossBonus = calculateCrossBonusAdjustment({
+    attachments: deal.crossBonusAttachments ?? [],
+    loanAmount: deal.amount,
+    loanDurationMonths: deal.durationMonths,
+  });
+  // totalDiscountPct = expected rate discount to client (subtracts from client rate)
+  // netBonusAdjustmentPct = net gain to bank (positive = can lower FTP)
+  const crossBonusDiscount = crossBonus.totalDiscountPct;
+
   // ── Aggregates ────────────────────────────────────────────────────────────
   const floorPrice = ftp + regulatoryCost + operationalCost + transCharge + physCharge
     + greeniumAdj + strategicSpread + liquidityRecharge + incentivisationAdj;
   const effectiveCapitalCharge = capitalCharge - dnshCapitalAdj - pillar1Adj;
   const technicalPrice = floorPrice + effectiveCapitalCharge;
-  const finalRate = ftp + deal.marginTarget;
+  // Client rate: margin target minus expected cross-bonus discount
+  const finalRate = ftp + deal.marginTarget - crossBonusDiscount;
 
   // ── RAROC (Gap 6 — full formula) ──────────────────────────────────────────
   const rarocInputs = buildRAROCInputsFromDeal(deal, ftp, riskFreeRate);
@@ -429,11 +460,37 @@ export const calculatePricing = (
   const raroc = rarocResult.raroc;
   const economicProfit = rarocResult.economicProfit;
 
-  // ── Governance ────────────────────────────────────────────────────────────
-  let approvalLevel: 'Auto' | 'L1_Manager' | 'L2_Committee' | 'Rejected' = 'Rejected';
-  if (raroc >= approvalMatrix.autoApprovalThreshold) approvalLevel = 'Auto';
-  else if (raroc >= approvalMatrix.l1Threshold) approvalLevel = 'L1_Manager';
-  else if (raroc >= approvalMatrix.l2Threshold) approvalLevel = 'L2_Committee';
+  // ── Governance (legacy single-threshold + multi-dimensional delegation) ──
+  let legacyApprovalLevel: 'Auto' | 'L1_Manager' | 'L2_Committee' | 'Rejected' = 'Rejected';
+  if (raroc >= approvalMatrix.autoApprovalThreshold) legacyApprovalLevel = 'Auto';
+  else if (raroc >= approvalMatrix.l1Threshold) legacyApprovalLevel = 'L1_Manager';
+  else if (raroc >= approvalMatrix.l2Threshold) legacyApprovalLevel = 'L2_Committee';
+
+  // Multi-dimensional delegation (spec §M8): amount × segment × rating × LTV × RAROC
+  const delegation = resolveDelegation({
+    amount: deal.amount,
+    segment: deal.clientType,
+    rating: deal.clientRating,
+    ltvPct: deal.ltvPct ?? (deal.haircutPct ? 100 - deal.haircutPct : undefined),
+    raroc,
+    hurdleRate: deal.targetROE,
+    businessUnit: deal.businessUnit,
+    managerRole: deal.submittedByRole,
+  });
+  const delegationLevel = tierToLegacyApprovalLevel(delegation.tier);
+
+  // Final approval: delegation engine is opt-in — only used when the deal
+  // provides enough data (at minimum clientRating) to evaluate multi-dim rules.
+  // Otherwise the legacy single-threshold is authoritative. When both apply,
+  // pick the most restrictive (delegation can ESCALATE but never downgrade).
+  const APPROVAL_ORDER = { 'Auto': 0, 'L1_Manager': 1, 'L2_Committee': 2, 'Rejected': 3 } as const;
+  const hasDelegationData = deal.clientRating != null;
+  const approvalLevel: 'Auto' | 'L1_Manager' | 'L2_Committee' | 'Rejected' =
+    hasDelegationData &&
+    delegation.matchedRuleId !== null &&
+    APPROVAL_ORDER[delegationLevel] > APPROVAL_ORDER[legacyApprovalLevel]
+      ? delegationLevel
+      : legacyApprovalLevel;
 
   // ── Methodology ───────────────────────────────────────────────────────────
   let method = ruleMatch.methodology || (deal.repricingFreq === 'Fixed' ? 'Matched Maturity' : 'Moving Average');
@@ -504,6 +561,16 @@ export const calculatePricing = (
     sicrTriggered: lifecycleResult?.sicrResult.triggered,
     sicrReasons: lifecycleResult?.sicrResult.reasons,
     lifetimeEL: lifecycleResult?.elLifetime,
+
+    // ── Phase 1 R2: Cross-bonuses (bonificaciones cruzadas) ──
+    crossBonusDiscountPct: crossBonus.totalDiscountPct,
+    crossBonusNpvIncome: crossBonus.totalNpvMarginIncome,
+    crossBonusNetAdjPct: crossBonus.netBonusAdjustmentPct,
+
+    // ── Phase 1 R2: Multi-dimensional delegation ──
+    delegationTier: delegation.tier,
+    delegationRuleId: delegation.matchedRuleId,
+    delegationRuleLabel: delegation.matchedRuleLabel,
   };
 };
 
