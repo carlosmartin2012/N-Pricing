@@ -86,8 +86,8 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   );
 
   return (
-    <div className="relative z-0 flex h-full min-h-0 flex-col">
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-12">
+    <div className="relative z-0 w-full">
+      <div className="grid gap-4 lg:grid-cols-12">
         <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
           <DealInputPanel
             values={dealParams}
