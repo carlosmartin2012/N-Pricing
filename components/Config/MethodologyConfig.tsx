@@ -15,6 +15,7 @@ import GovernanceTab from './tabs/GovernanceTab';
 import MasterDataTab from './tabs/MasterDataTab';
 import ReportSchedulingTab from './tabs/ReportSchedulingTab';
 import MethodologyTabNavigation from './MethodologyTabNavigation';
+import ModelInventoryPanel from './ModelInventoryPanel';
 import type { ConfigUser, MethodologyConfigMode, MethodologyTabId } from './configTypes';
 
 interface Props {
@@ -97,6 +98,7 @@ const MethodologyConfig: React.FC<Props> = ({
       />
     ),
     SCHEDULES: <ReportSchedulingTab user={user} />,
+    MRM: <ModelInventoryPanel />,
   };
 
   return (

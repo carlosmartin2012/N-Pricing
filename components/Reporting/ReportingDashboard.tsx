@@ -19,6 +19,7 @@ import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from 
 import ExecutiveDashboard from './ExecutiveDashboard';
 import PortfolioSnapshotsDashboard from './PortfolioSnapshotsDashboard';
 import { buildPricingContext, getPrimaryLiquidityPoints } from '../../utils/pricingContext';
+import { batchReprice } from '../../utils/pricingEngine';
 import { usePortfolioMetrics } from './hooks/usePortfolioMetrics';
 import { useScenarioAnalysis } from './hooks/useScenarioAnalysis';
 import { useFundingCurveData } from './hooks/useFundingCurveData';
@@ -45,6 +46,7 @@ const OverviewDashboard = React.lazy(() => import('./OverviewDashboard'));
 const PnlAttribution = React.lazy(() => import('./PnlAttribution'));
 const VintageAnalysis = React.lazy(() => import('./VintageAnalysis'));
 const BacktestingDashboard = React.lazy(() => import('./BacktestingDashboard'));
+const PortfolioReviewDashboard = React.lazy(() => import('./PortfolioReviewDashboard'));
 
 interface ReportingDashboardProps {
   deals: Transaction[];
@@ -164,6 +166,12 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
   const { portfolioMetrics, portfolioByBU } = usePortfolioMetrics({ deals, businessUnits });
   const { metrics, lcrHistory } = useScenarioAnalysis({ scenarioDeal, portfolioMetrics, liquidityCurvePoints });
   const fundingCurveData = useFundingCurveData({ liquidityCurvePoints, selectedCurrency, collateralType, curveShift });
+
+  // Lazy-computed results Map for Portfolio Review tab (computed only when active)
+  const portfolioResultsMap = useMemo(() => {
+    if (activeSubTab !== 'PORTFOLIO_REVIEW') return new Map();
+    return batchReprice(deals, contextData.approvalMatrix, pricingContext);
+  }, [activeSubTab, deals, contextData.approvalMatrix, pricingContext]);
 
   const findClientName = (id: string) => clients.find((c) => c.id === id)?.name || id;
 
@@ -505,6 +513,11 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
                 products={products}
                 businessUnits={businessUnits}
                 clients={clients}
+              />
+            ) : activeSubTab === 'PORTFOLIO_REVIEW' ? (
+              <PortfolioReviewDashboard
+                deals={deals}
+                results={portfolioResultsMap}
               />
             ) : (
               <BehaviourFocusDashboard behaviouralModels={behaviouralModels} />

@@ -212,6 +212,7 @@ export const translations = {
         governance: 'Governance',
         masterData: 'Master Data',
         reportSchedules: 'Report Schedules',
+        modelInventory: 'Model Inventory',
 
         // Config — Report Scheduling
         newSchedule: 'New Schedule',
@@ -776,6 +777,7 @@ export const translations = {
         governance: 'Gobernanza',
         masterData: 'Datos Maestros',
         reportSchedules: 'Informes Programados',
+        modelInventory: 'Inventario de Modelos',
 
         // Config — Report Scheduling
         newSchedule: 'Nuevo Informe',

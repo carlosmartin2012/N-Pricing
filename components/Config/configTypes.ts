@@ -8,6 +8,7 @@ export type MethodologyTabId =
   | 'GOVERNANCE'
   | 'MASTER'
   | 'RATE_CARDS'
-  | 'SCHEDULES';
+  | 'SCHEDULES'
+  | 'MRM';
 
 export type ConfigUser = UserProfile | null;

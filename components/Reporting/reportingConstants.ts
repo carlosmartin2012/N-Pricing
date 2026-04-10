@@ -10,7 +10,8 @@ export type SubTab =
   | 'PRICING_ANALYTICS'
   | 'PORTFOLIO_SNAPSHOTS'
   | 'VINTAGE'
-  | 'BACKTEST';
+  | 'BACKTEST'
+  | 'PORTFOLIO_REVIEW';
 
 export interface TabDefinition {
   key: SubTab;
@@ -40,6 +41,7 @@ export const TAB_GROUPS: TabDefinition[][] = [
     { key: 'PORTFOLIO_SNAPSHOTS', label: 'Scenario Repricing', activeColor: 'cyan' },
     { key: 'VINTAGE', label: 'Vintage Analysis', activeColor: 'purple' },
     { key: 'BACKTEST', label: 'Model Backtest', activeColor: 'purple' },
+    { key: 'PORTFOLIO_REVIEW', label: 'AI Portfolio Review', activeColor: 'purple' },
   ],
 ];
 

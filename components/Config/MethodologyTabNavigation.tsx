@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  ClipboardList,
   Clock,
   Database,
   FileSpreadsheet,
@@ -21,7 +22,7 @@ interface Props {
 
 interface TabDescriptor {
   id: MethodologyTabId;
-  labelKey: 'generalRules' | 'ftpCurvesAndSpreads' | 'esgRateCards' | 'governance' | 'masterData' | 'reportSchedules';
+  labelKey: 'generalRules' | 'ftpCurvesAndSpreads' | 'esgRateCards' | 'governance' | 'masterData' | 'reportSchedules' | 'modelInventory';
   icon: React.ReactNode;
   activeClasses: string;
   visible: (mode: MethodologyConfigMode) => boolean;
@@ -69,6 +70,13 @@ const TAB_DESCRIPTORS: TabDescriptor[] = [
     icon: <Clock size={14} />,
     activeClasses: 'nfq-tab--active',
     visible: (mode) => mode === 'SYS_CONFIG' || mode === 'ALL',
+  },
+  {
+    id: 'MRM',
+    labelKey: 'modelInventory',
+    icon: <ClipboardList size={14} />,
+    activeClasses: 'nfq-tab--active',
+    visible: (mode) => mode === 'METHODOLOGY' || mode === 'ALL',
   },
 ];
 
