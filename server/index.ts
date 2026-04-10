@@ -11,6 +11,7 @@ import entitiesRouter from './routes/entities';
 import reportSchedulesRouter from './routes/reportSchedules';
 import authRouter from './routes/auth';
 import geminiRouter from './routes/gemini';
+import pricingRouter from './routes/pricing';
 import { authMiddleware } from './middleware/auth';
 
 import fs from 'fs';
@@ -44,6 +45,7 @@ app.use('/api/market-data', authMiddleware, marketDataRouter);
 app.use('/api/entities', authMiddleware, entitiesRouter);
 app.use('/api/report-schedules', authMiddleware, reportSchedulesRouter);
 app.use('/api/gemini', authMiddleware, geminiRouter);
+app.use('/api/pricing', authMiddleware, pricingRouter);
 
 if (IS_PROD) {
   app.use(express.static(distDir));
