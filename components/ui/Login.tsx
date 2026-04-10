@@ -175,43 +175,43 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
           <div className="max-w-3xl">
             <span className="nfq-pill mb-8">Meridian Obsidian Control Shell</span>
             <h1 className="text-[clamp(3.1rem,5vw,5.4rem)] font-semibold leading-[1.02] tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
-              Governed pricing operations for treasury, risk and committee review.
+              Pricing, provisión y capital reconciliados por diseño.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[color:var(--nfq-text-secondary)]">
-              {t.subtitle}. Dark-first, capital-aware and structured around the Meridian Obsidian system from NFQ.
+              {t.subtitle}. Del parámetro al RAROC y del RAROC al comité sobre una única fuente de verdad — Anejo IX nativo, CRR3 con output floor, AI copilot grounded y replay bitemporal.
             </p>
 
             <div className="mt-12 grid max-w-3xl grid-cols-3 gap-4">
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Governance</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">M/C</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Maker-checker workflows and live methodology traceability.</div>
+                <div className="nfq-label">Anejo IX</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">IFRS 9</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Stage 1/2/3 con lifetime EL y SICR — segmentos BdE out-of-the-box.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Decisioning</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">RAROC</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">FTP, risk, ESG and accounting under one controlled flow.</div>
+                <div className="nfq-label">Capital</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">CRR3</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Output floor phase-in 50 % → 72,5 % y buffer stack Basel III.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Evidence</div>
+                <div className="nfq-label">Intelligence</div>
                 <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">AI</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Grounded dossiers, committee packs and governed export trails.</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Waterfall explainer grounded, portfolio agent y lineage bitemporal.</div>
               </div>
             </div>
           </div>
 
           <div className="grid max-w-3xl grid-cols-3 gap-6 text-sm text-[color:var(--nfq-text-secondary)]">
             <div>
-              <div className="nfq-label">Pricing stack</div>
-              <p className="mt-3 leading-6">Matched maturity, moving average, rate cards and zero discount methodologies.</p>
+              <div className="nfq-label">Motor de cálculo</div>
+              <p className="mt-3 leading-6">19 componentes FTP parametrizables — base rate, LP, LCR/NSFR, capital, CSRBB y delegación multi-dimensional.</p>
             </div>
             <div>
-              <div className="nfq-label">Portfolio view</div>
-              <p className="mt-3 leading-6">Snapshots, shocks, reporting and accounting views operating in the same shell.</p>
+              <div className="nfq-label">Stress &amp; reconciliación</div>
+              <p className="mt-3 leading-6">6 escenarios EBA, ΔEVE/ΔNII y reconciliación garantizada FTP ↔ provisión ↔ capital sobre un solo árbol.</p>
             </div>
             <div>
-              <div className="nfq-label">Visual posture</div>
-              <p className="mt-3 leading-6">Tonal layering, restrained chrome and machine-grade data typography throughout.</p>
+              <div className="nfq-label">Governance</div>
+              <p className="mt-3 leading-6">MRM model inventory TRIM/SS1-23, audit trail inmutable, replay bitemporal para disputas y supervisor.</p>
             </div>
           </div>
         </section>

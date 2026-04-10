@@ -4,11 +4,11 @@ export const translations = {
     en: {
         // General
         pricing: 'Pricing',
-        subtitle: 'Real Time Pricing Platform',
+        subtitle: 'One engine for pricing, provision and capital — reconciled by design',
         login: 'Login',
         continueAs: 'Continue as Carlos',
         email: 'carlos.martin@nfq.es',
-        footer: '© 2024 NFQ ADVISORY SERVICES',
+        footer: '© 2026 NFQ ADVISORY SERVICES',
         terms: 'Terms of Service',
         privacy: 'Privacy Policy',
         agree: 'By signing in, you agree to our',
@@ -569,11 +569,11 @@ export const translations = {
     es: {
         // General
         pricing: 'Pricing',
-        subtitle: 'Plataforma de Pricing en Tiempo Real',
+        subtitle: 'Un solo motor para pricing, provisión y capital — reconciliado por diseño',
         login: 'Iniciar Sesión',
         continueAs: 'Continuar como Carlos',
         email: 'carlos.martin@nfq.es',
-        footer: '© 2024 NFQ ADVISORY SERVICES',
+        footer: '© 2026 NFQ ADVISORY SERVICES',
         terms: 'Términos de Servicio',
         privacy: 'Política de Privacidad',
         agree: 'Al iniciar sesión, aceptas nuestros',
