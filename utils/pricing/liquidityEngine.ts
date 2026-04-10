@@ -1,8 +1,12 @@
 import type { Transaction, DualLiquidityCurve, SDRConfig, LRConfig } from '../../types';
 import { TENOR_MONTHS } from '../pricingConstants';
 import { LCR_OUTFLOW_TABLE, NSFR_ASF_TABLE, NSFR_RSF_TABLE, LCR_HQLA_COST_BPS, NSFR_BASE_COST_BPS } from '../../constants/regulations';
+import { linearInterpolate } from './interpolation';
 
 // ─── Liquidity Curve Interpolation ──────────────────────────────────────────
+
+type LiquidityPointArray = DualLiquidityCurve['points'];
+const liquidityCurveCache = new WeakMap<LiquidityPointArray, { x: number; y: number }[]>();
 
 /** Interpolate LP curve (returns bps). Gap 8: supports secured/unsecured selection */
 export function interpolateLiquidityCurve(
@@ -18,20 +22,14 @@ export function interpolateLiquidityCurve(
     curves[0];
   if (!curve || !curve.points.length) return 0;
 
-  const points = curve.points
-    .map(p => ({ months: TENOR_MONTHS[p.tenor] ?? 0, lp: p.termLP }))
-    .sort((a, b) => a.months - b.months);
-
-  if (targetMonths <= points[0].months) return points[0].lp;
-  if (targetMonths >= points[points.length - 1].months) return points[points.length - 1].lp;
-
-  const upperIdx = points.findIndex(p => p.months >= targetMonths);
-  if (upperIdx <= 0) return points[0].lp;
-
-  const lower = points[upperIdx - 1];
-  const upper = points[upperIdx];
-  const ratio = (targetMonths - lower.months) / (upper.months - lower.months);
-  return lower.lp + ratio * (upper.lp - lower.lp);
+  let points = liquidityCurveCache.get(curve.points);
+  if (!points) {
+    points = curve.points
+      .map(p => ({ x: TENOR_MONTHS[p.tenor] ?? 0, y: p.termLP }))
+      .sort((a, b) => a.x - b.x);
+    liquidityCurveCache.set(curve.points, points);
+  }
+  return linearInterpolate(points, targetMonths);
 }
 
 // ─── Blended LP Curve (Gap 2) ───────────────────────────────────────────────
@@ -68,23 +66,9 @@ export function calculateBlendedLP(
     i === 0 ? val : (val + blended[i - 1]) / 2,
   );
 
-  // Build interpolable array and interpolate
-  const smoothedPoints = points.map((p, i) => ({ months: p.months, lp: smoothed[i] }));
-
-  if (targetMonths <= smoothedPoints[0].months) return smoothedPoints[0].lp;
-  if (targetMonths >= smoothedPoints[smoothedPoints.length - 1].months) {
-    return smoothedPoints[smoothedPoints.length - 1].lp;
-  }
-
-  const upperIdx = smoothedPoints.findIndex(p => p.months >= targetMonths);
-  if (upperIdx <= 0) return smoothedPoints[0].lp;
-
-  const lower = smoothedPoints[upperIdx - 1];
-  const upper = smoothedPoints[upperIdx];
-  const denom = upper.months - lower.months;
-  if (denom === 0) return upper.lp;
-  const ratio = (targetMonths - lower.months) / denom;
-  return lower.lp + ratio * (upper.lp - lower.lp);
+  // Build interpolable array and interpolate using shared utility
+  const smoothedXY = points.map((p, i) => ({ x: p.months, y: smoothed[i] }));
+  return linearInterpolate(smoothedXY, targetMonths);
 }
 
 // ─── SDR Modulation (Gap 12) ────────────────────────────────────────────────

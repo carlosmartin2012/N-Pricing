@@ -1,4 +1,4 @@
-import { MOCK_LIQUIDITY_CURVES } from '../constants';
+import { MOCK_LIQUIDITY_CURVES } from './seedData';
 import type {
   BehaviouralModel,
   BusinessUnit,

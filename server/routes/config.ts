@@ -1,15 +1,17 @@
 import { Router } from 'express';
 import { query, queryOne, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 const nowIso = () => new Date().toISOString();
 
+
 // --- Rules ---
 router.get('/rules', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM rules'));
+    res.json(await query('SELECT * FROM rules LIMIT 500'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -29,7 +31,7 @@ router.post('/rules', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -38,7 +40,7 @@ router.delete('/rules/:id', async (req, res) => {
     await execute('DELETE FROM rules WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -47,7 +49,7 @@ router.get('/rules/:id/versions', async (req, res) => {
     const rows = await query('SELECT * FROM rule_versions WHERE rule_id = $1 ORDER BY version DESC', [req.params.id]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -68,16 +70,16 @@ router.post('/rules/:id/versions', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Clients ---
 router.get('/clients', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM clients'));
+    res.json(await query('SELECT * FROM clients LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -91,7 +93,7 @@ router.post('/clients', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -100,16 +102,16 @@ router.delete('/clients/:id', async (req, res) => {
     await execute('DELETE FROM clients WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Products ---
 router.get('/products', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM products'));
+    res.json(await query('SELECT * FROM products LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -123,7 +125,7 @@ router.post('/products', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -132,16 +134,16 @@ router.delete('/products/:id', async (req, res) => {
     await execute('DELETE FROM products WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Business Units ---
 router.get('/business-units', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM business_units'));
+    res.json(await query('SELECT * FROM business_units LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -155,7 +157,7 @@ router.post('/business-units', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -164,16 +166,16 @@ router.delete('/business-units/:id', async (req, res) => {
     await execute('DELETE FROM business_units WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Users ---
 router.get('/users', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM users'));
+    res.json(await query('SELECT * FROM users LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -187,7 +189,7 @@ router.post('/users', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -196,7 +198,7 @@ router.delete('/users/:id', async (req, res) => {
     await execute('DELETE FROM users WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -206,7 +208,7 @@ router.get('/notifications', async (req, res) => {
     const rows = await query('SELECT * FROM notifications WHERE recipient_email=$1 ORDER BY created_at DESC LIMIT 50', [req.query.email]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -215,7 +217,7 @@ router.get('/notifications/unread-count', async (req, res) => {
     const rows = await query<{ count: string }>('SELECT COUNT(*)::int as count FROM notifications WHERE recipient_email=$1 AND is_read=false', [req.query.email]);
     res.json({ count: parseInt(rows[0]?.count ?? '0') });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -225,7 +227,18 @@ router.post('/notifications', async (req, res) => {
     await execute('INSERT INTO notifications (recipient_email,sender_email,type,title,message,deal_id) VALUES ($1,$2,$3,$4,$5,$6)', [recipient, sender, type, title, message, dealId ?? null]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.patch('/notifications/read-all', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+    await execute('UPDATE notifications SET is_read = true WHERE recipient_email = $1 AND is_read = false', [email]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -234,7 +247,7 @@ router.patch('/notifications/:id/read', async (req, res) => {
     await execute('UPDATE notifications SET is_read=true WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -244,7 +257,7 @@ router.get('/system-config/:key', async (req, res) => {
     const row = await queryOne<{ value: unknown }>('SELECT value FROM system_config WHERE key=$1', [req.params.key]);
     res.json({ value: row?.value ?? null });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -257,7 +270,7 @@ router.post('/system-config/:key', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -282,7 +295,7 @@ router.post('/seed', async (req, res) => {
     }
     res.json({ success: errors.length === 0, errors });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

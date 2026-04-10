@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query, queryOne, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
@@ -7,12 +8,12 @@ router.get('/', async (req, res) => {
   try {
     const { entity_id } = req.query;
     if (entity_id) {
-      res.json(await query('SELECT * FROM report_schedules WHERE entity_id=$1 ORDER BY created_at DESC', [entity_id]));
+      res.json(await query('SELECT * FROM report_schedules WHERE entity_id=$1 ORDER BY created_at DESC LIMIT 1000', [entity_id]));
     } else {
-      res.json(await query('SELECT * FROM report_schedules ORDER BY created_at DESC'));
+      res.json(await query('SELECT * FROM report_schedules ORDER BY created_at DESC LIMIT 1000'));
     }
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -29,7 +30,7 @@ router.post('/', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -38,7 +39,7 @@ router.delete('/:id', async (req, res) => {
     await execute('DELETE FROM report_schedules WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -47,7 +48,7 @@ router.patch('/:id/toggle', async (req, res) => {
     await execute('UPDATE report_schedules SET is_active=$1 WHERE id=$2', [req.body.is_active, req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -56,7 +57,7 @@ router.get('/:id/runs', async (req, res) => {
     const rows = await query('SELECT * FROM report_runs WHERE schedule_id=$1 ORDER BY started_at DESC LIMIT 20', [req.params.id]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

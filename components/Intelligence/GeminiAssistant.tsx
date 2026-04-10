@@ -60,9 +60,6 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
     setIsThinking(true);
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-      if (!apiKey) throw new Error('VITE_GEMINI_API_KEY not configured');
-
       const systemInstruction = `
         You are 'Nexus AI', a specialized Funds Transfer Pricing (FTP) and Quantitative Risk Analyst assistant.
 
@@ -86,18 +83,26 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
       const modelMsgId = (Date.now() + 1).toString();
       setMessages((prev) => [...prev, { id: modelMsgId, role: 'model', text: '' }]);
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: systemInstruction }] },
-            contents: [{ role: 'user', parts: [{ text: input }] }],
-            generationConfig: { temperature: 0.7 },
-          }),
-        }
-      );
+      let authHeaders: Record<string, string> = {};
+      try {
+        const token = localStorage.getItem('n_pricing_auth_token');
+        if (token) authHeaders = { Authorization: `Bearer ${token}` };
+      } catch { /* ignore */ }
+
+      const res = await fetch('/api/gemini/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: input }] }],
+          model: 'gemini-2.0-flash',
+          systemInstruction,
+          generationConfig: { temperature: 0.7 },
+          stream: true,
+        }),
+      });
 
       if (!res.ok) throw new Error(`Gemini API ${res.status}: ${await res.text()}`);
 

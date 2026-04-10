@@ -6,7 +6,10 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+  ssl: process.env.DATABASE_URL.includes('localhost') ? false : {
+    rejectUnauthorized: process.env.DB_REJECT_UNAUTHORIZED !== 'false',
+    ca: process.env.DATABASE_CA_CERT || undefined,
+  },
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,

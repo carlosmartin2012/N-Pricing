@@ -1,4 +1,4 @@
-import { MOCK_YIELD_CURVE } from './constants';
+import { MOCK_YIELD_CURVE } from './utils/seedData';
 import type { Transaction, YieldCurvePoint } from './types';
 
 const ACTIVE_PORTFOLIO_STATUSES = new Set(['Booked', 'Approved']);

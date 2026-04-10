@@ -1,14 +1,28 @@
 const BASE = '/api';
 
+function getAuthToken(): string | null {
+  try {
+    return localStorage.getItem('n_pricing_auth_token');
+  } catch {
+    return null;
+  }
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getAuthToken();
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options?.headers ?? {}),
     },
   });
   if (!res.ok) {
+    if (res.status === 401) {
+      // Token expired or invalid — clear and let auth context handle redirect
+      localStorage.removeItem('n_pricing_auth_token');
+    }
     const text = await res.text().catch(() => '');
     throw new Error(`API ${options?.method ?? 'GET'} ${path} failed (${res.status}): ${text}`);
   }

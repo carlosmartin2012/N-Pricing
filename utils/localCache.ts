@@ -8,7 +8,7 @@ const STORAGE_KEYS = {
 };
 
 export const localCache = {
-    saveLocal: (key: string, data: any) => {
+    saveLocal: (key: string, data: unknown) => {
         localStorage.setItem(key, JSON.stringify(data));
     },
 

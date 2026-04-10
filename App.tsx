@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useEntity } from './contexts/EntityContext';
 import { Sparkles } from 'lucide-react';
-import { INITIAL_DEAL } from './constants';
+import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
 import { buildBottomNavItems, buildMainNavItems } from './appNavigation';
 import { buildAssistantMarketContext, buildMarketSummary } from './appSummaries';

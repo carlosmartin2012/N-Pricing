@@ -181,19 +181,9 @@ export function calculateMovingAverageFTP(
     return totalWeight > 0 ? weightedSum / totalWeight : currentRate;
   }
 
-  // Fallback: simulate with current curve (existing behavior)
-  const periods = Math.max(1, Math.floor(windowMonths));
-  let weightedSum = 0;
-  let totalWeight = 0;
-
-  for (let i = 0; i < periods; i++) {
-    const weight = Math.exp(-0.05 * i);
-    const historicalRate = currentRate + (Math.sin(i * 0.5) * 0.1);
-    weightedSum += weight * historicalRate;
-    totalWeight += weight;
-  }
-
-  return totalWeight > 0 ? weightedSum / totalWeight : currentRate;
+  // No historical data available — return current rate as best estimate.
+  // Moving Average methodology requires real historical curve data to be meaningful.
+  return currentRate;
 }
 
 // ─── Behavioural Model Spread (Option Cost) ─────────────────────────────────

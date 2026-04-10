@@ -112,7 +112,7 @@ export function buildRAROCInputsFromDeal(
     interestSpread: deal.marginTarget,
     cofRate: ftpRate,
     rwa,
-    ecl: 0, // Would come from credit model; placeholder
+    ecl: 0, // Overridden by pricingEngine with Anejo IX credit cost
     feeIncome: deal.feeIncome || 0,
     operatingCostPct: deal.operationalCostBps / 100,
     riskFreeRate,

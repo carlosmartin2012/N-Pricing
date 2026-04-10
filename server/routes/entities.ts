@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { query, queryOne, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
 // --- Groups ---
 router.get('/groups', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM groups ORDER BY name'));
+    res.json(await query('SELECT * FROM groups ORDER BY name LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -18,7 +19,7 @@ router.get('/groups/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -32,16 +33,16 @@ router.post('/groups', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Entities ---
 router.get('/entities', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM entities ORDER BY name'));
+    res.json(await query('SELECT * FROM entities ORDER BY name LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -51,7 +52,7 @@ router.get('/entities/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -68,7 +69,7 @@ router.post('/entities', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -87,10 +88,10 @@ router.get('/entity-users', async (req, res) => {
     } else if (user_id) {
       res.json(await query('SELECT * FROM entity_users WHERE user_id=$1', [user_id]));
     } else {
-      res.json(await query('SELECT * FROM entity_users'));
+      res.json(await query('SELECT * FROM entity_users LIMIT 1000'));
     }
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -103,7 +104,7 @@ router.post('/entity-users', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

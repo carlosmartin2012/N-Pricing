@@ -5,7 +5,7 @@
  */
 
 import type { AlertRule } from '../types/alertRule';
-import { safeSupabaseCall } from '../utils/validation';
+import { safeSupabaseCall } from '../utils/safeSupabaseCall';
 import { supabase } from '../utils/supabase/shared';
 
 // ---------------------------------------------------------------------------

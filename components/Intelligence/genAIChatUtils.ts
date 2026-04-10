@@ -112,26 +112,37 @@ export function buildSessionTitle(input: string) {
   return normalized.length > 28 ? `${normalized.slice(0, 28)}...` : normalized;
 }
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const token = localStorage.getItem('n_pricing_auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 export async function streamGeminiResponse(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   contents: Array<{ role: string; parts: Array<{ text: string }> }>,
   signal?: AbortSignal,
   onChunk?: (text: string) => void
 ) {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents,
-        generationConfig: { temperature: 0.5 },
-      }),
-      signal,
-    }
-  );
+  const response = await fetch('/api/gemini/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({
+      contents,
+      model: 'gemini-2.0-flash',
+      systemInstruction: systemPrompt,
+      generationConfig: { temperature: 0.5 },
+      stream: true,
+    }),
+    signal,
+  });
 
   if (!response.ok) {
     throw new Error(`Gemini API ${response.status}: ${await response.text()}`);

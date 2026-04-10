@@ -10,6 +10,27 @@ export interface MatchResult {
   strategicSpreadBps: number;
 }
 
+// ─── Rule-Match Cache ──────────────────────────────────────────────────────
+// In batch repricing, many deals share (productType, BU, clientType, tenor bucket).
+// Caching avoids re-scoring the full rule list for identical match keys.
+// The cache auto-invalidates when a different rules array is passed.
+
+const ruleMatchCache = new Map<string, MatchResult>();
+let cachedRulesRef: GeneralRule[] | null = null;
+
+function getRuleMatchCacheKey(deal: Transaction): string {
+  const tenorBucket = deal.durationMonths <= 12 ? 'ST'
+    : deal.durationMonths <= 60 ? 'MT'
+    : 'LT';
+  return `${deal.productType}|${deal.businessUnit}|${deal.clientType}|${tenorBucket}|${deal.repricingFreq || ''}`;
+}
+
+/** Clear the rule-match cache. Call before each batch repricing run. */
+export function clearRuleMatchCache(): void {
+  ruleMatchCache.clear();
+  cachedRulesRef = null;
+}
+
 /** Evaluate a tenor condition string (e.g. "<12M", ">36M", "Any") against deal months */
 function evaluateTenorCondition(tenorStr: string, months: number): boolean {
   if (!tenorStr || tenorStr === 'Any') return true;
@@ -50,6 +71,17 @@ export function matchDealToRule(
   businessUnits: BusinessUnit[],
   products: ProductDefinition[],
 ): MatchResult {
+  // Auto-invalidate cache when rules array reference changes
+  if (cachedRulesRef !== rules) {
+    ruleMatchCache.clear();
+    cachedRulesRef = rules;
+  }
+
+  // Check cache — same (product, BU, clientType, tenor bucket) yields same rule match
+  const cacheKey = getRuleMatchCacheKey(deal);
+  const cached = ruleMatchCache.get(cacheKey);
+  if (cached) return cached;
+
   const buName = businessUnits.find(bu => bu.id === deal.businessUnit)?.name || '';
   const productName = products.find(p => p.id === deal.productType)?.name || '';
 
@@ -99,7 +131,7 @@ export function matchDealToRule(
 
   if (scored.length > 0) {
     const best = scored[0].rule;
-    return {
+    const result: MatchResult = {
       rule: best,
       methodology: best.baseMethod || 'Matched Maturity',
       reason: `Rule #${best.id}: ${best.businessUnit}/${best.product}/${best.segment}`,
@@ -107,9 +139,11 @@ export function matchDealToRule(
       liquidityReference: best.liquidityReference || null,
       strategicSpreadBps: best.strategicSpread || 0,
     };
+    ruleMatchCache.set(cacheKey, result);
+    return result;
   }
 
-  return {
+  const fallback: MatchResult = {
     rule: null,
     methodology: deal.repricingFreq === 'Fixed' ? 'Matched Maturity' : 'Moving Average',
     reason: 'Default: no matching rule',
@@ -117,6 +151,8 @@ export function matchDealToRule(
     liquidityReference: null,
     strategicSpreadBps: 0,
   };
+  ruleMatchCache.set(cacheKey, fallback);
+  return fallback;
 }
 
 /**

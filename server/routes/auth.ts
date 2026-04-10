@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { OAuth2Client } from 'google-auth-library';
+import { signToken } from '../middleware/auth';
+import { queryOne } from '../db';
 
 const router = Router();
 
@@ -23,10 +25,25 @@ router.post('/google', async (req, res) => {
       res.status(400).json({ error: 'Token has no email claim' });
       return;
     }
+    const name = payload.name ?? payload.email.split('@')[0];
+
+    // Look up user in DB to get role
+    let role = 'viewer'; // default role
+    try {
+      const dbUser = await queryOne<{ role: string }>('SELECT role FROM users WHERE email = $1', [payload.email]);
+      if (dbUser?.role) {
+        role = dbUser.role;
+      }
+    } catch {
+      // DB lookup failed — proceed with default role
+    }
+
+    const token = signToken({ email: payload.email, name, role });
     res.json({
       email: payload.email,
-      name: payload.name ?? payload.email.split('@')[0],
+      name,
       picture: payload.picture ?? null,
+      token,
     });
   } catch {
     res.status(401).json({ error: 'Token verification failed' });

@@ -14,11 +14,11 @@ export function useNotifications() {
 
     supabaseService.fetchNotifications(currentUser.email)
       .then(setNotifications)
-      .catch(() => {});
+      .catch((err) => console.warn('[useNotifications] fetch failed:', err));
 
     supabaseService.getUnreadCount(currentUser.email)
       .then(setUnreadCount)
-      .catch(() => {});
+      .catch((err) => console.warn('[useNotifications] unread count failed:', err));
   }, [currentUser?.email]);
 
   const markRead = useCallback(async (id: number) => {
@@ -28,12 +28,19 @@ export function useNotifications() {
   }, []);
 
   const markAllRead = useCallback(async () => {
-    for (const n of notifications.filter(n => !n.isRead)) {
-      await supabaseService.markNotificationRead(n.id);
+    if (!currentUser?.email) return;
+    try {
+      await fetch('/api/config/notifications/read-all', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUser.email }),
+      });
+    } catch {
+      // Fallback: nothing to do, UI already reflects the change optimistically
     }
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     setUnreadCount(0);
-  }, [notifications]);
+  }, [currentUser?.email]);
 
   return { notifications, unreadCount, markRead, markAllRead };
 }

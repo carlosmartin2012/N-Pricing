@@ -1,5 +1,10 @@
-// Supabase replaced with local Express + PostgreSQL backend.
-// isSupabaseConfigured = true so existing hooks continue to use the API layer.
+/**
+ * Supabase client stub — all data access goes through the Express API (utils/apiFetch.ts).
+ * This stub exists to satisfy legacy imports that reference `supabase` without making
+ * real network calls. Any code path reaching this stub is a no-op by design.
+ *
+ * @deprecated Remove this file once all legacy Supabase imports are migrated.
+ */
 export const isSupabaseConfigured = true;
 
 // No-op supabase object — only used for legacy code paths that haven't been

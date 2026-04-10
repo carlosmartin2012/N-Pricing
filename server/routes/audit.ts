@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
@@ -8,7 +9,7 @@ router.get('/', async (req, res) => {
     const rows = await query('SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT 100');
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -23,7 +24,7 @@ router.get('/paginated', async (req, res) => {
     ]);
     res.json({ data: rows, total: parseInt(countRows[0]?.count ?? '0') });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -36,8 +37,7 @@ router.post('/', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    console.error('[audit] POST / error', err);
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, LockKeyhole, Loader2, ShieldCheck } from 'lucide-react';
 import { translations, Language } from '../../translations';
 import { Logo } from './Logo';
@@ -14,7 +14,7 @@ const DEMO_PASS = import.meta.env.VITE_DEMO_PASS || '';
 const DEMO_EMAIL = import.meta.env.VITE_DEMO_EMAIL || '';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
-let _gisInitialized = false;
+// _gisInitialized moved to useRef inside Login component (survives HMR correctly)
 
 declare global {
   interface Window {
@@ -48,8 +48,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showFallbackBtn, setShowFallbackBtn] = useState(false);
   const fallbackRef = useRef<HTMLDivElement>(null);
+  const gisInitializedRef = useRef(false);
 
-  const handleCredentialResponse = async (response: { credential: string }) => {
+  const handleCredentialResponse = useCallback(async (response: { credential: string }) => {
     setGoogleLoading(true);
     setError(null);
     try {
@@ -58,9 +59,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: response.credential }),
       });
-      const data = await res.json() as { email?: string; name?: string; error?: string };
+      const data = await res.json() as { email?: string; name?: string; token?: string; error?: string };
       if (!res.ok || !data.email) {
         throw new Error(data.error || 'Google authentication failed');
+      }
+      if (data.token) {
+        localStorage.setItem('n_pricing_auth_token', data.token);
       }
       onLogin(data.email);
     } catch (err) {
@@ -68,14 +72,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     } finally {
       setGoogleLoading(false);
     }
-  };
+  }, [onLogin]);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
 
     const initGis = () => {
-      if (!window.google?.accounts?.id || _gisInitialized) return;
-      _gisInitialized = true;
+      if (!window.google?.accounts?.id || gisInitializedRef.current) return;
+      gisInitializedRef.current = true;
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleCredentialResponse,
@@ -97,8 +101,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     return () => {
       scriptEl?.removeEventListener('load', initGis);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleCredentialResponse]);
 
   useEffect(() => {
     if (showFallbackBtn && fallbackRef.current && window.google?.accounts?.id && GOOGLE_CLIENT_ID) {
@@ -144,6 +147,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     event.preventDefault();
     if (username === DEMO_USER && password === DEMO_PASS) {
       setError(null);
+      localStorage.setItem('n_pricing_auth_token', 'demo-token');
       onLogin(DEMO_EMAIL);
       return;
     }

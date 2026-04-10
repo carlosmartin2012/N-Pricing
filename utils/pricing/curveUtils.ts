@@ -1,27 +1,20 @@
 import type { YieldCurvePoint } from '../../types';
 import { TENOR_MONTHS } from '../pricingConstants';
+import { linearInterpolate, prepareYieldCurvePoints } from './interpolation';
 
 // ─── Curve Interpolation ────────────────────────────────────────────────────
+
+const curveCache = new WeakMap<YieldCurvePoint[], { x: number; y: number }[]>();
 
 /** Linear interpolation on a yield curve (tenor string → rate) */
 export function interpolateYieldCurve(curve: YieldCurvePoint[], targetMonths: number): number {
   if (!curve || curve.length === 0) return 0;
-  const points = curve
-    .map(p => ({ months: TENOR_MONTHS[p.tenor] ?? 0, rate: p.rate }))
-    .sort((a, b) => a.months - b.months);
-
-  if (targetMonths <= points[0].months) return points[0].rate;
-  if (targetMonths >= points[points.length - 1].months) return points[points.length - 1].rate;
-
-  const upperIdx = points.findIndex(p => p.months >= targetMonths);
-  if (upperIdx <= 0) return points[0].rate;
-
-  const lower = points[upperIdx - 1];
-  const upper = points[upperIdx];
-  const denom = upper.months - lower.months;
-  if (denom === 0) return upper.rate;
-  const ratio = (targetMonths - lower.months) / denom;
-  return lower.rate + ratio * (upper.rate - lower.rate);
+  let points = curveCache.get(curve);
+  if (!points) {
+    points = prepareYieldCurvePoints(curve, TENOR_MONTHS);
+    curveCache.set(curve, points);
+  }
+  return linearInterpolate(points, targetMonths);
 }
 
 // ─── Zero Coupon Bootstrap (Gap 7) ──────────────────────────────────────────
@@ -72,17 +65,6 @@ export function bootstrapZeroRates(parCurve: YieldCurvePoint[]): YieldCurvePoint
 }
 
 export function interpolateFromZeros(zeros: { months: number; rate: number }[], targetMonths: number): number {
-  if (zeros.length === 0) return 0;
-  if (targetMonths <= zeros[0].months) return zeros[0].rate;
-  if (targetMonths >= zeros[zeros.length - 1].months) return zeros[zeros.length - 1].rate;
-
-  const upperIdx = zeros.findIndex(z => z.months >= targetMonths);
-  if (upperIdx <= 0) return zeros[0].rate;
-
-  const lower = zeros[upperIdx - 1];
-  const upper = zeros[upperIdx];
-  const denom = upper.months - lower.months;
-  if (denom === 0) return upper.rate;
-  const ratio = (targetMonths - lower.months) / denom;
-  return lower.rate + ratio * (upper.rate - lower.rate);
+  const points = zeros.map(z => ({ x: z.months, y: z.rate }));
+  return linearInterpolate(points, targetMonths);
 }

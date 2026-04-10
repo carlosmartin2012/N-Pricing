@@ -10,33 +10,40 @@ import marketDataRouter from './routes/marketData';
 import entitiesRouter from './routes/entities';
 import reportSchedulesRouter from './routes/reportSchedules';
 import authRouter from './routes/auth';
+import geminiRouter from './routes/gemini';
+import { authMiddleware } from './middleware/auth';
 
 import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '..', 'dist');
 const IS_PROD = !!process.env.PORT && fs.existsSync(path.join(distDir, 'index.html'));
-const PORT = parseInt(process.env.PORT ?? (IS_PROD ? '5000' : '3001'), 10);
+const PORT = parseInt(process.env.PORT ?? (IS_PROD ? '3001' : '3001'), 10);
 
 const app = express();
 
-if (!IS_PROD) {
-  app.use(cors({ origin: true }));
-}
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3001'];
+app.use(cors({
+  origin: IS_PROD ? false : ALLOWED_ORIGINS,
+  credentials: true,
+}));
 
 app.use(express.json({ limit: '10mb' }));
 
-app.use('/api/deals', dealsRouter);
-app.use('/api/audit', auditRouter);
-app.use('/api/config', configRouter);
-app.use('/api/market-data', marketDataRouter);
-app.use('/api/entities', entitiesRouter);
-app.use('/api/report-schedules', reportSchedulesRouter);
+// Public routes (no auth required)
 app.use('/api/auth', authRouter);
-
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
 });
+
+// Protected routes (auth required)
+app.use('/api/deals', authMiddleware, dealsRouter);
+app.use('/api/audit', authMiddleware, auditRouter);
+app.use('/api/config', authMiddleware, configRouter);
+app.use('/api/market-data', authMiddleware, marketDataRouter);
+app.use('/api/entities', authMiddleware, entitiesRouter);
+app.use('/api/report-schedules', authMiddleware, reportSchedulesRouter);
+app.use('/api/gemini', authMiddleware, geminiRouter);
 
 if (IS_PROD) {
   app.use(express.static(distDir));

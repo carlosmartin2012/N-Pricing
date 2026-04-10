@@ -104,24 +104,6 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
       return;
     }
 
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-    if (!apiKey) {
-      updateActiveSession((session) => ({
-        ...session,
-        messages: [
-          ...session.messages,
-          {
-            id: Date.now().toString(),
-            role: 'model',
-            content: 'Error: VITE_GEMINI_API_KEY not configured',
-            timestamp: new Date().toLocaleTimeString(),
-          },
-        ],
-      }));
-      setInput('');
-      return;
-    }
-
     requestAbortRef.current?.abort();
     const abortController = new AbortController();
     requestAbortRef.current = abortController;
@@ -163,7 +145,7 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
 
     try {
       const fullResponse = await streamGeminiResponse(
-        apiKey,
+        '', // API key now handled by server proxy
         systemPrompt,
         contents,
         abortController.signal,

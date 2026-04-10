@@ -6,7 +6,7 @@ import {
   IncentivisationRule, SDRConfig, LRConfig,
 } from '../types';
 import { PRICING_CONSTANTS as PC, TENOR_MONTHS } from './pricingConstants';
-import { matchDealToRule } from './ruleMatchingEngine';
+import { matchDealToRule, clearRuleMatchCache } from './ruleMatchingEngine';
 import { calculateRAROC, buildRAROCInputsFromDeal } from './rarocEngine';
 import {
   MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_GREENIUM_GRID,
@@ -14,7 +14,7 @@ import {
   MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS,
   MOCK_FTP_RATE_CARDS, MOCK_CLIENTS,
   MOCK_SDR_CONFIG, MOCK_LR_CONFIG, MOCK_INCENTIVISATION_RULES,
-} from '../constants';
+} from './seedData';
 
 // ── Re-export from sub-modules so existing imports from '../pricingEngine' still work ──
 export { interpolateYieldCurve, bootstrapZeroRates } from './pricing/curveUtils';
@@ -143,7 +143,7 @@ const EMPTY_RESULT: FTPResult = {
   floorPrice: 0, technicalPrice: 0, targetPrice: 0,
   totalFTP: 0, finalClientRate: 0,
   raroc: 0, economicProfit: 0, approvalLevel: 'Rejected',
-  matchedMethodology: 'MatchedMaturity' as any,
+  matchedMethodology: 'Matched Maturity',
   matchReason: '',
   accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 },
 };
@@ -406,7 +406,7 @@ export const calculatePricing = (
     raroc,
     economicProfit,
     approvalLevel,
-    matchedMethodology: method as any,
+    matchedMethodology: method,
     matchReason: ruleMatch.reason,
     accountingEntry: {
       source: deal.businessLine,
@@ -438,11 +438,17 @@ export function batchReprice(
   context: PricingContext,
   shocks: PricingShocks = DEFAULT_PRICING_SHOCKS,
 ): Map<string, FTPResult> {
+  // Clear caches so stale rule matches from previous batches don't leak
+  clearRuleMatchCache();
+
   const results = new Map<string, FTPResult>();
   for (const deal of deals) {
     if (!deal.id || !deal.productType || deal.amount === 0) continue;
     const result = calculatePricing(deal, approvalMatrix, context, shocks);
     results.set(deal.id, result);
   }
+
+  // Clean up after batch
+  clearRuleMatchCache();
   return results;
 }

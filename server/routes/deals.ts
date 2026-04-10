@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query, queryOne, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
@@ -8,17 +9,16 @@ const nowIso = () => new Date().toISOString();
 router.get('/', async (req, res) => {
   try {
     const { entity_id } = req.query;
-    let sql = 'SELECT * FROM deals ORDER BY created_at DESC';
+    let sql = 'SELECT * FROM deals ORDER BY created_at DESC LIMIT 1000';
     const params: unknown[] = [];
     if (entity_id) {
-      sql = 'SELECT * FROM deals WHERE entity_id = $1 ORDER BY created_at DESC';
+      sql = 'SELECT * FROM deals WHERE entity_id = $1 ORDER BY created_at DESC LIMIT 1000';
       params.push(entity_id);
     }
     const rows = await query(sql, params);
     res.json(rows);
   } catch (err) {
-    console.error('[deals] GET / error', err);
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -33,24 +33,23 @@ router.get('/paginated', async (req, res) => {
     ]);
     res.json({ data: rows, total: parseInt(countRows[0]?.count ?? '0') });
   } catch (err) {
-    console.error('[deals] GET /paginated error', err);
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 router.get('/light', async (req, res) => {
   try {
     const { entity_id } = req.query;
-    let sql = 'SELECT id, status, client_id, product_type, amount, currency, entity_id, created_at FROM deals ORDER BY created_at DESC';
+    let sql = 'SELECT id, status, client_id, product_type, amount, currency, entity_id, created_at FROM deals ORDER BY created_at DESC LIMIT 1000';
     const params: unknown[] = [];
     if (entity_id) {
-      sql = 'SELECT id, status, client_id, product_type, amount, currency, entity_id, created_at FROM deals WHERE entity_id = $1 ORDER BY created_at DESC';
+      sql = 'SELECT id, status, client_id, product_type, amount, currency, entity_id, created_at FROM deals WHERE entity_id = $1 ORDER BY created_at DESC LIMIT 1000';
       params.push(entity_id);
     }
     const rows = await query(sql, params);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -82,7 +81,7 @@ router.get('/cursor', async (req, res) => {
     }
     res.json({ data: pageRows, cursor: nextCursor, hasMore });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -92,7 +91,7 @@ router.get('/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -165,8 +164,7 @@ router.post('/upsert', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    console.error('[deals] POST /upsert error', err);
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -182,7 +180,7 @@ router.post('/batch-upsert', async (req, res) => {
     );
     res.json(results.filter(Boolean));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -217,7 +215,7 @@ router.patch('/:id/transition', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -237,7 +235,7 @@ router.patch('/:id/lock-update', async (req, res) => {
     );
     res.json({ conflict: false, deal: row });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -246,7 +244,7 @@ router.delete('/:id', async (req, res) => {
     await execute('DELETE FROM deals WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -269,8 +267,7 @@ router.post('/:id/rename', async (req, res) => {
     await execute('DELETE FROM deals WHERE id = $1', [previousId]);
     res.json(inserted);
   } catch (err) {
-    console.error('[deals] POST /:id/rename error', err);
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -279,7 +276,7 @@ router.get('/:id/versions', async (req, res) => {
     const rows = await query('SELECT * FROM deal_versions WHERE deal_id = $1 ORDER BY version DESC', [req.params.id]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -292,7 +289,7 @@ router.post('/:id/versions', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -301,7 +298,7 @@ router.get('/:id/comments', async (req, res) => {
     const rows = await query('SELECT * FROM deal_comments WHERE deal_id = $1 ORDER BY created_at DESC', [req.params.id]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -314,7 +311,7 @@ router.post('/:id/comments', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -323,15 +320,18 @@ router.get('/:id/pricing-history', async (req, res) => {
     const rows = await query('SELECT * FROM pricing_results WHERE deal_id = $1 ORDER BY version DESC', [req.params.id]);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 router.post('/:id/pricing-results', async (req, res) => {
   try {
     const r = req.body;
-    const countRows = await query<{ count: string }>('SELECT COUNT(*)::int as count FROM pricing_results WHERE deal_id = $1', [req.params.id]);
-    const version = parseInt(countRows[0]?.count ?? '0') + 1;
+    const versionRows = await query<{ next_version: number }>(
+      'SELECT COALESCE(MAX(version), 0) + 1 as next_version FROM pricing_results WHERE deal_id = $1 FOR UPDATE',
+      [req.params.id],
+    );
+    const version = versionRows[0]?.next_version ?? 1;
     await execute(
       `INSERT INTO pricing_results (deal_id, version, base_rate, liquidity_spread, strategic_spread, option_cost, regulatory_cost, lcr_cost, nsfr_cost, operational_cost, capital_charge, esg_transition_charge, esg_physical_charge, floor_price, technical_price, target_price, total_ftp, final_client_rate, raroc, economic_profit, approval_level, matched_methodology, match_reason, formula_used, behavioral_maturity_used, incentivisation_adj, capital_income, calculated_by, deal_snapshot)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)`,
@@ -339,7 +339,7 @@ router.post('/:id/pricing-results', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

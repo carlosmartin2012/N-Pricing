@@ -34,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSessionExpiresAt(null);
     localCache.saveCurrentUser(null);
     localCache.saveLocal('n_pricing_session_expires', null);
+    localStorage.removeItem('n_pricing_auth_token');
   }, []);
 
   const logAuthEvent = useCallback((user: UserProfile, action: string, description: string) => {

@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { query, queryOne, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
 // --- Behavioural Models ---
 router.get('/models', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM behavioural_models'));
+    res.json(await query('SELECT * FROM behavioural_models LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -25,7 +26,7 @@ router.post('/models', async (req, res) => {
     );
     res.json(row);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -34,16 +35,16 @@ router.delete('/models/:id', async (req, res) => {
     await execute('DELETE FROM behavioural_models WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Yield Curves ---
 router.get('/yield-curves', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM yield_curves ORDER BY as_of_date DESC'));
+    res.json(await query('SELECT * FROM yield_curves ORDER BY as_of_date DESC LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -56,7 +57,7 @@ router.post('/yield-curves', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -73,7 +74,7 @@ router.get('/yield-curve-history', async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
@@ -86,16 +87,16 @@ router.post('/yield-curve-history', async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 
 // --- Liquidity Curves ---
 router.get('/liquidity-curves', async (_req, res) => {
   try {
-    res.json(await query('SELECT * FROM liquidity_curves ORDER BY created_at DESC'));
+    res.json(await query('SELECT * FROM liquidity_curves ORDER BY created_at DESC LIMIT 1000'));
   } catch (err) {
-    res.status(500).json({ error: String(err) });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

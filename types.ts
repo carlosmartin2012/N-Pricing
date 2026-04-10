@@ -306,7 +306,7 @@ export interface FTPResult {
     amountDebit: number;
     amountCredit: number;
   };
-  matchedMethodology: MethodologyType;
+  matchedMethodology: string;
   matchReason: string;
   // V5.0: Granular FTP decomposition
   irrbbCharge?: number; // IRRBB component (base rate %)

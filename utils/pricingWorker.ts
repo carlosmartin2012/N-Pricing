@@ -9,6 +9,7 @@
  */
 
 import { calculatePricing, PricingContext, PricingShocks } from './pricingEngine';
+import { clearRuleMatchCache } from './ruleMatchingEngine';
 import type { Transaction, ApprovalMatrixConfig, FTPResult } from '../types';
 
 interface WorkerRequest {
@@ -34,6 +35,9 @@ self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const defaultShocks: PricingShocks = shocks || { interestRate: 0, liquiditySpread: 0 };
 
   try {
+    // Clear rule-match cache so stale results from a previous batch don't leak
+    clearRuleMatchCache();
+
     const results: [string, FTPResult][] = [];
     const validDeals = deals.filter(d => d.id && d.productType && d.amount > 0);
 
@@ -51,6 +55,9 @@ self.onmessage = (event: MessageEvent<WorkerRequest>) => {
         self.postMessage(response);
       }
     }
+
+    // Clean up cache after batch
+    clearRuleMatchCache();
 
     const response: WorkerResponse = { type: 'result', results };
     self.postMessage(response);
