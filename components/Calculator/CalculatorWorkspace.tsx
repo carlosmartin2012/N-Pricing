@@ -13,6 +13,8 @@ import MethodologyVisualizer from './MethodologyVisualizer';
 import PricingReceipt from './PricingReceipt';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
 import DelegationAuditPanel from './DelegationAuditPanel';
+import CrossBonusesPicker from './CrossBonusesPicker';
+import IFRS9StagePanel from './IFRS9StagePanel';
 import { WaterfallExplainerCard } from '../RAROC/WaterfallExplainerCard';
 import { calculatePricing } from '../../utils/pricingEngine';
 
@@ -68,6 +70,20 @@ export const CalculatorWorkspace: React.FC<Props> = ({
     [setDealParams],
   );
 
+  const handleBonusesChange = useCallback(
+    (attachments: Array<{ ruleId: string; overrideProbability?: number }>) => {
+      setDealParams((prev) => ({ ...prev, crossBonusAttachments: attachments }));
+    },
+    [setDealParams],
+  );
+
+  const handleIFRS9Change = useCallback(
+    (updates: Partial<Transaction>) => {
+      setDealParams((prev) => ({ ...prev, ...updates }));
+    },
+    [setDealParams],
+  );
+
   return (
     <div className="relative z-0 flex h-full min-h-0 flex-col">
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-12">
@@ -98,6 +114,17 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             onDealSaved={(savedDeal) => {
               setDealParams(savedDeal);
             }}
+          />
+        </div>
+
+        {/* Phase 1: IFRS 9 Stage/SICR + Cross-bonuses inputs */}
+        <div className="w-full lg:col-span-6">
+          <IFRS9StagePanel deal={dealParams} onChange={handleIFRS9Change} />
+        </div>
+        <div className="w-full lg:col-span-6">
+          <CrossBonusesPicker
+            attachments={dealParams.crossBonusAttachments ?? []}
+            onChange={handleBonusesChange}
           />
         </div>
 
