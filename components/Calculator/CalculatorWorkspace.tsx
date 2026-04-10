@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback } from 'react';
+import React, { Suspense, useCallback, useMemo } from 'react';
 import type {
   ApprovalMatrixConfig,
   BehaviouralModel,
@@ -11,6 +11,10 @@ import type { Language } from '../../translations';
 import DealInputPanel from './DealInputPanel';
 import MethodologyVisualizer from './MethodologyVisualizer';
 import PricingReceipt from './PricingReceipt';
+import InverseOptimizerPanel from './InverseOptimizerPanel';
+import DelegationAuditPanel from './DelegationAuditPanel';
+import { WaterfallExplainerCard } from '../RAROC/WaterfallExplainerCard';
+import { calculatePricing } from '../../utils/pricingEngine';
 
 const PricingComparison = React.lazy(() => import('./PricingComparison'));
 
@@ -48,6 +52,22 @@ export const CalculatorWorkspace: React.FC<Props> = ({
     [setDealParams]
   );
 
+  // Live pricing for the new Phase 1 panels (inverse optimizer + delegation)
+  const currentResult = useMemo(() => {
+    try {
+      return calculatePricing(dealParams, approvalMatrix);
+    } catch {
+      return null;
+    }
+  }, [dealParams, approvalMatrix]);
+
+  const handleApplyMargin = useCallback(
+    (newMargin: number) => {
+      setDealParams((prev) => ({ ...prev, marginTarget: newMargin }));
+    },
+    [setDealParams],
+  );
+
   return (
     <div className="relative z-0 flex h-full min-h-0 flex-col">
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-12">
@@ -79,6 +99,32 @@ export const CalculatorWorkspace: React.FC<Props> = ({
               setDealParams(savedDeal);
             }}
           />
+        </div>
+
+        {/* Phase 1: Inverse Optimizer + Delegation Audit side-by-side */}
+        <div className="w-full lg:col-span-6">
+          <InverseOptimizerPanel
+            deal={dealParams}
+            currentRaroc={currentResult?.raroc ?? 0}
+            targetRoe={dealParams.targetROE}
+            onApplyMargin={handleApplyMargin}
+          />
+        </div>
+        <div className="w-full lg:col-span-6">
+          {currentResult && (
+            <DelegationAuditPanel deal={dealParams} result={currentResult} />
+          )}
+        </div>
+
+        {/* Phase 1: Waterfall Explainer (full width) */}
+        <div className="w-full lg:col-span-12">
+          {currentResult && (
+            <WaterfallExplainerCard
+              deal={dealParams}
+              result={currentResult}
+              language={language}
+            />
+          )}
         </div>
 
         <div className="w-full lg:col-span-12">

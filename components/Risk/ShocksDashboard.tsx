@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ApprovalMatrixConfig, Transaction, UserProfile } from '../../types';
 import { DEFAULT_PRICING_SHOCKS, calculatePricing, type PricingShocks } from '../../utils/pricingEngine';
 import { supabaseService } from '../../utils/supabaseService';
@@ -8,6 +8,7 @@ import type { Language } from '../../translations';
 import { ShockControlPanel } from './ShockControlPanel';
 import { ShockImpactPanel } from './ShockImpactPanel';
 import { parseImportedShocks } from './shockUtils';
+import { MacroScenarioPicker } from './MacroScenarioPicker';
 
 interface Props {
   deal: Transaction;
@@ -28,6 +29,7 @@ const ShocksDashboard: React.FC<Props> = ({
 }) => {
   const pricingContext = usePricingContext();
   const auditTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeScenarioId, setActiveScenarioId] = useState<string | undefined>(undefined);
 
   const logShockAudit = useCallback(
     (description: string) => {
@@ -88,7 +90,19 @@ const ShocksDashboard: React.FC<Props> = ({
 
   const handleReset = useCallback(() => {
     setShocks(DEFAULT_PRICING_SHOCKS);
+    setActiveScenarioId(undefined);
   }, [setShocks]);
+
+  const handleSelectMacroScenario = useCallback(
+    (scenarioId: string, scenarioShocks: { interestRate: number; liquiditySpread: number }) => {
+      setShocks(scenarioShocks);
+      setActiveScenarioId(scenarioId);
+      logShockAudit(
+        `Applied macro scenario ${scenarioId} (IR ${scenarioShocks.interestRate}bps / Liq ${scenarioShocks.liquiditySpread}bps) for deal ${deal.id || 'NEW-DEAL'}`,
+      );
+    },
+    [setShocks, logShockAudit, deal.id],
+  );
 
   const handleDownloadTemplate = useCallback(
     async () => downloadTemplate('STRESS_TESTING', 'Stress_Testing_Template'),
@@ -126,26 +140,34 @@ const ShocksDashboard: React.FC<Props> = ({
   );
 
   return (
-    <div className="flex h-full flex-col gap-6 lg:grid lg:grid-cols-12">
-      <div className="h-full lg:col-span-4">
-        <ShockControlPanel
-          deal={deal}
-          shocks={shocks}
-          language={language}
-          onShockChange={updateShock}
-          onReset={handleReset}
-          onDownloadTemplate={handleDownloadTemplate}
-          onImport={handleImport}
-          onApplyPreset={applyPreset}
-        />
-      </div>
+    <div className="flex h-full flex-col gap-6">
+      {/* Macro scenario picker (EBA-style) */}
+      <MacroScenarioPicker
+        activeScenarioId={activeScenarioId}
+        onSelectScenario={handleSelectMacroScenario}
+      />
 
-      <div className="h-full lg:col-span-8">
-        <ShockImpactPanel
-          language={language}
-          baseResult={baseResult}
-          shockedResult={shockedResult}
-        />
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12">
+        <div className="h-full lg:col-span-4">
+          <ShockControlPanel
+            deal={deal}
+            shocks={shocks}
+            language={language}
+            onShockChange={updateShock}
+            onReset={handleReset}
+            onDownloadTemplate={handleDownloadTemplate}
+            onImport={handleImport}
+            onApplyPreset={applyPreset}
+          />
+        </div>
+
+        <div className="h-full lg:col-span-8">
+          <ShockImpactPanel
+            language={language}
+            baseResult={baseResult}
+            shockedResult={shockedResult}
+          />
+        </div>
       </div>
     </div>
   );
