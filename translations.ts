@@ -26,6 +26,7 @@ export const translations = {
         userConfig: 'User Configuration',
         userMgmt: 'User Management',
         manual: 'User Manual',
+        moreTools: 'More',
         close: 'Close',
         save: 'Save',
 
@@ -591,6 +592,7 @@ export const translations = {
         userConfig: 'Configuración de Usuario',
         userMgmt: 'Gestión de Usuarios',
         manual: 'Manual de Usuario',
+        moreTools: 'Más',
         close: 'Cerrar',
         save: 'Guardar',
 

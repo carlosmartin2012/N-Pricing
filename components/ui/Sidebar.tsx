@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { ChevronDown, LucideIcon, MoreHorizontal } from 'lucide-react';
 import { ViewState } from '../../types';
 import { translations, Language } from '../../translations';
 import { Logo } from './Logo';
@@ -110,6 +110,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return () => window.clearInterval(interval);
   }, []);
 
+  // Collapse bottom utility nav by default; auto-expand when one of its
+  // items is the active view so the user always sees where they are.
+  const isCurrentBottomView = React.useMemo(
+    () =>
+      bottomNavItems.some(
+        (item) => item.id !== 'USER_CONFIG' && item.id === currentView,
+      ),
+    [bottomNavItems, currentView],
+  );
+  const [bottomExpanded, setBottomExpanded] = React.useState<boolean>(
+    isCurrentBottomView,
+  );
+  React.useEffect(() => {
+    if (isCurrentBottomView) setBottomExpanded(true);
+  }, [isCurrentBottomView]);
+
   let lastSection: string | undefined;
 
   return (
@@ -175,19 +191,63 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </nav>
 
-        {/* Bottom navigation */}
-        <nav aria-label="Utility navigation" className="mt-6 px-2 pb-2 space-y-0.5">
-          {bottomNavItems.map((item) => (
-            <NavButton
-              key={item.id}
-              item={item}
-              currentView={currentView}
-              isSidebarOpen={isSidebarOpen}
-              setCurrentView={setCurrentView}
-              onOpenConfig={onOpenConfig}
-              onClose={onClose}
-            />
-          ))}
+        {/* Bottom navigation — collapsible "More" group when sidebar is open */}
+        <nav aria-label="Utility navigation" className="mt-4 px-2 pb-2">
+          {isSidebarOpen ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setBottomExpanded((prev) => !prev)}
+                aria-expanded={bottomExpanded}
+                aria-controls="sidebar-utility-items"
+                data-testid="sidebar-more-toggle"
+                className="group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[color:var(--nfq-text-secondary)] transition-all duration-200 hover:bg-[color:rgba(255,255,255,0.03)] hover:text-[color:var(--nfq-text-primary)]"
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center text-[color:var(--nfq-text-muted)] group-hover:text-[color:var(--nfq-text-secondary)]">
+                  <MoreHorizontal size={18} />
+                </span>
+                <span className="flex-1 truncate text-left text-[14px] font-medium">
+                  {t.moreTools}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`text-[color:var(--nfq-text-muted)] transition-transform duration-200 ${
+                    bottomExpanded ? 'rotate-180' : ''
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
+              {bottomExpanded && (
+                <div id="sidebar-utility-items" className="mt-0.5 space-y-0.5">
+                  {bottomNavItems.map((item) => (
+                    <NavButton
+                      key={item.id}
+                      item={item}
+                      currentView={currentView}
+                      isSidebarOpen={isSidebarOpen}
+                      setCurrentView={setCurrentView}
+                      onOpenConfig={onOpenConfig}
+                      onClose={onClose}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="space-y-0.5">
+              {bottomNavItems.map((item) => (
+                <NavButton
+                  key={item.id}
+                  item={item}
+                  currentView={currentView}
+                  isSidebarOpen={isSidebarOpen}
+                  setCurrentView={setCurrentView}
+                  onOpenConfig={onOpenConfig}
+                  onClose={onClose}
+                />
+              ))}
+            </div>
+          )}
         </nav>
 
         {/* Status indicator */}
