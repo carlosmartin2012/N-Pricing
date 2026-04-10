@@ -15,6 +15,7 @@ import InverseOptimizerPanel from './InverseOptimizerPanel';
 import DelegationAuditPanel from './DelegationAuditPanel';
 import CrossBonusesPicker from './CrossBonusesPicker';
 import IFRS9StagePanel from './IFRS9StagePanel';
+import LineagePanel from './LineagePanel';
 import { WaterfallExplainerCard } from '../RAROC/WaterfallExplainerCard';
 import { calculatePricing } from '../../utils/pricingEngine';
 
@@ -151,6 +152,13 @@ export const CalculatorWorkspace: React.FC<Props> = ({
               result={currentResult}
               language={language}
             />
+          )}
+        </div>
+
+        {/* Phase 2: Bitemporal Lineage Panel (full width) */}
+        <div className="w-full lg:col-span-12">
+          {currentResult && (
+            <LineagePanel deal={dealParams} result={currentResult} />
           )}
         </div>
 
