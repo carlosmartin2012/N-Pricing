@@ -45,11 +45,14 @@ export interface CSRBBResult {
 }
 
 /**
- * Calculate CSRBB charge. Applies only to Assets and Off-Balance exposures
- * (Liabilities don't carry asset-side credit spread risk in this model).
+ * Calculate CSRBB charge. Applies ONLY to Asset-category exposures on the
+ * banking book. Liabilities don't carry asset-side credit spread risk.
+ * Off-Balance exposures (guarantees, committed lines, standby LCs) are
+ * captured by the Contingent Liquidity charge instead — charging CSRBB
+ * on top would double-count their contingent liquidity cost.
  */
 export function calculateCSRBBCharge(input: CSRBBInput): CSRBBResult {
-  if (input.category === 'Liability') {
+  if (input.category !== 'Asset') {
     return { chargePct: 0, durationYears: 0, qualityMultiplier: 0 };
   }
 

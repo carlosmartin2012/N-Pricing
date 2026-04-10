@@ -53,6 +53,17 @@ describe('calculateCSRBBCharge', () => {
     expect(result.qualityMultiplier).toBe(0);
   });
 
+  it('returns zero for Off-Balance category (contingent liquidity covers it)', () => {
+    const result = calculateCSRBBCharge({
+      durationMonths: 60,
+      clientRating: 'BBB',
+      category: 'Off-Balance',
+    });
+    expect(result.chargePct).toBe(0);
+    expect(result.durationYears).toBe(0);
+    expect(result.qualityMultiplier).toBe(0);
+  });
+
   it('computes BBB asset charge = base × duration × 1.0', () => {
     const result = calculateCSRBBCharge({
       durationMonths: 24,

@@ -454,7 +454,9 @@ export const calculatePricing = (
   rarocInputs.interestRate = finalRate;
   rarocInputs.interestSpread = finalRate - ftp;
   // ECL from Anejo IX credit cost × EAD
-  rarocInputs.ecl = (regulatoryCost / 100) * rarocInputs.ead;
+  // regulatoryCost is already in fraction form (e.g. 0.005 for 0.5%),
+  // so multiply directly by EAD to get the absolute € amount expected by calculateRAROC.
+  rarocInputs.ecl = regulatoryCost * rarocInputs.ead;
 
   const rarocResult = calculateRAROC(rarocInputs);
   const raroc = rarocResult.raroc;

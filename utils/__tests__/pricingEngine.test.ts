@@ -347,7 +347,9 @@ describe('calculatePricing', () => {
   // ── RAROC-based approvals (Gap 6) ──
   describe('approval levels based on RAROC', () => {
     it('very high margin target produces Auto approval', () => {
-      const highMarginDeal: Transaction = { ...baseDeal, marginTarget: 8.0 };
+      // Margin must be high enough to cover correctly-computed ECL + capital + opcost
+      // and still clear the 15% RAROC threshold for Auto approval
+      const highMarginDeal: Transaction = { ...baseDeal, marginTarget: 12.0 };
       const result = calculatePricing(highMarginDeal, defaultApproval, undefined, noShocks);
       expect(result.approvalLevel).toBe('Auto');
     });
