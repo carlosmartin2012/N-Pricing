@@ -63,7 +63,7 @@ export const INITIAL_DEAL: Transaction = {
   durationMonths: 24,
   amortization: 'Bullet',
   repricingFreq: 'Fixed',
-  marginTarget: 2.25,
+  marginTarget: 9.75,
   behaviouralModelId: '',
   riskWeight: 100,
   capitalRatio: 11.5,
@@ -72,6 +72,10 @@ export const INITIAL_DEAL: Transaction = {
   lcrOutflowPct: 0,
   transitionRisk: 'Neutral',
   physicalRisk: 'Low',
+  // Phase 1+2: defaults for new panels to show meaningful content
+  clientRating: 'A',
+  ltvPct: 65,
+  ifrs9Stage: 1,
 };
 
 export const EMPTY_DEAL: Transaction = {

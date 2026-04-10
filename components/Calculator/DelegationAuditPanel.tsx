@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Transaction, FTPResult } from '../../types';
 import { apiPost } from '../../utils/apiFetch';
+import { resolveDelegation } from '../../utils/pricing/delegationEngine';
 import { Shield, Check, X, ChevronDown, ChevronRight, RefreshCw, Info } from 'lucide-react';
 
 interface DelegationAuditPanelProps {
@@ -65,24 +66,28 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
   const runDelegationCheck = useCallback(async () => {
     setReevaluating(true);
     setError(null);
+    const input = {
+      amount: deal.amount,
+      segment: deal.clientType,
+      rating: deal.clientRating,
+      ltvPct: deal.ltvPct,
+      raroc: result.raroc,
+      hurdleRate: deal.targetROE,
+      businessUnit: deal.businessUnit,
+      managerRole: deal.submittedByRole,
+    };
     try {
-      const response = await apiPost<DelegationCheckResponse>('/pricing/delegation-check', {
-        input: {
-          amount: deal.amount,
-          segment: deal.clientType,
-          rating: deal.clientRating,
-          ltvPct: deal.ltvPct,
-          raroc: result.raroc,
-          hurdleRate: deal.targetROE,
-          businessUnit: deal.businessUnit,
-          managerRole: deal.submittedByRole,
-        },
-      });
+      const response = await apiPost<DelegationCheckResponse>('/pricing/delegation-check', { input });
       setEvaluatedRules(response.evaluatedRules);
       setCurrentTier(response.tier);
       setCurrentRuleLabel(response.matchedRuleLabel);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al reevaluar la delegación');
+    } catch {
+      // Graceful fallback: run the delegation engine locally (same code as server)
+      // so the panel still shows a meaningful result when the backend is unreachable.
+      const local = resolveDelegation(input);
+      setEvaluatedRules(local.evaluatedRules);
+      setCurrentTier(local.tier);
+      setCurrentRuleLabel(local.matchedRuleLabel);
     } finally {
       setReevaluating(false);
     }

@@ -91,6 +91,19 @@ function ratingAtLeast(actual: string | undefined, minimum: string): boolean {
 /** Default delegation matrix (typical Spanish retail bank) */
 export const DEFAULT_DELEGATION_MATRIX: DelegationRule[] = [
   {
+    id: 'AUTO_LARGE_PRIME',
+    priority: 5,
+    label: 'Auto-aprobado — exposición grande con rating prime',
+    constraints: {
+      minAmount: 1_000_000,
+      maxAmount: 20_000_000,
+      minRating: 'A',
+      maxLtvPct: 75,
+      minRaroc: 15,
+    },
+    approvalTier: 'AUTO',
+  },
+  {
     id: 'AUTO_SMALL_GOOD',
     priority: 10,
     label: 'Auto-aprobado — importe bajo con RAROC saludable',

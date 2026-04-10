@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Target, Loader2, Check, AlertTriangle } from 'lucide-react';
 import type { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
 import { apiPost } from '../../utils/apiFetch';
+import { optimizeMarginForTargetRaroc } from '../../utils/pricing/inverseOptimizer';
 
 interface InverseOptimizationResult {
   converged: boolean;
@@ -51,19 +52,25 @@ export const InverseOptimizerPanel: React.FC<InverseOptimizerPanelProps> = ({
     setError(null);
     setResult(null);
 
+    const payload: InverseOptimizerRequest = {
+      deal,
+      targetRaroc,
+      approvalMatrix: DEFAULT_APPROVAL_MATRIX,
+    };
     try {
-      const payload: InverseOptimizerRequest = {
-        deal,
-        targetRaroc,
-        approvalMatrix: DEFAULT_APPROVAL_MATRIX,
-      };
       const response = await apiPost<InverseOptimizationResult>(
         '/pricing/inverse-optimize',
         payload,
       );
       setResult(response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error de cálculo');
+    } catch {
+      // Graceful fallback: run the optimizer locally when backend is unreachable
+      const local = optimizeMarginForTargetRaroc({
+        deal,
+        targetRaroc,
+        approvalMatrix: DEFAULT_APPROVAL_MATRIX,
+      });
+      setResult(local);
     } finally {
       setIsLoading(false);
     }
