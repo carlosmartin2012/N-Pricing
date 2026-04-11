@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { UserProfile } from '../types';
 import { logAudit } from '../api/audit';
 import { upsertUser } from '../api/config';
@@ -185,8 +185,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return requiredRoles.includes(currentUser.role);
   }, [currentUser]);
 
+  const value = useMemo(
+    () => ({ currentUser, isAuthenticated, handleLogin, handleLogout, hasRole, sessionExpiresAt }),
+    [currentUser, isAuthenticated, handleLogin, handleLogout, hasRole, sessionExpiresAt]
+  );
+
   return (
-    <AuthContext.Provider value={{ currentUser, isAuthenticated, handleLogin, handleLogout, hasRole, sessionExpiresAt }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

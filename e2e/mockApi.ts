@@ -45,6 +45,12 @@ interface MockState {
   systemConfig: Record<string, unknown>;
 }
 
+interface MockApiOptions {
+  audit?: Array<Record<string, unknown>>;
+  notifications?: Array<Record<string, unknown>>;
+  systemConfigOverrides?: Record<string, unknown>;
+}
+
 const nowIso = () => new Date().toISOString();
 
 function json(body: unknown, status = 200) {
@@ -112,24 +118,29 @@ function defaultSystemConfig(): Record<string, unknown> {
   };
 }
 
-function createState(): MockState {
+function createState(options: MockApiOptions = {}): MockState {
   return {
-    audit: [],
+    audit: options.audit ? [...options.audit] : [],
     deals: MOCK_DEALS.map((deal) => makeDealRow(deal)),
-    notifications: [
-      {
-        id: 1,
-        recipient_email: 'demo@nfq.es',
-        sender_email: 'system@nfq.es',
-        type: 'APPROVAL_REQUEST',
-        title: 'Demo workspace ready',
-        message: 'Seed data loaded for the demo user.',
-        deal_id: null,
-        is_read: false,
-        created_at: nowIso(),
-      },
-    ],
-    systemConfig: defaultSystemConfig(),
+    notifications: options.notifications
+      ? [...options.notifications]
+      : [
+          {
+            id: 1,
+            recipient_email: 'demo@nfq.es',
+            sender_email: 'system@nfq.es',
+            type: 'APPROVAL_REQUEST',
+            title: 'Demo workspace ready',
+            message: 'Seed data loaded for the demo user.',
+            deal_id: null,
+            is_read: false,
+            created_at: nowIso(),
+          },
+        ],
+    systemConfig: {
+      ...defaultSystemConfig(),
+      ...options.systemConfigOverrides,
+    },
   };
 }
 
@@ -212,8 +223,8 @@ async function fulfillConfig(
   return false;
 }
 
-export async function registerApiMocks(page: Page): Promise<void> {
-  const state = createState();
+export async function registerApiMocks(page: Page, options?: MockApiOptions): Promise<void> {
+  const state = createState(options);
 
   await page.route('**/api/**', async (route) => {
     const request = route.request();

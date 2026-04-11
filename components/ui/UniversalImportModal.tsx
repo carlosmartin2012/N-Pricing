@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Upload, CheckCircle2, AlertCircle, Database, TrendingUp, LineChart, FileText, GitBranch, ArrowRight } from 'lucide-react';
 import { parseExcel, REQUIRED_HEADERS } from '../../utils/excelUtils';
 import { useUI } from '../../contexts/UIContext';
@@ -32,6 +32,16 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
     const [status, setStatus] = useState<'idle' | 'parsing' | 'ready' | 'importing' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const [lastSummary, setLastSummary] = useState<ImportSummary | null>(null);
+    const successCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (successCloseTimerRef.current) {
+                clearTimeout(successCloseTimerRef.current);
+                successCloseTimerRef.current = null;
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -92,7 +102,9 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                 }
             }
             setStatus('success');
-            setTimeout(() => {
+            if (successCloseTimerRef.current) clearTimeout(successCloseTimerRef.current);
+            successCloseTimerRef.current = setTimeout(() => {
+                successCloseTimerRef.current = null;
                 onClose();
                 reset();
             }, 1500);

@@ -193,7 +193,7 @@ export function useSaveRateCards() {
   });
 }
 
-export function useEsgGridQuery(type: 'transition' | 'physical') {
+export function useEsgGridQuery(type: 'transition' | 'physical' | 'greenium') {
   return useQuery({
     queryKey: queryKeys.config.esgGrid(type),
     queryFn: () => configApi.fetchEsgGrid(type),
@@ -203,7 +203,7 @@ export function useEsgGridQuery(type: 'transition' | 'physical') {
 export function useSaveEsgGrid() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (params: { type: 'transition' | 'physical'; grid: unknown[] }) =>
+    mutationFn: (params: { type: 'transition' | 'physical' | 'greenium'; grid: unknown[] }) =>
       configApi.saveEsgGrid(params.type, params.grid),
     onSuccess: (_data, variables) => {
       void qc.invalidateQueries({ queryKey: queryKeys.config.esgGrid(variables.type) });

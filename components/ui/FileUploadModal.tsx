@@ -20,6 +20,23 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
     const [status, setStatus] = useState<'idle' | 'parsing' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const parseDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fileReaderRef = useRef<FileReader | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (parseDelayTimerRef.current) {
+                clearTimeout(parseDelayTimerRef.current);
+                parseDelayTimerRef.current = null;
+            }
+            if (fileReaderRef.current) {
+                try {
+                    fileReaderRef.current.abort();
+                } catch { /* noop */ }
+                fileReaderRef.current = null;
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -43,19 +60,33 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
         setFile(f);
         setStatus('parsing');
 
-        // Simulate parsing logic
-        setTimeout(() => {
+        // Simulate parsing latency without leaking timers across unmounts
+        if (parseDelayTimerRef.current) clearTimeout(parseDelayTimerRef.current);
+        parseDelayTimerRef.current = setTimeout(() => {
+            parseDelayTimerRef.current = null;
             const reader = new FileReader();
+            fileReaderRef.current = reader;
             reader.onload = (e) => {
+                if (fileReaderRef.current !== reader) return; // stale read after abort
+                fileReaderRef.current = null;
                 try {
-                    const text = e.target?.result as string;
-                    // Simple CSV parser
-                    const lines = text.split('\n').filter(l => l.trim());
-                    const headers = lines[0].split(',').map(h => h.trim());
+                    const text = (e.target?.result as string | null) ?? '';
+                    const lines = text.split(/\r?\n/).filter(l => l.trim());
+                    if (lines.length === 0) {
+                        setStatus('error');
+                        setErrorMessage('The uploaded CSV file is empty.');
+                        return;
+                    }
+                    const headers = lines[0].split(',').map(h => h.trim()).filter(Boolean);
+                    if (headers.length === 0) {
+                        setStatus('error');
+                        setErrorMessage('The CSV header row is empty or malformed.');
+                        return;
+                    }
                     const data = lines.slice(1).map(line => {
                         const values = line.split(',').map(v => v.trim());
                         return headers.reduce<UploadedCsvRow>((obj, header, i) => {
-                            obj[header] = values[i];
+                            obj[header] = values[i] ?? '';
                             return obj;
                         }, {});
                     });
@@ -67,7 +98,19 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                     setErrorMessage('Failed to parse file. Please ensure it follows the template format.');
                 }
             };
-            reader.readAsText(f);
+            reader.onerror = () => {
+                if (fileReaderRef.current !== reader) return;
+                fileReaderRef.current = null;
+                setStatus('error');
+                setErrorMessage('Failed to read file. Please try again.');
+            };
+            try {
+                reader.readAsText(f);
+            } catch {
+                fileReaderRef.current = null;
+                setStatus('error');
+                setErrorMessage('Failed to read file. Please try again.');
+            }
         }, 1000);
     };
 

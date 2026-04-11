@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import type {
   YieldCurvePoint,
   DualLiquidityCurve,
@@ -41,27 +41,39 @@ export const MarketDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [behaviouralModels, setBehaviouralModels] = useState<BehaviouralModel[]>([]);
   const [marketDataSources, setMarketDataSources] = useState<MarketDataSource[]>([]);
 
+  const value = useMemo(
+    () => ({
+      yieldCurves,
+      setYieldCurves,
+      liquidityCurves,
+      setLiquidityCurves,
+      ftpRateCards,
+      setFtpRateCards,
+      transitionGrid,
+      setTransitionGrid,
+      physicalGrid,
+      setPhysicalGrid,
+      greeniumGrid,
+      setGreeniumGrid,
+      behaviouralModels,
+      setBehaviouralModels,
+      marketDataSources,
+      setMarketDataSources,
+    }),
+    [
+      yieldCurves,
+      liquidityCurves,
+      ftpRateCards,
+      transitionGrid,
+      physicalGrid,
+      greeniumGrid,
+      behaviouralModels,
+      marketDataSources,
+    ]
+  );
+
   return (
-    <MarketDataContext.Provider
-      value={{
-        yieldCurves,
-        setYieldCurves,
-        liquidityCurves,
-        setLiquidityCurves,
-        ftpRateCards,
-        setFtpRateCards,
-        transitionGrid,
-        setTransitionGrid,
-        physicalGrid,
-        setPhysicalGrid,
-        greeniumGrid,
-        setGreeniumGrid,
-        behaviouralModels,
-        setBehaviouralModels,
-        marketDataSources,
-        setMarketDataSources,
-      }}
-    >
+    <MarketDataContext.Provider value={value}>
       {children}
     </MarketDataContext.Provider>
   );

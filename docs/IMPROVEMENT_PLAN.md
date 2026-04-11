@@ -33,12 +33,15 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 - **Q7**: añadida story de `BlotterTable` en `components/Blotter/BlotterTable.stories.tsx`; `npm run build-storybook` verde.
 - **Q8**: nueva suite `api/__tests__/mappers.test.ts` con round-trips y contratos públicos.
 - **A3 (fuerte)**: contrato público de `api/mappers.ts` ya cubierto por tests y el mapper legacy subyacente quedó sin `any` explícitos.
-- **C1 (parcial fuerte)**: infraestructura de mock centralizada en `e2e/mockApi.ts`; suite E2E estabilizada para correr sin API real y nuevo spec dedicado `e2e/deal-blotter.spec.ts` cubriendo grid, filtros, dossier y alta manual.
+- **C1 (parcial fuerte)**: infraestructura de mock centralizada en `e2e/mockApi.ts`; `registerApiMocks()` acepta seeds controlados de estado y ya existen specs dedicados `e2e/deal-blotter.spec.ts`, `e2e/rules-governance.spec.ts`, `e2e/shocks-reporting.spec.ts`, `e2e/market-data.spec.ts` y `e2e/esg-grid.spec.ts`, cubriendo grid/filtros/dossier/alta manual, el flujo maker-checker de metodología con audit trail, la creación de snapshots/reporting bajo stress, el golden path de gobierno de market data (alta de fuente + snapshot + audit trail) y el recorrido ESG gobernado hasta su impacto en pricing.
 - **C2**: añadida regresión numérica del motor en `utils/__tests__/pricingRegression.test.ts` con fixture JSON de 50 casos en `utils/__tests__/fixtures/pricing-regression.fixture.json`.
 - **A1 (cerrado en runtime)**: `App.tsx`, `components/`, `contexts/`, `hooks/` y `utils/` ya no consumen `supabaseService`; el código activo pasa por `api/` y servicios especializados (`monitoring`, `approvalService`, `portfolioReportingService`, `marketDataIngestionService`) según corresponda. `AuditLog` ya consume `api/mappers` en vez del path legacy y se han retirado los adapters CRUD `utils/supabase/{deals,config,market}.ts` junto con `utils/supabaseService.ts`.
-- **B1 (arranque)**: `DealBlotter.tsx` ya empezó a descomponerse; la lógica de filtro/selección/dossier salió a `components/Blotter/hooks/useBlotterState.ts` y la barra de acciones superior a `components/Blotter/BlotterHeaderActions.tsx`. El shell principal baja a ~910 líneas y queda mejor posicionado para el siguiente corte.
+- **B1 (avance)**: `DealBlotter.tsx` ya empezó a descomponerse; la lógica de filtro/selección/dossier salió a `components/Blotter/hooks/useBlotterState.ts`, la barra de acciones superior a `components/Blotter/BlotterHeaderActions.tsx`, las utilidades de renombrado/referencias a `components/Blotter/blotterReferenceUtils.ts` y la orquestación de drawers a `components/Blotter/DealBlotterDrawers.tsx`, reutilizando además `DealEditorDrawer.tsx` y `DealDeleteDrawer.tsx`. El shell principal baja a ~672 líneas y queda mejor posicionado para el siguiente corte.
+- **A2 (parcial)**: memoizados los `value` de `AuthContext`, `DataContext`, `UIContext`, `EntityContext`, `GovernanceContext` y `MarketDataContext`; `useData()` también deja de reconstruir el objeto combinado en cada render.
+- **Bug fix real en runtime**: `components/Risk/ShocksDashboard.tsx` ya no pierde el audit `APPLY_SHOCK` al cambiar de vista antes de que venza el debounce.
+- **Bug fix real en runtime**: `greenium_grid` vuelve a hidratarse desde la capa pública (`api/config.ts` + `hooks/supabaseSync/useInitialHydration.ts`) y deja de quedarse vacío en runtime; esto corregía un fallo silencioso donde la vista ESG aparecía vacía y el pricing engine caía al fallback `MOCK_GREENIUM_GRID` aunque se hubiera aplicado un cambio gobernado.
 - **Performance / bundle**: restaurado `npm run check:bundle` separando `CalculatorWorkspace`, `PricingReceipt`, `MethodologyVisualizer`, `UserConfigModal`, `UniversalImportModal` y `WalkthroughOverlay` en chunks lazy. El entry principal quedó en 372.1 KB y el workspace de calculator en 73.6 KB, ambos dentro de budget.
-- **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 671 tests unitarios y E2E 78 passing / 1 skipped.
+- **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 671 tests unitarios y E2E 84 passing / 1 skipped (85 tests totales).
 
 ### Avanzado pero no cerrado
 - **B1**: la descomposición de `DealBlotter` ya comenzó, pero todavía faltan separar filtros/acciones/drawers hasta acercarlo al objetivo <400 L por archivo.
@@ -57,7 +60,7 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 
 ## 1. Contexto mínimo (para agente nuevo)
 
-N-Pricing es un motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. React 19 + TypeScript 5.8 + Vite 6 + Supabase + React Query + Tailwind. PWA con fallback offline. AI Assistant (Gemini) vía proxy. 229 TS/TSX files, 111 componentes, 17 hooks, 45 utils, 7 Context providers, 671 unit tests, 5 E2E specs, 14 migraciones Supabase.
+N-Pricing es un motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. React 19 + TypeScript 5.8 + Vite 6 + Supabase + React Query + Tailwind. PWA con fallback offline. AI Assistant (Gemini) vía proxy. 229 TS/TSX files, 111 componentes, 17 hooks, 45 utils, 7 Context providers, 671 unit tests, 10 E2E specs, 14 migraciones Supabase.
 
 Lectura obligada antes de tocar código:
 - `CLAUDE.md` — arquitectura, convenciones, áreas sensibles
@@ -89,7 +92,7 @@ npm run check:bundle  # valida tamaños
 | **Duplicación capa datos** | Había duplicación entre `api/*` y adapters CRUD legacy en `utils/supabase/*`. | Mitigado en esta ejecución — `api/` queda como capa única |
 | **Dios-componentes** | `DealBlotter.tsx` 982 L, `ModelInventoryPanel.tsx` 832 L, `PricingReceipt.tsx` 777 L, `governanceWorkflows.ts` 916 L | Alto — cambios lentos y con regresiones |
 | **115 `any` tolerados** | ESLint `@typescript-eslint/no-explicit-any: 'off'`; peores en `utils/supabase/mappers.ts:16`, `api/config.ts:6`, `components/Config/MethodologyConfig.tsx:6` | Medio — errores de mapeo silenciosos |
-| **E2E todavía corto para el roadmap** | 5 specs activas con 79 tests (`78 pass`, `1 skip` esperado), ya estabilizadas con mock API central. | Medio — baseline ya más sólida, pero todavía faltan los golden paths pendientes del roadmap |
+| **E2E todavía corto para el roadmap** | 10 specs activas con 85 tests (`84 pass`, `1 skip` esperado), ya estabilizadas con mock API central y seeds controlados en el mock compartido. | Medio — baseline ya más sólida, pero todavía faltan los golden paths pendientes del roadmap |
 | **`pricingWorker.ts` probablemente muerto** | Existe en `utils/pricingWorker.ts`, referenciado en `hooks/useBatchPricing.ts`, sin evidencia de uso efectivo | Bajo — main thread bloquea en batch pricing >100 deals |
 | **Recharts y calculator chunking aún mejorables** | Bundle budget ya vuelve a pasar, pero siguen existiendo chunks pesados (`xlsx`, `CategoricalChart`) y oportunidades extra de lazy/manualChunks. | Medio — LCP / TBT |
 | **Context values sin `useMemo`** | Pendiente auditar `DataContext`, `UIContext`, `MarketDataContext`, `GovernanceContext` | Medio — re-renders en toda la app |
@@ -259,8 +262,8 @@ Pasar de 4 → ≥12 specs. Específicos:
 | `e2e/batch-import.spec.ts` (nuevo) | import CSV → batch price → export xlsx |
 | `e2e/rules-governance.spec.ts` (nuevo) | edit rule card → governance approval → audit trail |
 | `e2e/shocks-reporting.spec.ts` (nuevo) | apply shock scenario → NII sensitivity dashboard actualizado |
-| `e2e/market-data.spec.ts` (nuevo) | editar curva → bootstrap zero → verificar en calculator |
-| `e2e/esg-grid.spec.ts` (nuevo) | grid ESG → deal verde → greenium aplicado |
+| `e2e/market-data.spec.ts` (nuevo) | registrar fuente gobernada → guardar snapshot de curva → verificar audit trail |
+| `e2e/esg-grid.spec.ts` (nuevo) | request ESG greenium → aprobación/aplicación gobernada → greenium aplicado en calculator |
 | `e2e/ai-assistant.spec.ts` (nuevo, mock) | chat Gemini con grounding de portfolio |
 | `e2e/offline-pwa.spec.ts` (nuevo) | degradar network → operar con cache local → reconectar → sync |
 | `e2e/rbac.spec.ts` (nuevo) | Trader no puede approve; Risk_Manager sí; Auditor read-only |
@@ -399,7 +402,7 @@ Plan existente en `docs/superpowers/plans/`. No duplicar aquí, solo recordar qu
 - Q1, Q2, Q3, Q4, Q5, Q7 (quick wins)
 - A1 (consolidación `api/`)
 - A3 (typing `mappers.ts` + tests)
-- C1 parcial: 5 specs E2E activas; `deal-blotter.spec.ts` ya cubre el flujo básico del blotter
+- C1 parcial: 10 specs E2E activas; `deal-blotter.spec.ts`, `rules-governance.spec.ts`, `shocks-reporting.spec.ts`, `market-data.spec.ts` y `esg-grid.spec.ts` ya cubren el flujo básico del blotter, el maker-checker metodológico, el tramo de stress/reporting, el gobierno de curvas y el impacto ESG gobernado en pricing
 - C2 (regresión numérica motor)
 
 **Exit criteria:** `verify:full` verde, 8 E2E specs, 0 `any` en `api/mappers.ts`, capa datos única.
@@ -409,7 +412,7 @@ Plan existente en `docs/superpowers/plans/`. No duplicar aquí, solo recordar qu
 - B1 (`DealBlotter` descomposición)
 - D1 (Recharts lazy)
 - D2 (decidir `pricingWorker`)
-- C1 resto: 4 specs E2E adicionales
+- C1 resto: 2 specs E2E adicionales
 - C3 parcial: Storybook de los nuevos componentes de Blotter
 
 **Exit criteria:** Blotter en archivos <400 L, bundle inicial ≥80 KB más ligero, 12 E2E specs, Profiler shows ≥30% menos renders.

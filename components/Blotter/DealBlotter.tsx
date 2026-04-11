@@ -1,23 +1,19 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import * as auditApi from '../../api/audit';
 import * as configApi from '../../api/config';
 import * as dealsApi from '../../api/deals';
 import { Panel } from '../ui/LayoutComponents';
-import { Drawer } from '../ui/Drawer';
 import { validateDeal, type ValidationError } from '../../utils/validation';
 import {
-  PricingDossierStatus,
   Transaction,
   ProductDefinition,
   ClientEntity,
   BusinessUnit,
   UserProfile,
 } from '../../types';
-import { type DataContextType, useData } from '../../contexts/DataContext';
-import { Trash2 } from 'lucide-react';
+import { useData } from '../../contexts/DataContext';
 import { batchReprice, calculatePricing } from '../../utils/pricingEngine';
-import { FileUploadModal } from '../ui/FileUploadModal';
 import { errorTracker } from '../../utils/errorTracking';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, exportDealsToExcel } from '../../utils/excelUtils';
@@ -37,8 +33,7 @@ import BlotterFooter from './BlotterFooter';
 import BlotterHeaderActions from './BlotterHeaderActions';
 import BlotterTable from './BlotterTable';
 import BlotterToolbar from './BlotterToolbar';
-import CommitteeDossierDrawer from './CommitteeDossierDrawer';
-import DealForm from './DealForm';
+import DealBlotterDrawers from './DealBlotterDrawers';
 import {
   buildDealsCsv,
   createImportedDeal,
@@ -47,133 +42,9 @@ import {
   formatDealCurrency,
   normalizeDealDraft,
 } from './blotterUtils';
+import { mapWorkflowStatusToDossierStatus, type RenamedDealReferences, updateReferencedDealId } from './blotterReferenceUtils';
 import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
 import { useBlotterState } from './hooks/useBlotterState';
-
-const mapWorkflowStatusToDossierStatus = (status?: Transaction['status']): PricingDossierStatus | null => {
-  if (!status) return null;
-  if (status === 'Pending_Approval') return 'Pending_Approval';
-  if (status === 'Approved') return 'Approved';
-  if (status === 'Rejected') return 'Rejected';
-  if (status === 'Booked') return 'Booked';
-  if (status === 'Draft') return 'Draft';
-  return null;
-};
-
-const replaceDealIdentifier = (value: string | undefined, previousId: string, nextId: string) =>
-  value ? value.split(previousId).join(nextId) : value;
-
-const updateReferencedDealId = (
-  previousId: string,
-  nextId: string,
-  data: Pick<DataContextType, 'approvalTasks' | 'pricingDossiers' | 'portfolioSnapshots'>
-) => {
-  const nextApprovalTasks = data.approvalTasks.map((task) => {
-    if (task.scope !== 'DEAL_PRICING' || task.subject.id !== previousId) return task;
-
-    return {
-      ...task,
-      title: replaceDealIdentifier(task.title, previousId, nextId) || task.title,
-      description: replaceDealIdentifier(task.description, previousId, nextId) || task.description,
-      subject: {
-        ...task.subject,
-        id: nextId,
-        label: replaceDealIdentifier(task.subject.label, previousId, nextId) || nextId,
-      },
-      correlation: {
-        ...task.correlation,
-        dealId: nextId,
-      },
-    };
-  });
-
-  const nextPricingDossiers = data.pricingDossiers.map((dossier) => {
-    if (dossier.dealId !== previousId) return dossier;
-
-    return {
-      ...dossier,
-      dealId: nextId,
-      title: replaceDealIdentifier(dossier.title, previousId, nextId) || dossier.title,
-      dealSnapshot: {
-        ...dossier.dealSnapshot,
-        id: nextId,
-      },
-      evidence: dossier.evidence.map((evidence) => ({
-        ...evidence,
-        label: replaceDealIdentifier(evidence.label, previousId, nextId) || evidence.label,
-      })),
-      correlation: {
-        ...dossier.correlation,
-        dealId: nextId,
-      },
-      groundedContext: dossier.groundedContext
-        ? {
-            ...dossier.groundedContext,
-            dealId: nextId,
-            subjectRefs: dossier.groundedContext.subjectRefs.map((subject) =>
-              subject.type === 'DEAL' && subject.id === previousId
-                ? {
-                    ...subject,
-                    id: nextId,
-                    label: replaceDealIdentifier(subject.label, previousId, nextId) || nextId,
-                  }
-                : subject
-            ),
-          }
-        : dossier.groundedContext,
-      aiResponseTraces: dossier.aiResponseTraces?.map((trace) => ({
-        ...trace,
-        groundedContext: {
-          ...trace.groundedContext,
-          dealId: trace.groundedContext.dealId === previousId ? nextId : trace.groundedContext.dealId,
-          subjectRefs: trace.groundedContext.subjectRefs.map((subject) =>
-            subject.type === 'DEAL' && subject.id === previousId
-              ? {
-                  ...subject,
-                  id: nextId,
-                  label: replaceDealIdentifier(subject.label, previousId, nextId) || nextId,
-                }
-              : subject
-          ),
-        },
-        sources: trace.sources.map((subject) =>
-          subject.type === 'DEAL' && subject.id === previousId
-            ? {
-                ...subject,
-                id: nextId,
-                label: replaceDealIdentifier(subject.label, previousId, nextId) || nextId,
-              }
-            : subject
-        ),
-      })),
-    };
-  });
-
-  const nextPortfolioSnapshots = data.portfolioSnapshots.map((snapshot) => ({
-    ...snapshot,
-    dealIds: snapshot.dealIds.map((dealId) => (dealId === previousId ? nextId : dealId)),
-    results: snapshot.results.map((result) =>
-      result.dealId === previousId
-        ? {
-            ...result,
-            dealId: nextId,
-          }
-        : result
-    ),
-  }));
-
-  return {
-    nextApprovalTasks,
-    nextPricingDossiers,
-    nextPortfolioSnapshots,
-  };
-};
-
-interface RenamedDealReferences {
-  nextApprovalTasks: DataContextType['approvalTasks'];
-  nextPricingDossiers: DataContextType['pricingDossiers'];
-  nextPortfolioSnapshots: DataContextType['portfolioSnapshots'];
-}
 
 interface Props {
   deals: Transaction[];
@@ -333,6 +204,15 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   // Batch repricing
   const [isRepricing, setIsRepricing] = useState(false);
   const [repriceCount, setRepriceCount] = useState(0);
+  const repriceResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (repriceResetTimerRef.current) {
+        clearTimeout(repriceResetTimerRef.current);
+        repriceResetTimerRef.current = null;
+      }
+    };
+  }, []);
   const pricingContext = useMemo(
     () =>
       buildPricingContext(
@@ -480,7 +360,11 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       description: `Batch repriced ${results.size} deals and exported to Excel`,
     });
     setIsRepricing(false);
-    setTimeout(() => setRepriceCount(0), 3000);
+    if (repriceResetTimerRef.current) clearTimeout(repriceResetTimerRef.current);
+    repriceResetTimerRef.current = setTimeout(() => {
+      setRepriceCount(0);
+      repriceResetTimerRef.current = null;
+    }, 3000);
   }, [deals, user, data.approvalMatrix, pricingContext]);
 
   const handleEdit = (deal: Transaction) => {
@@ -751,155 +635,45 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
         <BlotterFooter deals={filteredDeals} committeeSummary={committeeSummary} />
 
-        {/* --- DRAWERS --- */}
-
-        {/* Edit Drawer */}
-        <Drawer
-          isOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-          title={`Edit Deal: ${selectedDeal?.id || ''}`}
-          footer={
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsEditOpen(false)}
-                className="px-4 py-2 text-xs text-slate-400 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded"
-              >
-                Save Changes
-              </button>
-            </div>
-          }
-        >
-          {dealValidationErrors.length > 0 && (
-            <div className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
-              <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Validation Errors</div>
-              <ul className="space-y-0.5">
-                {dealValidationErrors.map((err) => (
-                  <li key={err.field} className="text-[11px] text-red-300">
-                    <span className="font-mono text-red-400">{err.field}</span>: {err.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {selectedDeal && (
-            <DealForm
-              selectedDeal={selectedDeal}
-              clients={clients}
-              businessUnits={businessUnits}
-              products={products}
-              behaviouralModels={behaviouralModels}
-              onChange={(updates) => setSelectedDeal((prev) => ({ ...(prev ?? {}), ...updates }))}
-              onFormReady={(form) => { dealFormRef.current = form; }}
-            />
-          )}
-        </Drawer>
-
-        {/* New Deal Drawer */}
-        <Drawer
-          isOpen={isNewOpen}
-          onClose={() => setIsNewOpen(false)}
-          title="Create New Transaction"
-          footer={
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setIsNewOpen(false)} className="px-4 py-2 text-xs text-slate-400 hover:text-white">
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveNew}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded"
-              >
-                Create Deal
-              </button>
-            </div>
-          }
-        >
-          {dealValidationErrors.length > 0 && (
-            <div className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
-              <div className="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Validation Errors</div>
-              <ul className="space-y-0.5">
-                {dealValidationErrors.map((err) => (
-                  <li key={err.field} className="text-[11px] text-red-300">
-                    <span className="font-mono text-red-400">{err.field}</span>: {err.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {selectedDeal && (
-            <DealForm
-              selectedDeal={selectedDeal}
-              clients={clients}
-              businessUnits={businessUnits}
-              products={products}
-              behaviouralModels={behaviouralModels}
-              onChange={(updates) => setSelectedDeal((prev) => ({ ...(prev ?? {}), ...updates }))}
-              onFormReady={(form) => { dealFormRef.current = form; }}
-            />
-          )}
-        </Drawer>
-
-        {/* Import Drawer (FileUploadModal) */}
-        <FileUploadModal
-          isOpen={isImportOpen}
-          onClose={() => setIsImportOpen(false)}
-          onUpload={handleImport}
-          title="Import Transaction Batch"
-          templateName="deals_template.csv"
-          templateContent={DEAL_BLOTTER_TEMPLATE}
-        />
-
-        {/* Delete Confirmation Drawer */}
-        <Drawer
-          isOpen={isDeleteOpen}
-          onClose={() => setIsDeleteOpen(false)}
-          title="Delete Transaction"
-          footer={
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsDeleteOpen(false)}
-                className="px-4 py-2 text-xs text-slate-400 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded"
-              >
-                Confirm Delete
-              </button>
-            </div>
-          }
-        >
-          <div className="text-center p-4">
-            <div className="w-16 h-16 bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={32} className="text-red-500" />
-            </div>
-            <h3 className="text-slate-200 font-bold mb-2">Are you sure?</h3>
-            <p className="text-xs text-slate-400">
-              This action will permanently delete deal <span className="text-white font-mono">{selectedDeal?.id}</span>{' '}
-              and reverse all associated accounting entries.
-            </p>
-          </div>
-        </Drawer>
-
-        <CommitteeDossierDrawer
-          isOpen={isDossierOpen}
-          onClose={handleCloseDossier}
-          deal={selectedDossierDeal}
-          dossier={selectedPricingDossier}
-          approvalTask={selectedApprovalTask}
-          methodologyVersion={selectedMethodologyVersion}
-          portfolioSnapshot={selectedPortfolioSnapshot}
-          marketDataSources={selectedMarketDataSources}
-          availableActions={selectedAvailableActions}
-          onWorkflowAction={handleWorkflowAction}
-          onExportPackage={() => {
+        <DealBlotterDrawers
+          isEditOpen={isEditOpen}
+          isNewOpen={isNewOpen}
+          isImportOpen={isImportOpen}
+          isDeleteOpen={isDeleteOpen}
+          isDossierOpen={isDossierOpen}
+          selectedDeal={selectedDeal}
+          clients={clients}
+          businessUnits={businessUnits}
+          products={products}
+          behaviouralModels={behaviouralModels}
+          validationErrors={dealValidationErrors}
+          dossierState={{
+            selectedDossierDeal,
+            selectedPricingDossier,
+            selectedApprovalTask,
+            selectedMethodologyVersion,
+            selectedPortfolioSnapshot,
+            selectedMarketDataSources,
+            selectedAvailableActions,
+          }}
+          dealTemplateContent={DEAL_BLOTTER_TEMPLATE}
+          onCloseEdit={() => setIsEditOpen(false)}
+          onCloseNew={() => setIsNewOpen(false)}
+          onCloseImport={() => setIsImportOpen(false)}
+          onCloseDelete={() => setIsDeleteOpen(false)}
+          onCloseDossier={handleCloseDossier}
+          onSubmitEdit={handleSaveEdit}
+          onSubmitNew={handleSaveNew}
+          onConfirmDelete={() => {
+            void confirmDelete();
+          }}
+          onDealChange={(updates) => setSelectedDeal((prev) => ({ ...(prev ?? {}), ...updates }))}
+          onFormReady={(form) => {
+            dealFormRef.current = form;
+          }}
+          onImportUpload={handleImport}
+          onDossierWorkflowAction={handleWorkflowAction}
+          onExportCommitteePackage={() => {
             void handleExportCommitteePackage();
           }}
         />

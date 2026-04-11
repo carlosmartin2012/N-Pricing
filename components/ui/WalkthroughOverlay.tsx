@@ -147,12 +147,13 @@ export const WalkthroughOverlay: React.FC<{ language: Language }> = ({ language 
     }
 
     // Wait a frame for view navigation / lazy load to settle
+    let innerTimerId: ReturnType<typeof setTimeout> | null = null;
     const timerId = setTimeout(() => {
       const el = document.querySelector(step.targetSelector);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         // Wait for scroll to finish before measuring
-        setTimeout(() => {
+        innerTimerId = setTimeout(() => {
           setTargetRect(el.getBoundingClientRect());
         }, 350);
       } else {
@@ -160,7 +161,10 @@ export const WalkthroughOverlay: React.FC<{ language: Language }> = ({ language 
       }
     }, 150);
 
-    return () => clearTimeout(timerId);
+    return () => {
+      clearTimeout(timerId);
+      if (innerTimerId) clearTimeout(innerTimerId);
+    };
   }, [isActive, step, currentStep]);
 
   // Keep anchor div positioned at target center for the StepCard

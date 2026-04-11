@@ -49,11 +49,11 @@
 - Edge Function de pricing en `supabase/functions/pricing/` (Deno runtime)
 
 ### 4. Agente de Testing
-**Scope**: `utils/__tests__/` (23 archivos), `components/*/__tests__/` (3 archivos), `e2e/` (4 specs)
+**Scope**: `utils/__tests__/` (23 archivos), `components/*/__tests__/` (3 archivos), `e2e/` (10 specs)
 
 **Reglas**:
 - **Unit**: Vitest 4 (no Jest) — 328 tests en 67 suites, 26 archivos
-- **E2E**: Playwright 1.59 — 4 specs (auth, navigation, pricing flow, example)
+- **E2E**: Playwright 1.59 — 10 specs (`auth`, `brochure-screenshots`, `deal-blotter`, `esg-grid`, `example`, `market-data`, `navigation`, `pricing-flow`, `rules-governance`, `shocks-reporting`)
 - **Component**: Storybook 8.6 — stories junto al componente
 - Tests colocados en `__tests__/` junto al módulo
 - Patrón de test existente: describe → it → expect con datos inline

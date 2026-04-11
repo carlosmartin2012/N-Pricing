@@ -34,7 +34,7 @@ npm run build        # Build producción (PWA incluido)
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
 npm run test         # Vitest (671 tests, 45 archivos)
-npm run test:e2e     # Playwright (5 specs, 79 tests)
+npm run test:e2e     # Playwright (10 specs, 85 tests)
 npm run verify:full  # lint + typecheck + test + build + e2e
 npm run check:sync   # Validar seed↔schema sync
 npm run check:bundle # Validar tamaños de bundle
@@ -155,13 +155,18 @@ supabase/
   migrations/              # 14 migraciones secuenciales
   functions/pricing/       # Edge Function (Deno)
 
-e2e/                       # 5 specs Playwright (+ mock API compartida)
+e2e/                       # 10 specs Playwright (+ mock API compartida)
   auth.spec.ts
+  brochure-screenshots.spec.ts
   deal-blotter.spec.ts
+  esg-grid.spec.ts
   example.spec.ts
+  market-data.spec.ts
   mockApi.ts
   navigation.spec.ts
   pricing-flow.spec.ts
+  rules-governance.spec.ts
+  shocks-reporting.spec.ts
 
 scripts/
   check-bundle-size.ts     # Validación de bundle sizes

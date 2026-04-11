@@ -37,7 +37,7 @@ export const queryKeys = {
     users: ['config', 'users'] as const,
     shocks: ['config', 'shocks'] as const,
     rateCards: ['config', 'rateCards'] as const,
-    esgGrid: (type: 'transition' | 'physical') =>
+    esgGrid: (type: 'transition' | 'physical' | 'greenium') =>
       ['config', 'esgGrid', type] as const,
     rarocInputs: ['config', 'rarocInputs'] as const,
     approvalMatrix: ['config', 'approvalMatrix'] as const,

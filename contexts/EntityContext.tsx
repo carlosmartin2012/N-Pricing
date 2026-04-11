@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import type { Entity, EntityUser, Group } from '../types/entity';
 import { localCache } from '../utils/localCache';
 import * as entitiesApi from '../api/entities';
@@ -81,19 +81,31 @@ export const EntityProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
+  const value = useMemo(
+    () => ({
+      activeEntity,
+      availableEntities,
+      group,
+      isGroupScope,
+      isLoading,
+      switchEntity,
+      setGroupScope: setGroupScopeHandler,
+      loadUserEntities,
+    }),
+    [
+      activeEntity,
+      availableEntities,
+      group,
+      isGroupScope,
+      isLoading,
+      switchEntity,
+      setGroupScopeHandler,
+      loadUserEntities,
+    ]
+  );
+
   return (
-    <EntityContext.Provider
-      value={{
-        activeEntity,
-        availableEntities,
-        group,
-        isGroupScope,
-        isLoading,
-        switchEntity,
-        setGroupScope: setGroupScopeHandler,
-        loadUserEntities,
-      }}
-    >
+    <EntityContext.Provider value={value}>
       {children}
     </EntityContext.Provider>
   );

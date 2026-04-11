@@ -69,6 +69,23 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [dealSaveStatus, setDealSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveStatusResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dealSaveStatusResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (saveStatusResetTimer.current) {
+        clearTimeout(saveStatusResetTimer.current);
+        saveStatusResetTimer.current = null;
+      }
+      if (dealSaveStatusResetTimer.current) {
+        clearTimeout(dealSaveStatusResetTimer.current);
+        dealSaveStatusResetTimer.current = null;
+      }
+    };
+  }, []);
   const t = translations[language];
   const data = useData();
   const pricingContext = usePricingContext();
@@ -129,8 +146,14 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
       monitoringService
         .savePricingResult(deal.id!, result, deal, currentUser.email)
         .then(() => {
+          if (!isMountedRef.current) return;
           setSaveStatus('saved');
-          setTimeout(() => setSaveStatus('idle'), 2000);
+          if (saveStatusResetTimer.current) clearTimeout(saveStatusResetTimer.current);
+          saveStatusResetTimer.current = setTimeout(() => {
+            if (!isMountedRef.current) return;
+            setSaveStatus('idle');
+            saveStatusResetTimer.current = null;
+          }, 2000);
         })
         .catch(() => {});
     }, 3000);
@@ -228,7 +251,12 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
       });
       setDealSaveStatus('saved');
       onDealSaved?.(resolvedDeal);
-      setTimeout(() => setDealSaveStatus('idle'), 3000);
+      if (dealSaveStatusResetTimer.current) clearTimeout(dealSaveStatusResetTimer.current);
+      dealSaveStatusResetTimer.current = setTimeout(() => {
+        if (!isMountedRef.current) return;
+        setDealSaveStatus('idle');
+        dealSaveStatusResetTimer.current = null;
+      }, 3000);
     } catch {
       setDealSaveStatus('idle');
     }

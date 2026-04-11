@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import { ViewState } from '../types';
 import { Language, translations } from '../translations';
 
@@ -31,20 +31,31 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [isAiOpen, setIsAiOpen] = useState(false);
 
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const t = translations[language];
+  const t = useMemo(() => translations[language], [language]);
+  const value = useMemo(
+    () => ({
+      currentView, setCurrentView,
+      language, setLanguage,
+      theme, setTheme, t,
+      isSidebarOpen, setSidebarOpen,
+      isImportModalOpen, setIsImportModalOpen,
+      isConfigModalOpen, setIsConfigModalOpen,
+      isAiOpen, setIsAiOpen,
+    }),
+    [
+      currentView,
+      language,
+      theme,
+      t,
+      isSidebarOpen,
+      isImportModalOpen,
+      isConfigModalOpen,
+      isAiOpen,
+    ]
+  );
 
   return (
-    <UIContext.Provider
-      value={{
-        currentView, setCurrentView,
-        language, setLanguage,
-        theme, setTheme, t,
-        isSidebarOpen, setSidebarOpen,
-        isImportModalOpen, setIsImportModalOpen,
-        isConfigModalOpen, setIsConfigModalOpen,
-        isAiOpen, setIsAiOpen,
-      }}
-    >
+    <UIContext.Provider value={value}>
       {children}
     </UIContext.Provider>
   );

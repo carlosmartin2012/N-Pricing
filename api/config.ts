@@ -177,11 +177,11 @@ export async function saveRateCards(cards: FtpRateCard[]): Promise<void> {
   await saveSystemConfigValue('rate_cards', cards, 'saveRateCards');
 }
 
-export async function fetchEsgGrid(type: 'transition' | 'physical'): Promise<unknown[]> {
+export async function fetchEsgGrid(type: 'transition' | 'physical' | 'greenium'): Promise<unknown[]> {
   return fetchSystemConfigValue(`${type}_grid`, []);
 }
 
-export async function saveEsgGrid(type: 'transition' | 'physical', grid: unknown[]): Promise<void> {
+export async function saveEsgGrid(type: 'transition' | 'physical' | 'greenium', grid: unknown[]): Promise<void> {
   await saveSystemConfigValue(`${type}_grid`, grid, `saveEsgGrid:${type}`);
 }
 

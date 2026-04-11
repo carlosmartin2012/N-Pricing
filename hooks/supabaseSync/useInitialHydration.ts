@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { DataContextType } from '../../contexts/DataContext';
 import type {
   ApprovalMatrixConfig,
+  GreeniumRateCard,
   PhysicalRateCard,
   RAROCInputs,
   TransitionRateCard,
@@ -14,6 +15,7 @@ import {
   MOCK_CLIENTS,
   MOCK_DEALS,
   MOCK_FTP_RATE_CARDS,
+  MOCK_GREENIUM_GRID,
   MOCK_LIQUIDITY_CURVES,
   MOCK_PHYSICAL_GRID,
   MOCK_PRODUCT_DEFS,
@@ -66,6 +68,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
           dbRateCards,
           dbTransGrid,
           dbPhysGrid,
+          dbGreeniumGrid,
           dbYieldCurves,
           dbRaroc,
           dbApprovalMatrix,
@@ -88,6 +91,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
           configApi.fetchRateCards(),
           configApi.fetchEsgGrid('transition'),
           configApi.fetchEsgGrid('physical'),
+          configApi.fetchEsgGrid('greenium'),
           marketDataApi.listYieldCurves(),
           configApi.fetchRarocInputs(),
           configApi.fetchApprovalMatrix(),
@@ -112,6 +116,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
         queryClient.setQueryData(queryKeys.config.rateCards, resolveWithFallback(dbRateCards, MOCK_FTP_RATE_CARDS));
         queryClient.setQueryData(queryKeys.config.esgGrid('transition'), resolveWithFallback(dbTransGrid as unknown[], MOCK_TRANSITION_GRID));
         queryClient.setQueryData(queryKeys.config.esgGrid('physical'), resolveWithFallback(dbPhysGrid as unknown[], MOCK_PHYSICAL_GRID));
+        queryClient.setQueryData(queryKeys.config.esgGrid('greenium'), resolveWithFallback(dbGreeniumGrid as unknown[], MOCK_GREENIUM_GRID));
         queryClient.setQueryData(queryKeys.marketData.yieldCurves, dbYieldCurves?.length ? dbYieldCurves : MOCK_YIELD_CURVE);
         queryClient.setQueryData(queryKeys.config.rarocInputs, dbRaroc);
         queryClient.setQueryData(queryKeys.config.approvalMatrix, dbApprovalMatrix);
@@ -135,6 +140,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
         data.setFtpRateCards(resolveWithFallback(dbRateCards, MOCK_FTP_RATE_CARDS));
         data.setTransitionGrid(resolveWithFallback(dbTransGrid as TransitionRateCard[], MOCK_TRANSITION_GRID));
         data.setPhysicalGrid(resolveWithFallback(dbPhysGrid as PhysicalRateCard[], MOCK_PHYSICAL_GRID));
+        data.setGreeniumGrid(resolveWithFallback(dbGreeniumGrid as GreeniumRateCard[], MOCK_GREENIUM_GRID));
         // API returns YieldCurveSnapshot[] — extract gridData for context, or fallback to mock
         const yieldCurvePoints = dbYieldCurves?.length
           ? dbYieldCurves.flatMap((snapshot: YieldCurveSnapshot) => snapshot.gridData ?? [])

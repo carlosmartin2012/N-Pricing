@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import type {
   Transaction,
   ClientEntity,
@@ -87,33 +87,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'mock' | 'synced' | 'error'>('idle');
 
+  const value = useMemo(
+    () => ({
+      deals,
+      setDeals,
+      clients,
+      setClients,
+      products,
+      setProducts,
+      businessUnits,
+      setBusinessUnits,
+      rules,
+      setRules,
+      users,
+      setUsers,
+      approvalMatrix,
+      setApprovalMatrix,
+      shocks,
+      setShocks,
+      rarocInputs,
+      setRarocInputs,
+      isLoading,
+      setIsLoading,
+      syncStatus,
+      setSyncStatus,
+    }),
+    [
+      deals,
+      clients,
+      products,
+      businessUnits,
+      rules,
+      users,
+      approvalMatrix,
+      setApprovalMatrix,
+      shocks,
+      rarocInputs,
+      isLoading,
+      syncStatus,
+    ]
+  );
+
   return (
-    <CoreDataContext.Provider
-      value={{
-        deals,
-        setDeals,
-        clients,
-        setClients,
-        products,
-        setProducts,
-        businessUnits,
-        setBusinessUnits,
-        rules,
-        setRules,
-        users,
-        setUsers,
-        approvalMatrix,
-        setApprovalMatrix,
-        shocks,
-        setShocks,
-        rarocInputs,
-        setRarocInputs,
-        isLoading,
-        setIsLoading,
-        syncStatus,
-        setSyncStatus,
-      }}
-    >
+    <CoreDataContext.Provider value={value}>
       {children}
     </CoreDataContext.Provider>
   );
@@ -133,5 +149,5 @@ export const useData = (): DataContextType => {
   const core = useCoreData();
   const market = useMarketData();
   const governance = useGovernance();
-  return { ...core, ...market, ...governance };
+  return useMemo(() => ({ ...core, ...market, ...governance }), [core, market, governance]);
 };

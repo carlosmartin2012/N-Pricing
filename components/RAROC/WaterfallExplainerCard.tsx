@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Transaction, FTPResult } from '../../types';
 import { buildWaterfallExplanation } from '../../utils/waterfallExplainer';
 import { apiPost } from '../../utils/apiFetch';
@@ -88,6 +88,15 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) {
+        clearTimeout(copiedTimerRef.current);
+        copiedTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const empty = isEmptyResult(result);
 
@@ -95,7 +104,11 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
     try {
       await navigator.clipboard.writeText(markdown);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => {
+        copiedTimerRef.current = null;
+        setCopied(false);
+      }, 1800);
     } catch {
       // silently ignore clipboard failures
     }

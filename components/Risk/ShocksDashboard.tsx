@@ -32,7 +32,22 @@ const ShocksDashboard: React.FC<Props> = ({
 }) => {
   const pricingContext = usePricingContext();
   const auditTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingAuditDescriptionRef = useRef<string | null>(null);
   const [activeScenarioId, setActiveScenarioId] = useState<string | undefined>(undefined);
+
+  const flushShockAudit = useCallback(() => {
+    const pendingDescription = pendingAuditDescriptionRef.current;
+    if (!pendingDescription) return;
+
+    pendingAuditDescriptionRef.current = null;
+    void logAudit({
+      userEmail: user?.email || 'unknown',
+      userName: user?.name || 'Unknown User',
+      action: 'APPLY_SHOCK',
+      module: 'SHOCKS',
+      description: pendingDescription,
+    });
+  }, [user]);
 
   const logShockAudit = useCallback(
     (description: string) => {
@@ -40,26 +55,24 @@ const ShocksDashboard: React.FC<Props> = ({
         clearTimeout(auditTimerRef.current);
       }
 
+      pendingAuditDescriptionRef.current = description;
       auditTimerRef.current = setTimeout(() => {
-        void logAudit({
-          userEmail: user?.email || 'unknown',
-          userName: user?.name || 'Unknown User',
-          action: 'APPLY_SHOCK',
-          module: 'SHOCKS',
-          description,
-        });
+        flushShockAudit();
+        auditTimerRef.current = null;
       }, 500);
     },
-    [user],
+    [flushShockAudit],
   );
 
   useEffect(() => {
     return () => {
       if (auditTimerRef.current) {
         clearTimeout(auditTimerRef.current);
+        auditTimerRef.current = null;
+        flushShockAudit();
       }
     };
-  }, []);
+  }, [flushShockAudit]);
 
   const baseResult = useMemo(
     () => calculatePricing(deal, approvalMatrix, pricingContext, DEFAULT_PRICING_SHOCKS),

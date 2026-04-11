@@ -49,6 +49,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
   const [showFallbackBtn, setShowFallbackBtn] = useState(false);
   const fallbackRef = useRef<HTMLDivElement>(null);
   const gisInitializedRef = useRef(false);
+  const googleLoadingResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (googleLoadingResetRef.current) {
+        clearTimeout(googleLoadingResetRef.current);
+        googleLoadingResetRef.current = null;
+      }
+    };
+  }, []);
 
   const handleCredentialResponse = useCallback(async (response: { credential: string }) => {
     setGoogleLoading(true);
@@ -138,7 +147,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
       }
     });
 
-    setTimeout(() => {
+    if (googleLoadingResetRef.current) clearTimeout(googleLoadingResetRef.current);
+    googleLoadingResetRef.current = setTimeout(() => {
+      googleLoadingResetRef.current = null;
       setGoogleLoading(false);
     }, 3000);
   };

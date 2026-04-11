@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import type {
   ApprovalTask,
   PricingDossier,
@@ -29,21 +29,30 @@ export const GovernanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [methodologyVersions, setMethodologyVersions] = useState<MethodologyVersion[]>([]);
   const [portfolioSnapshots, setPortfolioSnapshots] = useState<PortfolioSnapshot[]>([]);
 
+  const value = useMemo(
+    () => ({
+      approvalTasks,
+      setApprovalTasks,
+      pricingDossiers,
+      setPricingDossiers,
+      methodologyChangeRequests,
+      setMethodologyChangeRequests,
+      methodologyVersions,
+      setMethodologyVersions,
+      portfolioSnapshots,
+      setPortfolioSnapshots,
+    }),
+    [
+      approvalTasks,
+      pricingDossiers,
+      methodologyChangeRequests,
+      methodologyVersions,
+      portfolioSnapshots,
+    ]
+  );
+
   return (
-    <GovernanceContext.Provider
-      value={{
-        approvalTasks,
-        setApprovalTasks,
-        pricingDossiers,
-        setPricingDossiers,
-        methodologyChangeRequests,
-        setMethodologyChangeRequests,
-        methodologyVersions,
-        setMethodologyVersions,
-        portfolioSnapshots,
-        setPortfolioSnapshots,
-      }}
-    >
+    <GovernanceContext.Provider value={value}>
       {children}
     </GovernanceContext.Provider>
   );
