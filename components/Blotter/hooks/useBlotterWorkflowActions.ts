@@ -22,7 +22,13 @@ import {
   upsertApprovalTask,
   upsertPricingDossier,
 } from '../../../utils/governanceWorkflows';
-import { executeTransition, type UserRole, type WorkflowAction } from '../../../utils/dealWorkflow';
+import {
+  canBatchRepriceDeals,
+  canCreateOrCloneDeals,
+  executeTransition,
+  type UserRole,
+  type WorkflowAction,
+} from '../../../utils/dealWorkflow';
 import { exportDealsToExcel } from '../../../utils/excelUtils';
 import { mapWorkflowStatusToDossierStatus } from '../blotterReferenceUtils';
 
@@ -96,6 +102,7 @@ export function useBlotterWorkflowActions({
 
   const handleCloneDeal = useCallback(
     async (deal: Transaction) => {
+      if (!canCreateOrCloneDeals(userRole)) return;
       const clonedDeal: Transaction = {
         ...deal,
         id: `TRD-${Date.now().toString(36).toUpperCase()}`,
@@ -113,7 +120,7 @@ export function useBlotterWorkflowActions({
         description: `Cloned deal ${deal.id} → ${clonedDeal.id}`,
       });
     },
-    [setDeals, user]
+    [setDeals, user, userRole]
   );
 
   const handleWorkflowAction = useCallback(
@@ -212,6 +219,7 @@ export function useBlotterWorkflowActions({
   );
 
   const handleBatchReprice = useCallback(async () => {
+    if (!canBatchRepriceDeals(userRole)) return;
     setIsRepricing(true);
     const results = batchReprice(deals, data.approvalMatrix, pricingContext);
     setRepriceCount(results.size);
@@ -230,7 +238,7 @@ export function useBlotterWorkflowActions({
       setRepriceCount(0);
       repriceResetTimerRef.current = null;
     }, 3000);
-  }, [data.approvalMatrix, deals, pricingContext, user]);
+  }, [data.approvalMatrix, deals, pricingContext, user, userRole]);
 
   return {
     behaviouralModels,

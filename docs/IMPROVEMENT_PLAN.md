@@ -51,6 +51,9 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 - **Performance / bundle**: restaurado `npm run check:bundle` separando `CalculatorWorkspace`, `PricingReceipt`, `MethodologyVisualizer`, `UserConfigModal`, `UniversalImportModal` y `WalkthroughOverlay` en chunks lazy. El entry principal quedó en 372.1 KB y el workspace de calculator en 73.6 KB, ambos dentro de budget.
 - **B4 (cerrado)**: `utils/governanceWorkflows.ts` queda reducido a fachada pública sobre `utils/governance/{common,methodology,methodologyRequests,methodologyApply,pricing}.ts`, preservando compatibilidad sin seguir concentrando ~900 líneas en un solo archivo.
 - **E2 (cerrado)**: `vercel.json` pasa de `Content-Security-Policy-Report-Only` a `Content-Security-Policy` efectiva, afinando además `style-src`/`font-src` para Google Fonts e `img-src` para el favicon de Google en login.
+- **Seguridad operativa**: `server/index.ts` añade headers runtime (`nosniff`, `DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store` en `/api/*`), `scripts/check-dependency-audit.ts` entra en CI con allowlist gobernada para `xlsx` y se publica `docs/security-baseline-2026-04.md`.
+- **Offline real**: `api/deals.ts` y `api/audit.ts` ya encolan mutaciones cuando `navigator.onLine === false`, `useOfflineSync` sincroniza contra la capa pública `api/*` y el header expone el badge pendiente en runtime.
+- **RBAC en blotter**: se cierran huecos de sólo-lectura para `Auditor` en acciones de crear, clonar, editar, borrar e importar/lanzar batch repricing; además quedan cubiertos por E2E.
 - **E1 (cerrado)**: auditoría formal publicada en `docs/rls-audit-2026-04.md`; la revisión detectó que `supabase/schema_v2.sql` ya no representa el estado completo de RLS y dejó un hardening adicional en `supabase/migrations/20260411000002_rls_hardening.sql`.
 - **F1 / F3 (diseño cerrado)**: publicados `docs/pricing-plugin-architecture.md` y `docs/pricing-calculation-observability.md` con la propuesta incremental de registry/pipeline y trazas estructuradas de cálculo.
 - **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 671 tests unitarios y E2E 86 passing / 1 skipped (87 tests totales).
@@ -61,7 +64,7 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 - La suite de screenshots E2E ya no escribe en `screenshots/` durante tests; ahora usa output de Playwright y Vite ignora artefactos de test para evitar HMR espurio.
 
 ### Pendiente del plan maestro
-- **C1**: objetivo mínimo `>=12 specs` cumplido; quedan specs adicionales (`batch-import`, `offline-pwa`, `rbac`) como expansión opcional.
+- **C1**: objetivo mínimo `>=12 specs` cumplido; `offline-pwa` y `rbac` ya están materializados y queda `batch-import` como expansión opcional.
 - **A2**: falta la parte de profiling cuantificado antes/después; la memoización parcial ya está hecha, pero no la evidencia del `>=30%`.
 - **F2 / F4 / F5** siguen como backlog real.
 

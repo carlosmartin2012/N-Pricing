@@ -4,6 +4,7 @@ import * as auditApi from '../../api/audit';
 import { mapAuditFromDB } from '../../api/mappers';
 import { AuditEntry } from '../../types';
 import { supabase } from '../../utils/supabaseClient';
+import { AUDIT_LOG_CHANGED_EVENT } from '../../utils/auditEvents';
 import { Panel } from '../ui/LayoutComponents';
 import { AuditEntryDrawer } from './AuditEntryDrawer';
 import { AuditLogTable } from './AuditLogTable';
@@ -40,7 +41,7 @@ const AuditLog: React.FC = () => {
 
     const fetchLogs = useCallback(async () => {
         setIsLoading(true);
-        setStatus(status === 'error' ? 'connecting' : status);
+        setStatus((current) => (current === 'error' ? 'connecting' : current));
         setStatusMsg('Cargando actividad...');
         try {
             const { data, total, errorMessage } = await auditApi.listAuditLogPaginated({ page: 1, pageSize: PAGE_SIZE });
@@ -57,7 +58,7 @@ const AuditLog: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [status]);
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -69,6 +70,12 @@ const AuditLog: React.FC = () => {
 
     useEffect(() => {
         fetchLogs();
+
+        const handleAuditLogChanged = () => {
+            setStatus('connecting');
+            setStatusMsg('Actualizando actividad...');
+            void fetchLogs();
+        };
 
         const channel = supabase
             .channel('audit-log-live')
@@ -97,7 +104,12 @@ const AuditLog: React.FC = () => {
                 }
             });
 
-        return () => { supabase.removeChannel(channel); };
+        window.addEventListener(AUDIT_LOG_CHANGED_EVENT, handleAuditLogChanged);
+
+        return () => {
+            window.removeEventListener(AUDIT_LOG_CHANGED_EVENT, handleAuditLogChanged);
+            supabase.removeChannel(channel);
+        };
     }, [fetchLogs]);
 
     const handleTestEntry = async () => {

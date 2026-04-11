@@ -2,8 +2,28 @@ import type { FTPResult, Transaction } from '../types';
 import { apiGet, apiPost, apiPatch, apiDelete } from '../utils/apiFetch';
 import { createLogger } from '../utils/logger';
 import { mapDealFromDB, mapDealToDB } from './mappers';
+import { enqueueMutation } from '../utils/offlineStore';
 
 const log = createLogger('api/deals');
+
+function isOfflineLikeError(err: unknown): boolean {
+  const message = String(err);
+  return (
+    (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+    message.includes('Failed to fetch') ||
+    message.includes('NetworkError') ||
+    message.includes('Load failed')
+  );
+}
+
+async function queueDealUpsert(deal: Transaction): Promise<void> {
+  await enqueueMutation({
+    type: 'upsert',
+    table: 'deals',
+    payload: mapDealToDB(deal),
+    entityId: deal.entityId ?? '',
+  });
+}
 
 export async function listDeals(entityId?: string): Promise<Transaction[]> {
   const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
@@ -12,10 +32,18 @@ export async function listDeals(entityId?: string): Promise<Transaction[]> {
 }
 
 export async function upsertDeal(deal: Transaction): Promise<Transaction | null> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    await queueDealUpsert(deal);
+    return deal;
+  }
   try {
     const row = await apiPost<Record<string, unknown>>('/deals/upsert', mapDealToDB(deal));
     return row ? mapDealFromDB(row) : null;
   } catch (err) {
+    if (isOfflineLikeError(err)) {
+      await queueDealUpsert(deal);
+      return deal;
+    }
     log.error('upsertDeal failed', { dealId: deal.id }, err as Error);
     return null;
   }
@@ -42,7 +70,30 @@ export async function updateDealWithLock(
 }
 
 export async function deleteDeal(id: string): Promise<void> {
-  await apiDelete(`/deals/${id}`);
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    await enqueueMutation({
+      type: 'delete',
+      table: 'deals',
+      payload: { id },
+      entityId: '',
+    });
+    return;
+  }
+
+  try {
+    await apiDelete(`/deals/${id}`);
+  } catch (err) {
+    if (isOfflineLikeError(err)) {
+      await enqueueMutation({
+        type: 'delete',
+        table: 'deals',
+        payload: { id },
+        entityId: '',
+      });
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function renameDealId(previousId: string, nextId: string): Promise<Transaction | null> {
@@ -58,10 +109,18 @@ export async function renameDealId(previousId: string, nextId: string): Promise<
 
 export async function batchUpsertDeals(deals: Transaction[]): Promise<Transaction[]> {
   if (deals.length === 0) return [];
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    await Promise.all(deals.map(queueDealUpsert));
+    return deals;
+  }
   try {
     const rows = await apiPost<Record<string, unknown>[]>('/deals/batch-upsert', deals.map(mapDealToDB));
     return rows.map(mapDealFromDB);
   } catch (err) {
+    if (isOfflineLikeError(err)) {
+      await Promise.all(deals.map(queueDealUpsert));
+      return deals;
+    }
     log.error('batchUpsertDeals failed', { count: deals.length }, err as Error);
     return [];
   }

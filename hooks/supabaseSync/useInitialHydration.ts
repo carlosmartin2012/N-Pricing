@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { DataContextType } from '../../contexts/DataContext';
 import type {
@@ -55,6 +55,8 @@ export function useInitialHydration({
   addToast,
 }: InitialHydrationOptions) {
   const queryClient = useQueryClient();
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   useEffect(() => {
     if (currentUser && isEntityLoading) return;
@@ -63,9 +65,11 @@ export function useInitialHydration({
     let isCancelled = false;
 
     const hydrate = async () => {
+      const context = dataRef.current;
+
       if (!isSupabaseConfigured) {
-        applyMockData(data, 'mock');
-        data.setIsLoading(false);
+        applyMockData(context, 'mock');
+        context.setIsLoading(false);
         return;
       }
 
@@ -150,42 +154,42 @@ export function useInitialHydration({
         queryClient.setQueryData(queryKeys.config.marketDataSources, dbMarketDataSources);
 
         // Hydrate context providers for backward compatibility
-        data.setDeals(resolvedDeals);
-        data.setBehaviouralModels(resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS));
-        data.setRules(resolveWithFallback(dbRules, MOCK_RULES));
-        data.setClients(resolveWithFallback(dbClients, MOCK_CLIENTS));
-        data.setBusinessUnits(resolveWithFallback(dbUnits, MOCK_BUSINESS_UNITS));
-        data.setProducts(resolveWithFallback(dbProducts, MOCK_PRODUCT_DEFS));
-        data.setUsers(resolveWithFallback(dbUsers, MOCK_USERS));
-        if (dbShocks) data.setShocks(dbShocks);
-        data.setFtpRateCards(resolveWithFallback(dbRateCards, MOCK_FTP_RATE_CARDS));
-        data.setTransitionGrid(resolveWithFallback(dbTransGrid as TransitionRateCard[], MOCK_TRANSITION_GRID));
-        data.setPhysicalGrid(resolveWithFallback(dbPhysGrid as PhysicalRateCard[], MOCK_PHYSICAL_GRID));
-        data.setGreeniumGrid(resolveWithFallback(dbGreeniumGrid as GreeniumRateCard[], MOCK_GREENIUM_GRID));
+        context.setDeals(resolvedDeals);
+        context.setBehaviouralModels(resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS));
+        context.setRules(resolveWithFallback(dbRules, MOCK_RULES));
+        context.setClients(resolveWithFallback(dbClients, MOCK_CLIENTS));
+        context.setBusinessUnits(resolveWithFallback(dbUnits, MOCK_BUSINESS_UNITS));
+        context.setProducts(resolveWithFallback(dbProducts, MOCK_PRODUCT_DEFS));
+        context.setUsers(resolveWithFallback(dbUsers, MOCK_USERS));
+        if (dbShocks) context.setShocks(dbShocks);
+        context.setFtpRateCards(resolveWithFallback(dbRateCards, MOCK_FTP_RATE_CARDS));
+        context.setTransitionGrid(resolveWithFallback(dbTransGrid as TransitionRateCard[], MOCK_TRANSITION_GRID));
+        context.setPhysicalGrid(resolveWithFallback(dbPhysGrid as PhysicalRateCard[], MOCK_PHYSICAL_GRID));
+        context.setGreeniumGrid(resolveWithFallback(dbGreeniumGrid as GreeniumRateCard[], MOCK_GREENIUM_GRID));
         // API returns YieldCurveSnapshot[] — extract gridData for context, or fallback to mock
         const yieldCurvePoints = dbYieldCurves?.length
           ? dbYieldCurves.flatMap((snapshot: YieldCurveSnapshot) => snapshot.gridData ?? [])
           : null;
-        data.setYieldCurves(resolveWithFallback(yieldCurvePoints, MOCK_YIELD_CURVE));
-        data.setLiquidityCurves(resolveWithFallback(dbLiqCurves, MOCK_LIQUIDITY_CURVES));
+        context.setYieldCurves(resolveWithFallback(yieldCurvePoints, MOCK_YIELD_CURVE));
+        context.setLiquidityCurves(resolveWithFallback(dbLiqCurves, MOCK_LIQUIDITY_CURVES));
         if (dbRaroc && typeof dbRaroc === 'object' && 'transactionId' in dbRaroc) {
-          data.setRarocInputs(dbRaroc as RAROCInputs);
+          context.setRarocInputs(dbRaroc as RAROCInputs);
         }
         if (dbApprovalMatrix && typeof dbApprovalMatrix === 'object' && 'autoApprovalThreshold' in dbApprovalMatrix) {
-          data.setApprovalMatrix(dbApprovalMatrix as ApprovalMatrixConfig);
+          context.setApprovalMatrix(dbApprovalMatrix as ApprovalMatrixConfig);
         }
-        data.setMethodologyChangeRequests(dbMethodologyChangeRequests);
-        data.setMethodologyVersions(dbMethodologyVersions);
-        data.setApprovalTasks(dbApprovalTasks);
-        data.setPricingDossiers(dbPricingDossiers);
-        data.setPortfolioSnapshots(dbPortfolioSnapshots);
-        data.setMarketDataSources(dbMarketDataSources);
+        context.setMethodologyChangeRequests(dbMethodologyChangeRequests);
+        context.setMethodologyVersions(dbMethodologyVersions);
+        context.setApprovalTasks(dbApprovalTasks);
+        context.setPricingDossiers(dbPricingDossiers);
+        context.setPortfolioSnapshots(dbPortfolioSnapshots);
+        context.setMarketDataSources(dbMarketDataSources);
 
         const hasRemoteData = [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts].some(
           (dataset) => dataset?.length
         );
         const nextSyncStatus: DataContextType['syncStatus'] = hasRemoteData ? 'synced' : 'mock';
-        data.setSyncStatus(nextSyncStatus);
+        context.setSyncStatus(nextSyncStatus);
 
         await auditApi.logAudit({
           userEmail: currentUser?.email || 'system',
@@ -198,7 +202,7 @@ export function useInitialHydration({
         if (isCancelled) return;
         log.warn('Supabase sync failed, loading mock data', { error: String(error) });
         addToast('warning', 'Could not connect to server. Using offline demo data.');
-        applyMockData(data, 'error');
+        applyMockData(context, 'error');
         await auditApi.logAudit({
           userEmail: currentUser?.email || 'system',
           userName: currentUser?.name || 'System',
@@ -207,7 +211,7 @@ export function useInitialHydration({
           description: 'Data hydrated. Status: error.',
         });
       } finally {
-        data.setIsLoading(false);
+        context.setIsLoading(false);
       }
     };
 
@@ -215,5 +219,5 @@ export function useInitialHydration({
     return () => {
       isCancelled = true;
     };
-  }, [activeEntityId, addToast, currentUser, data, isEntityLoading, isGroupScope, queryClient]);
+  }, [activeEntityId, addToast, currentUser, isEntityLoading, isGroupScope, queryClient]);
 }

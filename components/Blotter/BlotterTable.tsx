@@ -3,9 +3,11 @@ import { BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, RotateCcw, Send,
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '../ui/LayoutComponents';
 import {
+  canCreateOrCloneDeals,
+  canDeleteDeal,
+  canEditDeal,
   formatStatus,
   getAvailableActions,
-  isDealEditable,
   type UserRole,
   type WorkflowAction,
 } from '../../utils/dealWorkflow';
@@ -73,7 +75,11 @@ const DealRow: React.FC<{
   style?: React.CSSProperties;
 }> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, formatCurrency, style }) => {
   const availableActions = getAvailableActions(deal.status || 'Draft', userRole);
-  const canEdit = isDealEditable(deal) || userRole === 'Admin';
+  const canEdit = canEditDeal(deal, userRole);
+  const canClone = canCreateOrCloneDeals(userRole);
+  const canDelete = canDeleteDeal(userRole);
+  const editDisabledTitle = userRole === 'Auditor' ? 'Read-only role' : 'Deal is locked';
+  const editDisabledLabel = userRole === 'Auditor' ? `Edit disabled for deal ${deal.id}` : `Deal ${deal.id} is locked`;
 
   const statusStyle = getStatusStyle(deal.status);
 
@@ -142,9 +148,10 @@ const DealRow: React.FC<{
           </button>
           <button
             onClick={() => onCloneDeal(deal)}
-            className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[var(--nfq-warning)]"
-            title="Clone deal"
-            aria-label={`Clone deal ${deal.id}`}
+            className={`p-1 transition-colors ${canClone ? 'text-[color:var(--nfq-text-muted)] hover:text-[var(--nfq-warning)]' : 'cursor-not-allowed text-[color:var(--nfq-text-faint)]'}`}
+            disabled={!canClone}
+            title={canClone ? 'Clone deal' : 'Read-only role'}
+            aria-label={canClone ? `Clone deal ${deal.id}` : `Clone disabled for deal ${deal.id}`}
           >
             <Copy size={14} aria-hidden="true" />
           </button>
@@ -152,16 +159,17 @@ const DealRow: React.FC<{
             onClick={() => onEditDeal(deal)}
             className={`p-1 transition-colors ${canEdit ? 'text-[color:var(--nfq-text-muted)] hover:text-[var(--nfq-accent)]' : 'cursor-not-allowed text-[color:var(--nfq-text-faint)]'}`}
             disabled={!canEdit}
-            title={canEdit ? 'Edit deal' : 'Deal is locked'}
-            aria-label={canEdit ? `Edit deal ${deal.id}` : `Deal ${deal.id} is locked`}
+            title={canEdit ? 'Edit deal' : editDisabledTitle}
+            aria-label={canEdit ? `Edit deal ${deal.id}` : editDisabledLabel}
           >
             <Edit size={14} aria-hidden="true" />
           </button>
           <button
             onClick={() => onDeleteDeal(deal)}
-            className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[var(--nfq-danger)]"
-            title="Delete deal"
-            aria-label={`Delete deal ${deal.id}`}
+            className={`p-1 transition-colors ${canDelete ? 'text-[color:var(--nfq-text-muted)] hover:text-[var(--nfq-danger)]' : 'cursor-not-allowed text-[color:var(--nfq-text-faint)]'}`}
+            disabled={!canDelete}
+            title={canDelete ? 'Delete deal' : 'Read-only role'}
+            aria-label={canDelete ? `Delete deal ${deal.id}` : `Delete disabled for deal ${deal.id}`}
           >
             <Trash2 size={14} aria-hidden="true" />
           </button>

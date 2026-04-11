@@ -7,6 +7,7 @@ export type AuditWriteEntry = Omit<AuditEntry, 'id'>;
 export interface AuditWriteResult {
   ok: boolean;
   errorMessage?: string;
+  queued?: boolean;
 }
 
 export function buildAuditInsertPayload(entry: AuditWriteEntry) {

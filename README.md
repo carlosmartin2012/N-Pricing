@@ -104,12 +104,14 @@ npm run dev            # Servidor de desarrollo con HMR
 npm run build          # Build de produccion optimizado (PWA incluido)
 npm run preview        # Preview del build de produccion
 npm run test           # Tests unitarios (Vitest — 328 tests)
-npm run test:e2e       # Tests E2E (Playwright — 4 specs)
+npm run test:e2e       # Tests E2E (Playwright — 14 specs)
 npm run typecheck      # Verificacion de tipos TypeScript
 npm run lint           # Analisis estatico (ESLint)
 npm run format         # Formateo automatico (Prettier)
 npm run verify:full    # Pipeline completo: lint + typecheck + test + build + e2e
 npm run check:sync     # Validar sync seed↔schema
+npm run check:data-quality # Validar integridad relacional y calidad del seed/config
+npm run check:security # Scan de dependencias prod con excepciones gobernadas
 npm run check:bundle   # Validar tamaños de bundle
 npm run storybook      # Storybook dev en :6006
 ```
@@ -140,8 +142,8 @@ npm run storybook      # Storybook dev en :6006
 │   ├── supabase/        # 15 servicios Supabase especializados
 │   └── __tests__/       # 26 archivos, 67 suites, 328 tests
 ├── supabase/            # SQL schemas, 14 migraciones, Edge Functions (Deno)
-├── e2e/                 # 4 specs Playwright
-├── scripts/             # Validacion: bundle sizes, seed↔schema sync
+├── e2e/                 # 14 specs Playwright
+├── scripts/             # Validacion: bundle sizes, seed↔schema sync, security audit, data quality
 ├── docs/                # API spec, pricing methodology, Supabase setup
 └── public/              # Assets estaticos + PWA manifest
 ```
@@ -183,7 +185,7 @@ npm run storybook      # Component stories (Storybook)
 - Audit transport y logging
 - Portfolio snapshots y market data sources
 
-**E2E tests** (4 specs): auth flows, navigation, pricing end-to-end.
+**E2E tests** (14 specs): auth, navigation, pricing flow, deal blotter, governance, shocks, market data, ESG, multi-entity, AI assistant, offline queue y RBAC.
 
 **Storybook**: component stories para desarrollo visual aislado.
 
@@ -234,6 +236,7 @@ npm run storybook      # Component stories (Storybook)
 - [APP_INFO.md](./APP_INFO.md) — Resumen ejecutivo del proyecto
 - [docs/pricing-methodology.md](./docs/pricing-methodology.md) — Metodologia FTP (19 gaps)
 - [docs/supabase-setup.md](./docs/supabase-setup.md) — Guia de setup Supabase
+- [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md) — Baseline de seguridad, scan de dependencias y excepciones gobernadas
 - [docs/api-spec.yaml](./docs/api-spec.yaml) — Especificacion API
 
 ## Licencia

@@ -19,7 +19,7 @@ export const MOCK_PRODUCT_DEFS: ProductDefinition[] = [
   { id: 'DEP_TERM', name: 'Term Deposit', category: 'Liability' },
   { id: 'DEP_CASA', name: 'Current Account (CASA)', category: 'Liability' },
   { id: 'SWAP_IRS', name: 'Interest Rate Swap', category: 'Off-Balance' },
-  { id: 'CRED_LINE', name: 'Revolving Credit Line', category: 'Asset' },
+  { id: 'CRED_LINE', name: 'Revolving Credit Line', category: 'Off-Balance' },
 ];
 
 export const MOCK_BUSINESS_UNITS: BusinessUnit[] = [

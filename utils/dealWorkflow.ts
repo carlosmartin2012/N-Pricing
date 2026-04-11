@@ -100,6 +100,23 @@ export function isDealEditable(deal: Transaction): boolean {
   return !lockedStatuses.includes(deal.status as DealStatus);
 }
 
+export function canCreateOrCloneDeals(userRole: UserRole): boolean {
+  return userRole !== 'Auditor';
+}
+
+export function canEditDeal(deal: Transaction, userRole: UserRole): boolean {
+  if (userRole === 'Auditor') return false;
+  return isDealEditable(deal) || userRole === 'Admin';
+}
+
+export function canDeleteDeal(userRole: UserRole): boolean {
+  return userRole !== 'Auditor';
+}
+
+export function canBatchRepriceDeals(userRole: UserRole): boolean {
+  return userRole !== 'Auditor';
+}
+
 /**
  * Check if a specific transition is allowed.
  */

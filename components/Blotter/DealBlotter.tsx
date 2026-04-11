@@ -23,6 +23,7 @@ import { buildDealsCsv, formatDealCurrency } from './blotterUtils';
 import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
 import { useBlotterActions } from './hooks/useBlotterActions';
 import { useBlotterState } from './hooks/useBlotterState';
+import { canBatchRepriceDeals } from '../../utils/dealWorkflow';
 
 interface Props {
   deals: Transaction[];
@@ -209,6 +210,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       className="h-full overflow-hidden"
       actions={
         <BlotterHeaderActions
+          canMutate={canBatchRepriceDeals(userRole)}
           isRepricing={isRepricing}
           repriceCount={repriceCount}
           onDownloadTemplate={() => {

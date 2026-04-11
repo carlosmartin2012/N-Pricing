@@ -3,8 +3,20 @@ import { apiGet, apiPost } from '../utils/apiFetch';
 import { mapAuditFromDB } from './mappers';
 import { buildAuditInsertPayload, type AuditWriteResult } from '../utils/supabase/auditTransport';
 import { createLogger } from '../utils/logger';
+import { enqueueMutation } from '../utils/offlineStore';
+import { emitAuditLogChanged } from '../utils/auditEvents';
 
 const log = createLogger('api/audit');
+
+function isOfflineLikeError(err: unknown): boolean {
+  const message = String(err);
+  return (
+    (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+    message.includes('Failed to fetch') ||
+    message.includes('NetworkError') ||
+    message.includes('Load failed')
+  );
+}
 
 export async function listAuditLog(): Promise<AuditEntry[]> {
   try {
@@ -38,11 +50,33 @@ export async function listAuditLogPaginated(filters: AuditLogFilters = {}): Prom
 export async function createAuditEntry(
   entry: Omit<AuditEntry, 'id' | 'timestamp'>,
 ): Promise<AuditWriteResult> {
+  const payload = buildAuditInsertPayload({ ...entry, timestamp: new Date().toISOString() } as AuditEntry);
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    await enqueueMutation({
+      type: 'create',
+      table: 'audit_log',
+      payload,
+      entityId: String((payload as { entity_id?: string | null }).entity_id ?? ''),
+    });
+    return { ok: true, queued: true };
+  }
+
   try {
-    const payload = buildAuditInsertPayload({ ...entry, timestamp: new Date().toISOString() } as AuditEntry);
     await apiPost('/audit', payload);
+    emitAuditLogChanged();
     return { ok: true };
-  } catch (err) { return { ok: false, errorMessage: String(err) }; }
+  } catch (err) {
+    if (isOfflineLikeError(err)) {
+      await enqueueMutation({
+        type: 'create',
+        table: 'audit_log',
+        payload,
+        entityId: String((payload as { entity_id?: string | null }).entity_id ?? ''),
+      });
+      return { ok: true, queued: true };
+    }
+    return { ok: false, errorMessage: String(err) };
+  }
 }
 
 /**

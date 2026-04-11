@@ -11,7 +11,12 @@ import type {
   Transaction,
   UserProfile,
 } from '../../../types';
-import { type UserRole } from '../../../utils/dealWorkflow';
+import {
+  canCreateOrCloneDeals,
+  canDeleteDeal,
+  canEditDeal,
+  type UserRole,
+} from '../../../utils/dealWorkflow';
 import { downloadTemplate } from '../../../utils/excelUtils';
 import { validateDeal, type ValidationError } from '../../../utils/validation';
 import {
@@ -77,6 +82,7 @@ export function useBlotterActions({
 
   const handleImport = useCallback(
     async (rows: ImportRow[]) => {
+      if (!canCreateOrCloneDeals(userRole)) return;
       const isIDMod = rows[0] && (rows[0].NewID !== undefined || rows[0].newID !== undefined);
 
       if (isIDMod) {
@@ -196,7 +202,7 @@ export function useBlotterActions({
 
       setIsImportOpen(false);
     },
-    [data, deals, products, setDeals, user]
+    [data, deals, products, setDeals, user, userRole]
   );
 
   const handleDownloadTemplate = useCallback(
@@ -205,14 +211,16 @@ export function useBlotterActions({
   );
 
   const handleEdit = useCallback((deal: Transaction) => {
+    if (!canEditDeal(deal, userRole)) return;
     setDealValidationErrors([]);
     setSelectedDeal({ ...deal });
     setIsEditOpen(true);
-  }, []);
+  }, [userRole]);
 
   const handleSaveEdit = useCallback(async () => {
     const form = dealFormRef.current;
     if (!form || !selectedDeal) return;
+    if (!canEditDeal(selectedDeal as Transaction, userRole)) return;
 
     const isValid = await form.trigger();
     if (!isValid) {
@@ -238,17 +246,19 @@ export function useBlotterActions({
     const savedDeal = await dealsApi.upsertDeal(updated);
     setDeals((previous) => previous.map((deal) => (deal.id === updated.id ? savedDeal || updated : deal)));
     setIsEditOpen(false);
-  }, [products, selectedDeal, setDeals]);
+  }, [products, selectedDeal, setDeals, userRole]);
 
   const handleNewDeal = useCallback(() => {
+    if (!canCreateOrCloneDeals(userRole)) return;
     setDealValidationErrors([]);
     setSelectedDeal(createNewDealDraft(products));
     setIsNewOpen(true);
-  }, [products]);
+  }, [products, userRole]);
 
   const handleSaveNew = useCallback(async () => {
     const form = dealFormRef.current;
     if (!form || !selectedDeal) return;
+    if (!canCreateOrCloneDeals(userRole)) return;
 
     const isValid = await form.trigger();
     if (!isValid) {
@@ -274,15 +284,17 @@ export function useBlotterActions({
     const savedDeal = await dealsApi.upsertDeal(newDeal);
     setDeals((previous) => [savedDeal || newDeal, ...previous]);
     setIsNewOpen(false);
-  }, [products, selectedDeal, setDeals]);
+  }, [products, selectedDeal, setDeals, userRole]);
 
   const handleDelete = useCallback((deal: Transaction) => {
+    if (!canDeleteDeal(userRole)) return;
     setSelectedDeal(deal);
     setIsDeleteOpen(true);
-  }, []);
+  }, [userRole]);
 
   const confirmDelete = useCallback(async () => {
     if (!selectedDeal?.id) return;
+    if (!canDeleteDeal(userRole)) return;
 
     await dealsApi.deleteDeal(selectedDeal.id);
     setDeals((previous) => previous.filter((deal) => deal.id !== selectedDeal.id));
@@ -321,7 +333,7 @@ export function useBlotterActions({
     });
     setIsDeleteOpen(false);
     setSelectedDeal(null);
-  }, [data, selectedDeal, setDeals, user]);
+  }, [data, selectedDeal, setDeals, user, userRole]);
 
   return {
     behaviouralModels,

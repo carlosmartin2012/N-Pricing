@@ -4,6 +4,18 @@ type ExcelCellValue = string | number | boolean | null | undefined;
 type ExcelRow = Record<string, ExcelCellValue>;
 type ParsedExcelRow = Record<string, unknown>;
 type ExcelTemplateData = ExcelRow[] | Record<string, ExcelRow[]>;
+const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMPORT_EXTENSIONS = new Set(['xlsx', 'xls', 'csv']);
+
+function validateImportFile(file: File): void {
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!ALLOWED_IMPORT_EXTENSIONS.has(extension)) {
+        throw new Error('Unsupported file type. Use .xlsx, .xls, or .csv.');
+    }
+    if (file.size > MAX_IMPORT_FILE_BYTES) {
+        throw new Error('File too large. Maximum supported size is 5 MB.');
+    }
+}
 
 export const EXCEL_TEMPLATES = {
     YIELD_CURVE: [
@@ -147,12 +159,20 @@ export const exportDealsToExcel = async (deals: Transaction[], results?: Map<str
 };
 
 export const parseExcel = async (file: File): Promise<ParsedExcelRow[]> => {
+    validateImportFile(file);
     const XLSX = await import('xlsx');
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = e.target?.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
+            const workbook = XLSX.read(data, {
+                type: 'array',
+                dense: true,
+                raw: true,
+                cellFormula: false,
+                cellHTML: false,
+                cellText: false,
+            });
 
             let allData: ParsedExcelRow[] = [];
 
@@ -186,6 +206,6 @@ export const parseExcel = async (file: File): Promise<ParsedExcelRow[]> => {
             resolve(allData);
         };
         reader.onerror = (error) => reject(error);
-        reader.readAsBinaryString(file);
+        reader.readAsArrayBuffer(file);
     });
 };

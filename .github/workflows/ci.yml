@@ -26,7 +26,13 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Seed/schema sync check
-        run: npx tsx scripts/check-seed-schema-sync.ts
+        run: npm run check:sync
+
+      - name: Seed and config data quality
+        run: npm run check:data-quality
+
+      - name: Dependency security audit
+        run: npm run check:security
 
       - name: Run tests
         run: npx vitest run

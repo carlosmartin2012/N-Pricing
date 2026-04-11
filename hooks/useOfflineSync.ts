@@ -1,8 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { getPendingMutations, removeMutation, incrementRetry, getPendingCount } from '../utils/offlineStore';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  OFFLINE_QUEUE_EVENT,
+  getPendingMutations,
+  removeMutation,
+  incrementRetry,
+  getPendingCount,
+} from '../utils/offlineStore';
 import type { OfflineMutation } from '../utils/offlineStore';
-import { supabase, isSupabaseConfigured } from '../utils/supabaseClient';
+import { apiDelete, apiPost } from '../utils/apiFetch';
 import { createLogger } from '../utils/logger';
+import { emitAuditLogChanged } from '../utils/auditEvents';
 
 const log = createLogger('offline-sync');
 const MAX_RETRIES = 3;
@@ -10,7 +17,6 @@ const MAX_RETRIES = 3;
 export function useOfflineSync() {
   const [pendingCount, setPendingCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
-  const isOnline = useRef(navigator.onLine);
 
   // Update pending count
   const refreshCount = useCallback(async () => {
@@ -20,20 +26,23 @@ export function useOfflineSync() {
 
   // Process a single mutation
   const processMutation = useCallback(async (mutation: OfflineMutation): Promise<boolean> => {
-    if (!isSupabaseConfigured) return false;
-
     try {
-      if (mutation.type === 'create') {
-        const { error } = await supabase.from(mutation.table).insert(mutation.payload);
-        if (error) throw error;
-      } else if (mutation.type === 'update') {
-        const id = mutation.payload.id;
-        const { error } = await supabase.from(mutation.table).update(mutation.payload).eq('id', id);
-        if (error) throw error;
-      } else if (mutation.type === 'delete') {
-        const id = mutation.payload.id;
-        const { error } = await supabase.from(mutation.table).delete().eq('id', id);
-        if (error) throw error;
+      if (mutation.table === 'deals') {
+        if (mutation.type === 'delete') {
+          const id = String(mutation.payload.id ?? '');
+          if (!id) throw new Error('Offline delete mutation missing deal id');
+          await apiDelete(`/deals/${encodeURIComponent(id)}`);
+        } else {
+          await apiPost('/deals/upsert', mutation.payload);
+        }
+      } else if (mutation.table === 'audit_log') {
+        if (mutation.type === 'delete') {
+          throw new Error('Audit log deletions are not supported');
+        }
+        await apiPost('/audit', mutation.payload);
+        emitAuditLogChanged();
+      } else {
+        throw new Error(`Unsupported offline mutation table: ${mutation.table}`);
       }
 
       await removeMutation(mutation.id);
@@ -81,18 +90,20 @@ export function useOfflineSync() {
 
   // Listen for online/offline events
   useEffect(() => {
+    const handleQueueChange = () => {
+      void refreshCount();
+    };
     const handleOnline = () => {
-      isOnline.current = true;
       log.info('Back online, starting sync');
       void syncAll();
     };
     const handleOffline = () => {
-      isOnline.current = false;
       log.info('Went offline');
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    window.addEventListener(OFFLINE_QUEUE_EVENT, handleQueueChange);
 
     // Initial count
     void refreshCount();
@@ -105,6 +116,7 @@ export function useOfflineSync() {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener(OFFLINE_QUEUE_EVENT, handleQueueChange);
     };
   }, [refreshCount, syncAll]);
 
