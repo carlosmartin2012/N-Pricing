@@ -25,6 +25,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { usePricingContext } from '../../hooks/usePricingContext';
 import { supabaseService } from '../../utils/supabaseService';
+import { errorTracker } from '../../utils/errorTracking';
 import { exportPricingPDF } from '../../utils/pdfExport';
 import { findLatestPortfolioSnapshotForDeal } from '../../utils/aiGrounding';
 import { calculateFullCreditRisk } from '../../utils/pricing/creditRiskEngine';
@@ -277,7 +278,18 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
     });
 
     data.setPricingDossiers(nextDossiers);
-    void supabaseService.savePricingDossiers(nextDossiers);
+    // Fire-and-forget persistence — failures are captured centrally and
+    // surfaced via the error tracker instead of crashing the render path.
+    supabaseService.savePricingDossiers(nextDossiers).catch((error: unknown) => {
+      errorTracker.captureException(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          module: 'PRICING_RECEIPT',
+          dealId: deal.id,
+          extra: { operation: 'savePricingDossiers' },
+        },
+      );
+    });
   }, [deal, result, data, currentUser]);
 
   const fmtCurrency = (n: number) =>

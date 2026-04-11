@@ -16,6 +16,7 @@ import { FileUp, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
 import { batchReprice, calculatePricing } from '../../utils/pricingEngine';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { supabaseService } from '../../utils/supabaseService';
+import { errorTracker } from '../../utils/errorTracking';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, exportDealsToExcel } from '../../utils/excelUtils';
 import { executeTransition, getAvailableActions, type UserRole, type WorkflowAction } from '../../utils/dealWorkflow';
@@ -718,15 +719,26 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     });
 
     data.setPricingDossiers(nextDossiers);
-    await supabaseService.savePricingDossiers(nextDossiers);
-    await supabaseService.addAuditEntry({
-      userEmail: user?.email || 'unknown',
-      userName: user?.name || 'Unknown',
-      action: 'EXPORT_COMMITTEE_PACKAGE',
-      module: 'BLOTTER',
-      description: `Exported committee package for deal ${selectedDossierDeal.id}`,
-      details: packageMetadata,
-    });
+    try {
+      await supabaseService.savePricingDossiers(nextDossiers);
+      await supabaseService.addAuditEntry({
+        userEmail: user?.email || 'unknown',
+        userName: user?.name || 'Unknown',
+        action: 'EXPORT_COMMITTEE_PACKAGE',
+        module: 'BLOTTER',
+        description: `Exported committee package for deal ${selectedDossierDeal.id}`,
+        details: packageMetadata,
+      });
+    } catch (error) {
+      errorTracker.captureException(error instanceof Error ? error : new Error(String(error)), {
+        module: 'DEAL_BLOTTER',
+        dealId: selectedDossierDeal.id,
+        extra: { operation: 'exportCommitteePackage' },
+      });
+      window.alert(
+        'The committee package was exported locally, but its persistence record could not be saved. Please retry or check the backend connection.',
+      );
+    }
   }, [
     data,
     selectedApprovalTask,
