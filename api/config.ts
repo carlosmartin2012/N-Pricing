@@ -14,6 +14,7 @@ import type {
   UserProfile,
 } from '../types';
 import { apiGet, apiPost, apiDelete } from '../utils/apiFetch';
+import { createLogger } from '../utils/logger';
 import {
   mapRuleFromDB,
   mapRuleToDB,
@@ -25,6 +26,8 @@ import {
 } from './mappers';
 import { fetchSystemConfigValue, saveSystemConfigValue } from '../utils/supabase/systemConfig';
 
+const log = createLogger('api/config');
+
 // ---------------------------------------------------------------------------
 // Rules
 // ---------------------------------------------------------------------------
@@ -33,7 +36,10 @@ export async function listRules(): Promise<GeneralRule[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/rules');
     return rows.map(mapRuleFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listRules failed — returning empty list', { error: String(err) });
+    return [];
+  }
 }
 
 export async function upsertRule(rule: GeneralRule): Promise<void> {
@@ -48,7 +54,10 @@ export async function listRuleVersions(ruleId: number): Promise<RuleVersion[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>(`/config/rules/${ruleId}/versions`);
     return rows.map(mapRuleVersionFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listRuleVersions failed — returning empty list', { ruleId, error: String(err) });
+    return [];
+  }
 }
 
 export async function createRuleVersion(
@@ -68,7 +77,10 @@ export async function listClients(): Promise<ClientEntity[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/clients');
     return rows.map(mapClientFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listClients failed — returning empty list', { error: String(err) });
+    return [];
+  }
 }
 
 export async function upsertClient(client: ClientEntity): Promise<void> {
@@ -87,7 +99,10 @@ export async function listProducts(): Promise<ProductDefinition[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/products');
     return rows.map(mapProductFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listProducts failed — returning empty list', { error: String(err) });
+    return [];
+  }
 }
 
 export async function upsertProduct(product: ProductDefinition): Promise<void> {
@@ -106,7 +121,10 @@ export async function listBusinessUnits(): Promise<BusinessUnit[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/business-units');
     return rows.map(mapBUFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listBusinessUnits failed — returning empty list', { error: String(err) });
+    return [];
+  }
 }
 
 export async function upsertBusinessUnit(unit: BusinessUnit): Promise<void> {
@@ -124,7 +142,10 @@ export async function deleteBusinessUnit(id: string): Promise<void> {
 export async function listUsers(): Promise<UserProfile[]> {
   try {
     return await apiGet<UserProfile[]>('/config/users');
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listUsers failed — returning empty list', { error: String(err) });
+    return [];
+  }
 }
 
 export async function upsertUser(user: UserProfile): Promise<void> {

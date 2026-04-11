@@ -163,7 +163,8 @@ export function interpolateRateCard(
   targetMonths: number,
 ): number {
   const points = card.points
-    .map(p => ({ months: TENOR_MONTHS[p.tenor] ?? 0, rate: p.rate }))
+    .filter(p => p.tenor in TENOR_MONTHS)
+    .map(p => ({ months: TENOR_MONTHS[p.tenor], rate: p.rate }))
     .sort((a, b) => a.months - b.months);
 
   if (points.length === 0) return 0;

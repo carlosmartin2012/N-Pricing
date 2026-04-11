@@ -10,7 +10,10 @@ export async function listAuditLog(): Promise<AuditEntry[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/audit');
     return rows.map(mapAuditFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listAuditLog failed — returning empty list', { error: String(err) });
+    return [];
+  }
 }
 
 export interface AuditLogFilters {

@@ -304,11 +304,11 @@ serve(async (req: Request) => {
       }
 
       // batchReprice returns a Map<string, FTPResult>; convert to serializable array
-      const resultsMap = batchReprice(deals, approvalMatrix, loadedContext, shocks);
-      const results = Array.from(resultsMap.entries()).map(([dealId, result]: [string, any]) => ({
-        dealId,
-        ...result,
-      }));
+      const resultsMap = batchReprice(deals, approvalMatrix, loadedContext, shocks) as Map<string, Record<string, unknown>>;
+      const results: Array<Record<string, unknown>> = [];
+      resultsMap.forEach((result, dealId) => {
+        results.push({ dealId, ...result });
+      });
 
       // Log batch pricing to audit
       await supabase.from('audit_log').insert({

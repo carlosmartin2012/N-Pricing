@@ -1,6 +1,9 @@
 import type { FTPResult, Transaction } from '../types';
 import { apiGet, apiPost, apiPatch, apiDelete } from '../utils/apiFetch';
+import { createLogger } from '../utils/logger';
 import { mapDealFromDB, mapDealToDB } from './mappers';
+
+const log = createLogger('api/deals');
 
 export async function listDeals(entityId?: string): Promise<Transaction[]> {
   const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
@@ -12,7 +15,10 @@ export async function upsertDeal(deal: Transaction): Promise<Transaction | null>
   try {
     const row = await apiPost<Record<string, unknown>>('/deals/upsert', mapDealToDB(deal));
     return row ? mapDealFromDB(row) : null;
-  } catch { return null; }
+  } catch (err) {
+    log.error('upsertDeal failed', { dealId: deal.id }, err as Error);
+    return null;
+  }
 }
 
 export async function updateDealWithLock(
@@ -29,7 +35,10 @@ export async function updateDealWithLock(
       conflict: result.conflict,
       serverVersion: result.serverVersion ? mapDealFromDB(result.serverVersion) : undefined,
     };
-  } catch { return { deal: null, conflict: false }; }
+  } catch (err) {
+    log.error('updateDealWithLock failed', { dealId: deal.id, expectedVersion }, err as Error);
+    return { deal: null, conflict: false };
+  }
 }
 
 export async function deleteDeal(id: string): Promise<void> {
@@ -41,7 +50,10 @@ export async function batchUpsertDeals(deals: Transaction[]): Promise<Transactio
   try {
     const rows = await apiPost<Record<string, unknown>[]>('/deals/batch-upsert', deals.map(mapDealToDB));
     return rows.map(mapDealFromDB);
-  } catch { return []; }
+  } catch (err) {
+    log.error('batchUpsertDeals failed', { count: deals.length }, err as Error);
+    return [];
+  }
 }
 
 export interface PaginatedDeals {
@@ -77,7 +89,10 @@ export async function listDealsCursor(
   try {
     const result = await apiGet<{ data: Record<string, unknown>[]; cursor: string | null; hasMore: boolean }>(`/deals/cursor?${params}`);
     return { data: result.data.map(mapDealFromDB), cursor: result.cursor, hasMore: result.hasMore };
-  } catch { return { data: [], cursor: null, hasMore: false }; }
+  } catch (err) {
+    log.warn('listDealsCursor failed — returning empty page', { limit, cursor, entityId, error: String(err) });
+    return { data: [], cursor: null, hasMore: false };
+  }
 }
 
 export async function listDealsLight(entityId?: string): Promise<DealSummary[]> {
@@ -94,14 +109,20 @@ export async function listDealsLight(entityId?: string): Promise<DealSummary[]> 
       entityId: row.entity_id ? String(row.entity_id) : undefined,
       createdAt: String(row.created_at ?? ''),
     }));
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listDealsLight failed — returning empty list', { entityId, error: String(err) });
+    return [];
+  }
 }
 
 export async function listDealsPaginated(page: number = 1, pageSize: number = 50): Promise<PaginatedDeals> {
   try {
     const result = await apiGet<{ data: Record<string, unknown>[]; total: number }>(`/deals/paginated?page=${page}&pageSize=${pageSize}`);
     return { data: result.data.map(mapDealFromDB), total: result.total };
-  } catch { return { data: [], total: 0 }; }
+  } catch (err) {
+    log.warn('listDealsPaginated failed — returning empty page', { page, pageSize, error: String(err) });
+    return { data: [], total: 0 };
+  }
 }
 
 export interface TransitionOptions {
@@ -119,7 +140,10 @@ export async function transitionDeal(opts: TransitionOptions): Promise<Transacti
       pricingSnapshot: opts.pricingSnapshot,
     });
     return row ? mapDealFromDB(row) : null;
-  } catch { return null; }
+  } catch (err) {
+    log.error('transitionDeal failed', { dealId: opts.dealId, newStatus: opts.newStatus }, err as Error);
+    return null;
+  }
 }
 
 export async function createDealVersion(
@@ -132,11 +156,17 @@ export async function createDealVersion(
 ): Promise<void> {
   try {
     await apiPost(`/deals/${dealId}/versions`, { version, snapshot, pricingResult, changedBy, changeReason: reason });
-  } catch { /* silent */ }
+  } catch (err) {
+    // Non-blocking: versioning failure should surface but not break deal save flow
+    log.warn('createDealVersion failed — version snapshot not persisted', { dealId, version, changedBy, error: String(err) });
+  }
 }
 
 export async function listDealVersions(dealId: string): Promise<Record<string, unknown>[]> {
   try {
     return await apiGet<Record<string, unknown>[]>(`/deals/${dealId}/versions`);
-  } catch { return []; }
+  } catch (err) {
+    log.warn('listDealVersions failed — returning empty list', { dealId, error: String(err) });
+    return [];
+  }
 }

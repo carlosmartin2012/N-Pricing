@@ -3,6 +3,8 @@
  * All values in percentage points unless noted otherwise (bps = basis points).
  */
 
+import { createLogger } from './logger';
+
 /** Tenor string to months mapping for curve interpolation */
 export const TENOR_MONTHS: Record<string, number> = {
   'ON': 0, '1W': 0.25, '2W': 0.5,
@@ -10,6 +12,30 @@ export const TENOR_MONTHS: Record<string, number> = {
   '1Y': 12, '2Y': 24, '3Y': 36, '5Y': 60,
   '7Y': 84, '10Y': 120, '15Y': 180, '20Y': 240, '30Y': 360,
 };
+
+const tenorLog = createLogger('pricingConstants/tenor');
+const warnedTenors = new Set<string>();
+
+/**
+ * Resolve a tenor string to months. Returns `undefined` for unknown tenors
+ * rather than `0` — so callers can filter them out instead of silently
+ * collapsing unknown points onto the ON (0-month) bucket, which would
+ * corrupt curve interpolation.
+ *
+ * The first time a given unknown tenor is seen per session it is logged
+ * once so a broken curve configuration is visible in ops without spamming.
+ */
+export function resolveTenorMonths(tenor: string): number | undefined {
+  const months = TENOR_MONTHS[tenor];
+  if (months === undefined) {
+    if (!warnedTenors.has(tenor)) {
+      warnedTenors.add(tenor);
+      tenorLog.warn('Unknown tenor in curve — point will be dropped from interpolation', { tenor });
+    }
+    return undefined;
+  }
+  return months;
+}
 
 /**
  * PD/LGD parameters by credit rating.

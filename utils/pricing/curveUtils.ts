@@ -25,8 +25,11 @@ export function interpolateYieldCurve(curve: YieldCurvePoint[], targetMonths: nu
  * Long-term: iterative bootstrap with semi-annual compounding
  */
 export function bootstrapZeroRates(parCurve: YieldCurvePoint[]): YieldCurvePoint[] {
-  const sorted = [...parCurve]
-    .map(p => ({ tenor: p.tenor, months: TENOR_MONTHS[p.tenor] ?? 0, rate: p.rate }))
+  // Drop unknown tenors rather than coerce them to month 0 — would otherwise
+  // inject phantom points at the short end of the curve and corrupt the bootstrap.
+  const sorted = parCurve
+    .filter(p => p.tenor in TENOR_MONTHS)
+    .map(p => ({ tenor: p.tenor, months: TENOR_MONTHS[p.tenor], rate: p.rate }))
     .sort((a, b) => a.months - b.months);
 
   const zeroRates: { tenor: string; months: number; rate: number }[] = [];

@@ -25,13 +25,18 @@ export function linearInterpolate(
 /**
  * Pre-sorts and maps curve points for interpolation.
  * Call this ONCE before a batch loop, then use linearInterpolate on the result.
+ *
+ * Points whose tenor is not present in `tenorMonths` are dropped rather than
+ * coerced to month 0 — silently mapping unknown tenors onto the ON bucket
+ * corrupts interpolation on every curve that passes through.
  */
 export function prepareYieldCurvePoints(
   curve: { tenor: string; rate: number }[],
   tenorMonths: Record<string, number>,
 ): { x: number; y: number }[] {
   return curve
-    .map(p => ({ x: tenorMonths[p.tenor] ?? 0, y: p.rate }))
+    .filter(p => p.tenor in tenorMonths)
+    .map(p => ({ x: tenorMonths[p.tenor], y: p.rate }))
     .sort((a, b) => a.x - b.x);
 }
 
@@ -40,6 +45,7 @@ export function prepareLiquidityCurvePoints(
   tenorMonths: Record<string, number>,
 ): { x: number; y: number }[] {
   return points
-    .map(p => ({ x: tenorMonths[p.tenor] ?? 0, y: p.termLP }))
+    .filter(p => p.tenor in tenorMonths)
+    .map(p => ({ x: tenorMonths[p.tenor], y: p.termLP }))
     .sort((a, b) => a.x - b.x);
 }

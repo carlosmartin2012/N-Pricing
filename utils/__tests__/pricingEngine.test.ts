@@ -66,6 +66,24 @@ describe('interpolateYieldCurve', () => {
     const rate = interpolateYieldCurve(MOCK_YIELD_CURVE, 500);
     expect(rate).toBeCloseTo(4.10, 1);
   });
+
+  it('drops points with unknown tenors instead of collapsing them onto month 0', () => {
+    // Curve contains a bogus tenor "18M" (not in TENOR_MONTHS) with a sentinel
+    // rate. If the code silently mapped unknown tenors to 0 months, the 0-month
+    // interpolation would be pulled toward the sentinel (99) instead of ON (5.0).
+    const curveWithBadTenor = [
+      { tenor: 'ON', rate: 5.0 },
+      { tenor: '18M', rate: 99 }, // unknown — must be dropped
+      { tenor: '2Y', rate: 4.0 },
+    ];
+    const rate0 = interpolateYieldCurve(curveWithBadTenor, 0);
+    // ON anchors the short end; the bogus point must not leak into the result.
+    expect(rate0).toBeCloseTo(5.0, 5);
+    // And 12 months should interpolate linearly between ON (5.0 @ 0) and 2Y (4.0 @ 24)
+    // = 5.0 + (12/24) * (4.0 - 5.0) = 4.5 — NOT influenced by the 99 sentinel.
+    const rate12 = interpolateYieldCurve(curveWithBadTenor, 12);
+    expect(rate12).toBeCloseTo(4.5, 5);
+  });
 });
 
 // ---------------------------------------------------------------------------

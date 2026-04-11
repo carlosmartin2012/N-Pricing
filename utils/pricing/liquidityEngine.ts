@@ -24,8 +24,11 @@ export function interpolateLiquidityCurve(
 
   let points = liquidityCurveCache.get(curve.points);
   if (!points) {
+    // Drop points with unknown tenors — mapping them to 0 would silently
+    // collapse them onto the ON bucket and corrupt interpolation.
     points = curve.points
-      .map(p => ({ x: TENOR_MONTHS[p.tenor] ?? 0, y: p.termLP }))
+      .filter(p => p.tenor in TENOR_MONTHS)
+      .map(p => ({ x: TENOR_MONTHS[p.tenor], y: p.termLP }))
       .sort((a, b) => a.x - b.x);
     liquidityCurveCache.set(curve.points, points);
   }
@@ -53,12 +56,14 @@ export function calculateBlendedLP(
   if (!curve || !curve.points.length) return 0;
 
   const points = curve.points
+    .filter(p => p.tenor in TENOR_MONTHS)
     .map(p => ({
-      months: TENOR_MONTHS[p.tenor] ?? 0,
+      months: TENOR_MONTHS[p.tenor],
       wholesale: p.wholesaleSpread,
       termLP: p.termLP,
     }))
     .sort((a, b) => a.months - b.months);
+  if (points.length === 0) return 0;
 
   // Compute blended for each point, then apply rolling 2-point average
   const blended = points.map(p => externalPct * p.wholesale + internalPct * p.termLP);
