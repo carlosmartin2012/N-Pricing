@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { ErrorRequestHandler, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -13,6 +13,7 @@ import authRouter from './routes/auth';
 import geminiRouter from './routes/gemini';
 import pricingRouter from './routes/pricing';
 import { authMiddleware } from './middleware/auth';
+import { safeError } from './middleware/errorHandler';
 
 import fs from 'fs';
 
@@ -47,12 +48,61 @@ app.use('/api/report-schedules', authMiddleware, reportSchedulesRouter);
 app.use('/api/gemini', authMiddleware, geminiRouter);
 app.use('/api/pricing', authMiddleware, pricingRouter);
 
+// 404 for unknown API routes — without this, the SPA fallback below would
+// swallow typos as HTML responses and a failing frontend fetch would surface
+// as a JSON-parse error instead of a clear 404.
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 if (IS_PROD) {
   app.use(express.static(distDir));
   app.get('/{*path}', (_req, res) => {
     res.sendFile(path.join(distDir, 'index.html'));
   });
 }
+
+// Global error handler. Catches:
+//   1. Malformed JSON bodies (SyntaxError from express.json) → 400
+//   2. Request-too-large (PayloadTooLargeError) → 413
+//   3. Anything thrown from an async route handler that wasn't caught
+//      locally. Express 5 forwards async rejections here automatically.
+// Without this middleware, a crash in one handler produced an unhelpful
+// default 500 with no logging, making prod incidents invisible.
+const errorHandler: ErrorRequestHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (res.headersSent) {
+    return;
+  }
+  if (err && typeof err === 'object') {
+    const e = err as { type?: string; status?: number; statusCode?: number };
+    if (e.type === 'entity.parse.failed') {
+      res.status(400).json({ error: 'Malformed JSON body' });
+      return;
+    }
+    if (e.type === 'entity.too.large') {
+      res.status(413).json({ error: 'Request body too large' });
+      return;
+    }
+    const status = e.status ?? e.statusCode;
+    if (status && status >= 400 && status < 500) {
+      res.status(status).json({ error: safeError(err) });
+      return;
+    }
+  }
+  console.error('[server] Unhandled route error', err);
+  res.status(500).json({ error: safeError(err) });
+};
+app.use(errorHandler);
+
+// Process-level safety nets. Before these handlers, an unhandled rejection
+// anywhere in the process would either be silently swallowed or crash the
+// Node process in a future runtime (Node 15+ defaults), leaving no log trail.
+process.on('unhandledRejection', (reason) => {
+  console.error('[server] Unhandled promise rejection', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[server] Uncaught exception', err);
+});
 
 async function main() {
   try {

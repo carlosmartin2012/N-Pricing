@@ -58,7 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- one-time hydration from cache
 
-  // Track user activity to extend session
+  // Track user activity to extend session. The previous version wired up the
+  // listeners but never consumed `lastActivity`, so sessions always expired at
+  // the SESSION_TIMEOUT_MS wall-clock even if the user was still clicking —
+  // see the interval below which now reads the ref to slide the expiry.
   useEffect(() => {
     if (!isAuthenticated) return;
     const updateActivity = () => { lastActivity.current = Date.now(); };
@@ -94,6 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const expiresAt = Date.now() + SESSION_TIMEOUT_MS;
+    // Reset the activity marker so the idle-timeout checker starts fresh for
+    // this session. Without this, a login-after-logout inside the same tab
+    // would inherit stale activity from the previous session.
+    lastActivity.current = Date.now();
     setCurrentUser(loggedUser);
     setIsAuthenticated(true);
     setSessionExpiresAt(expiresAt);
@@ -132,21 +139,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearSession();
   }, [clearSession, currentUser, logAuthEvent]);
 
-  // Session timeout checker
+  // Session timeout checker. Expires the session when the idle window
+  // (SESSION_TIMEOUT_MS) has elapsed since the last recorded user activity.
+  // Previously this read the initial `sessionExpiresAt` and never consulted
+  // `lastActivity`, so sessions died exactly 8 hours after login regardless
+  // of whether the user was still working.
   useEffect(() => {
-    if (!isAuthenticated || !sessionExpiresAt || !currentUser) return;
+    if (!isAuthenticated || !currentUser) return;
     const interval = setInterval(() => {
-      if (Date.now() > sessionExpiresAt) {
+      const idleFor = Date.now() - lastActivity.current;
+      if (idleFor >= SESSION_TIMEOUT_MS) {
         logAuthEvent(
           currentUser,
           'SESSION_TIMEOUT',
           `User ${currentUser.name} session expired after inactivity window.`,
         );
         clearSession();
+        return;
       }
+      // Slide the "session expires at" marker forward so any UI showing
+      // remaining time reflects the actual idle window.
+      const nextExpiry = lastActivity.current + SESSION_TIMEOUT_MS;
+      setSessionExpiresAt((prev) => (prev === nextExpiry ? prev : nextExpiry));
     }, ACTIVITY_CHECK_INTERVAL);
     return () => clearInterval(interval);
-  }, [clearSession, currentUser, isAuthenticated, logAuthEvent, sessionExpiresAt]);
+  }, [clearSession, currentUser, isAuthenticated, logAuthEvent]);
 
   // Role check utility
   const hasRole = useCallback((requiredRoles: string[]) => {

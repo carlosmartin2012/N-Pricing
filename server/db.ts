@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required');
@@ -42,4 +42,56 @@ export async function queryOne<T = Record<string, unknown>>(
 
 export async function execute(sql: string, params?: unknown[]): Promise<void> {
   await query(sql, params);
+}
+
+/**
+ * Transaction-scoped client. Exposes the same shape as the top-level helpers
+ * but pins every call to the single PoolClient passed to `withTransaction`,
+ * so `SELECT FOR UPDATE` locks and multi-statement writes stay atomic.
+ */
+export interface Tx {
+  query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>;
+  queryOne<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | null>;
+  execute(sql: string, params?: unknown[]): Promise<void>;
+}
+
+function wrapClient(client: PoolClient): Tx {
+  return {
+    async query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]> {
+      const result = await client.query(sql, params);
+      return result.rows as T[];
+    },
+    async queryOne<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | null> {
+      const result = await client.query(sql, params);
+      return (result.rows[0] as T | undefined) ?? null;
+    },
+    async execute(sql: string, params?: unknown[]): Promise<void> {
+      await client.query(sql, params);
+    },
+  };
+}
+
+/**
+ * Runs `fn` inside a BEGIN/COMMIT transaction. On any thrown error the
+ * transaction is rolled back before the error is rethrown. The client is
+ * always released back to the pool. Use this whenever you need either
+ * SELECT FOR UPDATE locking or multi-statement atomicity.
+ */
+export async function withTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(wrapClient(client));
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    try {
+      await client.query('ROLLBACK');
+    } catch (rollbackErr) {
+      console.error('[db] ROLLBACK failed after transaction error', rollbackErr);
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 }

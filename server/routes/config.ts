@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
-import { query, queryOne, execute } from '../db';
+import { query, queryOne, execute, withTransaction } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
@@ -57,19 +57,33 @@ router.get('/rules/:id/versions', async (req, res) => {
 router.post('/rules/:id/versions', async (req, res) => {
   try {
     const ruleId = req.params.id;
-    const r = req.body;
-    const existing = await query<{ version: number }>('SELECT version FROM rule_versions WHERE rule_id = $1 ORDER BY version DESC LIMIT 1', [ruleId]);
-    const currentMax = existing[0]?.version ?? 0;
-    const newVersion = currentMax + 1;
+    const r = req.body ?? {};
     const today = new Date().toISOString().split('T')[0];
-    if (currentMax > 0) {
-      await execute('UPDATE rule_versions SET effective_to=$1 WHERE rule_id=$2 AND version=$3', [today, ruleId, currentMax]);
-    }
-    await execute(
-      'INSERT INTO rule_versions (rule_id,version,business_unit,product,segment,tenor,base_method,base_reference,spread_method,liquidity_reference,strategic_spread,formula_spec,effective_from,effective_to,changed_by,change_reason) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NULL,$14,$15)',
-      [ruleId, newVersion, r.businessUnit, r.product, r.segment, r.tenor, r.baseMethod, r.baseReference, r.spreadMethod, r.liquidityReference, r.strategicSpread ?? 0, r.formulaSpec ? JSON.stringify(r.formulaSpec) : null, today, r.changedBy, r.changeReason],
-    );
-    res.json({ ok: true });
+    // Run the max-version lookup, the close of the current version and the
+    // insert of the new version inside a single transaction so two concurrent
+    // writers cannot both land on `version = N+1` and produce duplicate rows.
+    // The FOR UPDATE lock pins the latest version row for the duration of the
+    // transaction.
+    const newVersion = await withTransaction(async (tx) => {
+      const existing = await tx.query<{ version: number }>(
+        'SELECT version FROM rule_versions WHERE rule_id = $1 ORDER BY version DESC LIMIT 1 FOR UPDATE',
+        [ruleId],
+      );
+      const currentMax = Number(existing[0]?.version ?? 0);
+      const nextVersion = currentMax + 1;
+      if (currentMax > 0) {
+        await tx.execute(
+          'UPDATE rule_versions SET effective_to=$1 WHERE rule_id=$2 AND version=$3',
+          [today, ruleId, currentMax],
+        );
+      }
+      await tx.execute(
+        'INSERT INTO rule_versions (rule_id,version,business_unit,product,segment,tenor,base_method,base_reference,spread_method,liquidity_reference,strategic_spread,formula_spec,effective_from,effective_to,changed_by,change_reason) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NULL,$14,$15)',
+        [ruleId, nextVersion, r.businessUnit, r.product, r.segment, r.tenor, r.baseMethod, r.baseReference, r.spreadMethod, r.liquidityReference, r.strategicSpread ?? 0, r.formulaSpec ? JSON.stringify(r.formulaSpec) : null, today, r.changedBy, r.changeReason],
+      );
+      return nextVersion;
+    });
+    res.json({ ok: true, version: newVersion });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }

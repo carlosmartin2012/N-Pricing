@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
-import { query, queryOne, execute } from '../db';
+import { query, queryOne, execute, withTransaction } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import {
   any,
@@ -314,19 +314,26 @@ router.patch('/:id/transition', validateBody(TransitionSchema), async (req, res)
 
 router.patch('/:id/lock-update', async (req, res) => {
   try {
-    const { deal, expectedVersion } = req.body;
-    const existing = await queryOne<{ version: number }>('SELECT version FROM deals WHERE id = $1', [req.params.id]);
-    if (!existing) return res.status(404).json({ conflict: false, deal: null });
-    if (existing.version !== expectedVersion) {
-      const serverDeal = await queryOne('SELECT * FROM deals WHERE id = $1', [req.params.id]);
-      return res.json({ conflict: true, deal: null, serverVersion: serverDeal });
+    const { deal, expectedVersion } = req.body ?? {};
+    if (!deal || typeof expectedVersion !== 'number') {
+      return res.status(400).json({ error: 'deal and expectedVersion are required' });
     }
-    const d = deal;
-    const row = await queryOne(
-      'UPDATE deals SET status=$2, client_id=$3, amount=$4, version=$5, updated_at=$6 WHERE id=$1 RETURNING *',
-      [req.params.id, d.status, d.client_id, d.amount, (d.version ?? expectedVersion) + 1, nowIso()],
+    // Atomic optimistic-concurrency update: the WHERE clause enforces that the
+    // row is still at `expectedVersion`. If another writer bumped it in the
+    // meantime, no row is returned and we surface the current server state.
+    // This replaces a TOCTOU SELECT + UPDATE pair that lived on two separate
+    // pool clients and could silently clobber concurrent edits.
+    const newVersion = (deal.version ?? expectedVersion) + 1;
+    const updated = await queryOne(
+      'UPDATE deals SET status=$2, client_id=$3, amount=$4, version=$5, updated_at=$6 WHERE id=$1 AND version=$7 RETURNING *',
+      [req.params.id, deal.status, deal.client_id, deal.amount, newVersion, nowIso(), expectedVersion],
     );
-    res.json({ conflict: false, deal: row });
+    if (updated) {
+      return res.json({ conflict: false, deal: updated });
+    }
+    const existing = await queryOne('SELECT * FROM deals WHERE id = $1', [req.params.id]);
+    if (!existing) return res.status(404).json({ conflict: false, deal: null });
+    return res.json({ conflict: true, deal: null, serverVersion: existing });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -343,21 +350,33 @@ router.delete('/:id', async (req, res) => {
 
 router.post('/:id/rename', async (req, res) => {
   try {
-    const { nextId } = req.body;
+    const { nextId } = req.body ?? {};
+    if (!nextId || typeof nextId !== 'string') {
+      return res.status(400).json({ error: 'nextId is required' });
+    }
     const previousId = req.params.id;
-    const existing = await queryOne('SELECT * FROM deals WHERE id = $1', [previousId]);
-    if (!existing) return res.status(404).json({ error: 'Deal not found' });
-    const inserted = await queryOne(
-      'INSERT INTO deals SELECT $1 as id, status, client_id, client_type, business_unit, funding_business_unit, business_line, product_type, currency, amount, start_date, duration_months, amortization, repricing_freq, margin_target, behavioural_model_id, risk_weight, capital_ratio, target_roe, operational_cost_bps, lcr_outflow_pct, category, drawn_amount, undrawn_amount, is_committed, lcr_classification, deposit_type, behavioral_maturity_override, transition_risk, physical_risk, liquidity_spread, _liquidity_premium_details, _clc_charge_details, entity_id, version, locked_at, locked_by, approved_by, approved_at, pricing_snapshot, created_by, created_at, $2 FROM deals WHERE id = $3 RETURNING *',
-      [nextId, nowIso(), previousId],
-    );
-    await Promise.all([
-      execute('UPDATE pricing_results SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]),
-      execute('UPDATE deal_versions SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]),
-      execute('UPDATE deal_comments SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]),
-      execute('UPDATE notifications SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]),
-    ]);
-    await execute('DELETE FROM deals WHERE id = $1', [previousId]);
+    // Wrap the full rename in a single transaction so that insert, child-table
+    // reparenting and delete either all commit or all roll back. Without the
+    // transaction a failure midway left orphaned rows or dangling FKs.
+    const inserted = await withTransaction(async (tx) => {
+      const existing = await tx.queryOne('SELECT 1 FROM deals WHERE id = $1', [previousId]);
+      if (!existing) return null;
+      // Reject if the target ID is already taken — before the transaction this
+      // collision produced a 500 with partial child-table writes.
+      const collision = await tx.queryOne('SELECT 1 FROM deals WHERE id = $1', [nextId]);
+      if (collision) throw new Error('Target deal id already exists');
+      const insertedRow = await tx.queryOne(
+        'INSERT INTO deals SELECT $1 as id, status, client_id, client_type, business_unit, funding_business_unit, business_line, product_type, currency, amount, start_date, duration_months, amortization, repricing_freq, margin_target, behavioural_model_id, risk_weight, capital_ratio, target_roe, operational_cost_bps, lcr_outflow_pct, category, drawn_amount, undrawn_amount, is_committed, lcr_classification, deposit_type, behavioral_maturity_override, transition_risk, physical_risk, liquidity_spread, _liquidity_premium_details, _clc_charge_details, entity_id, version, locked_at, locked_by, approved_by, approved_at, pricing_snapshot, created_by, created_at, $2 FROM deals WHERE id = $3 RETURNING *',
+        [nextId, nowIso(), previousId],
+      );
+      await tx.execute('UPDATE pricing_results SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]);
+      await tx.execute('UPDATE deal_versions SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]);
+      await tx.execute('UPDATE deal_comments SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]);
+      await tx.execute('UPDATE notifications SET deal_id=$1 WHERE deal_id=$2', [nextId, previousId]);
+      await tx.execute('DELETE FROM deals WHERE id = $1', [previousId]);
+      return insertedRow;
+    });
+    if (!inserted) return res.status(404).json({ error: 'Deal not found' });
     res.json(inserted);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
@@ -419,18 +438,27 @@ router.get('/:id/pricing-history', async (req, res) => {
 
 router.post('/:id/pricing-results', async (req, res) => {
   try {
-    const r = req.body;
-    const versionRows = await query<{ next_version: number }>(
-      'SELECT COALESCE(MAX(version), 0) + 1 as next_version FROM pricing_results WHERE deal_id = $1 FOR UPDATE',
-      [req.params.id],
-    );
-    const version = versionRows[0]?.next_version ?? 1;
-    await execute(
-      `INSERT INTO pricing_results (deal_id, version, base_rate, liquidity_spread, strategic_spread, option_cost, regulatory_cost, lcr_cost, nsfr_cost, operational_cost, capital_charge, esg_transition_charge, esg_physical_charge, floor_price, technical_price, target_price, total_ftp, final_client_rate, raroc, economic_profit, approval_level, matched_methodology, match_reason, formula_used, behavioral_maturity_used, incentivisation_adj, capital_income, calculated_by, deal_snapshot)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)`,
-      [req.params.id, version, r.baseRate, r.liquiditySpread, r.strategicSpread, r.optionCost, r.regulatoryCost, r.lcrCost ?? 0, r.nsfrCost ?? 0, r.operationalCost, r.capitalCharge, r.esgTransitionCharge, r.esgPhysicalCharge, r.floorPrice, r.technicalPrice, r.targetPrice, r.totalFTP, r.finalClientRate, r.raroc, r.economicProfit, r.approvalLevel, r.matchedMethodology, r.matchReason, r.formulaUsed ?? null, r.behavioralMaturityUsed ?? null, r.incentivisationAdj ?? null, r.capitalIncome ?? null, r.calculatedBy, r.dealSnapshot ? JSON.stringify(r.dealSnapshot) : null],
-    );
-    res.json({ ok: true });
+    const r = req.body ?? {};
+    // The previous implementation ran `SELECT ... FOR UPDATE` and the INSERT on
+    // two separate pool clients, so the row-lock was released as soon as the
+    // SELECT returned. Two concurrent writers could then read the same
+    // next_version and race to insert duplicates. Running both statements
+    // inside one transaction pins them to the same client and enforces the
+    // lock window.
+    const version = await withTransaction(async (tx) => {
+      const rows = await tx.query<{ next_version: number }>(
+        'SELECT COALESCE(MAX(version), 0) + 1 as next_version FROM pricing_results WHERE deal_id = $1 FOR UPDATE',
+        [req.params.id],
+      );
+      const nextVersion = Number(rows[0]?.next_version ?? 1);
+      await tx.execute(
+        `INSERT INTO pricing_results (deal_id, version, base_rate, liquidity_spread, strategic_spread, option_cost, regulatory_cost, lcr_cost, nsfr_cost, operational_cost, capital_charge, esg_transition_charge, esg_physical_charge, floor_price, technical_price, target_price, total_ftp, final_client_rate, raroc, economic_profit, approval_level, matched_methodology, match_reason, formula_used, behavioral_maturity_used, incentivisation_adj, capital_income, calculated_by, deal_snapshot)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)`,
+        [req.params.id, nextVersion, r.baseRate, r.liquiditySpread, r.strategicSpread, r.optionCost, r.regulatoryCost, r.lcrCost ?? 0, r.nsfrCost ?? 0, r.operationalCost, r.capitalCharge, r.esgTransitionCharge, r.esgPhysicalCharge, r.floorPrice, r.technicalPrice, r.targetPrice, r.totalFTP, r.finalClientRate, r.raroc, r.economicProfit, r.approvalLevel, r.matchedMethodology, r.matchReason, r.formulaUsed ?? null, r.behavioralMaturityUsed ?? null, r.incentivisationAdj ?? null, r.capitalIncome ?? null, r.calculatedBy, r.dealSnapshot ? JSON.stringify(r.dealSnapshot) : null],
+      );
+      return nextVersion;
+    });
+    res.json({ ok: true, version });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
