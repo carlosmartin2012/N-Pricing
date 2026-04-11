@@ -1,6 +1,7 @@
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/ui/Toast';
+import { useEntity } from '../contexts/EntityContext';
 import { useConfigPersistence } from './supabaseSync/useConfigPersistence';
 import { useInitialHydration } from './supabaseSync/useInitialHydration';
 // Realtime and presence disabled — Supabase Realtime WebSocket reconnection loop
@@ -17,8 +18,16 @@ export const useSupabaseSync = () => {
   const data = useData();
   const { currentUser } = useAuth();
   const { addToast } = useToast();
+  const { activeEntity, isGroupScope, isLoading: isEntityLoading } = useEntity();
 
-  useInitialHydration({ data, currentUser, addToast });
+  useInitialHydration({
+    data,
+    currentUser,
+    activeEntityId: activeEntity?.id,
+    isGroupScope,
+    isEntityLoading,
+    addToast,
+  });
   // useRealtimeSync(data);  // Disabled: WebSocket reconnection loop blocks UI
   // usePresenceAndSessionAudit({ currentUser, isAuthenticated });  // Disabled: depends on Realtime
   useConfigPersistence(data);

@@ -6,6 +6,8 @@
     "index": 450000,
     "xlsx": 450000,
     "CategoricalChart": 320000,
-    "vendor-supabase": 200000
+    "vendor-supabase": 200000,
+    "vendor-recharts": 450000,
+    "DealBlotter": 105000
   }
 }

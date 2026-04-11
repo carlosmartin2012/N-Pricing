@@ -33,24 +33,37 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 - **Q7**: añadida story de `BlotterTable` en `components/Blotter/BlotterTable.stories.tsx`; `npm run build-storybook` verde.
 - **Q8**: nueva suite `api/__tests__/mappers.test.ts` con round-trips y contratos públicos.
 - **A3 (fuerte)**: contrato público de `api/mappers.ts` ya cubierto por tests y el mapper legacy subyacente quedó sin `any` explícitos.
-- **C1 (parcial fuerte)**: infraestructura de mock centralizada en `e2e/mockApi.ts`; `registerApiMocks()` acepta seeds controlados de estado y ya existen specs dedicados `e2e/deal-blotter.spec.ts`, `e2e/rules-governance.spec.ts`, `e2e/shocks-reporting.spec.ts`, `e2e/market-data.spec.ts` y `e2e/esg-grid.spec.ts`, cubriendo grid/filtros/dossier/alta manual, el flujo maker-checker de metodología con audit trail, la creación de snapshots/reporting bajo stress, el golden path de gobierno de market data (alta de fuente + snapshot + audit trail) y el recorrido ESG gobernado hasta su impacto en pricing.
+- **C1 (mínimo del roadmap cumplido)**: infraestructura de mock centralizada en `e2e/mockApi.ts`; `registerApiMocks()` acepta seeds controlados de estado y ya existen specs dedicados `e2e/deal-blotter.spec.ts`, `e2e/rules-governance.spec.ts`, `e2e/shocks-reporting.spec.ts`, `e2e/market-data.spec.ts`, `e2e/esg-grid.spec.ts`, `e2e/multi-entity.spec.ts` y `e2e/ai-assistant.spec.ts`, cubriendo grid/filtros/dossier/alta manual, el flujo maker-checker de metodología con audit trail, la creación de snapshots/reporting bajo stress, el golden path de gobierno de market data (alta de fuente + snapshot + audit trail), el recorrido ESG gobernado hasta su impacto en pricing, el aislamiento real de datos al cambiar de entidad o volver a vista consolidada y el chat del copiloto en AI Lab vía stream mockeado.
 - **C2**: añadida regresión numérica del motor en `utils/__tests__/pricingRegression.test.ts` con fixture JSON de 50 casos en `utils/__tests__/fixtures/pricing-regression.fixture.json`.
 - **A1 (cerrado en runtime)**: `App.tsx`, `components/`, `contexts/`, `hooks/` y `utils/` ya no consumen `supabaseService`; el código activo pasa por `api/` y servicios especializados (`monitoring`, `approvalService`, `portfolioReportingService`, `marketDataIngestionService`) según corresponda. `AuditLog` ya consume `api/mappers` en vez del path legacy y se han retirado los adapters CRUD `utils/supabase/{deals,config,market}.ts` junto con `utils/supabaseService.ts`.
-- **B1 (avance)**: `DealBlotter.tsx` ya empezó a descomponerse; la lógica de filtro/selección/dossier salió a `components/Blotter/hooks/useBlotterState.ts`, la barra de acciones superior a `components/Blotter/BlotterHeaderActions.tsx`, las utilidades de renombrado/referencias a `components/Blotter/blotterReferenceUtils.ts` y la orquestación de drawers a `components/Blotter/DealBlotterDrawers.tsx`, reutilizando además `DealEditorDrawer.tsx` y `DealDeleteDrawer.tsx`. El shell principal baja a ~672 líneas y queda mejor posicionado para el siguiente corte.
+- **B1 (avance fuerte)**: `DealBlotter.tsx` siguió descomponiéndose; la lógica de filtro/selección/dossier salió a `components/Blotter/hooks/useBlotterState.ts`, la barra de acciones superior a `components/Blotter/BlotterHeaderActions.tsx`, las utilidades de renombrado/referencias a `components/Blotter/blotterReferenceUtils.ts`, la orquestación de drawers a `components/Blotter/DealBlotterDrawers.tsx` y las acciones mutadoras/workflow a `components/Blotter/hooks/useBlotterActions.ts` + `useBlotterWorkflowActions.ts`, reutilizando además `DealEditorDrawer.tsx` y `DealDeleteDrawer.tsx`. El shell principal baja a ~305 líneas y las piezas activas quedan ya por debajo del objetivo `<400 L`.
+- **B2 (cerrado)**: `ModelInventoryPanel.tsx` deja de concentrar seed/config/helpers/drawer; ahora el shell baja a ~271 líneas y se apoya en `components/Config/ModelInventoryDrawer.tsx`, `ModelInventoryBadges.tsx` y `modelInventoryConfig.ts`, manteniendo intacto el flujo de backtest sintético. Se añadió además `ModelInventoryPanel.stories.tsx`, test de componente dedicado y `npm run build-storybook` vuelve a quedar verde.
+- **B3 (avance fuerte)**: `PricingReceipt.tsx` deja de ser un dios-componente y pasa a shell de ~207 líneas, apoyado en `components/Calculator/PricingReceiptChrome.tsx`, `PricingReceiptWaterfall.tsx`, `PricingReceiptCreditDetail.tsx` y `hooks/usePricingReceiptActions.ts`; todas las piezas activas quedan por debajo de `<400 L` sin tocar la fórmula de pricing.
+- **D1 (cerrado)**: los dashboards de reporting consumen Recharts a través de `components/ui/charts/lazyRecharts.ts` y el build ahora aísla `dist/assets/vendor-recharts-*.js` como chunk lazy dedicado; `npm run check:bundle` vuelve a quedar verde con budget explícito para ese vendor opcional.
+- **D2 (cerrado)**: `utils/pricingWorker.ts` y `hooks/useBatchPricing.ts` se retiran al no tener consumidores reales; el código activo no usaba el worker y solo conservaba deuda zombie.
+- **D3 (cerrado)**: `components/Admin/AuditLogTable.tsx` pasa a render virtualizado con `@tanstack/react-virtual`, manteniendo el listado fluido por encima del threshold del plan.
+- **D4 (cerrado)**: `.lighthouserc.json` endurece el budget con `performance >= 0.85`, `LCP < 2.5s`, `TBT < 200ms` y `CLS < 0.05`.
 - **A2 (parcial)**: memoizados los `value` de `AuthContext`, `DataContext`, `UIContext`, `EntityContext`, `GovernanceContext` y `MarketDataContext`; `useData()` también deja de reconstruir el objeto combinado en cada render.
 - **Bug fix real en runtime**: `components/Risk/ShocksDashboard.tsx` ya no pierde el audit `APPLY_SHOCK` al cambiar de vista antes de que venza el debounce.
 - **Bug fix real en runtime**: `greenium_grid` vuelve a hidratarse desde la capa pública (`api/config.ts` + `hooks/supabaseSync/useInitialHydration.ts`) y deja de quedarse vacío en runtime; esto corregía un fallo silencioso donde la vista ESG aparecía vacía y el pricing engine caía al fallback `MOCK_GREENIUM_GRID` aunque se hubiera aplicado un cambio gobernado.
+- **Bug fix real en runtime**: `useSupabaseSync` / `useInitialHydration` ya respetan `activeEntity` y `groupScope` al hidratar `deals`; antes el cambio de entidad no reescopaba el libro activo y seguía mostrando datos sin filtrar.
+- **Estabilidad E2E**: `e2e/brochure-screenshots.spec.ts` deja de depender de `networkidle`, varias aserciones frágiles en `market-data`, `shocks-reporting` y `ai-assistant` se sustituyen por señales funcionales, y `playwright.config.ts` se serializa en local (`workers: 1`, `fullyParallel: false`) para evitar caídas esporádicas del `webServer` de Vite en tandas largas.
 - **Performance / bundle**: restaurado `npm run check:bundle` separando `CalculatorWorkspace`, `PricingReceipt`, `MethodologyVisualizer`, `UserConfigModal`, `UniversalImportModal` y `WalkthroughOverlay` en chunks lazy. El entry principal quedó en 372.1 KB y el workspace de calculator en 73.6 KB, ambos dentro de budget.
-- **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 671 tests unitarios y E2E 84 passing / 1 skipped (85 tests totales).
+- **B4 (cerrado)**: `utils/governanceWorkflows.ts` queda reducido a fachada pública sobre `utils/governance/{common,methodology,methodologyRequests,methodologyApply,pricing}.ts`, preservando compatibilidad sin seguir concentrando ~900 líneas en un solo archivo.
+- **E2 (cerrado)**: `vercel.json` pasa de `Content-Security-Policy-Report-Only` a `Content-Security-Policy` efectiva, afinando además `style-src`/`font-src` para Google Fonts e `img-src` para el favicon de Google en login.
+- **E1 (cerrado)**: auditoría formal publicada en `docs/rls-audit-2026-04.md`; la revisión detectó que `supabase/schema_v2.sql` ya no representa el estado completo de RLS y dejó un hardening adicional en `supabase/migrations/20260411000002_rls_hardening.sql`.
+- **F1 / F3 (diseño cerrado)**: publicados `docs/pricing-plugin-architecture.md` y `docs/pricing-calculation-observability.md` con la propuesta incremental de registry/pipeline y trazas estructuradas de cálculo.
+- **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 671 tests unitarios y E2E 86 passing / 1 skipped (87 tests totales).
 
 ### Avanzado pero no cerrado
-- **B1**: la descomposición de `DealBlotter` ya comenzó, pero todavía faltan separar filtros/acciones/drawers hasta acercarlo al objetivo <400 L por archivo.
+- **PricingReceipt / pricing-flow**: hubo una pasada limpia de `e2e/pricing-flow.spec.ts` en este corte, pero repeticiones consecutivas siguen chocando de forma intermitente con caídas del `webServer` de Vite ya conocidas en local.
 - **CLAUDE.md** ya refleja que `api/` es la capa pública y que esos módulos legacy son adapters/deprecated path.
 - La suite de screenshots E2E ya no escribe en `screenshots/` durante tests; ahora usa output de Playwright y Vite ignora artefactos de test para evitar HMR espurio.
 
 ### Pendiente del plan maestro
-- **C1 expansión**: faltan los specs nuevos del roadmap hasta llegar a ≥12.
-- **B, D, E, F** permanecen mayormente pendientes salvo los quick wins ya indicados.
+- **C1**: objetivo mínimo `>=12 specs` cumplido; quedan specs adicionales (`batch-import`, `offline-pwa`, `rbac`) como expansión opcional.
+- **A2**: falta la parte de profiling cuantificado antes/después; la memoización parcial ya está hecha, pero no la evidencia del `>=30%`.
+- **F2 / F4 / F5** siguen como backlog real.
 
 ### Notas para la siguiente sesión
 - Tomar este estado como nuevo baseline, no volver a reabrir la discusión sobre mock API ni los skips originales.
@@ -60,7 +73,7 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 
 ## 1. Contexto mínimo (para agente nuevo)
 
-N-Pricing es un motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. React 19 + TypeScript 5.8 + Vite 6 + Supabase + React Query + Tailwind. PWA con fallback offline. AI Assistant (Gemini) vía proxy. 229 TS/TSX files, 111 componentes, 17 hooks, 45 utils, 7 Context providers, 671 unit tests, 10 E2E specs, 14 migraciones Supabase.
+N-Pricing es un motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. React 19 + TypeScript 5.8 + Vite 6 + Supabase + React Query + Tailwind. PWA con fallback offline. AI Assistant (Gemini) vía proxy. 229 TS/TSX files, 111 componentes, 17 hooks, 45 utils, 7 Context providers, 671 unit tests, 12 E2E specs, 15 migraciones Supabase.
 
 Lectura obligada antes de tocar código:
 - `CLAUDE.md` — arquitectura, convenciones, áreas sensibles
@@ -90,14 +103,14 @@ npm run check:bundle  # valida tamaños
 | Tema | Evidencia | Impacto |
 |---|---|---|
 | **Duplicación capa datos** | Había duplicación entre `api/*` y adapters CRUD legacy en `utils/supabase/*`. | Mitigado en esta ejecución — `api/` queda como capa única |
-| **Dios-componentes** | `DealBlotter.tsx` 982 L, `ModelInventoryPanel.tsx` 832 L, `PricingReceipt.tsx` 777 L, `governanceWorkflows.ts` 916 L | Alto — cambios lentos y con regresiones |
+| **Dios-componentes** | `DealBlotter`, `PricingReceipt` y `governanceWorkflows` ya quedaron troceados; el foco residual está sobre todo en `ModelInventoryPanel` y en añadir stories/tests a los shells nuevos. | Medio — deuda más acotada y menos concentrada |
 | **115 `any` tolerados** | ESLint `@typescript-eslint/no-explicit-any: 'off'`; peores en `utils/supabase/mappers.ts:16`, `api/config.ts:6`, `components/Config/MethodologyConfig.tsx:6` | Medio — errores de mapeo silenciosos |
-| **E2E todavía corto para el roadmap** | 10 specs activas con 85 tests (`84 pass`, `1 skip` esperado), ya estabilizadas con mock API central y seeds controlados en el mock compartido. | Medio — baseline ya más sólida, pero todavía faltan los golden paths pendientes del roadmap |
-| **`pricingWorker.ts` probablemente muerto** | Existe en `utils/pricingWorker.ts`, referenciado en `hooks/useBatchPricing.ts`, sin evidencia de uso efectivo | Bajo — main thread bloquea en batch pricing >100 deals |
+| **E2E alineado con el mínimo del roadmap** | 12 specs activas con 87 tests (`86 pass`, `1 skip` esperado), estabilizadas con mock API central, seeds controlados y runner serial en local para evitar caídas del web server. | Bajo/Medio — mínimo cubierto; expansión adicional ya es opcional |
+| **`pricingWorker.ts` / `useBatchPricing`** | Código muerto retirado: no tenía consumidores reales y solo se referenciaba a sí mismo. | Mitigado — menos complejidad zombie en runtime |
 | **Recharts y calculator chunking aún mejorables** | Bundle budget ya vuelve a pasar, pero siguen existiendo chunks pesados (`xlsx`, `CategoricalChart`) y oportunidades extra de lazy/manualChunks. | Medio — LCP / TBT |
 | **Context values sin `useMemo`** | Pendiente auditar `DataContext`, `UIContext`, `MarketDataContext`, `GovernanceContext` | Medio — re-renders en toda la app |
-| **`api/mappers.ts` sin tests** | Ningún test de round-trip Domain↔DB | Alto — persistencia rota silenciosa |
-| **50 `console.log` olvidados** | `index.tsx`, `hooks/useBatchPricing.ts`, `components/Intelligence/GeminiAssistant.tsx`, `scripts/*`, `server/*` | Bajo — ruido en prod |
+| **`api/mappers.ts` sin tests** | Riesgo ya mitigado con round-trips y contratos públicos en `api/__tests__/mappers.test.ts`. | Cerrado |
+| **50 `console.log` olvidados** | Persisten restos en `index.tsx`, `components/Intelligence/GeminiAssistant.tsx`, `scripts/*`, `server/*`; ya no aplica `hooks/useBatchPricing.ts`. | Bajo — ruido en prod |
 | **Storybook mínimo** | 4 stories (`AccountingSummaryCard`, `ErrorBoundary`, `Toast`, `RAROCMetricCard`) | Bajo — no es la norma del equipo |
 | **CSP ausente** | `vercel.json` sin `Content-Security-Policy` header | Medio — app financiera |
 
@@ -206,26 +219,25 @@ components/Blotter/
 
 **Criterios:** ningún archivo >400 L, cada pieza con su test, E2E `deal-blotter.spec.ts` verde.
 
-#### B2. `ModelInventoryPanel.tsx` (832 L)
+#### B2. `ModelInventoryPanel.tsx` (832 L → ~271 L shell)
 **Descomposición:**
 ```text
-components/Config/ModelInventory/
+components/Config/
   ModelInventoryPanel.tsx   (shell)
-  ModelGrid.tsx             (tabla)
-  ModelEditor.tsx           (drawer edición)
-  ModelValidationBadge.tsx
-  ModelUsageCard.tsx
+  ModelInventoryDrawer.tsx  (drawer detalles + backtest)
+  ModelInventoryBadges.tsx  (badges/traffic light)
+  modelInventoryConfig.ts   (seed + catálogos + helpers)
 ```
 
-#### B3. `PricingReceipt.tsx` (777 L)
+#### B3. `PricingReceipt.tsx` (777 L → ~207 L shell)
 **Descomposición:**
 ```text
-components/Calculator/Receipt/
-  PricingReceipt.tsx        (shell)
-  WaterfallTree.tsx         (breakdown de los 19 gaps)
-  ShockSimulator.tsx
-  ScenarioComparison.tsx
-  hooks/useReceiptDerivation.ts
+components/Calculator/
+  PricingReceipt.tsx                (shell orquestador)
+  PricingReceiptChrome.tsx          (summary + footer + accounting)
+  PricingReceiptWaterfall.tsx       (breakdown de pricing + toggles)
+  PricingReceiptCreditDetail.tsx    (detalle Anejo IX / capital params)
+  hooks/usePricingReceiptActions.ts (autosave + save as deal + export)
 ```
 
 #### B4. `utils/governanceWorkflows.ts` (916 L) → state machine
@@ -267,7 +279,7 @@ Pasar de 4 → ≥12 specs. Específicos:
 | `e2e/ai-assistant.spec.ts` (nuevo, mock) | chat Gemini con grounding de portfolio |
 | `e2e/offline-pwa.spec.ts` (nuevo) | degradar network → operar con cache local → reconectar → sync |
 | `e2e/rbac.spec.ts` (nuevo) | Trader no puede approve; Risk_Manager sí; Auditor read-only |
-| `e2e/multi-entity.spec.ts` (nuevo) | cambiar entidad activa → datos aislados |
+| `e2e/multi-entity.spec.ts` (nuevo) | cambiar entidad activa → datos aislados + vista grupo consolidada |
 | `e2e/auth.spec.ts` (activar) | login demo + OAuth mock |
 
 **Infra requerida:** servicio API mockeable (hoy los dos skip dependen de `E2E_WITH_API=1`). Montar un mock de Supabase en Playwright fixture o un `msw/node` en el server `tsx`.
@@ -300,6 +312,8 @@ rg -n "pricingWorker" --type ts --type tsx
 - Si no lo usa nadie → borrar, incluyendo el archivo y sus tipos.
 **Criterio:** Batch pricing de 200 deals no bloquea main thread >50ms (medible con Performance API).
 
+**Estado actual:** cerrado por retirada. `utils/pricingWorker.ts` y `hooks/useBatchPricing.ts` no tenían consumidores reales en el código activo, así que se eliminaron para reducir complejidad y evitar deuda zombie.
+
 #### D3. Virtualización de AuditLog
 Confirmar en `components/Admin/AuditLog.tsx` si usa `@tanstack/react-virtual`. Si no, aplicar con threshold 100 rows.
 
@@ -314,7 +328,7 @@ Endurecer `.lighthouserc.json`:
 
 ### Eje E — Seguridad
 
-#### E1. Revisión RLS de las 14 migraciones
+#### E1. Revisión RLS de las migraciones activas
 Abrir cada `supabase/migrations/*.sql` y confirmar:
 - Toda tabla sensible tiene `ENABLE ROW LEVEL SECURITY`.
 - Policies filtran por `auth.uid()` y/o `entity_id` del usuario.
@@ -332,6 +346,8 @@ Añadir bloque `headers` con las siguientes directivas:
 - `Permissions-Policy: geolocation=(), microphone=(), camera=()`
 
 Validar primero en modo `Content-Security-Policy-Report-Only` durante un sprint, afinar si hay violations, y luego pasar a enforce. Afinar `connect-src` si el proxy Gemini usa otro host.
+
+**Estado actual:** cerrado. La política ya está en modo enforce (`Content-Security-Policy`) y quedó ampliada para permitir Google Fonts y el favicon de Google usado en login sin abrir más superficie de la necesaria.
 
 #### E3. Cerrar 2 E2E skip + 50 `console.log`
 - Activar `e2e/auth.spec.ts` y `e2e/pricing-flow.spec.ts` con el mock del Eje C1.
@@ -402,7 +418,7 @@ Plan existente en `docs/superpowers/plans/`. No duplicar aquí, solo recordar qu
 - Q1, Q2, Q3, Q4, Q5, Q7 (quick wins)
 - A1 (consolidación `api/`)
 - A3 (typing `mappers.ts` + tests)
-- C1 parcial: 10 specs E2E activas; `deal-blotter.spec.ts`, `rules-governance.spec.ts`, `shocks-reporting.spec.ts`, `market-data.spec.ts` y `esg-grid.spec.ts` ya cubren el flujo básico del blotter, el maker-checker metodológico, el tramo de stress/reporting, el gobierno de curvas y el impacto ESG gobernado en pricing
+- C1 cumplido: 12 specs E2E activas; `deal-blotter.spec.ts`, `rules-governance.spec.ts`, `shocks-reporting.spec.ts`, `market-data.spec.ts`, `esg-grid.spec.ts`, `multi-entity.spec.ts` y `ai-assistant.spec.ts` ya cubren el flujo básico del blotter, el maker-checker metodológico, el tramo de stress/reporting, el gobierno de curvas, el impacto ESG gobernado en pricing, el scoping real por entidad/vista grupo y el chat mockeado del copiloto
 - C2 (regresión numérica motor)
 
 **Exit criteria:** `verify:full` verde, 8 E2E specs, 0 `any` en `api/mappers.ts`, capa datos única.
@@ -411,8 +427,8 @@ Plan existente en `docs/superpowers/plans/`. No duplicar aquí, solo recordar qu
 - A2 (audit contexts + memoización)
 - B1 (`DealBlotter` descomposición)
 - D1 (Recharts lazy)
-- D2 (decidir `pricingWorker`)
-- C1 resto: 2 specs E2E adicionales
+- D2 (retirada de `pricingWorker` / `useBatchPricing` muerto)
+- C1 expansión opcional: `batch-import`, `offline-pwa` o `rbac`
 - C3 parcial: Storybook de los nuevos componentes de Blotter
 
 **Exit criteria:** Blotter en archivos <400 L, bundle inicial ≥80 KB más ligero, 12 E2E specs, Profiler shows ≥30% menos renders.
@@ -462,17 +478,16 @@ Plan existente en `docs/superpowers/plans/`. No duplicar aquí, solo recordar qu
 | `App.tsx` | Shell principal, lazy loading, routing | No tocar salvo para quitar imports obsoletos |
 | `utils/pricingEngine.ts` | Orquestador FTP 603 L | **Sensible.** Cualquier cambio con test de regresión |
 | `utils/pricing/` | Motor modularizado (curveUtils, formulaEngine, liquidityEngine) | BIEN. Refactor interno incremental está OK |
-| `utils/governanceWorkflows.ts` | State de approval 916 L | **B4.** Descomponer en `utils/governance/` |
+| `utils/governanceWorkflows.ts` | Fachada pública de governance | **B4.** Ya delega en `utils/governance/` |
 | `api/` | Capa CRUD nueva | **A1.** Se convierte en capa pública única |
 | `utils/supabase/` | Servicios Supabase 15 módulos | **A1.** Parcialmente deprecado; queda solo lo no-CRUD |
 | `api/mappers.ts` | Snake_case ↔ camelCase | **A3.** Tipar y testear |
 | `hooks/supabaseSync/` | Hidratación + realtime + fallback | **Zona sensible.** No tocar salvo con tests |
 | `hooks/queries/` | React Query wrappers | BIEN. Usar sus queryKeys para invalidar cache |
-| `components/Blotter/DealBlotter.tsx` | 982 L | **B1.** Descomponer |
-| `components/Config/ModelInventoryPanel.tsx` | 832 L | **B2.** Descomponer |
-| `components/Calculator/PricingReceipt.tsx` | 777 L | **B3.** Descomponer |
-| `utils/pricingWorker.ts` | Web Worker batch pricing | **D2.** Investigar si vivo o muerto |
-| `supabase/migrations/*.sql` | 14 migraciones | **E1.** Revisar RLS |
+| `components/Blotter/DealBlotter.tsx` | Shell ~305 L | **B1.** Ya descompuesto |
+| `components/Config/ModelInventoryPanel.tsx` | Shell ~271 L | **B2.** Refinar stories/tests |
+| `components/Calculator/PricingReceipt.tsx` | Shell ~207 L | **B3.** Ya descompuesto |
+| `supabase/migrations/*.sql` | 15 migraciones | **E1.** Auditado + hardening |
 | `vercel.json` | Deploy + headers | **E2.** Añadir CSP |
 | `eslint.config.js` | Reglas lint | **Q1, Q5.** Subir rigor gradualmente |
 | `.lighthouserc.json` | Budget Lighthouse | **D4.** Endurecer |

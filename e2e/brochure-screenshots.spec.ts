@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }) => {
 
 async function login(page: Page) {
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
+  await page.getByTestId('login-page').waitFor({ state: 'visible', timeout: 10000 });
 
   // Demo login — fill username + password + submit
   const usernameInput = page.getByTestId('demo-username');
@@ -31,8 +31,9 @@ async function login(page: Page) {
 
   // Wait for login to transition — the login page should disappear
   await page.getByTestId('demo-login-btn').waitFor({ state: 'detached', timeout: 15000 }).catch(() => {});
+  await page.getByTestId('deal-input-panel').waitFor({ state: 'visible', timeout: 15000 });
   // Let the SPA hydrate and lazy components render
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(1500);
 }
 
 async function gotoView(page: Page, viewId: string) {

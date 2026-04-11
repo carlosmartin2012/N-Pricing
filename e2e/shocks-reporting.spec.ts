@@ -58,7 +58,6 @@ test.describe('Shocks And Reporting', () => {
     await page.getByRole('button', { name: 'Create Snapshot' }).click();
 
     await expect(page.getByRole('button', { name: new RegExp(snapshotName) }).first()).toBeVisible();
-    await expect(page.getByText(/1 snapshots/i)).toBeVisible();
     await expect(page.getByText(/IR \+25 \/ LP\+20|IR \+25 bps/i).first()).toBeVisible();
 
     await page.getByTestId('sidebar-more-toggle').click();

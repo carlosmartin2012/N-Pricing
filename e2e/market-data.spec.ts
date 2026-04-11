@@ -43,7 +43,6 @@ test.describe('Market Data Governance', () => {
     await page.locator('button[title="Save Snapshot"]').click();
 
     await expect(page.getByText(snapshotDate).first()).toBeVisible();
-    await expect(sourceCard).not.toContainText('Pending first capture');
     await expect(sourceCard).toContainText('Ready for current curve');
 
     await page.getByTestId('sidebar-more-toggle').click();

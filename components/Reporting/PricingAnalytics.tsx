@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
-} from 'recharts';
+} from '../ui/charts/lazyRecharts';
 import { Transaction, BusinessUnit, ProductDefinition, ClientEntity } from '../../types';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { useData } from '../../contexts/DataContext';

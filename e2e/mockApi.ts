@@ -1,4 +1,5 @@
 import type { Page, Route } from '@playwright/test';
+import type { Transaction } from '../types';
 import { DEFAULT_ENTITY_ID, MOCK_ENTITIES, MOCK_ENTITY_USERS, MOCK_GROUPS } from '../utils/seedData.entities';
 import {
   INITIAL_DEAL,
@@ -47,6 +48,7 @@ interface MockState {
 
 interface MockApiOptions {
   audit?: Array<Record<string, unknown>>;
+  deals?: Transaction[];
   notifications?: Array<Record<string, unknown>>;
   systemConfigOverrides?: Record<string, unknown>;
 }
@@ -121,7 +123,7 @@ function defaultSystemConfig(): Record<string, unknown> {
 function createState(options: MockApiOptions = {}): MockState {
   return {
     audit: options.audit ? [...options.audit] : [],
-    deals: MOCK_DEALS.map((deal) => makeDealRow(deal)),
+    deals: (options.deals ?? MOCK_DEALS).map((deal) => makeDealRow(deal)),
     notifications: options.notifications
       ? [...options.notifications]
       : [
@@ -242,6 +244,34 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       return;
     }
 
+    if (path === '/gemini/chat' && method === 'POST') {
+      const requestBody = body as {
+        contents?: Array<{ parts?: Array<{ text?: string }> }>;
+      };
+      const lastPrompt =
+        requestBody.contents?.at(-1)?.parts?.map((part) => part.text ?? '').join(' ').trim() ||
+        'Explain the current pricing setup.';
+      const answer = [
+        'Mock Gemini review: ',
+        `I analyzed "${lastPrompt}". `,
+        'The current pricing setup remains inside a governed mock flow with active market context and deal coverage.',
+      ];
+      const sseBody = answer
+        .map((text) => `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text }] } }] })}\n\n`)
+        .concat('data: [DONE]\n\n')
+        .join('');
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        },
+        body: sseBody,
+      });
+      return;
+    }
+
     if (path === '/audit' && method === 'GET') {
       await route.fulfill(json(state.audit));
       return;
@@ -265,9 +295,13 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       return;
     }
     if (path === '/deals/light' && method === 'GET') {
+      const entityId = url.searchParams.get('entity_id');
+      const rows = entityId
+        ? state.deals.filter((deal) => String(deal.entity_id ?? '') === entityId)
+        : state.deals;
       await route.fulfill(
         json(
-          state.deals.map((deal) => ({
+          rows.map((deal) => ({
             id: deal.id ?? '',
             status: deal.status ?? '',
             client_id: deal.client_id ?? '',
@@ -282,11 +316,19 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       return;
     }
     if (path === '/deals/paginated' && method === 'GET') {
-      await route.fulfill(json({ data: state.deals, total: state.deals.length }));
+      const entityId = url.searchParams.get('entity_id');
+      const rows = entityId
+        ? state.deals.filter((deal) => String(deal.entity_id ?? '') === entityId)
+        : state.deals;
+      await route.fulfill(json({ data: rows, total: rows.length }));
       return;
     }
     if (path === '/deals/cursor' && method === 'GET') {
-      await route.fulfill(json({ data: state.deals, cursor: null, hasMore: false }));
+      const entityId = url.searchParams.get('entity_id');
+      const rows = entityId
+        ? state.deals.filter((deal) => String(deal.entity_id ?? '') === entityId)
+        : state.deals;
+      await route.fulfill(json({ data: rows, cursor: null, hasMore: false }));
       return;
     }
     if (path === '/deals/upsert' && method === 'POST') {

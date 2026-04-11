@@ -37,7 +37,7 @@
 
 **Reglas**:
 - Schema de referencia: `supabase/schema_v2.sql` (ignorar schema.sql, es legacy)
-- 14 migraciones en `supabase/migrations/` — ejecutar en orden
+- 15 migraciones en `supabase/migrations/` — ejecutar en orden
 - Capa API centralizada en `api/` — usar `api/mappers.ts` para snake_case↔camelCase
 - Servicios especializados en `utils/supabase/`: deals, market, config, audit, approval, masterData, rules, monitoring, etc.
 - Toda nueva tabla necesita: RLS policies, realtime habilitado, suscripción en `hooks/supabaseSync/useRealtimeSync.ts`
@@ -49,11 +49,11 @@
 - Edge Function de pricing en `supabase/functions/pricing/` (Deno runtime)
 
 ### 4. Agente de Testing
-**Scope**: `utils/__tests__/` (23 archivos), `components/*/__tests__/` (3 archivos), `e2e/` (10 specs)
+**Scope**: `utils/__tests__/` (23 archivos), `components/*/__tests__/` (3 archivos), `e2e/` (12 specs)
 
 **Reglas**:
 - **Unit**: Vitest 4 (no Jest) — 328 tests en 67 suites, 26 archivos
-- **E2E**: Playwright 1.59 — 10 specs (`auth`, `brochure-screenshots`, `deal-blotter`, `esg-grid`, `example`, `market-data`, `navigation`, `pricing-flow`, `rules-governance`, `shocks-reporting`)
+- **E2E**: Playwright 1.59 — 12 specs (`ai-assistant`, `auth`, `brochure-screenshots`, `deal-blotter`, `esg-grid`, `example`, `market-data`, `multi-entity`, `navigation`, `pricing-flow`, `rules-governance`, `shocks-reporting`)
 - **Component**: Storybook 8.6 — stories junto al componente
 - Tests colocados en `__tests__/` junto al módulo
 - Patrón de test existente: describe → it → expect con datos inline

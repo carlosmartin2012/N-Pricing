@@ -13,7 +13,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from '../ui/charts/lazyRecharts';
 import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from '../../types';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { buildPricingContext } from '../../utils/pricingContext';

@@ -40,13 +40,28 @@ const log = createLogger('sync-hydration');
 interface InitialHydrationOptions {
   data: DataContextType;
   currentUser: UserProfile | null;
+  activeEntityId?: string;
+  isGroupScope?: boolean;
+  isEntityLoading?: boolean;
   addToast: (type: 'warning' | 'error' | 'success' | 'info', message: string, duration?: number) => void;
 }
 
-export function useInitialHydration({ data, currentUser, addToast }: InitialHydrationOptions) {
+export function useInitialHydration({
+  data,
+  currentUser,
+  activeEntityId,
+  isGroupScope = false,
+  isEntityLoading = false,
+  addToast,
+}: InitialHydrationOptions) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (currentUser && isEntityLoading) return;
+
+    const scopedEntityId = isGroupScope ? undefined : activeEntityId;
+    let isCancelled = false;
+
     const hydrate = async () => {
       if (!isSupabaseConfigured) {
         applyMockData(data, 'mock');
@@ -80,7 +95,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
           dbPortfolioSnapshots,
           dbMarketDataSources,
         ] = await Promise.all([
-          dealsApi.listDeals(),
+          dealsApi.listDeals(scopedEntityId),
           marketDataApi.listModels(),
           configApi.listRules(),
           configApi.listClients(),
@@ -104,8 +119,14 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
           configApi.fetchMarketDataSources(),
         ]);
 
+        if (isCancelled) return;
+
         // Seed React Query cache so subsequent useQuery calls are instant
-        queryClient.setQueryData(queryKeys.deals.all, resolveWithFallback(dbDeals, MOCK_DEALS));
+        const resolvedDeals = resolveWithFallback(dbDeals, MOCK_DEALS);
+        queryClient.setQueryData(queryKeys.deals.all, resolvedDeals);
+        if (scopedEntityId) {
+          queryClient.setQueryData([...queryKeys.deals.all, scopedEntityId], resolvedDeals);
+        }
         queryClient.setQueryData(queryKeys.marketData.behaviouralModels, resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS));
         queryClient.setQueryData(queryKeys.config.rules, resolveWithFallback(dbRules, MOCK_RULES));
         queryClient.setQueryData(queryKeys.config.clients, resolveWithFallback(dbClients, MOCK_CLIENTS));
@@ -129,7 +150,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
         queryClient.setQueryData(queryKeys.config.marketDataSources, dbMarketDataSources);
 
         // Hydrate context providers for backward compatibility
-        data.setDeals(resolveWithFallback(dbDeals, MOCK_DEALS));
+        data.setDeals(resolvedDeals);
         data.setBehaviouralModels(resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS));
         data.setRules(resolveWithFallback(dbRules, MOCK_RULES));
         data.setClients(resolveWithFallback(dbClients, MOCK_CLIENTS));
@@ -174,6 +195,7 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
           description: `Data hydrated. Status: ${nextSyncStatus}.`,
         });
       } catch (error) {
+        if (isCancelled) return;
         log.warn('Supabase sync failed, loading mock data', { error: String(error) });
         addToast('warning', 'Could not connect to server. Using offline demo data.');
         applyMockData(data, 'error');
@@ -190,6 +212,8 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
     };
 
     void hydrate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeEntityId, addToast, currentUser, data, isEntityLoading, isGroupScope, queryClient]);
 }

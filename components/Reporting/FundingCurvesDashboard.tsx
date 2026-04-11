@@ -9,7 +9,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from '../ui/charts/lazyRecharts';
 import type {
   FundingCollateralType,
   FundingCurveDatum,

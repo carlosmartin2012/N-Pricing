@@ -7,7 +7,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from '../ui/charts/lazyRecharts';
 import { Badge } from '../ui/LayoutComponents';
 import type { BehaviouralModel } from '../../types';
 

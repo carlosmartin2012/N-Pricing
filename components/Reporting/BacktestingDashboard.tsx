@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-} from 'recharts';
+} from '../ui/charts/lazyRecharts';
 import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from '../../types';
 import { calculateFullCreditRisk, backtestCreditRisk } from '../../utils/pricing/creditRiskEngine';
 import type { BacktestRecord } from '../../utils/pricing/creditRiskEngine';

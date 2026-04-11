@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Transaction } from '../../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from '../ui/charts/lazyRecharts';
 
 interface Props {
   deals: Transaction[];

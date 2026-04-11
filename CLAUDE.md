@@ -34,7 +34,7 @@ npm run build        # Build producción (PWA incluido)
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
 npm run test         # Vitest (671 tests, 45 archivos)
-npm run test:e2e     # Playwright (10 specs, 85 tests)
+npm run test:e2e     # Playwright (12 specs, 87 tests)
 npm run verify:full  # lint + typecheck + test + build + e2e
 npm run check:sync   # Validar seed↔schema sync
 npm run check:bundle # Validar tamaños de bundle
@@ -79,7 +79,6 @@ contexts/
 
 hooks/
   useAudit.ts              # Hook de auditoría
-  useBatchPricing.ts       # Pricing en lote
   useNotifications.ts      # Sistema de notificaciones
   useOfflineStatus.ts      # Detección offline
   usePricingContext.ts      # Contexto de pricing
@@ -135,7 +134,6 @@ utils/
   dealFormResolver.ts      # Resolución de formularios
   generateId.ts            # Generación de IDs
   storage.ts               # Abstracción storage
-  pricingWorker.ts         # Web Worker para pricing
   supabaseClient.ts        # Cliente Supabase
   pricing/                 # Motor de pricing modularizado
     curveUtils.ts
@@ -152,10 +150,11 @@ supabase/
   schema.sql               # Schema v1 (legacy)
   schema_v2.sql            # Schema principal de referencia
   fix_rls_realtime.sql     # Fixes de RLS
-  migrations/              # 14 migraciones secuenciales
+  migrations/              # 15 migraciones secuenciales
   functions/pricing/       # Edge Function (Deno)
 
-e2e/                       # 10 specs Playwright (+ mock API compartida)
+e2e/                       # 12 specs Playwright (+ mock API compartida)
+  ai-assistant.spec.ts
   auth.spec.ts
   brochure-screenshots.spec.ts
   deal-blotter.spec.ts
@@ -163,6 +162,7 @@ e2e/                       # 10 specs Playwright (+ mock API compartida)
   example.spec.ts
   market-data.spec.ts
   mockApi.ts
+  multi-entity.spec.ts
   navigation.spec.ts
   pricing-flow.spec.ts
   rules-governance.spec.ts
@@ -190,7 +190,8 @@ docs/
 - `utils/supabase/` queda para servicios especializados no-CRUD (`approvalService`, `monitoring`, `marketDataIngestionService`, `methodologyService`, etc.) e infraestructura compartida.
 - `hooks/queries/` usa React Query para data fetching con cache, invalidación y query keys centralizadas.
 - `hooks/supabaseSync/` descompone la hidratación en: initial hydration, realtime sync, config persistence y presence.
-- `useSupabaseSync` hidrata desde Supabase y hace fallback a seed/mock data cuando no hay conexión.
+- `useSupabaseSync` hidrata desde Supabase y hace fallback a seed/mock data cuando no hay conexión; el scope de `deals` sigue `activeEntity` o vuelve a vista grupo consolidada cuando corresponde.
+- `playwright.config.ts` corre la suite E2E serializada en local (`workers: 1`, `fullyParallel: false`) para evitar caídas espurias del `webServer` de Vite en tandas largas; CI ya estaba en 1 worker.
 - `pricingEngine.calculatePricing()` es el núcleo del cálculo FTP, consumido por calculator, blotter, reporting, shocks y accounting.
 - `utils/pricing/` contiene el motor modularizado: curveUtils, formulaEngine, liquidityEngine.
 
@@ -287,7 +288,8 @@ User Configuration, User Management, System Audit, User Manual.
 ## Base de datos y Supabase
 
 - `supabase/schema_v2.sql` es la referencia principal de schema.
-- 14 migraciones secuenciales en `supabase/migrations/`.
+- 15 migraciones secuenciales en `supabase/migrations/`.
+- Ver auditoría de RLS en `docs/rls-audit-2026-04.md`.
 - `api/` es la capa CRUD centralizada — usar `api/mappers.ts` para conversión snake_case↔camelCase.
 - `utils/supabase/` queda para adapters legacy residuales y servicios especializados (approval, audit, monitoring, methodology, reporting, etc.).
 - Si cambias contratos de datos, revisar: `types.ts`, `api/mappers.ts` y los adapters/servicios que aún cuelgan de `utils/supabase/`.

@@ -14,7 +14,7 @@ import {
   Line,
   Area,
   Legend,
-} from 'recharts';
+} from '../ui/charts/lazyRecharts';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { useData } from '../../contexts/DataContext';
 import { buildPricingContext } from '../../utils/pricingContext';
