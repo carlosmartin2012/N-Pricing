@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
@@ -26,7 +27,7 @@ router.get('/groups/:id', async (req, res) => {
 router.post('/groups', async (req, res) => {
   try {
     const g = req.body;
-    const id = g.id || crypto.randomUUID();
+    const id = g.id || randomUUID();
     const row = await queryOne(
       'INSERT INTO groups (id,name,short_code,country,base_currency,config,is_active) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,short_code=EXCLUDED.short_code,country=EXCLUDED.country,base_currency=EXCLUDED.base_currency,config=EXCLUDED.config,is_active=EXCLUDED.is_active RETURNING *',
       [id, g.name, g.short_code, g.country, g.base_currency, g.config ? JSON.stringify(g.config) : '{}', g.is_active ?? true],
@@ -59,7 +60,7 @@ router.get('/entities/:id', async (req, res) => {
 router.post('/entities', async (req, res) => {
   try {
     const e = req.body;
-    const id = e.id || crypto.randomUUID();
+    const id = e.id || randomUUID();
     const row = await queryOne(
       `INSERT INTO entities (id,group_id,name,legal_name,short_code,country,base_currency,timezone,approval_matrix,sdr_config,lr_config,is_active)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)

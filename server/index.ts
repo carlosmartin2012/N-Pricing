@@ -19,7 +19,7 @@ import fs from 'fs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '..', 'dist');
 const IS_PROD = !!process.env.PORT && fs.existsSync(path.join(distDir, 'index.html'));
-const PORT = parseInt(process.env.PORT ?? (IS_PROD ? '3001' : '3001'), 10);
+const PORT = parseInt(process.env.PORT ?? '3001', 10);
 
 const app = express();
 

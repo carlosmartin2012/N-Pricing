@@ -1,10 +1,21 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
 const nowIso = () => new Date().toISOString();
+
+// Bound pagination inputs to protect the DB from NaN / unbounded scans.
+// A missing or malformed query param falls back to `fallback`; anything above
+// `max` is clamped down. Avoids `LIMIT NaN` crashes and `LIMIT 999_999_999`
+// DoS vectors.
+function parsePositiveInt(raw: unknown, fallback: number, max: number): number {
+  const n = parseInt(String(raw ?? ''), 10);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.min(n, max);
+}
 
 router.get('/', async (req, res) => {
   try {
@@ -24,14 +35,14 @@ router.get('/', async (req, res) => {
 
 router.get('/paginated', async (req, res) => {
   try {
-    const page = parseInt(String(req.query.page ?? '1'));
-    const pageSize = parseInt(String(req.query.pageSize ?? '50'));
+    const page = parsePositiveInt(req.query.page, 1, 10_000);
+    const pageSize = parsePositiveInt(req.query.pageSize, 50, 500);
     const offset = (page - 1) * pageSize;
     const [rows, countRows] = await Promise.all([
       query('SELECT * FROM deals ORDER BY created_at DESC LIMIT $1 OFFSET $2', [pageSize, offset]),
       query<{ count: string }>('SELECT COUNT(*)::int as count FROM deals'),
     ]);
-    res.json({ data: rows, total: parseInt(countRows[0]?.count ?? '0') });
+    res.json({ data: rows, total: parseInt(countRows[0]?.count ?? '0', 10) });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -55,7 +66,7 @@ router.get('/light', async (req, res) => {
 
 router.get('/cursor', async (req, res) => {
   try {
-    const limit = parseInt(String(req.query.limit ?? '50'));
+    const limit = parsePositiveInt(req.query.limit, 50, 500);
     const cursor = req.query.cursor as string | undefined;
     const entity_id = req.query.entity_id as string | undefined;
     const params: unknown[] = [limit + 1];
@@ -98,7 +109,7 @@ router.get('/:id', async (req, res) => {
 router.post('/upsert', async (req, res) => {
   try {
     const d = req.body;
-    const id = d.id || crypto.randomUUID();
+    const id = d.id || randomUUID();
     const row = await queryOne(
       `INSERT INTO deals (
         id, status, client_id, client_type, business_unit, funding_business_unit,
@@ -173,7 +184,7 @@ router.post('/batch-upsert', async (req, res) => {
     const deals = req.body as Record<string, unknown>[];
     const results = await Promise.all(
       deals.map(async (d) => {
-        const id = (d.id as string) || crypto.randomUUID();
+        const id = (d.id as string) || randomUUID();
         return queryOne('INSERT INTO deals (id, status, client_id, product_type, currency, amount, entity_id, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status, updated_at=EXCLUDED.updated_at RETURNING *',
           [id, d.status, d.client_id, d.product_type, d.currency, d.amount, d.entity_id, nowIso()]);
       })

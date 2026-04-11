@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
@@ -16,7 +17,7 @@ router.get('/models', async (_req, res) => {
 router.post('/models', async (req, res) => {
   try {
     const m = req.body;
-    const id = m.id || crypto.randomUUID();
+    const id = m.id || randomUUID();
     const row = await queryOne(
       `INSERT INTO behavioural_models (id,name,type,nmd_method,description,core_ratio,decay_rate,beta_factor,replication_profile,cpr,penalty_exempt)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)

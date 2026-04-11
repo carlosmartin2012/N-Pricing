@@ -1,4 +1,3 @@
-/* global console, process */
 /**
  * Build script for Supabase Edge Function pricing bundle.
  *

@@ -2,6 +2,31 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 
+// Minimal globals we need — avoids pulling the `globals` npm package.
+const nodeGlobals = {
+  process: 'readonly',
+  console: 'readonly',
+  Buffer: 'readonly',
+  __dirname: 'readonly',
+  __filename: 'readonly',
+  global: 'readonly',
+  setTimeout: 'readonly',
+  clearTimeout: 'readonly',
+  setInterval: 'readonly',
+  clearInterval: 'readonly',
+  setImmediate: 'readonly',
+  clearImmediate: 'readonly',
+  URL: 'readonly',
+  URLSearchParams: 'readonly',
+};
+const browserGlobals = {
+  window: 'readonly',
+  document: 'readonly',
+  navigator: 'readonly',
+  location: 'readonly',
+  localStorage: 'readonly',
+};
+
 export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -14,6 +39,23 @@ export default [
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'no-console': ['warn', { allow: ['debug', 'info', 'warn', 'error'] }],
     },
+  },
+  // Node-only scripts (Playwright callbacks execute in browser context, so we
+  // also expose browser globals — ESLint cannot statically distinguish between
+  // the script scope and `page.evaluate(() => {...})` callbacks).
+  {
+    files: ['scripts/**/*.{js,mjs,ts}', 'supabase/functions/**/*.mjs'],
+    languageOptions: {
+      globals: { ...nodeGlobals, ...browserGlobals },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  // Server runtime
+  {
+    files: ['server/**/*.ts'],
+    languageOptions: { globals: nodeGlobals },
   },
   { ignores: ['dist/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'] },
 ];

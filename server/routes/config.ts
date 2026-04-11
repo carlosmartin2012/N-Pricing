@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
@@ -86,7 +87,7 @@ router.get('/clients', async (_req, res) => {
 router.post('/clients', async (req, res) => {
   try {
     const c = req.body;
-    const id = c.id || crypto.randomUUID();
+    const id = c.id || randomUUID();
     const row = await queryOne(
       'INSERT INTO clients (id,name,type,segment,rating,country,lei_code) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,type=EXCLUDED.type,segment=EXCLUDED.segment,rating=EXCLUDED.rating,country=EXCLUDED.country,lei_code=EXCLUDED.lei_code RETURNING *',
       [id, c.name, c.type, c.segment, c.rating ?? 'BBB', c.country ?? 'ES', c.lei_code],
@@ -118,7 +119,7 @@ router.get('/products', async (_req, res) => {
 router.post('/products', async (req, res) => {
   try {
     const p = req.body;
-    const id = p.id || crypto.randomUUID();
+    const id = p.id || randomUUID();
     const row = await queryOne(
       'INSERT INTO products (id,name,category,default_amortization,default_repricing,description,is_active) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,category=EXCLUDED.category,default_amortization=EXCLUDED.default_amortization,default_repricing=EXCLUDED.default_repricing,description=EXCLUDED.description,is_active=EXCLUDED.is_active RETURNING *',
       [id, p.name, p.category, p.default_amortization ?? 'Bullet', p.default_repricing ?? 'Fixed', p.description, p.is_active ?? true],
@@ -150,7 +151,7 @@ router.get('/business-units', async (_req, res) => {
 router.post('/business-units', async (req, res) => {
   try {
     const b = req.body;
-    const id = b.id || crypto.randomUUID();
+    const id = b.id || randomUUID();
     const row = await queryOne(
       'INSERT INTO business_units (id,name,code,parent_id,is_funding_unit) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,code=EXCLUDED.code,parent_id=EXCLUDED.parent_id,is_funding_unit=EXCLUDED.is_funding_unit RETURNING *',
       [id, b.name, b.code, b.parent_id ?? null, b.is_funding_unit ?? false],
@@ -182,7 +183,7 @@ router.get('/users', async (_req, res) => {
 router.post('/users', async (req, res) => {
   try {
     const u = req.body;
-    const id = u.id || `USR-${crypto.randomUUID().slice(0, 8)}`;
+    const id = u.id || `USR-${randomUUID().slice(0, 8)}`;
     const row = await queryOne(
       'INSERT INTO users (id,name,email,role,status,last_login,department) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,email=EXCLUDED.email,role=EXCLUDED.role,status=EXCLUDED.status,last_login=EXCLUDED.last_login,department=EXCLUDED.department RETURNING *',
       [id, u.name, u.email, u.role, u.status, u.last_login ?? u.lastLogin, u.department],

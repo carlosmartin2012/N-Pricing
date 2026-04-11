@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
@@ -20,7 +21,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const s = req.body;
-    const id = s.id || crypto.randomUUID();
+    const id = s.id || randomUUID();
     const row = await queryOne(
       `INSERT INTO report_schedules (id,entity_id,name,report_type,frequency,format,recipients,config,is_active,created_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)

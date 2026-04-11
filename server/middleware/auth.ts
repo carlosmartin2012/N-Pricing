@@ -1,8 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+const DEV_SECRET_FALLBACK = 'dev-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || DEV_SECRET_FALLBACK;
 const TOKEN_EXPIRY_SECONDS = 8 * 60 * 60; // 8 hours
+
+// Fail fast if we boot in production without an explicit secret. The previous
+// behaviour silently fell back to a well-known default, which would have
+// allowed anyone to mint valid tokens.
+if (process.env.NODE_ENV === 'production' && JWT_SECRET === DEV_SECRET_FALLBACK) {
+  throw new Error(
+    '[auth] JWT_SECRET is required in production. Refusing to start with the dev fallback.',
+  );
+}
 
 interface JwtPayload {
   email: string;
@@ -12,7 +22,6 @@ interface JwtPayload {
   exp: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
@@ -52,7 +61,13 @@ export function verifyToken(token: string): JwtPayload | null {
       .createHmac('sha256', JWT_SECRET)
       .update(`${header}.${body}`)
       .digest('base64url');
-    if (signature !== expected) return null;
+    // Constant-time comparison to prevent timing attacks against the HMAC
+    // signature. timingSafeEqual throws if buffers differ in length, so we
+    // guard for that explicitly.
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length !== expBuf.length) return null;
+    if (!crypto.timingSafeEqual(sigBuf, expBuf)) return null;
     const payload = JSON.parse(base64UrlDecode(body)) as JwtPayload;
     if (payload.exp < Math.floor(Date.now() / 1000)) return null;
     return payload;
