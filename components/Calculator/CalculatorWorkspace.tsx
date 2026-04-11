@@ -9,8 +9,6 @@ import type {
 } from '../../types';
 import type { Language } from '../../translations';
 import DealInputPanel from './DealInputPanel';
-import MethodologyVisualizer from './MethodologyVisualizer';
-import PricingReceipt from './PricingReceipt';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
 import DelegationAuditPanel from './DelegationAuditPanel';
 import CrossBonusesPicker from './CrossBonusesPicker';
@@ -19,6 +17,8 @@ import LineagePanel from './LineagePanel';
 import { WaterfallExplainerCard } from '../RAROC/WaterfallExplainerCard';
 import { calculatePricing } from '../../utils/pricingEngine';
 
+const MethodologyVisualizer = React.lazy(() => import('./MethodologyVisualizer'));
+const PricingReceipt = React.lazy(() => import('./PricingReceipt'));
 const PricingComparison = React.lazy(() => import('./PricingComparison'));
 
 interface Props {
@@ -103,19 +103,23 @@ export const CalculatorWorkspace: React.FC<Props> = ({
         </div>
 
         <div data-tour="methodology-panel" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
-          <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
+          <Suspense fallback={<div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+            <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
+          </Suspense>
         </div>
 
         <div data-tour="pricing-receipt" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
-          <PricingReceipt
-            deal={dealParams}
-            setMatchedMethod={setMatchedMethod}
-            approvalMatrix={approvalMatrix}
-            language={language}
-            onDealSaved={(savedDeal) => {
-              setDealParams(savedDeal);
-            }}
-          />
+          <Suspense fallback={<div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+            <PricingReceipt
+              deal={dealParams}
+              setMatchedMethod={setMatchedMethod}
+              approvalMatrix={approvalMatrix}
+              language={language}
+              onDealSaved={(savedDeal) => {
+                setDealParams(savedDeal);
+              }}
+            />
+          </Suspense>
         </div>
 
         {/* Phase 1: IFRS 9 Stage/SICR + Cross-bonuses inputs */}

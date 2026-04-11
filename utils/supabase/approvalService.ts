@@ -1,20 +1,20 @@
 import type { ApprovalTask, PricingDossier } from '../../types';
-import { configService } from './config';
+import * as configApi from '../../api/config';
 
 export const approvalService = {
   async fetchApprovalTasks(): Promise<ApprovalTask[]> {
-    return configService.fetchApprovalTasks();
+    return configApi.fetchApprovalTasks();
   },
 
   async saveApprovalTasks(tasks: ApprovalTask[]): Promise<void> {
-    await configService.saveApprovalTasks(tasks);
+    await configApi.saveApprovalTasks(tasks);
   },
 
   async fetchPricingDossiers(): Promise<PricingDossier[]> {
-    return configService.fetchPricingDossiers();
+    return configApi.fetchPricingDossiers();
   },
 
   async savePricingDossiers(dossiers: PricingDossier[]): Promise<void> {
-    await configService.savePricingDossiers(dossiers);
+    await configApi.savePricingDossiers(dossiers);
   },
 };

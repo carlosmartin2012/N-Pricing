@@ -1,6 +1,23 @@
 import { MOCK_YIELD_CURVE } from '../../constants';
 import type { YieldCurvePoint } from '../../types';
 
+interface YieldCurveHistoryPoint {
+  tenor: string;
+  rate: string | number;
+  prev?: string | number;
+}
+
+interface YieldCurveHistoryEntry {
+  id?: number | string;
+  currency: string;
+  as_of_date?: string;
+  asOfDate?: string;
+  created_at?: string;
+  createdAt?: string;
+  grid_data?: YieldCurveHistoryPoint[];
+  gridData?: YieldCurveHistoryPoint[];
+}
+
 export interface CurveSnapshotVersion {
   id: string;
   date: string;
@@ -21,14 +38,14 @@ export const getCurveHistoryKey = (currency: string, date: string) =>
 export const getCurveDateFromKey = (key: string) =>
   key.split('-').slice(1).join('-');
 
-export const mapCurveHistoryRecords = (history: any[]) => {
+export const mapCurveHistoryRecords = (history: YieldCurveHistoryEntry[]) => {
   const historyMap: Record<string, YieldCurvePoint[]> = {};
   const versions: CurveSnapshotVersion[] = [];
 
-  history.forEach((entry: any) => {
+  history.forEach((entry) => {
     const date = entry.as_of_date || entry.asOfDate || 'unknown';
     const key = getCurveHistoryKey(entry.currency, date);
-    historyMap[key] = (entry.grid_data || entry.gridData || []).map((point: any) => ({
+    historyMap[key] = (entry.grid_data || entry.gridData || []).map((point) => ({
       tenor: point.tenor,
       rate: Number(point.rate) || 0,
       prev: Number(point.prev || point.rate) || 0,

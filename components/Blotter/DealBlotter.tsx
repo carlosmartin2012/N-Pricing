@@ -1,5 +1,8 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import * as auditApi from '../../api/audit';
+import * as configApi from '../../api/config';
+import * as dealsApi from '../../api/deals';
 import { Panel } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { validateDeal, type ValidationError } from '../../utils/validation';
@@ -12,15 +15,13 @@ import {
   UserProfile,
 } from '../../types';
 import { type DataContextType, useData } from '../../contexts/DataContext';
-import { FileUp, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { batchReprice, calculatePricing } from '../../utils/pricingEngine';
 import { FileUploadModal } from '../ui/FileUploadModal';
-import { supabaseService } from '../../utils/supabaseService';
 import { errorTracker } from '../../utils/errorTracking';
 import { translations, Language } from '../../translations';
 import { downloadTemplate, exportDealsToExcel } from '../../utils/excelUtils';
-import { executeTransition, getAvailableActions, type UserRole, type WorkflowAction } from '../../utils/dealWorkflow';
-import { findLatestPortfolioSnapshotForDeal } from '../../utils/aiGrounding';
+import { executeTransition, type UserRole, type WorkflowAction } from '../../utils/dealWorkflow';
 import { buildPricingContext } from '../../utils/pricingContext';
 import {
   buildApprovalTaskForPricingDossier,
@@ -33,6 +34,7 @@ import {
   upsertPricingDossier,
 } from '../../utils/governanceWorkflows';
 import BlotterFooter from './BlotterFooter';
+import BlotterHeaderActions from './BlotterHeaderActions';
 import BlotterTable from './BlotterTable';
 import BlotterToolbar from './BlotterToolbar';
 import CommitteeDossierDrawer from './CommitteeDossierDrawer';
@@ -45,7 +47,8 @@ import {
   formatDealCurrency,
   normalizeDealDraft,
 } from './blotterUtils';
-import { buildCommitteePackage, downloadCommitteePackage, summarizeCommitteeQueue } from './committeeDossierUtils';
+import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
+import { useBlotterState } from './hooks/useBlotterState';
 
 const mapWorkflowStatusToDossierStatus = (status?: Transaction['status']): PricingDossierStatus | null => {
   if (!status) return null;
@@ -182,11 +185,11 @@ interface Props {
   user: UserProfile | null;
 }
 
+type ImportRow = Record<string, unknown>;
+
 const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language, user }) => {
   const data = useData();
   const { behaviouralModels } = data;
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
   const t = translations[language];
 
   // Drawer States
@@ -197,12 +200,27 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
   const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const [selectedDeal, setSelectedDeal] = useState<Partial<Transaction> | null>(null);
-  const [selectedDossierDealId, setSelectedDossierDealId] = useState<string | null>(null);
   const [dealValidationErrors, setDealValidationErrors] = useState<ValidationError[]>([]);
   const dealFormRef = useRef<UseFormReturn<Transaction> | null>(null);
   const userRole = (user?.role || 'Trader') as UserRole;
+  const {
+    searchTerm,
+    setSearchTerm,
+    filterStatus,
+    setFilterStatus,
+    filteredDeals,
+    selectedDossierDeal,
+    selectedPricingDossier,
+    selectedApprovalTask,
+    selectedMethodologyVersion,
+    selectedPortfolioSnapshot,
+    selectedMarketDataSources,
+    committeeSummary,
+    selectedAvailableActions,
+    setSelectedDossierDealId,
+  } = useBlotterState({ deals, data, userRole });
 
-  const handleImport = async (rows: any[]) => {
+  const handleImport = async (rows: ImportRow[]) => {
     // Check if it's an ID modification import or a full deal import
     const isIDMod = rows[0] && (rows[0].NewID !== undefined || rows[0].newID !== undefined);
 
@@ -217,7 +235,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       const successfulRenames: Array<{ previousId: string; nextId: string }> = [];
 
       for (const operation of renameOperations) {
-        const renamedDeal = await supabaseService.renameDealId(operation.previousId, operation.nextId);
+        const renamedDeal = await dealsApi.renameDealId(operation.previousId, operation.nextId);
         if (renamedDeal?.id === operation.nextId) {
           successfulRenames.push(operation);
         }
@@ -252,13 +270,13 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         data.setPricingDossiers(updatedReferences.nextPricingDossiers);
         data.setPortfolioSnapshots(updatedReferences.nextPortfolioSnapshots);
         await Promise.all([
-          supabaseService.saveApprovalTasks(updatedReferences.nextApprovalTasks),
-          supabaseService.savePricingDossiers(updatedReferences.nextPricingDossiers),
-          supabaseService.savePortfolioSnapshots(updatedReferences.nextPortfolioSnapshots),
+          configApi.saveApprovalTasks(updatedReferences.nextApprovalTasks),
+          configApi.savePricingDossiers(updatedReferences.nextPricingDossiers),
+          configApi.savePortfolioSnapshots(updatedReferences.nextPortfolioSnapshots),
         ]);
       }
 
-      supabaseService.addAuditEntry({
+      void auditApi.logAudit({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown User',
         action: 'BATCH_ID_RENAME',
@@ -274,9 +292,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
       setDeals((prev) => [...newDeals, ...prev]);
       // Persist imported deals to Supabase
-      await Promise.all(newDeals.map((d) => supabaseService.upsertDeal(d)));
+      await Promise.all(newDeals.map((d) => dealsApi.upsertDeal(d)));
 
-      supabaseService.addAuditEntry({
+      void auditApi.logAudit({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown User',
         action: 'IMPORT_DEALS',
@@ -289,80 +307,6 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
   const handleDownloadTemplate = async () => downloadTemplate('DEAL_BLOTTER_IDS', 'Deal_ID_Modification_Template');
 
-  const filteredDeals = useMemo(
-    () =>
-      deals.filter((deal) => {
-        const matchesSearch =
-          deal.clientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (deal.id || '').toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'All' || deal.status === filterStatus;
-        return matchesSearch && matchesStatus;
-      }),
-    [deals, searchTerm, filterStatus]
-  );
-  const filteredDealIds = useMemo(() => new Set(filteredDeals.map((deal) => deal.id)), [filteredDeals]);
-  const selectedDossierDeal = useMemo(
-    () => deals.find((deal) => deal.id === selectedDossierDealId) || null,
-    [deals, selectedDossierDealId]
-  );
-  const selectedPricingDossier = useMemo(
-    () =>
-      selectedDossierDeal?.id
-        ? data.pricingDossiers.find((dossier) => dossier.dealId === selectedDossierDeal.id)
-        : undefined,
-    [data.pricingDossiers, selectedDossierDeal?.id]
-  );
-  const selectedApprovalTask = useMemo(() => {
-    if (!selectedDossierDeal?.id) return undefined;
-
-    return (
-      (selectedPricingDossier?.approvalTaskId
-        ? data.approvalTasks.find((task) => task.id === selectedPricingDossier.approvalTaskId)
-        : undefined) ||
-      data.approvalTasks.find((task) => task.scope === 'DEAL_PRICING' && task.subject.id === selectedDossierDeal.id)
-    );
-  }, [data.approvalTasks, selectedDossierDeal?.id, selectedPricingDossier?.approvalTaskId]);
-  const selectedMethodologyVersion = useMemo(
-    () =>
-      selectedPricingDossier
-        ? data.methodologyVersions.find((version) => version.id === selectedPricingDossier.methodologyVersionId)
-        : undefined,
-    [data.methodologyVersions, selectedPricingDossier]
-  );
-  const selectedPortfolioSnapshot = useMemo(() => {
-    if (!selectedDossierDeal?.id) return undefined;
-
-    return (
-      (selectedPricingDossier?.groundedContext?.portfolioSnapshotId
-        ? data.portfolioSnapshots.find(
-            (snapshot) => snapshot.id === selectedPricingDossier.groundedContext?.portfolioSnapshotId
-          )
-        : undefined) || findLatestPortfolioSnapshotForDeal(selectedDossierDeal.id, data.portfolioSnapshots)
-    );
-  }, [data.portfolioSnapshots, selectedDossierDeal?.id, selectedPricingDossier?.groundedContext?.portfolioSnapshotId]);
-  const selectedMarketDataSources = useMemo(() => {
-    if (!selectedPricingDossier?.groundedContext?.marketDataSourceIds?.length) return data.marketDataSources;
-
-    return data.marketDataSources.filter((source) =>
-      selectedPricingDossier.groundedContext?.marketDataSourceIds?.includes(source.id)
-    );
-  }, [data.marketDataSources, selectedPricingDossier?.groundedContext?.marketDataSourceIds]);
-  const committeeSummary = useMemo(
-    () =>
-      summarizeCommitteeQueue({
-        deals: filteredDeals,
-        dossiers: data.pricingDossiers.filter((dossier) => filteredDealIds.has(dossier.dealId)),
-        approvalTasks: data.approvalTasks.filter(
-          (task) => task.scope === 'DEAL_PRICING' && filteredDealIds.has(task.subject.id)
-        ),
-      }),
-    [data.approvalTasks, data.pricingDossiers, filteredDealIds, filteredDeals]
-  );
-  const selectedAvailableActions = useMemo(
-    () => (selectedDossierDeal ? getAvailableActions(selectedDossierDeal.status || 'Draft', userRole) : []),
-    [selectedDossierDeal, userRole]
-  );
-
   // Clone deal handler
   const handleCloneDeal = useCallback(
     async (deal: Transaction) => {
@@ -373,9 +317,9 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         startDate: new Date().toISOString().split('T')[0],
         description: `Clone of ${deal.id}`,
       };
-      await supabaseService.upsertDeal(clonedDeal);
+      await dealsApi.upsertDeal(clonedDeal);
       setDeals((prev) => [clonedDeal, ...prev]);
-      await supabaseService.addAuditEntry({
+      await auditApi.createAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown',
         action: 'DEAL_CLONED',
@@ -437,8 +381,13 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       }
 
       const persistedDeal = deal.id
-        ? await supabaseService.transitionDeal(deal.id, action.to, user?.email || 'unknown', pricingSnapshot)
-        : await supabaseService.upsertDeal({
+        ? await dealsApi.transitionDeal({
+            dealId: deal.id,
+            newStatus: action.to,
+            userEmail: user?.email || 'unknown',
+            pricingSnapshot,
+          })
+        : await dealsApi.upsertDeal({
             ...deal,
             status: result.newStatus as Transaction['status'],
           });
@@ -497,12 +446,12 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
         data.setPricingDossiers(nextDossiers);
         data.setApprovalTasks(nextTasks);
         await Promise.all([
-          supabaseService.savePricingDossiers(nextDossiers),
-          supabaseService.saveApprovalTasks(nextTasks),
+          configApi.savePricingDossiers(nextDossiers),
+          configApi.saveApprovalTasks(nextTasks),
         ]);
       }
 
-      await supabaseService.addAuditEntry({
+      await auditApi.createAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown',
         action: `WORKFLOW_${action.to.toUpperCase()}`,
@@ -523,7 +472,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     setRepriceCount(results.size);
     await exportDealsToExcel(deals, results);
 
-    await supabaseService.addAuditEntry({
+    await auditApi.createAuditEntry({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown',
       action: 'BATCH_REPRICE',
@@ -544,12 +493,12 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     if (!deal.id) return;
     setSelectedDossierDealId(deal.id);
     setIsDossierOpen(true);
-  }, []);
+  }, [setSelectedDossierDealId]);
 
   const handleCloseDossier = useCallback(() => {
     setIsDossierOpen(false);
     setSelectedDossierDealId(null);
-  }, []);
+  }, [setSelectedDossierDealId]);
 
   const handleSaveEdit = async () => {
     const form = dealFormRef.current;
@@ -582,7 +531,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     }
 
     setDealValidationErrors([]);
-    const savedDeal = await supabaseService.upsertDeal(updated);
+    const savedDeal = await dealsApi.upsertDeal(updated);
     setDeals((prev) => prev.map((d) => (d.id === updated.id ? savedDeal || updated : d)));
     setIsEditOpen(false);
   };
@@ -621,7 +570,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
     }
 
     setDealValidationErrors([]);
-    const savedDeal = await supabaseService.upsertDeal(newDeal);
+    const savedDeal = await dealsApi.upsertDeal(newDeal);
     setDeals((prev) => [savedDeal || newDeal, ...prev]);
     setIsNewOpen(false);
   };
@@ -633,7 +582,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
   const confirmDelete = async () => {
     if (selectedDeal && selectedDeal.id) {
-      await supabaseService.deleteDeal(selectedDeal.id);
+      await dealsApi.deleteDeal(selectedDeal.id);
       setDeals((prev) => prev.filter((deal) => deal.id !== selectedDeal.id));
       const nextTasks = data.approvalTasks.filter(
         (task) => !(task.scope === 'DEAL_PRICING' && task.subject.id === selectedDeal.id)
@@ -642,10 +591,10 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       data.setApprovalTasks(nextTasks);
       data.setPricingDossiers(nextDossiers);
       await Promise.all([
-        supabaseService.saveApprovalTasks(nextTasks),
-        supabaseService.savePricingDossiers(nextDossiers),
+        configApi.saveApprovalTasks(nextTasks),
+        configApi.savePricingDossiers(nextDossiers),
       ]);
-      await supabaseService.addAuditEntry({
+      await auditApi.createAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown',
         action: 'DELETE_DEAL',
@@ -720,8 +669,8 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
 
     data.setPricingDossiers(nextDossiers);
     try {
-      await supabaseService.savePricingDossiers(nextDossiers);
-      await supabaseService.addAuditEntry({
+      await configApi.savePricingDossiers(nextDossiers);
+      await auditApi.createAuditEntry({
         userEmail: user?.email || 'unknown',
         userName: user?.name || 'Unknown',
         action: 'EXPORT_COMMITTEE_PACKAGE',
@@ -755,39 +704,18 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
       title={t.dealBlotter}
       className="h-full overflow-hidden"
       actions={
-        <div className="flex gap-2">
-          <button
-            onClick={handleDownloadTemplate}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors"
-            title="Download ID Modification Template"
-          >
-            <FileUp size={14} /> <span className="hidden sm:inline">ID Template</span>
-          </button>
-          <button
-            onClick={() => setIsImportOpen(true)}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors"
-          >
-            <Upload size={14} /> <span className="hidden sm:inline">Import Excel</span>
-          </button>
-          <button
-            onClick={handleBatchReprice}
-            disabled={isRepricing}
-            className={`px-3 py-1.5 rounded border text-xs flex items-center gap-1 transition-colors font-bold ${
-              repriceCount > 0
-                ? 'bg-emerald-900/30 border-emerald-700 text-emerald-400'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-400'
-            }`}
-          >
-            <RefreshCw size={14} className={isRepricing ? 'animate-spin' : ''} />
-            <span className="hidden sm:inline">{repriceCount > 0 ? `${repriceCount} Repriced` : 'Batch Reprice'}</span>
-          </button>
-          <button
-            onClick={handleNewDeal}
-            className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs flex items-center gap-1 transition-colors font-bold shadow-lg shadow-cyan-900/20"
-          >
-            <Plus size={14} /> <span className="hidden sm:inline">New Deal</span>
-          </button>
-        </div>
+        <BlotterHeaderActions
+          isRepricing={isRepricing}
+          repriceCount={repriceCount}
+          onDownloadTemplate={() => {
+            void handleDownloadTemplate();
+          }}
+          onOpenImport={() => setIsImportOpen(true)}
+          onBatchReprice={() => {
+            void handleBatchReprice();
+          }}
+          onNewDeal={handleNewDeal}
+        />
       }
     >
       <div className="flex flex-col h-full bg-slate-50 dark:bg-black">
@@ -911,6 +839,7 @@ const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, busi
               products={products}
               behaviouralModels={behaviouralModels}
               onChange={(updates) => setSelectedDeal((prev) => ({ ...(prev ?? {}), ...updates }))}
+              onFormReady={(form) => { dealFormRef.current = form; }}
             />
           )}
         </Drawer>

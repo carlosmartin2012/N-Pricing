@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createAuditEntry } from '../../api/audit';
 import { Archive, Download, Layers3, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
 import type { ApprovalMatrixConfig, PortfolioSnapshot, Transaction, UserProfile } from '../../types';
 import { Badge, Button, Panel, SelectInput, TextInput } from '../ui/LayoutComponents';
 import { useToast } from '../ui/Toast';
 import type { PricingContext } from '../../utils/pricingEngine';
-import { supabaseService } from '../../utils/supabaseService';
+import { portfolioReportingService } from '../../utils/supabase/portfolioReportingService';
 import {
   buildPortfolioSnapshotCsv,
   buildPortfolioSnapshotDelta,
@@ -78,7 +79,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
       createdByEmail: actorEmail,
       createdByName: actorName,
     });
-    const snapshot = supabaseService.createPortfolioSnapshot({
+    const snapshot = portfolioReportingService.createPortfolioSnapshot({
       name: snapshotName.trim() || `Portfolio Snapshot ${new Date().toISOString().slice(0, 10)}`,
       scenario,
       deals: eligibleDeals,
@@ -91,7 +92,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
     onSnapshotsChange((previous) => [snapshot, ...previous]);
     setSelectedSnapshotId(snapshot.id);
 
-    await supabaseService.addAuditEntry({
+    await createAuditEntry({
       userEmail: actorEmail,
       userName: actorName,
       action: 'CREATE_PORTFOLIO_SNAPSHOT',
@@ -118,7 +119,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
     link.click();
     URL.revokeObjectURL(url);
 
-    await supabaseService.addAuditEntry({
+    await createAuditEntry({
       userEmail: currentUser?.email || 'system',
       userName: currentUser?.name || 'System',
       action: 'EXPORT_PORTFOLIO_SNAPSHOT',

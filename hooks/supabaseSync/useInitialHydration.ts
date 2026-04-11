@@ -1,7 +1,13 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { DataContextType } from '../../contexts/DataContext';
-import type { UserProfile } from '../../types';
+import type {
+  ApprovalMatrixConfig,
+  PhysicalRateCard,
+  RAROCInputs,
+  TransitionRateCard,
+  UserProfile,
+} from '../../types';
 import {
   MOCK_BEHAVIOURAL_MODELS,
   MOCK_BUSINESS_UNITS,
@@ -24,6 +30,7 @@ import * as dealsApi from '../../api/deals';
 import * as marketDataApi from '../../api/marketData';
 import * as configApi from '../../api/config';
 import * as auditApi from '../../api/audit';
+import type { YieldCurveSnapshot } from '../../api/mappers';
 import { queryKeys } from '../queries/queryKeys';
 
 const log = createLogger('sync-hydration');
@@ -126,16 +133,20 @@ export function useInitialHydration({ data, currentUser, addToast }: InitialHydr
         data.setUsers(resolveWithFallback(dbUsers, MOCK_USERS));
         if (dbShocks) data.setShocks(dbShocks);
         data.setFtpRateCards(resolveWithFallback(dbRateCards, MOCK_FTP_RATE_CARDS));
-        data.setTransitionGrid(resolveWithFallback(dbTransGrid as any[], MOCK_TRANSITION_GRID));
-        data.setPhysicalGrid(resolveWithFallback(dbPhysGrid as any[], MOCK_PHYSICAL_GRID));
+        data.setTransitionGrid(resolveWithFallback(dbTransGrid as TransitionRateCard[], MOCK_TRANSITION_GRID));
+        data.setPhysicalGrid(resolveWithFallback(dbPhysGrid as PhysicalRateCard[], MOCK_PHYSICAL_GRID));
         // API returns YieldCurveSnapshot[] — extract gridData for context, or fallback to mock
         const yieldCurvePoints = dbYieldCurves?.length
-          ? dbYieldCurves.flatMap((s: any) => s.gridData ?? [])
+          ? dbYieldCurves.flatMap((snapshot: YieldCurveSnapshot) => snapshot.gridData ?? [])
           : null;
         data.setYieldCurves(resolveWithFallback(yieldCurvePoints, MOCK_YIELD_CURVE));
         data.setLiquidityCurves(resolveWithFallback(dbLiqCurves, MOCK_LIQUIDITY_CURVES));
-        if (dbRaroc && typeof dbRaroc === 'object' && 'transactionId' in (dbRaroc as Record<string, unknown>)) data.setRarocInputs(dbRaroc as any);
-        if (dbApprovalMatrix && typeof dbApprovalMatrix === 'object' && 'autoApprovalThreshold' in (dbApprovalMatrix as Record<string, unknown>)) data.setApprovalMatrix(dbApprovalMatrix as any);
+        if (dbRaroc && typeof dbRaroc === 'object' && 'transactionId' in dbRaroc) {
+          data.setRarocInputs(dbRaroc as RAROCInputs);
+        }
+        if (dbApprovalMatrix && typeof dbApprovalMatrix === 'object' && 'autoApprovalThreshold' in dbApprovalMatrix) {
+          data.setApprovalMatrix(dbApprovalMatrix as ApprovalMatrixConfig);
+        }
         data.setMethodologyChangeRequests(dbMethodologyChangeRequests);
         data.setMethodologyVersions(dbMethodologyVersions);
         data.setApprovalTasks(dbApprovalTasks);

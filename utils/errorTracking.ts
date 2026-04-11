@@ -93,8 +93,8 @@ function createSupabaseReporter(): ErrorReporter {
     name: 'supabase',
     onException(error: Error, context?: ErrorContext) {
       // Lazy-import to avoid circular dependencies and keep it optional
-      void import('./supabaseService').then(({ supabaseService }) => {
-        supabaseService.addAuditEntry({
+      void import('../api/audit').then(({ logAudit }) => {
+        void logAudit({
           userEmail: currentUser?.email || 'system',
           userName: currentUser?.id || 'system',
           action: 'ERROR_CAPTURED',
@@ -105,8 +105,6 @@ function createSupabaseReporter(): ErrorReporter {
             dealId: context?.dealId,
             ...context?.extra,
           },
-        }).catch(() => {
-          // Silently ignore — we don't want error reporting to cause more errors
         });
       }).catch(() => {
         // Module not available — Supabase not configured
@@ -114,8 +112,8 @@ function createSupabaseReporter(): ErrorReporter {
     },
     onMessage(message: string, level: 'info' | 'warning' | 'error', context?: ErrorContext) {
       if (level !== 'error') return; // Only persist errors to audit log
-      void import('./supabaseService').then(({ supabaseService }) => {
-        supabaseService.addAuditEntry({
+      void import('../api/audit').then(({ logAudit }) => {
+        void logAudit({
           userEmail: currentUser?.email || 'system',
           userName: currentUser?.id || 'system',
           action: 'ERROR_MESSAGE',
@@ -126,8 +124,6 @@ function createSupabaseReporter(): ErrorReporter {
             dealId: context?.dealId,
             ...context?.extra,
           },
-        }).catch(() => {
-          // Silently ignore
         });
       }).catch(() => {
         // Module not available

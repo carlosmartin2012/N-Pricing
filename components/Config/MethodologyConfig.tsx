@@ -7,6 +7,9 @@ import {
   ClientEntity,
   GeneralRule,
   FtpRateCard,
+  GreeniumRateCard,
+  PhysicalRateCard,
+  TransitionRateCard,
 } from '../../types';
 import GeneralRulesTab from './tabs/GeneralRulesTab';
 import RateCardsTab from './tabs/RateCardsTab';
@@ -32,12 +35,12 @@ interface Props {
   setClients?: React.Dispatch<React.SetStateAction<ClientEntity[]>>;
   ftpRateCards?: FtpRateCard[];
   setFtpRateCards?: React.Dispatch<React.SetStateAction<FtpRateCard[]>>;
-  transitionGrid?: any[];
-  setTransitionGrid?: React.Dispatch<React.SetStateAction<any[]>>;
-  physicalGrid?: any[];
-  setPhysicalGrid?: React.Dispatch<React.SetStateAction<any[]>>;
-  greeniumGrid?: any[];
-  setGreeniumGrid?: React.Dispatch<React.SetStateAction<any[]>>;
+  transitionGrid?: TransitionRateCard[];
+  setTransitionGrid?: React.Dispatch<React.SetStateAction<TransitionRateCard[]>>;
+  physicalGrid?: PhysicalRateCard[];
+  setPhysicalGrid?: React.Dispatch<React.SetStateAction<PhysicalRateCard[]>>;
+  greeniumGrid?: GreeniumRateCard[];
+  setGreeniumGrid?: React.Dispatch<React.SetStateAction<GreeniumRateCard[]>>;
   user: ConfigUser;
 }
 

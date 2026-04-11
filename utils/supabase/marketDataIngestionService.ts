@@ -1,22 +1,23 @@
 import type { MarketDataSource, YieldCurvePoint } from '../../types';
-import { configService } from './config';
-import { marketDataService } from './market';
+import * as configApi from '../../api/config';
+import * as marketDataApi from '../../api/marketData';
+import { apiPost } from '../apiFetch';
 
 export const marketDataIngestionService = {
   async fetchMarketDataSources(): Promise<MarketDataSource[]> {
-    return configService.fetchMarketDataSources();
+    return configApi.fetchMarketDataSources();
   },
 
   async saveMarketDataSources(sources: MarketDataSource[]): Promise<void> {
-    await configService.saveMarketDataSources(sources);
+    await configApi.saveMarketDataSources(sources);
   },
 
   async registerMarketDataSource(source: MarketDataSource): Promise<MarketDataSource[]> {
-    const existing = await configService.fetchMarketDataSources();
+    const existing = await configApi.fetchMarketDataSources();
     const nextSources = existing.some((item) => item.id === source.id)
       ? existing.map((item) => (item.id === source.id ? source : item))
       : [source, ...existing];
-    await configService.saveMarketDataSources(nextSources);
+    await configApi.saveMarketDataSources(nextSources);
     return nextSources;
   },
 
@@ -31,7 +32,12 @@ export const marketDataIngestionService = {
     date: string;
     points: YieldCurvePoint[];
   }): Promise<void> {
-    await marketDataService.saveCurveSnapshot(currency, date, points);
-    await marketDataService.saveCurveHistorySnapshot(sourceId, currency, date, points);
+    await marketDataApi.upsertYieldCurves(currency, date, points);
+    await apiPost('/market-data/yield-curve-history', {
+      curve_id: sourceId,
+      currency,
+      snapshot_date: date,
+      points,
+    });
   },
 };

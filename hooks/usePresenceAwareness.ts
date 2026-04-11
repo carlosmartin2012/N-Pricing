@@ -24,6 +24,8 @@ interface UsePresenceOptions {
   enabled: boolean;
 }
 
+type PresenceStateEntry = PresenceUser[];
+
 export function usePresenceAwareness(options: UsePresenceOptions) {
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -40,7 +42,7 @@ export function usePresenceAwareness(options: UsePresenceOptions) {
         const state = channel.presenceState();
         const users: PresenceUser[] = [];
         for (const [, presences] of Object.entries(state)) {
-          for (const p of presences as any[]) {
+          for (const p of presences as unknown as PresenceStateEntry) {
             if (p.userId !== options.userId) {
               users.push({
                 userId: p.userId,

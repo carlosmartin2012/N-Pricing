@@ -1,0 +1,1542 @@
+{
+  "approvalMatrix": {
+    "autoApprovalThreshold": 15,
+    "l1Threshold": 10,
+    "l2Threshold": 5
+  },
+  "cases": [
+    {
+      "baseDealId": "TRD-HYPER-001",
+      "overrides": {
+        "id": "TRD-HYPER-001-R1",
+        "amount": 17500000,
+        "durationMonths": 48,
+        "marginTarget": 1.35,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2023-11-01",
+        "ltvPct": 55,
+        "ifrs9Stage": 1,
+        "collateralType": "None",
+        "haircutPct": 0
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": 0.633,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.455494687499999,
+        "technicalPrice": 7.617094687499999,
+        "totalFTP": 5.983,
+        "finalClientRate": 7.333,
+        "raroc": -42.57831204379561,
+        "economicProfit": -1380440.0312499998,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-001",
+      "overrides": {
+        "id": "TRD-HYPER-001-R2",
+        "amount": 21250000,
+        "durationMonths": 54,
+        "marginTarget": 1.55,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2023-11-01",
+        "ltvPct": 62,
+        "ifrs9Stage": 1,
+        "collateralType": "Cash",
+        "haircutPct": 5
+      },
+      "expected": {
+        "baseRate": 4.5375,
+        "liquiditySpread": 0.5337500000000001,
+        "regulatoryCost": 0,
+        "capitalCharge": 1.1616,
+        "floorPrice": 5.577953999999999,
+        "technicalPrice": 6.739553999999999,
+        "totalFTP": 5.07125,
+        "finalClientRate": 6.62125,
+        "raroc": -22.93729927007299,
+        "economicProfit": -1104449.625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-001",
+      "overrides": {
+        "id": "TRD-HYPER-001-R3",
+        "amount": 25000000,
+        "durationMonths": 60,
+        "marginTarget": 1.75,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2023-11-01",
+        "ltvPct": 69,
+        "ifrs9Stage": 2,
+        "collateralType": "Sovereign",
+        "haircutPct": 8
+      },
+      "expected": {
+        "baseRate": 4.5,
+        "liquiditySpread": 0.5866,
+        "regulatoryCost": 0.0021728106351594613,
+        "capitalCharge": 1.1616,
+        "floorPrice": 5.975476810635159,
+        "technicalPrice": 7.1370768106351585,
+        "totalFTP": 5.0866,
+        "finalClientRate": 6.8366,
+        "raroc": -23.175482215444855,
+        "economicProfit": -1307510.2658789863,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-001",
+      "overrides": {
+        "id": "TRD-HYPER-001-R4",
+        "amount": 28750000,
+        "durationMonths": 66,
+        "marginTarget": 1.95,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2023-11-01",
+        "ltvPct": 76,
+        "ifrs9Stage": 2,
+        "collateralType": "Corporate",
+        "haircutPct": 12
+      },
+      "expected": {
+        "baseRate": 4.475,
+        "liquiditySpread": 0.71902,
+        "regulatoryCost": 0.0023298974151354846,
+        "capitalCharge": 1.1616,
+        "floorPrice": 5.703053897415135,
+        "technicalPrice": 6.864653897415135,
+        "totalFTP": 5.19402,
+        "finalClientRate": 7.14402,
+        "raroc": -22.614377675281368,
+        "economicProfit": -1481536.300685145,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-001",
+      "overrides": {
+        "id": "TRD-HYPER-001-R5",
+        "amount": 32500000,
+        "durationMonths": 72,
+        "marginTarget": 2.15,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2023-11-01",
+        "ltvPct": 83,
+        "ifrs9Stage": 3,
+        "collateralType": "Real_Estate",
+        "haircutPct": 20
+      },
+      "expected": {
+        "baseRate": 4.45,
+        "liquiditySpread": 0.9384000000000001,
+        "regulatoryCost": 0.06666666666666667,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.111770666666667,
+        "technicalPrice": 7.273370666666667,
+        "totalFTP": 5.388400000000001,
+        "finalClientRate": 7.538400000000001,
+        "raroc": -69.53450121654501,
+        "economicProfit": -3763898.6666666665,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-002",
+      "overrides": {
+        "id": "TRD-HYPER-002-R1",
+        "amount": 245000,
+        "durationMonths": 228,
+        "marginTarget": 0.8,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Green",
+        "physicalRisk": "Medium",
+        "clientRating": "AA",
+        "startDate": "2023-10-15",
+        "ltvPct": 55,
+        "ifrs9Stage": 1,
+        "collateralType": "None",
+        "haircutPct": 0
+      },
+      "expected": {
+        "baseRate": 3.16,
+        "liquiditySpread": 0.7370000000000001,
+        "regulatoryCost": 0.044938687500000005,
+        "capitalCharge": 0.26887,
+        "floorPrice": 4.138628687500001,
+        "technicalPrice": 4.4074986875,
+        "totalFTP": 3.8970000000000002,
+        "finalClientRate": 4.697,
+        "raroc": -130.7650436681223,
+        "economicProfit": -20024.581937500006,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-002",
+      "overrides": {
+        "id": "TRD-HYPER-002-R2",
+        "amount": 297500,
+        "durationMonths": 234,
+        "marginTarget": 1,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Brown",
+        "physicalRisk": "Low",
+        "clientRating": "A",
+        "startDate": "2023-10-15",
+        "ltvPct": 62,
+        "ifrs9Stage": 1,
+        "collateralType": "Cash",
+        "haircutPct": 5
+      },
+      "expected": {
+        "baseRate": 3.1550000000000002,
+        "liquiditySpread": 0.812,
+        "regulatoryCost": 0,
+        "capitalCharge": 0.26887,
+        "floorPrice": 4.583690000000001,
+        "technicalPrice": 4.85256,
+        "totalFTP": 3.9670000000000005,
+        "finalClientRate": 4.9670000000000005,
+        "raroc": -49.99877729257642,
+        "economicProfit": -10559.554250000001,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-002",
+      "overrides": {
+        "id": "TRD-HYPER-002-R3",
+        "amount": 350000,
+        "durationMonths": 240,
+        "marginTarget": 1.2,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Amber",
+        "physicalRisk": "High",
+        "clientRating": "BBB",
+        "startDate": "2023-10-15",
+        "ltvPct": 69,
+        "ifrs9Stage": 2,
+        "collateralType": "Sovereign",
+        "haircutPct": 8
+      },
+      "expected": {
+        "baseRate": 3.1500000000000004,
+        "liquiditySpread": 0.8620000000000001,
+        "regulatoryCost": 0.004612336888285431,
+        "capitalCharge": 0.26886999999999994,
+        "floorPrice": 4.533302336888286,
+        "technicalPrice": 4.802172336888286,
+        "totalFTP": 4.0120000000000005,
+        "finalClientRate": 5.212000000000001,
+        "raroc": -55.34783735945054,
+        "economicProfit": -13494.8229108999,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-002",
+      "overrides": {
+        "id": "TRD-HYPER-002-R4",
+        "amount": 402500,
+        "durationMonths": 246,
+        "marginTarget": 1.4,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Medium",
+        "clientRating": "BB",
+        "startDate": "2023-10-15",
+        "ltvPct": 76,
+        "ifrs9Stage": 2,
+        "collateralType": "Corporate",
+        "haircutPct": 12
+      },
+      "expected": {
+        "baseRate": 3.1475,
+        "liquiditySpread": 1.062,
+        "regulatoryCost": 0.004631129362345531,
+        "capitalCharge": 0.26887,
+        "floorPrice": 4.560821129362346,
+        "technicalPrice": 4.829691129362346,
+        "totalFTP": 4.2095,
+        "finalClientRate": 5.609500000000001,
+        "raroc": -55.33699451938083,
+        "economicProfit": -15516.547818344074,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-002",
+      "overrides": {
+        "id": "TRD-HYPER-002-R5",
+        "amount": 455000,
+        "durationMonths": 252,
+        "marginTarget": 1.6,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Green",
+        "physicalRisk": "Low",
+        "clientRating": "B",
+        "startDate": "2023-10-15",
+        "ltvPct": 83,
+        "ifrs9Stage": 3,
+        "collateralType": "Real_Estate",
+        "haircutPct": 20
+      },
+      "expected": {
+        "baseRate": 3.1450000000000005,
+        "liquiditySpread": 1.362,
+        "regulatoryCost": 0.01904761904761905,
+        "capitalCharge": 0.26887,
+        "floorPrice": 4.64273761904762,
+        "technicalPrice": 4.911607619047619,
+        "totalFTP": 4.507000000000001,
+        "finalClientRate": 6.107000000000001,
+        "raroc": -82.2216926595966,
+        "economicProfit": -24543.57316666667,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-003",
+      "overrides": {
+        "id": "TRD-HYPER-003-R1",
+        "amount": 10500000,
+        "durationMonths": 1,
+        "marginTarget": 0.45,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2023-11-20",
+        "depositStability": "Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": -0.14551000000000003,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.426984687499999,
+        "technicalPrice": 5.426984687499999,
+        "totalFTP": 5.20449,
+        "finalClientRate": 5.65449,
+        "raroc": -373.12463235294115,
+        "economicProfit": -683877.46875,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-003",
+      "overrides": {
+        "id": "TRD-HYPER-003-R2",
+        "amount": 12750000,
+        "durationMonths": 6,
+        "marginTarget": 0.65,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2023-11-20",
+        "depositStability": "Semi_Stable",
+        "isOperationalSegment": false
+      },
+      "expected": {
+        "baseRate": 5.25,
+        "liquiditySpread": -0.22940000000000002,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.293094687499999,
+        "technicalPrice": 5.293094687499999,
+        "totalFTP": 5.0206,
+        "finalClientRate": 5.6706,
+        "raroc": -350.5428676470588,
+        "economicProfit": -781476.665625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-003",
+      "overrides": {
+        "id": "TRD-HYPER-003-R3",
+        "amount": 15000000,
+        "durationMonths": 12,
+        "marginTarget": 0.85,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2023-11-20",
+        "depositStability": "Non_Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.1,
+        "liquiditySpread": -0.27688999999999997,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.475604687499999,
+        "technicalPrice": 5.475604687499999,
+        "totalFTP": 4.82311,
+        "finalClientRate": 5.673109999999999,
+        "raroc": -327.16110294117647,
+        "economicProfit": -859760.8125,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-003",
+      "overrides": {
+        "id": "TRD-HYPER-003-R4",
+        "amount": 17250000,
+        "durationMonths": 18,
+        "marginTarget": 1.05,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2023-11-20",
+        "depositStability": "Stable",
+        "isOperationalSegment": false
+      },
+      "expected": {
+        "baseRate": 4.975,
+        "liquiditySpread": -0.29008,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 4.957414687499999,
+        "technicalPrice": 4.957414687499999,
+        "totalFTP": 4.68492,
+        "finalClientRate": 5.73492,
+        "raroc": -307.2675735294117,
+        "economicProfit": -930387.1593749999,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-003",
+      "overrides": {
+        "id": "TRD-HYPER-003-R5",
+        "amount": 19500000,
+        "durationMonths": 24,
+        "marginTarget": 1.25,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2023-11-20",
+        "depositStability": "Semi_Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 4.85,
+        "liquiditySpread": -0.36302000000000006,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 4.9094746874999995,
+        "technicalPrice": 4.9094746874999995,
+        "totalFTP": 4.48698,
+        "finalClientRate": 5.73698,
+        "raroc": -283.8593382352941,
+        "economicProfit": -974143.7062499999,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-004",
+      "overrides": {
+        "id": "TRD-HYPER-004-R1",
+        "amount": 35000000,
+        "durationMonths": 24,
+        "marginTarget": 0.05,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2023-11-10"
+      },
+      "expected": {
+        "baseRate": 4.1499999999999995,
+        "liquiditySpread": 0.5135714285714286,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.9982,
+        "floorPrice": 4.921372303571428,
+        "technicalPrice": 5.919572303571428,
+        "totalFTP": 4.663571428571428,
+        "finalClientRate": 4.713571428571428,
+        "raroc": -31.59862824675324,
+        "economicProfit": -2106656.625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-004",
+      "overrides": {
+        "id": "TRD-HYPER-004-R2",
+        "amount": 42500000,
+        "durationMonths": 30,
+        "marginTarget": 0.25,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2023-11-10"
+      },
+      "expected": {
+        "baseRate": 4,
+        "liquiditySpread": 0.5338235294117647,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.9982,
+        "floorPrice": 4.841624404411765,
+        "technicalPrice": 5.839824404411765,
+        "totalFTP": 4.533823529411765,
+        "finalClientRate": 4.783823529411765,
+        "raroc": -29.100538101604283,
+        "economicProfit": -2417940.1875000005,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-004",
+      "overrides": {
+        "id": "TRD-HYPER-004-R3",
+        "amount": 50000000,
+        "durationMonths": 36,
+        "marginTarget": 0.45,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2023-11-10"
+      },
+      "expected": {
+        "baseRate": 3.8500000000000005,
+        "liquiditySpread": 0.554,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.9982,
+        "floorPrice": 5.091800875000001,
+        "technicalPrice": 6.090000875,
+        "totalFTP": 4.404000000000001,
+        "finalClientRate": 4.854000000000001,
+        "raroc": -26.601875000000007,
+        "economicProfit": -2679723.7500000005,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-004",
+      "overrides": {
+        "id": "TRD-HYPER-004-R4",
+        "amount": 57500000,
+        "durationMonths": 42,
+        "marginTarget": 0.65,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2023-11-10"
+      },
+      "expected": {
+        "baseRate": 3.7625000000000006,
+        "liquiditySpread": 0.5644565217391305,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.9982,
+        "floorPrice": 4.634757396739131,
+        "technicalPrice": 5.632957396739131,
+        "totalFTP": 4.326956521739131,
+        "finalClientRate": 4.976956521739131,
+        "raroc": -24.503060770750995,
+        "economicProfit": -2922382.3125000005,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-004",
+      "overrides": {
+        "id": "TRD-HYPER-004-R5",
+        "amount": 65000000,
+        "durationMonths": 48,
+        "marginTarget": 0.85,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2023-11-10"
+      },
+      "expected": {
+        "baseRate": 3.6750000000000003,
+        "liquiditySpread": 0.5765384615384616,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.9982,
+        "floorPrice": 4.709339336538462,
+        "technicalPrice": 5.707539336538462,
+        "totalFTP": 4.251538461538462,
+        "finalClientRate": 5.101538461538461,
+        "raroc": -22.416560314685317,
+        "economicProfit": -3124540.875,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-005",
+      "overrides": {
+        "id": "TRD-HYPER-005-R1",
+        "amount": 840000,
+        "durationMonths": 36,
+        "marginTarget": 3.1,
+        "repricingFreq": "Quarterly",
+        "repricingMonths": 3,
+        "transitionRisk": "Amber",
+        "physicalRisk": "High",
+        "clientRating": "AA",
+        "startDate": "2023-11-25",
+        "ltvPct": 55,
+        "ifrs9Stage": 1,
+        "collateralType": "None",
+        "haircutPct": 0
+      },
+      "expected": {
+        "baseRate": 5.4,
+        "liquiditySpread": 0.5855,
+        "regulatoryCost": 0.030481914062500004,
+        "capitalCharge": 1.5215999999999998,
+        "floorPrice": 7.1559959140625,
+        "technicalPrice": 8.6775959140625,
+        "totalFTP": 5.9855,
+        "finalClientRate": 9.0855,
+        "raroc": -44.195995666058394,
+        "economicProfit": -71575.1518125,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-005",
+      "overrides": {
+        "id": "TRD-HYPER-005-R2",
+        "amount": 1020000,
+        "durationMonths": 42,
+        "marginTarget": 3.3,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Medium",
+        "clientRating": "A",
+        "startDate": "2023-11-25",
+        "ltvPct": 62,
+        "ifrs9Stage": 1,
+        "collateralType": "Cash",
+        "haircutPct": 5
+      },
+      "expected": {
+        "baseRate": 4.612500000000001,
+        "liquiditySpread": 0.48825,
+        "regulatoryCost": 0,
+        "capitalCharge": 1.5215999999999998,
+        "floorPrice": 6.0707640000000005,
+        "technicalPrice": 7.592364,
+        "totalFTP": 5.100750000000001,
+        "finalClientRate": 8.40075,
+        "raroc": -14.028540145985403,
+        "economicProfit": -44756.682,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-005",
+      "overrides": {
+        "id": "TRD-HYPER-005-R3",
+        "amount": 1200000,
+        "durationMonths": 48,
+        "marginTarget": 3.5,
+        "repricingFreq": "Quarterly",
+        "repricingMonths": 3,
+        "transitionRisk": "Green",
+        "physicalRisk": "Low",
+        "clientRating": "BBB",
+        "startDate": "2023-11-25",
+        "ltvPct": 69,
+        "ifrs9Stage": 2,
+        "collateralType": "Sovereign",
+        "haircutPct": 8
+      },
+      "expected": {
+        "baseRate": 4.575,
+        "liquiditySpread": 0.5358,
+        "regulatoryCost": 0.004023479601994412,
+        "capitalCharge": 1.5215999999999998,
+        "floorPrice": 5.854837479601994,
+        "technicalPrice": 7.376437479601995,
+        "totalFTP": 5.1108,
+        "finalClientRate": 8.610800000000001,
+        "raroc": -15.578890220433866,
+        "economicProfit": -55203.695522393275,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-005",
+      "overrides": {
+        "id": "TRD-HYPER-005-R4",
+        "amount": 1380000,
+        "durationMonths": 54,
+        "marginTarget": 3.7,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Brown",
+        "physicalRisk": "High",
+        "clientRating": "BB",
+        "startDate": "2023-11-25",
+        "ltvPct": 76,
+        "ifrs9Stage": 2,
+        "collateralType": "Corporate",
+        "haircutPct": 12
+      },
+      "expected": {
+        "baseRate": 4.5375,
+        "liquiditySpread": 0.6578,
+        "regulatoryCost": 0.004383362525456288,
+        "capitalCharge": 1.5215999999999998,
+        "floorPrice": 6.639697362525456,
+        "technicalPrice": 8.161297362525456,
+        "totalFTP": 5.1953,
+        "finalClientRate": 8.895299999999999,
+        "raroc": -14.99851279230387,
+        "economicProfit": -62386.98828512969,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-005",
+      "overrides": {
+        "id": "TRD-HYPER-005-R5",
+        "amount": 1560000,
+        "durationMonths": 60,
+        "marginTarget": 3.9,
+        "repricingFreq": "Quarterly",
+        "repricingMonths": 3,
+        "transitionRisk": "Amber",
+        "physicalRisk": "Medium",
+        "clientRating": "B",
+        "startDate": "2023-11-25",
+        "ltvPct": 83,
+        "ifrs9Stage": 3,
+        "collateralType": "Real_Estate",
+        "haircutPct": 20
+      },
+      "expected": {
+        "baseRate": 4.5,
+        "liquiditySpread": 0.857,
+        "regulatoryCost": 0.08,
+        "capitalCharge": 1.5215999999999998,
+        "floorPrice": 6.457014,
+        "technicalPrice": 7.978614,
+        "totalFTP": 5.357,
+        "finalClientRate": 9.257,
+        "raroc": -69.91357664233576,
+        "economicProfit": -187888.896,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-006",
+      "overrides": {
+        "id": "TRD-HYPER-006-R1",
+        "amount": 70000000,
+        "durationMonths": 1,
+        "marginTarget": -0.3,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2023-11-01",
+        "depositStability": "Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": -0.17051000000000002,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0,
+        "floorPrice": 5.2572628749999994,
+        "technicalPrice": 5.2572628749999994,
+        "totalFTP": 5.1794899999999995,
+        "finalClientRate": 4.87949,
+        "raroc": -326.39632352941175,
+        "economicProfit": -4026916.25,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-006",
+      "overrides": {
+        "id": "TRD-HYPER-006-R2",
+        "amount": 85000000,
+        "durationMonths": 1,
+        "marginTarget": -0.1,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2023-11-01",
+        "depositStability": "Semi_Stable",
+        "isOperationalSegment": false
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": -0.16826000000000002,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0,
+        "floorPrice": 5.309512874999999,
+        "technicalPrice": 5.309512874999999,
+        "totalFTP": 5.18174,
+        "finalClientRate": 5.08174,
+        "raroc": -314.7639705882352,
+        "economicProfit": -4721739.374999999,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-006",
+      "overrides": {
+        "id": "TRD-HYPER-006-R3",
+        "amount": 100000000,
+        "durationMonths": 1,
+        "marginTarget": 0.1,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2023-11-01",
+        "depositStability": "Non_Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": -0.16376000000000002,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0,
+        "floorPrice": 5.694012874999999,
+        "technicalPrice": 5.694012874999999,
+        "totalFTP": 5.18624,
+        "finalClientRate": 5.286239999999999,
+        "raroc": -303.26397058823534,
+        "economicProfit": -5359487.5,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-006",
+      "overrides": {
+        "id": "TRD-HYPER-006-R4",
+        "amount": 115000000,
+        "durationMonths": 7,
+        "marginTarget": 0.3,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2023-11-01",
+        "depositStability": "Stable",
+        "isOperationalSegment": false
+      },
+      "expected": {
+        "baseRate": 5.225,
+        "liquiditySpread": -0.23302333333333333,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0,
+        "floorPrice": 5.119749541666666,
+        "technicalPrice": 5.119749541666666,
+        "totalFTP": 4.991976666666666,
+        "finalClientRate": 5.291976666666666,
+        "raroc": -280.07200980392156,
+        "economicProfit": -5710007.791666666,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "TRD-HYPER-006",
+      "overrides": {
+        "id": "TRD-HYPER-006-R5",
+        "amount": 130000000,
+        "durationMonths": 13,
+        "marginTarget": 0.5,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2023-11-01",
+        "depositStability": "Semi_Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.079166666666667,
+        "liquiditySpread": -0.2762133333333333,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0,
+        "floorPrice": 5.080726208333333,
+        "technicalPrice": 5.080726208333333,
+        "totalFTP": 4.802953333333333,
+        "finalClientRate": 5.302953333333333,
+        "raroc": -257.1882843137255,
+        "economicProfit": -5949061.083333333,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-001",
+      "overrides": {
+        "id": "DL-DEMO-001-R1",
+        "amount": 7000000,
+        "durationMonths": 1,
+        "marginTarget": 2.1,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2024-01-01",
+        "ltvPct": 55,
+        "ifrs9Stage": 1,
+        "collateralType": "None",
+        "haircutPct": 0
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": 0.29104166666666664,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.213536354166666,
+        "technicalPrice": 7.375136354166666,
+        "totalFTP": 5.641041666666666,
+        "finalClientRate": 7.741041666666666,
+        "raroc": -35.3377402676399,
+        "economicProfit": -482738.92916666664,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-001",
+      "overrides": {
+        "id": "DL-DEMO-001-R2",
+        "amount": 8500000,
+        "durationMonths": 1,
+        "marginTarget": 2.3,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2024-01-01",
+        "ltvPct": 62,
+        "ifrs9Stage": 1,
+        "collateralType": "Cash",
+        "haircutPct": 5
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": 0.24416666666666667,
+        "regulatoryCost": 0,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.200870666666666,
+        "technicalPrice": 7.362470666666666,
+        "totalFTP": 5.594166666666666,
+        "finalClientRate": 7.894166666666666,
+        "raroc": -22.009683698296833,
+        "economicProfit": -430977.7666666666,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-001",
+      "overrides": {
+        "id": "DL-DEMO-001-R3",
+        "amount": 10000000,
+        "durationMonths": 6,
+        "marginTarget": 2.5,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2024-01-01",
+        "ltvPct": 69,
+        "ifrs9Stage": 2,
+        "collateralType": "Sovereign",
+        "haircutPct": 8
+      },
+      "expected": {
+        "baseRate": 5.25,
+        "liquiditySpread": 0.2815,
+        "regulatoryCost": 0.004660194174757286,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.522864194174757,
+        "technicalPrice": 7.684464194174757,
+        "totalFTP": 5.5315,
+        "finalClientRate": 8.031500000000001,
+        "raroc": -23.494010346538154,
+        "economicProfit": -527367.9417475727,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-001",
+      "overrides": {
+        "id": "DL-DEMO-001-R4",
+        "amount": 11500000,
+        "durationMonths": 12,
+        "marginTarget": 2.7,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2024-01-01",
+        "ltvPct": 76,
+        "ifrs9Stage": 2,
+        "collateralType": "Corporate",
+        "haircutPct": 12
+      },
+      "expected": {
+        "baseRate": 5.1,
+        "liquiditySpread": 0.297,
+        "regulatoryCost": 0.0023300970873786435,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.006034097087378,
+        "technicalPrice": 7.167634097087378,
+        "totalFTP": 5.396999999999999,
+        "finalClientRate": 8.097,
+        "raroc": -19.351603713415056,
+        "economicProfit": -541209.5165048542,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-001",
+      "overrides": {
+        "id": "DL-DEMO-001-R5",
+        "amount": 13000000,
+        "durationMonths": 18,
+        "marginTarget": 2.9,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2024-01-01",
+        "ltvPct": 83,
+        "ifrs9Stage": 3,
+        "collateralType": "Real_Estate",
+        "haircutPct": 20
+      },
+      "expected": {
+        "baseRate": 4.975,
+        "liquiditySpread": 0.4425,
+        "regulatoryCost": 0.26666666666666666,
+        "capitalCharge": 1.1616,
+        "floorPrice": 6.440870666666666,
+        "technicalPrice": 7.602470666666666,
+        "totalFTP": 5.4174999999999995,
+        "finalClientRate": 8.317499999999999,
+        "raroc": -210.98778588807784,
+        "economicProfit": -4024842.4666666663,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-002",
+      "overrides": {
+        "id": "DL-DEMO-002-R1",
+        "amount": 35000000,
+        "durationMonths": 1,
+        "marginTarget": 0.8,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2024-01-01",
+        "depositStability": "Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.35,
+        "liquiditySpread": -0.14551000000000003,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.4769846875,
+        "technicalPrice": 5.4769846875,
+        "totalFTP": 5.20449,
+        "finalClientRate": 6.00449,
+        "raroc": -355.47757352941176,
+        "economicProfit": -2186491.5625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-002",
+      "overrides": {
+        "id": "DL-DEMO-002-R2",
+        "amount": 42500000,
+        "durationMonths": 6,
+        "marginTarget": 1,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2024-01-01",
+        "depositStability": "Semi_Stable",
+        "isOperationalSegment": false
+      },
+      "expected": {
+        "baseRate": 5.25,
+        "liquiditySpread": -0.22940000000000002,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.3430946875,
+        "technicalPrice": 5.3430946875,
+        "totalFTP": 5.0206,
+        "finalClientRate": 6.0206,
+        "raroc": -332.8958088235294,
+        "economicProfit": -2491872.21875,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-002",
+      "overrides": {
+        "id": "DL-DEMO-002-R3",
+        "amount": 50000000,
+        "durationMonths": 12,
+        "marginTarget": 1.2,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2024-01-01",
+        "depositStability": "Non_Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 5.1,
+        "liquiditySpread": -0.27688999999999997,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.5256046875,
+        "technicalPrice": 5.5256046875,
+        "totalFTP": 4.82311,
+        "finalClientRate": 6.02311,
+        "raroc": -309.5140441176471,
+        "economicProfit": -2732869.375,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-002",
+      "overrides": {
+        "id": "DL-DEMO-002-R4",
+        "amount": 57500000,
+        "durationMonths": 18,
+        "marginTarget": 1.4,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2024-01-01",
+        "depositStability": "Stable",
+        "isOperationalSegment": false
+      },
+      "expected": {
+        "baseRate": 4.975,
+        "liquiditySpread": -0.29008,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 5.0074146875,
+        "technicalPrice": 5.0074146875,
+        "totalFTP": 4.68492,
+        "finalClientRate": 6.08492,
+        "raroc": -289.62051470588233,
+        "economicProfit": -2948340.53125,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-002",
+      "overrides": {
+        "id": "DL-DEMO-002-R5",
+        "amount": 65000000,
+        "durationMonths": 24,
+        "marginTarget": 1.6,
+        "repricingFreq": "Fixed",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2024-01-01",
+        "depositStability": "Semi_Stable",
+        "isOperationalSegment": true
+      },
+      "expected": {
+        "baseRate": 4.85,
+        "liquiditySpread": -0.36302000000000006,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0,
+        "floorPrice": 4.9594746875,
+        "technicalPrice": 4.9594746875,
+        "totalFTP": 4.48698,
+        "finalClientRate": 6.0869800000000005,
+        "raroc": -266.2122794117647,
+        "economicProfit": -3074245.6875,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Matched Maturity"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-004",
+      "overrides": {
+        "id": "DL-DEMO-004-R1",
+        "amount": 70000000,
+        "durationMonths": 24,
+        "marginTarget": 0.1,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2024-01-01"
+      },
+      "expected": {
+        "baseRate": 4.85,
+        "liquiditySpread": 0.4322321428571429,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0.7486499999999999,
+        "floorPrice": 5.6047268303571425,
+        "technicalPrice": 6.353376830357142,
+        "totalFTP": 5.282232142857143,
+        "finalClientRate": 5.382232142857142,
+        "raroc": -62.101800415081286,
+        "economicProfit": -5500257.625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-004",
+      "overrides": {
+        "id": "DL-DEMO-004-R2",
+        "amount": 85000000,
+        "durationMonths": 30,
+        "marginTarget": 0.3,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2024-01-01"
+      },
+      "expected": {
+        "baseRate": 4.75,
+        "liquiditySpread": 0.4675,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0.7486499999999999,
+        "floorPrice": 5.5899946875,
+        "technicalPrice": 6.3386446874999995,
+        "totalFTP": 5.2175,
+        "finalClientRate": 5.5175,
+        "raroc": -59.53780871670702,
+        "economicProfit": -6453861.9375,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-004",
+      "overrides": {
+        "id": "DL-DEMO-004-R3",
+        "amount": 100000000,
+        "durationMonths": 36,
+        "marginTarget": 0.5,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2024-01-01"
+      },
+      "expected": {
+        "baseRate": 4.65,
+        "liquiditySpread": 0.50525,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0.7486499999999999,
+        "floorPrice": 5.9077446875,
+        "technicalPrice": 6.6563946875,
+        "totalFTP": 5.1552500000000006,
+        "finalClientRate": 5.6552500000000006,
+        "raroc": -56.99785714285716,
+        "economicProfit": -7330528.750000001,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-004",
+      "overrides": {
+        "id": "DL-DEMO-004-R4",
+        "amount": 115000000,
+        "durationMonths": 42,
+        "marginTarget": 0.7,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2024-01-01"
+      },
+      "expected": {
+        "baseRate": 4.612500000000001,
+        "liquiditySpread": 0.5210869565217391,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0.7486499999999999,
+        "floorPrice": 5.506081644021739,
+        "technicalPrice": 6.254731644021739,
+        "totalFTP": 5.133586956521739,
+        "finalClientRate": 5.8335869565217395,
+        "raroc": -54.850999578903036,
+        "economicProfit": -8175195.5625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "DL-DEMO-004",
+      "overrides": {
+        "id": "DL-DEMO-004-R5",
+        "amount": 130000000,
+        "durationMonths": 48,
+        "marginTarget": 0.9,
+        "repricingFreq": "Daily",
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2024-01-01"
+      },
+      "expected": {
+        "baseRate": 4.575,
+        "liquiditySpread": 0.5373076923076923,
+        "regulatoryCost": 0.0157906875,
+        "capitalCharge": 0.7486499999999999,
+        "floorPrice": 5.6348023798076925,
+        "technicalPrice": 6.383452379807692,
+        "totalFTP": 5.112307692307692,
+        "finalClientRate": 6.012307692307693,
+        "raroc": -52.70785900540138,
+        "economicProfit": -8953862.375,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-IRS-001",
+      "overrides": {
+        "id": "TRD-IRS-001-R1",
+        "amount": 17500000,
+        "durationMonths": 108,
+        "marginTarget": -0.25,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Neutral",
+        "physicalRisk": "Low",
+        "clientRating": "AA",
+        "startDate": "2023-12-01"
+      },
+      "expected": {
+        "baseRate": 3.3,
+        "liquiditySpread": 0.552,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.23232,
+        "floorPrice": 4.059800875,
+        "technicalPrice": 4.292120874999999,
+        "totalFTP": 3.852,
+        "finalClientRate": 3.602,
+        "raroc": -99.84310975609756,
+        "economicProfit": -823999.3125,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-IRS-001",
+      "overrides": {
+        "id": "TRD-IRS-001-R2",
+        "amount": 21250000,
+        "durationMonths": 114,
+        "marginTarget": -0.05,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Green",
+        "physicalRisk": "High",
+        "clientRating": "A",
+        "startDate": "2023-12-01"
+      },
+      "expected": {
+        "baseRate": 3.2750000000000004,
+        "liquiditySpread": 0.556,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.23232,
+        "floorPrice": 4.0888008750000004,
+        "technicalPrice": 4.321120875,
+        "totalFTP": 3.8310000000000004,
+        "finalClientRate": 3.7810000000000006,
+        "raroc": -94.45286585365855,
+        "economicProfit": -953608.0937500001,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-IRS-001",
+      "overrides": {
+        "id": "TRD-IRS-001-R3",
+        "amount": 25000000,
+        "durationMonths": 120,
+        "marginTarget": 0.15,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Brown",
+        "physicalRisk": "Medium",
+        "clientRating": "BBB",
+        "startDate": "2023-12-01"
+      },
+      "expected": {
+        "baseRate": 3.25,
+        "liquiditySpread": 0.56,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.23232,
+        "floorPrice": 4.4478008749999995,
+        "technicalPrice": 4.680120874999999,
+        "totalFTP": 3.81,
+        "finalClientRate": 3.96,
+        "raroc": -89.06262195121951,
+        "economicProfit": -1066641.875,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-IRS-001",
+      "overrides": {
+        "id": "TRD-IRS-001-R4",
+        "amount": 28750000,
+        "durationMonths": 126,
+        "marginTarget": 0.35,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Amber",
+        "physicalRisk": "Low",
+        "clientRating": "BB",
+        "startDate": "2023-12-01"
+      },
+      "expected": {
+        "baseRate": 3.245,
+        "liquiditySpread": 0.56,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.23232,
+        "floorPrice": 4.062800875,
+        "technicalPrice": 4.295120874999999,
+        "totalFTP": 3.805,
+        "finalClientRate": 4.155,
+        "raroc": -84.06262195121951,
+        "economicProfit": -1167700.65625,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    },
+    {
+      "baseDealId": "TRD-IRS-001",
+      "overrides": {
+        "id": "TRD-IRS-001-R5",
+        "amount": 32500000,
+        "durationMonths": 132,
+        "marginTarget": 0.55,
+        "repricingFreq": "Monthly",
+        "repricingMonths": 1,
+        "transitionRisk": "Neutral",
+        "physicalRisk": "High",
+        "clientRating": "B",
+        "startDate": "2023-12-01"
+      },
+      "expected": {
+        "baseRate": 3.24,
+        "liquiditySpread": 0.56,
+        "regulatoryCost": 0.001096875,
+        "capitalCharge": 0.23232,
+        "floorPrice": 4.207800875,
+        "technicalPrice": 4.440120875,
+        "totalFTP": 3.8000000000000003,
+        "finalClientRate": 4.3500000000000005,
+        "raroc": -79.06262195121953,
+        "economicProfit": -1253384.4375000002,
+        "approvalLevel": "Rejected",
+        "matchedMethodology": "Moving Average"
+      }
+    }
+  ]
+}

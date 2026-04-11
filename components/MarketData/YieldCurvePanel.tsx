@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import * as auditApi from '../../api/audit';
+import * as marketDataApi from '../../api/marketData';
 import { localCache } from '../../utils/localCache';
-import { supabaseService } from '../../utils/supabaseService';
+import { monitoringService } from '../../utils/supabase/monitoring';
+import { marketDataIngestionService } from '../../utils/supabase/marketDataIngestionService';
 import { FileUploadModal } from '../ui/FileUploadModal';
 import { YieldCurvePoint, UserProfile } from '../../types';
 import { translations, Language } from '../../translations';
@@ -21,6 +24,31 @@ import {
 interface Props {
   language: Language;
   user: UserProfile | null;
+}
+
+interface CurveImportRow {
+  Tenor?: string;
+  tenor?: string;
+  Rate?: string | number;
+  rate?: string | number;
+  Prev?: string | number;
+  prev?: string | number;
+}
+
+interface RealtimeCurvePoint {
+  tenor: string;
+  rate: string | number;
+  prev: string | number;
+}
+
+interface YieldCurveRealtimePayload {
+  table: string;
+  eventType: string;
+  mapped?: {
+    currency: string;
+    date: string;
+    points: RealtimeCurvePoint[];
+  };
 }
 
 const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
@@ -62,11 +90,18 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
 
   // Load curve history from Supabase on mount and when currency changes
   useEffect(() => {
-    supabaseService
-      .fetchCurveHistory(currency)
-      .then((history: any[]) => {
-        if (!history?.length) return;
-        const { historyMap, versions } = mapCurveHistoryRecords(history);
+    marketDataApi
+      .listYieldCurves()
+      .then((history) => {
+        const matchingHistory = history.filter((entry) => entry.currency === currency);
+        if (!matchingHistory.length) return;
+        const normalizedHistory = matchingHistory.map((entry) => ({
+          id: entry.id,
+          currency: entry.currency,
+          as_of_date: entry.asOfDate,
+          grid_data: entry.gridData,
+        }));
+        const { historyMap, versions } = mapCurveHistoryRecords(normalizedHistory);
         setCurvesHistory((prev) => ({ ...prev, ...historyMap }));
         setCurveVersions(versions.slice(0, 10));
       })
@@ -80,8 +115,8 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
 
   // Realtime Sync for Yield Curves
   useEffect(() => {
-    const subscription = supabaseService.subscribeToAll((rawPayload) => {
-      const payload = rawPayload as { table: string; eventType: string; mapped?: { currency: string; date: string; points: { tenor: string; rate: string; prev: string }[] } };
+    const subscription = monitoringService.subscribeToAll((rawPayload) => {
+      const payload = rawPayload as YieldCurveRealtimePayload;
       if (payload.table === 'yield_curves' && payload.eventType === 'INSERT') {
         const mapped = payload.mapped;
         if (!mapped) return;
@@ -91,10 +126,10 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
 
         setCurvesHistory((prev) => ({
           ...prev,
-          [key]: pts.map((pt: any) => ({
+          [key]: pts.map((pt) => ({
             tenor: pt.tenor,
-            rate: parseFloat(pt.rate) || 0,
-            prev: parseFloat(pt.prev) || parseFloat(pt.rate) || 0,
+            rate: parseFloat(String(pt.rate)) || 0,
+            prev: parseFloat(String(pt.prev)) || parseFloat(String(pt.rate)) || 0,
           })),
         }));
       }
@@ -138,7 +173,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     }));
 
     if (selectedSource) {
-      await supabaseService.captureYieldCurveSnapshot({
+      await marketDataIngestionService.captureYieldCurveSnapshot({
         sourceId: selectedSource.id,
         currency,
         date: selectedDate,
@@ -150,7 +185,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         )
       );
     } else {
-      await supabaseService.saveCurveSnapshot(currency, selectedDate, snapshotPoints);
+      await marketDataApi.saveCurveHistorySnapshot(currency, selectedDate, snapshotPoints);
     }
 
     // Update active yield curve in DataContext if it's the current date
@@ -172,7 +207,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
       ].slice(0, 10)
     );
 
-    supabaseService.addAuditEntry({
+    void auditApi.logAudit({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown User',
       action: 'SAVE_CURVE_SNAPSHOT',
@@ -182,10 +217,10 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
     });
   };
 
-  const handleImport = async (importedData: any[]) => {
+  const handleImport = async (importedData: CurveImportRow[]) => {
     const key = getCurveHistoryKey(currency, selectedDate);
     const newCurve: YieldCurvePoint[] = importedData.map((row) => ({
-      tenor: row.Tenor || row.tenor,
+      tenor: row.Tenor || row.tenor || '',
       rate: Number(row.Rate || row.rate) || 0,
       prev: Number(row.Prev || row.prev) || 0,
     }));
@@ -195,7 +230,7 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
 
     if (selectedSource) {
       const syncedAt = new Date().toISOString();
-      await supabaseService.captureYieldCurveSnapshot({
+      await marketDataIngestionService.captureYieldCurveSnapshot({
         sourceId: selectedSource.id,
         currency,
         date: selectedDate,
@@ -207,11 +242,11 @@ const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
         )
       );
     } else {
-      await supabaseService.saveCurveSnapshot(currency, selectedDate, newCurve);
+      await marketDataApi.saveCurveHistorySnapshot(currency, selectedDate, newCurve);
     }
     appData.setYieldCurves(newCurve);
 
-    supabaseService.addAuditEntry({
+    void auditApi.logAudit({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown User',
       action: 'IMPORT_CURVE',

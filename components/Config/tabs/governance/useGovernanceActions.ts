@@ -1,8 +1,10 @@
 import { useCallback } from 'react';
-import type { ApprovalMatrixConfig, MethodologyChangeRequest } from '../../../../types';
+import * as configApi from '../../../../api/config';
+import type { ApprovalMatrixConfig, GreeniumRateCard, MethodologyChangeRequest } from '../../../../types';
 import { useAudit } from '../../../../hooks/useAudit';
 import { useData } from '../../../../contexts/DataContext';
-import { supabaseService } from '../../../../utils/supabaseService';
+import { ruleService } from '../../../../utils/supabase/rules';
+import { saveSystemConfigValue } from '../../../../utils/supabase/systemConfig';
 import {
   applyMethodologyChangeRequestToCollection,
   applyMethodologyChangeRequestToRules,
@@ -39,6 +41,10 @@ export function useGovernanceActions({
 }: UseGovernanceActionsParams) {
   const data = useData();
   const logAudit = useAudit(user);
+  const persistGreeniumGrid = useCallback(
+    (grid: GreeniumRateCard[]) => saveSystemConfigValue('greenium_grid', grid, 'saveEsgGrid:greenium'),
+    []
+  );
 
   const persistRuleOperations = useCallback(
     async (request: MethodologyChangeRequest, mode: 'apply' | 'rollback', actorEmail: string) => {
@@ -53,31 +59,31 @@ export function useGovernanceActions({
 
           if (mode === 'apply') {
             if ((operation.action === 'CREATE' || operation.action === 'IMPORT') && proposedRule) {
-              await supabaseService.saveRule(proposedRule);
-              await supabaseService.createRuleVersion(proposedRule.id, proposedRule, actorEmail, versionReason);
+              await ruleService.saveRule(proposedRule);
+              await ruleService.createRuleVersion(proposedRule.id, proposedRule, actorEmail, versionReason);
             }
             if (operation.action === 'UPDATE' && proposedRule) {
-              await supabaseService.saveRule(proposedRule);
-              await supabaseService.createRuleVersion(proposedRule.id, proposedRule, actorEmail, versionReason);
+              await ruleService.saveRule(proposedRule);
+              await ruleService.createRuleVersion(proposedRule.id, proposedRule, actorEmail, versionReason);
             }
             if (operation.action === 'DELETE' && currentRule) {
-              await supabaseService.createRuleVersion(currentRule.id, currentRule, actorEmail, versionReason);
-              await supabaseService.deleteRule(currentRule.id);
+              await ruleService.createRuleVersion(currentRule.id, currentRule, actorEmail, versionReason);
+              await ruleService.deleteRule(currentRule.id);
             }
             return;
           }
 
           if ((operation.action === 'CREATE' || operation.action === 'IMPORT') && proposedRule) {
-            await supabaseService.createRuleVersion(proposedRule.id, proposedRule, actorEmail, versionReason);
-            await supabaseService.deleteRule(proposedRule.id);
+            await ruleService.createRuleVersion(proposedRule.id, proposedRule, actorEmail, versionReason);
+            await ruleService.deleteRule(proposedRule.id);
           }
           if (operation.action === 'UPDATE' && currentRule) {
-            await supabaseService.saveRule(currentRule);
-            await supabaseService.createRuleVersion(currentRule.id, currentRule, actorEmail, versionReason);
+            await ruleService.saveRule(currentRule);
+            await ruleService.createRuleVersion(currentRule.id, currentRule, actorEmail, versionReason);
           }
           if (operation.action === 'DELETE' && currentRule) {
-            await supabaseService.saveRule(currentRule);
-            await supabaseService.createRuleVersion(currentRule.id, currentRule, actorEmail, versionReason);
+            await ruleService.saveRule(currentRule);
+            await ruleService.createRuleVersion(currentRule.id, currentRule, actorEmail, versionReason);
           }
         })
       );
@@ -132,8 +138,8 @@ export function useGovernanceActions({
     data.setMethodologyChangeRequests(nextRequests);
     data.setApprovalTasks(persistedTasks);
     await Promise.all([
-      supabaseService.saveMethodologyChangeRequests(nextRequests),
-      supabaseService.saveApprovalTasks(persistedTasks),
+      configApi.saveMethodologyChangeRequests(nextRequests),
+      configApi.saveApprovalTasks(persistedTasks),
     ]);
 
     logAudit({
@@ -164,8 +170,8 @@ export function useGovernanceActions({
       data.setMethodologyChangeRequests(nextRequests);
       data.setApprovalTasks(nextTasks);
       await Promise.all([
-        supabaseService.saveMethodologyChangeRequests(nextRequests),
-        supabaseService.saveApprovalTasks(nextTasks),
+        configApi.saveMethodologyChangeRequests(nextRequests),
+        configApi.saveApprovalTasks(nextTasks),
       ]);
 
       logAudit({
@@ -234,9 +240,9 @@ export function useGovernanceActions({
       data.setMethodologyVersions(nextVersions);
 
       await Promise.all([
-        supabaseService.saveMethodologyChangeRequests(nextRequests),
-        supabaseService.saveApprovalTasks(nextTasks),
-        supabaseService.saveMethodologyVersions(nextVersions),
+        configApi.saveMethodologyChangeRequests(nextRequests),
+        configApi.saveApprovalTasks(nextTasks),
+        configApi.saveMethodologyVersions(nextVersions),
       ]);
 
       logAudit({
@@ -275,29 +281,29 @@ export function useGovernanceActions({
       } else if (request.target === 'RATE_CARD') {
         const applied = applyMethodologyChangeRequestToCollection(request, data.ftpRateCards, { actorEmail: user.email, actorName: user.name });
         nextRateCards = applied.items;
-        await supabaseService.saveRateCards(nextRateCards);
+        await configApi.saveRateCards(nextRateCards);
         appliedRequest = applied.request;
       } else if (request.target === 'TRANSITION_GRID') {
         const applied = applyMethodologyChangeRequestToCollection(request, data.transitionGrid, { actorEmail: user.email, actorName: user.name });
         nextTransitionGrid = applied.items;
-        await supabaseService.saveEsgGrid('transition', nextTransitionGrid);
+        await configApi.saveEsgGrid('transition', nextTransitionGrid);
         appliedRequest = applied.request;
       } else if (request.target === 'PHYSICAL_GRID') {
         const applied = applyMethodologyChangeRequestToCollection(request, data.physicalGrid, { actorEmail: user.email, actorName: user.name });
         nextPhysicalGrid = applied.items;
-        await supabaseService.saveEsgGrid('physical', nextPhysicalGrid);
+        await configApi.saveEsgGrid('physical', nextPhysicalGrid);
         appliedRequest = applied.request;
       } else if (request.target === 'GREENIUM_GRID') {
         const applied = applyMethodologyChangeRequestToCollection(request, data.greeniumGrid as unknown as Parameters<typeof applyMethodologyChangeRequestToCollection>[1], { actorEmail: user.email, actorName: user.name });
         nextGreeniumGrid = applied.items as unknown as typeof data.greeniumGrid;
-        await supabaseService.saveEsgGrid('greenium', nextGreeniumGrid);
+        await persistGreeniumGrid(nextGreeniumGrid);
         appliedRequest = applied.request;
       } else if (request.target === 'APPROVAL_MATRIX') {
         const proposedApprovalMatrix = request.operations[0]?.proposedSnapshot as ApprovalMatrixConfig | undefined;
         if (!proposedApprovalMatrix || !setApprovalMatrix) return;
         setApprovalMatrix(proposedApprovalMatrix);
         setApprovalMatrixDraft(proposedApprovalMatrix);
-        await supabaseService.saveApprovalMatrix(proposedApprovalMatrix);
+        await configApi.saveApprovalMatrix(proposedApprovalMatrix);
         nextApprovalMatrix = proposedApprovalMatrix;
         appliedRequest = { ...request, status: 'Applied', appliedByEmail: user.email, appliedByName: user.name, appliedAt: new Date().toISOString() };
       } else {
@@ -308,7 +314,7 @@ export function useGovernanceActions({
         rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, greeniumGrid: nextGreeniumGrid, approvalMatrix: nextApprovalMatrix,
       });
     },
-    [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
+    [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistGreeniumGrid, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
   );
 
   const handleRollback = useCallback(
@@ -333,29 +339,29 @@ export function useGovernanceActions({
       } else if (request.target === 'RATE_CARD') {
         const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.ftpRateCards, { actorEmail: user.email, actorName: user.name });
         nextRateCards = rolledBack.items;
-        await supabaseService.saveRateCards(nextRateCards);
+        await configApi.saveRateCards(nextRateCards);
         rolledBackRequest = rolledBack.request;
       } else if (request.target === 'TRANSITION_GRID') {
         const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.transitionGrid, { actorEmail: user.email, actorName: user.name });
         nextTransitionGrid = rolledBack.items;
-        await supabaseService.saveEsgGrid('transition', nextTransitionGrid);
+        await configApi.saveEsgGrid('transition', nextTransitionGrid);
         rolledBackRequest = rolledBack.request;
       } else if (request.target === 'PHYSICAL_GRID') {
         const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.physicalGrid, { actorEmail: user.email, actorName: user.name });
         nextPhysicalGrid = rolledBack.items;
-        await supabaseService.saveEsgGrid('physical', nextPhysicalGrid);
+        await configApi.saveEsgGrid('physical', nextPhysicalGrid);
         rolledBackRequest = rolledBack.request;
       } else if (request.target === 'GREENIUM_GRID') {
         const rolledBack = rollbackMethodologyChangeRequestToCollection(request, data.greeniumGrid as unknown as Parameters<typeof rollbackMethodologyChangeRequestToCollection>[1], { actorEmail: user.email, actorName: user.name });
         nextGreeniumGrid = rolledBack.items as unknown as typeof data.greeniumGrid;
-        await supabaseService.saveEsgGrid('greenium', nextGreeniumGrid);
+        await persistGreeniumGrid(nextGreeniumGrid);
         rolledBackRequest = rolledBack.request;
       } else if (request.target === 'APPROVAL_MATRIX') {
         const currentApprovalMatrix = request.operations[0]?.currentSnapshot as ApprovalMatrixConfig | undefined;
         if (!currentApprovalMatrix || !setApprovalMatrix) return;
         setApprovalMatrix(currentApprovalMatrix);
         setApprovalMatrixDraft(currentApprovalMatrix);
-        await supabaseService.saveApprovalMatrix(currentApprovalMatrix);
+        await configApi.saveApprovalMatrix(currentApprovalMatrix);
         nextApprovalMatrix = currentApprovalMatrix;
         rolledBackRequest = { ...request, status: 'Rolled_Back', rolledBackByEmail: user.email, rolledBackByName: user.name, rolledBackAt: new Date().toISOString() };
       } else {
@@ -366,7 +372,7 @@ export function useGovernanceActions({
         rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, greeniumGrid: nextGreeniumGrid, approvalMatrix: nextApprovalMatrix,
       });
     },
-    [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
+    [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistGreeniumGrid, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
   );
 
   return { handleSubmitApprovalMatrixChange, handleReview, handleApply, handleRollback };

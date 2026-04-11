@@ -1,15 +1,15 @@
 import type { ApprovalMatrixConfig, PortfolioScenario, PortfolioSnapshot, Transaction } from '../../types';
+import * as configApi from '../../api/config';
 import type { PricingContext } from '../pricingEngine';
 import { buildPortfolioSnapshot } from '../governanceWorkflows';
-import { configService } from './config';
 
 export const portfolioReportingService = {
   async fetchPortfolioSnapshots(): Promise<PortfolioSnapshot[]> {
-    return configService.fetchPortfolioSnapshots();
+    return configApi.fetchPortfolioSnapshots();
   },
 
   async savePortfolioSnapshots(snapshots: PortfolioSnapshot[]): Promise<void> {
-    await configService.savePortfolioSnapshots(snapshots);
+    await configApi.savePortfolioSnapshots(snapshots);
   },
 
   createPortfolioSnapshot({

@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Activity, Wifi, WifiOff } from 'lucide-react';
-import { supabaseService } from '../../utils/supabaseService';
+import * as auditApi from '../../api/audit';
+import { mapAuditFromDB } from '../../api/mappers';
 import { AuditEntry } from '../../types';
 import { supabase } from '../../utils/supabaseClient';
 import { Panel } from '../ui/LayoutComponents';
-import { mapAuditFromDB } from '../../utils/supabase/mappers';
 import { AuditEntryDrawer } from './AuditEntryDrawer';
 import { AuditLogTable } from './AuditLogTable';
 import { AuditLogToolbar } from './AuditLogToolbar';
@@ -43,7 +43,7 @@ const AuditLog: React.FC = () => {
         setStatus(status === 'error' ? 'connecting' : status);
         setStatusMsg('Cargando actividad...');
         try {
-            const { data, total, errorMessage } = await supabaseService.fetchAuditLogPaginated(1, PAGE_SIZE);
+            const { data, total, errorMessage } = await auditApi.listAuditLogPaginated({ page: 1, pageSize: PAGE_SIZE });
 
             if (errorMessage) {
                 setStatus('error');
@@ -102,7 +102,7 @@ const AuditLog: React.FC = () => {
 
     const handleTestEntry = async () => {
         setStatusMsg('Enviando prueba...');
-        const result = await supabaseService.addAuditEntry({
+        const result = await auditApi.createAuditEntry({
             action: 'TEST_CONNECTION',
             module: 'AUDIT_LOG',
             description: 'Prueba manual de escritura desde el Monitor de Actividad.',

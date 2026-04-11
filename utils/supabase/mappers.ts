@@ -11,7 +11,190 @@ import type {
   RuleVersion,
   Transaction,
 } from '../../types';
+import type { Entity, EntityUser, Group } from '../../types/entity';
+import type { ReportRun, ReportSchedule } from '../../types/reportSchedule';
 import { nowIso } from './shared';
+
+type DealRow = {
+  id?: string;
+  status?: Transaction['status'];
+  client_id: string;
+  client_type: string;
+  business_unit: string;
+  funding_business_unit: string;
+  business_line: string;
+  product_type: string;
+  currency: string;
+  amount: number;
+  start_date: string;
+  duration_months: number;
+  amortization: Transaction['amortization'];
+  repricing_freq: Transaction['repricingFreq'];
+  margin_target: number;
+  behavioural_model_id?: string;
+  risk_weight: number;
+  capital_ratio: number;
+  target_roe: number;
+  operational_cost_bps: number;
+  lcr_outflow_pct?: number;
+  category: Transaction['category'];
+  drawn_amount?: number;
+  undrawn_amount?: number;
+  is_committed?: boolean;
+  lcr_classification?: Transaction['lcrClassification'];
+  deposit_type?: Transaction['depositType'];
+  behavioral_maturity_override?: number;
+  transition_risk: Transaction['transitionRisk'];
+  physical_risk: Transaction['physicalRisk'];
+  green_format?: Transaction['greenFormat'];
+  dnsh_compliant?: boolean;
+  isf_eligible?: boolean;
+  liquidity_spread?: number;
+  _liquidity_premium_details?: number;
+  _clc_charge_details?: number;
+  client_rating?: string | null;
+  ltv_pct?: number | string | null;
+  ifrs9_stage?: number | string | null;
+  entity_id?: string;
+  version?: number;
+};
+
+type AuditEntryWrite = Omit<AuditEntry, 'id' | 'timestamp'> & {
+  timestamp?: string;
+};
+
+type AuditEntryRow = {
+  id?: string | number;
+  timestamp?: string;
+  user_email?: string;
+  user_name?: string;
+  action?: string;
+  module?: AuditEntry['module'];
+  description?: string;
+  details?: AuditEntry['details'];
+};
+
+type BehaviouralModelRow = {
+  id: string;
+  name: string;
+  type: BehaviouralModel['type'];
+  nmd_method?: BehaviouralModel['nmdMethod'];
+  description: string;
+  core_ratio?: number;
+  decay_rate?: number;
+  beta_factor?: number;
+  replication_profile?: BehaviouralModel['replicationProfile'];
+  cpr?: number;
+  penalty_exempt?: number;
+};
+
+type GeneralRuleRow = {
+  id: number;
+  business_unit: string;
+  product: string;
+  segment: string;
+  tenor: string;
+  base_method: string;
+  base_reference?: string;
+  spread_method: string;
+  liquidity_reference?: string;
+  strategic_spread: number;
+};
+
+type RuleVersionRow = GeneralRuleRow & {
+  rule_id: number;
+  version: number;
+  formula_spec?: RuleVersion['formulaSpec'];
+  effective_from: string;
+  effective_to?: string;
+  changed_by?: string;
+  change_reason?: string;
+  created_at: string;
+};
+
+type DealCommentRow = {
+  id: number;
+  deal_id: string;
+  user_email: string;
+  user_name?: string;
+  action: DealComment['action'];
+  comment: string;
+  created_at: string;
+};
+
+type NotificationRow = {
+  id: number;
+  recipient_email: string;
+  sender_email?: string;
+  type: Notification['type'];
+  title: string;
+  message?: string;
+  deal_id?: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+type GroupRow = {
+  id: string;
+  name: string;
+  short_code: string;
+  country: string;
+  base_currency: string;
+  config?: Group['config'];
+  is_active?: boolean;
+  created_at: string;
+};
+
+type EntityRow = {
+  id: string;
+  group_id: string;
+  name: string;
+  legal_name?: string;
+  short_code: string;
+  country: string;
+  base_currency: string;
+  timezone?: string;
+  approval_matrix?: Entity['approvalMatrix'];
+  sdr_config?: Entity['sdrConfig'];
+  lr_config?: Entity['lrConfig'];
+  is_active?: boolean;
+  created_at: string;
+};
+
+type EntityUserRow = {
+  entity_id: string;
+  user_id: string;
+  role: EntityUser['role'];
+  default_bu_id?: string | null;
+  is_primary_entity?: boolean;
+};
+
+type ReportScheduleRow = {
+  id: string;
+  entity_id: string;
+  name: string;
+  report_type: ReportSchedule['reportType'];
+  frequency: ReportSchedule['frequency'];
+  format: ReportSchedule['format'];
+  recipients?: string[];
+  config?: Record<string, unknown>;
+  is_active?: boolean;
+  last_run_at: string | null;
+  next_run_at: string | null;
+  created_by: string;
+  created_at: string;
+};
+
+type ReportRunRow = {
+  id: string;
+  schedule_id: string;
+  entity_id: string;
+  status: ReportRun['status'];
+  output_url: string | null;
+  error_message: string | null;
+  started_at: string;
+  completed_at: string | null;
+};
 
 export const mapDealToDB = (deal: Transaction) => ({
   id: deal.id || undefined,
@@ -58,52 +241,56 @@ export const mapDealToDB = (deal: Transaction) => ({
   updated_at: nowIso(),
 });
 
-export const mapDealFromDB = (row: any): Transaction => ({
-  id: row.id,
-  status: row.status,
-  clientId: row.client_id,
-  clientType: row.client_type,
-  businessUnit: row.business_unit,
-  fundingBusinessUnit: row.funding_business_unit,
-  businessLine: row.business_line,
-  productType: row.product_type,
-  currency: row.currency,
-  amount: row.amount,
-  startDate: row.start_date,
-  durationMonths: row.duration_months,
-  amortization: row.amortization,
-  repricingFreq: row.repricing_freq,
-  marginTarget: row.margin_target,
-  behaviouralModelId: row.behavioural_model_id,
-  riskWeight: row.risk_weight,
-  capitalRatio: row.capital_ratio,
-  targetROE: row.target_roe,
-  operationalCostBps: row.operational_cost_bps,
-  lcrOutflowPct: row.lcr_outflow_pct,
-  category: row.category,
-  drawnAmount: row.drawn_amount,
-  undrawnAmount: row.undrawn_amount,
-  isCommitted: row.is_committed,
-  lcrClassification: row.lcr_classification,
-  depositType: row.deposit_type,
-  behavioralMaturityOverride: row.behavioral_maturity_override,
-  transitionRisk: row.transition_risk,
-  physicalRisk: row.physical_risk,
-  greenFormat: row.green_format,
-  dnshCompliant: row.dnsh_compliant,
-  isfEligible: row.isf_eligible,
-  liquiditySpread: row.liquidity_spread,
-  _liquidityPremiumDetails: row._liquidity_premium_details,
-  _clcChargeDetails: row._clc_charge_details,
-  clientRating: row.client_rating ?? undefined,
-  ltvPct: row.ltv_pct != null ? Number(row.ltv_pct) : undefined,
-  ifrs9Stage:
-    row.ifrs9_stage != null ? (Number(row.ifrs9_stage) as 1 | 2 | 3) : undefined,
-  entityId: row.entity_id,
-  version: row.version ?? 1,
-});
+export const mapDealFromDB = (row: Record<string, unknown>): Transaction => {
+  const dealRow = row as DealRow;
 
-export const mapAuditToDB = (entry: any) => ({
+  return ({
+  id: dealRow.id,
+  status: dealRow.status,
+  clientId: dealRow.client_id,
+  clientType: dealRow.client_type,
+  businessUnit: dealRow.business_unit,
+  fundingBusinessUnit: dealRow.funding_business_unit,
+  businessLine: dealRow.business_line,
+  productType: dealRow.product_type,
+  currency: dealRow.currency,
+  amount: dealRow.amount,
+  startDate: dealRow.start_date,
+  durationMonths: dealRow.duration_months,
+  amortization: dealRow.amortization,
+  repricingFreq: dealRow.repricing_freq,
+  marginTarget: dealRow.margin_target,
+  behaviouralModelId: dealRow.behavioural_model_id,
+  riskWeight: dealRow.risk_weight,
+  capitalRatio: dealRow.capital_ratio,
+  targetROE: dealRow.target_roe,
+  operationalCostBps: dealRow.operational_cost_bps,
+  lcrOutflowPct: dealRow.lcr_outflow_pct,
+  category: dealRow.category,
+  drawnAmount: dealRow.drawn_amount,
+  undrawnAmount: dealRow.undrawn_amount,
+  isCommitted: dealRow.is_committed,
+  lcrClassification: dealRow.lcr_classification,
+  depositType: dealRow.deposit_type,
+  behavioralMaturityOverride: dealRow.behavioral_maturity_override,
+  transitionRisk: dealRow.transition_risk,
+  physicalRisk: dealRow.physical_risk,
+  greenFormat: dealRow.green_format,
+  dnshCompliant: dealRow.dnsh_compliant,
+  isfEligible: dealRow.isf_eligible,
+  liquiditySpread: dealRow.liquidity_spread,
+  _liquidityPremiumDetails: dealRow._liquidity_premium_details,
+  _clcChargeDetails: dealRow._clc_charge_details,
+  clientRating: dealRow.client_rating ?? undefined,
+  ltvPct: dealRow.ltv_pct != null ? Number(dealRow.ltv_pct) : undefined,
+  ifrs9Stage:
+    dealRow.ifrs9_stage != null ? (Number(dealRow.ifrs9_stage) as 1 | 2 | 3) : undefined,
+  entityId: dealRow.entity_id,
+  version: dealRow.version ?? 1,
+});
+};
+
+export const mapAuditToDB = (entry: AuditEntryWrite) => ({
   user_email: entry.userEmail,
   user_name: entry.userName,
   action: entry.action,
@@ -113,16 +300,20 @@ export const mapAuditToDB = (entry: any) => ({
   timestamp: entry.timestamp || nowIso(),
 });
 
-export const mapAuditFromDB = (row: any): AuditEntry => ({
-  id: String(row.id || `audit-${Math.random()}`),
-  timestamp: row.timestamp || nowIso(),
-  userEmail: row.user_email || 'unknown@system.com',
-  userName: row.user_name || 'System User',
-  action: row.action || 'UNKNOWN_ACTION',
-  module: row.module || 'SYSTEM',
-  description: row.description || 'No description provided',
-  details: row.details || {},
-});
+export const mapAuditFromDB = (row: Record<string, unknown>): AuditEntry => {
+  const auditRow = row as AuditEntryRow;
+
+  return ({
+    id: String(auditRow.id || `audit-${Math.random()}`),
+    timestamp: auditRow.timestamp || nowIso(),
+    userEmail: auditRow.user_email || 'unknown@system.com',
+    userName: auditRow.user_name || 'System User',
+    action: auditRow.action || 'UNKNOWN_ACTION',
+    module: auditRow.module || 'SYSTEM',
+    description: auditRow.description || 'No description provided',
+    details: auditRow.details || {},
+  });
+};
 
 export const mapModelToDB = (model: BehaviouralModel) => ({
   id: model.id,
@@ -138,19 +329,23 @@ export const mapModelToDB = (model: BehaviouralModel) => ({
   penalty_exempt: model.penaltyExempt,
 });
 
-export const mapModelFromDB = (row: any): BehaviouralModel => ({
-  id: row.id,
-  name: row.name,
-  type: row.type,
-  nmdMethod: row.nmd_method,
-  description: row.description,
-  coreRatio: row.core_ratio,
-  decayRate: row.decay_rate,
-  betaFactor: row.beta_factor,
-  replicationProfile: row.replication_profile,
-  cpr: row.cpr,
-  penaltyExempt: row.penalty_exempt,
-});
+export const mapModelFromDB = (row: Record<string, unknown>): BehaviouralModel => {
+  const modelRow = row as BehaviouralModelRow;
+
+  return ({
+    id: modelRow.id,
+    name: modelRow.name,
+    type: modelRow.type,
+    nmdMethod: modelRow.nmd_method,
+    description: modelRow.description,
+    coreRatio: modelRow.core_ratio,
+    decayRate: modelRow.decay_rate,
+    betaFactor: modelRow.beta_factor,
+    replicationProfile: modelRow.replication_profile,
+    cpr: modelRow.cpr,
+    penaltyExempt: modelRow.penalty_exempt,
+  });
+};
 
 export const mapRuleToDB = (rule: GeneralRule) => ({
   id: rule.id || undefined,
@@ -165,83 +360,101 @@ export const mapRuleToDB = (rule: GeneralRule) => ({
   strategic_spread: rule.strategicSpread,
 });
 
-export const mapRuleFromDB = (row: any): GeneralRule => ({
-  id: row.id,
-  businessUnit: row.business_unit,
-  product: row.product,
-  segment: row.segment,
-  tenor: row.tenor,
-  baseMethod: row.base_method,
-  baseReference: row.base_reference,
-  spreadMethod: row.spread_method,
-  liquidityReference: row.liquidity_reference,
-  strategicSpread: row.strategic_spread,
-});
+export const mapRuleFromDB = (row: Record<string, unknown>): GeneralRule => {
+  const ruleRow = row as GeneralRuleRow;
 
-export const mapRuleVersionFromDB = (row: any): RuleVersion => ({
-  id: row.id,
-  ruleId: row.rule_id,
-  version: row.version,
-  businessUnit: row.business_unit,
-  product: row.product,
-  segment: row.segment,
-  tenor: row.tenor,
-  baseMethod: row.base_method,
-  baseReference: row.base_reference,
-  spreadMethod: row.spread_method,
-  liquidityReference: row.liquidity_reference,
-  strategicSpread: row.strategic_spread,
-  formulaSpec: row.formula_spec,
-  effectiveFrom: row.effective_from,
-  effectiveTo: row.effective_to,
-  changedBy: row.changed_by,
-  changeReason: row.change_reason,
-  createdAt: row.created_at,
-});
+  return ({
+    id: ruleRow.id,
+    businessUnit: ruleRow.business_unit,
+    product: ruleRow.product,
+    segment: ruleRow.segment,
+    tenor: ruleRow.tenor,
+    baseMethod: ruleRow.base_method,
+    baseReference: ruleRow.base_reference,
+    spreadMethod: ruleRow.spread_method,
+    liquidityReference: ruleRow.liquidity_reference,
+    strategicSpread: ruleRow.strategic_spread,
+  });
+};
 
-export const mapClientFromDB = (row: any): ClientEntity => ({ ...row });
-export const mapBUFromDB = (row: any): BusinessUnit => ({ ...row });
-export const mapProductFromDB = (row: any): ProductDefinition => ({ ...row });
+export const mapRuleVersionFromDB = (row: Record<string, unknown>): RuleVersion => {
+  const versionRow = row as RuleVersionRow;
 
-export const mapDealCommentFromDB = (row: any): DealComment => ({
-  id: row.id,
-  dealId: row.deal_id,
-  userEmail: row.user_email,
-  userName: row.user_name,
-  action: row.action,
-  comment: row.comment,
-  createdAt: row.created_at,
-});
+  return ({
+    id: versionRow.id,
+    ruleId: versionRow.rule_id,
+    version: versionRow.version,
+    businessUnit: versionRow.business_unit,
+    product: versionRow.product,
+    segment: versionRow.segment,
+    tenor: versionRow.tenor,
+    baseMethod: versionRow.base_method,
+    baseReference: versionRow.base_reference,
+    spreadMethod: versionRow.spread_method,
+    liquidityReference: versionRow.liquidity_reference,
+    strategicSpread: versionRow.strategic_spread,
+    formulaSpec: versionRow.formula_spec,
+    effectiveFrom: versionRow.effective_from,
+    effectiveTo: versionRow.effective_to,
+    changedBy: versionRow.changed_by,
+    changeReason: versionRow.change_reason,
+    createdAt: versionRow.created_at,
+  });
+};
 
-export const mapNotificationFromDB = (row: any): Notification => ({
-  id: row.id,
-  recipientEmail: row.recipient_email,
-  senderEmail: row.sender_email,
-  type: row.type,
-  title: row.title,
-  message: row.message,
-  dealId: row.deal_id,
-  isRead: row.is_read,
-  createdAt: row.created_at,
-});
+export const mapClientFromDB = (row: ClientEntity | Record<string, unknown>): ClientEntity => ({ ...(row as unknown as ClientEntity) });
+export const mapBUFromDB = (row: BusinessUnit | Record<string, unknown>): BusinessUnit => ({ ...(row as unknown as BusinessUnit) });
+export const mapProductFromDB = (row: ProductDefinition | Record<string, unknown>): ProductDefinition => ({ ...(row as unknown as ProductDefinition) });
+
+export const mapDealCommentFromDB = (row: Record<string, unknown>): DealComment => {
+  const commentRow = row as DealCommentRow;
+
+  return ({
+    id: commentRow.id,
+    dealId: commentRow.deal_id,
+    userEmail: commentRow.user_email,
+    userName: commentRow.user_name,
+    action: commentRow.action,
+    comment: commentRow.comment,
+    createdAt: commentRow.created_at,
+  });
+};
+
+export const mapNotificationFromDB = (row: Record<string, unknown>): Notification => {
+  const notificationRow = row as NotificationRow;
+
+  return ({
+    id: notificationRow.id,
+    recipientEmail: notificationRow.recipient_email,
+    senderEmail: notificationRow.sender_email,
+    type: notificationRow.type,
+    title: notificationRow.title,
+    message: notificationRow.message,
+    dealId: notificationRow.deal_id,
+    isRead: notificationRow.is_read,
+    createdAt: notificationRow.created_at,
+  });
+};
 
 export const mapRateCardsFromDB = (cards: unknown): FtpRateCard[] =>
   Array.isArray(cards) ? (cards as FtpRateCard[]) : [];
 
 // --- Entity mappers ---
 
-import type { Group, Entity, EntityUser } from '../../types/entity';
+export const mapGroupFromDB = (row: Record<string, unknown>): Group => {
+  const groupRow = row as GroupRow;
 
-export const mapGroupFromDB = (row: any): Group => ({
-  id: row.id,
-  name: row.name,
-  shortCode: row.short_code,
-  country: row.country,
-  baseCurrency: row.base_currency,
-  config: row.config ?? {},
-  isActive: row.is_active ?? true,
-  createdAt: row.created_at,
-});
+  return ({
+    id: groupRow.id,
+    name: groupRow.name,
+    shortCode: groupRow.short_code,
+    country: groupRow.country,
+    baseCurrency: groupRow.base_currency,
+    config: groupRow.config ?? {},
+    isActive: groupRow.is_active ?? true,
+    createdAt: groupRow.created_at,
+  });
+};
 
 export const mapGroupToDB = (group: Partial<Group>) => ({
   ...(group.id && { id: group.id }),
@@ -253,21 +466,25 @@ export const mapGroupToDB = (group: Partial<Group>) => ({
   is_active: group.isActive ?? true,
 });
 
-export const mapEntityFromDB = (row: any): Entity => ({
-  id: row.id,
-  groupId: row.group_id,
-  name: row.name,
-  legalName: row.legal_name ?? '',
-  shortCode: row.short_code,
-  country: row.country,
-  baseCurrency: row.base_currency,
-  timezone: row.timezone ?? 'Europe/Madrid',
-  approvalMatrix: row.approval_matrix ?? {},
-  sdrConfig: row.sdr_config ?? {},
-  lrConfig: row.lr_config ?? {},
-  isActive: row.is_active ?? true,
-  createdAt: row.created_at,
-});
+export const mapEntityFromDB = (row: Record<string, unknown>): Entity => {
+  const entityRow = row as EntityRow;
+
+  return ({
+    id: entityRow.id,
+    groupId: entityRow.group_id,
+    name: entityRow.name,
+    legalName: entityRow.legal_name ?? '',
+    shortCode: entityRow.short_code,
+    country: entityRow.country,
+    baseCurrency: entityRow.base_currency,
+    timezone: entityRow.timezone ?? 'Europe/Madrid',
+    approvalMatrix: entityRow.approval_matrix ?? ({} as Entity['approvalMatrix']),
+    sdrConfig: entityRow.sdr_config ?? ({} as Entity['sdrConfig']),
+    lrConfig: entityRow.lr_config ?? ({} as Entity['lrConfig']),
+    isActive: entityRow.is_active ?? true,
+    createdAt: entityRow.created_at,
+  });
+};
 
 export const mapEntityToDB = (entity: Partial<Entity>) => ({
   ...(entity.id && { id: entity.id }),
@@ -284,35 +501,41 @@ export const mapEntityToDB = (entity: Partial<Entity>) => ({
   is_active: entity.isActive ?? true,
 });
 
-export const mapEntityUserFromDB = (row: any): EntityUser => ({
-  entityId: row.entity_id,
-  userId: row.user_id,
-  role: row.role,
-  defaultBuId: row.default_bu_id ?? undefined,
-  isPrimaryEntity: row.is_primary_entity ?? false,
-});
+export const mapEntityUserFromDB = (row: Record<string, unknown>): EntityUser => {
+  const entityUserRow = row as EntityUserRow;
+
+  return ({
+    entityId: entityUserRow.entity_id,
+    userId: entityUserRow.user_id,
+    role: entityUserRow.role,
+    defaultBuId: entityUserRow.default_bu_id ?? undefined,
+    isPrimaryEntity: entityUserRow.is_primary_entity ?? false,
+  });
+};
 
 // ---------------------------------------------------------------------------
 // Report Schedules
 // ---------------------------------------------------------------------------
 
-import type { ReportSchedule, ReportRun } from '../../types/reportSchedule';
+export const mapReportScheduleFromDB = (row: Record<string, unknown>): ReportSchedule => {
+  const scheduleRow = row as ReportScheduleRow;
 
-export const mapReportScheduleFromDB = (row: any): ReportSchedule => ({
-  id: row.id,
-  entityId: row.entity_id,
-  name: row.name,
-  reportType: row.report_type,
-  frequency: row.frequency,
-  format: row.format,
-  recipients: row.recipients ?? [],
-  config: row.config ?? {},
-  isActive: row.is_active ?? true,
-  lastRunAt: row.last_run_at,
-  nextRunAt: row.next_run_at,
-  createdBy: row.created_by,
-  createdAt: row.created_at,
-});
+  return ({
+    id: scheduleRow.id,
+    entityId: scheduleRow.entity_id,
+    name: scheduleRow.name,
+    reportType: scheduleRow.report_type,
+    frequency: scheduleRow.frequency,
+    format: scheduleRow.format,
+    recipients: scheduleRow.recipients ?? [],
+    config: scheduleRow.config ?? {},
+    isActive: scheduleRow.is_active ?? true,
+    lastRunAt: scheduleRow.last_run_at,
+    nextRunAt: scheduleRow.next_run_at,
+    createdBy: scheduleRow.created_by,
+    createdAt: scheduleRow.created_at,
+  });
+};
 
 export const mapReportScheduleToDB = (s: Partial<ReportSchedule>) => ({
   ...(s.id && { id: s.id }),
@@ -327,13 +550,17 @@ export const mapReportScheduleToDB = (s: Partial<ReportSchedule>) => ({
   created_by: s.createdBy,
 });
 
-export const mapReportRunFromDB = (row: any): ReportRun => ({
-  id: row.id,
-  scheduleId: row.schedule_id,
-  entityId: row.entity_id,
-  status: row.status,
-  outputUrl: row.output_url,
-  errorMessage: row.error_message,
-  startedAt: row.started_at,
-  completedAt: row.completed_at,
-});
+export const mapReportRunFromDB = (row: Record<string, unknown>): ReportRun => {
+  const runRow = row as ReportRunRow;
+
+  return ({
+    id: runRow.id,
+    scheduleId: runRow.schedule_id,
+    entityId: runRow.entity_id,
+    status: runRow.status,
+    outputUrl: runRow.output_url,
+    errorMessage: runRow.error_message,
+    startedAt: runRow.started_at,
+    completedAt: runRow.completed_at,
+  });
+};

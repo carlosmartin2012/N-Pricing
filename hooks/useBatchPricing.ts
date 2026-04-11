@@ -44,11 +44,11 @@ export function useBatchPricing() {
         results,
         error: null,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setState(prev => ({
         ...prev,
         isRunning: false,
-        error: err.message || 'Batch pricing failed',
+        error: err instanceof Error ? err.message : 'Batch pricing failed',
       }));
     }
   }, []);

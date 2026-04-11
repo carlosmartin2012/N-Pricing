@@ -71,7 +71,7 @@ const MaturityLadder: React.FC<Props> = React.memo(({ deals }) => {
             <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => `${v}M`} />
             <Tooltip
               contentStyle={{ backgroundColor: 'var(--nfq-bg-elevated)', border: '1px solid var(--nfq-border-ghost)', borderRadius: 'var(--nfq-radius-lg)', padding: '8px 12px', fontFamily: 'var(--nfq-font-mono)', fontSize: 12 }}
-              formatter={(val: any) => fmtM(Number(val))}
+              formatter={(val: number | string | undefined) => fmtM(Number(val ?? 0))}
             />
             <Legend wrapperStyle={{ fontSize: 10 }} />
             <ReferenceLine y={0} stroke="#475569" />

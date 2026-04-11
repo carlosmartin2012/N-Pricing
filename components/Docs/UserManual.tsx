@@ -1,4 +1,5 @@
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { Panel } from '../ui/LayoutComponents';
 import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles, Compass, BookA } from 'lucide-react';
 import { translations, Language } from '../../translations';
@@ -25,7 +26,7 @@ const TocItem: React.FC<{ targetId: string; label: string }> = ({ targetId, labe
    );
 };
 
-const SectionHeader: React.FC<{ icon: any; title: string; color: string }> = ({ icon: Icon, title, color }) => (
+const SectionHeader: React.FC<{ icon: LucideIcon; title: string; color: string }> = ({ icon: Icon, title, color }) => (
    <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
       <Icon size={20} className={color} />
       <h3 className={`text-lg font-bold ${color}`}>{title}</h3>
@@ -348,5 +349,4 @@ const UserManual: React.FC<UserManualProps> = ({ language }) => {
 };
 
 export default UserManual;
-
 

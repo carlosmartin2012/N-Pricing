@@ -1,8 +1,22 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { UserProfile } from '../types';
+import { logAudit } from '../api/audit';
+import { upsertUser } from '../api/config';
 import { localCache } from '../utils/localCache';
-import { supabaseService } from '../utils/supabaseService';
 import { errorTracker } from '../utils/errorTracking';
+
+interface GoogleAccountsIdApi {
+  cancel: () => void;
+  disableAutoSelect: () => void;
+}
+
+interface WindowWithGoogle {
+  google?: {
+    accounts?: {
+      id?: GoogleAccountsIdApi;
+    };
+  };
+}
 
 const SESSION_TIMEOUT_MS = 8 * 60 * 60 * 1000; // 8 hours
 const ACTIVITY_CHECK_INTERVAL = 60 * 1000; // check every minute
@@ -38,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logAuthEvent = useCallback((user: UserProfile, action: string, description: string) => {
-    void supabaseService.addAuditEntry({
+    void logAudit({
       userEmail: user.email,
       userName: user.name,
       action,
@@ -106,13 +120,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSessionExpiresAt(expiresAt);
     localCache.saveCurrentUser(loggedUser);
     localCache.saveLocal('n_pricing_session_expires', expiresAt);
-    await supabaseService.upsertUser(loggedUser);
+    await upsertUser(loggedUser);
 
     logAuthEvent(loggedUser, 'LOGIN', `User ${loggedUser.name} logged into the system.`);
 
     // Clean up Google Identity Services to prevent COOP polling and overlay injection
     try {
-      const goog = (window as any).google;
+      const goog = (window as Window & WindowWithGoogle).google;
       if (goog?.accounts?.id) {
         goog.accounts.id.cancel();
         goog.accounts.id.disableAutoSelect();

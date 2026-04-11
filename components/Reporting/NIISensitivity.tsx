@@ -376,7 +376,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                     const label = name === 'avgTechnical' ? 'Technical Price' : name === 'avgFinal' ? 'Avg Final Rate' : (name ?? '');
                     return [value != null ? fmtPct(value) : '-', label] as [React.ReactNode, string];
                   }}
-                  labelFormatter={(label: any) => `Month: ${String(label)}`}
+                  labelFormatter={(label: React.ReactNode) => `Month: ${String(label ?? '')}`}
                 />
                 <Legend
                   formatter={(value: string) =>

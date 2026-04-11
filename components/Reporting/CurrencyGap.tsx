@@ -8,6 +8,11 @@ interface Props {
 
 const COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#f43f5e', '#6366f1'];
 
+interface PieLabelProps {
+  name?: string;
+  percent?: number;
+}
+
 const CurrencyGap: React.FC<Props> = React.memo(({ deals }) => {
   const data = useMemo(() => {
     const byCurrency: Record<string, { assets: number; liabilities: number; offBalance: number; count: number }> = {};
@@ -62,7 +67,7 @@ const CurrencyGap: React.FC<Props> = React.memo(({ deals }) => {
                 outerRadius={100}
                 paddingAngle={2}
                 dataKey="value"
-                label={({ name, percent }: any) => `${name || ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }: PieLabelProps) => `${name || ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
                 labelLine={{ stroke: '#475569' }}
               >
                 {pieData.map((_, idx) => (
@@ -71,7 +76,7 @@ const CurrencyGap: React.FC<Props> = React.memo(({ deals }) => {
               </Pie>
               <Tooltip
                 contentStyle={{ backgroundColor: 'var(--nfq-bg-elevated)', border: '1px solid var(--nfq-border-ghost)', borderRadius: 'var(--nfq-radius-lg)', padding: '8px 12px', fontFamily: 'var(--nfq-font-mono)', fontSize: 12 }}
-                formatter={(val: any) => fmtM(Number(val))}
+                formatter={(val: number | string | undefined) => fmtM(Number(val ?? 0))}
               />
             </PieChart>
           </ResponsiveContainer>

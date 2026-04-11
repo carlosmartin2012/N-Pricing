@@ -45,6 +45,17 @@ export async function deleteDeal(id: string): Promise<void> {
   await apiDelete(`/deals/${id}`);
 }
 
+export async function renameDealId(previousId: string, nextId: string): Promise<Transaction | null> {
+  if (!previousId || !nextId || previousId === nextId) return null;
+  try {
+    const row = await apiPost<Record<string, unknown>>(`/deals/${previousId}/rename`, { nextId });
+    return row ? mapDealFromDB(row) : null;
+  } catch (err) {
+    log.error('renameDealId failed', { previousId, nextId }, err as Error);
+    return null;
+  }
+}
+
 export async function batchUpsertDeals(deals: Transaction[]): Promise<Transaction[]> {
   if (deals.length === 0) return [];
   try {

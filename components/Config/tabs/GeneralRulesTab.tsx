@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
+import { saveApprovalTasks, saveMethodologyChangeRequests } from '../../../api/config';
 import { Drawer } from '../../ui/Drawer';
 import { GeneralRule, FtpRateCard, BusinessUnit } from '../../../types';
 import { Search, Plus, FileSpreadsheet, Upload } from 'lucide-react';
 import { useAudit } from '../../../hooks/useAudit';
 import { useData } from '../../../contexts/DataContext';
-import { supabaseService } from '../../../utils/supabaseService';
 import { downloadTemplate, parseExcel } from '../../../utils/excelUtils';
 import {
   buildApprovalTaskForMethodologyChange,
@@ -74,8 +74,8 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
       data.setMethodologyChangeRequests(nextRequests);
       data.setApprovalTasks(nextTasks);
       await Promise.all([
-        supabaseService.saveMethodologyChangeRequests(nextRequests),
-        supabaseService.saveApprovalTasks(nextTasks),
+        saveMethodologyChangeRequests(nextRequests),
+        saveApprovalTasks(nextTasks),
       ]);
 
       logAudit({
@@ -109,8 +109,8 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
     data.setMethodologyChangeRequests(nextRequests);
     data.setApprovalTasks(nextTasks);
     await Promise.all([
-      supabaseService.saveMethodologyChangeRequests(nextRequests),
-      supabaseService.saveApprovalTasks(nextTasks),
+      saveMethodologyChangeRequests(nextRequests),
+      saveApprovalTasks(nextTasks),
     ]);
 
     logAudit({
@@ -158,8 +158,8 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
       data.setMethodologyChangeRequests(nextRequests);
       data.setApprovalTasks(nextTasks);
       await Promise.all([
-        supabaseService.saveMethodologyChangeRequests(nextRequests),
-        supabaseService.saveApprovalTasks(nextTasks),
+        saveMethodologyChangeRequests(nextRequests),
+        saveApprovalTasks(nextTasks),
       ]);
 
       logAudit({

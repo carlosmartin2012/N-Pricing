@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Upload, FileUp, X, Download, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useUI } from '../../contexts/UIContext';
 
+type UploadedCsvRow = Record<string, string>;
+
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onUpload: (data: any[]) => void;
+    onUpload: (data: UploadedCsvRow[]) => void;
     title: string;
     templateName: string;
     templateContent: string;
@@ -52,7 +54,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                     const headers = lines[0].split(',').map(h => h.trim());
                     const data = lines.slice(1).map(line => {
                         const values = line.split(',').map(v => v.trim());
-                        return headers.reduce((obj: any, header, i) => {
+                        return headers.reduce<UploadedCsvRow>((obj, header, i) => {
                             obj[header] = values[i];
                             return obj;
                         }, {});

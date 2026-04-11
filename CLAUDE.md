@@ -33,12 +33,13 @@ npm run dev          # Servidor desarrollo (Vite HMR)
 npm run build        # Build producción (PWA incluido)
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
-npm run test         # Vitest (328 tests, 26 archivos, 67 suites)
-npm run test:e2e     # Playwright (4 specs)
+npm run test         # Vitest (671 tests, 45 archivos)
+npm run test:e2e     # Playwright (5 specs, 79 tests)
 npm run verify:full  # lint + typecheck + test + build + e2e
 npm run check:sync   # Validar seed↔schema sync
 npm run check:bundle # Validar tamaños de bundle
 npm run storybook    # Storybook dev en :6006
+npm run build-storybook # Build estático de Storybook
 npm run format       # Prettier
 ```
 
@@ -136,16 +137,14 @@ utils/
   storage.ts               # Abstracción storage
   pricingWorker.ts         # Web Worker para pricing
   supabaseClient.ts        # Cliente Supabase
-  supabaseService.ts       # Fachada legacy; adapters CRUD delegan en `api/`
   pricing/                 # Motor de pricing modularizado
     curveUtils.ts
     formulaEngine.ts
     liquidityEngine.ts
     index.ts
-  supabase/                # Servicios legacy / especializados
-    approvalService.ts, audit.ts, auditTransport.ts, config.ts,
-    deals.ts, mappers.ts, market.ts, marketDataIngestionService.ts,
-    masterData.ts, methodologyService.ts, monitoring.ts,
+  supabase/                # Servicios especializados / infraestructura
+    approvalService.ts, audit.ts, auditTransport.ts, mappers.ts,
+    marketDataIngestionService.ts, masterData.ts, methodologyService.ts, monitoring.ts,
     portfolioReportingService.ts, rules.ts, shared.ts, systemConfig.ts
   __tests__/               # 26 archivos, 67 suites, 328 tests
 
@@ -156,9 +155,11 @@ supabase/
   migrations/              # 14 migraciones secuenciales
   functions/pricing/       # Edge Function (Deno)
 
-e2e/                       # 4 specs Playwright
+e2e/                       # 5 specs Playwright (+ mock API compartida)
   auth.spec.ts
+  deal-blotter.spec.ts
   example.spec.ts
+  mockApi.ts
   navigation.spec.ts
   pricing-flow.spec.ts
 
@@ -174,14 +175,14 @@ docs/
 
 ## Arquitectura y flujo de datos
 
-- `App.tsx` actúa como shell principal y delega la composición de vistas a workspaces/componentes de dominio. 13 componentes lazy-loaded + Calculator eager.
+- `App.tsx` actúa como shell principal y delega la composición de vistas a workspaces/componentes de dominio. Calculator, vistas secundarias y modales pesados ya cargan vía `React.lazy()`.
 - `AuthContext` gestiona sesión y login demo/OAuth con Google.
 - `DataContext` mantiene los datos de negocio: deals, curves, rules, users, ESG grids, approval matrix.
 - `UIContext` controla vista activa, idioma, tema y modales.
 - `GovernanceContext` gestiona flujos de aprobación y governance de cambios metodológicos.
 - `MarketDataContext` centraliza el estado de curvas y datos de mercado.
-- `api/` proporciona la capa CRUD pública y centralizada (9 módulos: deals, marketData, config, audit, entities, reportSchedules, observability, mappers, index) sobre Supabase con mappers snake_case↔camelCase.
-- `utils/supabase/deals.ts`, `utils/supabase/config.ts` y `utils/supabase/market.ts` son adapters legacy sobre `api/` para no romper `supabaseService` mientras se migra el código histórico.
+- `api/` proporciona la capa CRUD pública y centralizada (9 módulos: deals, marketData, config, audit, entities, reportSchedules, notifications, observability, mappers) sobre Supabase con mappers snake_case↔camelCase.
+- `utils/supabase/` queda para servicios especializados no-CRUD (`approvalService`, `monitoring`, `marketDataIngestionService`, `methodologyService`, etc.) e infraestructura compartida.
 - `hooks/queries/` usa React Query para data fetching con cache, invalidación y query keys centralizadas.
 - `hooks/supabaseSync/` descompone la hidratación en: initial hydration, realtime sync, config persistence y presence.
 - `useSupabaseSync` hidrata desde Supabase y hace fallback a seed/mock data cuando no hay conexión.
@@ -271,7 +272,7 @@ User Configuration, User Management, System Audit, User Manual.
 ## Testing
 
 - **Unit**: Vitest 4 — 26 archivos, 67 suites, 328 tests. Colocados en `utils/__tests__/` y `components/*/__tests__/`.
-- **E2E**: Playwright 1.59 — 4 specs (auth, navigation, pricing flow, example).
+- **E2E**: Playwright 1.59 — 5 specs (auth, deal-blotter, navigation, pricing flow, example).
 - **Component**: Storybook 8.6 — stories en `*.stories.tsx` junto al componente.
 - Para cálculos financieros usar `toBeCloseTo`.
 - Cualquier cambio en `pricingEngine`, `ruleMatchingEngine`, accounting derivation o helpers críticos debería venir con test nuevo o ajuste explícito.
@@ -283,7 +284,7 @@ User Configuration, User Management, System Audit, User Manual.
 - `supabase/schema_v2.sql` es la referencia principal de schema.
 - 14 migraciones secuenciales en `supabase/migrations/`.
 - `api/` es la capa CRUD centralizada — usar `api/mappers.ts` para conversión snake_case↔camelCase.
-- `utils/supabase/` queda para adapters legacy y servicios especializados (approval, audit, monitoring, methodology, reporting, etc.).
+- `utils/supabase/` queda para adapters legacy residuales y servicios especializados (approval, audit, monitoring, methodology, reporting, etc.).
 - Si cambias contratos de datos, revisar: `types.ts`, `api/mappers.ts` y los adapters/servicios que aún cuelgan de `utils/supabase/`.
 - Mantener RLS y realtime en tablas nuevas cuando corresponda.
 - En modo offline, degradar funcionalidad realtime de forma segura; no romper la app por ausencia de credenciales.

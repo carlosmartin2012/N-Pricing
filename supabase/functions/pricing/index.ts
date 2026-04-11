@@ -116,6 +116,89 @@ interface PricingContext {
   incentivisationRules?: unknown[];
 }
 
+interface YieldCurveRow {
+  tenor: string;
+  rate: number | string;
+  prev?: number | string | null;
+}
+
+interface LiquidityCurveRow {
+  currency: string;
+  curve_type?: DualLiquidityCurve['curveType'] | null;
+  last_update?: string | null;
+  updated_at?: string | null;
+  tenor: string;
+  wholesale_spread?: number | string | null;
+  wholesaleSpread?: number | string | null;
+  term_lp?: number | string | null;
+  termLP?: number | string | null;
+}
+
+interface RuleRow {
+  id: number;
+  business_unit?: string;
+  businessUnit?: string;
+  product?: string;
+  segment?: string;
+  tenor?: string;
+  base_method?: string;
+  baseMethod?: string;
+  base_reference?: string;
+  baseReference?: string;
+  spread_method?: string;
+  spreadMethod?: string;
+  liquidity_reference?: string;
+  liquidityReference?: string;
+  strategic_spread?: number | string;
+  strategicSpread?: number | string;
+  formula_spec?: GeneralRule['formulaSpec'];
+  formulaSpec?: GeneralRule['formulaSpec'];
+  version?: number;
+  effective_from?: string;
+  effectiveFrom?: string;
+  effective_to?: string;
+  effectiveTo?: string;
+  is_active?: boolean;
+  isActive?: boolean;
+}
+
+interface ClientRow {
+  id: string;
+  name: string;
+  type?: ClientEntity['type'];
+  client_type?: ClientEntity['type'];
+  segment?: string;
+  rating?: string;
+}
+
+interface ProductRow {
+  id: string;
+  name: string;
+  category?: ProductDefinition['category'];
+  default_amortization?: string;
+  defaultAmortization?: string;
+}
+
+interface BusinessUnitRow {
+  id: string;
+  name: string;
+  code?: string;
+}
+
+interface PricingRequestBody {
+  deal?: Record<string, unknown>;
+  deals?: Array<Record<string, unknown>>;
+  approvalMatrix?: Partial<{
+    autoApprovalThreshold: number;
+    l1Threshold: number;
+    l2Threshold: number;
+  }>;
+  shocks?: Partial<{
+    interestRate: number;
+    liquiditySpread: number;
+  }>;
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -123,21 +206,26 @@ const corsHeaders = {
 };
 
 /** Map DB yield_curves rows → YieldCurvePoint[] */
-function mapYieldCurveRows(rows: any[]): YieldCurvePoint[] {
+function mapYieldCurveRows(rows: YieldCurveRow[]): YieldCurvePoint[] {
   if (!rows?.length) return [];
-  return rows.map((r: any) => ({
-    tenor: r.tenor as string,
+  return rows.map((r) => ({
+    tenor: r.tenor,
     rate: Number(r.rate),
     ...(r.prev != null ? { prev: Number(r.prev) } : {}),
   }));
 }
 
 /** Map DB liquidity_curves rows → DualLiquidityCurve[] */
-function mapLiquidityCurveRows(rows: any[]): DualLiquidityCurve[] {
+function mapLiquidityCurveRows(rows: LiquidityCurveRow[]): DualLiquidityCurve[] {
   if (!rows?.length) return [];
 
   // Group rows by currency + curveType
-  const grouped = new Map<string, { currency: string; curveType: string; lastUpdate: string; points: LiquidityCurvePoint[] }>();
+  const grouped = new Map<string, {
+    currency: string;
+    curveType: NonNullable<DualLiquidityCurve['curveType']>;
+    lastUpdate: string;
+    points: LiquidityCurvePoint[];
+  }>();
 
   for (const r of rows) {
     const key = `${r.currency}_${r.curve_type || 'unsecured'}`;
@@ -150,7 +238,7 @@ function mapLiquidityCurveRows(rows: any[]): DualLiquidityCurve[] {
       });
     }
     grouped.get(key)!.points.push({
-      tenor: r.tenor as string,
+      tenor: r.tenor,
       wholesaleSpread: Number(r.wholesale_spread ?? r.wholesaleSpread ?? 0),
       termLP: Number(r.term_lp ?? r.termLP ?? 0),
     });
@@ -160,9 +248,9 @@ function mapLiquidityCurveRows(rows: any[]): DualLiquidityCurve[] {
 }
 
 /** Map DB rules rows → GeneralRule[] */
-function mapRuleRows(rows: any[]): GeneralRule[] {
+function mapRuleRows(rows: RuleRow[]): GeneralRule[] {
   if (!rows?.length) return [];
-  return rows.map((r: any) => ({
+  return rows.map((r) => ({
     id: r.id,
     businessUnit: r.business_unit ?? r.businessUnit ?? 'All',
     product: r.product ?? 'Any',
@@ -182,9 +270,9 @@ function mapRuleRows(rows: any[]): GeneralRule[] {
 }
 
 /** Map DB clients rows → ClientEntity[] */
-function mapClientRows(rows: any[]): ClientEntity[] {
+function mapClientRows(rows: ClientRow[]): ClientEntity[] {
   if (!rows?.length) return [];
-  return rows.map((r: any) => ({
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
     type: r.type ?? r.client_type ?? 'Corporate',
@@ -194,9 +282,9 @@ function mapClientRows(rows: any[]): ClientEntity[] {
 }
 
 /** Map DB products rows → ProductDefinition[] */
-function mapProductRows(rows: any[]): ProductDefinition[] {
+function mapProductRows(rows: ProductRow[]): ProductDefinition[] {
   if (!rows?.length) return [];
-  return rows.map((r: any) => ({
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
     category: r.category ?? 'Asset',
@@ -205,9 +293,9 @@ function mapProductRows(rows: any[]): ProductDefinition[] {
 }
 
 /** Map DB business_units rows → BusinessUnit[] */
-function mapBusinessUnitRows(rows: any[]): BusinessUnit[] {
+function mapBusinessUnitRows(rows: BusinessUnitRow[]): BusinessUnit[] {
   if (!rows?.length) return [];
-  return rows.map((r: any) => ({
+  return rows.map((r) => ({
     id: r.id,
     name: r.name,
     code: r.code ?? '',
@@ -246,17 +334,19 @@ serve(async (req: Request) => {
       );
     }
 
-    const body = await req.json();
+    const body = await req.json() as PricingRequestBody;
     const url = new URL(req.url);
     const isBatch = url.pathname.endsWith('/batch');
 
     // Extract approvalMatrix and shocks from request body
-    const approvalMatrix = body.approvalMatrix ?? {
+    const approvalMatrix = {
       autoApprovalThreshold: 15,
       l1Threshold: 10,
       l2Threshold: 5,
     };
-    const shocks = body.shocks ?? { interestRate: 0, liquiditySpread: 0 };
+    Object.assign(approvalMatrix, body.approvalMatrix);
+    const shocks = { interestRate: 0, liquiditySpread: 0 };
+    Object.assign(shocks, body.shocks);
 
     // Load market data from Supabase
     const [
@@ -341,9 +431,10 @@ serve(async (req: Request) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown pricing error';
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }

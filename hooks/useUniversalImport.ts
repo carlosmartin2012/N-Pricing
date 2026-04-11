@@ -1,9 +1,12 @@
 import { useCallback } from 'react';
+import * as configApi from '../api/config';
+import * as dealsApi from '../api/deals';
+import * as marketDataApi from '../api/marketData';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useAudit } from './useAudit';
 import { GeneralRule, BehaviouralModel, YieldCurvePoint, Transaction } from '../types';
-import { supabaseService } from '../utils/supabaseService';
+import { ruleService } from '../utils/supabase/rules';
 import { generateId } from '../utils/generateId';
 
 type RawRow = Record<string, unknown>;
@@ -103,7 +106,7 @@ export const useUniversalImport = () => {
           });
           for (const [cur, points] of Object.entries(curves)) {
             try {
-              await supabaseService.saveCurveSnapshot(cur, new Date().toISOString().split('T')[0], points);
+              await marketDataApi.upsertYieldCurves(cur, new Date().toISOString().split('T')[0], points);
               summary.imported += points.length;
               logAudit({
                 action: 'IMPORT_YIELD_CURVES',
@@ -134,7 +137,7 @@ export const useUniversalImport = () => {
           }));
           for (let i = 0; i < rulesToSave.length; i++) {
             try {
-              await supabaseService.saveRule(rulesToSave[i] as GeneralRule);
+              await ruleService.saveRule(rulesToSave[i] as GeneralRule);
               summary.imported += 1;
             } catch (err) {
               recordFailure(i, err);
@@ -162,7 +165,7 @@ export const useUniversalImport = () => {
           }));
           for (let i = 0; i < modelsToSave.length; i++) {
             try {
-              await supabaseService.saveModel(modelsToSave[i] as BehaviouralModel);
+              await marketDataApi.upsertBehaviouralModel(modelsToSave[i] as BehaviouralModel);
               summary.imported += 1;
             } catch (err) {
               recordFailure(i, err);
@@ -187,7 +190,7 @@ export const useUniversalImport = () => {
           };
           try {
             setShocks(newShocks);
-            await supabaseService.saveShocks(newShocks);
+            await configApi.saveShocks(newShocks);
             summary.imported = 1;
             logAudit({
               action: 'IMPORT_SHOCKS',
@@ -234,7 +237,7 @@ export const useUniversalImport = () => {
           }));
           for (let i = 0; i < dealsToSave.length; i++) {
             try {
-              await supabaseService.upsertDeal(dealsToSave[i]);
+              await dealsApi.upsertDeal(dealsToSave[i]);
               summary.imported += 1;
             } catch (err) {
               recordFailure(i, err);

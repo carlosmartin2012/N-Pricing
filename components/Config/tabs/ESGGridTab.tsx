@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { saveApprovalTasks, saveMethodologyChangeRequests } from '../../../api/config';
 import { Drawer } from '../../ui/Drawer';
 import { Plus } from 'lucide-react';
 import { useAudit } from '../../../hooks/useAudit';
 import { useData } from '../../../contexts/DataContext';
-import { supabaseService } from '../../../utils/supabaseService';
 import type { GreeniumRateCard, PhysicalRateCard, TransitionRateCard } from '../../../types';
 import {
   buildApprovalTaskForMethodologyChange,
@@ -82,8 +82,8 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
       data.setMethodologyChangeRequests(nextRequests);
       data.setApprovalTasks(nextTasks);
       await Promise.all([
-        supabaseService.saveMethodologyChangeRequests(nextRequests),
-        supabaseService.saveApprovalTasks(nextTasks),
+        saveMethodologyChangeRequests(nextRequests),
+        saveApprovalTasks(nextTasks),
       ]);
 
       logAudit({

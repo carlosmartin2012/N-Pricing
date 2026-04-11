@@ -39,11 +39,11 @@ export function useOptimisticDealUpdate() {
 
         log.info('Optimistic update synced', { dealId: updatedDeal.id });
         return { success: true };
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Rollback
         log.warn('Optimistic update failed, rolling back', { dealId: updatedDeal.id, error: err });
         setDeals(snapshot);
-        return { success: false, error: err.message ?? 'Sync failed' };
+        return { success: false, error: err instanceof Error ? err.message : 'Sync failed' };
       }
     },
     [deals, setDeals],
@@ -60,10 +60,10 @@ export function useOptimisticDealUpdate() {
         await dealsApi.deleteDeal(dealId);
         log.info('Optimistic delete synced', { dealId });
         return { success: true };
-      } catch (err: any) {
+      } catch (err: unknown) {
         log.warn('Optimistic delete failed, rolling back', { dealId, error: err });
         setDeals(snapshot);
-        return { success: false, error: err.message ?? 'Delete failed' };
+        return { success: false, error: err instanceof Error ? err.message : 'Delete failed' };
       }
     },
     [deals, setDeals],

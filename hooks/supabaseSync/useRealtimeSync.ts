@@ -4,11 +4,19 @@ import type { DataContextType } from '../../contexts/DataContext';
 import { useToast } from '../../components/ui/Toast';
 import { createLogger } from '../../utils/logger';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
-import { supabaseService } from '../../utils/supabaseService';
+import { monitoringService } from '../../utils/supabase/monitoring';
 
 const log = createLogger('sync-realtime');
 
-function updateCollectionState<T extends { id: string | number }>(
+interface RealtimePayload {
+  table?: string;
+  eventType: string;
+  mapped?: unknown;
+  old?: { id?: string | number };
+  config_key?: string;
+}
+
+function updateCollectionState<T extends { id?: string | number }>(
   setter: Dispatch<SetStateAction<T[]>>,
   eventType: string,
   mappedRecord: T | undefined,
@@ -54,38 +62,43 @@ export function useRealtimeSync(data: DataContextType) {
   useEffect(() => {
     if (!isSupabaseConfigured) return;
 
-    let channel: ReturnType<typeof supabaseService.subscribeToAll> | null = null;
+    let channel: ReturnType<typeof monitoringService.subscribeToAll> | null = null;
 
     try {
-      channel = supabaseService.subscribeToAll((payload: any) => {
-        const { table, eventType, mapped: mappedRecord, old: oldRecord } = payload;
+      channel = monitoringService.subscribeToAll((payload) => {
+        const { table, eventType, mapped: mappedRecord, old: oldRecord, config_key } =
+          payload as RealtimePayload;
 
-        if (table === 'deals') updateCollectionState(setDeals, eventType, mappedRecord, oldRecord);
+        if (table === 'deals') updateCollectionState(setDeals, eventType, mappedRecord as DataContextType['deals'][number] | undefined, oldRecord);
         if (table === 'behavioural_models') {
-          updateCollectionState(setBehaviouralModels, eventType, mappedRecord, oldRecord);
+          updateCollectionState(
+            setBehaviouralModels,
+            eventType,
+            mappedRecord as DataContextType['behaviouralModels'][number] | undefined,
+            oldRecord,
+          );
         }
-        if (table === 'rules') updateCollectionState(setRules, eventType, mappedRecord, oldRecord);
-        if (table === 'clients') updateCollectionState(setClients, eventType, mappedRecord, oldRecord);
+        if (table === 'rules') updateCollectionState(setRules, eventType, mappedRecord as DataContextType['rules'][number] | undefined, oldRecord);
+        if (table === 'clients') updateCollectionState(setClients, eventType, mappedRecord as DataContextType['clients'][number] | undefined, oldRecord);
         if (table === 'business_units') {
-          updateCollectionState(setBusinessUnits, eventType, mappedRecord, oldRecord);
+          updateCollectionState(setBusinessUnits, eventType, mappedRecord as DataContextType['businessUnits'][number] | undefined, oldRecord);
         }
         if (table === 'products') {
-          updateCollectionState(setProducts, eventType, mappedRecord, oldRecord);
+          updateCollectionState(setProducts, eventType, mappedRecord as DataContextType['products'][number] | undefined, oldRecord);
         }
-        if (table === 'users') updateCollectionState(setUsers, eventType, mappedRecord, oldRecord);
+        if (table === 'users') updateCollectionState(setUsers, eventType, mappedRecord as DataContextType['users'][number] | undefined, oldRecord);
 
         if (table === 'system_config' && eventType !== 'DELETE' && mappedRecord) {
-          const configKey = (payload as { config_key?: string }).config_key;
-          if (configKey === 'shocks') setShocks(mappedRecord);
-          if (configKey === 'raroc_inputs') setRarocInputs(mappedRecord);
-          if (configKey === 'methodology_change_requests') {
-            setMethodologyChangeRequests(mappedRecord);
+          if (config_key === 'shocks') setShocks(mappedRecord as DataContextType['shocks']);
+          if (config_key === 'raroc_inputs') setRarocInputs(mappedRecord as DataContextType['rarocInputs']);
+          if (config_key === 'methodology_change_requests') {
+            setMethodologyChangeRequests(mappedRecord as DataContextType['methodologyChangeRequests']);
           }
-          if (configKey === 'methodology_versions') setMethodologyVersions(mappedRecord);
-          if (configKey === 'approval_tasks') setApprovalTasks(mappedRecord);
-          if (configKey === 'pricing_dossiers') setPricingDossiers(mappedRecord);
-          if (configKey === 'portfolio_snapshots') setPortfolioSnapshots(mappedRecord);
-          if (configKey === 'market_data_sources') setMarketDataSources(mappedRecord);
+          if (config_key === 'methodology_versions') setMethodologyVersions(mappedRecord as DataContextType['methodologyVersions']);
+          if (config_key === 'approval_tasks') setApprovalTasks(mappedRecord as DataContextType['approvalTasks']);
+          if (config_key === 'pricing_dossiers') setPricingDossiers(mappedRecord as DataContextType['pricingDossiers']);
+          if (config_key === 'portfolio_snapshots') setPortfolioSnapshots(mappedRecord as DataContextType['portfolioSnapshots']);
+          if (config_key === 'market_data_sources') setMarketDataSources(mappedRecord as DataContextType['marketDataSources']);
         }
       });
     } catch (error) {

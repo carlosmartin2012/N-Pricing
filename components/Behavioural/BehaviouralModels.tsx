@@ -1,13 +1,14 @@
 
 import React, { useMemo, useState } from 'react';
+import { createAuditEntry } from '../../api/audit';
+import { deleteBehaviouralModel, upsertBehaviouralModel } from '../../api/marketData';
 import { Panel } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { BehaviouralModel, ReplicationTranche, UserProfile } from '../../types';
 import { Search, Plus, TrendingDown, GitMerge, FileSpreadsheet, Upload } from 'lucide-react';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 import { useUI } from '../../contexts/UIContext';
-
-import { supabaseService } from '../../utils/supabaseService';
+import { createLogger } from '../../utils/logger';
 import BehaviouralModelCard from './BehaviouralModelCard';
 import BehaviouralModelEditor from './BehaviouralModelEditor';
 import {
@@ -18,6 +19,8 @@ import {
    normalizeBehaviouralModel,
    parseImportedBehaviouralModel,
 } from './behaviouralModelUtils';
+
+const log = createLogger('BehaviouralModels');
 
 interface Props {
    models: BehaviouralModel[];
@@ -59,12 +62,12 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
             const exists = models.find(m => m.id === editingModel.id);
             const finalModel = normalizeBehaviouralModel(editingModel, activeTab);
 
-            const savedRecord = await supabaseService.saveModel(finalModel);
+            const savedRecord = await upsertBehaviouralModel(finalModel);
 
             // Optimistic Update: Use the record returned from database if available
             setModels(prev => mergeBehaviouralModels(prev, [savedRecord || finalModel]));
 
-            await supabaseService.addAuditEntry({
+            await createAuditEntry({
                userEmail: user?.email || 'unknown',
                userName: user?.name || 'Unknown User',
                action: exists ? 'UPDATE_MODEL' : 'CREATE_MODEL',
@@ -75,7 +78,7 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
             alert(`Modelo "${finalModel.name}" guardado correctamente.`);
             setDrawerOpen(false);
          } catch (error) {
-            console.error('CRITICAL: Error saving model:', error);
+            log.error('Error saving model', {}, error instanceof Error ? error : undefined);
             alert(`Error al guardar el modelo: ${error instanceof Error ? error.message : 'Unknown error'}`);
          }
       }
@@ -91,10 +94,10 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
       if (file) {
          const data = await parseExcel(file);
          const newModels: BehaviouralModel[] = data.map(row => parseImportedBehaviouralModel(row, activeTab));
-         const savedModels = await Promise.all(newModels.map(model => supabaseService.saveModel(model)));
+         const savedModels = await Promise.all(newModels.map(model => upsertBehaviouralModel(model)));
          setModels(prev => mergeBehaviouralModels(prev, savedModels.filter(Boolean) as BehaviouralModel[]));
 
-         await supabaseService.addAuditEntry({
+         await createAuditEntry({
             userEmail: user?.email || 'unknown',
             userName: user?.name || 'Unknown User',
             action: 'IMPORT_MODELS',
@@ -112,9 +115,9 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
          setModels(prev => prev.filter(m => m.id !== id));
 
          try {
-            await supabaseService.deleteModel(id);
+            await deleteBehaviouralModel(id);
 
-            await supabaseService.addAuditEntry({
+            await createAuditEntry({
                userEmail: user?.email || 'unknown',
                userName: user?.name || 'Unknown User',
                action: 'DELETE_MODEL',
@@ -122,7 +125,7 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
                description: `Deleted behavioural model: ${modelToDelete?.name || id}`
             });
          } catch (error) {
-            console.error('Error deleting model:', error);
+            log.error('Error deleting model', { modelId: id }, error instanceof Error ? error : undefined);
             // Rollback if failed
             if (modelToDelete) setModels(prev => [...prev, modelToDelete]);
             alert('Failed to delete model. Please try again.');
@@ -131,7 +134,11 @@ const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
    }
 
    // --- Tranche Helpers for Caterpillar ---
-   const handleTrancheChange = (index: number, field: keyof ReplicationTranche, value: any) => {
+   const handleTrancheChange = (
+      index: number,
+      field: keyof ReplicationTranche,
+      value: ReplicationTranche[keyof ReplicationTranche],
+   ) => {
       if (editingModel?.replicationProfile) {
          const updatedProfile = [...editingModel.replicationProfile];
          updatedProfile[index] = { ...updatedProfile[index], [field]: value };

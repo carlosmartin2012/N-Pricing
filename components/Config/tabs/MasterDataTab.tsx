@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { deleteBusinessUnit, deleteClient, deleteProduct, upsertBusinessUnit, upsertClient, upsertProduct } from '../../../api/config';
 import { Drawer } from '../../ui/Drawer';
 import { Badge } from '../../ui/LayoutComponents';
 import { ClientEntity, ProductDefinition, BusinessUnit } from '../../../types';
 import { Plus, Edit, Trash2, Users, Briefcase, Building2 } from 'lucide-react';
 import { useAudit } from '../../../hooks/useAudit';
-import { supabaseService } from '../../../utils/supabaseService';
 import type { ConfigUser } from '../configTypes';
 import MasterDataEditor from './MasterDataEditor';
 import MasterDataSection from './MasterDataSection';
@@ -59,7 +59,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
          const nextClient = editorState.value as ClientEntity;
          const exists = clients.find(c => c.id === nextClient.id);
          setClients(prev => upsertEntityById(prev, nextClient));
-         await supabaseService.saveClient(nextClient);
+         await upsertClient(nextClient);
 
          logAudit({
             action: exists ? 'UPDATE_CLIENT' : 'CREATE_CLIENT',
@@ -73,7 +73,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
    const handleDeleteClient = async (id: string) => {
       const client = clients.find(c => c.id === id);
       if (setClients) setClients(prev => removeEntityById(prev, id));
-      await supabaseService.deleteClient(id);
+      await deleteClient(id);
 
       logAudit({
          action: 'DELETE_CLIENT',
@@ -101,7 +101,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
          const nextProduct = editorState.value as ProductDefinition;
          const exists = products.find(p => p.id === nextProduct.id);
          setProducts(prev => upsertEntityById(prev, nextProduct));
-         await supabaseService.saveProduct(nextProduct);
+         await upsertProduct(nextProduct);
 
          logAudit({
             action: exists ? 'UPDATE_PRODUCT' : 'CREATE_PRODUCT',
@@ -115,7 +115,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
    const handleDeleteProduct = async (id: string) => {
       const prod = products.find(p => p.id === id);
       if (setProducts) setProducts(prev => removeEntityById(prev, id));
-      await supabaseService.deleteProduct(id);
+      await deleteProduct(id);
 
       logAudit({
          action: 'DELETE_PRODUCT',
@@ -143,7 +143,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
          const nextBusinessUnit = editorState.value as BusinessUnit;
          const exists = businessUnits.find(b => b.id === nextBusinessUnit.id);
          setBusinessUnits(prev => upsertEntityById(prev, nextBusinessUnit));
-         await supabaseService.saveBusinessUnit(nextBusinessUnit);
+         await upsertBusinessUnit(nextBusinessUnit);
 
          logAudit({
             action: exists ? 'UPDATE_BUSINESS_UNIT' : 'CREATE_BUSINESS_UNIT',
@@ -157,7 +157,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
    const handleDeleteBU = async (id: string) => {
       const bu = businessUnits.find(b => b.id === id);
       if (setBusinessUnits) setBusinessUnits(prev => removeEntityById(prev, id));
-      await supabaseService.deleteBusinessUnit(id);
+      await deleteBusinessUnit(id);
 
       logAudit({
          action: 'DELETE_BUSINESS_UNIT',

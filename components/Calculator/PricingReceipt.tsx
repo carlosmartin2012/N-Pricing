@@ -1,4 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import * as auditApi from '../../api/audit';
+import * as configApi from '../../api/config';
+import * as dealsApi from '../../api/deals';
 import { Transaction, FTPResult, ApprovalMatrixConfig, type CreditRiskResult } from '../../types';
 import { calculatePricing, DEFAULT_PRICING_SHOCKS, PricingShocks } from '../../utils/pricingEngine';
 import { validateDeal, type ValidationError } from '../../utils/validation';
@@ -24,11 +27,11 @@ import { translations, Language } from '../../translations';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { usePricingContext } from '../../hooks/usePricingContext';
-import { supabaseService } from '../../utils/supabaseService';
 import { errorTracker } from '../../utils/errorTracking';
 import { exportPricingPDF } from '../../utils/pdfExport';
 import { findLatestPortfolioSnapshotForDeal } from '../../utils/aiGrounding';
 import { calculateFullCreditRisk } from '../../utils/pricing/creditRiskEngine';
+import { monitoringService } from '../../utils/supabase/monitoring';
 import {
   buildApprovalTaskForPricingDossier,
   buildPricingDossier,
@@ -38,7 +41,7 @@ import {
   upsertApprovalTask,
   upsertPricingDossier,
 } from '../../utils/governanceWorkflows';
-// storage eliminated: use supabaseService directly
+// Persistence flows through api/* modules and specialized services.
 
 interface Props {
   deal: Transaction;
@@ -55,7 +58,7 @@ const VALIDATION_FAILED_RESULT: FTPResult = {
   esgTransitionCharge: 0, esgPhysicalCharge: 0, esgGreeniumAdj: 0, esgDnshCapitalAdj: 0, esgPillar1Adj: 0,
   floorPrice: 0, technicalPrice: 0, targetPrice: 0,
   totalFTP: 0, finalClientRate: 0, raroc: 0, economicProfit: 0,
-  approvalLevel: 'Rejected', matchedMethodology: '' as any, matchReason: '',
+  approvalLevel: 'Rejected', matchedMethodology: '', matchReason: '',
   accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 },
 };
 
@@ -123,7 +126,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
     if (!deal.id || !currentUser) return;
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
-      supabaseService
+      monitoringService
         .savePricingResult(deal.id!, result, deal, currentUser.email)
         .then(() => {
           setSaveStatus('saved');
@@ -150,13 +153,13 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
       _clcChargeDetails: result._clcChargeDetails,
     };
     try {
-      const persistedDeal = await supabaseService.upsertDeal(newDeal);
+      const persistedDeal = await dealsApi.upsertDeal(newDeal);
       const resolvedDeal = persistedDeal || newDeal;
       data.setDeals((prev) => {
         const exists = prev.find((d) => d.id === resolvedDeal.id);
         return exists ? prev.map((d) => (d.id === resolvedDeal.id ? resolvedDeal : d)) : [...prev, resolvedDeal];
       });
-      await supabaseService.savePricingResult(resolvedDeal.id!, result, resolvedDeal, currentUser.email);
+      await monitoringService.savePricingResult(resolvedDeal.id!, result, resolvedDeal, currentUser.email);
 
       const existingDossier = data.pricingDossiers.find((dossier) => dossier.dealId === resolvedDeal.id);
       let dossier = mergePricingDossier(
@@ -207,11 +210,11 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
       data.setPricingDossiers(nextDossiers);
       data.setApprovalTasks(nextTasks);
       await Promise.all([
-        supabaseService.savePricingDossiers(nextDossiers),
-        supabaseService.saveApprovalTasks(nextTasks),
+        configApi.savePricingDossiers(nextDossiers),
+        configApi.saveApprovalTasks(nextTasks),
       ]);
 
-      await supabaseService.addAuditEntry({
+      await auditApi.createAuditEntry({
         userEmail: currentUser.email,
         userName: currentUser.name,
         action: 'DEAL_SAVED_FROM_CALCULATOR',
@@ -280,7 +283,7 @@ const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatri
     data.setPricingDossiers(nextDossiers);
     // Fire-and-forget persistence — failures are captured centrally and
     // surfaced via the error tracker instead of crashing the render path.
-    supabaseService.savePricingDossiers(nextDossiers).catch((error: unknown) => {
+    configApi.savePricingDossiers(nextDossiers).catch((error: unknown) => {
       errorTracker.captureException(
         error instanceof Error ? error : new Error(String(error)),
         {

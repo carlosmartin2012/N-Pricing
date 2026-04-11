@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { deleteUser, upsertUser } from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
 import type { UserProfile } from '../../types';
 import { useUI } from '../../contexts/UIContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
-import { supabaseService } from '../../utils/supabaseService';
 import { createLogger } from '../../utils/logger';
 import { UserCard } from './UserCard';
 import { UserEditorDrawer } from './UserEditorDrawer';
@@ -127,7 +127,7 @@ const UserManagement: React.FC<Props> = ({ users, setUsers }) => {
 
     if (isSupabaseConfigured) {
       try {
-        await supabaseService.upsertUser(userToSave);
+        await upsertUser(userToSave);
       } catch (saveError) {
         log.error('Failed to persist user', { userId: userToSave.id }, saveError instanceof Error ? saveError : undefined);
       }
@@ -146,7 +146,7 @@ const UserManagement: React.FC<Props> = ({ users, setUsers }) => {
 
       if (isSupabaseConfigured) {
         try {
-          await supabaseService.deleteUser(id);
+          await deleteUser(id);
         } catch (deleteError) {
           log.error('Failed to delete user', { userId: id }, deleteError instanceof Error ? deleteError : undefined);
         }

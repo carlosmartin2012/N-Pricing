@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { saveApprovalTasks, saveMethodologyChangeRequests } from '../../../api/config';
 import { Drawer } from '../../ui/Drawer';
 import { FtpRateCard } from '../../../types';
 import { Plus } from 'lucide-react';
@@ -15,7 +16,6 @@ import type { ConfigUser } from '../configTypes';
 import RateCardCard from './RateCardCard';
 import RateCardEditor from './RateCardEditor';
 import { createDefaultRateCardDraft, normalizeRateCardDraft } from './rateCardsUtils';
-import { supabaseService } from '../../../utils/supabaseService';
 
 interface Props {
   ftpRateCards: FtpRateCard[];
@@ -68,8 +68,8 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
       data.setMethodologyChangeRequests(nextRequests);
       data.setApprovalTasks(nextTasks);
       await Promise.all([
-        supabaseService.saveMethodologyChangeRequests(nextRequests),
-        supabaseService.saveApprovalTasks(nextTasks),
+        saveMethodologyChangeRequests(nextRequests),
+        saveApprovalTasks(nextTasks),
       ]);
 
       logAudit({
@@ -109,8 +109,8 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
     data.setMethodologyChangeRequests(nextRequests);
     data.setApprovalTasks(nextTasks);
     await Promise.all([
-      supabaseService.saveMethodologyChangeRequests(nextRequests),
-      supabaseService.saveApprovalTasks(nextTasks),
+      saveMethodologyChangeRequests(nextRequests),
+      saveApprovalTasks(nextTasks),
     ]);
 
     logAudit({

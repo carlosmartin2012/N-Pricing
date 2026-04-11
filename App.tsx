@@ -1,19 +1,16 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { saveRarocInputs } from './api/config';
 import { useEntity } from './contexts/EntityContext';
 import { Sparkles } from 'lucide-react';
 import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
 import { buildBottomNavItems, buildMainNavItems } from './appNavigation';
 import { buildAssistantMarketContext, buildMarketSummary } from './appSummaries';
-import { CalculatorWorkspace } from './components/Calculator/CalculatorWorkspace';
 import { Login } from './components/ui/Login';
 import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
-import { UniversalImportModal } from './components/ui/UniversalImportModal';
-import { UserConfigModal } from './components/ui/UserConfigModal';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { SkipNav } from './components/ui/SkipNav';
-import { WalkthroughOverlay } from './components/ui/WalkthroughOverlay';
 import { useAuth } from './contexts/AuthContext';
 import { useData } from './contexts/DataContext';
 import { useUI } from './contexts/UIContext';
@@ -22,8 +19,12 @@ import { useUniversalImport } from './hooks/useUniversalImport';
 import { useOfflineStatus } from './hooks/useOfflineStatus';
 import { useOfflineSync } from './hooks/useOfflineSync';
 import { usePresenceAwareness } from './hooks/usePresenceAwareness';
-import { supabaseService } from './utils/supabaseService';
 
+const CalculatorWorkspace = React.lazy(() =>
+  import('./components/Calculator/CalculatorWorkspace').then((module) => ({
+    default: module.CalculatorWorkspace,
+  }))
+);
 const MethodologyConfig = React.lazy(() => import('./components/Config/MethodologyConfig'));
 const DealBlotter = React.lazy(() => import('./components/Blotter/DealBlotter'));
 const YieldCurvePanel = React.lazy(() => import('./components/MarketData/YieldCurvePanel'));
@@ -38,6 +39,21 @@ const ReportingDashboard = React.lazy(() => import('./components/Reporting/Repor
 const RAROCCalculator = React.lazy(() => import('./components/RAROC/RAROCCalculator'));
 const ShocksDashboard = React.lazy(() => import('./components/Risk/ShocksDashboard'));
 const HealthDashboard = React.lazy(() => import('./components/Admin/HealthDashboard'));
+const UserConfigModal = React.lazy(() =>
+  import('./components/ui/UserConfigModal').then((module) => ({
+    default: module.UserConfigModal,
+  }))
+);
+const UniversalImportModal = React.lazy(() =>
+  import('./components/ui/UniversalImportModal').then((module) => ({
+    default: module.UniversalImportModal,
+  }))
+);
+const WalkthroughOverlay = React.lazy(() =>
+  import('./components/ui/WalkthroughOverlay').then((module) => ({
+    default: module.WalkthroughOverlay,
+  }))
+);
 
 const ViewLoader: React.FC = () => (
   <div className="flex h-full items-center justify-center rounded-[28px] bg-[var(--nfq-bg-surface)]">
@@ -254,7 +270,7 @@ const AppContent: React.FC = () => {
                         externalInputs={data.rarocInputs}
                         onUpdateExternal={(inputs) => {
                           data.setRarocInputs(inputs);
-                          supabaseService.saveRarocInputs(inputs).catch(console.error);
+                          saveRarocInputs(inputs).catch(console.error);
                         }}
                       />
                     </div>
@@ -384,23 +400,29 @@ const AppContent: React.FC = () => {
           />
         </Suspense>
 
-        <UserConfigModal
-          isOpen={ui.isConfigModalOpen}
-          onClose={() => ui.setIsConfigModalOpen(false)}
-          language={ui.language}
-          setLanguage={ui.setLanguage}
-          theme={ui.theme}
-          setTheme={ui.setTheme}
-          userEmail={currentUser?.email ?? ''}
-        />
+        <Suspense fallback={null}>
+          <UserConfigModal
+            isOpen={ui.isConfigModalOpen}
+            onClose={() => ui.setIsConfigModalOpen(false)}
+            language={ui.language}
+            setLanguage={ui.setLanguage}
+            theme={ui.theme}
+            setTheme={ui.setTheme}
+            userEmail={currentUser?.email ?? ''}
+          />
+        </Suspense>
 
-        <UniversalImportModal
-          isOpen={ui.isImportModalOpen}
-          onClose={() => ui.setIsImportModalOpen(false)}
-          onImport={handleUniversalImport}
-        />
+        <Suspense fallback={null}>
+          <UniversalImportModal
+            isOpen={ui.isImportModalOpen}
+            onClose={() => ui.setIsImportModalOpen(false)}
+            onImport={handleUniversalImport}
+          />
+        </Suspense>
 
-        <WalkthroughOverlay language={ui.language} />
+        <Suspense fallback={null}>
+          <WalkthroughOverlay language={ui.language} />
+        </Suspense>
       </div>
     </div>
   );

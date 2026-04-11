@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import * as auditApi from '../../api/audit';
+import * as configApi from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
 import type { Transaction } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { createLogger } from '../../utils/logger';
 import { appendAITraceToPricingDossier, buildAIResponseTrace, resolveChatGrounding } from '../../utils/aiGrounding';
-import { supabaseService } from '../../utils/supabaseService';
 import { ChatComposer } from './ChatComposer';
 import { ChatHistoryPanel } from './ChatHistoryPanel';
 import { ChatMessageList } from './ChatMessageList';
@@ -210,8 +211,8 @@ const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
           );
 
           data.setPricingDossiers(nextDossiers);
-          await supabaseService.savePricingDossiers(nextDossiers);
-          await supabaseService.addAuditEntry({
+          await configApi.savePricingDossiers(nextDossiers);
+          await auditApi.createAuditEntry({
             userEmail: currentUser.email,
             userName: currentUser.name,
             action: 'GENERATE_AI_TRACE',

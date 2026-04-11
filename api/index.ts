@@ -16,6 +16,7 @@ export * as deals from './deals';
 export * as marketData from './marketData';
 export * as config from './config';
 export * as audit from './audit';
+export * as notifications from './notifications';
 export * as entities from './entities';
 export * as reportSchedules from './reportSchedules';
 

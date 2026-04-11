@@ -1,14 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { logAudit } from '../../api/audit';
 import type { ApprovalMatrixConfig, Transaction, UserProfile } from '../../types';
 import { DEFAULT_PRICING_SHOCKS, calculatePricing, type PricingShocks } from '../../utils/pricingEngine';
-import { supabaseService } from '../../utils/supabaseService';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 import { usePricingContext } from '../../hooks/usePricingContext';
 import type { Language } from '../../translations';
+import { createLogger } from '../../utils/logger';
 import { ShockControlPanel } from './ShockControlPanel';
 import { ShockImpactPanel } from './ShockImpactPanel';
 import { parseImportedShocks } from './shockUtils';
 import { MacroScenarioPicker } from './MacroScenarioPicker';
+
+const log = createLogger('ShocksDashboard');
 
 interface Props {
   deal: Transaction;
@@ -38,7 +41,7 @@ const ShocksDashboard: React.FC<Props> = ({
       }
 
       auditTimerRef.current = setTimeout(() => {
-        supabaseService.addAuditEntry({
+        void logAudit({
           userEmail: user?.email || 'unknown',
           userName: user?.name || 'Unknown User',
           action: 'APPLY_SHOCK',
@@ -130,7 +133,7 @@ const ShocksDashboard: React.FC<Props> = ({
           );
         }
       } catch (error) {
-        console.error('Error importing shocks:', error);
+        log.error('Error importing shocks', {}, error instanceof Error ? error : undefined);
         alert('Error al importar shocks. Verifique el formato del archivo.');
       } finally {
         event.target.value = '';

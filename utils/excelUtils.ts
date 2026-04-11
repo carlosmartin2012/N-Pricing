@@ -1,3 +1,10 @@
+import type { FTPResult, Transaction } from '../types';
+
+type ExcelCellValue = string | number | boolean | null | undefined;
+type ExcelRow = Record<string, ExcelCellValue>;
+type ParsedExcelRow = Record<string, unknown>;
+type ExcelTemplateData = ExcelRow[] | Record<string, ExcelRow[]>;
+
 export const EXCEL_TEMPLATES = {
     YIELD_CURVE: [
         { Currency: 'USD', Tenor: '1D', Rate: 0.05, Prev: 0.048 },
@@ -36,9 +43,13 @@ export const REQUIRED_HEADERS = {
     DEALS: ['Amount', 'Currency', 'Product']
 };
 
-export const downloadTemplate = async (templateKey: keyof typeof EXCEL_TEMPLATES | string, fileName: string, liveData?: any) => {
+export const downloadTemplate = async (
+    templateKey: keyof typeof EXCEL_TEMPLATES | string,
+    fileName: string,
+    liveData?: ExcelTemplateData,
+) => {
     const XLSX = await import('xlsx');
-    const templateData = liveData || (EXCEL_TEMPLATES as any)[templateKey];
+    const templateData = liveData || EXCEL_TEMPLATES[templateKey as keyof typeof EXCEL_TEMPLATES];
     const wb = XLSX.utils.book_new();
 
     if (!templateData) {
@@ -74,7 +85,7 @@ export const downloadTemplate = async (templateKey: keyof typeof EXCEL_TEMPLATES
     if (!Array.isArray(templateData)) {
         Object.entries(templateData).forEach(([sheetName, data]) => {
             const ws = XLSX.utils.aoa_to_sheet(branding);
-            XLSX.utils.sheet_add_json(ws, data as any[], { origin: "A4" });
+            XLSX.utils.sheet_add_json(ws, data, { origin: "A4" });
             ws['!cols'] = [{ wch: 25 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 40 }];
             XLSX.utils.book_append_sheet(wb, ws, sheetName);
         });
@@ -91,12 +102,12 @@ export const downloadTemplate = async (templateKey: keyof typeof EXCEL_TEMPLATES
 /**
  * Export deals to a formatted Excel file with FTP results.
  */
-export const exportDealsToExcel = async (deals: any[], results?: Map<string, any>) => {
+export const exportDealsToExcel = async (deals: Transaction[], results?: Map<string, FTPResult>) => {
     const XLSX = await import('xlsx');
     const wb = XLSX.utils.book_new();
 
     const rows = deals.map(d => {
-        const r = results?.get(d.id);
+        const r = d.id ? results?.get(d.id) : undefined;
         return {
             'Deal ID': d.id,
             'Client': d.clientId,
@@ -135,7 +146,7 @@ export const exportDealsToExcel = async (deals: any[], results?: Map<string, any
     XLSX.writeFile(wb, `N-Pricing_Portfolio_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
-export const parseExcel = async (file: File): Promise<any[]> => {
+export const parseExcel = async (file: File): Promise<ParsedExcelRow[]> => {
     const XLSX = await import('xlsx');
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -143,7 +154,7 @@ export const parseExcel = async (file: File): Promise<any[]> => {
             const data = e.target?.result;
             const workbook = XLSX.read(data, { type: 'binary' });
 
-            let allData: any[] = [];
+            let allData: ParsedExcelRow[] = [];
 
             workbook.SheetNames.forEach(sheetName => {
                 const worksheet = workbook.Sheets[sheetName];
@@ -161,14 +172,14 @@ export const parseExcel = async (file: File): Promise<any[]> => {
                 }
 
                 // If branded, headers are in row 4 (offset 3). Otherwise row 1 (offset 0).
-                const json = XLSX.utils.sheet_to_json(worksheet, {
+                const json = XLSX.utils.sheet_to_json<ParsedExcelRow>(worksheet, {
                     range: isBranded ? 3 : 0,
                     defval: null // Ensure missing cells don't shift data
                 });
 
                 if (json.length > 0) {
                     // Tag data with sheetName to help disambiguate if needed
-                    const taggedData = json.map((item: any) => ({ ...item, _sheet: sheetName }));
+                    const taggedData = json.map((item) => ({ ...item, _sheet: sheetName }));
                     allData = [...allData, ...taggedData];
                 }
             });

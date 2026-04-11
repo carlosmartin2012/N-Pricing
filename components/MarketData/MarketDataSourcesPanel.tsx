@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createAuditEntry } from '../../api/audit';
 import { Activity, DatabaseZap, Save, SatelliteDish, Sparkles } from 'lucide-react';
 import type { MarketDataSource, UserProfile } from '../../types';
 import { Badge, Button, Panel, SelectInput, TextInput } from '../ui/LayoutComponents';
 import { useToast } from '../ui/Toast';
-import { supabaseService } from '../../utils/supabaseService';
+import { marketDataIngestionService } from '../../utils/supabase/marketDataIngestionService';
 import {
   buildMarketDataSourceDraft,
   buildMarketDataSourceFromDraft,
@@ -61,11 +62,11 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
 
   const handleSave = async () => {
     const source = buildMarketDataSourceFromDraft(draft, currentCurrency, selectedSource);
-    const nextSources = await supabaseService.registerMarketDataSource(source);
+    const nextSources = await marketDataIngestionService.registerMarketDataSource(source);
     onSourcesChange(nextSources);
     onSelectedSourceChange(source.id);
 
-    await supabaseService.addAuditEntry({
+    await createAuditEntry({
       userEmail: user?.email || 'system',
       userName: user?.name || 'System',
       action: selectedSource ? 'UPDATE_MARKET_DATA_SOURCE' : 'REGISTER_MARKET_DATA_SOURCE',

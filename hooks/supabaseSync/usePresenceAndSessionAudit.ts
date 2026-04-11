@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { UserProfile } from '../../types';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { sendAuditEntryKeepalive } from '../../utils/supabase/auditTransport';
-import { supabaseService } from '../../utils/supabaseService';
+import { masterDataService } from '../../utils/supabase/masterData';
 
 interface Options {
   currentUser: UserProfile | null;
@@ -14,7 +14,7 @@ export function usePresenceAndSessionAudit({ currentUser, isAuthenticated }: Opt
     if (!isSupabaseConfigured) return;
 
     if (isAuthenticated && currentUser) {
-      const presenceChannel = supabaseService.trackPresence(currentUser.id, {
+      const presenceChannel = masterDataService.trackPresence(currentUser.id, {
         name: currentUser.name,
         email: currentUser.email,
         role: currentUser.role,

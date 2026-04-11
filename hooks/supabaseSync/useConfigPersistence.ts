@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
+import * as configApi from '../../api/config';
 import type { DataContextType } from '../../contexts/DataContext';
 import { localCache } from '../../utils/localCache';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
-import { supabaseService } from '../../utils/supabaseService';
+import { saveSystemConfigValue } from '../../utils/supabase/systemConfig';
 
 function useDebouncedRemotePersistence<T>({
   value,
@@ -38,15 +39,16 @@ function useDebouncedRemotePersistence<T>({
 
 export function useConfigPersistence(data: DataContextType) {
   const saveTransitionGrid = useCallback(
-    (nextValue: DataContextType['transitionGrid']) => supabaseService.saveEsgGrid('transition', nextValue),
+    (nextValue: DataContextType['transitionGrid']) => configApi.saveEsgGrid('transition', nextValue),
     []
   );
   const savePhysicalGrid = useCallback(
-    (nextValue: DataContextType['physicalGrid']) => supabaseService.saveEsgGrid('physical', nextValue),
+    (nextValue: DataContextType['physicalGrid']) => configApi.saveEsgGrid('physical', nextValue),
     []
   );
   const saveGreeniumGrid = useCallback(
-    (nextValue: DataContextType['greeniumGrid']) => supabaseService.saveEsgGrid('greenium', nextValue),
+    (nextValue: DataContextType['greeniumGrid']) =>
+      saveSystemConfigValue('greenium_grid', nextValue, 'saveEsgGrid:greenium'),
     []
   );
 
@@ -69,7 +71,7 @@ export function useConfigPersistence(data: DataContextType) {
   useDebouncedRemotePersistence({
     value: data.ftpRateCards,
     isLoading: data.isLoading,
-    save: supabaseService.saveRateCards,
+    save: configApi.saveRateCards,
   });
 
   useDebouncedRemotePersistence({
@@ -93,48 +95,48 @@ export function useConfigPersistence(data: DataContextType) {
   useDebouncedRemotePersistence({
     value: data.approvalMatrix,
     isLoading: data.isLoading,
-    save: supabaseService.saveApprovalMatrix,
+    save: configApi.saveApprovalMatrix,
   });
 
   useDebouncedRemotePersistence({
     value: data.shocks,
     isLoading: data.isLoading,
-    save: supabaseService.saveShocks,
+    save: configApi.saveShocks,
   });
 
   useDebouncedRemotePersistence({
     value: data.methodologyChangeRequests,
     isLoading: data.isLoading,
-    save: supabaseService.saveMethodologyChangeRequests,
+    save: configApi.saveMethodologyChangeRequests,
   });
 
   useDebouncedRemotePersistence({
     value: data.methodologyVersions,
     isLoading: data.isLoading,
-    save: supabaseService.saveMethodologyVersions,
+    save: configApi.saveMethodologyVersions,
   });
 
   useDebouncedRemotePersistence({
     value: data.approvalTasks,
     isLoading: data.isLoading,
-    save: supabaseService.saveApprovalTasks,
+    save: configApi.saveApprovalTasks,
   });
 
   useDebouncedRemotePersistence({
     value: data.pricingDossiers,
     isLoading: data.isLoading,
-    save: supabaseService.savePricingDossiers,
+    save: configApi.savePricingDossiers,
   });
 
   useDebouncedRemotePersistence({
     value: data.portfolioSnapshots,
     isLoading: data.isLoading,
-    save: supabaseService.savePortfolioSnapshots,
+    save: configApi.savePortfolioSnapshots,
   });
 
   useDebouncedRemotePersistence({
     value: data.marketDataSources,
     isLoading: data.isLoading,
-    save: supabaseService.saveMarketDataSources,
+    save: configApi.saveMarketDataSources,
   });
 }

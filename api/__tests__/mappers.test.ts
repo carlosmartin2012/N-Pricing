@@ -42,6 +42,7 @@ import {
   mapReportScheduleToDB,
   mapRuleFromDB,
   mapRuleToDB,
+  mapRuleVersionFromDB,
   mapYieldCurveSnapshotFromDB,
 } from '../mappers';
 
@@ -156,6 +157,19 @@ describe('api/mappers', () => {
     });
   });
 
+  it('fills audit defaults when DB rows are partial', () => {
+    const mapped = mapAuditFromDB({});
+
+    expect(mapped).toMatchObject({
+      userEmail: 'unknown@system.com',
+      userName: 'System User',
+      action: 'UNKNOWN_ACTION',
+      module: 'SYSTEM',
+      description: 'No description provided',
+      details: {},
+    });
+  });
+
   it('passes through master data records without mutation', () => {
     expect(mapClientFromDB(MOCK_CLIENTS[0])).toEqual(MOCK_CLIENTS[0]);
     expect(mapBUFromDB(MOCK_BUSINESS_UNITS[0])).toEqual(MOCK_BUSINESS_UNITS[0]);
@@ -169,6 +183,7 @@ describe('api/mappers', () => {
     expect(
       mapGroupFromDB({
         ...mapGroupToDB(group),
+        id: group.id,
         created_at: group.createdAt,
       }),
     ).toEqual(group);
@@ -176,6 +191,7 @@ describe('api/mappers', () => {
     expect(
       mapEntityFromDB({
         ...mapEntityToDB(entity),
+        id: entity.id,
         created_at: entity.createdAt,
       }),
     ).toEqual(entity);
@@ -199,6 +215,27 @@ describe('api/mappers', () => {
     });
   });
 
+  it('applies entity defaults for optional DB columns', () => {
+    const mapped = mapEntityFromDB({
+      ...mapEntityToDB(MOCK_ENTITIES[0] as Entity),
+      id: MOCK_ENTITIES[0].id,
+      created_at: MOCK_ENTITIES[0].createdAt,
+      legal_name: undefined,
+      timezone: undefined,
+      approval_matrix: undefined,
+      sdr_config: undefined,
+      lr_config: undefined,
+      is_active: undefined,
+    });
+
+    expect(mapped.legalName).toBe('');
+    expect(mapped.timezone).toBe('Europe/Madrid');
+    expect(mapped.approvalMatrix).toEqual({});
+    expect(mapped.sdrConfig).toEqual({});
+    expect(mapped.lrConfig).toEqual({});
+    expect(mapped.isActive).toBe(true);
+  });
+
   it('round-trips report schedules', () => {
     const schedule: ReportSchedule = {
       id: 'rs-1',
@@ -218,6 +255,7 @@ describe('api/mappers', () => {
 
     const mapped = mapReportScheduleFromDB({
       ...mapReportScheduleToDB(schedule),
+      id: schedule.id,
       last_run_at: schedule.lastRunAt,
       next_run_at: schedule.nextRunAt,
       created_at: schedule.createdAt,
@@ -297,5 +335,42 @@ describe('api/mappers', () => {
   it('returns rate cards only for array payloads', () => {
     expect(mapRateCardsFromDB(MOCK_FTP_RATE_CARDS)).toEqual(MOCK_FTP_RATE_CARDS);
     expect(mapRateCardsFromDB({ id: 'invalid' })).toEqual([]);
+  });
+
+  it('maps rule versions from snake_case rows', () => {
+    const rule = MOCK_RULES[0];
+    const mapped = mapRuleVersionFromDB({
+      ...mapRuleToDB(rule),
+      id: 101,
+      rule_id: rule.id,
+      version: 4,
+      formula_spec: { baseRateKey: 'DTM', lpFormula: 'LP_DTM' },
+      effective_from: '2026-04-11',
+      effective_to: '2026-06-30',
+      changed_by: 'demo@nfq.es',
+      change_reason: 'Refresh curve methodology',
+      created_at: '2026-04-11T09:00:00.000Z',
+    });
+
+    expect(mapped).toEqual({
+      id: 101,
+      ruleId: rule.id,
+      version: 4,
+      businessUnit: rule.businessUnit,
+      product: rule.product,
+      segment: rule.segment,
+      tenor: rule.tenor,
+      baseMethod: rule.baseMethod,
+      baseReference: rule.baseReference,
+      spreadMethod: rule.spreadMethod,
+      liquidityReference: rule.liquidityReference,
+      strategicSpread: rule.strategicSpread,
+      formulaSpec: { baseRateKey: 'DTM', lpFormula: 'LP_DTM' },
+      effectiveFrom: '2026-04-11',
+      effectiveTo: '2026-06-30',
+      changedBy: 'demo@nfq.es',
+      changeReason: 'Refresh curve methodology',
+      createdAt: '2026-04-11T09:00:00.000Z',
+    });
   });
 });

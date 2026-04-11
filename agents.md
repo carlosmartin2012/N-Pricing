@@ -95,7 +95,7 @@
 1. Añadir campo en `Transaction` interface (`types.ts`)
 2. Actualizar `INITIAL_DEAL` en seed data (`utils/seedData.ts`)
 3. Añadir columna en `deals` table (`schema_v2.sql`)
-4. Actualizar mapeo en `api/mappers.ts` (snake_case↔camelCase) y `utils/supabase/deals.ts`
+4. Actualizar mapeo en `api/mappers.ts` (snake_case↔camelCase) y el flujo CRUD en `api/deals.ts`
 5. Añadir input en `DealInputPanel.tsx` o `DealConfigurationPanel.tsx` si es editable
 6. Si afecta pricing: integrar en `pricingEngine.ts` (o `utils/pricing/`) + añadir test
 7. Actualizar `PricingReceipt.tsx` si debe mostrarse en el resultado

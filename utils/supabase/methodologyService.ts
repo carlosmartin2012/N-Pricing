@@ -1,20 +1,20 @@
 import type { MethodologyChangeRequest, MethodologyVersion } from '../../types';
-import { configService } from './config';
+import * as configApi from '../../api/config';
 
 export const methodologyService = {
   async fetchMethodologyChangeRequests(): Promise<MethodologyChangeRequest[]> {
-    return configService.fetchMethodologyChangeRequests();
+    return configApi.fetchMethodologyChangeRequests();
   },
 
   async saveMethodologyChangeRequests(requests: MethodologyChangeRequest[]): Promise<void> {
-    await configService.saveMethodologyChangeRequests(requests);
+    await configApi.saveMethodologyChangeRequests(requests);
   },
 
   async fetchMethodologyVersions(): Promise<MethodologyVersion[]> {
-    return configService.fetchMethodologyVersions();
+    return configApi.fetchMethodologyVersions();
   },
 
   async saveMethodologyVersions(versions: MethodologyVersion[]): Promise<void> {
-    await configService.saveMethodologyVersions(versions);
+    await configApi.saveMethodologyVersions(versions);
   },
 };

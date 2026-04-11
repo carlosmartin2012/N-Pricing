@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabaseService } from '../utils/supabaseService';
+import * as notificationsApi from '../api/notifications';
 import { useAuth } from '../contexts/AuthContext';
 import type { Notification } from '../types';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('useNotifications');
 
 export function useNotifications() {
   const { currentUser } = useAuth();
@@ -12,17 +15,17 @@ export function useNotifications() {
   useEffect(() => {
     if (!currentUser?.email) return;
 
-    supabaseService.fetchNotifications(currentUser.email)
+    notificationsApi.listNotifications(currentUser.email)
       .then(setNotifications)
-      .catch((err) => console.warn('[useNotifications] fetch failed:', err));
+      .catch((err) => log.warn('fetch failed', { error: String(err) }));
 
-    supabaseService.getUnreadCount(currentUser.email)
+    notificationsApi.getUnreadNotificationCount(currentUser.email)
       .then(setUnreadCount)
-      .catch((err) => console.warn('[useNotifications] unread count failed:', err));
+      .catch((err) => log.warn('unread count failed', { error: String(err) }));
   }, [currentUser?.email]);
 
   const markRead = useCallback(async (id: number) => {
-    await supabaseService.markNotificationRead(id);
+    await notificationsApi.markNotificationRead(id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
   }, []);
@@ -30,11 +33,7 @@ export function useNotifications() {
   const markAllRead = useCallback(async () => {
     if (!currentUser?.email) return;
     try {
-      await fetch('/api/config/notifications/read-all', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentUser.email }),
-      });
+      await notificationsApi.markAllNotificationsRead(currentUser.email);
     } catch {
       // Fallback: nothing to do, UI already reflects the change optimistically
     }
