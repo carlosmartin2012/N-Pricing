@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, Page } from '@playwright/test';
 
 /**
  * Capture brochure-quality screenshots of the new Phase 1 + Phase 2

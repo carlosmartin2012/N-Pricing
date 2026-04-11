@@ -83,7 +83,7 @@ export const marketDataService = {
       const { MOCK_CLIENTS, MOCK_PRODUCT_DEFS, MOCK_BUSINESS_UNITS, MOCK_USERS,
               MOCK_BEHAVIOURAL_MODELS, MOCK_DEALS, MOCK_YIELD_CURVE } =
         await import('../../constants');
-      const { mapDealToDB, mapRuleToDB } = await import('./mappers');
+      const { mapDealToDB } = await import('./mappers');
       const { apiPost: post } = await import('../apiFetch');
 
       const errors: string[] = [];

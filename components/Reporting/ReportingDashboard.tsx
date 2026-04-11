@@ -101,6 +101,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products
       contextData.ftpRateCards,
       contextData.liquidityCurves,
       contextData.physicalGrid,
+      contextData.greeniumGrid,
       contextData.rules,
       contextData.transitionGrid,
       contextData.yieldCurves,

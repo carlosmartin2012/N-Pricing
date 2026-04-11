@@ -242,10 +242,9 @@ describe('Risk Classification', () => {
   });
 
   it('uses "new" as dealId when id is undefined', () => {
-    const dealWithoutId = makeDeal();
-    // Force id to be undefined
-    const { id: _id, ...rest } = dealWithoutId;
-    const result = classifyDealRisk(rest as Transaction);
+    const dealWithoutId: Partial<Transaction> = { ...makeDeal() };
+    delete dealWithoutId.id;
+    const result = classifyDealRisk(dealWithoutId as Transaction);
     expect(result.dealId).toBe('new');
   });
 

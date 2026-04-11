@@ -64,6 +64,16 @@ test.describe('Bottom Navigation Items', () => {
     { testId: 'nav-MANUAL', label: 'User Manual' },
   ];
 
+  // The utility items now live inside a collapsible "More" group in the
+  // sidebar — expand it before each assertion.
+  test.beforeEach(async ({ page }) => {
+    const moreToggle = page.getByTestId('sidebar-more-toggle');
+    await expect(moreToggle).toBeVisible();
+    if ((await moreToggle.getAttribute('aria-expanded')) !== 'true') {
+      await moreToggle.click();
+    }
+  });
+
   for (const navItem of bottomNavItems) {
     test(`bottom nav item "${navItem.label}" is visible`, async ({ page }) => {
       const button = page.getByTestId(navItem.testId);
@@ -111,6 +121,8 @@ test.describe('View Switching', () => {
   });
 
   test('navigating to User Management loads admin view', async ({ page }) => {
+    // Utility items are behind the "More" group in the sidebar
+    await page.getByTestId('sidebar-more-toggle').click();
     await page.getByTestId('nav-USER_MGMT').click();
 
     const header = page.getByTestId('header');
@@ -118,6 +130,7 @@ test.describe('View Switching', () => {
   });
 
   test('navigating to System Audit loads audit log', async ({ page }) => {
+    await page.getByTestId('sidebar-more-toggle').click();
     await page.getByTestId('nav-AUDIT_LOG').click();
 
     const header = page.getByTestId('header');

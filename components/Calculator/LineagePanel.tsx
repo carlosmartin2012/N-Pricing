@@ -172,8 +172,6 @@ const PARAMETER_NAMES: Record<string, string> = {
 
 const PARAMETER_IDS = Object.keys(PARAMETER_NAMES);
 
-const nowISO = () => new Date().toISOString();
-
 function formatDate(d: string | null): string {
   if (!d) return '—';
   // Only show YYYY-MM-DD for compactness

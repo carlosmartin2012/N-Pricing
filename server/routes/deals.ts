@@ -2,8 +2,90 @@ import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { query, queryOne, execute } from '../db';
 import { safeError } from '../middleware/errorHandler';
+import {
+  any,
+  array,
+  number,
+  object,
+  optional,
+  string,
+  stringEnum,
+  validateBody,
+} from '../middleware/validate';
 
 const router = Router();
+
+// ─── Validation schemas ─────────────────────────────────────────────────────
+
+// A deal has ~35 columns, most of which are passed through verbatim. We
+// validate the handful of fields that gate inserts (identity, money, status)
+// and leave the rest as optional passthrough to keep the schema aligned with
+// the richer client-side type.
+const DealUpsertSchema = object({
+  id: optional(string({ maxLength: 128 })),
+  status: string({ maxLength: 64 }),
+  client_id: optional(string({ maxLength: 128 })),
+  client_type: optional(string({ maxLength: 64 })),
+  business_unit: optional(string({ maxLength: 128 })),
+  funding_business_unit: optional(string({ maxLength: 128 })),
+  business_line: optional(string({ maxLength: 128 })),
+  product_type: optional(string({ maxLength: 64 })),
+  currency: optional(string({ minLength: 3, maxLength: 3 })),
+  amount: number({ min: 0, max: 1e15 }),
+  start_date: optional(string({ maxLength: 32 })),
+  duration_months: optional(number({ min: 0, max: 1200, integer: true })),
+  amortization: optional(string({ maxLength: 64 })),
+  repricing_freq: optional(string({ maxLength: 64 })),
+  margin_target: optional(number({ min: -100, max: 100 })),
+  behavioural_model_id: optional(string({ maxLength: 128 })),
+  risk_weight: optional(number({ min: 0, max: 1500 })),
+  capital_ratio: optional(number({ min: 0, max: 100 })),
+  target_roe: optional(number({ min: -100, max: 100 })),
+  operational_cost_bps: optional(number({ min: 0, max: 10_000 })),
+  lcr_outflow_pct: optional(number({ min: 0, max: 100 })),
+  category: optional(string({ maxLength: 32 })),
+  drawn_amount: optional(number({ min: 0, max: 1e15 })),
+  undrawn_amount: optional(number({ min: 0, max: 1e15 })),
+  is_committed: optional(any()),
+  lcr_classification: optional(string({ maxLength: 64 })),
+  deposit_type: optional(string({ maxLength: 64 })),
+  behavioral_maturity_override: optional(any()),
+  transition_risk: optional(string({ maxLength: 32 })),
+  physical_risk: optional(string({ maxLength: 32 })),
+  liquidity_spread: optional(number({ min: -100, max: 100 })),
+  liquidity_premium_details: optional(any()),
+  clc_charge_details: optional(any()),
+  entity_id: optional(string({ maxLength: 128 })),
+  version: optional(number({ min: 0, max: 1_000_000, integer: true })),
+});
+
+// Batch upsert uses a slimmer payload — enforce the shape and a hard cap of
+// 1000 deals per request to prevent memory/DB exhaustion.
+const BatchDealSchema = object({
+  id: optional(string({ maxLength: 128 })),
+  status: string({ maxLength: 64 }),
+  client_id: optional(string({ maxLength: 128 })),
+  product_type: optional(string({ maxLength: 64 })),
+  currency: optional(string({ minLength: 3, maxLength: 3 })),
+  amount: number({ min: 0, max: 1e15 }),
+  entity_id: optional(string({ maxLength: 128 })),
+});
+const BatchDealArraySchema = array(BatchDealSchema, { maxLength: 1000 });
+
+// Transition payload: the server derives the rest from `newStatus`.
+const ALLOWED_STATUSES = [
+  'Draft',
+  'Pending_Approval',
+  'Approved',
+  'Rejected',
+  'Booked',
+  'Cancelled',
+] as const;
+const TransitionSchema = object({
+  newStatus: stringEnum(ALLOWED_STATUSES),
+  userEmail: optional(string({ maxLength: 256 })),
+  pricingSnapshot: optional(any()),
+});
 
 const nowIso = () => new Date().toISOString();
 
@@ -106,7 +188,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/upsert', async (req, res) => {
+router.post('/upsert', validateBody(DealUpsertSchema), async (req, res) => {
   try {
     const d = req.body;
     const id = d.id || randomUUID();
@@ -179,7 +261,7 @@ router.post('/upsert', async (req, res) => {
   }
 });
 
-router.post('/batch-upsert', async (req, res) => {
+router.post('/batch-upsert', validateBody(BatchDealArraySchema), async (req, res) => {
   try {
     const deals = req.body as Record<string, unknown>[];
     const results = await Promise.all(
@@ -195,7 +277,7 @@ router.post('/batch-upsert', async (req, res) => {
   }
 });
 
-router.patch('/:id/transition', async (req, res) => {
+router.patch('/:id/transition', validateBody(TransitionSchema), async (req, res) => {
   try {
     const { newStatus, userEmail, pricingSnapshot } = req.body;
     const updates: Record<string, unknown> = { status: newStatus, updated_at: nowIso() };

@@ -50,6 +50,7 @@ const PnlAttribution: React.FC<Props> = React.memo(({ deals, products, businessU
       contextData.ftpRateCards,
       contextData.transitionGrid,
       contextData.physicalGrid,
+      contextData.greeniumGrid,
       contextData.behaviouralModels,
       clients,
       products,

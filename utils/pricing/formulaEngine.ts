@@ -158,7 +158,11 @@ export function applyProductFormula(
 export function calculateMovingAverageFTP(
   yieldCurve: YieldCurvePoint[],
   targetMonths: number,
-  windowMonths: number = 12,
+  // windowMonths is kept as part of the public signature for Gap 16's
+  // fixed-window variant; the current implementation uses exponential decay
+  // across all observations, so the argument is unused until we expose a
+  // fixed-window option.
+  _windowMonths: number = 12,
   historicalRates?: { date: string; rate: number }[],
 ): number {
   const currentRate = interpolateYieldCurve(yieldCurve, targetMonths);

@@ -58,7 +58,7 @@ async function main() {
   try {
     await runMigrations();
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[server] Running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
+      console.info(`[server] Running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
     });
   } catch (err) {
     console.error('[server] Failed to start:', err);

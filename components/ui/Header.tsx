@@ -138,6 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onOpenImport}
           className="nfq-button nfq-button-primary px-4 text-[11px] uppercase tracking-[0.14em]"
           title="Universal Data Import"
+          aria-label="Universal Data Import"
         >
           <Upload size={14} />
           <span className="hidden lg:inline">Import Data</span>

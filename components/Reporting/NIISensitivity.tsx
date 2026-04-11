@@ -85,6 +85,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
       contextData.ftpRateCards,
       contextData.transitionGrid,
       contextData.physicalGrid,
+      contextData.greeniumGrid,
       contextData.behaviouralModels,
       contextData.clients,
       contextData.products,

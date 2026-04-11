@@ -1,7 +1,7 @@
 import type { FTPResult, Transaction } from '../../types';
 import { mapDealFromDB, mapDealToDB } from './mappers';
 import { apiGet, apiPost, apiPatch, apiDelete } from '../apiFetch';
-import { log, nowIso } from './shared';
+import { log } from './shared';
 
 export const dealService = {
   async fetchDeals(): Promise<Transaction[]> {

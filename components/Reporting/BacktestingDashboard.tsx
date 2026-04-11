@@ -13,7 +13,7 @@ import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from 
 import { calculateFullCreditRisk, backtestCreditRisk } from '../../utils/pricing/creditRiskEngine';
 import type { BacktestRecord } from '../../utils/pricing/creditRiskEngine';
 import { useUI } from '../../contexts/UIContext';
-import { ShieldCheck, AlertTriangle, Info } from 'lucide-react';
+import { ShieldCheck, Info } from 'lucide-react';
 
 interface Props {
   deals: Transaction[];

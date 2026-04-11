@@ -17,7 +17,9 @@ export interface PricingSuggestion {
 export function getSimilarDealSuggestions(
   currentDeal: Transaction,
   historicalDeals: Transaction[],
-  historicalResults: Map<string, FTPResult>,
+  // Reserved for future margin-vs-RAROC tuning — kept in the signature so
+  // call-sites don't need to change when we start consuming it.
+  _historicalResults: Map<string, FTPResult>,
 ): PricingSuggestion[] {
   const similar = historicalDeals.filter(
     (d) =>

@@ -1,9 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Bar,
-  BarChart,
   CartesianGrid,
-  Cell,
   ComposedChart,
   Legend,
   Line,
@@ -121,6 +119,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
       contextData.ftpRateCards,
       contextData.transitionGrid,
       contextData.physicalGrid,
+      contextData.greeniumGrid,
       contextData.behaviouralModels,
       clients,
       products,

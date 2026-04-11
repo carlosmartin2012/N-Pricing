@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Check, Plus, Minus } from 'lucide-react';
 import { DEFAULT_CROSS_BONUS_CATALOGUE } from '../../utils/pricing/crossBonuses';
 
@@ -20,8 +20,12 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
   attachments,
   onChange,
 }) => {
-  const attachmentByRuleId = new Map(
-    attachments.map((att) => [att.ruleId, att] as const),
+  // Memoize the lookup map so it is stable across renders — otherwise every
+  // render would rebuild the Map and invalidate the useCallback dependency
+  // chain that reads it.
+  const attachmentByRuleId = useMemo(
+    () => new Map(attachments.map((att) => [att.ruleId, att] as const)),
+    [attachments],
   );
 
   const toggleRule = useCallback(
@@ -52,7 +56,11 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
     (ruleId: string) => {
       const next = attachments.map((att) => {
         if (att.ruleId !== ruleId) return att;
-        const { overrideProbability: _omit, ...rest } = att;
+        // Drop `overrideProbability` so the rule falls back to the catalogue
+        // default.
+        const rest: { ruleId: string; overrideProbability?: number } = {
+          ruleId: att.ruleId,
+        };
         return rest;
       });
       onChange(next);

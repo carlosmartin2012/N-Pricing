@@ -19,9 +19,16 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'VITE_DEMO_USER=demo VITE_DEMO_PASS=demo VITE_DEMO_EMAIL=demo@nfq.es npm run dev -- --host 127.0.0.1 --port 3000',
+    // Use `dev:vite` (not `dev`) — the full `dev` script runs vite + the
+    // Express API via `concurrently`, and when the API crashes on a missing
+    // DATABASE_URL it also tears down vite, leaving Playwright with no
+    // server. The e2e specs only exercise the frontend, so we can boot
+    // vite in isolation and let the app fall back to its offline/mock
+    // data path.
+    command:
+      'VITE_DEMO_USER=demo VITE_DEMO_PASS=demo VITE_DEMO_EMAIL=demo@nfq.es npm run dev:vite -- --host 127.0.0.1 --port 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60_000,
   },
 });

@@ -8,7 +8,6 @@ import { buildAssistantMarketContext, buildMarketSummary } from './appSummaries'
 import { CalculatorWorkspace } from './components/Calculator/CalculatorWorkspace';
 import { Login } from './components/ui/Login';
 import { Header } from './components/ui/Header';
-import { OfflineBadge } from './components/ui/OfflineBadge';
 import { Sidebar } from './components/ui/Sidebar';
 import { UniversalImportModal } from './components/ui/UniversalImportModal';
 import { UserConfigModal } from './components/ui/UserConfigModal';

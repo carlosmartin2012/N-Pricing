@@ -163,7 +163,7 @@ function createConsoleReporter(): ErrorReporter {
 // ---------------------------------------------------------------------------
 
 export const errorTracker: ErrorTracker = {
-  init(cfg?: ErrorTrackerConfig) {
+  init(_cfg?: ErrorTrackerConfig) {
     if (initialized) return;
     initialized = true;
 

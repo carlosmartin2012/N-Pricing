@@ -278,7 +278,10 @@ router.post('/system-config/:key', async (req, res) => {
 // --- Seed ---
 router.post('/seed', async (req, res) => {
   try {
-    const { clients, products, business_units, users, models, deals, rules, yield_curve } = req.body;
+    // Only `clients` and `users` are currently seeded. The other entities
+    // (products, business_units, models, deals, rules, yield_curve) are
+    // accepted in the payload but not yet persisted by this endpoint.
+    const { clients, users } = req.body;
     const errors: string[] = [];
     if (clients?.length) {
       for (const c of clients) {

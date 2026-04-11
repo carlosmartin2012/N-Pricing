@@ -87,6 +87,7 @@ const OverviewDashboard: React.FC<Props> = ({
       contextData.ftpRateCards,
       contextData.transitionGrid,
       contextData.physicalGrid,
+      contextData.greeniumGrid,
       contextData.behaviouralModels,
       clients,
       products,

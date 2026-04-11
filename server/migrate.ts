@@ -361,7 +361,7 @@ export async function runMigrations(): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query(SCHEMA);
-    console.log('[migrate] Database schema created/verified');
+    console.info('[migrate] Database schema created/verified');
   } catch (err) {
     console.error('[migrate] Migration failed:', err);
     throw err;

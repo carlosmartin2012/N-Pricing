@@ -78,6 +78,12 @@ export function usePresenceAwareness(options: UsePresenceOptions) {
       channel.unsubscribe();
       channelRef.current = null;
     };
+    // Intentionally only re-subscribes when `enabled` or `userId` change.
+    // Changes to other `options.*` fields (name, role, view, deal, entity)
+    // are handled by the second effect below, which calls `channel.track`
+    // on the existing channel without tearing down and re-opening the
+    // Realtime subscription.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.enabled, options.userId]);
 
   // Update tracked presence when view/deal changes (without re-subscribing)

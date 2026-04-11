@@ -12,7 +12,7 @@ import {
   MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_GREENIUM_GRID,
   MOCK_LIQUIDITY_CURVES,
   MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS,
-  MOCK_FTP_RATE_CARDS, MOCK_CLIENTS,
+  MOCK_FTP_RATE_CARDS,
   MOCK_SDR_CONFIG, MOCK_LR_CONFIG, MOCK_INCENTIVISATION_RULES,
 } from './seedData';
 
@@ -181,7 +181,6 @@ export const calculatePricing = (
   const physGrid = context?.physicalGrid?.length ? context.physicalGrid : MOCK_PHYSICAL_GRID;
   const greenGrid = context?.greeniumGrid?.length ? context.greeniumGrid : MOCK_GREENIUM_GRID;
   const models = context?.behaviouralModels?.length ? context.behaviouralModels : MOCK_BEHAVIOURAL_MODELS;
-  const clients = context?.clients?.length ? context.clients : MOCK_CLIENTS;
   const rules = context?.rules || [];
   const products = context?.products || [];
   const businessUnits = context?.businessUnits || [];
