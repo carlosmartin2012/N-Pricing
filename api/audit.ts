@@ -2,6 +2,9 @@ import type { AuditEntry } from '../types';
 import { apiGet, apiPost } from '../utils/apiFetch';
 import { mapAuditFromDB } from './mappers';
 import { buildAuditInsertPayload, type AuditWriteResult } from '../utils/supabase/auditTransport';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('api/audit');
 
 export async function listAuditLog(): Promise<AuditEntry[]> {
   try {
@@ -39,8 +42,21 @@ export async function createAuditEntry(
   } catch (err) { return { ok: false, errorMessage: String(err) }; }
 }
 
+/**
+ * Fire-and-forget audit write used for non-blocking system events
+ * (bootstrap, background sync). Never throws — but failures are logged
+ * via the central logger so ops can detect a broken audit pipeline
+ * instead of seeing absolute silence.
+ */
 export async function logAudit(
   entry: Omit<AuditEntry, 'id' | 'timestamp'>,
 ): Promise<void> {
-  await createAuditEntry(entry).catch(() => {});
+  const result = await createAuditEntry(entry);
+  if (!result.ok) {
+    log.warn('Audit write failed', {
+      action: entry.action,
+      module: entry.module,
+      errorMessage: result.errorMessage,
+    });
+  }
 }

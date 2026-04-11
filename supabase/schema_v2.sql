@@ -95,6 +95,17 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='deals' AND column_name='created_by') THEN
         ALTER TABLE deals ADD COLUMN created_by TEXT;
     END IF;
+
+    -- Credit risk inputs consumed by pricingEngine/creditRiskEngine/delegationEngine
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='deals' AND column_name='client_rating') THEN
+        ALTER TABLE deals ADD COLUMN client_rating TEXT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='deals' AND column_name='ltv_pct') THEN
+        ALTER TABLE deals ADD COLUMN ltv_pct NUMERIC;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='deals' AND column_name='ifrs9_stage') THEN
+        ALTER TABLE deals ADD COLUMN ifrs9_stage INTEGER;
+    END IF;
 END $$;
 
 -- ============================================================

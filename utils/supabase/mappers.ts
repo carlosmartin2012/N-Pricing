@@ -50,6 +50,9 @@ export const mapDealToDB = (deal: Transaction) => ({
   liquidity_spread: deal.liquiditySpread,
   _liquidity_premium_details: deal._liquidityPremiumDetails,
   _clc_charge_details: deal._clcChargeDetails,
+  client_rating: deal.clientRating,
+  ltv_pct: deal.ltvPct,
+  ifrs9_stage: deal.ifrs9Stage,
   entity_id: deal.entityId,
   version: deal.version,
   updated_at: nowIso(),
@@ -92,6 +95,10 @@ export const mapDealFromDB = (row: any): Transaction => ({
   liquiditySpread: row.liquidity_spread,
   _liquidityPremiumDetails: row._liquidity_premium_details,
   _clcChargeDetails: row._clc_charge_details,
+  clientRating: row.client_rating ?? undefined,
+  ltvPct: row.ltv_pct != null ? Number(row.ltv_pct) : undefined,
+  ifrs9Stage:
+    row.ifrs9_stage != null ? (Number(row.ifrs9_stage) as 1 | 2 | 3) : undefined,
   entityId: row.entity_id,
   version: row.version ?? 1,
 });
