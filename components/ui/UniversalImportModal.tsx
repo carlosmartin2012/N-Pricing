@@ -3,10 +3,17 @@ import { X, Upload, CheckCircle2, AlertCircle, Database, TrendingUp, LineChart, 
 import { parseExcel, REQUIRED_HEADERS } from '../../utils/excelUtils';
 import { useUI } from '../../contexts/UIContext';
 
+interface ImportSummary {
+    module: string;
+    imported: number;
+    skipped: number;
+    failures: Array<{ row: number; error: string }>;
+}
+
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onImport: (module: string, data: any[]) => Promise<void>;
+    onImport: (module: string, data: Record<string, unknown>[]) => Promise<ImportSummary | void>;
 }
 
 const MODULES = [
@@ -20,10 +27,11 @@ const MODULES = [
 export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImport }) => {
     const { t } = useUI();
     const [file, setFile] = useState<File | null>(null);
-    const [parsedData, setParsedData] = useState<any[]>([]);
+    const [parsedData, setParsedData] = useState<Record<string, unknown>[]>([]);
     const [selectedModule, setSelectedModule] = useState<string>('');
     const [status, setStatus] = useState<'idle' | 'parsing' | 'ready' | 'importing' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
+    const [lastSummary, setLastSummary] = useState<ImportSummary | null>(null);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -72,7 +80,17 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
         setStatus('importing');
         try {
-            await onImport(selectedModule, parsedData);
+            const summary = await onImport(selectedModule, parsedData);
+            if (summary) {
+                setLastSummary(summary);
+                if (summary.failures.length > 0 && summary.imported === 0) {
+                    setStatus('error');
+                    setErrorMessage(
+                        `Import failed for ${summary.failures.length} record(s). First error: ${summary.failures[0]?.error || 'unknown'}`,
+                    );
+                    return;
+                }
+            }
             setStatus('success');
             setTimeout(() => {
                 onClose();
@@ -81,7 +99,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
         } catch (err) {
             console.error(err);
             setStatus('error');
-            setErrorMessage('Import failed. Please check data mapping.');
+            setErrorMessage(err instanceof Error ? err.message : 'Import failed. Please check data mapping.');
         }
     };
 
@@ -91,6 +109,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
         setSelectedModule('');
         setStatus('idle');
         setErrorMessage('');
+        setLastSummary(null);
     };
 
     return (
@@ -197,7 +216,9 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                             {parsedData.slice(0, 3).map((row, i) => (
                                                 <tr key={i}>
                                                     {Object.keys(row).filter(k => !k.startsWith('_')).slice(0, 5).map(k => (
-                                                        <td key={k} className="py-2 px-2 border-b border-slate-900 truncate max-w-[100px]">{row[k]}</td>
+                                                        <td key={k} className="py-2 px-2 border-b border-slate-900 truncate max-w-[100px]">
+                                                            {row[k] == null ? '' : String(row[k])}
+                                                        </td>
                                                     ))}
                                                 </tr>
                                             ))}
@@ -223,6 +244,11 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                             <CheckCircle2 size={64} className="text-emerald-500 mx-auto mb-4 animate-bounce" />
                             <h3 className="text-xl font-bold text-white">{t.importSuccessful}</h3>
                             <p className="text-sm text-slate-500 mt-2">{t.databaseUpdated}</p>
+                            {lastSummary && lastSummary.failures.length > 0 && (
+                                <p className="text-xs text-amber-400 mt-3">
+                                    {lastSummary.imported} imported, {lastSummary.failures.length} failed (see audit log)
+                                </p>
+                            )}
                         </div>
                     )}
 

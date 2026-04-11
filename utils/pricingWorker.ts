@@ -24,11 +24,18 @@ interface WorkerResponse {
   type: 'result' | 'progress' | 'error';
   results?: [string, FTPResult][];
   progress?: { completed: number; total: number };
+  failures?: Array<{ dealId: string; error: string }>;
   error?: string;
 }
 
 // Chunk size for progress reporting
 const CHUNK_SIZE = 50;
+
+const extractErrorMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === 'string' && err) return err;
+  return fallback;
+};
 
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const { deals, approvalMatrix, context, shocks } = event.data;
@@ -39,12 +46,21 @@ self.onmessage = (event: MessageEvent<WorkerRequest>) => {
     clearRuleMatchCache();
 
     const results: [string, FTPResult][] = [];
+    const failures: Array<{ dealId: string; error: string }> = [];
     const validDeals = deals.filter(d => d.id && d.productType && d.amount > 0);
 
     for (let i = 0; i < validDeals.length; i++) {
       const deal = validDeals[i];
-      const result = calculatePricing(deal, approvalMatrix, context, defaultShocks);
-      results.push([deal.id!, result]);
+      // Isolate per-deal errors so a single bad deal doesn't abort the batch.
+      try {
+        const result = calculatePricing(deal, approvalMatrix, context, defaultShocks);
+        results.push([deal.id!, result]);
+      } catch (err) {
+        failures.push({
+          dealId: deal.id!,
+          error: extractErrorMessage(err, 'Failed to price deal'),
+        });
+      }
 
       // Report progress every CHUNK_SIZE deals
       if ((i + 1) % CHUNK_SIZE === 0 || i === validDeals.length - 1) {
@@ -59,12 +75,12 @@ self.onmessage = (event: MessageEvent<WorkerRequest>) => {
     // Clean up cache after batch
     clearRuleMatchCache();
 
-    const response: WorkerResponse = { type: 'result', results };
+    const response: WorkerResponse = { type: 'result', results, failures };
     self.postMessage(response);
-  } catch (err: any) {
+  } catch (err) {
     const response: WorkerResponse = {
       type: 'error',
-      error: err.message || 'Worker pricing error',
+      error: extractErrorMessage(err, 'Worker pricing error'),
     };
     self.postMessage(response);
   }

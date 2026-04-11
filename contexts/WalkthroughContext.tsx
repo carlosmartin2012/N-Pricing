@@ -5,19 +5,39 @@ import type { ViewState } from '../types';
 
 const STORAGE_KEY = 'nfq-tours-completed';
 
-function getCompletedTours(): string[] {
+function safeGetStorage(): Storage | null {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    // Safari private mode and SSR both need guards
+    return typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
+  } catch {
+    return null;
+  }
+}
+
+function getCompletedTours(): string[] {
+  const storage = safeGetStorage();
+  if (!storage) return [];
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((v): v is string => typeof v === 'string');
   } catch {
     return [];
   }
 }
 
 function markTourCompleted(tourId: string) {
+  const storage = safeGetStorage();
+  if (!storage) return;
   const completed = getCompletedTours();
-  if (!completed.includes(tourId)) {
-    completed.push(tourId);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(completed));
+  if (completed.includes(tourId)) return;
+  completed.push(tourId);
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(completed));
+  } catch {
+    // Quota exceeded / private mode: best-effort, swallow.
   }
 }
 
