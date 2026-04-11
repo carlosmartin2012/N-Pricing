@@ -4,6 +4,9 @@ import { useUI } from '../../contexts/UIContext';
 
 type UploadedCsvRow = Record<string, string>;
 
+const MAX_CSV_UPLOAD_BYTES = 5 * 1024 * 1024;
+const ALLOWED_CSV_EXTENSIONS = new Set(['csv', 'txt']);
+
 interface Props {
     isOpen: boolean;
     onClose: () => void;
@@ -57,6 +60,20 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
     };
 
     const processFile = async (f: File) => {
+        const extension = f.name.split('.').pop()?.toLowerCase() ?? '';
+        if (!ALLOWED_CSV_EXTENSIONS.has(extension)) {
+            setFile(f);
+            setStatus('error');
+            setErrorMessage('Unsupported file type. Please upload a .csv file.');
+            return;
+        }
+        if (f.size > MAX_CSV_UPLOAD_BYTES) {
+            setFile(f);
+            setStatus('error');
+            setErrorMessage('File too large. Maximum supported size is 5 MB.');
+            return;
+        }
+
         setFile(f);
         setStatus('parsing');
 

@@ -24,8 +24,20 @@ export function exportConfig(config: ExportableConfig): void {
   URL.revokeObjectURL(url);
 }
 
+const MAX_CONFIG_FILE_BYTES = 2 * 1024 * 1024;
+
 export function parseConfigFile(file: File): Promise<ExportableConfig> {
   return new Promise((resolve, reject) => {
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (extension !== 'json') {
+      reject(new Error('Unsupported file type. Use a .json config file.'));
+      return;
+    }
+    if (file.size > MAX_CONFIG_FILE_BYTES) {
+      reject(new Error('Config file too large. Maximum supported size is 2 MB.'));
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       try {
