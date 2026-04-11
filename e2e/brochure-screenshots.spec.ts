@@ -1,13 +1,19 @@
-import { test, Page } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+import path from 'node:path';
+import { test, Page, type TestInfo } from '@playwright/test';
+import { registerApiMocks } from './mockApi.ts';
+
+test.beforeEach(async ({ page }) => {
+  await registerApiMocks(page);
+});
 
 /**
  * Capture brochure-quality screenshots of the new Phase 1 + Phase 2
  * panels for the N-Pricing marketing brochure.
  *
- * Saves PNG files to /screenshots/v3-*.png
+ * Saves PNG files to Playwright output instead of the repo tree so
+ * Vite watch mode does not trigger HMR reloads mid-suite.
  */
-
-const SCREENSHOT_DIR = 'screenshots';
 
 async function login(page: Page) {
   await page.goto('/');
@@ -36,6 +42,12 @@ async function gotoView(page: Page, viewId: string) {
   await page.waitForTimeout(2500);
 }
 
+function screenshotPath(testInfo: TestInfo, fileName: string): string {
+  const dir = testInfo.outputPath('brochure');
+  mkdirSync(dir, { recursive: true });
+  return path.join(dir, fileName);
+}
+
 test.describe('Brochure screenshots', () => {
   test.setTimeout(90000);
 
@@ -43,12 +55,12 @@ test.describe('Brochure screenshots', () => {
     viewport: { width: 1920, height: 1200 },
   });
 
-  test('01 Calculator workspace with new panels', async ({ page }) => {
+  test('01 Calculator workspace with new panels', async ({ page }, testInfo) => {
     await login(page);
 
     // Capture the full calculator workspace which now contains all the new panels
     await page.screenshot({
-      path: `${SCREENSHOT_DIR}/v3-calculator-full.png`,
+      path: screenshotPath(testInfo, 'v3-calculator-full.png'),
       fullPage: true,
     });
 
@@ -58,7 +70,7 @@ test.describe('Brochure screenshots', () => {
       await ifrs9Panel.scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
       await page.screenshot({
-        path: `${SCREENSHOT_DIR}/v3-calculator-ifrs9-bonuses.png`,
+        path: screenshotPath(testInfo, 'v3-calculator-ifrs9-bonuses.png'),
         fullPage: false,
       });
     }
@@ -69,7 +81,7 @@ test.describe('Brochure screenshots', () => {
       await inverseOptimizer.scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
       await page.screenshot({
-        path: `${SCREENSHOT_DIR}/v3-calculator-optimizer-delegation.png`,
+        path: screenshotPath(testInfo, 'v3-calculator-optimizer-delegation.png'),
         fullPage: false,
       });
     }
@@ -80,7 +92,7 @@ test.describe('Brochure screenshots', () => {
       await waterfall.scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
       await page.screenshot({
-        path: `${SCREENSHOT_DIR}/v3-calculator-waterfall-explainer.png`,
+        path: screenshotPath(testInfo, 'v3-calculator-waterfall-explainer.png'),
         fullPage: false,
       });
     }
@@ -91,13 +103,13 @@ test.describe('Brochure screenshots', () => {
       await lineage.scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
       await page.screenshot({
-        path: `${SCREENSHOT_DIR}/v3-calculator-lineage.png`,
+        path: screenshotPath(testInfo, 'v3-calculator-lineage.png'),
         fullPage: false,
       });
     }
   });
 
-  test('02 Stress testing with macro scenarios', async ({ page }) => {
+  test('02 Stress testing with macro scenarios', async ({ page }, testInfo) => {
     await login(page);
     await gotoView(page, 'SHOCKS');
 
@@ -108,12 +120,12 @@ test.describe('Brochure screenshots', () => {
     await page.waitForTimeout(1500);
 
     await page.screenshot({
-      path: `${SCREENSHOT_DIR}/v3-stress-macro-scenarios.png`,
+      path: screenshotPath(testInfo, 'v3-stress-macro-scenarios.png'),
       fullPage: true,
     });
   });
 
-  test('03 Reporting — AI Portfolio Review tab', async ({ page }) => {
+  test('03 Reporting — AI Portfolio Review tab', async ({ page }, testInfo) => {
     await login(page);
     await gotoView(page, 'REPORTING');
 
@@ -125,12 +137,12 @@ test.describe('Brochure screenshots', () => {
     }
 
     await page.screenshot({
-      path: `${SCREENSHOT_DIR}/v3-reporting-portfolio-review.png`,
+      path: screenshotPath(testInfo, 'v3-reporting-portfolio-review.png'),
       fullPage: true,
     });
   });
 
-  test('04 Methodology Config — Model Inventory MRM tab', async ({ page }) => {
+  test('04 Methodology Config — Model Inventory MRM tab', async ({ page }, testInfo) => {
     await login(page);
     await gotoView(page, 'METHODOLOGY');
 
@@ -142,7 +154,7 @@ test.describe('Brochure screenshots', () => {
     }
 
     await page.screenshot({
-      path: `${SCREENSHOT_DIR}/v3-config-mrm-inventory.png`,
+      path: screenshotPath(testInfo, 'v3-config-mrm-inventory.png'),
       fullPage: true,
     });
   });

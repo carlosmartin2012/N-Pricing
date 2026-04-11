@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { registerApiMocks } from './mockApi.ts';
+
+test.beforeEach(async ({ page }) => {
+  await registerApiMocks(page);
+});
 
 test.describe('Login Flow', () => {
   test('shows login page when not authenticated', async ({ page }) => {

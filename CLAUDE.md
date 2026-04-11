@@ -136,13 +136,13 @@ utils/
   storage.ts               # Abstracción storage
   pricingWorker.ts         # Web Worker para pricing
   supabaseClient.ts        # Cliente Supabase
-  supabaseService.ts       # Servicio Supabase legacy
+  supabaseService.ts       # Fachada legacy; adapters CRUD delegan en `api/`
   pricing/                 # Motor de pricing modularizado
     curveUtils.ts
     formulaEngine.ts
     liquidityEngine.ts
     index.ts
-  supabase/                # Servicios Supabase (15 módulos)
+  supabase/                # Servicios legacy / especializados
     approvalService.ts, audit.ts, auditTransport.ts, config.ts,
     deals.ts, mappers.ts, market.ts, marketDataIngestionService.ts,
     masterData.ts, methodologyService.ts, monitoring.ts,
@@ -180,7 +180,8 @@ docs/
 - `UIContext` controla vista activa, idioma, tema y modales.
 - `GovernanceContext` gestiona flujos de aprobación y governance de cambios metodológicos.
 - `MarketDataContext` centraliza el estado de curvas y datos de mercado.
-- `api/` proporciona una capa CRUD centralizada (9 módulos: deals, marketData, config, audit, entities, reportSchedules, observability, mappers, index) sobre Supabase con mappers snake_case↔camelCase.
+- `api/` proporciona la capa CRUD pública y centralizada (9 módulos: deals, marketData, config, audit, entities, reportSchedules, observability, mappers, index) sobre Supabase con mappers snake_case↔camelCase.
+- `utils/supabase/deals.ts`, `utils/supabase/config.ts` y `utils/supabase/market.ts` son adapters legacy sobre `api/` para no romper `supabaseService` mientras se migra el código histórico.
 - `hooks/queries/` usa React Query para data fetching con cache, invalidación y query keys centralizadas.
 - `hooks/supabaseSync/` descompone la hidratación en: initial hydration, realtime sync, config persistence y presence.
 - `useSupabaseSync` hidrata desde Supabase y hace fallback a seed/mock data cuando no hay conexión.
@@ -282,8 +283,8 @@ User Configuration, User Management, System Audit, User Manual.
 - `supabase/schema_v2.sql` es la referencia principal de schema.
 - 14 migraciones secuenciales en `supabase/migrations/`.
 - `api/` es la capa CRUD centralizada — usar `api/mappers.ts` para conversión snake_case↔camelCase.
-- Servicios detallados en `utils/supabase/` (15 módulos: deals, market, config, audit, approval, etc.).
-- Si cambias contratos de datos, revisar: `types.ts`, `api/mappers.ts`, servicios en `utils/supabase/`.
+- `utils/supabase/` queda para adapters legacy y servicios especializados (approval, audit, monitoring, methodology, reporting, etc.).
+- Si cambias contratos de datos, revisar: `types.ts`, `api/mappers.ts` y los adapters/servicios que aún cuelgan de `utils/supabase/`.
 - Mantener RLS y realtime en tablas nuevas cuando corresponda.
 - En modo offline, degradar funcionalidad realtime de forma segura; no romper la app por ausencia de credenciales.
 - Edge Function de pricing en `supabase/functions/pricing/` (Deno runtime).

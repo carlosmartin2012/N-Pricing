@@ -35,9 +35,9 @@ export default [
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'no-console': ['warn', { allow: ['debug', 'info', 'warn', 'error'] }],
+      'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
     },
   },
   // Node-only scripts (Playwright callbacks execute in browser context, so we

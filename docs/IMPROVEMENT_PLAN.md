@@ -17,6 +17,36 @@ Este plan es **autocontenido**: un agente que abra el repo por primera vez puede
 - **Regla dura:** ningún refactor del Eje B sin los E2E del Eje C ya verdes para ese flujo.
 - Antes de empezar cualquier eje, correr `npm run verify:full` para tener baseline limpio.
 
+## 0.1 Estado de ejecución real (2026-04-11)
+
+> **Última validación completa:** `npm run verify:full` ✅
+
+Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión se ejecutó una **tranche de cimientos / Sprint 1 parcial**, no el plan completo end-to-end.
+
+### Completado en esta ejecución
+- **Q1**: `@typescript-eslint/no-explicit-any` subido a `warn` en `eslint.config.js`.
+- **Q3**: activados los flujos E2E dependientes de API mock en `e2e/auth.spec.ts` y `e2e/pricing-flow.spec.ts`.
+- **Q5**: `no-console` endurecido a error con allowlist `info|warn|error`; `utils/logger.ts` ajustado para cumplir.
+- **Q6**: headers de seguridad añadidos en `vercel.json` con `Content-Security-Policy-Report-Only`.
+- **Q8**: nueva suite `api/__tests__/mappers.test.ts` con round-trips y contratos públicos.
+- **A3 (parcial fuerte)**: contrato público de `api/mappers.ts` ya cubierto por tests.
+- **C1 (parcial)**: infraestructura de mock centralizada en `e2e/mockApi.ts`; suite E2E estabilizada para correr sin API real.
+
+### Avanzado pero no cerrado
+- **A1**: `utils/supabase/deals.ts`, `utils/supabase/config.ts` y `utils/supabase/market.ts` ahora delegan en gran parte a `api/`, pero todavía quedan consumidores legacy y `supabaseService.ts` sigue siendo fachada heredada.
+- **CLAUDE.md** ya refleja que `api/` es la capa pública y que esos módulos legacy son adapters/deprecated path.
+- La suite de screenshots E2E ya no escribe en `screenshots/` durante tests; ahora usa output de Playwright y Vite ignora artefactos de test para evitar HMR espurio.
+
+### Pendiente del plan maestro
+- **Q2, Q4, Q7** siguen abiertos.
+- **A1 cierre total**: migración completa de imports y retirada final del path legacy.
+- **C1 expansión**: faltan los specs nuevos del roadmap hasta llegar a ≥12.
+- **B, D, E, F** permanecen mayormente pendientes salvo los quick wins ya indicados.
+
+### Notas para la siguiente sesión
+- Tomar este estado como nuevo baseline, no volver a reabrir la discusión sobre mock API ni los skips originales.
+- Si se continúa por Sprint 1, el siguiente tramo natural es: cerrar **A1**, añadir **C2** (regresión numérica) y decidir si **Q2** se hace como limpieza dedicada o se difiere por áreas.
+
 ---
 
 ## 1. Contexto mínimo (para agente nuevo)

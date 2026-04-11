@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { registerApiMocks } from './mockApi.ts';
 
 /**
  * Pricing Flow E2E Tests
@@ -9,6 +10,10 @@ import { test, expect } from '@playwright/test';
  *
  * The app uses seed/mock data by default so no real Supabase is needed.
  */
+
+test.beforeEach(async ({ page }) => {
+  await registerApiMocks(page);
+});
 
 // Shared login and wait for Calculator
 test.beforeEach(async ({ page }) => {
@@ -235,12 +240,6 @@ test.describe('Save Deal', () => {
   });
 
   test('saved deal appears in the scenario selector dropdown', async ({ page }) => {
-    // This test exercises the full save flow, which depends on the Express
-    // API being reachable. When the e2e run only boots vite (as configured
-    // in playwright.config.ts), the upsert request hangs and the button
-    // never returns to the enabled state. Skip when the API isn't running.
-    test.skip(!process.env.E2E_WITH_API, 'Requires the API server (set E2E_WITH_API=1)');
-
     // Save the current deal
     await page.getByTestId('save-deal-btn').click();
 
@@ -260,8 +259,6 @@ test.describe('Save Deal', () => {
 
 test.describe('Cross-View Data Persistence', () => {
   test('saving a deal from calculator makes it appear in the blotter', async ({ page }) => {
-    test.skip(!process.env.E2E_WITH_API, 'Requires the API server (set E2E_WITH_API=1)');
-
     // Save the current deal
     await page.getByTestId('save-deal-btn').click();
     await expect(page.getByTestId('save-deal-btn')).toBeEnabled({ timeout: 5_000 });
@@ -281,9 +278,8 @@ test.describe('Cross-View Data Persistence', () => {
     await page.getByTestId('nav-BLOTTER').click();
     await expect(page.getByTestId('header').getByText('Deal Blotter')).toBeVisible({ timeout: 5_000 });
 
-    // The blotter should contain at least one deal row
-    // (seed data may already have deals, plus the one we just saved).
-    // Use .first() since multiple deals with the same client can appear.
-    await expect(page.getByText('Acme Corp').first()).toBeVisible({ timeout: 5_000 });
+    // The blotter should contain visible rows once the saved deal has been
+    // persisted into the mocked API state and the view rehydrates.
+    await expect(page.getByText('CL-1001').first()).toBeVisible({ timeout: 5_000 });
   });
 });

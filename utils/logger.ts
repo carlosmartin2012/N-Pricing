@@ -46,7 +46,7 @@ function emit(entry: LogEntry) {
   // Console output
   const prefix = `[${entry.module}]`;
   switch (entry.level) {
-    case 'debug': console.debug(prefix, entry.message, entry.data || ''); break;
+    case 'debug': console.info(prefix, entry.message, entry.data || ''); break;
     case 'info': console.info(prefix, entry.message, entry.data || ''); break;
     case 'warn': console.warn(prefix, entry.message, entry.data || ''); break;
     case 'error': console.error(prefix, entry.message, entry.data || '', entry.error || ''); break;

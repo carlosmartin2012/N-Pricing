@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { registerApiMocks } from './mockApi.ts';
 
 /**
  * Navigation E2E Tests
@@ -7,6 +8,10 @@ import { test, expect } from '@playwright/test';
  * switching between views loads the expected content, and the header
  * reflects the active view label.
  */
+
+test.beforeEach(async ({ page }) => {
+  await registerApiMocks(page);
+});
 
 // Shared login helper — runs before each test
 test.beforeEach(async ({ page }) => {
