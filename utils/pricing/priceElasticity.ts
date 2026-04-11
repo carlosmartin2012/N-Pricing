@@ -154,12 +154,40 @@ export function fitElasticityModel(
   const n = bins.length;
   const meanX = sumX / n;
   const meanY = sumY / n;
-  const slope = (sumXY - n * meanX * meanY) / (sumXX - n * meanX * meanX);
+  const denom = sumXX - n * meanX * meanX;
+  // Guard against a near-singular regression (all bins at ~same log(rate)).
+  // Returning a LOW-confidence zero-elasticity model is safer than emitting NaN/Infinity
+  // into downstream pricing calculations.
+  if (!Number.isFinite(denom) || Math.abs(denom) < 1e-12) {
+    const convRate = observations.reduce((s, o) => s + o.converted, 0) / observations.length;
+    const avgRate = observations.reduce((s, o) => s + o.offeredRate, 0) / observations.length;
+    return {
+      segmentKey,
+      elasticity: 0,
+      baselineConversion: convRate,
+      anchorRate: avgRate,
+      sampleSize: observations.length,
+      confidence: 'LOW',
+    };
+  }
+  const slope = (sumXY - n * meanX * meanY) / denom;
   const intercept = meanY - slope * meanX;
 
   const elasticity = -slope; // ε = -β₁
   const anchorRate = bins[Math.floor(bins.length / 2)].avgRate;
   const baselineConversion = Math.exp(intercept) * Math.pow(anchorRate, slope);
+  if (!Number.isFinite(elasticity) || !Number.isFinite(baselineConversion)) {
+    const convRate = observations.reduce((s, o) => s + o.converted, 0) / observations.length;
+    const avgRate = observations.reduce((s, o) => s + o.offeredRate, 0) / observations.length;
+    return {
+      segmentKey,
+      elasticity: 0,
+      baselineConversion: convRate,
+      anchorRate: avgRate,
+      sampleSize: observations.length,
+      confidence: 'LOW',
+    };
+  }
 
   let confidence: 'LOW' | 'MEDIUM' | 'HIGH';
   if (observations.length >= 500) confidence = 'HIGH';
@@ -234,10 +262,15 @@ export function buildPriceResponseCurve(
   maxRate: number = currentRate * 1.5,
   points: number = 20,
 ): PriceResponsePoint[] {
+  // Clamp callers to a minimum of 2 points and defend against minRate > maxRate
+  // so the curve is always monotonic and reduce()/max searches always have data.
+  const safePoints = Math.max(2, Math.floor(points));
+  const lo = Math.min(minRate, maxRate);
+  const hi = Math.max(minRate, maxRate);
   const curve: PriceResponsePoint[] = [];
-  const step = (maxRate - minRate) / (points - 1);
-  for (let i = 0; i < points; i++) {
-    const rate = minRate + i * step;
+  const step = (hi - lo) / (safePoints - 1);
+  for (let i = 0; i < safePoints; i++) {
+    const rate = lo + i * step;
     const conversion = predictConversion(model, rate);
     const expectedVolume = baseVolume * conversion;
     const expectedRevenue = rate * expectedVolume;

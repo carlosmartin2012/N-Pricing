@@ -3,6 +3,7 @@ import type {
   ProductDefinition,
   Transaction,
 } from '../../types';
+import { generateId } from '../../utils/generateId';
 
 type ImportRow = Record<string, unknown>;
 
@@ -64,7 +65,7 @@ export const createImportedDeal = (
 ): Transaction =>
   normalizeDealDraft(
     {
-      id: readString(row.id ?? row.ID, `TRD-IMP-${Math.floor(Math.random() * 100000)}`),
+      id: readString(row.id ?? row.ID, generateId('TRD-IMP')),
       clientId: readString(row.clientId ?? row.ClientID, 'Unknown'),
       clientType: readString(row.clientType ?? row.ClientType, 'Corporate'),
       productType: readString(row.productType ?? row.ProductType, INITIAL_DEAL.productType),

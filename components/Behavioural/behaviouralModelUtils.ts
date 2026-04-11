@@ -2,6 +2,7 @@ import type {
   BehaviouralModel,
   ReplicationTranche,
 } from '../../types';
+import { generateId } from '../../utils/generateId';
 
 type ImportRow = Record<string, unknown>;
 
@@ -43,7 +44,7 @@ const parseReplicationProfile = (value: unknown): ReplicationTranche[] => {
 export const createDefaultBehaviouralModel = (
   type: BehaviouralModel['type'],
 ): BehaviouralModel => ({
-  id: `MOD-${Math.floor(Math.random() * 1000)}`,
+  id: generateId('MOD'),
   name: '',
   type,
   nmdMethod: 'Caterpillar',
@@ -64,7 +65,7 @@ export const normalizeBehaviouralModel = (
   const replicationProfile = parseReplicationProfile(model.replicationProfile);
 
   return {
-    id: readString(model.id, `MOD-${Math.floor(Math.random() * 1000)}`),
+    id: readString(model.id, generateId('MOD')),
     name: readString(model.name),
     type,
     nmdMethod: model.nmdMethod || 'Caterpillar',
@@ -85,7 +86,7 @@ export const parseImportedBehaviouralModel = (
   fallbackType: BehaviouralModel['type'],
 ): BehaviouralModel =>
   normalizeBehaviouralModel({
-    id: readString(row.ID ?? row.id, `MOD-IMP-${Math.floor(Math.random() * 1000)}`),
+    id: readString(row.ID ?? row.id, generateId('MOD-IMP')),
     name: readString(row.Name ?? row.name, 'Imported Model'),
     type: readString(row.Type ?? row.type, fallbackType) as BehaviouralModel['type'],
     description: readString(row.Description ?? row.description),

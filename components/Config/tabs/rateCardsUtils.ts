@@ -1,4 +1,5 @@
 import type { FtpRateCard, YieldCurvePoint } from '../../../types';
+import { generateId } from '../../../utils/generateId';
 
 const readString = (value: unknown, fallback = '') =>
   typeof value === 'string' && value.trim() ? value.trim() : fallback;
@@ -9,7 +10,7 @@ const readNumber = (value: unknown, fallback: number) => {
 };
 
 export const createDefaultRateCardDraft = (): FtpRateCard => ({
-  id: `RC-NEW-${Math.floor(Math.random() * 1000)}`,
+  id: generateId('RC-NEW'),
   name: '',
   type: 'Liquidity',
   currency: 'USD',
@@ -19,7 +20,7 @@ export const createDefaultRateCardDraft = (): FtpRateCard => ({
 export const normalizeRateCardDraft = (
   draft: Partial<FtpRateCard>,
 ): FtpRateCard => ({
-  id: readString(draft.id, `RC-${Math.floor(Math.random() * 100000)}`),
+  id: readString(draft.id, generateId('RC')),
   name: readString(draft.name, 'Untitled Curve'),
   type: (draft.type || 'Liquidity') as FtpRateCard['type'],
   currency: readString(draft.currency, 'USD'),
