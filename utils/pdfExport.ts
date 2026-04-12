@@ -166,7 +166,7 @@ function buildPricingReceiptHTML(
     </div>
   </div>
 
-  <script>window.onload = () => { window.print(); }<\/script>
+  <script>window.onload = () => { window.print(); }</script>
 </body>
 </html>`;
 }

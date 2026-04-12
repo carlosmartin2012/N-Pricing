@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { ArrowDown, ArrowUp, Equal, GitCompare } from 'lucide-react';
 import { Drawer } from '../ui/Drawer';
-import type { ApprovalMatrixConfig, FTPResult, Transaction } from '../../types';
+import type { FTPResult, Transaction } from '../../types';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { usePricingContext } from '../../hooks/usePricingContext';
 import { useData } from '../../contexts/DataContext';

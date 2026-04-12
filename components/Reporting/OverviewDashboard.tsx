@@ -65,22 +65,6 @@ const OverviewDashboard: React.FC<Props> = ({
   const { activeEntity, isGroupScope } = useEntity();
   const contextData = useData();
 
-  if (deals.length === 0) {
-    return (
-      <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--nfq-bg-elevated)]">
-          <BarChart4 size={28} className="text-[var(--nfq-text-muted)] opacity-60" />
-        </div>
-        <div>
-          <h3 className="text-base font-semibold text-[var(--nfq-text-primary)]">No portfolio data</h3>
-          <p className="mt-1.5 max-w-sm text-sm text-[var(--nfq-text-muted)]">
-            Book deals in the Deal Blotter to see portfolio analytics and FTP breakdowns.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const pricingContext = useMemo(
     () =>
       buildPricingContext(
@@ -194,6 +178,22 @@ const OverviewDashboard: React.FC<Props> = ({
     () => Math.max(0, ...portfolioByBU.map(item => item.volume)),
     [portfolioByBU],
   );
+
+  if (deals.length === 0) {
+    return (
+      <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--nfq-bg-elevated)]">
+          <BarChart4 size={28} className="text-[var(--nfq-text-muted)] opacity-60" />
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-[var(--nfq-text-primary)]">No portfolio data</h3>
+          <p className="mt-1.5 max-w-sm text-sm text-[var(--nfq-text-muted)]">
+            Book deals in the Deal Blotter to see portfolio analytics and FTP breakdowns.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

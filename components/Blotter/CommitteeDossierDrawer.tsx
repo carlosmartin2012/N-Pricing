@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Badge, Button } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { BookOpen, CheckCircle2, Download, FileSearch, ShieldCheck, Sparkles, XCircle } from 'lucide-react';

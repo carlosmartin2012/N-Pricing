@@ -272,6 +272,17 @@ const BlotterTable: React.FC<Props> = ({
     [behaviouralModels]
   );
 
+  const useVirtual = deals.length > VIRTUAL_THRESHOLD;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: deals.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ROW_HEIGHT_ESTIMATE,
+    overscan: 10,
+    enabled: useVirtual,
+  });
+
   if (deals.length === 0) {
     return (
       <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
@@ -287,17 +298,6 @@ const BlotterTable: React.FC<Props> = ({
       </div>
     );
   }
-
-  const useVirtual = deals.length > VIRTUAL_THRESHOLD;
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const virtualizer = useVirtualizer({
-    count: deals.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize: () => ROW_HEIGHT_ESTIMATE,
-    overscan: 10,
-    enabled: useVirtual,
-  });
 
   const rowProps = {
     userRole,
