@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   ApprovalMatrixConfig,
   CreditRiskResult,
@@ -85,22 +85,27 @@ const PricingReceipt: React.FC<Props> = ({
     if (validationErrors.length > 0) {
       return VALIDATION_FAILED_RESULT;
     }
-    const baseResult = calculatePricing(
+    return calculatePricing(
       deal,
       approvalMatrix,
       pricingContext,
       activeScenarioShocks
     );
-    setMatchedMethod(baseResult.matchedMethodology);
-    return baseResult;
   }, [
     activeScenarioShocks,
     approvalMatrix,
     deal,
     pricingContext,
-    setMatchedMethod,
     validationErrors,
   ]);
+
+  // Sync matched methodology to parent — kept outside useMemo to avoid
+  // side effects during render (React anti-pattern).
+  useEffect(() => {
+    if (result.matchedMethodology) {
+      setMatchedMethod(result.matchedMethodology);
+    }
+  }, [result.matchedMethodology, setMatchedMethod]);
 
   const creditDetail: CreditRiskResult | null = useMemo(() => {
     if (validationErrors.length > 0) return null;

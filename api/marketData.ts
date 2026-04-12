@@ -14,6 +14,7 @@ const log = createLogger('api/marketData');
 export async function listYieldCurves(): Promise<YieldCurveSnapshot[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/market-data/yield-curves');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapYieldCurveSnapshotFromDB);
   } catch (err) {
     log.warn('listYieldCurves failed — returning empty list', { error: String(err) });
@@ -28,6 +29,7 @@ export async function upsertYieldCurves(currency: string, date: string, points: 
 export async function listLiquidityCurves(): Promise<DualLiquidityCurve[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/market-data/liquidity-curves');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapLiquidityCurveFromDB);
   } catch (err) {
     log.warn('listLiquidityCurves failed — returning empty list', { error: String(err) });
@@ -38,6 +40,7 @@ export async function listLiquidityCurves(): Promise<DualLiquidityCurve[]> {
 export async function listBehaviouralModels(): Promise<BehaviouralModel[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/market-data/models');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapModelFromDB);
   } catch (err) {
     log.warn('listBehaviouralModels failed — returning empty list', { error: String(err) });
@@ -66,6 +69,7 @@ export const deleteModel = deleteBehaviouralModel;
 export async function listCurveHistory(curveId: string, months: number = 12): Promise<YieldCurveSnapshot[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>(`/market-data/yield-curves/history?curveId=${encodeURIComponent(curveId)}&months=${months}`);
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapYieldCurveSnapshotFromDB);
   } catch (err) {
     log.warn('listCurveHistory failed — returning empty history', { curveId, months, error: String(err) });

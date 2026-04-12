@@ -28,6 +28,7 @@ async function queueDealUpsert(deal: Transaction): Promise<void> {
 export async function listDeals(entityId?: string): Promise<Transaction[]> {
   const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
   const rows = await apiGet<Record<string, unknown>[]>(`/deals${qs}`);
+  if (!Array.isArray(rows)) return [];
   return rows.map(mapDealFromDB);
 }
 
@@ -115,6 +116,7 @@ export async function batchUpsertDeals(deals: Transaction[]): Promise<Transactio
   }
   try {
     const rows = await apiPost<Record<string, unknown>[]>('/deals/batch-upsert', deals.map(mapDealToDB));
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapDealFromDB);
   } catch (err) {
     if (isOfflineLikeError(err)) {
@@ -158,7 +160,7 @@ export async function listDealsCursor(
   if (entityId) params.set('entity_id', entityId);
   try {
     const result = await apiGet<{ data: Record<string, unknown>[]; cursor: string | null; hasMore: boolean }>(`/deals/cursor?${params}`);
-    return { data: result.data.map(mapDealFromDB), cursor: result.cursor, hasMore: result.hasMore };
+    return { data: Array.isArray(result.data) ? result.data.map(mapDealFromDB) : [], cursor: result.cursor, hasMore: result.hasMore };
   } catch (err) {
     log.warn('listDealsCursor failed — returning empty page', { limit, cursor, entityId, error: String(err) });
     return { data: [], cursor: null, hasMore: false };
@@ -169,6 +171,7 @@ export async function listDealsLight(entityId?: string): Promise<DealSummary[]> 
   const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
   try {
     const rows = await apiGet<Record<string, unknown>[]>(`/deals/light${qs}`);
+    if (!Array.isArray(rows)) return [];
     return rows.map((row) => ({
       id: String(row.id),
       status: String(row.status ?? ''),

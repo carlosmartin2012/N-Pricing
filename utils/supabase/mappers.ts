@@ -304,7 +304,7 @@ export const mapAuditFromDB = (row: Record<string, unknown>): AuditEntry => {
   const auditRow = row as AuditEntryRow;
 
   return ({
-    id: String(auditRow.id || `audit-${Math.random()}`),
+    id: String(auditRow.id || `audit-${crypto.randomUUID()}`),
     timestamp: auditRow.timestamp || nowIso(),
     userEmail: auditRow.user_email || 'unknown@system.com',
     userName: auditRow.user_name || 'System User',

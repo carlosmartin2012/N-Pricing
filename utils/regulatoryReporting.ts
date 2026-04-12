@@ -92,7 +92,9 @@ export function generateLCRReport(
     totalOutflows * 0.75, // LCR cap: inflows capped at 75% of outflows
   );
   const netOutflows = totalOutflows - totalInflows;
-  const lcrRatio = netOutflows > 0 ? (hqlaEstimate / netOutflows) * 100 : 999;
+  const lcrRatio = netOutflows > 0 && Number.isFinite(hqlaEstimate)
+    ? (hqlaEstimate / netOutflows) * 100
+    : 999;
 
   return {
     reportDate: new Date().toISOString().slice(0, 10),
@@ -194,7 +196,7 @@ export function generateNSFRReport(
   const rsf = Array.from(rsfMap.values());
   const totalASF = asf.reduce((s, l) => s + l.weightedAmount, 0);
   const totalRSF = rsf.reduce((s, l) => s + l.weightedAmount, 0);
-  const nsfrRatio = totalRSF > 0 ? (totalASF / totalRSF) * 100 : 999;
+  const nsfrRatio = totalRSF > 0 && Number.isFinite(totalASF) ? (totalASF / totalRSF) * 100 : 999;
 
   return {
     reportDate: new Date().toISOString().slice(0, 10),

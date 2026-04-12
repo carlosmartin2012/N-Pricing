@@ -21,6 +21,7 @@ function isOfflineLikeError(err: unknown): boolean {
 export async function listAuditLog(): Promise<AuditEntry[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/audit');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapAuditFromDB);
   } catch (err) {
     log.warn('listAuditLog failed — returning empty list', { error: String(err) });
@@ -43,7 +44,7 @@ export async function listAuditLogPaginated(filters: AuditLogFilters = {}): Prom
   const { page = 1, pageSize = 100 } = filters;
   try {
     const result = await apiGet<{ data: Record<string, unknown>[]; total: number }>(`/audit/paginated?page=${page}&pageSize=${pageSize}`);
-    return { data: result.data.map(mapAuditFromDB), total: result.total };
+    return { data: Array.isArray(result.data) ? result.data.map(mapAuditFromDB) : [], total: result.total ?? 0 };
   } catch (err) { return { data: [], total: 0, errorMessage: String(err) }; }
 }
 

@@ -41,9 +41,14 @@ export interface HealthSummary {
 }
 
 export async function listAlertRules(entityId?: string): Promise<AlertRule[]> {
-  const suffix = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
-  const rows = await apiGet<Record<string, unknown>[]>(`/observability/alert-rules${suffix}`);
-  return rows.map(mapAlertRuleFromDB);
+  try {
+    const suffix = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
+    const rows = await apiGet<Record<string, unknown>[]>(`/observability/alert-rules${suffix}`);
+    if (!Array.isArray(rows)) return [];
+    return rows.map(mapAlertRuleFromDB);
+  } catch {
+    return [];
+  }
 }
 
 export async function upsertAlertRule(rule: Partial<AlertRule>): Promise<AlertRule | null> {
@@ -68,13 +73,18 @@ export async function getRecentMetrics(
   metricName: string,
   limit: number = 50,
 ): Promise<{ value: number; recordedAt: string }[]> {
-  const rows = await apiGet<Record<string, unknown>[]>(
-    `/observability/metrics/recent?entity_id=${encodeURIComponent(entityId)}&metric_name=${encodeURIComponent(metricName)}&limit=${limit}`,
-  );
-  return rows.map((r) => ({
-    value: Number(r.metric_value),
-    recordedAt: r.recorded_at as string,
-  }));
+  try {
+    const rows = await apiGet<Record<string, unknown>[]>(
+      `/observability/metrics/recent?entity_id=${encodeURIComponent(entityId)}&metric_name=${encodeURIComponent(metricName)}&limit=${limit}`,
+    );
+    if (!Array.isArray(rows)) return [];
+    return rows.map((r) => ({
+      value: Number(r.metric_value ?? 0),
+      recordedAt: String(r.recorded_at ?? ''),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getHealthSummary(entityId: string): Promise<HealthSummary> {

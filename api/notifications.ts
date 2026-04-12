@@ -10,6 +10,7 @@ export async function listNotifications(email: string): Promise<Notification[]> 
     const rows = await apiGet<Record<string, unknown>[]>(
       `/config/notifications?email=${encodeURIComponent(email)}`,
     );
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapNotificationFromDB);
   } catch (err) {
     log.warn('listNotifications failed — returning empty list', { email, error: String(err) });

@@ -117,12 +117,15 @@ export function resolveEffectiveTenors(
     if (model) {
       if (model.type === 'NMD_Replication') {
         if (model.nmdMethod === 'Caterpillar' && model.replicationProfile?.length) {
-          // Weighted average of tranche tenors
-          const totalWeight = model.replicationProfile.reduce((s, t) => s + t.weight, 0);
+          // Weighted average of tranche tenors — guard against NaN weights
+          const totalWeight = model.replicationProfile.reduce(
+            (s, t) => s + (Number.isFinite(t.weight) ? t.weight : 0), 0,
+          );
           if (totalWeight > 0) {
             bm = model.replicationProfile.reduce((s, t) => {
+              const w = Number.isFinite(t.weight) ? t.weight : 0;
               const months = TENOR_MONTHS[t.term] || 12;
-              return s + (t.weight / totalWeight) * months;
+              return s + (w / totalWeight) * months;
             }, 0);
           }
         } else {
@@ -390,18 +393,18 @@ export const calculatePricing = (
   // ── 13. ESG Adjustments ───────────────────────────────────────────────────
   let transCharge = 0;
   const transRule = transGrid.find(r => r.classification === deal.transitionRisk);
-  if (transRule) transCharge = transRule.adjustmentBps / 100;
+  if (transRule && Number.isFinite(transRule.adjustmentBps)) transCharge = transRule.adjustmentBps / 100;
 
   let physCharge = 0;
   const physRule = physGrid.find(r => r.riskLevel === deal.physicalRisk);
-  if (physRule) physCharge = physRule.adjustmentBps / 100;
+  if (physRule && Number.isFinite(physRule.adjustmentBps)) physCharge = physRule.adjustmentBps / 100;
 
   // ── 13b. Greenium / Movilización (Gap 17) ────────────────────────────
   // Strategic ESG discount for deals with verified green/sustainable format
   let greeniumAdj = 0;
   if (deal.greenFormat && deal.greenFormat !== 'None') {
     const greenRule = greenGrid.find(r => r.greenFormat === deal.greenFormat);
-    if (greenRule) greeniumAdj = greenRule.adjustmentBps / 100; // negative = discount
+    if (greenRule && Number.isFinite(greenRule.adjustmentBps)) greeniumAdj = greenRule.adjustmentBps / 100; // negative = discount
   }
 
   // ── 13c. DNSH Capital Discount (Gap 18) ──────────────────────────────

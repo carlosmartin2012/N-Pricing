@@ -208,21 +208,29 @@ export function calculateBehaviouralSpread(
 
   if (model.type === 'NMD_Replication') {
     if (model.nmdMethod === 'Caterpillar' && model.replicationProfile?.length) {
-      const totalWeight = model.replicationProfile.reduce((sum, t) => sum + t.weight, 0);
+      const totalWeight = model.replicationProfile.reduce(
+        (sum, t) => sum + (Number.isFinite(t.weight) ? t.weight : 0), 0,
+      );
       if (totalWeight === 0) return 0;
       const weightedSpread = model.replicationProfile.reduce(
-        (sum, t) => sum + (t.weight / totalWeight) * t.spread, 0,
+        (sum, t) => {
+          const w = Number.isFinite(t.weight) ? t.weight : 0;
+          const s = Number.isFinite(t.spread) ? t.spread : 0;
+          return sum + (w / totalWeight) * s;
+        }, 0,
       );
+      if (!Number.isFinite(weightedSpread)) return 0;
       const spreadPct = weightedSpread / 100;
       return deal.category === 'Liability' ? -Math.abs(spreadPct) : spreadPct;
     }
 
-    const coreRatio = (model.coreRatio || 50) / 100;
-    const beta = model.betaFactor || 0.5;
-    const decayRate = (model.decayRate || 15) / 100;
+    const coreRatio = Math.max(0, Math.min((model.coreRatio || 50) / 100, 1));
+    const beta = Math.max(0, Math.min(model.betaFactor || 0.5, 1));
+    const decayRate = Math.max(0, Math.min((model.decayRate || 15) / 100, 1));
     // Stability benefit: higher core ratio + lower beta + lower decay = more stable = higher benefit
     // Model-derived: core * (1-beta) * (1-decay) as annualized spread factor
     const stabilityBenefit = coreRatio * (1 - beta) * (1 - decayRate);
+    if (!Number.isFinite(stabilityBenefit)) return 0;
     return deal.category === 'Liability' ? -stabilityBenefit : stabilityBenefit * 0.5;
   }
 

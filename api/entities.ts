@@ -14,6 +14,7 @@ const log = createLogger('api/entities');
 export async function listGroups(): Promise<Group[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/entities/groups');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapGroupFromDB);
   } catch (err) {
     log.warn('listGroups failed — returning empty list', { error: String(err) });
@@ -44,6 +45,7 @@ export async function upsertGroup(group: Partial<Group>): Promise<Group | null> 
 export async function listEntities(): Promise<Entity[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/entities/entities');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapEntityFromDB);
   } catch (err) {
     log.warn('listEntities failed — returning empty list', { error: String(err) });
@@ -75,6 +77,7 @@ export async function listEntityUsers(entityId?: string): Promise<EntityUser[]> 
   try {
     const qs = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
     const rows = await apiGet<Record<string, unknown>[]>(`/entities/entity-users${qs}`);
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapEntityUserFromDB);
   } catch (err) {
     log.warn('listEntityUsers failed — returning empty list', { entityId, error: String(err) });
@@ -85,6 +88,7 @@ export async function listEntityUsers(entityId?: string): Promise<EntityUser[]> 
 export async function getUserEntities(email: string): Promise<EntityUser[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>(`/entities/entity-users?email=${encodeURIComponent(email)}`);
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapEntityUserFromDB);
   } catch (err) {
     log.warn('getUserEntities failed — returning empty list', { email, error: String(err) });

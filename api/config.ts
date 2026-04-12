@@ -35,6 +35,7 @@ const log = createLogger('api/config');
 export async function listRules(): Promise<GeneralRule[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/rules');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapRuleFromDB);
   } catch (err) {
     log.warn('listRules failed — returning empty list', { error: String(err) });
@@ -53,6 +54,7 @@ export async function deleteRule(id: number): Promise<void> {
 export async function listRuleVersions(ruleId: number): Promise<RuleVersion[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>(`/config/rules/${ruleId}/versions`);
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapRuleVersionFromDB);
   } catch (err) {
     log.warn('listRuleVersions failed — returning empty list', { ruleId, error: String(err) });
@@ -76,6 +78,7 @@ export async function createRuleVersion(
 export async function listClients(): Promise<ClientEntity[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/clients');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapClientFromDB);
   } catch (err) {
     log.warn('listClients failed — returning empty list', { error: String(err) });
@@ -98,6 +101,7 @@ export async function deleteClient(id: string): Promise<void> {
 export async function listProducts(): Promise<ProductDefinition[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/products');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapProductFromDB);
   } catch (err) {
     log.warn('listProducts failed — returning empty list', { error: String(err) });
@@ -120,6 +124,7 @@ export async function deleteProduct(id: string): Promise<void> {
 export async function listBusinessUnits(): Promise<BusinessUnit[]> {
   try {
     const rows = await apiGet<Record<string, unknown>[]>('/config/business-units');
+    if (!Array.isArray(rows)) return [];
     return rows.map(mapBUFromDB);
   } catch (err) {
     log.warn('listBusinessUnits failed — returning empty list', { error: String(err) });

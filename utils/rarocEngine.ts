@@ -39,6 +39,16 @@ export function calculateRAROC(inputs: RAROCInputs): RAROCResult {
     hurdleRate, osAmt,
   } = inputs;
 
+  // Guard: if core numeric inputs are NaN/Infinity, return zero result
+  // rather than propagating corruption through RAROC → approval decisions.
+  if (!Number.isFinite(ead) || !Number.isFinite(rwa) || !Number.isFinite(hurdleRate)) {
+    return {
+      grossRevenue: 0, costOfFunds: 0, operatingCost: 0, capitalIncome: 0,
+      creditRiskCapital: 0, pillar2Capital: 0, opRiskCapital: 0, totalRegCapital: 0,
+      riskAdjustedReturn: 0, raroc: 0, eva: 0, economicProfit: 0,
+    };
+  }
+
   // Revenue
   const grossRevenue = ead * (interestSpread / 100) + feeIncome;
 
