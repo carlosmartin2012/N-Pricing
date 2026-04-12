@@ -8,18 +8,23 @@ export function linearInterpolate(
   targetX: number,
 ): number {
   if (!points || points.length === 0) return 0;
-  if (targetX <= points[0].x) return points[0].y;
-  if (targetX >= points[points.length - 1].x) return points[points.length - 1].y;
+  if (!Number.isFinite(targetX)) return 0;
+  if (targetX <= points[0].x) return Number.isFinite(points[0].y) ? points[0].y : 0;
+  if (targetX >= points[points.length - 1].x) {
+    const last = points[points.length - 1];
+    return Number.isFinite(last.y) ? last.y : 0;
+  }
 
   const upperIdx = points.findIndex(p => p.x >= targetX);
-  if (upperIdx <= 0) return points[0].y;
+  if (upperIdx <= 0) return Number.isFinite(points[0].y) ? points[0].y : 0;
 
   const lower = points[upperIdx - 1];
   const upper = points[upperIdx];
   const denom = upper.x - lower.x;
-  if (denom === 0) return upper.y;
+  if (denom === 0) return Number.isFinite(upper.y) ? upper.y : 0;
   const ratio = (targetX - lower.x) / denom;
-  return lower.y + ratio * (upper.y - lower.y);
+  const result = lower.y + ratio * (upper.y - lower.y);
+  return Number.isFinite(result) ? result : 0;
 }
 
 /**

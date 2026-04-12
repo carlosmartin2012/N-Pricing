@@ -4,6 +4,9 @@ import { useEntity } from '../../contexts/EntityContext';
 import { useUI } from '../../contexts/UIContext';
 import * as observability from '../../api/observability';
 import type { AlertRule } from '../../types/alertRule';
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('HealthDashboard');
 
 const HealthDashboard: React.FC = () => {
   const { activeEntity } = useEntity();
@@ -22,7 +25,8 @@ const HealthDashboard: React.FC = () => {
       ]);
       setAlertRules(rules);
       setSummary(nextSummary);
-    } catch {
+    } catch (error) {
+      log.warn('Failed to load health dashboard data', { entity: activeEntity?.id, error: String(error) });
       setAlertRules([]);
       setSummary(null);
     } finally {

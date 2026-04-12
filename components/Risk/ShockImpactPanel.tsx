@@ -5,6 +5,11 @@ import type { Language } from '../../translations';
 import { translations } from '../../translations';
 import { buildShockImpactRows, getDeltaTone } from './shockUtils';
 
+/** Format a number with toFixed, falling back to '0.00' if NaN/Infinity */
+function safeFixed(value: number, decimals: number): string {
+  return Number.isFinite(value) ? value.toFixed(decimals) : (0).toFixed(decimals);
+}
+
 interface Props {
   language: Language;
   baseResult: FTPResult;
@@ -26,9 +31,9 @@ const KpiCard: React.FC<{
       <div className="flex items-end justify-between">
         <div>
           <div className="font-mono-nums text-2xl font-bold text-slate-900 dark:text-white">
-            {shocked.toFixed(2)}%
+            {safeFixed(shocked, 2)}%
           </div>
-          <div className="font-mono text-xs text-slate-400">Base: {base.toFixed(2)}%</div>
+          <div className="font-mono text-xs text-slate-400">Base: {safeFixed(base, 2)}%</div>
         </div>
         <div
           className={`font-mono-nums flex items-center text-sm font-bold ${
@@ -40,7 +45,7 @@ const KpiCard: React.FC<{
           }`}
         >
           {delta > 0 ? '+' : ''}
-          {delta.toFixed(2)}%
+          {safeFixed(delta, 2)}%
         </div>
       </div>
     </div>
@@ -58,12 +63,12 @@ const ImpactRow: React.FC<{
   return (
     <tr className="group transition-colors even:bg-[var(--nfq-bg-surface)] odd:bg-[var(--nfq-bg-root)] hover:bg-[var(--nfq-bg-elevated)]">
       <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-[color:var(--nfq-text-tertiary)]">{label}</td>
-      <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums]">{base.toFixed(3)}%</td>
+      <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums]">{safeFixed(base, 3)}%</td>
       <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)] [font-variant-numeric:tabular-nums]">
-        {shocked.toFixed(3)}%
+        {safeFixed(shocked, 3)}%
       </td>
       <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-xs [font-variant-numeric:tabular-nums]">
-        {Math.abs(delta) > 0.001 && (
+        {Number.isFinite(delta) && Math.abs(delta) > 0.001 && (
           <span
             className={
               tone === 'positive'
@@ -74,7 +79,7 @@ const ImpactRow: React.FC<{
             }
           >
             {delta > 0 ? '+' : ''}
-            {delta.toFixed(3)}%
+            {safeFixed(delta, 3)}%
           </span>
         )}
       </td>
@@ -135,19 +140,19 @@ export const ShockImpactPanel: React.FC<Props> = React.memo(({
 
             <tr className="bg-[var(--nfq-bg-elevated)] font-bold">
               <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-[color:var(--nfq-text-secondary)]">Total FTP</td>
-              <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums]">{baseResult.totalFTP.toFixed(2)}%</td>
+              <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums]">{safeFixed(baseResult.totalFTP, 2)}%</td>
               <td
                 className={`border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums] ${
                   deltaFTP > 0 ? 'text-[var(--nfq-danger)]' : 'text-[var(--nfq-success)]'
                 }`}
               >
-                {shockedResult.totalFTP.toFixed(2)}%
+                {safeFixed(shockedResult.totalFTP, 2)}%
               </td>
               <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-xs [font-variant-numeric:tabular-nums]">
-                {deltaFTP !== 0 && (
+                {Number.isFinite(deltaFTP) && deltaFTP !== 0 && (
                   <span className={deltaFTP > 0 ? 'text-[var(--nfq-danger)]' : 'text-[var(--nfq-success)]'}>
                     {deltaFTP > 0 ? '+' : ''}
-                    {deltaFTP.toFixed(2)}%
+                    {safeFixed(deltaFTP, 2)}%
                   </span>
                 )}
               </td>
@@ -155,19 +160,19 @@ export const ShockImpactPanel: React.FC<Props> = React.memo(({
 
             <tr className="bg-[var(--nfq-bg-highest)] font-bold">
               <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-[color:var(--nfq-text-primary)]">RAROC</td>
-              <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums]">{baseResult.raroc.toFixed(2)}%</td>
+              <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums]">{safeFixed(baseResult.raroc, 2)}%</td>
               <td
                 className={`border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums] ${
                   deltaRAROC < 0 ? 'text-[var(--nfq-danger)]' : 'text-[var(--nfq-success)]'
                 }`}
               >
-                {shockedResult.raroc.toFixed(2)}%
+                {safeFixed(shockedResult.raroc, 2)}%
               </td>
               <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-xs [font-variant-numeric:tabular-nums]">
-                {deltaRAROC !== 0 && (
+                {Number.isFinite(deltaRAROC) && deltaRAROC !== 0 && (
                   <span className={deltaRAROC < 0 ? 'text-[var(--nfq-danger)]' : 'text-[var(--nfq-success)]'}>
                     {deltaRAROC > 0 ? '+' : ''}
-                    {deltaRAROC.toFixed(2)}%
+                    {safeFixed(deltaRAROC, 2)}%
                   </span>
                 )}
               </td>

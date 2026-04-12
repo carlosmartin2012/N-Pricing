@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { X, Upload, CheckCircle2, AlertCircle, Database, TrendingUp, LineChart, FileText, GitBranch, ArrowRight } from 'lucide-react';
 import { parseExcel, REQUIRED_HEADERS } from '../../utils/excelUtils';
 import { useUI } from '../../contexts/UIContext';
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('UniversalImportModal');
 
 interface ImportSummary {
     module: string;
@@ -79,7 +82,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
             setParsedData(data);
             setStatus('ready');
         } catch (err) {
-            console.error(err);
+            log.error('Failed to parse import file', { module: selectedModule }, err instanceof Error ? err : undefined);
             setStatus('error');
             setErrorMessage(err instanceof Error ? err.message : 'Failed to parse Excel file. Check format.');
         }
@@ -109,7 +112,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                 reset();
             }, 1500);
         } catch (err) {
-            console.error(err);
+            log.error('Import failed', { module: selectedModule }, err instanceof Error ? err : undefined);
             setStatus('error');
             setErrorMessage(err instanceof Error ? err.message : 'Import failed. Please check data mapping.');
         }

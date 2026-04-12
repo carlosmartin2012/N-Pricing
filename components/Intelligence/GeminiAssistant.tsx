@@ -4,6 +4,9 @@ import { Sparkles, Send, X, Bot, User, Cpu, Maximize2 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { resolveChatGrounding } from '../../utils/aiGrounding';
 import { buildAssistantMarketContext } from '../../appSummaries';
+import { createLogger } from '../../utils/logger';
+
+const log = createLogger('GeminiAssistant');
 
 interface Message {
   id: string;
@@ -136,7 +139,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
         }
       }
     } catch (error) {
-      console.error('Gemini Error:', error);
+      log.error('Gemini chat failed', {}, error instanceof Error ? error : undefined);
       setMessages((prev) => [
         ...prev,
         {
