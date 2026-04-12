@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown, LucideIcon, MoreHorizontal } from 'lucide-react';
 import { ViewState } from '../../types';
-import { translations, Language } from '../../translations';
+import { getTranslations, Language } from '../../translations';
 import { Logo } from './Logo';
 
 export interface NavItem {
@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   language,
   onClose,
 }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
   const [latency, setLatency] = React.useState(14);
 
   React.useEffect(() => {

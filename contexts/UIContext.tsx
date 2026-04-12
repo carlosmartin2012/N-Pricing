@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { ViewState } from '../types';
-import { Language, translations } from '../translations';
+import { Language, translations, getTranslations } from '../translations';
 import { pathToView, viewToPath } from '../appNavigation';
 
 export type ThemeMode = 'dark' | 'light' | 'system';
@@ -65,7 +65,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const theme: 'dark' | 'light' = themeMode === 'system' ? systemTheme : themeMode;
   const setTheme = useCallback((mode: ThemeMode) => setThemeMode(mode), []);
 
-  const t = useMemo(() => translations[language], [language]);
+  const t = useMemo(() => getTranslations(language), [language]);
   const value = useMemo(
     () => ({
       currentView, setCurrentView,

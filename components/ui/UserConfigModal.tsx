@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { X, Moon, Sun, Languages, Check } from 'lucide-react';
-import { translations, Language } from '../../translations';
+import { getTranslations, Language } from '../../translations';
 import { MFASetup } from './MFASetup';
 
 interface UserConfigModalProps {
@@ -33,7 +33,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
 
     if (!isOpen) return null;
 
-    const t = translations[language];
+    const t = getTranslations(language);
 
     return (
         <>

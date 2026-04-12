@@ -2,7 +2,7 @@ import React from 'react';
 import { Sliders } from 'lucide-react';
 import type { Transaction } from '../../types';
 import type { Language } from '../../translations';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import { SelectInput, TextInput } from '../ui/LayoutComponents';
 import { TooltipTrigger } from '../ui/Tooltip';
 import { DEAL_AMORTIZATION_OPTIONS, formatDealAmount, type DealFieldChange } from './dealInputPanelUtils';
@@ -72,7 +72,7 @@ export const DealLeversPanel: React.FC<Props> = ({
   onFieldInputChange,
   onFieldChange,
 }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
 
   return (
     <div data-tour="deal-levers" className="relative flex-1 space-y-6 overflow-y-auto p-4 custom-scrollbar">

@@ -3,7 +3,7 @@ import { AlertTriangle, FileSpreadsheet, RefreshCcw, TrendingUp } from 'lucide-r
 import { Badge, Panel } from '../ui/LayoutComponents';
 import type { PricingShocks } from '../../utils/pricingEngine';
 import type { Language } from '../../translations';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import type { Transaction } from '../../types';
 import { QUICK_SHOCK_SCENARIOS } from './shockUtils';
 
@@ -63,7 +63,7 @@ export const ShockControlPanel: React.FC<Props> = ({
   onImport,
   onApplyPreset,
 }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
 
   return (
     <Panel title={t.shocksConfig || 'Shocks Configuration'} className="h-full bg-white dark:bg-[#0a0a0a]">

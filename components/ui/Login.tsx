@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, LockKeyhole, Loader2, ShieldCheck } from 'lucide-react';
-import { translations, Language } from '../../translations';
+import { getTranslations, Language } from '../../translations';
 import { Logo } from './Logo';
 
 interface LoginProps {
@@ -40,7 +40,7 @@ interface GoogleNotification {
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

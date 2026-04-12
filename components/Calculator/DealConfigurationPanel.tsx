@@ -14,7 +14,7 @@ import {
   DEAL_REPRICING_OPTIONS,
 } from './dealInputPanelUtils';
 import type { Language } from '../../translations';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import { RegulatorySection } from './RegulatorySection';
 import { ESGSection } from './ESGSection';
 import { CreditRiskSection } from './CreditRiskSection';
@@ -56,7 +56,7 @@ export const DealConfigurationPanel: React.FC<Props> = ({
   onProductSelect,
   onBooleanChange,
 }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
   return (
     <div className="grid max-h-[60vh] grid-cols-1 gap-4 overflow-y-auto border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4 animate-in slide-in-from-bottom-5 duration-300">
       {/* Client & Product */}

@@ -3,7 +3,7 @@ import { FileSearch } from 'lucide-react';
 import type { ClientEntity, Transaction } from '../../types';
 import { Badge, InputGroup, SelectInput } from '../ui/LayoutComponents';
 import type { Language } from '../../translations';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 
 interface Props {
   values: Transaction;
@@ -22,7 +22,7 @@ export const DealScenarioSelector: React.FC<Props> = ({
   language,
   onTransactionSelect,
 }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
   const selectedClient = clients.find((client) => client.id === values.clientId);
   const hasCurrentDeal = Boolean(values.id);
 

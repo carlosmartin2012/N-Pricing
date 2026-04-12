@@ -1,4 +1,4 @@
-export type Language = 'en' | 'es';
+export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
 
 export const translations = {
     en: {
@@ -1158,3 +1158,63 @@ export const translations = {
         backtestNote: 'Backtest usa pérdidas simuladas para demostración. Conectar con API de historial de pérdidas para producción.',
     }
 };
+
+type TranslationKeys = (typeof translations)['en'];
+
+/** Partial translations for additional languages */
+const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
+  pt: {
+    pricing: 'Pricing', login: 'Entrar', settings: 'Configurações', language: 'Idioma',
+    theme: 'Tema', dark: 'Escuro', light: 'Claro', close: 'Fechar', save: 'Salvar',
+    cancel: 'Cancelar', online: 'CORE: ONLINE',
+    pricingEngine: 'Motor de Pricing', dealBlotter: 'Carteira de Operações',
+    yieldCurves: 'Curvas de Juros', accountingLedger: 'Livro Contábil',
+    behaviouralModels: 'Modelos Comportamentais', shocks: 'Stress Testing',
+    auditLog: 'Registro de Auditoria', userConfig: 'Configuração do Usuário',
+    userMgmt: 'Gestão de Usuários', manual: 'Manual do Usuário',
+    moreTools: 'Mais', systemHealth: 'Saúde do Sistema',
+    subtitle: 'Um motor para pricing, provisão e capital — reconciliado por design',
+  },
+  fr: {
+    pricing: 'Tarification', login: 'Connexion', settings: 'Paramètres', language: 'Langue',
+    theme: 'Thème', dark: 'Sombre', light: 'Clair', close: 'Fermer', save: 'Enregistrer',
+    cancel: 'Annuler', online: 'CORE: EN LIGNE',
+    pricingEngine: 'Moteur de Tarification', dealBlotter: 'Carnet d\'Opérations',
+    yieldCurves: 'Courbes de Taux', accountingLedger: 'Grand Livre',
+    behaviouralModels: 'Modèles Comportementaux', shocks: 'Tests de Stress',
+    auditLog: 'Journal d\'Audit', userConfig: 'Configuration Utilisateur',
+    userMgmt: 'Gestion des Utilisateurs', manual: 'Manuel Utilisateur',
+    moreTools: 'Plus', systemHealth: 'Santé du Système',
+    subtitle: 'Un moteur pour tarification, provision et capital — réconcilié par conception',
+  },
+  de: {
+    pricing: 'Pricing', login: 'Anmelden', settings: 'Einstellungen', language: 'Sprache',
+    theme: 'Design', dark: 'Dunkel', light: 'Hell', close: 'Schließen', save: 'Speichern',
+    cancel: 'Abbrechen', online: 'CORE: ONLINE',
+    pricingEngine: 'Pricing-Engine', dealBlotter: 'Geschäftsbuch',
+    yieldCurves: 'Zinskurven', accountingLedger: 'Hauptbuch',
+    behaviouralModels: 'Verhaltensmodelle', shocks: 'Stresstests',
+    auditLog: 'Prüfprotokoll', userConfig: 'Benutzerkonfiguration',
+    userMgmt: 'Benutzerverwaltung', manual: 'Benutzerhandbuch',
+    moreTools: 'Mehr', systemHealth: 'Systemzustand',
+    subtitle: 'Eine Engine für Pricing, Rückstellung und Kapital — konstruktionsbedingt abgestimmt',
+  },
+};
+
+/**
+ * Get translations for a language with English fallback.
+ * Use this instead of `translations[language]` for Language types that include pt/fr/de.
+ */
+export function getTranslations(lang: Language): TranslationKeys {
+  if (lang === 'en' || lang === 'es') return translations[lang];
+  const partial = partialTranslations[lang] || {};
+  return { ...translations.en, ...partial } as TranslationKeys;
+}
+
+export const AVAILABLE_LANGUAGES: { code: Language; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'pt', label: 'Português' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+];

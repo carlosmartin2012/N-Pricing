@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useWalkthrough } from '../../contexts/WalkthroughContext';
 import { useTooltipPosition, type Placement } from '../../hooks/useTooltipPosition';
-import { translations, type Language } from '../../translations';
+import { getTranslations, type Language } from '../../translations';
 
 interface StepCardProps {
   title: string;
@@ -32,7 +32,7 @@ const StepCard: React.FC<StepCardProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const pos = useTooltipPosition(anchorRef, cardRef, placement, true);
-  const t = translations[language];
+  const t = getTranslations(language);
   const isLast = stepIndex === totalSteps - 1;
 
   return (
@@ -135,7 +135,7 @@ export const WalkthroughOverlay: React.FC<{ language: Language }> = ({ language 
   const { isActive, currentStep, steps, next, prev, skip } = useWalkthrough();
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
-  const t = translations[language];
+  const t = getTranslations(language);
 
   const step = steps[currentStep];
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { Panel } from '../ui/LayoutComponents';
 import type { FTPResult } from '../../types';
 import type { Language } from '../../translations';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import { buildShockImpactRows, getDeltaTone } from './shockUtils';
 
 /** Format a number with toFixed, falling back to '0.00' if NaN/Infinity */
@@ -92,7 +92,7 @@ export const ShockImpactPanel: React.FC<Props> = React.memo(({
   baseResult,
   shockedResult,
 }) => {
-  const t = translations[language];
+  const t = getTranslations(language);
   const impactRows = buildShockImpactRows(baseResult, shockedResult);
   const deltaFTP = shockedResult.totalFTP - baseResult.totalFTP;
   const deltaRAROC = shockedResult.raroc - baseResult.raroc;

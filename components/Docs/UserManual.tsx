@@ -2,7 +2,7 @@ import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Panel } from '../ui/LayoutComponents';
 import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles, Compass, BookA } from 'lucide-react';
-import { translations } from '../../translations';
+import { translations, getTranslations } from '../../translations';
 import { useUI } from '../../contexts/UIContext';
 import { useWalkthrough } from '../../contexts/WalkthroughContext';
 
@@ -46,10 +46,10 @@ const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc })
 const UserManual: React.FC = () => {
    const { language } = useUI();
    // Fallback configuration if translations are missing or partial
-   const t = translations[language] || translations['en'];
+   const t = getTranslations(language) || translations['en'];
    const { startTour } = useWalkthrough();
 
-   const manualContent = {
+   const manualContentAll = {
       en: {
          introTitle: "Welcome to N Pricing",
          introDesc: "The N Pricing Engine is a high-performance calculation platform designed for modern commercial banking. It enables Treasury and Commercial desks to accurately price liquidity, credit risk, and option costs in real-time, bridging the gap between centralized FTP strategy and front-office execution.",
@@ -98,7 +98,8 @@ const UserManual: React.FC = () => {
          realtime: "Difusión de cambios en operaciones, modelos y curvas a toda la organización según ocurren.",
          centralized: "Fuente única de verdad impulsada por Supabase, reemplazando el almacenamiento local para una fiabilidad empresarial."
       }
-   }[language];
+   } as Record<string, Record<string, string>>;
+   const manualContent = manualContentAll[language] || manualContentAll.en;
 
    return (
       <Panel title={`N Pricing - ${t.manual}`} className="h-full">

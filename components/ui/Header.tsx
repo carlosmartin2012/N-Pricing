@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Bell, Languages, Menu, Monitor, Moon, Sun, Upload } from 'lucide-react';
 import { ViewState, UserProfile } from '../../types';
 import type { ThemeMode } from '../../contexts/UIContext';
-import { translations, Language } from '../../translations';
+import { getTranslations, Language } from '../../translations';
 import { EntitySwitcher } from './EntitySwitcher';
 import { NotificationPanel } from './NotificationPanel';
 import { OfflineBadge } from './OfflineBadge';
@@ -51,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOfflineSync,
 }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const t = translations[language];
+  const t = getTranslations(language);
   const currentLabel =
     mainNavItems.find((item) => item.id === currentView)?.label ||
     bottomNavItems.find((item) => item.id === currentView)?.label ||

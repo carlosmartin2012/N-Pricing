@@ -10,7 +10,7 @@ import { EMPTY_DEAL } from '../../constants';
 import { Panel } from '../ui/LayoutComponents';
 import { ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import type { Language } from '../../translations';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import { DealConfigurationPanel } from './DealConfigurationPanel';
 import { DealLeversPanel } from './DealLeversPanel';
 import { DealScenarioSelector } from './DealScenarioSelector';
@@ -47,7 +47,7 @@ const DealInputPanel: React.FC<Props> = ({
   behaviouralModels,
 }) => {
   const [showConfig, setShowConfig] = useState(false);
-  const t = translations[language];
+  const t = getTranslations(language);
 
   const clientDisplayName = useMemo(
     () => getClientDisplayName(clients, values.clientId),

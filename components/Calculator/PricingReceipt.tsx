@@ -14,7 +14,7 @@ import {
 import { validateDeal, type ValidationError } from '../../utils/validation';
 import { Panel } from '../ui/LayoutComponents';
 import { AccessibleLiveRegion } from '../ui/AccessibleLiveRegion';
-import { translations, type Language } from '../../translations';
+import { getTranslations, type Language } from '../../translations';
 import { usePricingContext } from '../../hooks/usePricingContext';
 import {
   PricingReceiptAccountingPanel,
@@ -72,7 +72,7 @@ const PricingReceipt: React.FC<Props> = ({
   const [showAccounting, setShowAccounting] = useState(false);
   const [showCreditDetail, setShowCreditDetail] = useState(false);
   const [applyShocks, setApplyShocks] = useState(false);
-  const t = translations[language];
+  const t = getTranslations(language);
   const pricingContext = usePricingContext();
   const activeScenarioShocks = applyShocks && shocks ? shocks : DEFAULT_PRICING_SHOCKS;
 

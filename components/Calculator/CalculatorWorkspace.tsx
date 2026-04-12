@@ -137,7 +137,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             <WaterfallExplainerCard
               deal={dealParams}
               result={currentResult}
-              language={language}
+              language={language === 'es' ? 'es' : 'en'}
             />
           )}
         </div>
