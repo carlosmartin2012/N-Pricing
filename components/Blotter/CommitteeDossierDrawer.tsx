@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { Badge, Button } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
 import { BookOpen, CheckCircle2, Download, FileSearch, ShieldCheck, Sparkles, XCircle } from 'lucide-react';
+import { AuditTimeline } from './AuditTimeline';
 import type {
   ApprovalTask,
   MarketDataSource,
@@ -307,6 +308,16 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
               </section>
             </div>
           </div>
+
+          {/* Audit Timeline */}
+          {deal?.id && (
+            <div className="mt-6 border-t border-[color:var(--nfq-border-ghost)] pt-4">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[color:var(--nfq-text-muted)]">
+                Audit Trail
+              </h3>
+              <AuditTimeline dealId={deal.id} />
+            </div>
+          )}
         </div>
       )}
     </Drawer>
