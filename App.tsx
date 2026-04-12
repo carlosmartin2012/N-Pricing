@@ -151,6 +151,7 @@ const AppContent: React.FC = () => {
           mainNavItems={mainNavItems}
           bottomNavItems={bottomNavItems}
           theme={ui.theme}
+          themeMode={ui.themeMode}
           setTheme={ui.setTheme}
           language={ui.language}
           setLanguage={ui.setLanguage}

@@ -15,6 +15,8 @@ import { calculatePricing } from '../../utils/pricingEngine';
 const MethodologyVisualizer = React.lazy(() => import('./MethodologyVisualizer'));
 const PricingReceipt = React.lazy(() => import('./PricingReceipt'));
 const PricingComparison = React.lazy(() => import('./PricingComparison'));
+import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
+import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
 
 interface Props {
   dealParams: Transaction;
@@ -147,10 +149,20 @@ export const CalculatorWorkspace: React.FC<Props> = ({
           )}
         </div>
 
-        <div className="w-full lg:col-span-12">
+        <div className="w-full lg:col-span-9">
           <Suspense fallback={<div className="h-24 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
             <PricingComparison baseDeal={dealParams} approvalMatrix={approvalMatrix} />
           </Suspense>
+        </div>
+        <div className="w-full lg:col-span-3">
+          <ScenarioLibraryPanel
+            currentScenarios={DEFAULT_PRICING_SCENARIOS}
+            onLoadScenario={(scenario: PricingScenario) => {
+              if (scenario.overrides.marginTarget != null) {
+                setDealParams((prev) => ({ ...prev, marginTarget: scenario.overrides.marginTarget! }));
+              }
+            }}
+          />
         </div>
       </div>
     </div>

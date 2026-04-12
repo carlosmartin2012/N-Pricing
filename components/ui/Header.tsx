@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Bell, Languages, Menu, Moon, Sun, Upload } from 'lucide-react';
+import { Bell, Languages, Menu, Monitor, Moon, Sun, Upload } from 'lucide-react';
 import { ViewState, UserProfile } from '../../types';
+import type { ThemeMode } from '../../contexts/UIContext';
 import { translations, Language } from '../../translations';
 import { EntitySwitcher } from './EntitySwitcher';
 import { NotificationPanel } from './NotificationPanel';
@@ -15,7 +16,8 @@ interface HeaderProps {
   mainNavItems: { id: string; label: string }[];
   bottomNavItems: { id: string; label: string }[];
   theme: 'dark' | 'light';
-  setTheme: (theme: 'dark' | 'light') => void;
+  themeMode?: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   user: UserProfile | null;
@@ -43,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenImport,
   entityLabels,
   onlineUsers,
+  themeMode = theme,
   offlinePendingCount = 0,
   offlineIsSyncing = false,
   onOfflineSync,
@@ -53,7 +56,13 @@ export const Header: React.FC<HeaderProps> = ({
     mainNavItems.find((item) => item.id === currentView)?.label ||
     bottomNavItems.find((item) => item.id === currentView)?.label ||
     'Workspace';
-  const ThemeIcon = theme === 'dark' ? Moon : Sun;
+  const ThemeIcon = themeMode === 'system' ? Monitor : theme === 'dark' ? Moon : Sun;
+  const nextTheme = (): ThemeMode => {
+    if (themeMode === 'dark') return 'light';
+    if (themeMode === 'light') return 'system';
+    return 'dark';
+  };
+  const themeLabel = themeMode === 'system' ? 'System' : themeMode === 'dark' ? 'Dark' : 'Light';
   const userInitials = user?.name
     ? user.name
         .split(' ')
@@ -121,9 +130,9 @@ export const Header: React.FC<HeaderProps> = ({
         {entityLabels && <EntitySwitcher labels={entityLabels} />}
 
         <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => setTheme(nextTheme())}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
-          title={t.theme}
+          title={`${t.theme}: ${themeLabel}`}
         >
           <ThemeIcon size={16} />
         </button>

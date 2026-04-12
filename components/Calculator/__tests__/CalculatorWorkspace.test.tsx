@@ -20,6 +20,10 @@ vi.mock('../../../utils/pricingEngine', () => ({
   calculatePricing: mocks.calculatePricing,
 }));
 
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ currentUser: { id: 'u1', email: 'test@nfq.es', name: 'Test', role: 'Trader' } }),
+}));
+
 vi.mock('../../../contexts/DataContext', () => ({
   useData: () => ({
     deals: [],
