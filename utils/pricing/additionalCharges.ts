@@ -122,7 +122,8 @@ export function calculateContingentLiquidityCharge(
   input: ContingentLiquidityInput,
 ): ContingentLiquidityResult {
   const undrawn = input.undrawnAmount ?? 0;
-  const drawn = Math.max(1, input.amount);
+  // Guard: Math.max(1, NaN) returns NaN — ensure a finite drawn floor
+  const drawn = Math.max(1, Number.isFinite(input.amount) ? input.amount : 1);
 
   if (undrawn <= 0) {
     return { chargePct: 0, drawFactor: 0, undrawnRatio: 0 };

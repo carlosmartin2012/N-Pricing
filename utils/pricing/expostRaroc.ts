@@ -79,10 +79,10 @@ export function extractExpectedFromSnapshot(
   deal: Pick<Transaction, 'amount' | 'marginTarget' | 'feeIncome' | 'operationalCostBps'>,
   snapshot: FTPResult,
 ): ExpectedRaroc {
-  const ead = deal.amount;
-  const interestSpread = deal.marginTarget / 100;
+  const ead = Number.isFinite(deal.amount) ? deal.amount : 0;
+  const interestSpread = (Number.isFinite(deal.marginTarget) ? deal.marginTarget : 0) / 100;
   const cofRate = snapshot.totalFTP / 100;
-  const opCostRate = deal.operationalCostBps / 10000;
+  const opCostRate = (Number.isFinite(deal.operationalCostBps) ? deal.operationalCostBps : 0) / 10000;
 
   const expectedRevenue = ead * interestSpread + (deal.feeIncome ?? 0);
   const expectedCof = ead * cofRate;
@@ -112,7 +112,8 @@ export function calculateRealizedRaroc(performance: RealizedPerformance): {
   cofAnnualized: number;
   opCostAnnualized: number;
 } {
-  const months = Math.max(1, performance.observationMonths);
+  // Guard: Math.max(1, NaN) returns NaN — ensure a finite month floor
+  const months = Math.max(1, Number.isFinite(performance.observationMonths) ? performance.observationMonths : 1);
   const annualFactor = 12 / months;
 
   const revenueAnnualized = performance.realizedRevenue * annualFactor;

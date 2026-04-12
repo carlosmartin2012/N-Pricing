@@ -124,15 +124,16 @@ export function calculateLifetimeEL(input: LifetimeELInput): LifetimeELResult {
   const yearsRaw = durationMonths / 12;
   const years = Math.max(1, Math.ceil(yearsRaw));
 
-  // Sanitize inputs
-  const pdSafe = Math.min(0.9999, Math.max(0, pd12m));
-  const lgdSafe = Math.min(1, Math.max(0, lgd));
+  // Sanitize inputs — guard NaN before clamping (Math.min/max with NaN returns NaN)
+  const pdSafe = Math.min(0.9999, Math.max(0, Number.isFinite(pd12m) ? pd12m : 0));
+  const lgdSafe = Math.min(1, Math.max(0, Number.isFinite(lgd) ? lgd : 0));
+  const eadSafe = Number.isFinite(ead) ? ead : 0;
 
   // Build term-structural PD curve (cumulative)
   const pdCurve = buildPdTermStructure(pdSafe, durationMonths);
 
   // Stage 1: 12m EL only
-  const el12m = pdSafe * lgdSafe * ead;
+  const el12m = pdSafe * lgdSafe * eadSafe;
 
   // Stage 2: lifetime EL with incremental PD per period
   let elLifetime = 0;
@@ -141,17 +142,17 @@ export function calculateLifetimeEL(input: LifetimeELInput): LifetimeELResult {
     const cumPd = pdCurve[t];
     const marginalPd = Math.max(0, cumPd - prevCumPd);
     const df = 1 / Math.pow(1 + discountRate, t + 1);
-    elLifetime += marginalPd * lgdSafe * ead * df;
+    elLifetime += marginalPd * lgdSafe * eadSafe * df;
     prevCumPd = cumPd;
   }
 
   // Stage 3: defaulted — full LGD × EAD
-  const stage3EL = lgdSafe * ead;
+  const stage3EL = lgdSafe * eadSafe;
 
   const provisionEL =
     stage === 3 ? stage3EL : stage === 2 ? elLifetime : el12m;
 
-  const annualCostPct = yearsRaw > 0 ? (provisionEL / ead / yearsRaw) * 100 : 0;
+  const annualCostPct = eadSafe > 0 && yearsRaw > 0 ? (provisionEL / eadSafe / yearsRaw) * 100 : 0;
 
   return {
     stage,

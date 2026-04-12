@@ -342,7 +342,7 @@ export const calculatePricing = (
       : anejoResult.creditCostAnnualPct / 100;
 
   // ── 11. Operational Cost ──────────────────────────────────────────────────
-  const operationalCost = deal.operationalCostBps / 100;
+  const operationalCost = (Number.isFinite(deal.operationalCostBps) ? deal.operationalCostBps : 0) / 100;
 
   // ── 12. Capital Charge (CRR3 output floor + Basel III buffer stack) ───────
   const riskFreeRate = interpolateYieldCurve(yieldCurve, 0);

@@ -124,7 +124,7 @@ export function buildRAROCInputsFromDeal(
     rwa,
     ecl: 0, // Overridden by pricingEngine with Anejo IX credit cost
     feeIncome: deal.feeIncome || 0,
-    operatingCostPct: deal.operationalCostBps / 100,
+    operatingCostPct: (Number.isFinite(deal.operationalCostBps) ? deal.operationalCostBps : 0) / 100,
     riskFreeRate,
     opRiskCapitalCharge: 0.2,    // 20bps standard
     minRegCapitalReq: deal.capitalRatio,

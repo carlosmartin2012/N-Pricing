@@ -89,7 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isAuthenticated]);
 
   const handleLogin = useCallback(async (email: string, users: UserProfile[]) => {
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const emailNorm = (email || '').toLowerCase();
+    const user = users.find(u => u.email.toLowerCase() === emailNorm);
     const now = new Date().toISOString();
     let loggedUser: UserProfile;
 
