@@ -17,6 +17,7 @@ import { useSupabaseSync } from './hooks/useSupabaseSync';
 import { useUniversalImport } from './hooks/useUniversalImport';
 import { useOfflineStatus } from './hooks/useOfflineStatus';
 import { useOfflineSync } from './hooks/useOfflineSync';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePresenceAwareness } from './hooks/usePresenceAwareness';
 
 const CalculatorWorkspace = React.lazy(() =>
@@ -74,6 +75,14 @@ const AppContent: React.FC = () => {
 
   useSupabaseSync();
   useOfflineStatus();
+  useKeyboardShortcuts({
+    onToggleSearch: () => ui.setIsAiOpen((prev) => !prev),
+    onCloseModal: () => {
+      ui.setIsConfigModalOpen(false);
+      ui.setIsImportModalOpen(false);
+      ui.setIsAiOpen(false);
+    },
+  });
   const { pendingCount, isSyncing, syncAll } = useOfflineSync();
 
   const { loadUserEntities, activeEntity } = useEntity();

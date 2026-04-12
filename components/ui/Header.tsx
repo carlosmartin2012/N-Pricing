@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Bell, Languages, Menu, Moon, Sun, Upload } from 'lucide-react';
 import { ViewState, UserProfile } from '../../types';
 import { translations, Language } from '../../translations';
 import { EntitySwitcher } from './EntitySwitcher';
+import { NotificationPanel } from './NotificationPanel';
 import { OfflineBadge } from './OfflineBadge';
 import { PresenceAvatars } from './PresenceAvatars';
 import type { PresenceUser } from '../../hooks/usePresenceAwareness';
@@ -46,6 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   offlineIsSyncing = false,
   onOfflineSync,
 }) => {
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const t = translations[language];
   const currentLabel =
     mainNavItems.find((item) => item.id === currentView)?.label ||
@@ -126,13 +128,20 @@ export const Header: React.FC<HeaderProps> = ({
           <ThemeIcon size={16} />
         </button>
 
-        <button
-          aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
-        >
-          <Bell size={17} />
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[var(--nfq-danger)]" />
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setIsNotificationOpen((prev) => !prev)}
+            aria-label="Notifications"
+            aria-expanded={isNotificationOpen}
+            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
+          >
+            <Bell size={17} />
+          </button>
+          <NotificationPanel
+            isOpen={isNotificationOpen}
+            onClose={() => setIsNotificationOpen(false)}
+          />
+        </div>
 
         <button
           onClick={onOpenImport}
