@@ -283,8 +283,10 @@ export const mapDealFromDB = (row: Record<string, unknown>): Transaction => {
   _clcChargeDetails: dealRow._clc_charge_details,
   clientRating: dealRow.client_rating ?? undefined,
   ltvPct: dealRow.ltv_pct != null && Number.isFinite(Number(dealRow.ltv_pct)) ? Number(dealRow.ltv_pct) : undefined,
-  ifrs9Stage:
-    dealRow.ifrs9_stage != null && Number.isFinite(Number(dealRow.ifrs9_stage)) ? (Number(dealRow.ifrs9_stage) as 1 | 2 | 3) : undefined,
+  ifrs9Stage: (() => {
+    const raw = dealRow.ifrs9_stage != null ? Number(dealRow.ifrs9_stage) : NaN;
+    return raw === 1 || raw === 2 || raw === 3 ? raw : undefined;
+  })(),
   entityId: dealRow.entity_id,
   version: dealRow.version ?? 1,
 });

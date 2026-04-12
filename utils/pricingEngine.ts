@@ -176,6 +176,7 @@ export const calculatePricing = (
     return { ...EMPTY_RESULT };
   }
 
+  try {
   // Resolve context with fallbacks to mocks
   const yieldCurve = context?.yieldCurve?.length ? context.yieldCurve : MOCK_YIELD_CURVE;
   const liqCurves = context?.liquidityCurves?.length ? context.liquidityCurves : MOCK_LIQUIDITY_CURVES;
@@ -577,6 +578,14 @@ export const calculatePricing = (
     delegationRuleId: delegation.matchedRuleId,
     delegationRuleLabel: delegation.matchedRuleLabel,
   };
+  } catch (err) {
+    // Catch unexpected exceptions in pricing to prevent UI crash.
+    // Return EMPTY_RESULT so consumers degrade gracefully.
+    if (import.meta.env.DEV) {
+      console.error('[pricingEngine] calculatePricing threw:', err);
+    }
+    return { ...EMPTY_RESULT };
+  }
 };
 
 // ─── Batch Repricing ───────────────────────────────────────────────────────

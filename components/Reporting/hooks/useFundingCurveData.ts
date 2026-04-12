@@ -24,13 +24,15 @@ export function useFundingCurveData({
     const collateralSpread = collateralType === 'Unsecured' ? 15 : 0;
 
     return liquidityCurvePoints.map((p) => {
-      const wholesaleShifted = (p.wholesaleSpread + collateralSpread + curveShift) * currencyFactor;
-      const lpShifted = (p.termLP + collateralSpread + curveShift) * currencyFactor;
+      const ws = Number.isFinite(p.wholesaleSpread) ? p.wholesaleSpread : 0;
+      const lp = Number.isFinite(p.termLP) ? p.termLP : 0;
+      const wholesaleShifted = (ws + collateralSpread + curveShift) * currencyFactor;
+      const lpShifted = (lp + collateralSpread + curveShift) * currencyFactor;
 
       return {
         tenor: p.tenor,
-        wholesale: p.wholesaleSpread * currencyFactor,
-        lp: p.termLP * currencyFactor,
+        wholesale: ws * currencyFactor,
+        lp: lp * currencyFactor,
         simWholesale: wholesaleShifted,
         simLP: lpShifted,
         basis: lpShifted - wholesaleShifted,

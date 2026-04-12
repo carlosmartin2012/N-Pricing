@@ -41,11 +41,14 @@ export function usePortfolioMetrics({
       if (isAsset) totalAssetVolume += amt;
       if (isLiability) totalLiabilityVolume += amt;
 
+      const dur = deal.durationMonths ?? 0;
+      const rw = deal.riskWeight ?? 100;
+
       // LCR: outflows from liabilities and committed facilities
       if (isLiability) {
         totalOutflows += amt * ((deal.lcrOutflowPct || 25) / 100);
         // ASF contribution
-        if (deal.durationMonths >= 12) totalASF += amt * 0.95;
+        if (dur >= 12) totalASF += amt * 0.95;
         else if (deal.depositStability === 'Stable') totalASF += amt * 0.95;
         else if (deal.depositStability === 'Semi_Stable') totalASF += amt * 0.9;
         else totalASF += amt * 0.5;
@@ -54,13 +57,13 @@ export function usePortfolioMetrics({
       }
 
       // HQLA: high quality assets contribute to buffer
-      if (isAsset && deal.riskWeight <= 20) {
-        totalHQLA += amt * (1 - (deal.riskWeight / 100) * 0.15); // L1/L2 HQLA haircut
+      if (isAsset && rw <= 20) {
+        totalHQLA += amt * (1 - (rw / 100) * 0.15); // L1/L2 HQLA haircut
       }
 
       // RSF for assets
       if (isAsset) {
-        if (deal.durationMonths >= 12) totalRSF += amt * (deal.riskWeight >= 50 ? 0.85 : 0.65);
+        if (dur >= 12) totalRSF += amt * (rw >= 50 ? 0.85 : 0.65);
         else totalRSF += amt * 0.5;
       }
     });

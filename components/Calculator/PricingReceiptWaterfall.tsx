@@ -107,6 +107,7 @@ export function PricingReceiptWaterfall({
             </div>
             <div className="font-mono text-xs text-indigo-300">{result.formulaUsed}</div>
             {result.behavioralMaturityUsed != null &&
+              deal.durationMonths != null &&
               result.behavioralMaturityUsed !== deal.durationMonths && (
                 <div className="mt-1 text-[10px] text-indigo-500">
                   BM={Math.round(result.behavioralMaturityUsed)}M vs DTM={deal.durationMonths}M

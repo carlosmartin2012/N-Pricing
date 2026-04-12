@@ -55,10 +55,10 @@ import type { DualLiquidityCurve } from '../types';
 
 /** Map a raw DB row from `liquidity_curves` to the TS type. */
 export const mapLiquidityCurveFromDB = (row: Record<string, unknown>): DualLiquidityCurve => ({
-  currency: row.currency as string,
+  currency: (row.currency as string) ?? 'EUR',
   curveType: (row.curve_type as DualLiquidityCurve['curveType']) ?? undefined,
-  lastUpdate: row.last_update as string,
-  points: (row.points as DualLiquidityCurve['points']) ?? [],
+  lastUpdate: (row.last_update as string) ?? '',
+  points: Array.isArray(row.points) ? (row.points as DualLiquidityCurve['points']) : [],
 });
 
 // ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ export interface YieldCurveSnapshot {
 /** Map a raw DB row from `yield_curves` to a typed snapshot. */
 export const mapYieldCurveSnapshotFromDB = (row: Record<string, unknown>): YieldCurveSnapshot => ({
   id: row.id as number | undefined,
-  currency: row.currency as string,
-  asOfDate: row.as_of_date as string,
-  gridData: (row.grid_data as YieldCurvePoint[]) ?? [],
+  currency: (row.currency as string) ?? 'EUR',
+  asOfDate: (row.as_of_date as string) ?? '',
+  gridData: Array.isArray(row.grid_data) ? (row.grid_data as YieldCurvePoint[]) : [],
 });
