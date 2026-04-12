@@ -47,6 +47,7 @@ const PnlAttribution = React.lazy(() => import('./PnlAttribution'));
 const VintageAnalysis = React.lazy(() => import('./VintageAnalysis'));
 const BacktestingDashboard = React.lazy(() => import('./BacktestingDashboard'));
 const PortfolioReviewDashboard = React.lazy(() => import('./PortfolioReviewDashboard'));
+const DashboardBuilder = React.lazy(() => import('./DashboardBuilder').then((m) => ({ default: m.DashboardBuilder })));
 
 function downloadFile(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
@@ -512,6 +513,8 @@ const ReportingDashboard: React.FC = () => {
                 deals={deals}
                 results={portfolioResultsMap}
               />
+            ) : activeSubTab === 'CUSTOM_DASHBOARD' ? (
+              <DashboardBuilder />
             ) : (
               <BehaviourFocusDashboard behaviouralModels={behaviouralModels} />
             )}
