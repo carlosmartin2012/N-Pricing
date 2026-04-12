@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router';
+import { HashRouter } from 'react-router';
 import App from './App';
 import './index.css';
 
@@ -99,7 +99,7 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <RootErrorBoundary>
-      <BrowserRouter>
+      <HashRouter>
         <QueryClientProvider client={queryClient}>
           <ToastProvider>
               <AuthProvider>
@@ -119,7 +119,7 @@ root.render(
               </AuthProvider>
           </ToastProvider>
         </QueryClientProvider>
-      </BrowserRouter>
+      </HashRouter>
     </RootErrorBoundary>
   </React.StrictMode>
 );
