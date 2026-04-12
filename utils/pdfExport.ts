@@ -1,5 +1,15 @@
 import type { Transaction, FTPResult } from '../types';
 
+/** Escape HTML-special characters to prevent injection in generated markup. */
+function esc(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /**
  * Generate a printable pricing receipt and trigger browser print dialog.
  * Uses a new window with formatted HTML that produces a clean PDF.
@@ -49,25 +59,25 @@ export function exportPricingPDF(
   <div class="header">
     <div class="logo">N-Pricing<span>Funds Transfer Pricing Receipt</span></div>
     <div class="meta">
-      <strong>Deal ID:</strong> ${dealId}<br/>
-      <strong>Date:</strong> ${date}<br/>
-      <strong>Client:</strong> ${clientName}<br/>
-      <strong>Status:</strong> ${deal.status || 'New'}
+      <strong>Deal ID:</strong> ${esc(dealId)}<br/>
+      <strong>Date:</strong> ${esc(date)}<br/>
+      <strong>Client:</strong> ${esc(clientName)}<br/>
+      <strong>Status:</strong> ${esc(deal.status || 'New')}
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">Deal Parameters</div>
     <table>
-      <tr><td>Product</td><td>${deal.productType}</td></tr>
-      <tr><td>Category</td><td>${deal.category}</td></tr>
-      <tr><td>Amount</td><td>${deal.currency} ${deal.amount.toLocaleString()}</td></tr>
+      <tr><td>Product</td><td>${esc(deal.productType)}</td></tr>
+      <tr><td>Category</td><td>${esc(deal.category)}</td></tr>
+      <tr><td>Amount</td><td>${esc(deal.currency)} ${deal.amount.toLocaleString()}</td></tr>
       <tr><td>Duration</td><td>${deal.durationMonths} months</td></tr>
-      <tr><td>Amortization</td><td>${deal.amortization}</td></tr>
-      <tr><td>Repricing</td><td>${deal.repricingFreq}</td></tr>
+      <tr><td>Amortization</td><td>${esc(deal.amortization)}</td></tr>
+      <tr><td>Repricing</td><td>${esc(deal.repricingFreq)}</td></tr>
       <tr><td>Risk Weight</td><td>${deal.riskWeight}%</td></tr>
-      <tr><td>ESG Transition</td><td>${deal.transitionRisk}</td></tr>
-      <tr><td>ESG Physical</td><td>${deal.physicalRisk}</td></tr>
+      <tr><td>ESG Transition</td><td>${esc(deal.transitionRisk)}</td></tr>
+      <tr><td>ESG Physical</td><td>${esc(deal.physicalRisk)}</td></tr>
     </table>
   </div>
 
@@ -105,17 +115,17 @@ export function exportPricingPDF(
     <table>
       <tr><td>RAROC</td><td>${result.raroc.toFixed(2)}%</td></tr>
       <tr><td>Economic Profit</td><td>${deal.currency} ${result.economicProfit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td></tr>
-      <tr><td>Approval Level</td><td><span class="approval-badge" style="background: ${approvalColor}">${result.approvalLevel}</span></td></tr>
-      <tr><td>Methodology</td><td>${result.matchedMethodology}</td></tr>
-      <tr><td>Formula</td><td>${result.formulaUsed || '-'}</td></tr>
+      <tr><td>Approval Level</td><td><span class="approval-badge" style="background: ${approvalColor}">${esc(result.approvalLevel)}</span></td></tr>
+      <tr><td>Methodology</td><td>${esc(result.matchedMethodology)}</td></tr>
+      <tr><td>Formula</td><td>${esc(result.formulaUsed || '-')}</td></tr>
     </table>
   </div>
 
   <div class="section">
     <div class="section-title">Accounting Entry</div>
     <table>
-      <tr><td>Source (Debit)</td><td>${result.accountingEntry.source}: ${deal.currency} ${result.accountingEntry.amountDebit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td></tr>
-      <tr><td>Destination (Credit)</td><td>${result.accountingEntry.dest}: ${deal.currency} ${result.accountingEntry.amountCredit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td></tr>
+      <tr><td>Source (Debit)</td><td>${esc(result.accountingEntry.source)}: ${esc(deal.currency)} ${result.accountingEntry.amountDebit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td></tr>
+      <tr><td>Destination (Credit)</td><td>${esc(result.accountingEntry.dest)}: ${esc(deal.currency)} ${result.accountingEntry.amountCredit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td></tr>
     </table>
   </div>
 

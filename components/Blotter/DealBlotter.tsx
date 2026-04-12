@@ -4,15 +4,12 @@ import * as configApi from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
 import { exportDealsToExcel } from '../../utils/excelUtils';
 import type {
-  BusinessUnit,
-  ClientEntity,
-  ProductDefinition,
   Transaction,
-  UserProfile,
 } from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
+import { useUI } from '../../contexts/UIContext';
 import { errorTracker } from '../../utils/errorTracking';
-import { translations, type Language } from '../../translations';
 import type { UserRole } from '../../utils/dealWorkflow';
 import BlotterFooter from './BlotterFooter';
 import BlotterHeaderActions from './BlotterHeaderActions';
@@ -25,19 +22,11 @@ import { useBlotterActions } from './hooks/useBlotterActions';
 import { useBlotterState } from './hooks/useBlotterState';
 import { canBatchRepriceDeals } from '../../utils/dealWorkflow';
 
-interface Props {
-  deals: Transaction[];
-  setDeals: React.Dispatch<React.SetStateAction<Transaction[]>>;
-  products: ProductDefinition[];
-  clients: ClientEntity[];
-  businessUnits: BusinessUnit[];
-  language: Language;
-  user: UserProfile | null;
-}
-
-const DealBlotter: React.FC<Props> = ({ deals, setDeals, products, clients, businessUnits, language, user }) => {
+const DealBlotter: React.FC = () => {
   const data = useData();
-  const t = translations[language];
+  const { currentUser: user } = useAuth();
+  const { t } = useUI();
+  const { deals, setDeals, products, clients, businessUnits } = data;
   const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const userRole = (user?.role || 'Trader') as UserRole;

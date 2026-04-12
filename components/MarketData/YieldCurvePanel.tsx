@@ -5,10 +5,11 @@ import { localCache } from '../../utils/localCache';
 import { monitoringService } from '../../utils/supabase/monitoring';
 import { marketDataIngestionService } from '../../utils/supabase/marketDataIngestionService';
 import { FileUploadModal } from '../ui/FileUploadModal';
-import { YieldCurvePoint, UserProfile } from '../../types';
-import { translations, Language } from '../../translations';
+import { YieldCurvePoint } from '../../types';
 import { downloadTemplate } from '../../utils/excelUtils';
+import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
+import { useUI } from '../../contexts/UIContext';
 import MarketDataSourcesPanel from './MarketDataSourcesPanel';
 import { markMarketDataSourceSynced } from './marketDataSourcesUtils';
 import YieldCurveRatesPanel from './YieldCurveRatesPanel';
@@ -20,11 +21,6 @@ import {
   mapCurveHistoryRecords,
   type CurveSnapshotVersion,
 } from './yieldCurveUtils';
-
-interface Props {
-  language: Language;
-  user: UserProfile | null;
-}
 
 interface CurveImportRow {
   Tenor?: string;
@@ -51,8 +47,9 @@ interface YieldCurveRealtimePayload {
   };
 }
 
-const YieldCurvePanel: React.FC<Props> = ({ language, user }) => {
-  const t = translations[language];
+const YieldCurvePanel: React.FC = () => {
+  const { currentUser: user } = useAuth();
+  const { t } = useUI();
   const appData = useData();
   const [currency, setCurrency] = useState('USD');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);

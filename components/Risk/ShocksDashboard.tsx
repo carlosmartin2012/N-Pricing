@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { logAudit } from '../../api/audit';
-import type { ApprovalMatrixConfig, Transaction, UserProfile } from '../../types';
+import type { Transaction } from '../../types';
 import { DEFAULT_PRICING_SHOCKS, calculatePricing, type PricingShocks } from '../../utils/pricingEngine';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
+import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
+import { useUI } from '../../contexts/UIContext';
 import { usePricingContext } from '../../hooks/usePricingContext';
-import type { Language } from '../../translations';
 import { createLogger } from '../../utils/logger';
 import { ShockControlPanel } from './ShockControlPanel';
 import { ShockImpactPanel } from './ShockImpactPanel';
@@ -15,21 +17,12 @@ const log = createLogger('ShocksDashboard');
 
 interface Props {
   deal: Transaction;
-  approvalMatrix: ApprovalMatrixConfig;
-  language: Language;
-  shocks: PricingShocks;
-  setShocks: (shocks: PricingShocks) => void;
-  user: UserProfile | null;
 }
 
-const ShocksDashboard: React.FC<Props> = ({
-  deal,
-  approvalMatrix,
-  language,
-  shocks,
-  setShocks,
-  user,
-}) => {
+const ShocksDashboard: React.FC<Props> = ({ deal }) => {
+  const { currentUser: user } = useAuth();
+  const { approvalMatrix, shocks, setShocks } = useData();
+  const { language } = useUI();
   const pricingContext = usePricingContext();
   const auditTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingAuditDescriptionRef = useRef<string | null>(null);

@@ -123,7 +123,7 @@ export function detectUnderpricingClusters(
   const results: UnderpricingCluster[] = [];
 
   for (const [key, deals] of clusters.entries()) {
-    if (deals.length < minClusterSize) continue;
+    if (deals.length === 0 || deals.length < minClusterSize) continue;
 
     const totalAmount = deals.reduce((s, pd) => s + pd.deal.amount, 0);
     if (totalAmount <= 0) continue;

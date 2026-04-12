@@ -15,7 +15,7 @@ import {
   exportNSFRToXML,
   exportIRRBBToJSON,
 } from '../../utils/regulatoryExport';
-import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from '../../types';
+import type { Transaction } from '../../types';
 import ExecutiveDashboard from './ExecutiveDashboard';
 import PortfolioSnapshotsDashboard from './PortfolioSnapshotsDashboard';
 import { buildPricingContext, getPrimaryLiquidityPoints } from '../../utils/pricingContext';
@@ -48,13 +48,6 @@ const VintageAnalysis = React.lazy(() => import('./VintageAnalysis'));
 const BacktestingDashboard = React.lazy(() => import('./BacktestingDashboard'));
 const PortfolioReviewDashboard = React.lazy(() => import('./PortfolioReviewDashboard'));
 
-interface ReportingDashboardProps {
-  deals: Transaction[];
-  products: ProductDefinition[];
-  businessUnits: BusinessUnit[];
-  clients: ClientEntity[];
-}
-
 function downloadFile(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -65,8 +58,9 @@ function downloadFile(content: string, filename: string, mimeType: string) {
   URL.revokeObjectURL(url);
 }
 
-const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ deals, products, businessUnits, clients }) => {
+const ReportingDashboard: React.FC = () => {
   const contextData = useData();
+  const { deals, products, businessUnits, clients } = contextData;
   const { currentUser } = useAuth();
   const { activeEntity, isGroupScope } = useEntity();
   const { t } = useUI();

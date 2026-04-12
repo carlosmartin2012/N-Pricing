@@ -4,6 +4,7 @@ import { Panel } from '../ui/LayoutComponents';
 import type { UserProfile } from '../../types';
 import { useUI } from '../../contexts/UIContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
 import { createLogger } from '../../utils/logger';
 import { UserCard } from './UserCard';
@@ -18,14 +19,10 @@ import {
   type UserEditorMode,
 } from './userManagementUtils';
 
-interface Props {
-  users: UserProfile[];
-  setUsers: React.Dispatch<React.SetStateAction<UserProfile[]>>;
-}
-
 const log = createLogger('UserManagement');
 
-const UserManagement: React.FC<Props> = ({ users, setUsers }) => {
+const UserManagement: React.FC = () => {
+  const { users, setUsers } = useData();
   const { t } = useUI();
   const { currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');

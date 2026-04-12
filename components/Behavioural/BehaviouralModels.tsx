@@ -4,9 +4,11 @@ import { createAuditEntry } from '../../api/audit';
 import { deleteBehaviouralModel, upsertBehaviouralModel } from '../../api/marketData';
 import { Panel } from '../ui/LayoutComponents';
 import { Drawer } from '../ui/Drawer';
-import { BehaviouralModel, ReplicationTranche, UserProfile } from '../../types';
+import { BehaviouralModel, ReplicationTranche } from '../../types';
 import { Search, Plus, TrendingDown, GitMerge, FileSpreadsheet, Upload } from 'lucide-react';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
+import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { createLogger } from '../../utils/logger';
 import BehaviouralModelCard from './BehaviouralModelCard';
@@ -22,13 +24,9 @@ import {
 
 const log = createLogger('BehaviouralModels');
 
-interface Props {
-   models: BehaviouralModel[];
-   setModels: React.Dispatch<React.SetStateAction<BehaviouralModel[]>>;
-   user: UserProfile | null;
-}
-
-const BehaviouralModels: React.FC<Props> = ({ models, setModels, user }) => {
+const BehaviouralModels: React.FC = () => {
+   const { currentUser: user } = useAuth();
+   const { behaviouralModels: models, setBehaviouralModels: setModels } = useData();
    const { t } = useUI();
    const [activeTab, setActiveTab] = useState<'NMD_Replication' | 'Prepayment_CPR'>('NMD_Replication');
    const [searchTerm, setSearchTerm] = useState('');

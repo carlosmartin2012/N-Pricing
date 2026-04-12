@@ -2,7 +2,8 @@ import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Panel } from '../ui/LayoutComponents';
 import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles, Compass, BookA } from 'lucide-react';
-import { translations, Language } from '../../translations';
+import { translations } from '../../translations';
+import { useUI } from '../../contexts/UIContext';
 import { useWalkthrough } from '../../contexts/WalkthroughContext';
 
 // --- Helper Components ---
@@ -42,11 +43,8 @@ const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc })
 
 // --- Main Component ---
 
-interface UserManualProps {
-   language: Language;
-}
-
-const UserManual: React.FC<UserManualProps> = ({ language }) => {
+const UserManual: React.FC = () => {
+   const { language } = useUI();
    // Fallback configuration if translations are missing or partial
    const t = translations[language] || translations['en'];
    const { startTour } = useWalkthrough();

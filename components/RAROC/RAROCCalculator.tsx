@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { RAROCInputs } from '../../types';
+import { saveRarocInputs } from '../../api/config';
+import { useData } from '../../contexts/DataContext';
 import { RAROCBreakdownPanel } from './RAROCBreakdownPanel';
 import { RAROCInputSection } from './RAROCInputSection';
 import { RAROCMetricCard } from './RAROCMetricCard';
@@ -28,12 +30,12 @@ import {
     type EditableRarocField,
 } from './rarocCalculatorUtils';
 
-interface RAROCCalculatorProps {
-    externalInputs: RAROCInputs | null;
-    onUpdateExternal: (inputs: RAROCInputs) => void;
-}
-
-const RAROCCalculator: React.FC<RAROCCalculatorProps> = ({ externalInputs, onUpdateExternal }) => {
+const RAROCCalculator: React.FC = () => {
+    const { rarocInputs: externalInputs, setRarocInputs } = useData();
+    const onUpdateExternal = useCallback((inputs: RAROCInputs) => {
+        setRarocInputs(inputs);
+        saveRarocInputs(inputs).catch(console.error);
+    }, [setRarocInputs]);
     const [inputs, setInputs] = useState<RAROCInputs>(() => normalizeRarocInputs(externalInputs || INITIAL_RAROC_INPUTS));
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 

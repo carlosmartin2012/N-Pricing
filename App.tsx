@@ -1,11 +1,9 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
-import { saveRarocInputs } from './api/config';
 import { useEntity } from './contexts/EntityContext';
 import { Sparkles } from 'lucide-react';
 import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
 import { buildBottomNavItems, buildMainNavItems } from './appNavigation';
-import { buildAssistantMarketContext, buildMarketSummary } from './appSummaries';
 import { Login } from './components/ui/Login';
 import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
@@ -110,15 +108,9 @@ const AppContent: React.FC = () => {
   }, [ui.theme]);
 
   const [dealParams, setDealParams] = useState<Transaction>(INITIAL_DEAL);
-  const [matchedMethod, setMatchedMethod] = useState('Matched Maturity');
 
   const mainNavItems = useMemo(() => buildMainNavItems(ui.t), [ui.t]);
   const bottomNavItems = useMemo(() => buildBottomNavItems(ui.t), [ui.t]);
-  const marketSummary = useMemo(() => buildMarketSummary(data.deals, data.yieldCurves), [data.deals, data.yieldCurves]);
-  const assistantMarketContext = useMemo(
-    () => buildAssistantMarketContext(data.deals, data.yieldCurves),
-    [data.deals, data.yieldCurves]
-  );
 
   if (!isAuthenticated) {
     return <Login onLogin={(email: string) => handleLogin(email, data.users)} language={ui.language} />;
@@ -227,95 +219,42 @@ const AppContent: React.FC = () => {
                     <CalculatorWorkspace
                       dealParams={dealParams}
                       setDealParams={setDealParams}
-                      matchedMethod={matchedMethod}
-                      setMatchedMethod={setMatchedMethod}
-                      deals={data.deals}
-                      clients={data.clients}
-                      products={data.products}
-                      businessUnits={data.businessUnits}
-                      behaviouralModels={data.behaviouralModels}
-                      approvalMatrix={data.approvalMatrix}
-                      language={ui.language}
                     />
                   )}
 
                   {ui.currentView === 'BLOTTER' && (
                     <div className="relative z-0 h-full">
-                      <DealBlotter
-                        deals={data.deals}
-                        setDeals={data.setDeals}
-                        products={data.products}
-                        clients={data.clients}
-                        businessUnits={data.businessUnits}
-                        language={ui.language}
-                        user={currentUser}
-                      />
+                      <DealBlotter />
                     </div>
                   )}
 
                   {ui.currentView === 'REPORTING' && (
                     <div className="relative z-0 flex h-full flex-col">
-                      <ReportingDashboard
-                        deals={data.deals}
-                        products={data.products}
-                        businessUnits={data.businessUnits}
-                        clients={data.clients}
-                      />
+                      <ReportingDashboard />
                     </div>
                   )}
 
                   {ui.currentView === 'RAROC' && (
                     <div className="relative z-0 h-full">
-                      <RAROCCalculator
-                        externalInputs={data.rarocInputs}
-                        onUpdateExternal={(inputs) => {
-                          data.setRarocInputs(inputs);
-                          saveRarocInputs(inputs).catch(console.error);
-                        }}
-                      />
+                      <RAROCCalculator />
                     </div>
                   )}
 
                   {ui.currentView === 'MARKET_DATA' && (
                     <div className="relative z-0 h-full">
-                      <YieldCurvePanel language={ui.language} user={currentUser} />
+                      <YieldCurvePanel />
                     </div>
                   )}
 
                   {ui.currentView === 'BEHAVIOURAL' && (
                     <div className="relative z-0 h-full">
-                      <BehaviouralModels
-                        models={data.behaviouralModels}
-                        setModels={data.setBehaviouralModels}
-                        user={currentUser}
-                      />
+                      <BehaviouralModels />
                     </div>
                   )}
 
                   {(ui.currentView === 'METHODOLOGY' || ui.currentView === 'CONFIG') && (
                     <div className="relative z-0 h-full">
-                      <MethodologyConfig
-                        mode="ALL"
-                        rules={data.rules}
-                        setRules={data.setRules}
-                        approvalMatrix={data.approvalMatrix}
-                        setApprovalMatrix={data.setApprovalMatrix}
-                        products={data.products}
-                        setProducts={data.setProducts}
-                        businessUnits={data.businessUnits}
-                        setBusinessUnits={data.setBusinessUnits}
-                        clients={data.clients}
-                        setClients={data.setClients}
-                        ftpRateCards={data.ftpRateCards}
-                        setFtpRateCards={data.setFtpRateCards}
-                        transitionGrid={data.transitionGrid}
-                        setTransitionGrid={data.setTransitionGrid}
-                        physicalGrid={data.physicalGrid}
-                        setPhysicalGrid={data.setPhysicalGrid}
-                        greeniumGrid={data.greeniumGrid}
-                        setGreeniumGrid={data.setGreeniumGrid}
-                        user={currentUser}
-                      />
+                      <MethodologyConfig mode="ALL" />
                     </div>
                   )}
 
@@ -327,7 +266,7 @@ const AppContent: React.FC = () => {
 
                   {ui.currentView === 'USER_MGMT' && (
                     <div className="relative z-0 flex h-full flex-col">
-                      <UserManagement users={data.users} setUsers={data.setUsers} />
+                      <UserManagement />
                     </div>
                   )}
 
@@ -345,26 +284,19 @@ const AppContent: React.FC = () => {
 
                   {ui.currentView === 'MANUAL' && (
                     <div className="relative z-0 h-full">
-                      <UserManual language={ui.language} />
+                      <UserManual />
                     </div>
                   )}
 
                   {ui.currentView === 'AI_LAB' && (
                     <div className="relative z-0 flex h-full flex-col">
-                      <GenAIChat deals={data.deals} marketSummary={marketSummary} />
+                      <GenAIChat />
                     </div>
                   )}
 
                   {ui.currentView === 'SHOCKS' && (
                     <div className="relative z-0 flex h-full flex-col">
-                      <ShocksDashboard
-                        deal={dealParams}
-                        approvalMatrix={data.approvalMatrix}
-                        language={ui.language}
-                        shocks={data.shocks}
-                        setShocks={data.setShocks}
-                        user={currentUser}
-                      />
+                      <ShocksDashboard deal={dealParams} />
                     </div>
                   )}
                 </Suspense>
@@ -393,10 +325,7 @@ const AppContent: React.FC = () => {
               ui.setIsAiOpen(false);
               ui.setCurrentView('AI_LAB');
             }}
-            contextData={{
-              activeDeal: dealParams,
-              marketContext: assistantMarketContext,
-            }}
+            activeDeal={dealParams}
           />
         </Suspense>
 

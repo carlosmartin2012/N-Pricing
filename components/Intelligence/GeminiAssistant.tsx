@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Transaction } from '../../types';
 import { Sparkles, Send, X, Bot, User, Cpu, Maximize2 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { resolveChatGrounding } from '../../utils/aiGrounding';
+import { buildAssistantMarketContext } from '../../appSummaries';
 
 interface Message {
   id: string;
@@ -14,14 +15,15 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onOpenFullChat: () => void;
-  contextData: {
-    activeDeal: Transaction;
-    marketContext: string; // Brief description or JSON string of current curve
-  };
+  activeDeal: Transaction;
 }
 
-const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, contextData }) => {
+const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, activeDeal }) => {
   const data = useData();
+  const marketContext = useMemo(
+    () => buildAssistantMarketContext(data.deals, data.yieldCurves),
+    [data.deals, data.yieldCurves]
+  );
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
@@ -34,9 +36,9 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const grounding = resolveChatGrounding({
     input:
-      contextData.activeDeal.id ||
-      contextData.activeDeal.clientId ||
-      contextData.activeDeal.productType ||
+      activeDeal.id ||
+      activeDeal.clientId ||
+      activeDeal.productType ||
       'ACTIVE_DEAL',
     deals: data.deals,
     pricingDossiers: data.pricingDossiers,
@@ -65,17 +67,17 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
 
         CURRENT APP CONTEXT:
         You are looking at the following active transaction deal structure:
-        ${JSON.stringify(contextData.activeDeal, null, 2)}
+        ${JSON.stringify(activeDeal, null, 2)}
 
         MARKET CONTEXT:
-        ${contextData.marketContext}
+        ${marketContext}
 
         ${grounding.summary}
 
         YOUR GOAL:
         Provide concise, high-precision financial advice.
-        - If the user asks about RAROC, analyze the current risk weight (${contextData.activeDeal.riskWeight}%) vs the margin (${contextData.activeDeal.marginTarget}%).
-        - If the user asks about Duration, mention the ${contextData.activeDeal.durationMonths} month term.
+        - If the user asks about RAROC, analyze the current risk weight (${activeDeal.riskWeight}%) vs the margin (${activeDeal.marginTarget}%).
+        - If the user asks about Duration, mention the ${activeDeal.durationMonths} month term.
         - Explain FTP concepts (Liquidity Premium, Option Costs) clearly.
         - Be professional, industrial, and concise. Do not use markdown headers, just plain text or bullet points.
       `;
@@ -272,7 +274,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, con
             </button>
           </div>
           <div className="text-[9px] text-slate-600 mt-2 text-center font-mono">
-            Powered by Gemini 2.0 Flash • Context: Active Deal {contextData.activeDeal.id || 'NEW'}
+            Powered by Gemini 2.0 Flash • Context: Active Deal {activeDeal.id || 'NEW'}
           </div>
         </div>
       </div>

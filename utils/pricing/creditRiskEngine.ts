@@ -72,7 +72,7 @@ export function classifyAnejoSegment(
 
   // 2. Product-based classification
   if (product.includes('mortgage') || product.includes('hipoteca')) {
-    const ltv = ltvPct ?? 1; // assume high LTV if unknown
+    const ltv = Math.max(0, Math.min(ltvPct ?? 1, 1.5)); // clamp to [0, 150%]; default high if unknown
     return ltv <= MORTGAGE_LTV_THRESHOLD ? 'MORTGAGE_LOW_LTV' : 'MORTGAGE_HIGH_LTV';
   }
 

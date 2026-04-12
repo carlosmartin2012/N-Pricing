@@ -1,13 +1,7 @@
-import React, { Suspense, useCallback, useMemo } from 'react';
-import type {
-  ApprovalMatrixConfig,
-  BehaviouralModel,
-  BusinessUnit,
-  ClientEntity,
-  ProductDefinition,
-  Transaction,
-} from '../../types';
-import type { Language } from '../../translations';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import type { Transaction } from '../../types';
+import { useData } from '../../contexts/DataContext';
+import { useUI } from '../../contexts/UIContext';
 import DealInputPanel from './DealInputPanel';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
 import DelegationAuditPanel from './DelegationAuditPanel';
@@ -24,30 +18,15 @@ const PricingComparison = React.lazy(() => import('./PricingComparison'));
 interface Props {
   dealParams: Transaction;
   setDealParams: React.Dispatch<React.SetStateAction<Transaction>>;
-  matchedMethod: string;
-  setMatchedMethod: React.Dispatch<React.SetStateAction<string>>;
-  deals: Transaction[];
-  clients: ClientEntity[];
-  products: ProductDefinition[];
-  businessUnits: BusinessUnit[];
-  behaviouralModels: BehaviouralModel[];
-  approvalMatrix: ApprovalMatrixConfig;
-  language: Language;
 }
 
 export const CalculatorWorkspace: React.FC<Props> = ({
   dealParams,
   setDealParams,
-  matchedMethod,
-  setMatchedMethod,
-  deals,
-  clients,
-  products,
-  businessUnits,
-  behaviouralModels,
-  approvalMatrix,
-  language,
 }) => {
+  const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = useData();
+  const { language } = useUI();
+  const [matchedMethod, setMatchedMethod] = useState('Matched Maturity');
   const handleParamChange = useCallback(
     (key: keyof Transaction, value: Transaction[keyof Transaction] | undefined) => {
       setDealParams((previousDeal) => ({ ...previousDeal, [key]: value }));

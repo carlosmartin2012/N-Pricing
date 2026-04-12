@@ -61,7 +61,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  // Restore error tracker user context from cached session
+  // Keep error tracker in sync with the current authenticated user so that
+  // error reports always attribute to the correct session.
   useEffect(() => {
     if (currentUser) {
       errorTracker.setUser({
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: currentUser.role,
       });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- one-time hydration from cache
+  }, [currentUser]);
 
   // Track user activity to extend session. The previous version wired up the
   // listeners but never consumed `lastActivity`, so sessions always expired at

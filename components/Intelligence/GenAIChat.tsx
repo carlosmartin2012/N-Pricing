@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as auditApi from '../../api/audit';
 import * as configApi from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
-import type { Transaction } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { createLogger } from '../../utils/logger';
 import { appendAITraceToPricingDossier, buildAIResponseTrace, resolveChatGrounding } from '../../utils/aiGrounding';
+import { buildMarketSummary } from '../../appSummaries';
 import { ChatComposer } from './ChatComposer';
 import { ChatHistoryPanel } from './ChatHistoryPanel';
 import { ChatMessageList } from './ChatMessageList';
@@ -21,16 +21,13 @@ import {
   type ChatSession,
 } from './genAIChatUtils';
 
-interface Props {
-  deals: Transaction[];
-  marketSummary: string;
-}
-
 const log = createLogger('GenAIChat');
 
-const GenAIChat: React.FC<Props> = ({ deals, marketSummary }) => {
+const GenAIChat: React.FC = () => {
   const data = useData();
   const { currentUser } = useAuth();
+  const { deals, yieldCurves } = data;
+  const marketSummary = useMemo(() => buildMarketSummary(deals, yieldCurves), [deals, yieldCurves]);
   const initialSessionRef = useRef<ChatSession | null>(null);
   if (!initialSessionRef.current) {
     initialSessionRef.current = createDefaultChatSession();

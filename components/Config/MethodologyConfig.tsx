@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Panel } from '../ui/LayoutComponents';
-import {
-  ApprovalMatrixConfig,
-  ProductDefinition,
-  BusinessUnit,
-  ClientEntity,
-  GeneralRule,
-  FtpRateCard,
-  GreeniumRateCard,
-  PhysicalRateCard,
-  TransitionRateCard,
-} from '../../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import GeneralRulesTab from './tabs/GeneralRulesTab';
 import RateCardsTab from './tabs/RateCardsTab';
 import ESGGridTab from './tabs/ESGGridTab';
@@ -19,52 +10,22 @@ import MasterDataTab from './tabs/MasterDataTab';
 import ReportSchedulingTab from './tabs/ReportSchedulingTab';
 import MethodologyTabNavigation from './MethodologyTabNavigation';
 import ModelInventoryPanel from './ModelInventoryPanel';
-import type { ConfigUser, MethodologyConfigMode, MethodologyTabId } from './configTypes';
+import type { MethodologyConfigMode, MethodologyTabId } from './configTypes';
 
 interface Props {
   mode: MethodologyConfigMode;
-  rules: GeneralRule[];
-  setRules: React.Dispatch<React.SetStateAction<GeneralRule[]>>;
-  approvalMatrix?: ApprovalMatrixConfig;
-  setApprovalMatrix?: (config: ApprovalMatrixConfig) => void;
-  products?: ProductDefinition[];
-  setProducts?: React.Dispatch<React.SetStateAction<ProductDefinition[]>>;
-  businessUnits?: BusinessUnit[];
-  setBusinessUnits?: React.Dispatch<React.SetStateAction<BusinessUnit[]>>;
-  clients?: ClientEntity[];
-  setClients?: React.Dispatch<React.SetStateAction<ClientEntity[]>>;
-  ftpRateCards?: FtpRateCard[];
-  setFtpRateCards?: React.Dispatch<React.SetStateAction<FtpRateCard[]>>;
-  transitionGrid?: TransitionRateCard[];
-  setTransitionGrid?: React.Dispatch<React.SetStateAction<TransitionRateCard[]>>;
-  physicalGrid?: PhysicalRateCard[];
-  setPhysicalGrid?: React.Dispatch<React.SetStateAction<PhysicalRateCard[]>>;
-  greeniumGrid?: GreeniumRateCard[];
-  setGreeniumGrid?: React.Dispatch<React.SetStateAction<GreeniumRateCard[]>>;
-  user: ConfigUser;
 }
 
-const MethodologyConfig: React.FC<Props> = ({
-  mode,
-  rules,
-  approvalMatrix,
-  setApprovalMatrix,
-  products = [],
-  setProducts,
-  businessUnits = [],
-  setBusinessUnits,
-  clients = [],
-  setClients,
-  ftpRateCards = [],
-  setFtpRateCards,
-  transitionGrid = [],
-  setTransitionGrid,
-  physicalGrid = [],
-  setPhysicalGrid,
-  greeniumGrid = [],
-  setGreeniumGrid,
-  user,
-}) => {
+const MethodologyConfig: React.FC<Props> = ({ mode }) => {
+  const { currentUser: user } = useAuth();
+  const data = useData();
+  const {
+    rules, approvalMatrix, setApprovalMatrix,
+    products, setProducts, businessUnits, setBusinessUnits,
+    clients, setClients, ftpRateCards, setFtpRateCards,
+    transitionGrid, setTransitionGrid, physicalGrid, setPhysicalGrid,
+    greeniumGrid, setGreeniumGrid,
+  } = data;
   const [activeTab, setActiveTab] = useState<MethodologyTabId>(mode === 'SYS_CONFIG' ? 'RATE_CARDS' : 'GENERAL');
 
   useEffect(() => {
