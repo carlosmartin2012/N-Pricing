@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createAuditEntry } from '../../api/audit';
 import { Archive, Download, Layers3, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
-import type { ApprovalMatrixConfig, PortfolioSnapshot, Transaction, UserProfile } from '../../types';
+import type { ApprovalMatrixConfig, PortfolioSnapshot, Transaction } from '../../types';
 import { Badge, Button, Panel, SelectInput, TextInput } from '../ui/LayoutComponents';
 import { useToast } from '../ui/Toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { useGovernance } from '../../contexts/DataContext';
 import type { PricingContext } from '../../utils/pricingEngine';
 import { portfolioReportingService } from '../../utils/supabase/portfolioReportingService';
 import {
@@ -18,9 +20,6 @@ interface PortfolioSnapshotsDashboardProps {
   deals: Transaction[];
   approvalMatrix: ApprovalMatrixConfig;
   pricingContext: PricingContext;
-  snapshots: PortfolioSnapshot[];
-  onSnapshotsChange: React.Dispatch<React.SetStateAction<PortfolioSnapshot[]>>;
-  currentUser: UserProfile | null;
 }
 
 const nominalFormatter = new Intl.NumberFormat('en-US', {
@@ -40,10 +39,9 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
   deals,
   approvalMatrix,
   pricingContext,
-  snapshots,
-  onSnapshotsChange,
-  currentUser,
 }) => {
+  const { currentUser } = useAuth();
+  const { portfolioSnapshots: snapshots, setPortfolioSnapshots: onSnapshotsChange } = useGovernance();
   const { addToast } = useToast();
   const [snapshotName, setSnapshotName] = useState(`Portfolio Snapshot ${new Date().toISOString().slice(0, 10)}`);
   const [selectedPreset, setSelectedPreset] = useState<PortfolioScenarioPreset>('BASE');

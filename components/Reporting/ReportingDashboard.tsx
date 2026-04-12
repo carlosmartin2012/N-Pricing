@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
 import { INITIAL_DEAL } from '../../constants';
 import { Badge } from '../ui/LayoutComponents';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { useData } from '../../contexts/DataContext';
+import { useCoreData, useMarketData } from '../../contexts/DataContext';
 import { BarChart4, RefreshCw, AlertCircle, Info, Calculator, Globe, Lock, Unlock, Layers, Download, ChevronDown } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+
 import { useEntity } from '../../contexts/EntityContext';
 import { useUI } from '../../contexts/UIContext';
 import {
@@ -59,28 +59,29 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 }
 
 const ReportingDashboard: React.FC = () => {
-  const contextData = useData();
-  const { deals, products, businessUnits, clients } = contextData;
-  const { currentUser } = useAuth();
+  // Granular context subscriptions: avoids re-renders from governance changes
+  const { deals, products, businessUnits, clients, approvalMatrix, rules } = useCoreData();
+  const marketData = useMarketData();
+
   const { activeEntity, isGroupScope } = useEntity();
   const { t } = useUI();
-  const behaviouralModels = contextData.behaviouralModels;
+  const behaviouralModels = marketData.behaviouralModels;
   const liquidityCurvePoints = useMemo(
-    () => getPrimaryLiquidityPoints(contextData.liquidityCurves),
-    [contextData.liquidityCurves]
+    () => getPrimaryLiquidityPoints(marketData.liquidityCurves),
+    [marketData.liquidityCurves]
   );
   const pricingContext = useMemo(
     () =>
       buildPricingContext(
         {
-          yieldCurves: contextData.yieldCurves,
-          liquidityCurves: contextData.liquidityCurves,
-          rules: contextData.rules,
-          ftpRateCards: contextData.ftpRateCards,
-          transitionGrid: contextData.transitionGrid,
-          physicalGrid: contextData.physicalGrid,
-          greeniumGrid: contextData.greeniumGrid,
-          behaviouralModels: contextData.behaviouralModels,
+          yieldCurves: marketData.yieldCurves,
+          liquidityCurves: marketData.liquidityCurves,
+          rules,
+          ftpRateCards: marketData.ftpRateCards,
+          transitionGrid: marketData.transitionGrid,
+          physicalGrid: marketData.physicalGrid,
+          greeniumGrid: marketData.greeniumGrid,
+          behaviouralModels: marketData.behaviouralModels,
         },
         {
           clients,
@@ -91,14 +92,14 @@ const ReportingDashboard: React.FC = () => {
     [
       businessUnits,
       clients,
-      contextData.behaviouralModels,
-      contextData.ftpRateCards,
-      contextData.liquidityCurves,
-      contextData.physicalGrid,
-      contextData.greeniumGrid,
-      contextData.rules,
-      contextData.transitionGrid,
-      contextData.yieldCurves,
+      rules,
+      marketData.behaviouralModels,
+      marketData.ftpRateCards,
+      marketData.liquidityCurves,
+      marketData.physicalGrid,
+      marketData.greeniumGrid,
+      marketData.transitionGrid,
+      marketData.yieldCurves,
       products,
     ]
   );
@@ -165,8 +166,8 @@ const ReportingDashboard: React.FC = () => {
   // Lazy-computed results Map for Portfolio Review tab (computed only when active)
   const portfolioResultsMap = useMemo(() => {
     if (activeSubTab !== 'PORTFOLIO_REVIEW') return new Map();
-    return batchReprice(deals, contextData.approvalMatrix, pricingContext);
-  }, [activeSubTab, deals, contextData.approvalMatrix, pricingContext]);
+    return batchReprice(deals, approvalMatrix, pricingContext);
+  }, [activeSubTab, deals, approvalMatrix, pricingContext]);
 
   const findClientName = (id: string) => clients.find((c) => c.id === id)?.name || id;
 
@@ -475,7 +476,7 @@ const ReportingDashboard: React.FC = () => {
                 products={products}
                 businessUnits={businessUnits}
                 clients={clients}
-                contextData={contextData}
+                contextData={{ ...marketData, approvalMatrix, rules }}
               />
             ) : activeSubTab === 'EXECUTIVE' ? (
               <ExecutiveDashboard
@@ -489,11 +490,8 @@ const ReportingDashboard: React.FC = () => {
             ) : activeSubTab === 'PORTFOLIO_SNAPSHOTS' ? (
               <PortfolioSnapshotsDashboard
                 deals={deals}
-                approvalMatrix={contextData.approvalMatrix}
+                approvalMatrix={approvalMatrix}
                 pricingContext={pricingContext}
-                snapshots={contextData.portfolioSnapshots}
-                onSnapshotsChange={contextData.setPortfolioSnapshots}
-                currentUser={currentUser}
               />
             ) : activeSubTab === 'VINTAGE' ? (
               <VintageAnalysis
