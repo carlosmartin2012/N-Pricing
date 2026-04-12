@@ -7,12 +7,17 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
     return {
       server: {
-        // Port 5000 is macOS AirPlay — use 5173 (Vite default) instead.
-        port: 5173,
+        port: 5000,
+        strictPort: true,
         host: '0.0.0.0',
         allowedHosts: true,
         watch: {
-          ignored: ['**/screenshots/**', '**/test-results/**', '**/playwright-report/**'],
+          ignored: [
+            '**/.local/**',
+            '**/screenshots/**',
+            '**/test-results/**',
+            '**/playwright-report/**',
+          ],
         },
         proxy: {
           '/api': {
