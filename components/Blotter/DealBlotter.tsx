@@ -19,6 +19,7 @@ import DealBlotterDrawers from './DealBlotterDrawers';
 import { buildDealsCsv, formatDealCurrency } from './blotterUtils';
 import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
 import { BulkActionBar } from './BulkActionBar';
+import { DealComparisonDrawer } from './DealComparisonDrawer';
 import { useBlotterActions } from './hooks/useBlotterActions';
 import { useBlotterState } from './hooks/useBlotterState';
 import { canBatchRepriceDeals } from '../../utils/dealWorkflow';
@@ -30,6 +31,7 @@ const DealBlotter: React.FC = () => {
   const { deals, setDeals, products, clients, businessUnits } = data;
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(new Set());
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
 
   const userRole = (user?.role || 'Trader') as UserRole;
   const {
@@ -196,6 +198,7 @@ const DealBlotter: React.FC = () => {
   ]);
 
   return (
+    <>
     <Panel
       title={t.dealBlotter}
       className="h-full overflow-hidden"
@@ -244,6 +247,7 @@ const DealBlotter: React.FC = () => {
           }}
           onBatchReprice={() => { void handleBatchReprice(); setSelectedDealIds(new Set()); }}
           canReprice={canBatchRepriceDeals(userRole)}
+          onCompare={() => setIsCompareOpen(true)}
         />
 
         <BlotterTable
@@ -306,6 +310,21 @@ const DealBlotter: React.FC = () => {
         />
       </div>
     </Panel>
+
+    {(() => {
+      const ids = Array.from(selectedDealIds);
+      const compareA = filteredDeals.find((d) => d.id === ids[0]) || null;
+      const compareB = filteredDeals.find((d) => d.id === ids[1]) || null;
+      return (
+        <DealComparisonDrawer
+          isOpen={isCompareOpen}
+          onClose={() => setIsCompareOpen(false)}
+          dealA={compareA}
+          dealB={compareB}
+        />
+      );
+    })()}
+    </>
   );
 };
 

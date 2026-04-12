@@ -49,6 +49,28 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
 });
 
+// API documentation — serve OpenAPI spec + Swagger UI
+app.get('/api/docs/spec', (_req, res) => {
+  const specPath = path.resolve(__dirname, '..', 'docs', 'api-spec.yaml');
+  if (fs.existsSync(specPath)) {
+    res.setHeader('Content-Type', 'text/yaml');
+    res.sendFile(specPath);
+  } else {
+    res.status(404).json({ error: 'API spec not found' });
+  }
+});
+app.get('/api/docs', (_req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`<!DOCTYPE html>
+<html><head><title>N-Pricing API</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+</head><body>
+<div id="swagger-ui"></div>
+<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script>SwaggerUIBundle({ url: '/api/docs/spec', dom_id: '#swagger-ui' });</script>
+</body></html>`);
+});
+
 // Protected routes (auth required)
 app.use('/api/deals', authMiddleware, dealsRouter);
 app.use('/api/audit', authMiddleware, auditRouter);

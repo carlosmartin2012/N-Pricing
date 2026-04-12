@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckSquare, Download, RotateCcw, X } from 'lucide-react';
+import { CheckSquare, Download, GitCompare, RotateCcw, X } from 'lucide-react';
 
 interface Props {
   selectedCount: number;
@@ -7,6 +7,7 @@ interface Props {
   onExport: () => void;
   onBatchReprice: () => void;
   canReprice: boolean;
+  onCompare?: () => void;
 }
 
 export const BulkActionBar: React.FC<Props> = ({
@@ -15,6 +16,7 @@ export const BulkActionBar: React.FC<Props> = ({
   onExport,
   onBatchReprice,
   canReprice,
+  onCompare,
 }) => {
   if (selectedCount === 0) return null;
 
@@ -36,6 +38,16 @@ export const BulkActionBar: React.FC<Props> = ({
         <Download size={12} />
         Export
       </button>
+
+      {selectedCount === 2 && onCompare && (
+        <button
+          onClick={onCompare}
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium text-[var(--nfq-accent)] transition-colors hover:bg-[rgba(6,182,212,0.08)]"
+        >
+          <GitCompare size={12} />
+          Compare
+        </button>
+      )}
 
       {canReprice && (
         <button
