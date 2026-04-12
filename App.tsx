@@ -39,6 +39,7 @@ const GenAIChat = React.lazy(() => import('./components/Intelligence/GenAIChat')
 const ReportingDashboard = React.lazy(() => import('./components/Reporting/ReportingDashboard'));
 const RAROCCalculator = React.lazy(() => import('./components/RAROC/RAROCCalculator'));
 const ShocksDashboard = React.lazy(() => import('./components/Risk/ShocksDashboard'));
+const NotificationCenter = React.lazy(() => import('./components/Notifications/NotificationCenter'));
 const HealthDashboard = React.lazy(() => import('./components/Admin/HealthDashboard'));
 const UserConfigModal = React.lazy(() =>
   import('./components/ui/UserConfigModal').then((module) => ({
@@ -242,6 +243,7 @@ const AppContent: React.FC = () => {
                     <Route path="/audit" element={<div className="relative z-0 flex h-full flex-col"><AuditLog /></div>} />
                     <Route path="/health" element={<div className="relative z-0 flex h-full flex-col"><HealthDashboard /></div>} />
                     <Route path="/manual" element={<div className="relative z-0 h-full"><UserManual /></div>} />
+                    <Route path="/notifications" element={<div className="relative z-0 flex h-full flex-col"><NotificationCenter /></div>} />
                     <Route path="/ai" element={<div className="relative z-0 flex h-full flex-col"><GenAIChat /></div>} />
                     <Route path="/stress-testing" element={<div className="relative z-0 flex h-full flex-col"><ShocksDashboard deal={dealParams} /></div>} />
                     <Route path="/" element={<Navigate to="/pricing" replace />} />

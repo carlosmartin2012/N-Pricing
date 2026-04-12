@@ -12,7 +12,11 @@ export type SubTab =
   | 'VINTAGE'
   | 'BACKTEST'
   | 'PORTFOLIO_REVIEW'
-  | 'CUSTOM_DASHBOARD';
+  | 'CUSTOM_DASHBOARD'
+  | 'CLIENT_PROFITABILITY'
+  | 'CONCENTRATION'
+  | 'PRICE_ELASTICITY'
+  | 'EX_POST_RAROC';
 
 export interface TabDefinition {
   key: SubTab;
@@ -46,6 +50,10 @@ export const TAB_GROUPS: TabDefinition[][] = [
   ],
   [
     { key: 'CUSTOM_DASHBOARD', label: 'My Dashboard', activeColor: 'cyan' },
+    { key: 'CLIENT_PROFITABILITY', label: 'Client Profitability', activeColor: 'emerald' },
+    { key: 'CONCENTRATION', label: 'Concentration Risk', activeColor: 'purple' },
+    { key: 'PRICE_ELASTICITY', label: 'Price Elasticity', activeColor: 'emerald' },
+    { key: 'EX_POST_RAROC', label: 'Ex-Post RAROC', activeColor: 'purple' },
   ],
 ];
 

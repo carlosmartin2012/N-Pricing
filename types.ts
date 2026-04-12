@@ -99,6 +99,8 @@ export interface Transaction {
   status?: 'Draft' | 'Booked' | 'Pending' | 'Pending_Approval' | 'Approved' | 'Rejected' | 'Review';
   desk?: string; // usually businessLine
   entityId?: string;
+  parentDealId?: string; // links amendment/renewal to original deal
+  amendmentType?: 'AMENDMENT' | 'RENEWAL';
 
   // Client Data
   clientId: string;
@@ -415,7 +417,8 @@ export type ViewState =
   | 'SHOCKS'
   | 'REPORTING'
   | 'RAROC'
-  | 'HEALTH';
+  | 'HEALTH'
+  | 'NOTIFICATIONS';
 export type AuditModule = ViewState | 'AUTH' | 'MASTER_DATA' | 'SYS_CONFIG' | 'SYSTEM' | (string & {});
 
 export interface YieldCurvePoint {

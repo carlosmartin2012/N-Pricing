@@ -41,6 +41,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   AUDIT_LOG: '/audit',
   HEALTH: '/health',
   MANUAL: '/manual',
+  NOTIFICATIONS: '/notifications',
 };
 
 const PATH_TO_VIEW: Record<string, ViewState> = {};

@@ -48,6 +48,10 @@ const VintageAnalysis = React.lazy(() => import('./VintageAnalysis'));
 const BacktestingDashboard = React.lazy(() => import('./BacktestingDashboard'));
 const PortfolioReviewDashboard = React.lazy(() => import('./PortfolioReviewDashboard'));
 const DashboardBuilder = React.lazy(() => import('./DashboardBuilder').then((m) => ({ default: m.DashboardBuilder })));
+const ClientProfitabilityDashboard = React.lazy(() => import('./ClientProfitabilityDashboard'));
+const ConcentrationDashboard = React.lazy(() => import('./ConcentrationDashboard'));
+const PriceElasticityDashboard = React.lazy(() => import('./PriceElasticityDashboard'));
+const ExPostRAROCDashboard = React.lazy(() => import('./ExPostRAROCDashboard'));
 
 function downloadFile(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
@@ -514,6 +518,17 @@ const ReportingDashboard: React.FC = () => {
                 results={portfolioResultsMap}
               />
             ) : activeSubTab === 'CUSTOM_DASHBOARD' ? (
+              <DashboardBuilder />
+            ) : activeSubTab === 'CLIENT_PROFITABILITY' ? (
+              <ClientProfitabilityDashboard deals={deals} clients={clients} />
+            ) : activeSubTab === 'CONCENTRATION' ? (
+              <ConcentrationDashboard deals={deals} />
+            
+            ) : activeSubTab === 'PRICE_ELASTICITY' ? (
+              <PriceElasticityDashboard deals={deals} />
+            ) : activeSubTab === 'EX_POST_RAROC' ? (
+              <ExPostRAROCDashboard deals={deals} />
+            ) : false ? (
               <DashboardBuilder />
             ) : (
               <BehaviourFocusDashboard behaviouralModels={behaviouralModels} />
