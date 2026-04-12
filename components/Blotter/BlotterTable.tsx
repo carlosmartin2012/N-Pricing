@@ -26,6 +26,8 @@ interface Props {
   onEditDeal: (deal: Transaction) => void;
   onDeleteDeal: (deal: Transaction) => void;
   formatCurrency: (value: number, currency: string) => string;
+  selectedDealIds?: Set<string>;
+  onSelectionChange?: (ids: Set<string>) => void;
 }
 
 const getActionIcon = (label: string) => {
@@ -73,7 +75,9 @@ const DealRow: React.FC<{
   onDeleteDeal: (deal: Transaction) => void;
   formatCurrency: (value: number, currency: string) => string;
   style?: React.CSSProperties;
-}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, formatCurrency, style }) => {
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
+}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, formatCurrency, style, isSelected, onToggleSelect }) => {
   const availableActions = getAvailableActions(deal.status || 'Draft', userRole);
   const canEdit = canEditDeal(deal, userRole);
   const canClone = canCreateOrCloneDeals(userRole);
@@ -84,7 +88,17 @@ const DealRow: React.FC<{
   const statusStyle = getStatusStyle(deal.status);
 
   return (
-    <tr style={style} className="group transition-colors hover:bg-[var(--nfq-bg-elevated)] even:bg-[var(--nfq-bg-surface)] odd:bg-[var(--nfq-bg-root)]">
+    <tr style={style} className={`group transition-colors hover:bg-[var(--nfq-bg-elevated)] even:bg-[var(--nfq-bg-surface)] odd:bg-[var(--nfq-bg-root)] ${isSelected ? '!bg-[rgba(6,182,212,0.06)]' : ''}`}>
+      {onToggleSelect && (
+        <td className="w-10 border-b border-[color:var(--nfq-border-ghost)] px-2 py-2 text-center">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onToggleSelect}
+            className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30"
+          />
+        </td>
+      )}
       <td className="whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2">
         <div className="font-mono text-xs font-bold text-[var(--nfq-accent)] [font-variant-numeric:tabular-nums]">{deal.id}</div>
         <div className="font-mono text-[9px] text-[color:var(--nfq-text-muted)] [font-variant-numeric:tabular-nums]">{deal.startDate}</div>
@@ -179,9 +193,19 @@ const DealRow: React.FC<{
   );
 };
 
-const TableHeader: React.FC = () => (
+const TableHeader: React.FC<{ hasSelection?: boolean; allSelected?: boolean; onToggleAll?: () => void }> = ({ hasSelection, allSelected, onToggleAll }) => (
   <thead className="sticky top-0 z-10 bg-[var(--nfq-bg-surface)]">
     <tr>
+      {hasSelection && (
+        <th scope="col" className="w-10 border-b border-[color:var(--nfq-border-ghost)] px-2 py-2 text-center">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={onToggleAll}
+            className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30"
+          />
+        </th>
+      )}
       <th scope="col" className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-left nfq-label">
         Transaction ID
       </th>
@@ -224,7 +248,25 @@ const BlotterTable: React.FC<Props> = ({
   onEditDeal,
   onDeleteDeal,
   formatCurrency,
+  selectedDealIds = new Set(),
+  onSelectionChange,
 }) => {
+  const toggleDeal = (dealId: string) => {
+    if (!onSelectionChange) return;
+    const next = new Set(selectedDealIds);
+    if (next.has(dealId)) next.delete(dealId);
+    else next.add(dealId);
+    onSelectionChange(next);
+  };
+
+  const toggleAll = () => {
+    if (!onSelectionChange) return;
+    if (selectedDealIds.size === deals.filter((d) => d.id).length) {
+      onSelectionChange(new Set());
+    } else {
+      onSelectionChange(new Set(deals.map((d) => d.id).filter(Boolean) as string[]));
+    }
+  };
   const modelNames = useMemo(
     () => new Map(behaviouralModels.map((model) => [model.id, model.name])),
     [behaviouralModels]
@@ -274,10 +316,16 @@ const BlotterTable: React.FC<Props> = ({
       <div className="flex-1 overflow-auto custom-scrollbar">
         <div className="inline-block min-w-full align-middle">
           <table className="min-w-full" aria-label="Deal blotter">
-            <TableHeader />
+            <TableHeader hasSelection={!!onSelectionChange} allSelected={selectedDealIds.size > 0 && selectedDealIds.size === deals.filter((d) => d.id).length} onToggleAll={toggleAll} />
             <tbody>
               {deals.map((deal) => (
-                <DealRow key={deal.id} deal={deal} {...rowProps} />
+                <DealRow
+                  key={deal.id}
+                  deal={deal}
+                  {...rowProps}
+                  isSelected={deal.id ? selectedDealIds.has(deal.id) : false}
+                  onToggleSelect={onSelectionChange && deal.id ? () => toggleDeal(deal.id!) : undefined}
+                />
               ))}
             </tbody>
           </table>
@@ -305,7 +353,7 @@ const BlotterTable: React.FC<Props> = ({
     >
       <div className="inline-block min-w-full align-middle">
         <table className="min-w-full" aria-label="Deal blotter">
-          <TableHeader />
+          <TableHeader hasSelection={!!onSelectionChange} allSelected={selectedDealIds.size > 0 && selectedDealIds.size === deals.filter((d) => d.id).length} onToggleAll={toggleAll} />
           <tbody>
             {paddingTop > 0 && (
               <tr>
@@ -320,6 +368,8 @@ const BlotterTable: React.FC<Props> = ({
                   key={deal.id}
                   deal={deal}
                   {...rowProps}
+                  isSelected={deal.id ? selectedDealIds.has(deal.id) : false}
+                  onToggleSelect={onSelectionChange && deal.id ? () => toggleDeal(deal.id!) : undefined}
                   style={{
                     height: `${virtualRow.size}px`,
                   }}

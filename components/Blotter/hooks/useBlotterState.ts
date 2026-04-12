@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import type { DataContextType } from '../../../contexts/DataContext';
 import { findLatestPortfolioSnapshotForDeal } from '../../../utils/aiGrounding';
 import { getAvailableActions, type UserRole } from '../../../utils/dealWorkflow';
@@ -15,8 +16,34 @@ interface UseBlotterStateParams {
 }
 
 export function useBlotterState({ deals, data, userRole }: UseBlotterStateParams) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Derive filter state from URL, fallback to defaults
+  const searchTerm = searchParams.get('q') || '';
+  const filterStatus = searchParams.get('status') || 'All';
+
+  const setSearchTerm = useCallback(
+    (term: string) => {
+      setSearchParams((prev) => {
+        if (term) prev.set('q', term);
+        else prev.delete('q');
+        return prev;
+      }, { replace: true });
+    },
+    [setSearchParams]
+  );
+
+  const setFilterStatus = useCallback(
+    (status: string) => {
+      setSearchParams((prev) => {
+        if (status && status !== 'All') prev.set('status', status);
+        else prev.delete('status');
+        return prev;
+      }, { replace: true });
+    },
+    [setSearchParams]
+  );
+
   const [selectedDossierDealId, setSelectedDossierDealId] = useState<string | null>(null);
 
   const filteredDeals = useMemo(

@@ -18,6 +18,7 @@ import BlotterToolbar from './BlotterToolbar';
 import DealBlotterDrawers from './DealBlotterDrawers';
 import { buildDealsCsv, formatDealCurrency } from './blotterUtils';
 import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
+import { BulkActionBar } from './BulkActionBar';
 import { useBlotterActions } from './hooks/useBlotterActions';
 import { useBlotterState } from './hooks/useBlotterState';
 import { canBatchRepriceDeals } from '../../utils/dealWorkflow';
@@ -28,6 +29,7 @@ const DealBlotter: React.FC = () => {
   const { t } = useUI();
   const { deals, setDeals, products, clients, businessUnits } = data;
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+  const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(new Set());
 
   const userRole = (user?.role || 'Trader') as UserRole;
   const {
@@ -232,6 +234,18 @@ const DealBlotter: React.FC = () => {
           onExportExcel={async () => exportDealsToExcel(filteredDeals)}
         />
 
+        <BulkActionBar
+          selectedCount={selectedDealIds.size}
+          onClear={() => setSelectedDealIds(new Set())}
+          onExport={() => {
+            const selected = filteredDeals.filter((d) => d.id && selectedDealIds.has(d.id));
+            if (selected.length > 0) void exportDealsToExcel(selected);
+            setSelectedDealIds(new Set());
+          }}
+          onBatchReprice={() => { void handleBatchReprice(); setSelectedDealIds(new Set()); }}
+          canReprice={canBatchRepriceDeals(userRole)}
+        />
+
         <BlotterTable
           deals={filteredDeals}
           behaviouralModels={behaviouralModels}
@@ -242,6 +256,8 @@ const DealBlotter: React.FC = () => {
           onEditDeal={handleEdit}
           onDeleteDeal={handleDelete}
           formatCurrency={formatDealCurrency}
+          selectedDealIds={selectedDealIds}
+          onSelectionChange={setSelectedDealIds}
         />
 
         <BlotterFooter deals={filteredDeals} committeeSummary={committeeSummary} />
