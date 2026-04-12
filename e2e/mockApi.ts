@@ -41,14 +41,18 @@ type MockDealRow = ReturnType<typeof mapDealToDB> & {
 
 interface MockState {
   audit: Array<Record<string, unknown>>;
+  alertRules: Array<Record<string, unknown>>;
   deals: MockDealRow[];
+  recentMetrics: Array<Record<string, unknown>>;
   notifications: Array<Record<string, unknown>>;
   systemConfig: Record<string, unknown>;
 }
 
 interface MockApiOptions {
   audit?: Array<Record<string, unknown>>;
+  alertRules?: Array<Record<string, unknown>>;
   deals?: Transaction[];
+  recentMetrics?: Array<Record<string, unknown>>;
   notifications?: Array<Record<string, unknown>>;
   systemConfigOverrides?: Record<string, unknown>;
 }
@@ -120,10 +124,96 @@ function defaultSystemConfig(): Record<string, unknown> {
   };
 }
 
+function defaultAlertRules(): Array<Record<string, unknown>> {
+  return [
+    {
+      id: 'alert-latency-1',
+      entity_id: DEFAULT_ENTITY_ID,
+      name: 'Latency Guardrail',
+      metric_name: 'pricing_latency_ms',
+      operator: 'gte',
+      threshold: 250,
+      recipients: ['treasury@nfq.es'],
+      is_active: true,
+      last_triggered_at: null,
+      created_at: nowIso(),
+    },
+    {
+      id: 'alert-errors-1',
+      entity_id: DEFAULT_ENTITY_ID,
+      name: 'Pricing Error Spike',
+      metric_name: 'error_count',
+      operator: 'gte',
+      threshold: 3,
+      recipients: ['ops@nfq.es'],
+      is_active: false,
+      last_triggered_at: null,
+      created_at: nowIso(),
+    },
+  ];
+}
+
+function defaultRecentMetrics(): Array<Record<string, unknown>> {
+  return [
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'pricing_latency_ms', metric_value: 32, recorded_at: nowIso() },
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'pricing_latency_ms', metric_value: 48, recorded_at: nowIso() },
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'pricing_latency_ms', metric_value: 58, recorded_at: nowIso() },
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'pricing_latency_ms', metric_value: 160, recorded_at: nowIso() },
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'pricing_latency_ms', metric_value: 200, recorded_at: nowIso() },
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'error_count', metric_value: 1, recorded_at: nowIso() },
+    { entity_id: DEFAULT_ENTITY_ID, metric_name: 'error_count', metric_value: 1, recorded_at: nowIso() },
+  ];
+}
+
+function percentileCont(values: number[], percentile: number): number | null {
+  if (!values.length) return null;
+  if (values.length === 1) return values[0] ?? null;
+  const sorted = [...values].sort((left, right) => left - right);
+  const index = (sorted.length - 1) * percentile;
+  const lowerIndex = Math.floor(index);
+  const upperIndex = Math.ceil(index);
+  const lower = sorted[lowerIndex] ?? sorted[0] ?? 0;
+  const upper = sorted[upperIndex] ?? sorted[sorted.length - 1] ?? lower;
+  if (lowerIndex === upperIndex) return lower;
+  return lower + (upper - lower) * (index - lowerIndex);
+}
+
+function buildObservabilitySummary(entityId: string, state: MockState) {
+  const latencyValues = state.recentMetrics
+    .filter(
+      (metric) =>
+        String(metric.entity_id ?? '') === entityId &&
+        String(metric.metric_name ?? '') === 'pricing_latency_ms',
+    )
+    .map((metric) => Number(metric.metric_value ?? 0))
+    .filter((value) => Number.isFinite(value));
+  const errorEvents24h = state.recentMetrics
+    .filter(
+      (metric) =>
+        String(metric.entity_id ?? '') === entityId &&
+        String(metric.metric_name ?? '') === 'error_count',
+    )
+    .reduce((sum, metric) => sum + Number(metric.metric_value ?? 0), 0);
+
+  return {
+    entityId,
+    pricingLatencyP50Ms: percentileCont(latencyValues, 0.5),
+    pricingLatencyP95Ms: percentileCont(latencyValues, 0.95),
+    latencySampleCount24h: latencyValues.length,
+    errorEvents24h,
+    dealCount: state.deals.filter((deal) => String(deal.entity_id ?? '') === entityId).length,
+    activeAlertRules: state.alertRules.filter(
+      (rule) => String(rule.entity_id ?? '') === entityId && rule.is_active === true,
+    ).length,
+  };
+}
+
 function createState(options: MockApiOptions = {}): MockState {
   return {
     audit: options.audit ? [...options.audit] : [],
+    alertRules: options.alertRules ? [...options.alertRules] : defaultAlertRules(),
     deals: (options.deals ?? MOCK_DEALS).map((deal) => makeDealRow(deal)),
+    recentMetrics: options.recentMetrics ? [...options.recentMetrics] : defaultRecentMetrics(),
     notifications: options.notifications
       ? [...options.notifications]
       : [
@@ -287,6 +377,64 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
     }
     if (path === '/audit/paginated' && method === 'GET') {
       await route.fulfill(json({ data: state.audit, total: state.audit.length }));
+      return;
+    }
+
+    if (path === '/observability/summary' && method === 'GET') {
+      const entityId = url.searchParams.get('entity_id') ?? DEFAULT_ENTITY_ID;
+      await route.fulfill(json(buildObservabilitySummary(entityId, state)));
+      return;
+    }
+    if (path === '/observability/metrics/recent' && method === 'GET') {
+      const entityId = url.searchParams.get('entity_id') ?? DEFAULT_ENTITY_ID;
+      const metricName = url.searchParams.get('metric_name') ?? '';
+      const limit = Number(url.searchParams.get('limit') ?? '50');
+      const rows = state.recentMetrics
+        .filter(
+          (metric) =>
+            String(metric.entity_id ?? '') === entityId &&
+            String(metric.metric_name ?? '') === metricName,
+        )
+        .slice(0, limit);
+      await route.fulfill(json(rows));
+      return;
+    }
+    if (path === '/observability/alert-rules' && method === 'GET') {
+      const entityId = url.searchParams.get('entity_id');
+      const rows = entityId
+        ? state.alertRules.filter((rule) => String(rule.entity_id ?? '') === entityId)
+        : state.alertRules;
+      await route.fulfill(json(rows));
+      return;
+    }
+    if (path === '/observability/alert-rules' && method === 'POST') {
+      const payload = body as Record<string, unknown>;
+      const row = {
+        id: String((payload.id as string | undefined) ?? `alert-${state.alertRules.length + 1}`),
+        created_at: nowIso(),
+        ...payload,
+      };
+      const index = state.alertRules.findIndex((rule) => String(rule.id ?? '') === String(row.id));
+      if (index >= 0) state.alertRules[index] = row;
+      else state.alertRules.unshift(row);
+      await route.fulfill(json(row));
+      return;
+    }
+    if (/^\/observability\/alert-rules\/[^/]+\/toggle$/.test(path) && method === 'PATCH') {
+      const alertId = path.split('/')[3] ?? '';
+      state.alertRules = state.alertRules.map((rule) =>
+        String(rule.id ?? '') === alertId
+          ? { ...rule, is_active: Boolean((body as { is_active?: boolean }).is_active) }
+          : rule,
+      );
+      const row = state.alertRules.find((rule) => String(rule.id ?? '') === alertId);
+      await route.fulfill(json(row ?? { error: 'Not found' }, row ? 200 : 404));
+      return;
+    }
+    if (/^\/observability\/alert-rules\/[^/]+$/.test(path) && method === 'DELETE') {
+      const alertId = path.split('/')[3] ?? '';
+      state.alertRules = state.alertRules.filter((rule) => String(rule.id ?? '') !== alertId);
+      await route.fulfill(json({ ok: true }));
       return;
     }
 

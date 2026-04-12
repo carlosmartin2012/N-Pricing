@@ -29,6 +29,7 @@ export const translations = {
         moreTools: 'More',
         close: 'Close',
         save: 'Save',
+        name: 'Name',
 
         // Views
         intro: 'Introduction',
@@ -435,6 +436,17 @@ export const translations = {
         noAlertRules: 'No alert rules configured',
         pricingLatency: 'Pricing Latency',
         errorRate: 'Error Rate',
+        pricingLatencyP50: 'Pricing Latency P50',
+        pricingLatencyP95: 'Pricing Latency P95',
+        errorEvents24h: 'Error Events (24h)',
+        activeDeals: 'Active Deals',
+        healthMetricsWindow: 'Metrics reflect the last 24h of entity-scoped telemetry with',
+        healthLatencySamples: 'latency samples',
+        noHealthMetrics: 'No recent metrics available for the active entity yet.',
+        alertRulesHint: 'Alert rules will trigger notifications when metrics cross thresholds.',
+        condition: 'Condition',
+        active: 'Active',
+        refresh: 'Refresh',
 
         // Offline sync
         pendingChanges: 'pending changes',
@@ -595,6 +607,7 @@ export const translations = {
         moreTools: 'Más',
         close: 'Cerrar',
         save: 'Guardar',
+        name: 'Nombre',
 
         // Views
         intro: 'Introducción',
@@ -1001,6 +1014,17 @@ export const translations = {
         noAlertRules: 'Sin reglas de alerta configuradas',
         pricingLatency: 'Latencia de Pricing',
         errorRate: 'Tasa de Error',
+        pricingLatencyP50: 'Latencia de Pricing P50',
+        pricingLatencyP95: 'Latencia de Pricing P95',
+        errorEvents24h: 'Eventos de Error (24h)',
+        activeDeals: 'Deals Activos',
+        healthMetricsWindow: 'Las métricas reflejan las últimas 24h de telemetría acotada por entidad con',
+        healthLatencySamples: 'muestras de latencia',
+        noHealthMetrics: 'Todavía no hay métricas recientes para la entidad activa.',
+        alertRulesHint: 'Las reglas de alerta dispararán notificaciones cuando las métricas crucen umbrales.',
+        condition: 'Condición',
+        active: 'Activa',
+        refresh: 'Refrescar',
 
         // Offline sync
         pendingChanges: 'cambios pendientes',

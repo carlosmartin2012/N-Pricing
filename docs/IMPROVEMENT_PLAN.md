@@ -54,9 +54,10 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 - **Seguridad operativa**: `server/index.ts` añade headers runtime (`nosniff`, `DENY`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store` en `/api/*`), `scripts/check-dependency-audit.ts` entra en CI con allowlist gobernada para `xlsx` y se publica `docs/security-baseline-2026-04.md`.
 - **Offline real**: `api/deals.ts` y `api/audit.ts` ya encolan mutaciones cuando `navigator.onLine === false`, `useOfflineSync` sincroniza contra la capa pública `api/*` y el header expone el badge pendiente en runtime.
 - **RBAC en blotter**: se cierran huecos de sólo-lectura para `Auditor` en acciones de crear, clonar, editar, borrar e importar/lanzar batch repricing; además quedan cubiertos por E2E.
+- **Operabilidad verificable**: `server/routes/observability.ts` expone summary/metrics/alert-rules por la capa API pública, `api/observability.ts` deja de depender del cliente Supabase, `components/Admin/HealthDashboard.tsx` consume métricas reales entity-scoped y queda cubierto por test de componente + `e2e/health-dashboard.spec.ts`.
 - **E1 (cerrado)**: auditoría formal publicada en `docs/rls-audit-2026-04.md`; la revisión detectó que `supabase/schema_v2.sql` ya no representa el estado completo de RLS y dejó un hardening adicional en `supabase/migrations/20260411000002_rls_hardening.sql`.
 - **F1 / F3 (diseño cerrado)**: publicados `docs/pricing-plugin-architecture.md` y `docs/pricing-calculation-observability.md` con la propuesta incremental de registry/pipeline y trazas estructuradas de cálculo.
-- **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 671 tests unitarios y E2E 86 passing / 1 skipped (87 tests totales).
+- **Validación extendida**: `npm run check:sync`, `npm run check:bundle`, `npm run build-storybook` y `npm run verify:full` quedan verdes; baseline actual en `verify:full` = 676 tests unitarios y E2E 91 passing / 1 skipped (92 tests totales).
 
 ### Avanzado pero no cerrado
 - **PricingReceipt / pricing-flow**: hubo una pasada limpia de `e2e/pricing-flow.spec.ts` en este corte, pero repeticiones consecutivas siguen chocando de forma intermitente con caídas del `webServer` de Vite ya conocidas en local.
@@ -76,7 +77,7 @@ Este documento sigue siendo el plan maestro de 4 sprints, pero en esta sesión s
 
 ## 1. Contexto mínimo (para agente nuevo)
 
-N-Pricing es un motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. React 19 + TypeScript 5.8 + Vite 6 + Supabase + React Query + Tailwind. PWA con fallback offline. AI Assistant (Gemini) vía proxy. 229 TS/TSX files, 111 componentes, 17 hooks, 45 utils, 7 Context providers, 671 unit tests, 12 E2E specs, 15 migraciones Supabase.
+N-Pricing es un motor de **Funds Transfer Pricing (FTP)** para instituciones financieras. React 19 + TypeScript 5.8 + Vite 6 + Supabase + React Query + Tailwind. PWA con fallback offline. AI Assistant (Gemini) vía proxy. 229 TS/TSX files, 111 componentes, 17 hooks, 45 utils, 7 Context providers, 676 unit tests, 15 E2E specs, 15 migraciones Supabase.
 
 Lectura obligada antes de tocar código:
 - `CLAUDE.md` — arquitectura, convenciones, áreas sensibles

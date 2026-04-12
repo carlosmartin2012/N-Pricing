@@ -1,20 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Activity, AlertTriangle, BarChart4, Clock, RefreshCw, Zap } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
+import { useUI } from '../../contexts/UIContext';
 import * as observability from '../../api/observability';
 import type { AlertRule } from '../../types/alertRule';
 
 const HealthDashboard: React.FC = () => {
   const { activeEntity } = useEntity();
+  const { t } = useUI();
   const [alertRules, setAlertRules] = useState<AlertRule[]>([]);
+  const [summary, setSummary] = useState<observability.HealthSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!activeEntity) return;
     setIsLoading(true);
     try {
-      const rules = await observability.listAlertRules(activeEntity.id);
+      const [rules, nextSummary] = await Promise.all([
+        observability.listAlertRules(activeEntity.id),
+        observability.getHealthSummary(activeEntity.id),
+      ]);
       setAlertRules(rules);
+      setSummary(nextSummary);
+    } catch {
+      setAlertRules([]);
+      setSummary(null);
     } finally {
       setIsLoading(false);
     }
@@ -24,13 +34,42 @@ const HealthDashboard: React.FC = () => {
     void loadData();
   }, [loadData]);
 
-  // Placeholder metrics (in production these come from the metrics table)
-  const systemMetrics = [
-    { label: 'Pricing Latency P50', value: '45ms', icon: Zap, color: '#10b981', status: 'healthy' },
-    { label: 'Pricing Latency P95', value: '180ms', icon: Clock, color: '#06b6d4', status: 'healthy' },
-    { label: 'Error Rate (24h)', value: '0.2%', icon: AlertTriangle, color: '#10b981', status: 'healthy' },
-    { label: 'Active Deals', value: '—', icon: BarChart4, color: '#F48B4A', status: 'info' },
-  ];
+  const systemMetrics = useMemo(() => [
+    {
+      label: t.pricingLatencyP50,
+      value: summary?.pricingLatencyP50Ms != null ? `${summary.pricingLatencyP50Ms.toFixed(0)}ms` : '—',
+      icon: Zap,
+      color:
+        summary?.pricingLatencyP50Ms == null
+          ? '#94a3b8'
+          : summary.pricingLatencyP50Ms <= 75
+            ? '#10b981'
+            : '#f59e0b',
+    },
+    {
+      label: t.pricingLatencyP95,
+      value: summary?.pricingLatencyP95Ms != null ? `${summary.pricingLatencyP95Ms.toFixed(0)}ms` : '—',
+      icon: Clock,
+      color:
+        summary?.pricingLatencyP95Ms == null
+          ? '#94a3b8'
+          : summary.pricingLatencyP95Ms <= 250
+            ? '#06b6d4'
+            : '#f59e0b',
+    },
+    {
+      label: t.errorEvents24h,
+      value: String(summary?.errorEvents24h ?? 0),
+      icon: AlertTriangle,
+      color: (summary?.errorEvents24h ?? 0) === 0 ? '#10b981' : '#f59e0b',
+    },
+    {
+      label: t.activeDeals,
+      value: String(summary?.dealCount ?? 0),
+      icon: BarChart4,
+      color: '#F48B4A',
+    },
+  ], [summary, t.activeDeals, t.errorEvents24h, t.pricingLatencyP50, t.pricingLatencyP95]);
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -38,7 +77,7 @@ const HealthDashboard: React.FC = () => {
         <div className="flex items-center gap-3">
           <Activity className="h-5 w-5 text-cyan-400" />
           <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">
-            System Health
+            {t.systemHealth}
           </h2>
           {activeEntity && (
             <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>
@@ -50,8 +89,14 @@ const HealthDashboard: React.FC = () => {
           className="nfq-btn-ghost px-3 py-1.5 text-xs"
         >
           <RefreshCw className={`h-3 w-3 mr-1 inline ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh
+          {t.refresh}
         </button>
+      </div>
+
+      <div className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
+        {summary?.latencySampleCount24h
+          ? `${t.healthMetricsWindow} ${summary.latencySampleCount24h} ${t.healthLatencySamples}.`
+          : t.noHealthMetrics}
       </div>
 
       {/* System Metrics */}
@@ -69,13 +114,16 @@ const HealthDashboard: React.FC = () => {
 
       {/* Alert Rules */}
       <div>
-        <h3 className="nfq-label text-[10px] mb-3">ALERT RULES ({alertRules.length})</h3>
+        <h3 className="nfq-label text-[10px] mb-3">
+          {t.alertRules.toUpperCase()} ({alertRules.length})
+          {summary ? ` · ${summary.activeAlertRules} ${t.active.toLowerCase()}` : ''}
+        </h3>
         {alertRules.length === 0 ? (
           <div className="rounded-lg border border-white/5 bg-white/[0.02] px-6 py-8 text-center">
             <AlertTriangle className="h-8 w-8 text-slate-600 mx-auto mb-2" />
-            <p className="text-sm text-slate-400">No alert rules configured</p>
+            <p className="text-sm text-slate-400">{t.noAlertRules}</p>
             <p className="text-xs text-slate-500 mt-1">
-              Alert rules will trigger notifications when metrics cross thresholds
+              {t.alertRulesHint}
             </p>
           </div>
         ) : (
@@ -83,10 +131,10 @@ const HealthDashboard: React.FC = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/5 bg-white/[0.02]">
-                  <th className="nfq-label text-[10px] text-left px-4 py-2">Name</th>
-                  <th className="nfq-label text-[10px] text-left px-4 py-2">Metric</th>
-                  <th className="nfq-label text-[10px] text-left px-4 py-2">Condition</th>
-                  <th className="nfq-label text-[10px] text-left px-4 py-2">Active</th>
+                  <th className="nfq-label text-[10px] text-left px-4 py-2">{t.name}</th>
+                  <th className="nfq-label text-[10px] text-left px-4 py-2">{t.metric}</th>
+                  <th className="nfq-label text-[10px] text-left px-4 py-2">{t.condition}</th>
+                  <th className="nfq-label text-[10px] text-left px-4 py-2">{t.active}</th>
                 </tr>
               </thead>
               <tbody>

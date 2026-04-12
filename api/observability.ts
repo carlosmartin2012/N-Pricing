@@ -1,12 +1,5 @@
-/**
- * API layer — Observability
- *
- * Wraps Supabase calls for the `metrics` and `alert_rules` tables.
- */
-
 import type { AlertRule } from '../types/alertRule';
-import { safeSupabaseCall } from '../utils/safeSupabaseCall';
-import { supabase } from '../utils/supabase/shared';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../utils/apiFetch';
 
 // ---------------------------------------------------------------------------
 // Mappers
@@ -37,47 +30,33 @@ const mapAlertRuleToDB = (rule: Partial<AlertRule>) => ({
 });
 
 // ---------------------------------------------------------------------------
-// Alert Rules CRUD
-// ---------------------------------------------------------------------------
+export interface HealthSummary {
+  entityId: string;
+  pricingLatencyP50Ms: number | null;
+  pricingLatencyP95Ms: number | null;
+  latencySampleCount24h: number;
+  errorEvents24h: number;
+  dealCount: number;
+  activeAlertRules: number;
+}
 
 export async function listAlertRules(entityId?: string): Promise<AlertRule[]> {
-  const { data } = await safeSupabaseCall(
-    async () => {
-      let q = supabase.from('alert_rules').select('*').order('created_at', { ascending: false });
-      if (entityId) q = q.eq('entity_id', entityId);
-      return q;
-    },
-    [],
-    'listAlertRules',
-  );
-  return (data as Record<string, unknown>[]).map(mapAlertRuleFromDB);
+  const suffix = entityId ? `?entity_id=${encodeURIComponent(entityId)}` : '';
+  const rows = await apiGet<Record<string, unknown>[]>(`/observability/alert-rules${suffix}`);
+  return rows.map(mapAlertRuleFromDB);
 }
 
 export async function upsertAlertRule(rule: Partial<AlertRule>): Promise<AlertRule | null> {
-  const { data, error } = await safeSupabaseCall(
-    async () => supabase.from('alert_rules').upsert(mapAlertRuleToDB(rule)).select(),
-    null,
-    'upsertAlertRule',
-  );
-  if (error || !data) return null;
-  const rows = data as Record<string, unknown>[];
-  return rows.length > 0 ? mapAlertRuleFromDB(rows[0]) : null;
+  const row = await apiPost<Record<string, unknown> | null>('/observability/alert-rules', mapAlertRuleToDB(rule));
+  return row ? mapAlertRuleFromDB(row) : null;
 }
 
 export async function deleteAlertRule(id: string): Promise<void> {
-  await safeSupabaseCall(
-    async () => supabase.from('alert_rules').delete().eq('id', id),
-    null,
-    'deleteAlertRule',
-  );
+  await apiDelete(`/observability/alert-rules/${encodeURIComponent(id)}`);
 }
 
 export async function toggleAlertRule(id: string, isActive: boolean): Promise<void> {
-  await safeSupabaseCall(
-    async () => supabase.from('alert_rules').update({ is_active: isActive }).eq('id', id),
-    null,
-    'toggleAlertRule',
-  );
+  await apiPatch(`/observability/alert-rules/${encodeURIComponent(id)}/toggle`, { is_active: isActive });
 }
 
 // ---------------------------------------------------------------------------
@@ -89,20 +68,15 @@ export async function getRecentMetrics(
   metricName: string,
   limit: number = 50,
 ): Promise<{ value: number; recordedAt: string }[]> {
-  const { data } = await safeSupabaseCall(
-    async () =>
-      supabase
-        .from('metrics')
-        .select('metric_value, recorded_at')
-        .eq('entity_id', entityId)
-        .eq('metric_name', metricName)
-        .order('recorded_at', { ascending: false })
-        .limit(limit),
-    [],
-    'getRecentMetrics',
+  const rows = await apiGet<Record<string, unknown>[]>(
+    `/observability/metrics/recent?entity_id=${encodeURIComponent(entityId)}&metric_name=${encodeURIComponent(metricName)}&limit=${limit}`,
   );
-  return (data as Record<string, unknown>[]).map((r) => ({
+  return rows.map((r) => ({
     value: Number(r.metric_value),
     recordedAt: r.recorded_at as string,
   }));
+}
+
+export async function getHealthSummary(entityId: string): Promise<HealthSummary> {
+  return apiGet<HealthSummary>(`/observability/summary?entity_id=${encodeURIComponent(entityId)}`);
 }

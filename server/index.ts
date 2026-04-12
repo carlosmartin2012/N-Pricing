@@ -9,6 +9,7 @@ import configRouter from './routes/config';
 import marketDataRouter from './routes/marketData';
 import entitiesRouter from './routes/entities';
 import reportSchedulesRouter from './routes/reportSchedules';
+import observabilityRouter from './routes/observability';
 import authRouter from './routes/auth';
 import geminiRouter from './routes/gemini';
 import pricingRouter from './routes/pricing';
@@ -55,6 +56,7 @@ app.use('/api/config', authMiddleware, configRouter);
 app.use('/api/market-data', authMiddleware, marketDataRouter);
 app.use('/api/entities', authMiddleware, entitiesRouter);
 app.use('/api/report-schedules', authMiddleware, reportSchedulesRouter);
+app.use('/api/observability', authMiddleware, observabilityRouter);
 app.use('/api/gemini', authMiddleware, geminiRouter);
 app.use('/api/pricing', authMiddleware, pricingRouter);
 

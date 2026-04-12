@@ -103,12 +103,12 @@ npm run dev
 npm run dev            # Servidor de desarrollo con HMR
 npm run build          # Build de produccion optimizado (PWA incluido)
 npm run preview        # Preview del build de produccion
-npm run test           # Tests unitarios (Vitest — 328 tests)
-npm run test:e2e       # Tests E2E (Playwright — 14 specs)
+npm run test           # Tests unitarios (Vitest — 676 tests)
+npm run test:e2e       # Tests E2E (Playwright — 15 specs)
 npm run typecheck      # Verificacion de tipos TypeScript
 npm run lint           # Analisis estatico (ESLint)
 npm run format         # Formateo automatico (Prettier)
-npm run verify:full    # Pipeline completo: lint + typecheck + test + build + e2e
+npm run verify:full    # Pipeline completo: lint + typecheck + test + build + bundle + e2e
 npm run check:sync     # Validar sync seed↔schema
 npm run check:data-quality # Validar integridad relacional y calidad del seed/config
 npm run check:security # Scan de dependencias prod con excepciones gobernadas
@@ -142,7 +142,7 @@ npm run storybook      # Storybook dev en :6006
 │   ├── supabase/        # 15 servicios Supabase especializados
 │   └── __tests__/       # 26 archivos, 67 suites, 328 tests
 ├── supabase/            # SQL schemas, 14 migraciones, Edge Functions (Deno)
-├── e2e/                 # 14 specs Playwright
+├── e2e/                 # 15 specs Playwright
 ├── scripts/             # Validacion: bundle sizes, seed↔schema sync, security audit, data quality
 ├── docs/                # API spec, pricing methodology, Supabase setup
 └── public/              # Assets estaticos + PWA manifest
@@ -171,7 +171,7 @@ npm run test:e2e       # E2E tests (Playwright)
 npm run storybook      # Component stories (Storybook)
 ```
 
-**Unit tests** (328 tests en 26 archivos, 67 suites) cubriendo:
+**Unit tests** (676 tests) cubriendo:
 - Motor FTP completo (activos, pasivos, multi-divisa)
 - Interpolacion de curvas de tipos
 - Resolucion de tenors efectivos (DTM, BM, RM)
@@ -185,7 +185,7 @@ npm run storybook      # Component stories (Storybook)
 - Audit transport y logging
 - Portfolio snapshots y market data sources
 
-**E2E tests** (14 specs): auth, navigation, pricing flow, deal blotter, governance, shocks, market data, ESG, multi-entity, AI assistant, offline queue y RBAC.
+**E2E tests** (15 specs): auth, navigation, pricing flow, deal blotter, governance, shocks, market data, ESG, multi-entity, AI assistant, System Health, offline queue y RBAC.
 
 **Storybook**: component stories para desarrollo visual aislado.
 
