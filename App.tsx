@@ -56,17 +56,16 @@ const WalkthroughOverlay = React.lazy(() =>
   }))
 );
 
-const ViewLoader: React.FC = () => (
-  <div className="flex h-full items-center justify-center rounded-[28px] bg-[var(--nfq-bg-surface)]">
-    <div className="flex flex-col items-center gap-3">
-      <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/20 border-t-cyan-500"
-        style={{ boxShadow: '0 0 24px rgba(6, 182, 212, 0.16)' }}
-      />
-      <span className="nfq-label text-[10px]">Loading module</span>
-    </div>
-  </div>
-);
+import { CalculatorSkeleton, TableSkeleton, DashboardSkeleton, ConfigSkeleton } from './components/ui/ViewSkeleton';
+
+const ViewSkeleton: React.FC = () => {
+  const path = window.location.pathname;
+  if (path === '/pricing') return <CalculatorSkeleton />;
+  if (path === '/blotter' || path === '/users' || path === '/audit') return <TableSkeleton />;
+  if (path === '/analytics' || path === '/raroc' || path === '/stress-testing' || path === '/health') return <DashboardSkeleton />;
+  if (path === '/methodology' || path === '/behavioural') return <ConfigSkeleton />;
+  return <DashboardSkeleton />;
+};
 
 const AppContent: React.FC = () => {
   const { currentUser, isAuthenticated, handleLogin, handleLogout } = useAuth();
@@ -228,7 +227,7 @@ const AppContent: React.FC = () => {
 
             <div className="relative min-h-0 flex-1">
               <ErrorBoundary>
-                <Suspense fallback={<ViewLoader />}>
+                <Suspense fallback={<ViewSkeleton />}>
                   <Routes>
                     <Route path="/pricing" element={<CalculatorWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
                     <Route path="/blotter" element={<div className="relative z-0 h-full"><DealBlotter /></div>} />

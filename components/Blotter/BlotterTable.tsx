@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, RotateCcw, Send, Trash2, XCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, RotateCcw, Send, Trash2, XCircle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '../ui/LayoutComponents';
 import {
@@ -229,6 +229,22 @@ const BlotterTable: React.FC<Props> = ({
     () => new Map(behaviouralModels.map((model) => [model.id, model.name])),
     [behaviouralModels]
   );
+
+  if (deals.length === 0) {
+    return (
+      <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--nfq-bg-elevated)]">
+          <FileText size={28} className="text-[var(--nfq-text-muted)] opacity-60" />
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-[var(--nfq-text-primary)]">No deals found</h3>
+          <p className="mt-1.5 max-w-sm text-sm text-[var(--nfq-text-muted)]">
+            Create your first deal to start pricing, or adjust your search filters.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const useVirtual = deals.length > VIRTUAL_THRESHOLD;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
