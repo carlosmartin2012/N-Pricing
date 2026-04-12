@@ -345,7 +345,8 @@ export const calculatePricing = (
   const riskFreeRate = interpolateYieldCurve(yieldCurve, 0);
 
   // Derive SA RWA if not provided explicitly
-  const rwaStandardized = deal.rwaStandardized ?? (deal.riskWeight / 100) * deal.amount;
+  const rw = Number.isFinite(deal.riskWeight) ? deal.riskWeight : 0;
+  const rwaStandardized = deal.rwaStandardized ?? (rw / 100) * deal.amount;
 
   // CRR3 full buffer stack only applies when the deal opts in by providing
   // rwaIrb (IRB-authorized bank) OR explicit SIFI flags. Otherwise fall back

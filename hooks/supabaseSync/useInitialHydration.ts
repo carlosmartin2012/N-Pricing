@@ -75,30 +75,9 @@ export function useInitialHydration({
 
       try {
         // Fetch all data via the centralized api/ layer and seed React Query cache
-        const [
-          dbDeals,
-          dbModels,
-          dbRules,
-          dbClients,
-          dbUnits,
-          dbProducts,
-          dbUsers,
-          dbShocks,
-          dbRateCards,
-          dbTransGrid,
-          dbPhysGrid,
-          dbGreeniumGrid,
-          dbYieldCurves,
-          dbRaroc,
-          dbApprovalMatrix,
-          dbLiqCurves,
-          dbMethodologyChangeRequests,
-          dbMethodologyVersions,
-          dbApprovalTasks,
-          dbPricingDossiers,
-          dbPortfolioSnapshots,
-          dbMarketDataSources,
-        ] = await Promise.all([
+        // Use Promise.allSettled so a single failing endpoint doesn't lose
+        // all successfully-fetched data — partial hydration > total fallback.
+        const settled = await Promise.allSettled([
           dealsApi.listDeals(scopedEntityId),
           marketDataApi.listModels(),
           configApi.listRules(),
@@ -122,6 +101,37 @@ export function useInitialHydration({
           configApi.fetchPortfolioSnapshots(),
           configApi.fetchMarketDataSources(),
         ]);
+
+        const failedCount = settled.filter(r => r.status === 'rejected').length;
+        if (failedCount > 0) {
+          log.warn(`${failedCount}/${settled.length} hydration calls failed — using partial data`);
+        }
+
+        const v = <T,>(r: PromiseSettledResult<T>): T | null =>
+          r.status === 'fulfilled' ? r.value : null;
+
+        const dbDeals = v(settled[0]);
+        const dbModels = v(settled[1]);
+        const dbRules = v(settled[2]);
+        const dbClients = v(settled[3]);
+        const dbUnits = v(settled[4]);
+        const dbProducts = v(settled[5]);
+        const dbUsers = v(settled[6]);
+        const dbShocks = v(settled[7]);
+        const dbRateCards = v(settled[8]);
+        const dbTransGrid = v(settled[9]);
+        const dbPhysGrid = v(settled[10]);
+        const dbGreeniumGrid = v(settled[11]);
+        const dbYieldCurves = v(settled[12]);
+        const dbRaroc = v(settled[13]);
+        const dbApprovalMatrix = v(settled[14]);
+        const dbLiqCurves = v(settled[15]);
+        const dbMethodologyChangeRequests = v(settled[16]);
+        const dbMethodologyVersions = v(settled[17]);
+        const dbApprovalTasks = v(settled[18]);
+        const dbPricingDossiers = v(settled[19]);
+        const dbPortfolioSnapshots = v(settled[20]);
+        const dbMarketDataSources = v(settled[21]);
 
         if (isCancelled) return;
 
@@ -178,12 +188,12 @@ export function useInitialHydration({
         if (dbApprovalMatrix && typeof dbApprovalMatrix === 'object' && 'autoApprovalThreshold' in dbApprovalMatrix) {
           context.setApprovalMatrix(dbApprovalMatrix as ApprovalMatrixConfig);
         }
-        context.setMethodologyChangeRequests(dbMethodologyChangeRequests);
-        context.setMethodologyVersions(dbMethodologyVersions);
-        context.setApprovalTasks(dbApprovalTasks);
-        context.setPricingDossiers(dbPricingDossiers);
-        context.setPortfolioSnapshots(dbPortfolioSnapshots);
-        context.setMarketDataSources(dbMarketDataSources);
+        if (dbMethodologyChangeRequests) context.setMethodologyChangeRequests(dbMethodologyChangeRequests);
+        if (dbMethodologyVersions) context.setMethodologyVersions(dbMethodologyVersions);
+        if (dbApprovalTasks) context.setApprovalTasks(dbApprovalTasks);
+        if (dbPricingDossiers) context.setPricingDossiers(dbPricingDossiers);
+        if (dbPortfolioSnapshots) context.setPortfolioSnapshots(dbPortfolioSnapshots);
+        if (dbMarketDataSources) context.setMarketDataSources(dbMarketDataSources);
 
         const hasRemoteData = [dbDeals, dbModels, dbRules, dbClients, dbUnits, dbProducts].some(
           (dataset) => dataset?.length
@@ -191,12 +201,16 @@ export function useInitialHydration({
         const nextSyncStatus: DataContextType['syncStatus'] = hasRemoteData ? 'synced' : 'mock';
         context.setSyncStatus(nextSyncStatus);
 
+        if (failedCount > 0 && hasRemoteData) {
+          addToast('warning', `Loaded with ${failedCount} partial failure(s). Some data may use defaults.`);
+        }
+
         await auditApi.logAudit({
           userEmail: currentUser?.email || 'system',
           userName: currentUser?.name || 'System',
           action: 'SYSTEM_BOOTSTRAP',
           module: 'CALCULATOR',
-          description: `Data hydrated. Status: ${nextSyncStatus}.`,
+          description: `Data hydrated. Status: ${nextSyncStatus}. Failures: ${failedCount}/${settled.length}.`,
         });
       } catch (error) {
         if (isCancelled) return;

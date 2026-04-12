@@ -225,6 +225,7 @@ export function detectSystematicUnderpricing(
     };
 
     const entries = Object.entries(avgAttr) as Array<['REVENUE' | 'CREDIT_LOSS' | 'COF' | 'OPCOST' | 'CAPITAL', number]>;
+    if (entries.length === 0) continue;
     entries.sort((a, b) => a[1] - b[1]); // Most negative first
     const dominantDriver = entries[0][0];
 
