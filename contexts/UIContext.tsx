@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { ViewState } from '../types';
 import { Language, translations } from '../translations';
+import { pathToView, viewToPath } from '../appNavigation';
 
 interface UIContextType {
   currentView: ViewState;
@@ -23,7 +25,15 @@ interface UIContextType {
 const UIContext = createContext<UIContextType | null>(null);
 
 export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentView, setCurrentView] = useState<ViewState>('CALCULATOR');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentView = useMemo(() => pathToView(location.pathname), [location.pathname]);
+  const setCurrentView = useCallback(
+    (view: ViewState) => navigate(viewToPath(view)),
+    [navigate]
+  );
+
   const [language, setLanguage] = useState<Language>('en');
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -44,6 +54,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }),
     [
       currentView,
+      setCurrentView,
       language,
       theme,
       t,

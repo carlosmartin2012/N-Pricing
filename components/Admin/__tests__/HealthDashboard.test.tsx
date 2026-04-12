@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { MemoryRouter } from 'react-router';
 import { UIProvider } from '../../../contexts/UIContext';
 import HealthDashboard from '../HealthDashboard';
 
@@ -52,9 +53,11 @@ describe('HealthDashboard', () => {
     ]);
 
     render(
+      <MemoryRouter>
       <UIProvider>
         <HealthDashboard />
-      </UIProvider>,
+      </UIProvider>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
@@ -85,9 +88,11 @@ describe('HealthDashboard', () => {
     mocks.listAlertRules.mockResolvedValue([]);
 
     render(
+      <MemoryRouter>
       <UIProvider>
         <HealthDashboard />
-      </UIProvider>,
+      </UIProvider>
+      </MemoryRouter>,
     );
 
     expect(await screen.findByText('No alert rules configured')).toBeInTheDocument();

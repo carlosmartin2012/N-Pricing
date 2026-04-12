@@ -31,6 +31,9 @@
       ]
     }
   ],
+  "rewrites": [
+    { "source": "/((?!api|assets|icon-|favicon|robots|sw|workbox).*)", "destination": "/index.html" }
+  ],
   "build": {
     "env": {
       "VERCEL_FORCE_NO_BUILD_CACHE": "1",

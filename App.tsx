@@ -1,4 +1,5 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router';
 import { useEntity } from './contexts/EntityContext';
 import { Sparkles } from 'lucide-react';
 import { INITIAL_DEAL } from './utils/seedData';
@@ -215,90 +216,24 @@ const AppContent: React.FC = () => {
             <div className="relative min-h-0 flex-1">
               <ErrorBoundary>
                 <Suspense fallback={<ViewLoader />}>
-                  {ui.currentView === 'CALCULATOR' && (
-                    <CalculatorWorkspace
-                      dealParams={dealParams}
-                      setDealParams={setDealParams}
-                    />
-                  )}
-
-                  {ui.currentView === 'BLOTTER' && (
-                    <div className="relative z-0 h-full">
-                      <DealBlotter />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'REPORTING' && (
-                    <div className="relative z-0 flex h-full flex-col">
-                      <ReportingDashboard />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'RAROC' && (
-                    <div className="relative z-0 h-full">
-                      <RAROCCalculator />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'MARKET_DATA' && (
-                    <div className="relative z-0 h-full">
-                      <YieldCurvePanel />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'BEHAVIOURAL' && (
-                    <div className="relative z-0 h-full">
-                      <BehaviouralModels />
-                    </div>
-                  )}
-
-                  {(ui.currentView === 'METHODOLOGY' || ui.currentView === 'CONFIG') && (
-                    <div className="relative z-0 h-full">
-                      <MethodologyConfig mode="ALL" />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'ACCOUNTING' && (
-                    <div className="relative z-0 h-full">
-                      <AccountingLedger />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'USER_MGMT' && (
-                    <div className="relative z-0 flex h-full flex-col">
-                      <UserManagement />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'AUDIT_LOG' && (
-                    <div className="relative z-0 flex h-full flex-col">
-                      <AuditLog />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'HEALTH' && (
-                    <div className="relative z-0 flex h-full flex-col">
-                      <HealthDashboard />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'MANUAL' && (
-                    <div className="relative z-0 h-full">
-                      <UserManual />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'AI_LAB' && (
-                    <div className="relative z-0 flex h-full flex-col">
-                      <GenAIChat />
-                    </div>
-                  )}
-
-                  {ui.currentView === 'SHOCKS' && (
-                    <div className="relative z-0 flex h-full flex-col">
-                      <ShocksDashboard deal={dealParams} />
-                    </div>
-                  )}
+                  <Routes>
+                    <Route path="/pricing" element={<CalculatorWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
+                    <Route path="/blotter" element={<div className="relative z-0 h-full"><DealBlotter /></div>} />
+                    <Route path="/analytics" element={<div className="relative z-0 flex h-full flex-col"><ReportingDashboard /></div>} />
+                    <Route path="/raroc" element={<div className="relative z-0 h-full"><RAROCCalculator /></div>} />
+                    <Route path="/market-data" element={<div className="relative z-0 h-full"><YieldCurvePanel /></div>} />
+                    <Route path="/behavioural" element={<div className="relative z-0 h-full"><BehaviouralModels /></div>} />
+                    <Route path="/methodology" element={<div className="relative z-0 h-full"><MethodologyConfig mode="ALL" /></div>} />
+                    <Route path="/accounting" element={<div className="relative z-0 h-full"><AccountingLedger /></div>} />
+                    <Route path="/users" element={<div className="relative z-0 flex h-full flex-col"><UserManagement /></div>} />
+                    <Route path="/audit" element={<div className="relative z-0 flex h-full flex-col"><AuditLog /></div>} />
+                    <Route path="/health" element={<div className="relative z-0 flex h-full flex-col"><HealthDashboard /></div>} />
+                    <Route path="/manual" element={<div className="relative z-0 h-full"><UserManual /></div>} />
+                    <Route path="/ai" element={<div className="relative z-0 flex h-full flex-col"><GenAIChat /></div>} />
+                    <Route path="/stress-testing" element={<div className="relative z-0 flex h-full flex-col"><ShocksDashboard deal={dealParams} /></div>} />
+                    <Route path="/" element={<Navigate to="/pricing" replace />} />
+                    <Route path="*" element={<Navigate to="/pricing" replace />} />
+                  </Routes>
                 </Suspense>
               </ErrorBoundary>
             </div>

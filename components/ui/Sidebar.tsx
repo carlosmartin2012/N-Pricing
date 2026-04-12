@@ -9,6 +9,7 @@ export interface NavItem {
   label: string;
   icon: LucideIcon;
   section?: string;
+  path?: string;
 }
 
 interface NavButtonProps {

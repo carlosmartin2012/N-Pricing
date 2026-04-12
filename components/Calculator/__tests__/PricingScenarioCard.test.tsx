@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import { UIProvider } from '../../../contexts/UIContext';
 import { PricingScenarioCard } from '../PricingScenarioCard';
 import type { PricingScenario } from '../pricingComparisonUtils';
@@ -61,6 +62,7 @@ const noop = vi.fn();
 
 function renderCard(overrides: Partial<Parameters<typeof PricingScenarioCard>[0]> = {}) {
   return render(
+    <MemoryRouter>
     <UIProvider>
       <PricingScenarioCard
         scenario={baseScenario}
@@ -77,6 +79,7 @@ function renderCard(overrides: Partial<Parameters<typeof PricingScenarioCard>[0]
         {...overrides}
       />
     </UIProvider>
+    </MemoryRouter>
   );
 }
 

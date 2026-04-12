@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
 import App from './App';
 import './index.css';
 
@@ -98,25 +99,27 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <RootErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-            <AuthProvider>
-              <EntityProvider>
-              <MarketDataProvider>
-                <GovernanceProvider>
-                  <DataProvider>
-                    <UIProvider>
-                      <WalkthroughProvider>
-                        <App />
-                      </WalkthroughProvider>
-                    </UIProvider>
-                  </DataProvider>
-                </GovernanceProvider>
-              </MarketDataProvider>
-              </EntityProvider>
-            </AuthProvider>
-        </ToastProvider>
-      </QueryClientProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+              <AuthProvider>
+                <EntityProvider>
+                <MarketDataProvider>
+                  <GovernanceProvider>
+                    <DataProvider>
+                      <UIProvider>
+                        <WalkthroughProvider>
+                          <App />
+                        </WalkthroughProvider>
+                      </UIProvider>
+                    </DataProvider>
+                  </GovernanceProvider>
+                </MarketDataProvider>
+                </EntityProvider>
+              </AuthProvider>
+          </ToastProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
     </RootErrorBoundary>
   </React.StrictMode>
 );

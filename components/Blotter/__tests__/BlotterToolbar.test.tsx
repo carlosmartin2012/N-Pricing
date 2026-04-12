@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import { UIProvider } from '../../../contexts/UIContext';
 import BlotterToolbar from '../BlotterToolbar';
 
@@ -13,6 +14,7 @@ const noop = vi.fn();
 
 function renderToolbar(overrides: Partial<Parameters<typeof BlotterToolbar>[0]> = {}) {
   return render(
+    <MemoryRouter>
     <UIProvider>
       <BlotterToolbar
         searchTerm=""
@@ -24,6 +26,7 @@ function renderToolbar(overrides: Partial<Parameters<typeof BlotterToolbar>[0]> 
         {...overrides}
       />
     </UIProvider>
+    </MemoryRouter>
   );
 }
 
