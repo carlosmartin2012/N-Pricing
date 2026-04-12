@@ -9,6 +9,7 @@ import { Login } from './components/ui/Login';
 import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
+import { CommandPalette } from './components/ui/CommandPalette';
 import { SkipNav } from './components/ui/SkipNav';
 import { useAuth } from './contexts/AuthContext';
 import { useData } from './contexts/DataContext';
@@ -73,11 +74,14 @@ const AppContent: React.FC = () => {
   const ui = useUI();
   const handleUniversalImport = useUniversalImport();
 
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
   useSupabaseSync();
   useOfflineStatus();
   useKeyboardShortcuts({
-    onToggleSearch: () => ui.setIsAiOpen((prev) => !prev),
+    onToggleSearch: () => setIsCommandPaletteOpen((prev) => !prev),
     onCloseModal: () => {
+      if (isCommandPaletteOpen) { setIsCommandPaletteOpen(false); return; }
       ui.setIsConfigModalOpen(false);
       ui.setIsImportModalOpen(false);
       ui.setIsAiOpen(false);
@@ -296,6 +300,8 @@ const AppContent: React.FC = () => {
         <Suspense fallback={null}>
           <WalkthroughOverlay language={ui.language} />
         </Suspense>
+
+        <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
       </div>
     </div>
   );
