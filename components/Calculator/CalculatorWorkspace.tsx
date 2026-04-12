@@ -2,6 +2,7 @@ import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import type { Transaction } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import DealInputPanel from './DealInputPanel';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
 import DelegationAuditPanel from './DelegationAuditPanel';
@@ -65,6 +66,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   );
 
   return (
+    <ErrorBoundary fallbackMessage="Pricing calculator encountered an error">
     <div className="relative z-0 w-full">
       <div className="grid gap-4 lg:grid-cols-12">
         <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
@@ -152,5 +154,6 @@ export const CalculatorWorkspace: React.FC<Props> = ({
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 };

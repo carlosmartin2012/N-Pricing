@@ -119,7 +119,7 @@ export const RAROC_INPUT_SECTIONS: RarocInputSectionConfig[] = [
 ];
 
 function roundRate(value: number) {
-  return Number(value.toFixed(RATE_PRECISION));
+  return Number.isFinite(value) ? Number(value.toFixed(RATE_PRECISION)) : 0;
 }
 
 export function normalizeRarocInputs(inputs: RAROCInputs | null | undefined): RAROCInputs {
@@ -163,7 +163,7 @@ export function formatRarocCurrency(value: number) {
 }
 
 export function formatRarocPercent(value: number) {
-  return `${value.toFixed(2)}%`;
+  return `${Number.isFinite(value) ? value.toFixed(2) : '0.00'}%`;
 }
 
 export function buildRarocResults(inputs: RAROCInputs): RAROCResult {

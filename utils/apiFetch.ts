@@ -21,7 +21,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   if (!res.ok) {
     if (res.status === 401) {
       // Token expired or invalid — clear and let auth context handle redirect
-      localStorage.removeItem('n_pricing_auth_token');
+      try { localStorage.removeItem('n_pricing_auth_token'); } catch { /* SSR/test safe */ }
     }
     const text = await res.text().catch(() => '');
     throw new Error(`API ${options?.method ?? 'GET'} ${path} failed (${res.status}): ${text}`);

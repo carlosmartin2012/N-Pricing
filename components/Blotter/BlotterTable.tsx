@@ -105,7 +105,7 @@ const DealRow: React.FC<{
         {deal.durationMonths}m
       </td>
       <td className="hidden whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-xs font-bold text-[var(--nfq-success)] [font-variant-numeric:tabular-nums] lg:table-cell">
-        +{deal.marginTarget.toFixed(2)}%
+        +{(deal.marginTarget ?? 0).toFixed(2)}%
       </td>
       <td className="hidden whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 xl:table-cell">
         <div className="max-w-[200px] truncate text-[10px] text-[color:var(--nfq-text-muted)]">

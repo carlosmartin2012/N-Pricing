@@ -41,7 +41,11 @@ export function parseConfigFile(file: File): Promise<ExportableConfig> {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const config = JSON.parse(reader.result as string) as ExportableConfig;
+        if (typeof reader.result !== 'string') {
+          reject(new Error('Failed to read file as text'));
+          return;
+        }
+        const config = JSON.parse(reader.result) as ExportableConfig;
         if (!config.version || !config.rules) {
           reject(new Error('Invalid config file format'));
           return;

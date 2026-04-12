@@ -100,10 +100,10 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
             <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="nfq-label">Final Client Rate</div>
               <div className="mt-2 text-lg font-semibold text-[color:var(--nfq-text-primary)]">
-                {dossier.pricingResult.finalClientRate.toFixed(2)}%
+                {(dossier.pricingResult?.finalClientRate ?? 0).toFixed(2)}%
               </div>
               <div className="mt-1 text-xs text-[color:var(--nfq-text-secondary)]">
-                RAROC {dossier.pricingResult.raroc.toFixed(2)}%
+                RAROC {(dossier.pricingResult?.raroc ?? 0).toFixed(2)}%
               </div>
             </div>
             <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
@@ -143,7 +143,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                   <div>
                     <div className="nfq-label">Amount</div>
                     <div className="mt-1 text-sm text-[color:var(--nfq-text-primary)]">
-                      {deal.currency} {deal.amount.toLocaleString()}
+                      {deal.currency} {(deal.amount ?? 0).toLocaleString()}
                     </div>
                   </div>
                   <div>
@@ -300,7 +300,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                     <div className="font-medium text-[color:var(--nfq-text-primary)]">{portfolioSnapshot.name}</div>
                     <div className="mt-1 text-[color:var(--nfq-text-secondary)]">
                       {portfolioSnapshot.results.length} deals • Avg RAROC{' '}
-                      {portfolioSnapshot.totals.averageRaroc.toFixed(2)}%
+                      {(portfolioSnapshot.totals?.averageRaroc ?? 0).toFixed(2)}%
                     </div>
                   </div>
                 )}
