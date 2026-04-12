@@ -70,10 +70,13 @@ export function calculateRAROC(inputs: RAROCInputs): RAROCResult {
   // Risk-adjusted return
   const riskAdjustedReturn = grossRevenue - costOfFunds - ecl - operatingCost + capitalIncome;
 
-  // RAROC and EVA
-  const raroc = totalRegCapital > 0 ? (riskAdjustedReturn / totalRegCapital) * 100 : 0;
+  // RAROC and EVA — guard against NaN from upstream inputs to prevent
+  // corrupt values reaching approval-level decisions.
+  const rawRaroc = totalRegCapital > 0 ? (riskAdjustedReturn / totalRegCapital) * 100 : 0;
+  const raroc = Number.isFinite(rawRaroc) ? rawRaroc : 0;
   const eva = raroc - hurdleRate;
-  const economicProfit = riskAdjustedReturn - totalRegCapital * (hurdleRate / 100);
+  const rawEP = riskAdjustedReturn - totalRegCapital * (hurdleRate / 100);
+  const economicProfit = Number.isFinite(rawEP) ? rawEP : 0;
 
   return {
     grossRevenue,

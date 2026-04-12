@@ -48,18 +48,21 @@ const tooltipStyle: React.CSSProperties = {
 };
 
 function formatCurrency(v: number): string {
+  if (!Number.isFinite(v)) return '—';
   if (Math.abs(v) >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
   if (Math.abs(v) >= 1e3) return `${(v / 1e3).toFixed(0)}K`;
   return v.toFixed(0);
 }
 
 function accuracyColor(ratio: number): string {
+  if (!Number.isFinite(ratio)) return 'text-[color:var(--nfq-danger)]';
   if (ratio >= 0.8 && ratio <= 1.2) return 'text-[color:var(--nfq-success)]';
   if ((ratio >= 0.5 && ratio < 0.8) || (ratio > 1.2 && ratio <= 1.5)) return 'text-[color:var(--nfq-warning)]';
   return 'text-[color:var(--nfq-danger)]';
 }
 
 function accuracyBgColor(ratio: number): string {
+  if (!Number.isFinite(ratio)) return 'bg-[#f43f5e]/10';
   if (ratio >= 0.8 && ratio <= 1.2) return 'bg-[#10b981]/10';
   if ((ratio >= 0.5 && ratio < 0.8) || (ratio > 1.2 && ratio <= 1.5)) return 'bg-[#f59e0b]/10';
   return 'bg-[#f43f5e]/10';

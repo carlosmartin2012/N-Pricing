@@ -54,10 +54,12 @@ function formatThousands(n: number): string {
 }
 
 function formatPercent(n: number): string {
+  if (!Number.isFinite(n)) return '—%';
   return percentFormatter.format(n);
 }
 
 function formatSigned(n: number): string {
+  if (!Number.isFinite(n)) return '—%';
   const sign = n > 0 ? '+' : '';
   return `${sign}${formatPercent(n)}`;
 }

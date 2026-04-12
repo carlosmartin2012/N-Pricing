@@ -38,25 +38,31 @@ export function useScenarioAnalysis({
     const finalHQLA =
       isAsset && scenarioDeal.riskWeight <= 20 ? portfolioMetrics.hqla + amount : portfolioMetrics.hqla;
     const finalOutflows = (portfolioMetrics.netOutflows || 1) + dealOutflow;
-    const lcr = (finalHQLA / finalOutflows) * 100;
+    const rawLcr = (finalHQLA / finalOutflows) * 100;
+    const lcr = Number.isFinite(rawLcr) ? rawLcr : 0;
 
     let dealASF = 0;
     let dealRSF = 0;
     if (isLiability) dealASF = amount * (scenarioDeal.durationMonths >= 12 ? 0.95 : 0.5);
     else if (isAsset) dealRSF = amount * (scenarioDeal.durationMonths >= 12 ? 0.85 : 0.5);
 
-    const nsfr = ((portfolioMetrics.asf + dealASF) / ((portfolioMetrics.rsf || 1) + dealRSF)) * 100;
+    const rawNsfr = ((portfolioMetrics.asf + dealASF) / ((portfolioMetrics.rsf || 1) + dealRSF)) * 100;
+    const nsfr = Number.isFinite(rawNsfr) ? rawNsfr : 0;
 
     const duration = scenarioDeal.durationMonths || 1;
-    const lastPoint = liquidityCurvePoints[liquidityCurvePoints.length - 1];
-    const indexedPoint =
-      liquidityCurvePoints[Math.min(Math.floor(duration / 12), liquidityCurvePoints.length - 1)];
+    const hasLPCurve = liquidityCurvePoints.length > 0;
+    const lastPoint = hasLPCurve ? liquidityCurvePoints[liquidityCurvePoints.length - 1] : undefined;
+    const indexedPoint = hasLPCurve
+      ? liquidityCurvePoints[Math.min(Math.floor(duration / 12), liquidityCurvePoints.length - 1)]
+      : undefined;
     const lpValue =
-      duration <= 1
-        ? (liquidityCurvePoints[0]?.termLP ?? 0)
-        : duration >= 60
-          ? (lastPoint?.termLP ?? 0)
-          : (indexedPoint?.termLP ?? 0);
+      !hasLPCurve
+        ? 0
+        : duration <= 1
+          ? (liquidityCurvePoints[0]?.termLP ?? 0)
+          : duration >= 60
+            ? (lastPoint?.termLP ?? 0)
+            : (indexedPoint?.termLP ?? 0);
 
     return {
       lcr,

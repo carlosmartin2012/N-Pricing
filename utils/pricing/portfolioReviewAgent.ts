@@ -128,10 +128,12 @@ export function detectUnderpricingClusters(
     const totalAmount = deals.reduce((s, pd) => s + pd.deal.amount, 0);
     if (totalAmount <= 0) continue;
 
-    const weightedRaroc =
+    const rawWeightedRaroc =
       deals.reduce((s, pd) => s + pd.result.raroc * pd.deal.amount, 0) / totalAmount;
-    const weightedMargin =
+    const weightedRaroc = Number.isFinite(rawWeightedRaroc) ? rawWeightedRaroc : 0;
+    const rawWeightedMargin =
       deals.reduce((s, pd) => s + pd.deal.marginTarget * pd.deal.amount, 0) / totalAmount;
+    const weightedMargin = Number.isFinite(rawWeightedMargin) ? rawWeightedMargin : 0;
     const hurdleRate = Math.max(...deals.map((pd) => pd.deal.targetROE));
     const avgDelta = weightedRaroc - hurdleRate;
 

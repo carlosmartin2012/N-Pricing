@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import * as auditApi from '../../api/audit';
 import * as marketDataApi from '../../api/marketData';
+import { createLogger } from '../../utils/logger';
 import { localCache } from '../../utils/localCache';
 import { monitoringService } from '../../utils/supabase/monitoring';
 import { marketDataIngestionService } from '../../utils/supabase/marketDataIngestionService';
@@ -46,6 +47,8 @@ interface YieldCurveRealtimePayload {
     points: RealtimeCurvePoint[];
   };
 }
+
+const log = createLogger('YieldCurvePanel');
 
 const YieldCurvePanel: React.FC = () => {
   const { currentUser: user } = useAuth();
@@ -102,7 +105,9 @@ const YieldCurvePanel: React.FC = () => {
         setCurvesHistory((prev) => ({ ...prev, ...historyMap }));
         setCurveVersions(versions.slice(0, 10));
       })
-      .catch(() => {});
+      .catch((err) => {
+        log.warn('Failed to load curve history', { currency, error: String(err) });
+      });
   }, [currency]);
 
   // Sync History to Storage

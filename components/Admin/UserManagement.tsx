@@ -5,6 +5,7 @@ import type { UserProfile } from '../../types';
 import { useUI } from '../../contexts/UIContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
+import { useToast } from '../ui/Toast';
 import { supabase, isSupabaseConfigured } from '../../utils/supabaseClient';
 import { createLogger } from '../../utils/logger';
 import { UserCard } from './UserCard';
@@ -25,6 +26,7 @@ const UserManagement: React.FC = () => {
   const { users, setUsers } = useData();
   const { t } = useUI();
   const { currentUser } = useAuth();
+  const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -127,11 +129,12 @@ const UserManagement: React.FC = () => {
         await upsertUser(userToSave);
       } catch (saveError) {
         log.error('Failed to persist user', { userId: userToSave.id }, saveError instanceof Error ? saveError : undefined);
+        addToast('error', 'User saved locally but failed to sync to server. Changes may be lost on reload.');
       }
     }
 
     closeDrawer();
-  }, [editingUser, users, editorMode, setUsers]);
+  }, [editingUser, users, editorMode, setUsers, addToast]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -146,10 +149,11 @@ const UserManagement: React.FC = () => {
           await deleteUser(id);
         } catch (deleteError) {
           log.error('Failed to delete user', { userId: id }, deleteError instanceof Error ? deleteError : undefined);
+          addToast('error', 'User removed locally but failed to sync deletion to server.');
         }
       }
     },
-    [setUsers, t.confirmDeleteUser],
+    [setUsers, t.confirmDeleteUser, addToast],
   );
 
   const isAdmin = currentUser?.role === 'Admin';

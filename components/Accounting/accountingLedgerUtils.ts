@@ -145,5 +145,6 @@ export function formatCurrencyAmount(amount: number, currency: string) {
 }
 
 export function formatRate(rate: number) {
+  if (!Number.isFinite(rate)) return '—%';
   return `${rate.toFixed(2)}%`;
 }
