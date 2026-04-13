@@ -21,9 +21,11 @@ import {
   computeKpis,
   topOutliers,
 } from '../discipline/leakageAggregator';
+import { evaluateAlerts } from '../discipline/alertEngine';
+import type { AlertRule } from '../discipline/alertEngine';
 import type { Transaction, FTPResult } from '../../types';
 import type { TargetGridCell } from '../../types/targetGrid';
-import type { ToleranceBand, DealVariance, Cohort } from '../../types/discipline';
+import type { ToleranceBand, DealVariance, Cohort, DisciplineKpis } from '../../types/discipline';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -413,6 +415,157 @@ describe('leakageAggregator', () => {
       const top = topOutliers(VARIANCES, 5);
       expect(top).toHaveLength(1); // only 1 is outOfBand
       expect(top[0].dealId).toBe('d-1');
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Alert Engine tests
+// ---------------------------------------------------------------------------
+
+describe('alertEngine', () => {
+  const ALERT_VARIANCES: DealVariance[] = [
+    {
+      dealId: 'd-1', snapshotId: 's-1',
+      cohort: { product: 'Loan', segment: 'Corp', tenorBucket: '3-5Y', currency: 'EUR', entityId: 'originator-A' },
+      targetFtp: 0.05, realizedFtp: 0.06, ftpVarianceBps: 100,
+      targetRaroc: 0.12, realizedRaroc: 0.08, rarocVariancePp: -4,
+      targetMargin: 0.02, realizedMargin: 0.01, marginVarianceBps: -100,
+      leakageEur: -40000, outOfBand: true, computedAt: '2026-01-15',
+    },
+    {
+      dealId: 'd-2', snapshotId: 's-1',
+      cohort: { product: 'Loan', segment: 'Corp', tenorBucket: '3-5Y', currency: 'EUR', entityId: 'originator-A' },
+      targetFtp: 0.05, realizedFtp: 0.055, ftpVarianceBps: 50,
+      targetRaroc: 0.12, realizedRaroc: 0.10, rarocVariancePp: -2,
+      targetMargin: 0.02, realizedMargin: 0.015, marginVarianceBps: -50,
+      leakageEur: -10000, outOfBand: true, computedAt: '2026-01-16',
+    },
+    {
+      dealId: 'd-3', snapshotId: 's-1',
+      cohort: { product: 'Deposit', segment: 'Retail', tenorBucket: '0-1Y', currency: 'EUR', entityId: 'originator-B' },
+      targetFtp: 0.03, realizedFtp: 0.031, ftpVarianceBps: 10,
+      targetRaroc: 0.15, realizedRaroc: 0.14, rarocVariancePp: -1,
+      targetMargin: 0.01, realizedMargin: 0.009, marginVarianceBps: -10,
+      leakageEur: -2000, outOfBand: false, computedAt: '2026-01-17',
+    },
+  ];
+
+  const ALERT_KPIS: DisciplineKpis = {
+    totalDeals: 3,
+    inBandCount: 1,
+    inBandPct: 33.3,
+    outOfBandCount: 2,
+    totalLeakageEur: -52000,
+    leakageTrend: -10,
+    avgFtpVarianceBps: 53.3,
+    avgRarocVariancePp: -2.3,
+  };
+
+  describe('evaluateAlerts with threshold_breach', () => {
+    it('triggers when out-of-band percentage exceeds threshold', () => {
+      const rules: AlertRule[] = [
+        { id: 'r-1', type: 'threshold_breach', threshold: 30, enabled: true },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].type).toBe('threshold_breach');
+      // 2 out of 3 = 66.7% which exceeds 30%
+      expect(alerts[0].actualValue).toBeCloseTo(66.7, 0);
+      expect(alerts[0].threshold).toBe(30);
+      expect(alerts[0].acknowledged).toBe(false);
+      expect(alerts[0].id).toMatch(/^alert-/);
+    });
+
+    it('filters by cohort when specified', () => {
+      const rules: AlertRule[] = [
+        {
+          id: 'r-cohort',
+          type: 'threshold_breach',
+          cohort: { product: 'Loan' },
+          threshold: 50,
+          enabled: true,
+        },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+
+      // Only Loan deals: 2 out of 2 = 100% out-of-band > 50%
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].actualValue).toBeCloseTo(100, 0);
+    });
+  });
+
+  describe('evaluateAlerts with leakage_alert', () => {
+    it('triggers when total leakage exceeds threshold', () => {
+      const rules: AlertRule[] = [
+        { id: 'r-2', type: 'leakage_alert', threshold: 40000, enabled: true },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].type).toBe('leakage_alert');
+      // |totalLeakageEur| = 52000 > 40000
+      expect(alerts[0].actualValue).toBe(52000);
+      expect(alerts[0].threshold).toBe(40000);
+    });
+
+    it('does not trigger when leakage is below threshold', () => {
+      const rules: AlertRule[] = [
+        { id: 'r-2b', type: 'leakage_alert', threshold: 100000, enabled: true },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+      expect(alerts).toHaveLength(0);
+    });
+  });
+
+  describe('evaluateAlerts with no rules triggered', () => {
+    it('returns empty array when thresholds are not exceeded', () => {
+      const rules: AlertRule[] = [
+        { id: 'r-3a', type: 'threshold_breach', threshold: 90, enabled: true },
+        { id: 'r-3b', type: 'leakage_alert', threshold: 999999, enabled: true },
+        { id: 'r-3c', type: 'originator_drift', threshold: 999, enabled: true },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+      expect(alerts).toHaveLength(0);
+    });
+
+    it('returns empty array when no rules provided', () => {
+      const alerts = evaluateAlerts([], ALERT_KPIS, ALERT_VARIANCES);
+      expect(alerts).toHaveLength(0);
+    });
+  });
+
+  describe('evaluateAlerts with disabled rule', () => {
+    it('does not evaluate disabled rules', () => {
+      const rules: AlertRule[] = [
+        { id: 'r-disabled', type: 'threshold_breach', threshold: 1, enabled: false },
+        { id: 'r-disabled-2', type: 'leakage_alert', threshold: 1, enabled: false },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+      expect(alerts).toHaveLength(0);
+    });
+  });
+
+  describe('evaluateAlerts with originator_drift', () => {
+    it('triggers when originator avg FTP variance exceeds threshold', () => {
+      const rules: AlertRule[] = [
+        { id: 'r-drift', type: 'originator_drift', threshold: 50, enabled: true },
+      ];
+
+      const alerts = evaluateAlerts(rules, ALERT_KPIS, ALERT_VARIANCES);
+
+      // originator-A has avg |FTP variance| = (100 + 50) / 2 = 75 bps > 50
+      expect(alerts).toHaveLength(1);
+      expect(alerts[0].type).toBe('originator_drift');
+      expect(alerts[0].originatorId).toBe('originator-A');
+      expect(alerts[0].actualValue).toBeCloseTo(75, 0);
     });
   });
 });

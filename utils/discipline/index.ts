@@ -8,3 +8,5 @@ export type { VarianceInput } from './varianceCalculator';
 export { resolveToleranceBand, isOutOfBand, applyBandToVariance } from './bandResolver';
 export { aggregateByDimension, computeKpis, topOutliers } from './leakageAggregator';
 export type { AggregationDimension, DimensionAggregate } from './leakageAggregator';
+export { evaluateAlerts } from './alertEngine';
+export type { AlertRule } from './alertEngine';

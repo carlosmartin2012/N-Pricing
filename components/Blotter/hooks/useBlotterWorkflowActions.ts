@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as auditApi from '../../../api/audit';
 import * as configApi from '../../../api/config';
 import * as dealsApi from '../../../api/deals';
+import * as pricingDiscipline from '../../../api/pricingDiscipline';
 import { useData } from '../../../contexts/DataContext';
 import { canPersistRemotely } from '../../../utils/dataModeUtils';
 import { isSupabaseConfigured } from '../../../utils/supabaseClient';
@@ -162,6 +163,7 @@ export function useBlotterWorkflowActions({
       };
 
       setDeals((previous) => previous.map((item) => (item.id === deal.id ? updatedDeal : item)));
+      if (updatedDeal.id) void pricingDiscipline.recomputeVariance(updatedDeal.id);
 
       if (updatedDeal.id && user?.email && user?.name) {
         let nextDossiers = data.pricingDossiers;
