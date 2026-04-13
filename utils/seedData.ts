@@ -506,3 +506,227 @@ export const MOCK_INCENTIVISATION_RULES: IncentivisationRule[] = [
     description: 'Term deposit retention premium — stable funding incentive',
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Target Grid seed data (Ola 1)
+// ---------------------------------------------------------------------------
+
+const SNAPSHOT_ID = 'snap-2026-q1-001';
+
+/** Helper to build a minimal but realistic FTPResult for grid cells */
+function buildFtpResult(overrides: Partial<FTPResult> & Pick<FTPResult, 'baseRate' | 'liquiditySpread' | 'capitalCharge' | 'totalFTP' | 'finalClientRate' | 'raroc'>): FTPResult {
+  const base: FTPResult = {
+    baseRate: 0,
+    liquiditySpread: 0,
+    _liquidityPremiumDetails: 0,
+    _clcChargeDetails: 0,
+    strategicSpread: 0,
+    optionCost: 0,
+    regulatoryCost: 0,
+    operationalCost: 0.45,
+    capitalCharge: 0,
+    esgTransitionCharge: 0,
+    esgPhysicalCharge: 0,
+    floorPrice: 0,
+    technicalPrice: 0,
+    targetPrice: 0,
+    totalFTP: 0,
+    finalClientRate: 0,
+    raroc: 0,
+    economicProfit: 0,
+    approvalLevel: 'Auto',
+    accountingEntry: { source: 'ALM', dest: 'BU', amountDebit: 0, amountCredit: 0 },
+    matchedMethodology: 'MatchedMaturity',
+    matchReason: 'Auto-assigned by canonical template',
+  };
+  return { ...base, ...overrides };
+}
+
+export const MOCK_METHODOLOGY_SNAPSHOT: MethodologySnapshot = {
+  id: SNAPSHOT_ID,
+  version: '2026.Q1.v1',
+  approvedAt: '2026-01-15T10:30:00Z',
+  approvedBy: 'carlos.martin@nfq.es',
+  governanceRequestId: 'GOV-REQ-2026-001',
+  methodologyHash: 'sha256:a1b2c3d4e5f6789012345678',
+  notes: 'Q1 2026 methodology refresh — updated liquidity premium curves and CRR3 capital phase-in.',
+  isCurrent: true,
+  createdAt: '2026-01-14T16:00:00Z',
+};
+
+export const MOCK_TARGET_GRID_CELLS: TargetGridCell[] = [
+  // --- Commercial Loan × Corporate ---
+  {
+    id: 'tgc-001', snapshotId: SNAPSHOT_ID, product: 'LOAN_COMM', segment: 'Corporate',
+    tenorBucket: '0-1Y', currency: 'EUR', ftp: 2.85, liquidityPremium: 0.18,
+    capitalCharge: 0.92, esgAdjustment: 0, targetMargin: 1.25, targetClientRate: 4.10,
+    targetRaroc: 14.2,
+    canonicalDealInput: { productType: 'LOAN_COMM', clientType: 'Corporate', currency: 'EUR', durationMonths: 6, amount: 10000000 },
+    components: buildFtpResult({ baseRate: 2.85, liquiditySpread: 0.18, capitalCharge: 0.92, totalFTP: 2.85, finalClientRate: 4.10, raroc: 14.2, economicProfit: 42000 }),
+    computedAt: '2026-01-15T10:32:00Z',
+  },
+  {
+    id: 'tgc-002', snapshotId: SNAPSHOT_ID, product: 'LOAN_COMM', segment: 'Corporate',
+    tenorBucket: '1-3Y', currency: 'EUR', ftp: 3.15, liquidityPremium: 0.35,
+    capitalCharge: 1.05, esgAdjustment: 0, targetMargin: 1.40, targetClientRate: 4.55,
+    targetRaroc: 13.5,
+    canonicalDealInput: { productType: 'LOAN_COMM', clientType: 'Corporate', currency: 'EUR', durationMonths: 24, amount: 10000000 },
+    components: buildFtpResult({ baseRate: 3.15, liquiditySpread: 0.35, capitalCharge: 1.05, totalFTP: 3.15, finalClientRate: 4.55, raroc: 13.5, economicProfit: 38000 }),
+    computedAt: '2026-01-15T10:32:01Z',
+  },
+  {
+    id: 'tgc-003', snapshotId: SNAPSHOT_ID, product: 'LOAN_COMM', segment: 'Corporate',
+    tenorBucket: '3-5Y', currency: 'EUR', ftp: 3.50, liquidityPremium: 0.48,
+    capitalCharge: 1.12, esgAdjustment: -0.05, targetMargin: 1.55, targetClientRate: 5.05,
+    targetRaroc: 12.8,
+    canonicalDealInput: { productType: 'LOAN_COMM', clientType: 'Corporate', currency: 'EUR', durationMonths: 48, amount: 10000000 },
+    components: buildFtpResult({ baseRate: 3.50, liquiditySpread: 0.48, capitalCharge: 1.12, esgTransitionCharge: -0.05, totalFTP: 3.50, finalClientRate: 5.05, raroc: 12.8, economicProfit: 35000 }),
+    computedAt: '2026-01-15T10:32:02Z',
+  },
+  {
+    id: 'tgc-004', snapshotId: SNAPSHOT_ID, product: 'LOAN_COMM', segment: 'Corporate',
+    tenorBucket: '5-10Y', currency: 'USD', ftp: 3.90, liquidityPremium: 0.55,
+    capitalCharge: 1.20, esgAdjustment: 0, targetMargin: 1.70, targetClientRate: 5.60,
+    targetRaroc: 11.5,
+    canonicalDealInput: { productType: 'LOAN_COMM', clientType: 'Corporate', currency: 'USD', durationMonths: 84, amount: 15000000 },
+    components: buildFtpResult({ baseRate: 3.90, liquiditySpread: 0.55, capitalCharge: 1.20, totalFTP: 3.90, finalClientRate: 5.60, raroc: 11.5, economicProfit: 52000 }),
+    computedAt: '2026-01-15T10:32:03Z',
+  },
+  // --- Commercial Loan × Retail ---
+  {
+    id: 'tgc-005', snapshotId: SNAPSHOT_ID, product: 'LOAN_COMM', segment: 'Retail',
+    tenorBucket: '0-1Y', currency: 'EUR', ftp: 3.10, liquidityPremium: 0.20,
+    capitalCharge: 1.35, esgAdjustment: 0, targetMargin: 1.80, targetClientRate: 4.90,
+    targetRaroc: 15.8,
+    canonicalDealInput: { productType: 'LOAN_COMM', clientType: 'Retail', currency: 'EUR', durationMonths: 6, amount: 500000 },
+    components: buildFtpResult({ baseRate: 3.10, liquiditySpread: 0.20, capitalCharge: 1.35, totalFTP: 3.10, finalClientRate: 4.90, raroc: 15.8, economicProfit: 4200 }),
+    computedAt: '2026-01-15T10:32:04Z',
+  },
+  {
+    id: 'tgc-006', snapshotId: SNAPSHOT_ID, product: 'LOAN_COMM', segment: 'Retail',
+    tenorBucket: '1-3Y', currency: 'EUR', ftp: 3.40, liquidityPremium: 0.38,
+    capitalCharge: 1.42, esgAdjustment: 0, targetMargin: 1.95, targetClientRate: 5.35,
+    targetRaroc: 14.9,
+    canonicalDealInput: { productType: 'LOAN_COMM', clientType: 'Retail', currency: 'EUR', durationMonths: 24, amount: 500000 },
+    components: buildFtpResult({ baseRate: 3.40, liquiditySpread: 0.38, capitalCharge: 1.42, totalFTP: 3.40, finalClientRate: 5.35, raroc: 14.9, economicProfit: 3800 }),
+    computedAt: '2026-01-15T10:32:05Z',
+  },
+  // --- Term Deposit × Corporate ---
+  {
+    id: 'tgc-007', snapshotId: SNAPSHOT_ID, product: 'DEP_TERM', segment: 'Corporate',
+    tenorBucket: '0-1Y', currency: 'EUR', ftp: 2.20, liquidityPremium: -0.15,
+    capitalCharge: 0, esgAdjustment: 0, targetMargin: 0.65, targetClientRate: 2.85,
+    targetRaroc: 18.0,
+    canonicalDealInput: { productType: 'DEP_TERM', clientType: 'Corporate', currency: 'EUR', durationMonths: 6, amount: 5000000 },
+    components: buildFtpResult({ baseRate: 2.20, liquiditySpread: -0.15, capitalCharge: 0, totalFTP: 2.20, finalClientRate: 2.85, raroc: 18.0, economicProfit: 16000 }),
+    computedAt: '2026-01-15T10:32:06Z',
+  },
+  {
+    id: 'tgc-008', snapshotId: SNAPSHOT_ID, product: 'DEP_TERM', segment: 'Corporate',
+    tenorBucket: '1-3Y', currency: 'USD', ftp: 3.45, liquidityPremium: -0.25,
+    capitalCharge: 0, esgAdjustment: 0, targetMargin: 0.50, targetClientRate: 3.95,
+    targetRaroc: 16.5,
+    canonicalDealInput: { productType: 'DEP_TERM', clientType: 'Corporate', currency: 'USD', durationMonths: 18, amount: 10000000 },
+    components: buildFtpResult({ baseRate: 3.45, liquiditySpread: -0.25, capitalCharge: 0, totalFTP: 3.45, finalClientRate: 3.95, raroc: 16.5, economicProfit: 25000 }),
+    computedAt: '2026-01-15T10:32:07Z',
+  },
+  // --- Term Deposit × Retail ---
+  {
+    id: 'tgc-009', snapshotId: SNAPSHOT_ID, product: 'DEP_TERM', segment: 'Retail',
+    tenorBucket: '0-1Y', currency: 'EUR', ftp: 2.10, liquidityPremium: -0.10,
+    capitalCharge: 0, esgAdjustment: 0, targetMargin: 0.55, targetClientRate: 2.65,
+    targetRaroc: 17.2,
+    canonicalDealInput: { productType: 'DEP_TERM', clientType: 'Retail', currency: 'EUR', durationMonths: 12, amount: 50000 },
+    components: buildFtpResult({ baseRate: 2.10, liquiditySpread: -0.10, capitalCharge: 0, totalFTP: 2.10, finalClientRate: 2.65, raroc: 17.2, economicProfit: 450 }),
+    computedAt: '2026-01-15T10:32:08Z',
+  },
+  {
+    id: 'tgc-010', snapshotId: SNAPSHOT_ID, product: 'DEP_TERM', segment: 'Retail',
+    tenorBucket: '1-3Y', currency: 'EUR', ftp: 2.55, liquidityPremium: -0.20,
+    capitalCharge: 0, esgAdjustment: 0, targetMargin: 0.60, targetClientRate: 3.15,
+    targetRaroc: 16.8,
+    canonicalDealInput: { productType: 'DEP_TERM', clientType: 'Retail', currency: 'EUR', durationMonths: 24, amount: 50000 },
+    components: buildFtpResult({ baseRate: 2.55, liquiditySpread: -0.20, capitalCharge: 0, totalFTP: 2.55, finalClientRate: 3.15, raroc: 16.8, economicProfit: 520 }),
+    computedAt: '2026-01-15T10:32:09Z',
+  },
+];
+
+export const MOCK_CANONICAL_TEMPLATES: CanonicalDealTemplate[] = [
+  {
+    id: 'tpl-loan-corp', product: 'LOAN_COMM', segment: 'Corporate',
+    tenorBucket: '1-3Y', currency: 'EUR',
+    template: {
+      amount: 10000000, tenorMonths: 24, rating: 'BBB', clientType: 'Corporate',
+      riskWeight: 100, capitalRatio: 12.0, targetROE: 15, operationalCostBps: 35,
+      amortization: 'French', repricingFreq: 'Fixed',
+      transitionRisk: 'Neutral', physicalRisk: 'Low', marginTarget: 1.40,
+    },
+    editableByRole: ['Admin', 'Risk_Manager'],
+    updatedAt: '2026-01-14T16:00:00Z',
+  },
+  {
+    id: 'tpl-dep-retail', product: 'DEP_TERM', segment: 'Retail',
+    tenorBucket: '0-1Y', currency: 'EUR',
+    template: {
+      amount: 50000, tenorMonths: 12, rating: 'A', clientType: 'Retail',
+      riskWeight: 0, capitalRatio: 11.5, targetROE: 12, operationalCostBps: 10,
+      amortization: 'Bullet', repricingFreq: 'Fixed',
+      transitionRisk: 'Neutral', physicalRisk: 'Low', marginTarget: 0.55,
+    },
+    editableByRole: ['Admin', 'Risk_Manager'],
+    updatedAt: '2026-01-14T16:00:00Z',
+  },
+  {
+    id: 'tpl-loan-retail', product: 'LOAN_COMM', segment: 'Retail',
+    tenorBucket: '0-1Y', currency: 'EUR',
+    template: {
+      amount: 500000, tenorMonths: 6, rating: 'A-', clientType: 'Retail',
+      riskWeight: 75, capitalRatio: 11.5, targetROE: 14, operationalCostBps: 45,
+      amortization: 'French', repricingFreq: 'Monthly',
+      transitionRisk: 'Neutral', physicalRisk: 'Low', marginTarget: 1.80,
+    },
+    editableByRole: ['Admin', 'Risk_Manager', 'Trader'],
+    updatedAt: '2026-01-14T16:00:00Z',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Pricing Discipline seed data (Ola 2)
+// ---------------------------------------------------------------------------
+
+export const MOCK_TOLERANCE_BANDS: ToleranceBand[] = [
+  {
+    id: 'band-generic', ftpBpsTolerance: 25, rarocPpTolerance: 2.0,
+    marginBpsTolerance: 20, priority: 100, active: true,
+    effectiveFrom: '2026-01-01', createdAt: '2025-12-20T09:00:00Z',
+  },
+  {
+    id: 'band-loan-corp', product: 'LOAN_COMM', segment: 'Corporate',
+    ftpBpsTolerance: 15, rarocPpTolerance: 1.5, marginBpsTolerance: 12,
+    priority: 10, active: true,
+    effectiveFrom: '2026-01-01', createdAt: '2025-12-20T09:00:00Z',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// What-If seed data (Ola 3)
+// ---------------------------------------------------------------------------
+
+export const MOCK_ELASTICITY_MODELS: ElasticityModel[] = [
+  {
+    id: 'elast-loan-corp', product: 'LOAN_COMM', segment: 'Corporate',
+    currency: 'EUR', slope: -0.42, intercept: 0, rSquared: 0.78,
+    source: 'empirical', sampleSize: 1240,
+    calibratedAt: '2025-12-10T14:00:00Z', calibratedByEmail: 'carlos.martin@nfq.es',
+    validFrom: '2026-01-01',
+    notes: 'Calibrated on 2024-2025 corporate lending book. Slope means -0.42% volume per +1bps price.',
+  },
+  {
+    id: 'elast-dep-retail', product: 'DEP_TERM', segment: 'Retail',
+    currency: 'EUR', slope: -0.65, intercept: 0, rSquared: 0.85,
+    source: 'hybrid', sampleSize: 3800,
+    calibratedAt: '2025-12-12T11:00:00Z', calibratedByEmail: 'gregorio.gonzalo@nfq.es',
+    validFrom: '2026-01-01',
+    notes: 'Hybrid model blending historical deposit flows with expert judgment on rate sensitivity.',
+  },
+];

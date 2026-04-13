@@ -834,6 +834,79 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       return;
     }
 
+    // ── Target Grid endpoints ──
+    if (path === '/target-grid/snapshots' && method === 'GET') {
+      await route.fulfill(json([]));
+      return;
+    }
+    if (/^\/target-grid\/snapshots\/[^/]+$/.test(path) && method === 'GET') {
+      await route.fulfill(json(null));
+      return;
+    }
+    if (path === '/target-grid/snapshots' && method === 'POST') {
+      await route.fulfill(json(body));
+      return;
+    }
+    if (path === '/target-grid/cells' && method === 'GET') {
+      await route.fulfill(json([]));
+      return;
+    }
+    if (path === '/target-grid/diff' && method === 'GET') {
+      await route.fulfill(json([]));
+      return;
+    }
+    if (path === '/target-grid/templates' && method === 'GET') {
+      await route.fulfill(json([]));
+      return;
+    }
+    if (/^\/target-grid\/templates(\/[^/]+)?$/.test(path) && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+      await route.fulfill(method === 'DELETE' ? noContent() : json(body));
+      return;
+    }
+
+    // ── Pricing Discipline endpoints ──
+    if (path === '/discipline/kpis' && method === 'GET') {
+      await route.fulfill(json({
+        totalDeals: 0,
+        inBandCount: 0,
+        inBandPct: 0,
+        outOfBandCount: 0,
+        totalLeakageEur: 0,
+        leakageTrend: 0,
+        avgFtpVarianceBps: 0,
+        avgRarocVariancePp: 0,
+      }));
+      return;
+    }
+    if (path === '/discipline/variances' && method === 'GET') {
+      await route.fulfill(json({ data: [], total: 0 }));
+      return;
+    }
+    if (path === '/discipline/tolerance-bands' && method === 'GET') {
+      await route.fulfill(json([]));
+      return;
+    }
+    if (/^\/discipline\/tolerance-bands(\/[^/]+)?$/.test(path) && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+      await route.fulfill(method === 'DELETE' ? noContent() : json(body));
+      return;
+    }
+    if (path === '/discipline/cohort-breakdown' && method === 'GET') {
+      await route.fulfill(json({ cohort: {}, deals: [], summary: {} }));
+      return;
+    }
+    if (path === '/discipline/originator-scorecard' && method === 'GET') {
+      await route.fulfill(json(null));
+      return;
+    }
+    if (/^\/discipline\/exceptions(\/[^/]+)?$/.test(path)) {
+      if (method === 'GET') {
+        await route.fulfill(json([]));
+        return;
+      }
+      await route.fulfill(method === 'DELETE' ? noContent() : json(body));
+      return;
+    }
+
     await route.fulfill(json({ ok: true }));
   });
 }
