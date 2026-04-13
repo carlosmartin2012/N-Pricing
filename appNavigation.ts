@@ -83,7 +83,7 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'SHOCKS', label: t.shocks, icon: Zap, section: 'Pricing', path: '/stress-testing' },
     { id: 'BLOTTER', label: t.dealBlotter, icon: FileText, section: 'Portfolio', path: '/blotter' },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard, section: 'Portfolio', path: '/accounting' },
-    { id: 'REPORTING', label: 'FTP Analytics', icon: BarChart4, section: 'Analytics', path: '/analytics' },
+    { id: 'REPORTING', label: 'Analytics', icon: BarChart4, section: 'Analytics', path: '/analytics' },
     { id: 'MARKET_DATA', label: t.yieldCurves, icon: TrendingUp, section: 'Market Data', path: '/market-data' },
     { id: 'METHODOLOGY', label: 'Rules & Config', icon: GitBranch, section: 'Configuration', path: '/methodology' },
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity, section: 'Configuration', path: '/behavioural' },

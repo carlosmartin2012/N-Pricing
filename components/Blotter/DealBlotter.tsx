@@ -23,6 +23,7 @@ import { DealComparisonDrawer } from './DealComparisonDrawer';
 import { useBlotterActions } from './hooks/useBlotterActions';
 import { useBlotterState } from './hooks/useBlotterState';
 import { canBatchRepriceDeals } from '../../utils/dealWorkflow';
+import * as dealsApi from '../../api/deals';
 
 const DealBlotter: React.FC = () => {
   const data = useData();
@@ -32,6 +33,8 @@ const DealBlotter: React.FC = () => {
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(new Set());
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isOutcomeOpen, setIsOutcomeOpen] = useState(false);
+  const [outcomeDealId, setOutcomeDealId] = useState<string | null>(null);
 
   const userRole = (user?.role || 'Trader') as UserRole;
   const {
@@ -103,6 +106,42 @@ const DealBlotter: React.FC = () => {
     setIsDossierOpen(false);
     setSelectedDossierDealId(null);
   }, [setSelectedDossierDealId]);
+
+  const handleCaptureOutcome = useCallback((deal: Transaction) => {
+    if (!deal.id) return;
+    setOutcomeDealId(deal.id);
+    setIsOutcomeOpen(true);
+  }, []);
+
+  const handleSaveOutcome = useCallback(
+    async (patch: Partial<Transaction>) => {
+      if (!outcomeDealId) return;
+      const target = deals.find((d) => d.id === outcomeDealId);
+      if (!target) return;
+      const updated: Transaction = { ...target, ...patch };
+      try {
+        const saved = await dealsApi.upsertDeal(updated);
+        setDeals((previous) => previous.map((d) => (d.id === outcomeDealId ? saved || updated : d)));
+        await auditApi.createAuditEntry({
+          userEmail: user?.email || 'unknown',
+          userName: user?.name || 'Unknown',
+          action: 'CAPTURE_OUTCOME',
+          module: 'BLOTTER',
+          description: `Captured outcome ${patch.wonLost ?? '?'} for deal ${outcomeDealId}`,
+          details: { wonLost: patch.wonLost, lossReason: patch.lossReason, competitorRate: patch.competitorRate },
+        });
+      } catch (error) {
+        errorTracker.captureException(error instanceof Error ? error : new Error(String(error)), {
+          module: 'DEAL_BLOTTER',
+          dealId: outcomeDealId,
+          extra: { operation: 'captureOutcome' },
+        });
+      }
+    },
+    [outcomeDealId, deals, setDeals, user],
+  );
+
+  const outcomeDeal = outcomeDealId ? deals.find((d) => d.id === outcomeDealId) : undefined;
 
   const handleExportCommitteePackage = useCallback(async () => {
     if (!selectedDossierDeal || !selectedPricingDossier) return;
@@ -259,6 +298,7 @@ const DealBlotter: React.FC = () => {
           onCloneDeal={handleCloneDeal}
           onEditDeal={handleEdit}
           onDeleteDeal={handleDelete}
+          onCaptureOutcome={handleCaptureOutcome}
           formatCurrency={formatDealCurrency}
           selectedDealIds={selectedDealIds}
           onSelectionChange={setSelectedDealIds}
@@ -272,6 +312,13 @@ const DealBlotter: React.FC = () => {
           isImportOpen={isImportOpen}
           isDeleteOpen={isDeleteOpen}
           isDossierOpen={isDossierOpen}
+          isOutcomeOpen={isOutcomeOpen}
+          outcomeDeal={outcomeDeal}
+          onCloseOutcome={() => {
+            setIsOutcomeOpen(false);
+            setOutcomeDealId(null);
+          }}
+          onSaveOutcome={handleSaveOutcome}
           selectedDeal={selectedDeal}
           clients={clients}
           businessUnits={businessUnits}

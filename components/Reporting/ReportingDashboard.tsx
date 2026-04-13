@@ -52,6 +52,9 @@ const ClientProfitabilityDashboard = React.lazy(() => import('./ClientProfitabil
 const ConcentrationDashboard = React.lazy(() => import('./ConcentrationDashboard'));
 const PriceElasticityDashboard = React.lazy(() => import('./PriceElasticityDashboard'));
 const ExPostRAROCDashboard = React.lazy(() => import('./ExPostRAROCDashboard'));
+const MovedToAlquidPanel = React.lazy(() => import('../ui/MovedToAlquidPanel'));
+
+import { isAlmDeprecationEnabled } from '../../constants/alquidDeepLinks';
 
 function downloadFile(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
@@ -470,11 +473,17 @@ const ReportingDashboard: React.FC = () => {
                 fundingCurveData={fundingCurveData}
               />
             ) : activeSubTab === 'MATURITY_LADDER' ? (
-              <MaturityLadder deals={deals} />
+              isAlmDeprecationEnabled()
+                ? <MovedToAlquidPanel feature="MATURITY_LADDER" />
+                : <MaturityLadder deals={deals} />
             ) : activeSubTab === 'CURRENCY_GAP' ? (
-              <CurrencyGap deals={deals} />
+              isAlmDeprecationEnabled()
+                ? <MovedToAlquidPanel feature="CURRENCY_GAP" />
+                : <CurrencyGap deals={deals} />
             ) : activeSubTab === 'NII_SENSITIVITY' ? (
-              <NIISensitivity deals={deals} />
+              isAlmDeprecationEnabled()
+                ? <MovedToAlquidPanel feature="NII_SENSITIVITY" />
+                : <NIISensitivity deals={deals} />
             ) : activeSubTab === 'PNL_ATTRIBUTION' ? (
               <PnlAttribution
                 deals={deals}

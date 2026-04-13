@@ -4,6 +4,7 @@ import { FileUploadModal } from '../ui/FileUploadModal';
 import CommitteeDossierDrawer from './CommitteeDossierDrawer';
 import DealDeleteDrawer from './DealDeleteDrawer';
 import DealEditorDrawer from './DealEditorDrawer';
+import DealOutcomeDrawer from './DealOutcomeDrawer';
 import type { BehaviouralModel, ValidationError } from './dealEditorTypes';
 import type { useBlotterState } from './hooks/useBlotterState';
 
@@ -13,6 +14,10 @@ interface DealBlotterDrawersProps {
   isImportOpen: boolean;
   isDeleteOpen: boolean;
   isDossierOpen: boolean;
+  isOutcomeOpen: boolean;
+  outcomeDeal?: Transaction;
+  onCloseOutcome: () => void;
+  onSaveOutcome: (patch: Partial<Transaction>) => void | Promise<void>;
   selectedDeal: Partial<Transaction> | null;
   clients: ClientEntity[];
   businessUnits: BusinessUnit[];
@@ -54,6 +59,10 @@ const DealBlotterDrawers: React.FC<DealBlotterDrawersProps> = ({
   isImportOpen,
   isDeleteOpen,
   isDossierOpen,
+  isOutcomeOpen,
+  outcomeDeal,
+  onCloseOutcome,
+  onSaveOutcome,
   selectedDeal,
   clients,
   businessUnits,
@@ -135,6 +144,13 @@ const DealBlotterDrawers: React.FC<DealBlotterDrawersProps> = ({
       availableActions={dossierState.selectedAvailableActions}
       onWorkflowAction={onDossierWorkflowAction}
       onExportPackage={onExportCommitteePackage}
+    />
+
+    <DealOutcomeDrawer
+      isOpen={isOutcomeOpen}
+      deal={outcomeDeal}
+      onClose={onCloseOutcome}
+      onSave={onSaveOutcome}
     />
   </>
 );

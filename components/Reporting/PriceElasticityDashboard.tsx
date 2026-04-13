@@ -7,6 +7,7 @@ import {
   type ElasticityModel,
   type PriceResponsePoint,
 } from '../../utils/pricing/priceElasticity';
+import { calibrateFromDeals } from '../../utils/pricing/elasticityCalibration';
 
 interface Props {
   deals: Transaction[];
@@ -21,18 +22,48 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
 
   const booked = useMemo(() => deals.filter((d) => d.status === 'Booked' || d.status === 'Approved'), [deals]);
 
-  // Build a simple mock model from deal margin distribution
-  const models = useMemo(() => {
+  // Calibrate from real deal outcomes (wonLost captured).
+  // Falls back to a degraded single-segment model from marginTarget
+  // distribution when no outcomes exist yet (pre-pilot or empty tenant).
+  const { models, isMockFallback, calibrationMethod } = useMemo(() => {
+    const calibrated = calibrateFromDeals(deals);
+    if (calibrated.length > 0) {
+      const map = new Map<string, ElasticityModel>();
+      for (const model of calibrated) map.set(model.segmentKey, model);
+      // Aggregate "ALL" view weighted by sample_size
+      const totalN = calibrated.reduce((s, m) => s + m.sampleSize, 0);
+      if (totalN > 0) {
+        const weightedElasticity = calibrated.reduce((s, m) => s + m.elasticity * m.sampleSize, 0) / totalN;
+        const weightedBaseline = calibrated.reduce((s, m) => s + m.baselineConversion * m.sampleSize, 0) / totalN;
+        const weightedAnchor = calibrated.reduce((s, m) => s + m.anchorRate * m.sampleSize, 0) / totalN;
+        const allConfidence: 'LOW' | 'MEDIUM' | 'HIGH' =
+          totalN >= 100 ? 'HIGH' : totalN >= 30 ? 'MEDIUM' : 'LOW';
+        map.set('ALL', {
+          segmentKey: 'ALL',
+          elasticity: weightedElasticity,
+          baselineConversion: weightedBaseline,
+          anchorRate: weightedAnchor,
+          sampleSize: totalN,
+          confidence: allConfidence,
+        });
+      }
+      return { models: map, isMockFallback: false, calibrationMethod: calibrated[0]?.method ?? 'FREQUENTIST' };
+    }
+
+    // Fallback: degraded mock
     const map = new Map<string, ElasticityModel>();
-    if (booked.length < 3) return map;
+    if (booked.length < 3) return { models: map, isMockFallback: true, calibrationMethod: 'MOCK' as const };
     const avgRate = booked.reduce((s, d) => s + (d.marginTarget || 0), 0) / booked.length;
-    const mockModel: ElasticityModel = {
-      segmentKey: 'ALL', elasticity: -0.3, baselineConversion: 0.7, anchorRate: avgRate, sampleSize: booked.length, confidence: 'MEDIUM' as const,
-      
-    };
-    map.set('ALL', mockModel);
-    return map;
-  }, [booked]);
+    map.set('ALL', {
+      segmentKey: 'ALL',
+      elasticity: -0.3,
+      baselineConversion: 0.7,
+      anchorRate: avgRate,
+      sampleSize: booked.length,
+      confidence: 'LOW' as const,
+    });
+    return { models: map, isMockFallback: true, calibrationMethod: 'MOCK' as const };
+  }, [deals, booked]);
 
   const activeModel = useMemo(() => {
     if (selectedSegment === 'ALL') {
@@ -64,6 +95,22 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
 
   return (
     <div className="space-y-4">
+      {/* Calibration method banner */}
+      <div className={`flex items-center justify-between rounded-[10px] px-3 py-2 text-[11px] ${
+        isMockFallback
+          ? 'bg-[rgba(245,158,11,0.08)] text-[var(--nfq-warning)]'
+          : 'bg-[var(--nfq-bg-surface)] text-[color:var(--nfq-text-secondary)]'
+      }`}>
+        <span className="font-mono uppercase tracking-[0.16em] text-[10px]">
+          {isMockFallback ? 'Calibration: MOCK (awaiting outcome capture)' : `Calibration: ${calibrationMethod}`}
+        </span>
+        {!isMockFallback && activeModel && (
+          <span className="font-mono text-[10px]">
+            Confidence: <span className="font-semibold">{activeModel.confidence}</span> · n={activeModel.sampleSize}
+          </span>
+        )}
+      </div>
+
       {/* Segment selector */}
       <div className="flex items-center gap-2">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-faint)]">Segment</span>

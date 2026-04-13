@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, RotateCcw, Send, Trash2, XCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, RotateCcw, Send, Target, Trash2, XCircle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '../ui/LayoutComponents';
 import {
@@ -11,6 +11,7 @@ import {
   type UserRole,
   type WorkflowAction,
 } from '../../utils/dealWorkflow';
+import { getOutcomeStyle } from '../../utils/dealOutcome';
 import type { BehaviouralModel, Transaction } from '../../types';
 
 const VIRTUAL_THRESHOLD = 50;
@@ -25,6 +26,7 @@ interface Props {
   onCloneDeal: (deal: Transaction) => void;
   onEditDeal: (deal: Transaction) => void;
   onDeleteDeal: (deal: Transaction) => void;
+  onCaptureOutcome?: (deal: Transaction) => void;
   formatCurrency: (value: number, currency: string) => string;
   selectedDealIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
@@ -73,11 +75,12 @@ const DealRow: React.FC<{
   onCloneDeal: (deal: Transaction) => void;
   onEditDeal: (deal: Transaction) => void;
   onDeleteDeal: (deal: Transaction) => void;
+  onCaptureOutcome?: (deal: Transaction) => void;
   formatCurrency: (value: number, currency: string) => string;
   style?: React.CSSProperties;
   isSelected?: boolean;
   onToggleSelect?: () => void;
-}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, formatCurrency, style, isSelected, onToggleSelect }) => {
+}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, onCaptureOutcome, formatCurrency, style, isSelected, onToggleSelect }) => {
   const availableActions = getAvailableActions(deal.status || 'Draft', userRole);
   const canEdit = canEditDeal(deal, userRole);
   const canClone = canCreateOrCloneDeals(userRole);
@@ -134,6 +137,19 @@ const DealRow: React.FC<{
           </span>
         </span>
       </td>
+      <td className="hidden whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center lg:table-cell">
+        {(() => {
+          const outcomeStyle = getOutcomeStyle(deal.wonLost);
+          return (
+            <span className="inline-flex items-center gap-1.5">
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${outcomeStyle.dot}`} />
+              <span className={`font-mono text-[10px] font-medium uppercase tracking-wide ${outcomeStyle.text}`}>
+                {outcomeStyle.label}
+              </span>
+            </span>
+          );
+        })()}
+      </td>
       <td className="hidden whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center md:table-cell">
         <div className="flex flex-wrap items-center justify-center gap-1">
           {availableActions.map((action) => (
@@ -187,6 +203,16 @@ const DealRow: React.FC<{
           >
             <Trash2 size={14} aria-hidden="true" />
           </button>
+          {onCaptureOutcome && (
+            <button
+              onClick={() => onCaptureOutcome(deal)}
+              className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[var(--nfq-accent)]"
+              title="Capture deal outcome (won/lost)"
+              aria-label={`Capture outcome for deal ${deal.id}`}
+            >
+              <Target size={14} aria-hidden="true" />
+            </button>
+          )}
         </div>
       </td>
     </tr>
@@ -230,6 +256,9 @@ const TableHeader: React.FC<{ hasSelection?: boolean; allSelected?: boolean; onT
       <th scope="col" className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center nfq-label">
         Status
       </th>
+      <th scope="col" className="hidden border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center nfq-label lg:table-cell">
+        Outcome
+      </th>
       <th scope="col" className="hidden border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center nfq-label md:table-cell">
         Actions
       </th>
@@ -247,6 +276,7 @@ const BlotterTable: React.FC<Props> = ({
   onCloneDeal,
   onEditDeal,
   onDeleteDeal,
+  onCaptureOutcome,
   formatCurrency,
   selectedDealIds = new Set(),
   onSelectionChange,
@@ -307,6 +337,7 @@ const BlotterTable: React.FC<Props> = ({
     onCloneDeal,
     onEditDeal,
     onDeleteDeal,
+    onCaptureOutcome,
     formatCurrency,
   };
 
@@ -357,7 +388,7 @@ const BlotterTable: React.FC<Props> = ({
           <tbody>
             {paddingTop > 0 && (
               <tr>
-                <td style={{ height: paddingTop, padding: 0, border: 0 }} colSpan={10} />
+                <td style={{ height: paddingTop, padding: 0, border: 0 }} colSpan={11} />
               </tr>
             )}
             {virtualItems.map((virtualRow) => {
@@ -378,7 +409,7 @@ const BlotterTable: React.FC<Props> = ({
             })}
             {paddingBottom > 0 && (
               <tr>
-                <td style={{ height: paddingBottom, padding: 0, border: 0 }} colSpan={10} />
+                <td style={{ height: paddingBottom, padding: 0, border: 0 }} colSpan={11} />
               </tr>
             )}
           </tbody>

@@ -208,6 +208,14 @@ export interface Transaction {
     ruleId: string;
     overrideProbability?: number;
   }>;
+
+  // ── Pivot extension — Outcome capture for pricing elasticity calibration ──
+  // See: docs/pivot/PIVOT_PLAN.md §Bloque A, migration 20260413000001_deal_outcomes.sql
+  wonLost?: 'WON' | 'LOST' | 'PENDING' | 'WITHDRAWN';
+  lossReason?: 'PRICE' | 'COVENANT' | 'RELATIONSHIP' | 'COMPETITOR' | 'TIMING' | 'CLIENT_WITHDREW' | 'OTHER';
+  competitorRate?: number;   // pct, best competitor rate disclosed by client (optional)
+  proposedRate?: number;     // pct, snapshot of initial rate proposed to client
+  decisionDate?: string;     // ISO timestamp when won/lost decision was recorded
 }
 
 export interface ReplicationTranche {
@@ -241,6 +249,11 @@ export interface ApprovalMatrixConfig {
   autoApprovalThreshold: number;
   l1Threshold: number;
   l2Threshold: number;
+  // Pivot §Bloque E: EVA-based governance (optional — gated by VITE_GOVERNANCE_MODE).
+  // EVA bands in basis points. Deals with EVA above the threshold pass that tier.
+  autoApprovalEvaBp?: number;   // e.g., 200  → EVA > +200bp auto-approve
+  l1EvaBp?: number;              // e.g., 0    → EVA > 0 L1
+  l2EvaBp?: number;              // e.g., -100 → EVA > -100bp L2 committee
 }
 
 export interface TransitionRateCard {

@@ -8,6 +8,7 @@ import {
 import { PRICING_CONSTANTS as PC, TENOR_MONTHS } from './pricingConstants';
 import { matchDealToRule, clearRuleMatchCache } from './ruleMatchingEngine';
 import { calculateRAROC, buildRAROCInputsFromDeal } from './rarocEngine';
+import { resolveApprovalLevel } from './pricing/governance';
 import {
   MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_GREENIUM_GRID,
   MOCK_LIQUIDITY_CURVES,
@@ -466,11 +467,9 @@ export const calculatePricing = (
   const raroc = rarocResult.raroc;
   const economicProfit = rarocResult.economicProfit;
 
-  // ── Governance (legacy single-threshold + multi-dimensional delegation) ──
-  let legacyApprovalLevel: 'Auto' | 'L1_Manager' | 'L2_Committee' | 'Rejected' = 'Rejected';
-  if (raroc >= approvalMatrix.autoApprovalThreshold) legacyApprovalLevel = 'Auto';
-  else if (raroc >= approvalMatrix.l1Threshold) legacyApprovalLevel = 'L1_Manager';
-  else if (raroc >= approvalMatrix.l2Threshold) legacyApprovalLevel = 'L2_Committee';
+  // ── Governance (legacy RAROC or EVA-based, configurable via VITE_GOVERNANCE_MODE) ──
+  // See: utils/pricing/governance.ts + docs/pivot/PIVOT_PLAN.md §Bloque E
+  const legacyApprovalLevel = resolveApprovalLevel(raroc, deal.targetROE, approvalMatrix);
 
   // Multi-dimensional delegation (spec §M8): amount × segment × rating × LTV × RAROC
   const delegation = resolveDelegation({

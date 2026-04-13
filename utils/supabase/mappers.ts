@@ -57,6 +57,12 @@ type DealRow = {
   ifrs9_stage?: number | string | null;
   entity_id?: string;
   version?: number;
+  // Outcome capture (pivot §Bloque A)
+  won_lost?: Transaction['wonLost'] | null;
+  loss_reason?: Transaction['lossReason'] | null;
+  competitor_rate?: number | string | null;
+  proposed_rate?: number | string | null;
+  decision_date?: string | null;
 };
 
 type AuditEntryWrite = Omit<AuditEntry, 'id' | 'timestamp'> & {
@@ -238,6 +244,12 @@ export const mapDealToDB = (deal: Transaction) => ({
   ifrs9_stage: deal.ifrs9Stage,
   entity_id: deal.entityId,
   version: deal.version,
+  // Outcome capture
+  won_lost: deal.wonLost,
+  loss_reason: deal.lossReason,
+  competitor_rate: deal.competitorRate,
+  proposed_rate: deal.proposedRate,
+  decision_date: deal.decisionDate,
   updated_at: nowIso(),
 });
 
@@ -289,6 +301,16 @@ export const mapDealFromDB = (row: Record<string, unknown>): Transaction => {
   })(),
   entityId: dealRow.entity_id,
   version: dealRow.version ?? 1,
+  // Outcome capture
+  wonLost: dealRow.won_lost ?? undefined,
+  lossReason: dealRow.loss_reason ?? undefined,
+  competitorRate: dealRow.competitor_rate != null && Number.isFinite(Number(dealRow.competitor_rate))
+    ? Number(dealRow.competitor_rate)
+    : undefined,
+  proposedRate: dealRow.proposed_rate != null && Number.isFinite(Number(dealRow.proposed_rate))
+    ? Number(dealRow.proposed_rate)
+    : undefined,
+  decisionDate: dealRow.decision_date ?? undefined,
 });
 };
 
