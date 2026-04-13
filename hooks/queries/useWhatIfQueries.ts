@@ -95,6 +95,8 @@ export function useComputeImpactReport() {
     mutationFn: (sandboxId: string) => whatIfApi.computeImpactReport(sandboxId),
     onSuccess: (_data, sandboxId) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.whatIf.impact(sandboxId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.whatIf.sandbox(sandboxId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.whatIf.sandboxes });
     },
   });
 }

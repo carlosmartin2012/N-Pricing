@@ -88,36 +88,130 @@ const DiffCard: React.FC<{
   diff: SandboxDiff;
   index: number;
   onRemove: (index: number) => void;
-}> = ({ diff, index, onRemove }) => (
-  <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0 flex-1">
+  onUpdate: (index: number, updated: SandboxDiff) => void;
+}> = ({ diff, index, onRemove, onUpdate }) => {
+  const [editing, setEditing] = useState(false);
+  const [label, setLabel] = useState(diff.parameterLabel);
+  const [currentVal, setCurrentVal] = useState(String(diff.currentValue ?? ''));
+  const [proposedVal, setProposedVal] = useState(String(diff.proposedValue ?? ''));
+  const [changeType, setChangeType] = useState(diff.changeType);
+
+  const handleSave = () => {
+    const parsedCurrent = Number(currentVal);
+    const parsedProposed = Number(proposedVal);
+    onUpdate(index, {
+      ...diff,
+      parameterLabel: label,
+      currentValue: Number.isFinite(parsedCurrent) ? parsedCurrent : currentVal,
+      proposedValue: Number.isFinite(parsedProposed) ? parsedProposed : proposedVal,
+      changeType,
+    });
+    setEditing(false);
+  };
+
+  const handleCancel = () => {
+    setLabel(diff.parameterLabel);
+    setCurrentVal(String(diff.currentValue ?? ''));
+    setProposedVal(String(diff.proposedValue ?? ''));
+    setChangeType(diff.changeType);
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="rounded-[16px] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Label</label>
+            <input
+              className="nfq-input-field mt-1 w-full text-xs"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Type</label>
+            <select
+              className="nfq-select-field mt-1 w-full text-xs"
+              value={changeType}
+              onChange={(e) => setChangeType(e.target.value as SandboxDiff['changeType'])}
+            >
+              {Object.entries(CHANGE_TYPE_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Current Value</label>
+            <input
+              className="nfq-input-field mt-1 w-full text-xs"
+              value={currentVal}
+              onChange={(e) => setCurrentVal(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Proposed Value</label>
+            <input
+              className="nfq-input-field mt-1 w-full text-xs"
+              value={proposedVal}
+              onChange={(e) => setProposedVal(e.target.value)}
+            />
+          </div>
+        </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline">{CHANGE_TYPE_LABELS[diff.changeType]}</Badge>
-          <span className="text-xs font-medium text-[color:var(--nfq-text-primary)] truncate">
-            {diff.parameterLabel}
-          </span>
-        </div>
-        <div className="mt-2 text-[11px] font-mono text-[color:var(--nfq-text-secondary)]">
-          {diff.parameterPath}
-        </div>
-        <div className="mt-2 flex items-center gap-3 text-xs">
-          <span className="text-rose-400 line-through">{formatChangeValue(diff.currentValue)}</span>
-          <span className="text-[color:var(--nfq-text-secondary)]">&rarr;</span>
-          <span className="text-emerald-400">{formatChangeValue(diff.proposedValue)}</span>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="rounded-lg bg-cyan-500/20 px-3 py-1.5 text-[11px] font-medium text-cyan-400 hover:bg-cyan-500/30 transition-colors"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[color:var(--nfq-text-secondary)] hover:bg-white/5 transition-colors"
+          >
+            Cancel
+          </button>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() => onRemove(index)}
-        className="shrink-0 rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
-        aria-label="Remove diff"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4 cursor-pointer hover:border-cyan-500/20 transition-colors"
+      onClick={() => setEditing(true)}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">{CHANGE_TYPE_LABELS[diff.changeType]}</Badge>
+            <span className="text-xs font-medium text-[color:var(--nfq-text-primary)] truncate">
+              {diff.parameterLabel}
+            </span>
+          </div>
+          <div className="mt-2 text-[11px] font-mono text-[color:var(--nfq-text-secondary)]">
+            {diff.parameterPath}
+          </div>
+          <div className="mt-2 flex items-center gap-3 text-xs">
+            <span className="text-rose-400 line-through">{formatChangeValue(diff.currentValue)}</span>
+            <span className="text-[color:var(--nfq-text-secondary)]">&rarr;</span>
+            <span className="text-emerald-400">{formatChangeValue(diff.proposedValue)}</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onRemove(index); }}
+          className="shrink-0 rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
+          aria-label="Remove diff"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -189,6 +283,15 @@ const WhatIfWorkspace: React.FC = () => {
     (index: number) => {
       if (!sandbox) return;
       const nextDiffs = sandbox.diffs.filter((_, i) => i !== index);
+      updateMutation.mutate({ id: sandbox.id, updates: { diffs: nextDiffs } });
+    },
+    [sandbox, updateMutation],
+  );
+
+  const handleUpdateDiff = useCallback(
+    (index: number, updated: SandboxDiff) => {
+      if (!sandbox) return;
+      const nextDiffs = sandbox.diffs.map((d, i) => (i === index ? updated : d));
       updateMutation.mutate({ id: sandbox.id, updates: { diffs: nextDiffs } });
     },
     [sandbox, updateMutation],
@@ -352,7 +455,7 @@ const WhatIfWorkspace: React.FC = () => {
                     autoFocus
                     onBlur={(e) => handleNameSave(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleNameSave((e.target as HTMLInputElement).value);
+                      if (e.key === 'Enter') e.currentTarget.blur();
                       if (e.key === 'Escape') setEditingName(false);
                     }}
                   />
@@ -397,7 +500,7 @@ const WhatIfWorkspace: React.FC = () => {
                 ) : (
                   <div className="space-y-3">
                     {sandbox.diffs.map((diff, i) => (
-                      <DiffCard key={`${diff.parameterPath}-${i}`} diff={diff} index={i} onRemove={handleRemoveDiff} />
+                      <DiffCard key={`${diff.parameterPath}-${i}`} diff={diff} index={i} onRemove={handleRemoveDiff} onUpdate={handleUpdateDiff} />
                     ))}
                   </div>
                 )}

@@ -103,6 +103,7 @@ const ElasticityCalibration: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ModelFormState>(EMPTY_FORM);
+  const [calibratingId, setCalibratingId] = useState<string | null>(null);
 
   // --- Queries ---
   const { data: models = [], isLoading } = useElasticityModelsQuery(entityId);
@@ -153,8 +154,15 @@ const ElasticityCalibration: React.FC = () => {
   }, [editingId, form, entityId, upsertMutation]);
 
   const handleCalibrate = useCallback(
-    (product: string, segment: string) => {
-      calibrateMutation.mutate({ product, segment, entityId });
+    (modelId: string, product: string, segment: string) => {
+      setCalibratingId(modelId);
+      calibrateMutation.mutate(
+        { product, segment, entityId },
+        {
+          onSuccess: () => setCalibratingId(null),
+          onError: () => setCalibratingId(null),
+        },
+      );
     },
     [entityId, calibrateMutation],
   );
@@ -328,12 +336,12 @@ const ElasticityCalibration: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleCalibrate(model.product, model.segment)}
-                          disabled={calibrateMutation.isPending}
+                          onClick={() => handleCalibrate(model.id, model.product, model.segment)}
+                          disabled={calibratingId === model.id}
                           className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-amber-400 transition-colors disabled:opacity-40"
                           aria-label={`Calibrate ${model.product} model`}
                         >
-                          <RefreshCw className={`h-3.5 w-3.5 ${calibrateMutation.isPending ? 'animate-spin' : ''}`} />
+                          <RefreshCw className={`h-3.5 w-3.5 ${calibratingId === model.id ? 'animate-spin' : ''}`} />
                         </button>
                       </div>
                     </td>

@@ -38,7 +38,8 @@ COMMENT ON TABLE tolerance_bands IS
 -- 2. Deal Variance Snapshots
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS deal_variance_snapshots (
-  deal_id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  deal_id UUID NOT NULL,
   snapshot_id UUID NOT NULL REFERENCES methodology_snapshots(id),
   cohort JSONB NOT NULL,
   target_ftp NUMERIC(10,6),
@@ -56,12 +57,16 @@ CREATE TABLE IF NOT EXISTS deal_variance_snapshots (
   computed_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_variance_deal_snapshot
+  ON deal_variance_snapshots (deal_id, snapshot_id);
 CREATE INDEX IF NOT EXISTS idx_variance_cohort
   ON deal_variance_snapshots USING gin (cohort);
 CREATE INDEX IF NOT EXISTS idx_variance_out_of_band
   ON deal_variance_snapshots (out_of_band) WHERE out_of_band = true;
 CREATE INDEX IF NOT EXISTS idx_variance_snapshot
   ON deal_variance_snapshots (snapshot_id);
+CREATE INDEX IF NOT EXISTS idx_variance_deal
+  ON deal_variance_snapshots (deal_id);
 
 COMMENT ON TABLE deal_variance_snapshots IS
   'Per-deal variance against the methodology snapshot active at deal creation time. Variance is frozen at deal creation; re-evaluation only on explicit request.';

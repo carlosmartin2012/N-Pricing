@@ -96,10 +96,11 @@ CREATE TABLE IF NOT EXISTS budget_targets (
   target_volume NUMERIC(18,2) NOT NULL,
   target_raroc NUMERIC(10,6) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (product, segment, currency, entity_id, period)
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_budget_targets_cohort_period
+  ON budget_targets (product, segment, currency, COALESCE(entity_id, '00000000-0000-0000-0000-000000000000'::uuid), period);
 CREATE INDEX IF NOT EXISTS idx_budget_targets_lookup
   ON budget_targets (product, segment, currency, period);
 

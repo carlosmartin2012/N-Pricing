@@ -88,25 +88,29 @@ export function runBacktest(input: BacktestInput): BacktestResult {
       matchedDealCount++;
     }
 
-    // Period breakdown
-    const period = (deal.startDate ?? '').slice(0, 7); // YYYY-MM
-    const periodEntry = periodMap.get(period) ?? { simulated: 0, actual: 0, count: 0 };
-    periodEntry.simulated += simPnlDeal;
-    periodEntry.actual += (actualResult ? (actualResult.finalClientRate - actualResult.totalFTP) * deal.amount * tenorYears : 0);
-    periodEntry.count++;
-    periodMap.set(period, periodEntry);
+    // Period and cohort breakdowns — only include matched deals for consistency
+    if (actualResult) {
+      const actMarginForBreakdown = actualResult.finalClientRate - actualResult.totalFTP;
+      const actPnlForBreakdown = actMarginForBreakdown * deal.amount * tenorYears;
 
-    // Cohort breakdown
-    const cohortKey = `${deal.productType}|${deal.clientType}`;
-    const cohortEntry = cohortMap.get(cohortKey) ?? {
-      simRateSum: 0, actRateSum: 0, count: 0,
-      product: deal.productType, segment: deal.clientType, volume: 0,
-    };
-    cohortEntry.simRateSum += simResult.finalClientRate;
-    cohortEntry.actRateSum += (actualResult?.finalClientRate ?? 0);
-    cohortEntry.count++;
-    cohortEntry.volume += deal.amount;
-    cohortMap.set(cohortKey, cohortEntry);
+      const period = (deal.startDate ?? '').slice(0, 7); // YYYY-MM
+      const periodEntry = periodMap.get(period) ?? { simulated: 0, actual: 0, count: 0 };
+      periodEntry.simulated += simPnlDeal;
+      periodEntry.actual += actPnlForBreakdown;
+      periodEntry.count++;
+      periodMap.set(period, periodEntry);
+
+      const cohortKey = `${deal.productType}|${deal.clientType}`;
+      const cohortEntry = cohortMap.get(cohortKey) ?? {
+        simRateSum: 0, actRateSum: 0, count: 0,
+        product: deal.productType, segment: deal.clientType, volume: 0,
+      };
+      cohortEntry.simRateSum += simResult.finalClientRate;
+      cohortEntry.actRateSum += actualResult.finalClientRate;
+      cohortEntry.count++;
+      cohortEntry.volume += deal.amount;
+      cohortMap.set(cohortKey, cohortEntry);
+    }
   }
 
   const dealCount = filteredDeals.length;

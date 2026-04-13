@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS methodology_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_methodology_snapshots_entity
   ON methodology_snapshots (entity_id);
-CREATE INDEX IF NOT EXISTS idx_methodology_snapshots_current
-  ON methodology_snapshots (entity_id) WHERE is_current = true;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_methodology_snapshots_current
+  ON methodology_snapshots (COALESCE(entity_id, '00000000-0000-0000-0000-000000000000'::uuid)) WHERE is_current = true;
 
 COMMENT ON TABLE methodology_snapshots IS
   'Frozen snapshots of the pricing methodology at approval time. Each governance-approved change creates a new snapshot. The is_current flag marks the active snapshot per entity.';
@@ -50,10 +50,11 @@ CREATE TABLE IF NOT EXISTS target_grid_cells (
   target_client_rate NUMERIC(10,6) NOT NULL,
   target_raroc NUMERIC(10,6) NOT NULL,
   components JSONB NOT NULL,                -- full breakdown per 19 gaps
-  computed_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (snapshot_id, product, segment, tenor_bucket, currency, entity_id)
+  computed_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_target_grid_cells_cohort
+  ON target_grid_cells (snapshot_id, product, segment, tenor_bucket, currency, COALESCE(entity_id, '00000000-0000-0000-0000-000000000000'::uuid));
 CREATE INDEX IF NOT EXISTS idx_target_grid_cells_snapshot
   ON target_grid_cells (snapshot_id);
 CREATE INDEX IF NOT EXISTS idx_target_grid_cells_dims
@@ -74,10 +75,11 @@ CREATE TABLE IF NOT EXISTS canonical_deal_templates (
   entity_id UUID,                           -- references entities(id)
   template JSONB NOT NULL,                  -- {amount, tenor_months, rating, ltv, ...}
   editable_by_role TEXT[] DEFAULT ARRAY['methodologist','admin'],
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (product, segment, tenor_bucket, currency, entity_id)
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_canonical_templates_cohort
+  ON canonical_deal_templates (product, segment, tenor_bucket, currency, COALESCE(entity_id, '00000000-0000-0000-0000-000000000000'::uuid));
 CREATE INDEX IF NOT EXISTS idx_canonical_templates_lookup
   ON canonical_deal_templates (product, segment, tenor_bucket, currency);
 

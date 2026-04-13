@@ -67,16 +67,14 @@ export async function computeTargetGrid(
   for (let i = 0; i < combos.length; i += batchSize) {
     const batch = combos.slice(i, i + batchSize);
 
-    const batchResults = await Promise.all(
-      batch.map((combo) => computeSingleCell(
-        combo,
-        templateIndex,
-        params.pricingContext,
-        params.approvalMatrix,
-        params.shocks,
-        snapshotId,
-      )),
-    );
+    const batchResults = batch.map((combo) => computeSingleCell(
+      combo,
+      templateIndex,
+      params.pricingContext,
+      params.approvalMatrix,
+      params.shocks,
+      snapshotId,
+    ));
 
     for (const result of batchResults) {
       if (result.error) {
@@ -114,14 +112,14 @@ interface CellComputeResult {
   error: string | null;
 }
 
-async function computeSingleCell(
+function computeSingleCell(
   combo: DimensionCombo,
   templateIndex: Map<string, CanonicalDealTemplate>,
   context: PricingContext,
   approvalMatrix: ApprovalMatrixConfig,
   shocks?: PricingShocks,
   snapshotId?: string,
-): Promise<CellComputeResult> {
+): CellComputeResult {
   const cohortKey = buildCohortKey(combo);
 
   try {

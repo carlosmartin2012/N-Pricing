@@ -6,6 +6,7 @@ import {
   useDisciplineKpisQuery,
   useVariancesQuery,
   useToleranceBandsQuery,
+  useOriginatorScorecardQuery,
 } from '../../hooks/queries/useDisciplineQueries';
 import type { DisciplineFilters, DateRange, Cohort, DealVariance } from '../../types';
 
@@ -130,10 +131,31 @@ const DisciplineDashboard: React.FC = () => {
   // Exception form
   const [exceptionDealId, setExceptionDealId] = useState<string | null>(null);
 
+  // Originator scorecard
+  const [selectedOriginatorId, setSelectedOriginatorId] = useState('');
+  const { data: scorecard = null, isLoading: scorecardLoading } = useOriginatorScorecardQuery(
+    selectedOriginatorId,
+    dateRange,
+  );
+
+  // Derive unique originators from variances for the selector
+  const originatorIds = useMemo(() => {
+    const seen = new Set<string>();
+    for (const v of variances) {
+      if (v.cohort.entityId) seen.add(v.cohort.entityId);
+    }
+    return Array.from(seen);
+  }, [variances]);
+
   const handleDealClick = useCallback((dealId: string) => {
+    // Also open cohort drilldown for the clicked deal
+    const match = variances.find((v) => v.dealId === dealId);
+    if (match) {
+      setDrilldownCohort(match.cohort);
+    }
     setExceptionDealId(dealId);
     setActiveTab('exceptions');
-  }, []);
+  }, [variances]);
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-auto p-6">
@@ -263,10 +285,37 @@ const DisciplineDashboard: React.FC = () => {
         )}
 
         {activeTab === 'scorecards' && (
-          <OriginatorScorecardComponent
-            scorecard={null}
-            isLoading={false}
-          />
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+                Originator
+              </label>
+              {originatorIds.length > 0 ? (
+                <select
+                  value={selectedOriginatorId}
+                  onChange={(e) => setSelectedOriginatorId(e.target.value)}
+                  className="nfq-select-field w-48 text-xs"
+                >
+                  <option value="">Select originator...</option>
+                  {originatorIds.map((id) => (
+                    <option key={id} value={id}>{id}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={selectedOriginatorId}
+                  onChange={(e) => setSelectedOriginatorId(e.target.value)}
+                  placeholder="Enter originator ID"
+                  className="nfq-input-field w-48 text-xs"
+                />
+              )}
+            </div>
+            <OriginatorScorecardComponent
+              scorecard={scorecard}
+              isLoading={scorecardLoading}
+            />
+          </div>
         )}
 
         {activeTab === 'bands' && (

@@ -66,7 +66,7 @@ export interface CellImpact {
   tenorBucket: string;
   currency: string;
   currentCell: TargetGridCell;
-  proposedCell: TargetGridCell;
+  proposedCell: Omit<TargetGridCell, 'id' | 'computedAt'> | TargetGridCell;
   ftpDeltaBps: number;
   rarocDeltaPp: number;
   clientRateDeltaBps: number;

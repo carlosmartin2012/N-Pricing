@@ -192,7 +192,7 @@ function computeCellImpacts(
       tenorBucket: nc.tenorBucket,
       currency: nc.currency,
       currentCell: base,
-      proposedCell: nc as TargetGridCell,
+      proposedCell: nc,
       ftpDeltaBps: (nc.ftp - base.ftp) * 10_000,
       rarocDeltaPp: (nc.targetRaroc - base.targetRaroc) * 100,
       clientRateDeltaBps: (nc.targetClientRate - base.targetClientRate) * 10_000,
