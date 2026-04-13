@@ -41,6 +41,9 @@ const RAROCCalculator = React.lazy(() => import('./components/RAROC/RAROCCalcula
 const ShocksDashboard = React.lazy(() => import('./components/Risk/ShocksDashboard'));
 const NotificationCenter = React.lazy(() => import('./components/Notifications/NotificationCenter'));
 const HealthDashboard = React.lazy(() => import('./components/Admin/HealthDashboard'));
+const TargetGridView = React.lazy(() => import('./components/TargetGrid/TargetGridView'));
+const DisciplineDashboard = React.lazy(() => import('./components/Discipline/DisciplineDashboard'));
+const WhatIfWorkspace = React.lazy(() => import('./components/WhatIf/WhatIfWorkspace'));
 const UserConfigModal = React.lazy(() =>
   import('./components/ui/UserConfigModal').then((module) => ({
     default: module.UserConfigModal,
@@ -63,7 +66,8 @@ const ViewSkeleton: React.FC = () => {
   const path = window.location.pathname;
   if (path === '/pricing') return <CalculatorSkeleton />;
   if (path === '/blotter' || path === '/users' || path === '/audit') return <TableSkeleton />;
-  if (path === '/analytics' || path === '/raroc' || path === '/stress-testing' || path === '/health') return <DashboardSkeleton />;
+  if (path === '/analytics' || path === '/raroc' || path === '/stress-testing' || path === '/health' || path === '/discipline' || path === '/what-if') return <DashboardSkeleton />;
+  if (path === '/target-grid') return <TableSkeleton />;
   if (path === '/methodology' || path === '/behavioural') return <ConfigSkeleton />;
   return <DashboardSkeleton />;
 };
@@ -246,6 +250,9 @@ const AppContent: React.FC = () => {
                     <Route path="/notifications" element={<div className="relative z-0 flex h-full flex-col"><NotificationCenter /></div>} />
                     <Route path="/ai" element={<div className="relative z-0 flex h-full flex-col"><GenAIChat /></div>} />
                     <Route path="/stress-testing" element={<div className="relative z-0 flex h-full flex-col"><ShocksDashboard deal={dealParams} /></div>} />
+                    <Route path="/target-grid" element={<div className="relative z-0 flex h-full flex-col"><TargetGridView /></div>} />
+                    <Route path="/discipline" element={<div className="relative z-0 flex h-full flex-col"><DisciplineDashboard /></div>} />
+                    <Route path="/what-if" element={<div className="relative z-0 flex h-full flex-col"><WhatIfWorkspace /></div>} />
                     <Route path="/" element={<Navigate to="/pricing" replace />} />
                     <Route path="*" element={<Navigate to="/pricing" replace />} />
                   </Routes>

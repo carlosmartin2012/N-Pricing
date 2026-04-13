@@ -3,6 +3,33 @@ export type { ReportSchedule, ReportRun, ReportType, ReportFrequency, ReportForm
 export type { PricingLineageRef } from './types/pricingLineage';
 export type { AlertRule, AlertOperator } from './types/alertRule';
 
+// Ola 1 — Target Grid
+export type {
+  TenorBucket, MethodologySnapshot, TargetGridCell, CanonicalDealTemplate,
+  CanonicalTemplateValues, GridFilters, GridDiff, DiffThresholds,
+  GridComputeOptions, GridComputeResult,
+} from './types/targetGrid';
+export { TENOR_BUCKETS, TENOR_BUCKET_MONTHS, DEFAULT_DIFF_THRESHOLDS } from './types/targetGrid';
+
+// Ola 2 — Pricing Discipline
+export type {
+  Cohort, ToleranceBand, DealVariance, PricingException,
+  PricingExceptionStatus, PricingExceptionReasonCode,
+  DisciplineKpis, CohortBreakdown, OriginatorScorecard,
+  DisciplineFilters, DateRange, VarianceFilters, PageOpts, Paged,
+  DisciplineAlert, DisciplineAlertType,
+} from './types/discipline';
+
+// Ola 3 — What-If
+export type {
+  SandboxMethodology, SandboxDiff, SandboxStatus,
+  ImpactReport, ImpactSummary, CellImpact, PortfolioImpact,
+  ElasticityModel, ElasticitySource, ElasticityPrediction,
+  BacktestRun, BacktestResult, BacktestStatus,
+  MarketBenchmark, BenchmarkComparison,
+  BudgetTarget, BudgetConsistency,
+} from './types/whatIf';
+
 export type MethodologyType = 'MatchedMaturity' | 'MovingAverage' | 'RateCard' | 'ZeroDiscount';
 
 export interface ClientEntity {
@@ -431,7 +458,10 @@ export type ViewState =
   | 'REPORTING'
   | 'RAROC'
   | 'HEALTH'
-  | 'NOTIFICATIONS';
+  | 'NOTIFICATIONS'
+  | 'TARGET_GRID'
+  | 'DISCIPLINE'
+  | 'WHAT_IF';
 export type AuditModule = ViewState | 'AUTH' | 'MASTER_DATA' | 'SYS_CONFIG' | 'SYSTEM' | (string & {});
 
 export interface YieldCurvePoint {

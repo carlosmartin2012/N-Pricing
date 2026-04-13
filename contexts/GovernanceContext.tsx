@@ -1,11 +1,15 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import type {
   ApprovalTask,
   PricingDossier,
   MethodologyChangeRequest,
   MethodologyVersion,
   PortfolioSnapshot,
+  MethodologySnapshot,
 } from '../types';
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('GovernanceContext');
 
 export interface GovernanceContextType {
   approvalTasks: ApprovalTask[];
@@ -18,6 +22,11 @@ export interface GovernanceContextType {
   setMethodologyVersions: React.Dispatch<React.SetStateAction<MethodologyVersion[]>>;
   portfolioSnapshots: PortfolioSnapshot[];
   setPortfolioSnapshots: React.Dispatch<React.SetStateAction<PortfolioSnapshot[]>>;
+  /** Ola 1: Methodology snapshots for target grid */
+  methodologySnapshots: MethodologySnapshot[];
+  setMethodologySnapshots: React.Dispatch<React.SetStateAction<MethodologySnapshot[]>>;
+  /** Triggers target grid snapshot computation on methodology approval */
+  onMethodologyApproved: (requestId: string, approverEmail: string) => void;
 }
 
 const GovernanceContext = createContext<GovernanceContextType | null>(null);
@@ -28,6 +37,17 @@ export const GovernanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [methodologyChangeRequests, setMethodologyChangeRequests] = useState<MethodologyChangeRequest[]>([]);
   const [methodologyVersions, setMethodologyVersions] = useState<MethodologyVersion[]>([]);
   const [portfolioSnapshots, setPortfolioSnapshots] = useState<PortfolioSnapshot[]>([]);
+  const [methodologySnapshots, setMethodologySnapshots] = useState<MethodologySnapshot[]>([]);
+
+  const onMethodologyApproved = useCallback(
+    (requestId: string, approverEmail: string) => {
+      log.info('Methodology approved — snapshot creation triggered', { requestId, approverEmail });
+      // In production, this would call the API to compute a new target grid snapshot.
+      // For now, we log and let the React Query invalidation handle the UI refresh.
+      // The actual computation is triggered server-side via the governance approval endpoint.
+    },
+    [],
+  );
 
   const value = useMemo(
     () => ({
@@ -41,6 +61,9 @@ export const GovernanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setMethodologyVersions,
       portfolioSnapshots,
       setPortfolioSnapshots,
+      methodologySnapshots,
+      setMethodologySnapshots,
+      onMethodologyApproved,
     }),
     [
       approvalTasks,
@@ -48,6 +71,8 @@ export const GovernanceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       methodologyChangeRequests,
       methodologyVersions,
       portfolioSnapshots,
+      methodologySnapshots,
+      onMethodologyApproved,
     ]
   );
 

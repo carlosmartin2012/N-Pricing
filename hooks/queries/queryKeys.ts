@@ -59,4 +59,40 @@ export const queryKeys = {
     paginated: (page: number, pageSize: number) =>
       ['audit', 'log', 'paginated', page, pageSize] as const,
   },
+
+  // --- Target Grid (Ola 1) ---
+  targetGrid: {
+    snapshots: ['targetGrid', 'snapshots'] as const,
+    snapshot: (id: string) => ['targetGrid', 'snapshots', id] as const,
+    cells: (snapshotId: string) => ['targetGrid', 'cells', snapshotId] as const,
+    diff: (fromId: string, toId: string) => ['targetGrid', 'diff', fromId, toId] as const,
+    templates: ['targetGrid', 'templates'] as const,
+  },
+
+  // --- Pricing Discipline (Ola 2) ---
+  discipline: {
+    kpis: (entityId?: string) => ['discipline', 'kpis', entityId] as const,
+    variances: ['discipline', 'variances'] as const,
+    bands: ['discipline', 'bands'] as const,
+    exceptions: ['discipline', 'exceptions'] as const,
+    scorecards: (originatorId: string) => ['discipline', 'scorecards', originatorId] as const,
+    cohortBreakdown: (product: string, segment: string) =>
+      ['discipline', 'cohort', product, segment] as const,
+  },
+
+  // --- What-If (Ola 3) ---
+  whatIf: {
+    sandboxes: ['whatIf', 'sandboxes'] as const,
+    sandbox: (id: string) => ['whatIf', 'sandboxes', id] as const,
+    impact: (sandboxId: string) => ['whatIf', 'impact', sandboxId] as const,
+    elasticity: ['whatIf', 'elasticity'] as const,
+    backtests: ['whatIf', 'backtests'] as const,
+    backtestResult: (runId: string) => ['whatIf', 'backtests', runId, 'result'] as const,
+    benchmarks: ['whatIf', 'benchmarks'] as const,
+    benchmarkComparison: (snapshotId: string) =>
+      ['whatIf', 'benchmarks', 'compare', snapshotId] as const,
+    budget: ['whatIf', 'budget'] as const,
+    budgetConsistency: (snapshotId: string) =>
+      ['whatIf', 'budget', 'consistency', snapshotId] as const,
+  },
 } as const;
