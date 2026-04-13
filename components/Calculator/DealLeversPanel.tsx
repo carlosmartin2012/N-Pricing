@@ -1,5 +1,4 @@
 import React from 'react';
-import { Sliders } from 'lucide-react';
 import type { Transaction } from '../../types';
 import type { Language } from '../../translations';
 import { getTranslations } from '../../translations';
@@ -76,10 +75,6 @@ export const DealLeversPanel: React.FC<Props> = ({
 
   return (
     <div data-tour="deal-levers" className="relative flex-1 space-y-6 overflow-y-auto p-4 custom-scrollbar">
-      <div className="pointer-events-none absolute right-0 top-0 p-4 opacity-5">
-        <Sliders size={120} />
-      </div>
-
       <DealLeverCard
         label={t.principalAmount}
         tooltip={t.tooltip_calc_amount}
