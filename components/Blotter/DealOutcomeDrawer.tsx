@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { Target, TrendingDown, TrendingUp, Clock, X as XIcon } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { Target, TrendingDown, TrendingUp, Clock, X as XIcon, Sparkles, Check, X as XMark } from 'lucide-react';
 import { Drawer } from '../ui/Drawer';
 import { TextInput } from '../ui/LayoutComponents';
 import type { Transaction } from '../../types';
@@ -11,6 +11,7 @@ import {
   type WonLost,
   type LossReason,
 } from '../../utils/dealOutcome';
+import { classifyLossReason } from '../../utils/ai';
 
 interface Props {
   isOpen: boolean;
@@ -41,6 +42,9 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
   const [competitorRate, setCompetitorRate] = useState<string>(
     deal?.competitorRate != null ? String(deal.competitorRate) : '',
   );
+  const [notes, setNotes] = useState('');
+  const [aiSuggestion, setAiSuggestion] = useState<{ reason: LossReason; confidence: number; rationale: string } | null>(null);
+  const [isClassifying, setIsClassifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Reset form when a different deal is loaded into the drawer.
@@ -48,7 +52,51 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
     setWonLost(deal?.wonLost);
     setLossReason(deal?.lossReason);
     setCompetitorRate(deal?.competitorRate != null ? String(deal.competitorRate) : '');
+    setNotes('');
+    setAiSuggestion(null);
   }, [deal?.id, deal?.wonLost, deal?.lossReason, deal?.competitorRate]);
+
+  // AI Loss Classifier — debounced suggestion from notes when wonLost=LOST.
+  // Only fires when notes >= 10 chars and LOST is selected.
+  // See: docs/pivot/ai-assistant-refocus.md §3
+  const requestClassification = useCallback(async (currentNotes: string) => {
+    if (wonLost !== 'LOST' || currentNotes.trim().length < 10) {
+      setAiSuggestion(null);
+      return;
+    }
+    setIsClassifying(true);
+    try {
+      const result = await classifyLossReason(currentNotes, {
+        segment: deal?.clientType,
+        proposedRate: deal?.proposedRate ?? deal?.marginTarget,
+      });
+      if (result.ok && result.result.confidence >= 0.6) {
+        setAiSuggestion({
+          reason: result.result.classification,
+          confidence: result.result.confidence,
+          rationale: result.result.rationale,
+        });
+      } else {
+        setAiSuggestion(null);
+      }
+    } catch {
+      setAiSuggestion(null);
+    } finally {
+      setIsClassifying(false);
+    }
+  }, [wonLost, deal?.clientType, deal?.proposedRate, deal?.marginTarget]);
+
+  useEffect(() => {
+    const handle = setTimeout(() => { void requestClassification(notes); }, 700);
+    return () => clearTimeout(handle);
+  }, [notes, requestClassification]);
+
+  const acceptSuggestion = () => {
+    if (aiSuggestion) {
+      setLossReason(aiSuggestion.reason);
+      setAiSuggestion(null);
+    }
+  };
 
   const canSave = useMemo(() => {
     if (!wonLost) return false;
@@ -151,6 +199,58 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
             })}
           </div>
         </div>
+
+        {/* Notes + AI Loss Classifier — only shown on LOST */}
+        {wonLost === 'LOST' && (
+          <div>
+            <label className="flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] font-mono">
+              Notes {isClassifying && <Sparkles size={10} className="animate-pulse text-[var(--nfq-accent)]" />}
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Context that led to the loss (Spanish or English). AI will suggest a category if you describe enough."
+              className="mt-2 w-full rounded-[10px] bg-[var(--nfq-bg-surface)] p-2 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--nfq-accent)]"
+            />
+            {aiSuggestion && (
+              <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] bg-[rgba(6,182,212,0.08)] px-3 py-2">
+                <div className="flex items-start gap-2">
+                  <Sparkles size={12} className="mt-0.5 text-[var(--nfq-accent)]" />
+                  <div className="text-[11px]">
+                    <div className="text-[color:var(--nfq-text-primary)]">
+                      AI suggests: <span className="font-semibold">{aiSuggestion.reason}</span>{' '}
+                      <span className="text-[color:var(--nfq-text-muted)]">
+                        (confidence {Math.round(aiSuggestion.confidence * 100)}%)
+                      </span>
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-[color:var(--nfq-text-muted)]">
+                      {aiSuggestion.rationale}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={acceptSuggestion}
+                    className="rounded bg-[var(--nfq-accent)] p-1 text-white hover:opacity-90"
+                    aria-label="Accept AI suggestion"
+                    title="Accept"
+                  >
+                    <Check size={12} />
+                  </button>
+                  <button
+                    onClick={() => setAiSuggestion(null)}
+                    className="rounded p-1 text-[color:var(--nfq-text-muted)] hover:text-[var(--nfq-danger)]"
+                    aria-label="Dismiss AI suggestion"
+                    title="Dismiss"
+                  >
+                    <XMark size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Loss reason — only when LOST */}
         {wonLost === 'LOST' && (

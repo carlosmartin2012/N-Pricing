@@ -15,6 +15,8 @@ import { calculatePricing } from '../../utils/pricingEngine';
 const MethodologyVisualizer = React.lazy(() => import('./MethodologyVisualizer'));
 const PricingReceipt = React.lazy(() => import('./PricingReceipt'));
 const PricingComparison = React.lazy(() => import('./PricingComparison'));
+const CalculatorRecommendationPanel = React.lazy(() => import('./CalculatorRecommendationPanel'));
+const PricingInsightsWidget = React.lazy(() => import('./PricingInsightsWidget'));
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
 
@@ -70,6 +72,31 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   return (
     <ErrorBoundary fallbackMessage="Pricing calculator encountered an error">
     <div className="relative z-0 w-full">
+      {/* Landing insights — pivot §Bloque G */}
+      <Suspense fallback={null}>
+        <div className="mb-4">
+          <PricingInsightsWidget deals={deals} />
+        </div>
+      </Suspense>
+
+      {/* Recommendation panel — pivot §Bloque E (EV-optimal, floor, commercial) */}
+      {currentResult && (
+        <Suspense fallback={null}>
+          <div className="mb-4">
+            <CalculatorRecommendationPanel
+              deal={dealParams}
+              deals={deals}
+              ftp={currentResult.baseRate + (currentResult.liquiditySpread ?? 0)}
+              capitalCharge={currentResult.capitalCharge ?? 0}
+              regulatoryCost={currentResult.regulatoryCost ?? 0}
+              raroc={currentResult.raroc ?? 0}
+              hurdleRate={dealParams.targetROE}
+              proposedRate={currentResult.finalClientRate ?? (currentResult.baseRate + dealParams.marginTarget)}
+            />
+          </div>
+        </Suspense>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-12">
         <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
           <DealInputPanel

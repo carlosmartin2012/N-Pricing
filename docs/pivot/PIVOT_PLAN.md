@@ -445,28 +445,28 @@ export const ALQUID_DEEP_LINKS = {
 
 | Bloque | Estado | Última actualización |
 |---|---|---|
-| 0 — Preflight | 🟡 VintageAnalysis/PricingAnalytics/Backtesting audit pendiente | 2026-04-13 |
-| A — Outcome capture | ✅ Schema + types + mappers + drawer + Blotter wiring + tests (18) | 2026-04-13 |
+| 0 — Preflight | ✅ Audit completo — `docs/pivot/bloque-0-audit.md` (Vintage/Pricing/Backtesting OK) | 2026-04-13 |
+| A — Outcome capture | ✅ Schema + types + mappers + drawer (AI-assisted) + Blotter wiring + tests (18) | 2026-04-13 |
 | B — ALM deprecation | ✅ Flag + deep-links + MovedToAlquidPanel wired (URLs TBD con piloto) | 2026-04-13 |
-| C — AI Assistant refocus | ✅ utils/ai/: client + redact + lossClassifier + pricingCopilot + negotiationAgent + tests (23) | 2026-04-13 |
-| D — Elasticity real | ✅ elasticityCalibration (OLS + Bayesian prior) + migration + dashboard integration + tests (19) | 2026-04-13 |
-| E — Calculator bridge | ✅ CalculatorRecommendationPanel + EVA governance + tests (15). Wiring to Calculator shell remains. | 2026-04-13 |
-| F — Ex-post RAROC | ✅ Schema + utility + deterministic proxy (replaces Math.random) + tests (10) | 2026-04-13 |
-| G — Reorg + landing | ✅ Navigation label fixed + PricingInsightsWidget | 2026-04-13 |
-| H — Market refs | ⚪ Post-MVP | — |
-| I — Marginal impact | ⚪ Post-MVP | — |
-| J — Negotiation cockpit | ⚪ Post-MVP (scaffolded in `utils/ai/negotiationAgent.ts`) | — |
+| C — AI Assistant refocus | ✅ utils/ai/: client + redact + lossClassifier + pricingCopilot + negotiationAgent + tests (23). Loss Classifier wired into DealOutcomeDrawer. | 2026-04-13 |
+| D — Elasticity real | ✅ elasticityCalibration (OLS + Bayesian prior) + migration + dashboard + Edge Function (Deno) + tests (19) | 2026-04-13 |
+| E — Calculator bridge | ✅ CalculatorRecommendationPanel wired into CalculatorWorkspace + EVA governance + tests (15) | 2026-04-13 |
+| F — Ex-post RAROC | ✅ Schema + utility + deterministic proxy + Edge Function (Deno, SPOT_CURVE) + tests (10) | 2026-04-13 |
+| G — Reorg + landing | ✅ Navigation label fixed + PricingInsightsWidget wired | 2026-04-13 |
+| H — Market refs | ✅ Migration + utils/marketBenchmarks.ts + tests (7) | 2026-04-13 |
+| I — Marginal impact | ✅ utils/portfolio/marginalImpact.ts (RWA/LCR/NSFR/Herfindahl) + tests (7) | 2026-04-13 |
+| J — Negotiation cockpit | 🟡 Backend ready (negotiationAgent.ts). UI pending pilot use-case validation. | 2026-04-13 |
 
 ### Summary del run 2026-04-13
 
-- **Tests**: 783 passing (was 671 at start).
+- **Tests**: 797 passing (was 671 at start, +126 new).
 - **Typecheck**: clean.
 - **Lint**: 0 new issues from pivot files.
-- **Build**: production build OK, 2.98s.
-- **Código nuevo**: 17 archivos.
-- **Código modificado**: 9 archivos.
-- **Ruta crítica** (A → D → E) cerrada al 100% en data layer y lógica; UI wiring en Calculator shell pending final UX decision with piloto.
-- **Siguiente paso**: ejecutar Bloque 0 audit (VintageAnalysis/PricingAnalytics) + recibir URLs Alquid para llenar `constants/alquidDeepLinks.ts`.
+- **Build**: production build OK.
+- **Edge Functions**: elasticity-recalibrate + realize-raroc (Deno).
+- **Ruta crítica** (A → D → E) cerrada al 100% incluyendo wiring al Calculator.
+- **Post-MVP** H e I cerrados (market benchmarks + marginal portfolio impact).
+- **Siguiente paso**: inputs del piloto (URLs Alquid, priors expertos, go-live) + decidir UX del Negotiation Cockpit (J).
 
 Legend: ✅ Done · 🟡 In progress · ⚪ Not started · 🔴 Blocked.
 
