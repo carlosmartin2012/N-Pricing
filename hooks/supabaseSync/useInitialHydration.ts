@@ -23,6 +23,11 @@ import {
   MOCK_TRANSITION_GRID,
   MOCK_USERS,
   MOCK_YIELD_CURVE,
+  MOCK_METHODOLOGY_SNAPSHOT,
+  MOCK_TARGET_GRID_CELLS,
+  MOCK_CANONICAL_TEMPLATES,
+  MOCK_TOLERANCE_BANDS,
+  MOCK_ELASTICITY_MODELS,
 } from '../../constants';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { createLogger } from '../../utils/logger';
@@ -74,7 +79,7 @@ export function useInitialHydration({
       });
 
       if (hydrationPlan.source === 'mock') {
-        applyMockData(context, hydrationPlan.syncStatus);
+        applyMockData(context, hydrationPlan.syncStatus, queryClient);
         context.setIsLoading(false);
         return;
       }
@@ -169,6 +174,15 @@ export function useInitialHydration({
         queryClient.setQueryData(queryKeys.governance.portfolioSnapshots, dbPortfolioSnapshots);
         queryClient.setQueryData(queryKeys.config.marketDataSources, dbMarketDataSources);
 
+        // Seed new views (Target Grid, Discipline, What-If) with mock fallback
+        // These views don't have dedicated Supabase endpoints yet, so always use mock data
+        queryClient.setQueryData(queryKeys.targetGrid.snapshots, [MOCK_METHODOLOGY_SNAPSHOT]);
+        queryClient.setQueryData(queryKeys.targetGrid.snapshot(MOCK_METHODOLOGY_SNAPSHOT.id), MOCK_METHODOLOGY_SNAPSHOT);
+        queryClient.setQueryData(queryKeys.targetGrid.cells(MOCK_METHODOLOGY_SNAPSHOT.id), MOCK_TARGET_GRID_CELLS);
+        queryClient.setQueryData(queryKeys.targetGrid.templates, MOCK_CANONICAL_TEMPLATES);
+        queryClient.setQueryData(queryKeys.discipline.bands, MOCK_TOLERANCE_BANDS);
+        queryClient.setQueryData(queryKeys.whatIf.elasticity, MOCK_ELASTICITY_MODELS);
+
         // Hydrate context providers for backward compatibility
         context.setDeals(resolvedDeals);
         context.setBehaviouralModels(resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS));
@@ -222,7 +236,7 @@ export function useInitialHydration({
         if (isCancelled) return;
         log.warn('Supabase sync failed, loading mock data', { error: String(error) });
         addToast('warning', 'Could not connect to server. Using offline demo data.');
-        applyMockData(context, 'error');
+        applyMockData(context, 'error', queryClient);
         await auditApi.logAudit({
           userEmail: currentUser?.email || 'system',
           userName: currentUser?.name || 'System',
