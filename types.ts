@@ -25,7 +25,7 @@ export type {
   SandboxMethodology, SandboxDiff, SandboxStatus,
   ImpactReport, ImpactSummary, CellImpact, PortfolioImpact,
   ElasticityModel, ElasticitySource, ElasticityPrediction,
-  BacktestRun, BacktestResult, BacktestStatus,
+  BacktestRun, BacktestResult, BacktestStatus, BacktestPeriod, BacktestCohort,
   MarketBenchmark, BenchmarkComparison,
   BudgetTarget, BudgetConsistency,
 } from './types/whatIf';

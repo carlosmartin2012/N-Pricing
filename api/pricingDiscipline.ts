@@ -28,6 +28,17 @@ const log = createLogger('api/pricingDiscipline');
 // Mappers
 // ---------------------------------------------------------------------------
 
+function mapCohortFromDB(raw: unknown): Cohort {
+  const c = (raw ?? {}) as Record<string, unknown>;
+  return {
+    product: String(c.product ?? ''),
+    segment: String(c.segment ?? ''),
+    tenorBucket: String(c.tenor_bucket ?? c.tenorBucket ?? '') as Cohort['tenorBucket'],
+    currency: String(c.currency ?? ''),
+    entityId: (c.entity_id ?? c.entityId) ? String(c.entity_id ?? c.entityId) : undefined,
+  };
+}
+
 function mapToleranceBandFromDB(row: Record<string, unknown>): ToleranceBand {
   return {
     id: String(row.id ?? ''),
@@ -49,19 +60,19 @@ function mapToleranceBandFromDB(row: Record<string, unknown>): ToleranceBand {
 
 function mapToleranceBandToDB(b: Partial<ToleranceBand>): Record<string, unknown> {
   return {
-    ...(b.id != null && { id: b.id }),
-    ...(b.product !== undefined && { product: b.product }),
-    ...(b.segment !== undefined && { segment: b.segment }),
-    ...(b.tenorBucket !== undefined && { tenor_bucket: b.tenorBucket }),
-    ...(b.currency !== undefined && { currency: b.currency }),
-    ...(b.entityId !== undefined && { entity_id: b.entityId }),
-    ...(b.ftpBpsTolerance != null && { ftp_bps_tolerance: b.ftpBpsTolerance }),
-    ...(b.rarocPpTolerance != null && { raroc_pp_tolerance: b.rarocPpTolerance }),
-    ...(b.marginBpsTolerance !== undefined && { margin_bps_tolerance: b.marginBpsTolerance }),
-    ...(b.priority != null && { priority: b.priority }),
-    ...(b.active != null && { active: b.active }),
-    ...(b.effectiveFrom != null && { effective_from: b.effectiveFrom }),
-    ...(b.effectiveTo !== undefined && { effective_to: b.effectiveTo }),
+    ...(b.id !== undefined ? { id: b.id } : {}),
+    ...(b.product !== undefined ? { product: b.product } : {}),
+    ...(b.segment !== undefined ? { segment: b.segment } : {}),
+    ...(b.tenorBucket !== undefined ? { tenor_bucket: b.tenorBucket } : {}),
+    ...(b.currency !== undefined ? { currency: b.currency } : {}),
+    ...(b.entityId !== undefined ? { entity_id: b.entityId } : {}),
+    ...(b.ftpBpsTolerance !== undefined ? { ftp_bps_tolerance: b.ftpBpsTolerance } : {}),
+    ...(b.rarocPpTolerance !== undefined ? { raroc_pp_tolerance: b.rarocPpTolerance } : {}),
+    ...(b.marginBpsTolerance !== undefined ? { margin_bps_tolerance: b.marginBpsTolerance } : {}),
+    ...(b.priority !== undefined ? { priority: b.priority } : {}),
+    ...(b.active !== undefined ? { active: b.active } : {}),
+    ...(b.effectiveFrom !== undefined ? { effective_from: b.effectiveFrom } : {}),
+    ...(b.effectiveTo !== undefined ? { effective_to: b.effectiveTo } : {}),
   };
 }
 
@@ -69,7 +80,7 @@ function mapVarianceFromDB(row: Record<string, unknown>): DealVariance {
   return {
     dealId: String(row.deal_id ?? ''),
     snapshotId: String(row.snapshot_id ?? ''),
-    cohort: (row.cohort ?? {}) as Cohort,
+    cohort: mapCohortFromDB(row.cohort),
     targetFtp: row.target_ftp != null ? Number(row.target_ftp) : null,
     realizedFtp: row.realized_ftp != null ? Number(row.realized_ftp) : null,
     ftpVarianceBps: row.ftp_variance_bps != null ? Number(row.ftp_variance_bps) : null,
@@ -202,10 +213,10 @@ export async function recomputeVariance(dealId: string): Promise<void> {
 
 export async function recomputeAllVariances(snapshotId: string): Promise<string | null> {
   try {
-    const result = await apiPost<{ jobId: string }>('/discipline/variances/recompute-all', {
+    const result = await apiPost<Record<string, unknown>>('/discipline/variances/recompute-all', {
       snapshot_id: snapshotId,
     });
-    return result?.jobId ?? null;
+    return String(result?.job_id ?? result?.jobId ?? '') || null;
   } catch (err) {
     log.error('recomputeAllVariances failed', { snapshotId }, err as Error);
     return null;

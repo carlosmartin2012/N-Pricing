@@ -276,7 +276,7 @@ const ToleranceBandEditor: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                bands
+                [...bands]
                   .sort((a, b) => a.priority - b.priority)
                   .map((band) => (
                     <tr

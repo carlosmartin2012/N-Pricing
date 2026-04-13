@@ -50,6 +50,7 @@ export function runBacktest(input: BacktestInput): BacktestResult {
   let actualPnl = 0;
   let simulatedRarocSum = 0;
   let actualRarocSum = 0;
+  let matchedDealCount = 0; // deals that have both simulated AND actual results
 
   // Group by period (month) and cohort for breakdown
   const periodMap = new Map<string, { simulated: number; actual: number; count: number }>();
@@ -65,9 +66,6 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     const tenorYears = deal.durationMonths / 12;
     const simPnlDeal = simMargin * deal.amount * tenorYears;
 
-    simulatedPnl += simPnlDeal;
-    simulatedRarocSum += simResult.raroc;
-
     // Actual: use stored result or fallback to target grid
     let actualResult = deal.actualResult;
     if (!actualResult) {
@@ -78,11 +76,16 @@ export function runBacktest(input: BacktestInput): BacktestResult {
       }
     }
 
+    // Only accumulate comparison metrics when we have both sides
     if (actualResult) {
       const actMargin = actualResult.finalClientRate - actualResult.totalFTP;
       const actPnlDeal = actMargin * deal.amount * tenorYears;
+
+      simulatedPnl += simPnlDeal;
       actualPnl += actPnlDeal;
+      simulatedRarocSum += simResult.raroc;
       actualRarocSum += actualResult.raroc;
+      matchedDealCount++;
     }
 
     // Period breakdown
@@ -141,9 +144,9 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     actualPnl,
     pnlDelta: simulatedPnl - actualPnl,
     pnlDeltaPct: actualPnl !== 0 ? ((simulatedPnl - actualPnl) / Math.abs(actualPnl)) * 100 : 0,
-    simulatedAvgRaroc: dealCount > 0 ? simulatedRarocSum / dealCount : 0,
-    actualAvgRaroc: dealCount > 0 ? actualRarocSum / dealCount : 0,
-    rarocDeltaPp: dealCount > 0 ? ((simulatedRarocSum - actualRarocSum) / dealCount) * 100 : 0,
+    simulatedAvgRaroc: matchedDealCount > 0 ? simulatedRarocSum / matchedDealCount : 0,
+    actualAvgRaroc: matchedDealCount > 0 ? actualRarocSum / matchedDealCount : 0,
+    rarocDeltaPp: matchedDealCount > 0 ? ((simulatedRarocSum - actualRarocSum) / matchedDealCount) * 100 : 0,
     periodBreakdown,
     cohortBreakdown,
   };

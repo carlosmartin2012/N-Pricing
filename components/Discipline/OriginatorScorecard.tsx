@@ -17,7 +17,7 @@ interface Props {
 function fmtEur(value: number): string {
   if (Math.abs(value) >= 1e6) return `EUR ${(value / 1e6).toFixed(1)}M`;
   if (Math.abs(value) >= 1e3) return `EUR ${(value / 1e3).toFixed(1)}K`;
-  return `EUR ${value.toLocaleString('en-EU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `EUR ${value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function fmtPct(value: number): string {

@@ -53,8 +53,9 @@ function applyDiff(context: PricingContext, diff: SandboxDiff): void {
 
   switch (diff.changeType) {
     case 'rule': {
-      // Apply to matching rule by ID
-      const ruleId = path.replace('rules.', '');
+      // Apply to matching rule by ID (path format: "rules.<id>")
+      const ruleParts = path.split('.');
+      const ruleId = ruleParts[1] ?? '';
       const rule = context.rules.find((r) => String(r.id) === ruleId);
       if (rule && typeof value === 'object' && value !== null) {
         Object.assign(rule, value);
@@ -99,10 +100,10 @@ function applyDiff(context: PricingContext, diff: SandboxDiff): void {
     }
     case 'threshold': {
       // Apply config thresholds (SDR, LR)
-      if (path.startsWith('sdrConfig') && typeof value === 'object' && context.sdrConfig) {
-        Object.assign(context.sdrConfig, value);
-      } else if (path.startsWith('lrConfig') && typeof value === 'object' && context.lrConfig) {
-        Object.assign(context.lrConfig, value);
+      if (path.startsWith('sdrConfig') && typeof value === 'object' && value !== null) {
+        context.sdrConfig = { ...context.sdrConfig, ...value as Record<string, unknown> } as NonNullable<PricingContext['sdrConfig']>;
+      } else if (path.startsWith('lrConfig') && typeof value === 'object' && value !== null) {
+        context.lrConfig = { ...context.lrConfig, ...value as Record<string, unknown> } as NonNullable<PricingContext['lrConfig']>;
       }
       break;
     }
@@ -269,12 +270,12 @@ function computePortfolioImpact(
     niiDelta: projectedNii - currentNii,
     currentAvgRaroc: currentRarocSum / portfolio.length,
     projectedAvgRaroc: projectedRarocSum / portfolio.length,
-    rarocDelta: (projectedRarocSum - currentRarocSum) / portfolio.length,
+    rarocDelta: ((projectedRarocSum - currentRarocSum) / portfolio.length) * 100,
     dealCount: portfolio.length,
     affectedDealCount: affectedCount,
   };
 }
 
-function cellKey(c: { product: string; segment: string; tenorBucket: string; currency: string }): string {
-  return `${c.product}|${c.segment}|${c.tenorBucket}|${c.currency}`;
+function cellKey(c: { product: string; segment: string; tenorBucket: string; currency: string; entityId?: string }): string {
+  return `${c.product}|${c.segment}|${c.tenorBucket}|${c.currency}|${c.entityId ?? ''}`;
 }

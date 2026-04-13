@@ -87,6 +87,9 @@ export function useSetCurrentSnapshot() {
       targetGridApi.setCurrentSnapshot(snapshotId, entityId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.targetGrid.snapshots });
+      void queryClient.invalidateQueries({ queryKey: ['targetGrid', 'cells'] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.variances });
+      void queryClient.invalidateQueries({ queryKey: ['discipline', 'kpis'] });
     },
   });
 }

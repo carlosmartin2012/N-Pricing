@@ -93,6 +93,7 @@ const PricingExceptionForm: React.FC<Props> = ({ dealId, onSubmit, onCancel }) =
             placeholder="Describe the business rationale for this pricing exception..."
             rows={4}
             required
+            maxLength={500}
             className="nfq-input-field resize-none text-xs"
           />
           <span className="text-[10px] text-[color:var(--nfq-text-muted)]">

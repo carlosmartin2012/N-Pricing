@@ -36,7 +36,7 @@ const SnapshotDiffView: React.FC<Props> = ({ snapshots }) => {
   );
   const [onlySignificant, setOnlySignificant] = useState(false);
 
-  const { data: diffs, isLoading } = useSnapshotDiffQuery(fromId, toId);
+  const { data: diffs, isLoading } = useSnapshotDiffQuery(fromId === toId ? '' : fromId, toId);
 
   const filtered = useMemo(() => {
     if (!diffs) return [];

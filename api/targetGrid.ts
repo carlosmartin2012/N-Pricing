@@ -38,15 +38,15 @@ export function mapSnapshotFromDB(row: Record<string, unknown>): MethodologySnap
 
 export function mapSnapshotToDB(s: Partial<MethodologySnapshot>): Record<string, unknown> {
   return {
-    ...(s.id != null && { id: s.id }),
-    ...(s.version != null && { version: s.version }),
-    ...(s.approvedAt != null && { approved_at: s.approvedAt }),
-    ...(s.approvedBy != null && { approved_by: s.approvedBy }),
-    ...(s.governanceRequestId != null && { governance_request_id: s.governanceRequestId }),
-    ...(s.methodologyHash != null && { methodology_hash: s.methodologyHash }),
-    ...(s.notes != null && { notes: s.notes }),
-    ...(s.entityId != null && { entity_id: s.entityId }),
-    ...(s.isCurrent != null && { is_current: s.isCurrent }),
+    ...(s.id !== undefined ? { id: s.id } : {}),
+    ...(s.version !== undefined ? { version: s.version } : {}),
+    ...(s.approvedAt !== undefined ? { approved_at: s.approvedAt } : {}),
+    ...(s.approvedBy !== undefined ? { approved_by: s.approvedBy } : {}),
+    ...(s.governanceRequestId !== undefined ? { governance_request_id: s.governanceRequestId } : {}),
+    ...(s.methodologyHash !== undefined ? { methodology_hash: s.methodologyHash } : {}),
+    ...(s.notes !== undefined ? { notes: s.notes } : {}),
+    ...(s.entityId !== undefined ? { entity_id: s.entityId } : {}),
+    ...(s.isCurrent !== undefined ? { is_current: s.isCurrent } : {}),
   };
 }
 
@@ -74,22 +74,22 @@ export function mapGridCellFromDB(row: Record<string, unknown>): TargetGridCell 
 
 export function mapGridCellToDB(cell: Partial<TargetGridCell>): Record<string, unknown> {
   return {
-    ...(cell.id != null && { id: cell.id }),
-    ...(cell.snapshotId != null && { snapshot_id: cell.snapshotId }),
-    ...(cell.product != null && { product: cell.product }),
-    ...(cell.segment != null && { segment: cell.segment }),
-    ...(cell.tenorBucket != null && { tenor_bucket: cell.tenorBucket }),
-    ...(cell.currency != null && { currency: cell.currency }),
-    ...(cell.entityId != null && { entity_id: cell.entityId }),
-    ...(cell.canonicalDealInput != null && { canonical_deal_input: cell.canonicalDealInput }),
-    ...(cell.ftp != null && { ftp: cell.ftp }),
-    ...(cell.liquidityPremium != null && { liquidity_premium: cell.liquidityPremium }),
-    ...(cell.capitalCharge != null && { capital_charge: cell.capitalCharge }),
-    ...(cell.esgAdjustment != null && { esg_adjustment: cell.esgAdjustment }),
-    ...(cell.targetMargin != null && { target_margin: cell.targetMargin }),
-    ...(cell.targetClientRate != null && { target_client_rate: cell.targetClientRate }),
-    ...(cell.targetRaroc != null && { target_raroc: cell.targetRaroc }),
-    ...(cell.components != null && { components: cell.components }),
+    ...(cell.id !== undefined ? { id: cell.id } : {}),
+    ...(cell.snapshotId !== undefined ? { snapshot_id: cell.snapshotId } : {}),
+    ...(cell.product !== undefined ? { product: cell.product } : {}),
+    ...(cell.segment !== undefined ? { segment: cell.segment } : {}),
+    ...(cell.tenorBucket !== undefined ? { tenor_bucket: cell.tenorBucket } : {}),
+    ...(cell.currency !== undefined ? { currency: cell.currency } : {}),
+    ...(cell.entityId !== undefined ? { entity_id: cell.entityId } : {}),
+    ...(cell.canonicalDealInput !== undefined ? { canonical_deal_input: cell.canonicalDealInput } : {}),
+    ...(cell.ftp !== undefined ? { ftp: cell.ftp } : {}),
+    ...(cell.liquidityPremium !== undefined ? { liquidity_premium: cell.liquidityPremium } : {}),
+    ...(cell.capitalCharge !== undefined ? { capital_charge: cell.capitalCharge } : {}),
+    ...(cell.esgAdjustment !== undefined ? { esg_adjustment: cell.esgAdjustment } : {}),
+    ...(cell.targetMargin !== undefined ? { target_margin: cell.targetMargin } : {}),
+    ...(cell.targetClientRate !== undefined ? { target_client_rate: cell.targetClientRate } : {}),
+    ...(cell.targetRaroc !== undefined ? { target_raroc: cell.targetRaroc } : {}),
+    ...(cell.components !== undefined ? { components: cell.components } : {}),
   };
 }
 
@@ -109,14 +109,14 @@ export function mapTemplateFromDB(row: Record<string, unknown>): CanonicalDealTe
 
 export function mapTemplateToDB(t: Partial<CanonicalDealTemplate>): Record<string, unknown> {
   return {
-    ...(t.id != null && { id: t.id }),
-    ...(t.product != null && { product: t.product }),
-    ...(t.segment != null && { segment: t.segment }),
-    ...(t.tenorBucket != null && { tenor_bucket: t.tenorBucket }),
-    ...(t.currency != null && { currency: t.currency }),
-    ...(t.entityId != null && { entity_id: t.entityId }),
-    ...(t.template != null && { template: t.template }),
-    ...(t.editableByRole != null && { editable_by_role: t.editableByRole }),
+    ...(t.id !== undefined ? { id: t.id } : {}),
+    ...(t.product !== undefined ? { product: t.product } : {}),
+    ...(t.segment !== undefined ? { segment: t.segment } : {}),
+    ...(t.tenorBucket !== undefined ? { tenor_bucket: t.tenorBucket } : {}),
+    ...(t.currency !== undefined ? { currency: t.currency } : {}),
+    ...(t.entityId !== undefined ? { entity_id: t.entityId } : {}),
+    ...(t.template !== undefined ? { template: t.template } : {}),
+    ...(t.editableByRole !== undefined ? { editable_by_role: t.editableByRole } : {}),
   };
 }
 
@@ -282,7 +282,9 @@ export async function exportGridXlsx(
     const params = new URLSearchParams();
     if (filters?.products?.length) params.set('products', filters.products.join(','));
     if (filters?.segments?.length) params.set('segments', filters.segments.join(','));
+    if (filters?.tenorBuckets?.length) params.set('tenor_buckets', filters.tenorBuckets.join(','));
     if (filters?.currencies?.length) params.set('currencies', filters.currencies.join(','));
+    if (filters?.entityId) params.set('entity_id', filters.entityId);
     const qs = params.toString() ? `?${params.toString()}` : '';
 
     const res = await fetch(
@@ -305,7 +307,9 @@ export async function exportGridPdf(
     const params = new URLSearchParams();
     if (filters?.products?.length) params.set('products', filters.products.join(','));
     if (filters?.segments?.length) params.set('segments', filters.segments.join(','));
+    if (filters?.tenorBuckets?.length) params.set('tenor_buckets', filters.tenorBuckets.join(','));
     if (filters?.currencies?.length) params.set('currencies', filters.currencies.join(','));
+    if (filters?.entityId) params.set('entity_id', filters.entityId);
     const qs = params.toString() ? `?${params.toString()}` : '';
 
     const res = await fetch(

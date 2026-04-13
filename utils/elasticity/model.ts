@@ -34,12 +34,15 @@ export function predictVolumeImpact(
 ): ElasticityPrediction {
   const volumeDeltaPct = model.slope * priceDeltaBps + model.intercept;
 
-  // Simple confidence interval based on R-squared (if available)
+  // Confidence interval: widens as R-squared decreases, symmetric around prediction
   const confidence = model.rSquared != null && model.rSquared > 0
-    ? {
-        low: volumeDeltaPct * (1 - (1 - model.rSquared)),
-        high: volumeDeltaPct * (1 + (1 - model.rSquared)),
-      }
+    ? (() => {
+        const halfWidth = Math.abs(volumeDeltaPct) * (1 - model.rSquared);
+        return {
+          low: volumeDeltaPct - halfWidth,
+          high: volumeDeltaPct + halfWidth,
+        };
+      })()
     : undefined;
 
   return {
@@ -93,8 +96,13 @@ export function calibrateFromHistory(
 
   if (points.length < 10) return null;
 
-  // Simple linear regression
-  const { slope, intercept, rSquared } = linearRegression(points);
+  // Linear regression on win probability, then scale to approximate volume delta:
+  // slope/intercept predict win probability (0-1), so we scale by 100 to express
+  // the result as "% volume change" — a 10pp drop in win rate ≈ -10% volume.
+  const reg = linearRegression(points);
+  const slope = reg.slope * 100;
+  const intercept = (reg.intercept - 0.5) * 100; // center around baseline 50% win rate
+  const rSquared = reg.rSquared;
 
   return {
     id: `elasticity-${product}-${segment}-${Date.now()}`,

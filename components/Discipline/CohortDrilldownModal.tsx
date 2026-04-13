@@ -16,7 +16,7 @@ function fmtBps(value: number | null): string {
 }
 
 function fmtEur(value: number): string {
-  return new Intl.NumberFormat('en-EU', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,

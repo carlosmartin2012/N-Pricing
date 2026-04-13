@@ -126,6 +126,8 @@ export function useResolveException() {
       disciplineApi.resolveException(id, status, approvedBy),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.exceptions });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.variances });
+      void queryClient.invalidateQueries({ queryKey: ['discipline', 'kpis'] });
     },
   });
 }
@@ -140,7 +142,7 @@ export function useRecomputeVariance() {
     mutationFn: (dealId: string) => disciplineApi.recomputeVariance(dealId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.variances });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.kpis() });
+      void queryClient.invalidateQueries({ queryKey: ['discipline', 'kpis'] });
     },
   });
 }

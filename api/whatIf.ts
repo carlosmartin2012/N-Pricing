@@ -79,11 +79,11 @@ export async function deleteSandbox(id: string): Promise<void> {
 
 export async function publishSandbox(id: string): Promise<string | null> {
   try {
-    const result = await apiPost<{ governanceRequestId: string }>(
+    const result = await apiPost<Record<string, unknown>>(
       `/what-if/sandboxes/${id}/publish`,
       {},
     );
-    return result?.governanceRequestId ?? null;
+    return String(result?.governance_request_id ?? result?.governanceRequestId ?? '') || null;
   } catch (err) {
     log.error('publishSandbox failed', { id }, err as Error);
     return null;

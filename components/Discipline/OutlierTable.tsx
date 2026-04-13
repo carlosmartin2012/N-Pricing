@@ -21,7 +21,7 @@ function fmtPp(value: number | null): string {
 
 function fmtEur(value: number | null): string {
   if (value == null) return '-';
-  return new Intl.NumberFormat('en-EU', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,

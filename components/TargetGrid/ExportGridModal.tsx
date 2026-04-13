@@ -18,11 +18,13 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
   const [format, setFormat] = useState<ExportFormat>('xlsx');
   const [includeBreakdown, setIncludeBreakdown] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleExport = async () => {
     setIsExporting(true);
+    setError(null);
     try {
       // Dynamic import for export utilities
       if (format === 'xlsx') {
@@ -47,12 +49,14 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
           await (exportFn as (id: string, f?: GridFilters) => Promise<void>)(snapshotId, filters);
         }
       }
-    } catch {
-      // Graceful fallback — utils may not yet have the target grid export helper
-    } finally {
+    } catch (err) {
+      console.error('Export failed', err);
+      setError('Export failed. Please try again.');
       setIsExporting(false);
-      onClose();
+      return;
     }
+    setIsExporting(false);
+    onClose();
   };
 
   return (
@@ -176,6 +180,13 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
               </div>
             </div>
           ) : null}
+
+          {/* Error state */}
+          {error && (
+            <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-rose-400">
+              {error}
+            </div>
+          )}
 
           {/* Cell count */}
           <div className="rounded-[12px] bg-[var(--nfq-bg-elevated)] p-3 text-center">

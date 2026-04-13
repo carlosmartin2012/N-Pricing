@@ -22,7 +22,7 @@ interface Props {
 function fmtEur(value: number): string {
   if (Math.abs(value) >= 1e6) return `${(value / 1e6).toFixed(1)}M`;
   if (Math.abs(value) >= 1e3) return `${(value / 1e3).toFixed(1)}K`;
-  return value.toLocaleString('en-EU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return value.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 const DIMENSIONS: { value: Dimension; label: string }[] = [
