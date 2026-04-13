@@ -22,5 +22,14 @@ export * as reportSchedules from './reportSchedules';
 
 export * as observability from './observability';
 
+// Ola 1 — Target Grid
+export * as targetGrid from './targetGrid';
+
+// Ola 2 — Pricing Discipline
+export * as pricingDiscipline from './pricingDiscipline';
+
+// Ola 3 — What-If
+export * as whatIf from './whatIf';
+
 // Re-export mappers for consumers that need direct access
 export * as mappers from './mappers';
