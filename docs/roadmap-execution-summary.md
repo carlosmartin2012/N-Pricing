@@ -212,7 +212,9 @@ mercado los aporta el banco. Se ejecutaron seis sprints adicionales:
   (esperando credenciales del banco ancla).
 - Workflow temporal de aprobación con escalación L1→L2→Committee
   (esperando decisión sobre tiempos máximos por entidad).
-- CI con job de integration tests (esperando elección del runner — GH
-  Actions / GitLab / Jenkins).
+- ~~CI con job de integration tests (esperando elección del runner — GH
+  Actions / GitLab / Jenkins).~~ ✅ Entregado en `ci.yml` · job
+  `integration-tests` con `postgres:16` service container, migraciones
+  aplicadas en orden, gating de merges en `main`.
 - Backtesting con datos históricos reales (esperando dataset del banco;
   mientras tanto el framework valida con seed sintética).

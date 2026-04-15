@@ -34,31 +34,21 @@ real Postgres database.
 - Fuzz: 50 concurrent operations alternating entity A/B, expecting zero
   cross-reads (skipped softly when the seeded entity UUIDs aren't present)
 
-## CI integration (when ready)
+## CI integration
 
-Add a job that:
+Live in `.github/workflows/ci.yml` as the `integration-tests` job. It runs
+after `build-and-test`, boots `postgres:16` as a service container, applies
+every migration in `supabase/migrations/` in lexicographic order, and then
+invokes `npx vitest run utils/__tests__/integration` with
+`INTEGRATION_DATABASE_URL` pointing at the service.
 
-```yaml
-services:
-  postgres:
-    image: postgres:16
-    ports: ['5432:5432']
-    env:
-      POSTGRES_PASSWORD: pw
-    options: >-
-      --health-cmd="pg_isready -U postgres"
-      --health-interval=10s
-      --health-timeout=5s
-      --health-retries=5
-steps:
-  - run: psql $INTEGRATION_DATABASE_URL -f supabase/migrations/*.sql
-  - run: npx vitest run utils/__tests__/integration
-    env:
-      INTEGRATION_DATABASE_URL: postgres://postgres:pw@localhost:5432/postgres
-```
+Key properties:
 
-The pre-step that applies migrations needs a glob expansion that respects
-file order — easiest with `for f in $(ls supabase/migrations/*.sql | sort); do psql -f $f; done`.
+- Runs on every push to `main` and every PR — failures gate merges.
+- Uses `psql -v ON_ERROR_STOP=1` so any migration failure fails fast.
+- Connects through the default `postgres` superuser; the suite does not
+  yet exercise a non-BYPASSRLS role. That's a known follow-up for richer
+  RLS assertions (see the `npricing_app` note in the test preamble).
 
 ## Why not testcontainers-node?
 
