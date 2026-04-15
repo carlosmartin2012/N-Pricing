@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { query, queryOne } from '../db';
+import { pool, query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import {
   buildClientRelationship,
@@ -7,6 +7,7 @@ import {
   mapClientMetricsSnapshotRow,
   mapPricingTargetRow,
 } from '../../utils/customer360/relationshipAggregator';
+import { parsePositionsCsv, parseMetricsCsv } from '../../utils/customer360/csvImport';
 import type { ClientEntity } from '../../types';
 
 const router = Router();
@@ -286,6 +287,129 @@ router.post('/pricing-targets', async (req, res) => {
       ],
     );
     res.status(201).json(row ? mapPricingTargetRow(row) : null);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+// ---------- Bulk CSV import ----------
+// Accepts text/csv body or { csv: '<text>' } JSON body. Streams INSERTs in
+// chunks of 200 within a single transaction so partial failures roll back.
+
+async function consumeCsv(req: import('express').Request): Promise<string> {
+  const ct = (req.headers['content-type'] ?? '').toString().toLowerCase();
+  if (ct.startsWith('text/csv') || ct.startsWith('text/plain')) {
+    return await new Promise<string>((resolve, reject) => {
+      let buf = '';
+      req.on('data', (c) => { buf += c.toString('utf8'); });
+      req.on('end', () => resolve(buf));
+      req.on('error', reject);
+    });
+  }
+  const body = req.body as Record<string, unknown> | undefined;
+  return typeof body?.csv === 'string' ? body.csv : '';
+}
+
+router.post('/import/positions', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const csv = await consumeCsv(req);
+    if (!csv) {
+      res.status(400).json({ code: 'invalid_payload', message: 'CSV body required (text/csv or { csv })' });
+      return;
+    }
+    const parsed = parsePositionsCsv(csv);
+    if (parsed.errors.length > 0 && parsed.rows.length === 0) {
+      res.status(400).json({ code: 'parse_failed', errors: parsed.errors });
+      return;
+    }
+    const client = await pool.connect();
+    let inserted = 0;
+    try {
+      await client.query('BEGIN');
+      for (const r of parsed.rows) {
+        await client.query(
+          `INSERT INTO client_positions (
+             entity_id, client_id, product_id, product_type, category, deal_id,
+             amount, currency, margin_bps, start_date, maturity_date, status
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          [
+            req.tenancy.entityId, r.clientId, r.productId, r.productType, r.category,
+            r.dealId, r.amount, r.currency, r.marginBps, r.startDate, r.maturityDate, r.status,
+          ],
+        );
+        inserted++;
+      }
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
+    res.status(201).json({
+      inserted,
+      skipped: parsed.errors.length,
+      errors: parsed.errors,
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/import/metrics', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const csv = await consumeCsv(req);
+    if (!csv) {
+      res.status(400).json({ code: 'invalid_payload', message: 'CSV body required' });
+      return;
+    }
+    const parsed = parseMetricsCsv(csv);
+    if (parsed.errors.length > 0 && parsed.rows.length === 0) {
+      res.status(400).json({ code: 'parse_failed', errors: parsed.errors });
+      return;
+    }
+    const client = await pool.connect();
+    let inserted = 0;
+    try {
+      await client.query('BEGIN');
+      for (const r of parsed.rows) {
+        await client.query(
+          `INSERT INTO client_metrics_snapshots (
+             entity_id, client_id, period,
+             nim_bps, fees_eur, eva_eur, share_of_wallet_pct,
+             relationship_age_years, nps_score,
+             active_position_count, total_exposure_eur, source, detail
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '{}'::jsonb)
+           ON CONFLICT (entity_id, client_id, period) DO NOTHING`,
+          [
+            req.tenancy.entityId, r.clientId, r.period,
+            r.nimBps, r.feesEur, r.evaEur, r.shareOfWalletPct,
+            r.relationshipAgeYears, r.npsScore,
+            r.activePositionCount, r.totalExposureEur, r.source,
+          ],
+        );
+        inserted++;
+      }
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => undefined);
+      throw err;
+    } finally {
+      client.release();
+    }
+    res.status(201).json({
+      inserted,
+      skipped: parsed.errors.length,
+      errors: parsed.errors,
+    });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }

@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import { safeError } from '../middleware/errorHandler';
+import { pool } from '../db';
+import { recorderFromPool } from '../../utils/metering/usageRecorder';
 
 const router = Router();
+const meter = recorderFromPool(pool);
 
 /**
  * POST /api/pricing/inverse-optimize
@@ -54,6 +57,9 @@ router.post('/inverse-optimize', async (req, res) => {
       precision,
     });
 
+    if (req.tenancy?.entityId) {
+      void meter.insert(req.tenancy.entityId, 'pricing_call', 1, { endpoint: 'inverse-optimize' });
+    }
     res.json(result);
   } catch (err) {
     console.error('[pricing] inverse-optimize error', err);

@@ -4,6 +4,7 @@ import { pool, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { consume } from '../../utils/channels/tokenBucket';
 import { findApplicableCampaigns, pickBestForBorrower } from '../../utils/channels/campaignMatcher';
+import { recorderFromPool } from '../../utils/metering/usageRecorder';
 import { calculatePricing } from '../../utils/pricingEngine';
 import type { Transaction, ApprovalMatrixConfig } from '../../types';
 import type { PricingCampaign, ChannelType } from '../../types/channels';
@@ -25,6 +26,7 @@ import type { PricingCampaign, ChannelType } from '../../types/channels';
  */
 
 const router = Router();
+const meter = recorderFromPool(pool);
 
 interface KeyRow {
   id: string;
@@ -215,6 +217,11 @@ router.post('/quote', async (req: ChannelRequest, res) => {
     const baseResult = calculatePricing(body.deal, approval) as unknown as Record<string, unknown>;
     const baseRate = Number(baseResult.finalClientRate ?? 0);
     const adjustedRate = winner ? baseRate + winner.rateDeltaBps / 10_000 : baseRate;
+
+    void meter.insert(auth.entityId, 'channel_quote', 1, {
+      channel: auth.channel,
+      campaign_id: winner?.id ?? null,
+    });
 
     res.json({
       requestId,

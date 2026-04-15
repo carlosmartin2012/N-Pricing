@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { query, queryOne } from '../db';
+import { pool, query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { signDossier, verifyDossierSignature } from '../../utils/governance/dossierSigning';
+import { recorderFromPool } from '../../utils/metering/usageRecorder';
 import type {
   ModelInventoryEntry,
   ModelKind,
@@ -10,6 +11,7 @@ import type {
 } from '../../types/governance';
 
 const router = Router();
+const meter = recorderFromPool(pool);
 
 // ---------- Model inventory ----------
 
@@ -174,6 +176,9 @@ router.post('/dossiers', async (req, res) => {
         req.tenancy.userEmail,
       ],
     );
+    if (row && req.tenancy?.entityId) {
+      void meter.insert(req.tenancy.entityId, 'dossier_sign', 1, { dealId: row.deal_id });
+    }
     res.status(201).json(row ? mapDossier(row) : null);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
