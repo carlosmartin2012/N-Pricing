@@ -120,6 +120,177 @@ router.get('/clients/:clientId/metrics', async (req, res) => {
   }
 });
 
+router.post('/clients/:clientId/positions', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const body = req.body as Record<string, unknown> | undefined;
+    if (!body || typeof body !== 'object') {
+      res.status(400).json({ code: 'invalid_payload', message: 'body required' });
+      return;
+    }
+    const productType = String(body.productType ?? '');
+    const category = String(body.category ?? '');
+    const amount = Number(body.amount);
+    if (!productType || !['Asset', 'Liability', 'Off-Balance', 'Service'].includes(category) || !Number.isFinite(amount)) {
+      res.status(400).json({ code: 'invalid_payload', message: 'productType, category and amount are required' });
+      return;
+    }
+    const row = await queryOne<Parameters<typeof mapClientPositionRow>[0]>(
+      `INSERT INTO client_positions (
+         entity_id, client_id, product_id, product_type, category, deal_id,
+         amount, currency, margin_bps, start_date, maturity_date, status
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, COALESCE($12, 'Active'))
+       RETURNING *`,
+      [
+        req.tenancy.entityId,
+        req.params.clientId,
+        body.productId ?? null,
+        productType,
+        category,
+        body.dealId ?? null,
+        amount,
+        body.currency ?? 'EUR',
+        body.marginBps ?? null,
+        body.startDate ?? new Date().toISOString().slice(0, 10),
+        body.maturityDate ?? null,
+        body.status ?? null,
+      ],
+    );
+    res.status(201).json(row ? mapClientPositionRow(row) : null);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.patch('/positions/:id', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const body = req.body as Record<string, unknown> | undefined;
+    if (!body) {
+      res.status(400).json({ code: 'invalid_payload', message: 'body required' });
+      return;
+    }
+    const row = await queryOne<Parameters<typeof mapClientPositionRow>[0]>(
+      `UPDATE client_positions SET
+         amount        = COALESCE($3, amount),
+         margin_bps    = COALESCE($4, margin_bps),
+         maturity_date = COALESCE($5, maturity_date),
+         status        = COALESCE($6, status),
+         updated_at    = NOW()
+       WHERE id = $1 AND entity_id = $2
+       RETURNING *`,
+      [
+        req.params.id,
+        req.tenancy.entityId,
+        body.amount ?? null,
+        body.marginBps ?? null,
+        body.maturityDate ?? null,
+        body.status ?? null,
+      ],
+    );
+    if (!row) {
+      res.status(404).json({ code: 'not_found', message: 'Position not found' });
+      return;
+    }
+    res.json(mapClientPositionRow(row));
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/clients/:clientId/metrics', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const body = req.body as Record<string, unknown> | undefined;
+    const period = String(body?.period ?? '').trim();
+    if (!period) {
+      res.status(400).json({ code: 'invalid_payload', message: 'period required' });
+      return;
+    }
+    const row = await queryOne<Parameters<typeof mapClientMetricsSnapshotRow>[0]>(
+      `INSERT INTO client_metrics_snapshots (
+         entity_id, client_id, period,
+         nim_bps, fees_eur, eva_eur, share_of_wallet_pct,
+         relationship_age_years, nps_score,
+         active_position_count, total_exposure_eur, source, detail
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, COALESCE($12, 'computed'), $13::jsonb)
+       RETURNING *`,
+      [
+        req.tenancy.entityId,
+        req.params.clientId,
+        period,
+        body?.nimBps ?? null,
+        body?.feesEur ?? null,
+        body?.evaEur ?? null,
+        body?.shareOfWalletPct ?? null,
+        body?.relationshipAgeYears ?? null,
+        body?.npsScore ?? null,
+        body?.activePositionCount ?? 0,
+        body?.totalExposureEur ?? 0,
+        body?.source ?? null,
+        JSON.stringify(body?.detail ?? {}),
+      ],
+    );
+    res.status(201).json(row ? mapClientMetricsSnapshotRow(row) : null);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/pricing-targets', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const body = req.body as Record<string, unknown> | undefined;
+    const segment      = String(body?.segment ?? '').trim();
+    const productType  = String(body?.productType ?? '').trim();
+    const period       = String(body?.period ?? '').trim();
+    if (!segment || !productType || !period) {
+      res.status(400).json({ code: 'invalid_payload', message: 'segment, productType, period required' });
+      return;
+    }
+    const row = await queryOne<Parameters<typeof mapPricingTargetRow>[0]>(
+      `INSERT INTO pricing_targets (
+         entity_id, segment, product_type, currency, period,
+         target_margin_bps, target_raroc_pct, target_volume_eur,
+         pre_approved_rate_bps, hard_floor_rate_bps,
+         active_from, active_to, is_active, created_by
+       ) VALUES ($1, $2, $3, COALESCE($4, 'EUR'), $5, $6, $7, $8, $9, $10, $11, $12, COALESCE($13, true), $14)
+       RETURNING *`,
+      [
+        req.tenancy.entityId,
+        segment,
+        productType,
+        body?.currency ?? null,
+        period,
+        body?.targetMarginBps ?? null,
+        body?.targetRarocPct ?? null,
+        body?.targetVolumeEur ?? null,
+        body?.preApprovedRateBps ?? null,
+        body?.hardFloorRateBps ?? null,
+        body?.activeFrom ?? new Date().toISOString().slice(0, 10),
+        body?.activeTo ?? null,
+        body?.isActive ?? null,
+        req.tenancy.userEmail,
+      ],
+    );
+    res.status(201).json(row ? mapPricingTargetRow(row) : null);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 router.get('/pricing-targets', async (req, res) => {
   try {
     if (!req.tenancy) {
