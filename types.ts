@@ -30,6 +30,18 @@ export type {
   BudgetTarget, BudgetConsistency,
 } from './types/whatIf';
 
+// Phase 0 — Tenancy, reproducibility snapshots, SLO
+export type {
+  EntityRole, TenancyErrorCode, TenancyContext, TenancyViolation,
+  PricingSnapshotRow, PricingSnapshotInput, PricingSnapshotContext, PricingSnapshotOutput,
+  SnapshotReplayResult, SnapshotReplayDiffEntry,
+  SLIName, AlertSeverity, AlertChannelType, SLODefinition,
+  EmailChannelConfig, SlackChannelConfig, PagerDutyChannelConfig,
+  WebhookChannelConfig, OpsgenieChannelConfig, AlertChannelConfig,
+  AlertRuleV2, AlertInvocation, SLOStatus,
+} from './types/phase0';
+export { PRICING_SLOS } from './types/phase0';
+
 export type MethodologyType = 'MatchedMaturity' | 'MovingAverage' | 'RateCard' | 'ZeroDiscount';
 
 export interface ClientEntity {

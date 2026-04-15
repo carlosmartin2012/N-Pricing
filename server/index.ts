@@ -14,6 +14,8 @@ import authRouter from './routes/auth';
 import geminiRouter from './routes/gemini';
 import pricingRouter from './routes/pricing';
 import { authMiddleware } from './middleware/auth';
+import { requestIdMiddleware } from './middleware/requestId';
+import { tenancyMiddleware } from './middleware/tenancy';
 import { safeError } from './middleware/errorHandler';
 
 import fs from 'fs';
@@ -32,6 +34,7 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '10mb' }));
+app.use(requestIdMiddleware);
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -71,16 +74,24 @@ app.get('/api/docs', (_req, res) => {
 </body></html>`);
 });
 
+// Tenancy enforcement is gated by the TENANCY_ENFORCE env var during rollout.
+// Valid values: 'off' (default — skip), 'on' (apply & block). 'warn' mode is
+// planned for the next sprint. Routes that are conceptually entity-scoped
+// (deals, pricing, market-data, etc.) opt into this middleware; global routes
+// (/api/entities — needed to discover entities before picking one) stay out.
+const tenancyOn = process.env.TENANCY_ENFORCE === 'on';
+const entityScoped = tenancyOn ? [authMiddleware, tenancyMiddleware()] : [authMiddleware];
+
 // Protected routes (auth required)
-app.use('/api/deals', authMiddleware, dealsRouter);
-app.use('/api/audit', authMiddleware, auditRouter);
-app.use('/api/config', authMiddleware, configRouter);
-app.use('/api/market-data', authMiddleware, marketDataRouter);
+app.use('/api/deals', ...entityScoped, dealsRouter);
+app.use('/api/audit', ...entityScoped, auditRouter);
+app.use('/api/config', ...entityScoped, configRouter);
+app.use('/api/market-data', ...entityScoped, marketDataRouter);
 app.use('/api/entities', authMiddleware, entitiesRouter);
-app.use('/api/report-schedules', authMiddleware, reportSchedulesRouter);
-app.use('/api/observability', authMiddleware, observabilityRouter);
+app.use('/api/report-schedules', ...entityScoped, reportSchedulesRouter);
+app.use('/api/observability', ...entityScoped, observabilityRouter);
 app.use('/api/gemini', authMiddleware, geminiRouter);
-app.use('/api/pricing', authMiddleware, pricingRouter);
+app.use('/api/pricing', ...entityScoped, pricingRouter);
 
 // 404 for unknown API routes — without this, the SPA fallback below would
 // swallow typos as HTML responses and a failing frontend fetch would surface

@@ -95,3 +95,40 @@ export async function withTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T>
     client.release();
   }
 }
+
+/**
+ * Tenancy-aware transaction. Sets `app.current_entity_id`,
+ * `app.current_user_email`, and `app.current_user_role` as LOCAL session
+ * settings so RLS policies (`get_current_entity_id()`,
+ * `get_current_user_role()`) resolve against the authenticated caller for
+ * the duration of the transaction. `SET LOCAL` auto-resets on COMMIT/ROLLBACK,
+ * so no leaks between pooled connections.
+ *
+ * When TENANCY_STRICT=on, also sets `app.tenancy_strict = 'on'` which turns
+ * `get_current_entity_id()` into a raise-on-missing function (see migration
+ * 20260602000001_tenancy_helpers). Until then, missing tenancy falls back to
+ * the legacy Default Entity to avoid breaking existing call paths.
+ *
+ * Prefer this over `withTransaction` when your handler touches entity-scoped
+ * data. Legacy handlers that bypass RLS will continue to work unchanged.
+ */
+export interface TenancyBinding {
+  entityId: string;
+  userEmail: string;
+  role: string;
+}
+
+export async function withTenancyTransaction<T>(
+  tenancy: TenancyBinding,
+  fn: (tx: Tx) => Promise<T>,
+): Promise<T> {
+  return withTransaction(async (tx) => {
+    await tx.execute('SELECT set_config($1, $2, true)', ['app.current_entity_id', tenancy.entityId]);
+    await tx.execute('SELECT set_config($1, $2, true)', ['app.current_user_email', tenancy.userEmail]);
+    await tx.execute('SELECT set_config($1, $2, true)', ['app.current_user_role', tenancy.role]);
+    if (process.env.TENANCY_STRICT === 'on') {
+      await tx.execute('SELECT set_config($1, $2, true)', ['app.tenancy_strict', 'on']);
+    }
+    return fn(tx);
+  });
+}

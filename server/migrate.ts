@@ -355,6 +355,35 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO entity_users (entity_id, user_id, role, is_primary_entity)
 VALUES ('00000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000100', 'Trader', true)
 ON CONFLICT (entity_id, user_id) DO NOTHING;
+-- Phase 0 runtime minimums — these are superseded by supabase/migrations/20260602*
+-- but applied inline here so the Node-only dev runtime can load the tenancy
+-- middleware without running the Supabase migration pipeline.
+
+-- Tenancy violations log (append-only)
+CREATE TABLE IF NOT EXISTS tenancy_violations (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  occurred_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  request_id      TEXT,
+  user_email      TEXT,
+  endpoint        TEXT,
+  claimed_entity  UUID,
+  actual_entities UUID[],
+  error_code      TEXT        NOT NULL,
+  detail          JSONB       DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_tenancy_violations_recent
+  ON tenancy_violations (occurred_at DESC);
+
+-- Helpers needed by the middleware — kept in sync with
+-- supabase/migrations/20260602000001_tenancy_helpers.sql
+CREATE OR REPLACE FUNCTION get_current_user_role()
+RETURNS TEXT
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+AS $fn$
+BEGIN
+  RETURN coalesce(current_setting('app.current_user_role', true), '');
+END;
+$fn$;
 `;
 
 export async function runMigrations(): Promise<void> {
