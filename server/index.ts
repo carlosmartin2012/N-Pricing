@@ -17,6 +17,7 @@ import snapshotsRouter from './routes/snapshots';
 import customer360Router from './routes/customer360';
 import channelPricingRouter from './routes/channelPricing';
 import governanceRouter from './routes/governance';
+import meteringRouter from './routes/metering';
 import { authMiddleware } from './middleware/auth';
 import { requestIdMiddleware } from './middleware/requestId';
 import { tenancyMiddleware } from './middleware/tenancy';
@@ -100,6 +101,7 @@ app.use('/api/pricing', ...entityScoped, pricingRouter);
 app.use('/api/snapshots', ...entityScoped, snapshotsRouter);
 app.use('/api/customer360', ...entityScoped, customer360Router);
 app.use('/api/governance', ...entityScoped, governanceRouter);
+app.use('/api/metering', ...entityScoped, meteringRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

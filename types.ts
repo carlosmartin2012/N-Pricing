@@ -30,6 +30,12 @@ export type {
   BudgetTarget, BudgetConsistency,
 } from './types/whatIf';
 
+// Phase 5 — Metering & feature flags
+export type {
+  UsageEventKind, UsageEvent, UsageAggregateDay,
+  TenantFeatureFlag, UsageInvoiceLine,
+} from './types/metering';
+
 // Phase 3 — Governance
 export type {
   ModelKind, ModelStatus, ModelInventoryEntry,
