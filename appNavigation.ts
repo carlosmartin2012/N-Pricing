@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Percent,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   Target,
   TrendingUp,
@@ -50,6 +51,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   WHAT_IF: '/what-if',
   CUSTOMER_360: '/customers',
   CAMPAIGNS: '/campaigns',
+  ESCALATIONS: '/escalations',
 };
 
 const PATH_TO_VIEW: Record<string, ViewState> = {};
@@ -109,6 +111,9 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     // Engine Config — parameters and rules that drive the motor
     { id: 'METHODOLOGY', label: 'Rules & Config', icon: GitBranch, section: 'Engine Config', path: '/methodology' },
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity, section: 'Engine Config', path: '/behavioural' },
+
+    // Governance — model inventory, dossiers, escalation queue
+    { id: 'ESCALATIONS', label: 'Escalations', icon: ShieldAlert, section: 'Governance', path: '/escalations' },
 
     // Assistant — copilot surface (kept in sidebar until top-bar refactor)
     { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Assistant', path: '/ai' },

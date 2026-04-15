@@ -505,7 +505,8 @@ export type ViewState =
   | 'DISCIPLINE'
   | 'WHAT_IF'
   | 'CUSTOMER_360'
-  | 'CAMPAIGNS';
+  | 'CAMPAIGNS'
+  | 'ESCALATIONS';
 export type AuditModule = ViewState | 'AUTH' | 'MASTER_DATA' | 'SYS_CONFIG' | 'SYSTEM' | (string & {});
 
 export interface YieldCurvePoint {

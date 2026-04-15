@@ -24,6 +24,7 @@ import { requestIdMiddleware } from './middleware/requestId';
 import { tenancyMiddleware } from './middleware/tenancy';
 import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
+import { startEscalationSweeper } from './workers/escalationSweeper';
 
 import fs from 'fs';
 
@@ -178,6 +179,10 @@ async function main() {
     // integer (milliseconds) to start the background tick. Disabled by default
     // to avoid background work during local dev or tests.
     startAlertEvaluator();
+    // Escalation sweeper — opt-in via ESCALATION_SWEEP_INTERVAL_MS.
+    // Recommended: ≥ 60000 (one minute). The /api/governance/escalations/sweep
+    // endpoint remains available for external cron triggers regardless.
+    startEscalationSweeper();
   } catch (err) {
     console.error('[server] Failed to start:', err);
     process.exit(1);

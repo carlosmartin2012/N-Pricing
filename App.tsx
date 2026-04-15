@@ -46,6 +46,7 @@ const DisciplineDashboard = React.lazy(() => import('./components/Discipline/Dis
 const WhatIfWorkspace = React.lazy(() => import('./components/WhatIf/WhatIfWorkspace'));
 const CustomerPricingView = React.lazy(() => import('./components/Customer360/CustomerPricingView'));
 const CampaignsView = React.lazy(() => import('./components/Campaigns/CampaignsView'));
+const EscalationsView = React.lazy(() => import('./components/Governance/EscalationsView'));
 const UserConfigModal = React.lazy(() =>
   import('./components/ui/UserConfigModal').then((module) => ({
     default: module.UserConfigModal,
@@ -257,6 +258,7 @@ const AppContent: React.FC = () => {
                     <Route path="/what-if" element={<div className="relative z-0 flex h-full flex-col"><WhatIfWorkspace /></div>} />
                     <Route path="/customers" element={<div className="relative z-0 flex h-full flex-col"><CustomerPricingView /></div>} />
                     <Route path="/campaigns" element={<div className="relative z-0 flex h-full flex-col"><CampaignsView /></div>} />
+                    <Route path="/escalations" element={<div className="relative z-0 flex h-full flex-col"><EscalationsView /></div>} />
                     <Route path="/" element={<Navigate to="/pricing" replace />} />
                     <Route path="*" element={<Navigate to="/pricing" replace />} />
                   </Routes>
