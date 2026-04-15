@@ -184,29 +184,29 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
           </div>
 
           <div className="max-w-3xl">
-            <span className="nfq-pill mb-8">Meridian Obsidian Control Shell</span>
+            <span className="nfq-pill mb-8">Integrated Bank Pricing Platform</span>
             <h1 className="text-[clamp(3.1rem,5vw,5.4rem)] font-semibold leading-[1.02] tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
-              Pricing, provisión y capital reconciliados por diseño.
+              Un motor. Relacional, gobernado y reproducible.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[color:var(--nfq-text-secondary)]">
-              {t.subtitle}. Del parámetro al RAROC y del RAROC al comité sobre una única fuente de verdad — Anejo IX nativo, CRR3 con output floor, AI copilot grounded y replay bitemporal.
+              FTP interno, pricing comercial al cliente y canales en tiempo real sobre una misma capa. Multi-tenant con RLS, snapshot-first por requerimiento regulatorio, gobierno MRM integrado.
             </p>
 
             <div className="mt-12 grid max-w-3xl grid-cols-3 gap-4">
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Anejo IX</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">IFRS 9</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Stage 1/2/3 con lifetime EL y SICR — segmentos BdE out-of-the-box.</div>
+                <div className="nfq-label">Engine</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">FTP · 19</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Base · LP · LCR/NSFR · capital · CSRBB · ESG · output floor CRR3. Stress EBA 6 escenarios.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Capital</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">CRR3</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Output floor phase-in 50 % → 72,5 % y buffer stack Basel III.</div>
+                <div className="nfq-label">Relational</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">360°</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Customer 360 con cross-bonus, campañas versionadas y quote API para sucursal, web y móvil.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Intelligence</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">AI</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Waterfall explainer grounded, portfolio agent y lineage bitemporal.</div>
+                <div className="nfq-label">Governed</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">MRM</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Snapshots inmutables + replay bitemporal, dossiers firmados HMAC, escalación L1 → L2 → Committee.</div>
               </div>
             </div>
           </div>
@@ -214,15 +214,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
           <div className="grid max-w-3xl grid-cols-3 gap-6 text-sm text-[color:var(--nfq-text-secondary)]">
             <div>
               <div className="nfq-label">Motor de cálculo</div>
-              <p className="mt-3 leading-6">19 componentes FTP parametrizables — base rate, LP, LCR/NSFR, capital, CSRBB y delegación multi-dimensional.</p>
+              <p className="mt-3 leading-6">19 componentes FTP parametrizables, RAROC con economic profit, stress EBA y reconciliación FTP ↔ provisión ↔ capital.</p>
             </div>
             <div>
-              <div className="nfq-label">Stress &amp; reconciliación</div>
-              <p className="mt-3 leading-6">6 escenarios EBA, ΔEVE/ΔNII y reconciliación garantizada FTP ↔ provisión ↔ capital sobre un solo árbol.</p>
+              <div className="nfq-label">Cliente y canal</div>
+              <p className="mt-3 leading-6">Customer 360 relacional, targets top-down, campañas con state machine y channel API con rate-limit y token bucket.</p>
             </div>
             <div>
-              <div className="nfq-label">Governance</div>
-              <p className="mt-3 leading-6">MRM model inventory TRIM/SS1-23, audit trail inmutable, replay bitemporal para disputas y supervisor.</p>
+              <div className="nfq-label">Gobierno y reproducibilidad</div>
+              <p className="mt-3 leading-6">Multi-tenant estricto, snapshot por ejecución con replay diff bitemporal, MRM SR 11-7 / EBA y SLO con alertas en 5 canales.</p>
             </div>
           </div>
         </section>
@@ -329,7 +329,21 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Workspace posture</div>
-                      <div className="text-xs text-[color:var(--nfq-text-secondary)]">Pricing, governance and evidence shell</div>
+                      <div className="text-xs text-[color:var(--nfq-text-secondary)]">Multi-tenant RLS · snapshot replay · MRM inventory · SLO alerting</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:var(--nfq-text-muted)]">
+                    <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
+                      <span className="block text-[color:var(--nfq-accent)]">FTP</span>
+                      <span>19 comp.</span>
+                    </div>
+                    <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
+                      <span className="block text-[color:var(--nfq-accent)]">API</span>
+                      <span>channels</span>
+                    </div>
+                    <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
+                      <span className="block text-[color:var(--nfq-accent)]">MRM</span>
+                      <span>L1/L2/C</span>
                     </div>
                   </div>
                 </div>
