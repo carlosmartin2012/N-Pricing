@@ -13,6 +13,7 @@ import observabilityRouter from './routes/observability';
 import authRouter from './routes/auth';
 import geminiRouter from './routes/gemini';
 import pricingRouter from './routes/pricing';
+import snapshotsRouter from './routes/snapshots';
 import { authMiddleware } from './middleware/auth';
 import { requestIdMiddleware } from './middleware/requestId';
 import { tenancyMiddleware } from './middleware/tenancy';
@@ -92,6 +93,7 @@ app.use('/api/report-schedules', ...entityScoped, reportSchedulesRouter);
 app.use('/api/observability', ...entityScoped, observabilityRouter);
 app.use('/api/gemini', authMiddleware, geminiRouter);
 app.use('/api/pricing', ...entityScoped, pricingRouter);
+app.use('/api/snapshots', ...entityScoped, snapshotsRouter);
 
 // 404 for unknown API routes — without this, the SPA fallback below would
 // swallow typos as HTML responses and a failing frontend fetch would surface

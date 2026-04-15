@@ -165,4 +165,163 @@ router.delete('/alert-rules/:id', async (req, res) => {
   }
 });
 
+// ─── SLO summary (Phase 0) ─────────────────────────────────────────────────
+// Returns current percentiles per endpoint from metrics, plus tenancy + mock
+// counters derived from the raw metrics table. The materialised view
+// pricing_slo_minute isn't strictly required here — we read from metrics
+// directly to keep the endpoint working even if pg_cron isn't set up yet.
+router.get('/slo-summary', async (req, res) => {
+  try {
+    const entityId = String(req.query.entity_id ?? req.tenancy?.entityId ?? '').trim();
+    if (!entityId) {
+      return res.status(400).json({ code: 'tenancy_missing_header', message: 'entity_id required' });
+    }
+
+    const [latencySingle, latencyBatch, tenancyViolations, mockCalls, snapshotFailures, alerts] =
+      await Promise.all([
+        queryOne<{ p50: string | null; p95: string | null; p99: string | null; n: string }>(
+          `SELECT
+             percentile_cont(0.5)  WITHIN GROUP (ORDER BY metric_value)::text AS p50,
+             percentile_cont(0.95) WITHIN GROUP (ORDER BY metric_value)::text AS p95,
+             percentile_cont(0.99) WITHIN GROUP (ORDER BY metric_value)::text AS p99,
+             COUNT(*)::text AS n
+           FROM metrics
+           WHERE entity_id = $1
+             AND metric_name = 'pricing_single_latency_ms'
+             AND recorded_at >= NOW() - INTERVAL '1 hour'`,
+          [entityId],
+        ),
+        queryOne<{ p50: string | null; p95: string | null; p99: string | null; n: string }>(
+          `SELECT
+             percentile_cont(0.5)  WITHIN GROUP (ORDER BY metric_value)::text AS p50,
+             percentile_cont(0.95) WITHIN GROUP (ORDER BY metric_value)::text AS p95,
+             percentile_cont(0.99) WITHIN GROUP (ORDER BY metric_value)::text AS p99,
+             COUNT(*)::text AS n
+           FROM metrics
+           WHERE entity_id = $1
+             AND metric_name = 'pricing_batch_latency_ms_per_deal'
+             AND recorded_at >= NOW() - INTERVAL '1 hour'`,
+          [entityId],
+        ),
+        queryOne<{ n: string }>(
+          `SELECT COUNT(*)::text AS n
+           FROM tenancy_violations
+           WHERE occurred_at >= NOW() - INTERVAL '1 hour'
+             AND (claimed_entity = $1 OR $1 = ANY (actual_entities))`,
+          [entityId],
+        ),
+        queryOne<{ total: string; mocked: string }>(
+          `SELECT
+             COUNT(*)::text AS total,
+             COUNT(*) FILTER (
+               WHERE (dimensions->>'used_mock_for') IS NOT NULL
+                 AND (dimensions->>'used_mock_for') <> '[]'
+             )::text AS mocked
+           FROM metrics
+           WHERE entity_id = $1
+             AND metric_name LIKE 'pricing_%_latency_ms'
+             AND recorded_at >= NOW() - INTERVAL '1 hour'`,
+          [entityId],
+        ),
+        queryOne<{ n: string }>(
+          `SELECT COUNT(*)::text AS n
+           FROM metrics
+           WHERE entity_id = $1
+             AND metric_name = 'snapshot_write_failures_total'
+             AND recorded_at >= NOW() - INTERVAL '5 minutes'`,
+          [entityId],
+        ),
+        query<{
+          id: string;
+          name: string;
+          metric_name: string;
+          severity: string;
+          last_triggered_at: string | null;
+        }>(
+          `SELECT id, name, metric_name,
+                  COALESCE(severity, 'warning') AS severity,
+                  last_triggered_at
+           FROM alert_rules
+           WHERE entity_id = $1 AND is_active = true
+           ORDER BY last_triggered_at DESC NULLS LAST
+           LIMIT 50`,
+          [entityId],
+        ),
+      ]);
+
+    const slos = [
+      {
+        name: 'pricing_single_latency_ms',
+        target: 300,
+        current: Number(latencySingle?.p95 ?? 0),
+        status: Number(latencySingle?.p95 ?? 0) <= 300 ? 'ok' : 'breached',
+        window: '1h',
+        percentiles: {
+          p50: Number(latencySingle?.p50 ?? 0),
+          p95: Number(latencySingle?.p95 ?? 0),
+          p99: Number(latencySingle?.p99 ?? 0),
+        },
+        sampleCount: Number(latencySingle?.n ?? '0'),
+      },
+      {
+        name: 'pricing_batch_latency_ms_per_deal',
+        target: 50,
+        current: Number(latencyBatch?.p95 ?? 0),
+        status: Number(latencyBatch?.p95 ?? 0) <= 50 ? 'ok' : 'breached',
+        window: '1h',
+        percentiles: {
+          p50: Number(latencyBatch?.p50 ?? 0),
+          p95: Number(latencyBatch?.p95 ?? 0),
+          p99: Number(latencyBatch?.p99 ?? 0),
+        },
+        sampleCount: Number(latencyBatch?.n ?? '0'),
+      },
+      {
+        name: 'tenancy_violations_total',
+        target: 0,
+        current: Number(tenancyViolations?.n ?? '0'),
+        status: Number(tenancyViolations?.n ?? '0') === 0 ? 'ok' : 'breached',
+        window: '1h',
+      },
+      {
+        name: 'mock_fallback_rate',
+        target: 0.05,
+        current: Number(mockCalls?.total ?? '0') > 0
+          ? Number(mockCalls?.mocked ?? '0') / Number(mockCalls?.total ?? '1')
+          : 0,
+        status: (() => {
+          const total = Number(mockCalls?.total ?? '0');
+          if (total === 0) return 'ok';
+          const rate = Number(mockCalls?.mocked ?? '0') / total;
+          return rate < 0.05 ? 'ok' : rate < 0.1 ? 'warning' : 'breached';
+        })(),
+        window: '1h',
+      },
+      {
+        name: 'snapshot_write_failures_total',
+        target: 0,
+        current: Number(snapshotFailures?.n ?? '0'),
+        status: Number(snapshotFailures?.n ?? '0') === 0 ? 'ok' : 'breached',
+        window: '5m',
+      },
+    ];
+
+    res.json({
+      entityId,
+      generatedAt: new Date().toISOString(),
+      window: '1h',
+      slos,
+      activeAlerts: alerts.map((a) => ({
+        ruleId: a.id,
+        name: a.name,
+        sli: a.metric_name,
+        severity: a.severity,
+        lastTriggeredAt: a.last_triggered_at,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 export default router;

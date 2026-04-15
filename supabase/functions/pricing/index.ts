@@ -197,13 +197,101 @@ interface PricingRequestBody {
     interestRate: number;
     liquiditySpread: number;
   }>;
+  asOfDate?: string; // YYYY-MM-DD — optional, defaults to today UTC
 }
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type, x-entity-id, x-request-id',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Expose-Headers': 'x-request-id, x-snapshot-id, x-engine-version',
 };
+
+// ─── Phase 0 — tenancy + reproducibility support ──────────────────────────
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const ENGINE_VERSION =
+  Deno.env.get('ENGINE_VERSION') ?? Deno.env.get('VERCEL_GIT_COMMIT_SHA') ?? 'dev-local';
+const ALLOW_MOCKS = Deno.env.get('PRICING_ALLOW_MOCKS') === 'true';
+
+function extractEntityId(req: Request, body: PricingRequestBody): string | null {
+  const fromHeader = req.headers.get('x-entity-id');
+  const fromBody = (body as unknown as { entity_id?: unknown }).entity_id;
+  const raw =
+    (typeof fromHeader === 'string' ? fromHeader : null) ??
+    (typeof fromBody === 'string' ? fromBody : null);
+  if (!raw) return null;
+  return UUID_RE.test(raw) ? raw : null;
+}
+
+function extractRequestId(req: Request): string {
+  const SAFE = /^[A-Za-z0-9._-]{8,128}$/;
+  const inbound = req.headers.get('x-request-id');
+  if (inbound && SAFE.test(inbound)) return inbound;
+  return crypto.randomUUID();
+}
+
+async function canonicalJson(value: unknown): Promise<string> {
+  // Match utils/canonicalJson — inlined here because Edge Functions can't
+  // easily import from the app-level utils directory.
+  const stringify = (v: unknown): string => {
+    if (v === null) return 'null';
+    const t = typeof v;
+    if (t === 'string') return JSON.stringify(v);
+    if (t === 'boolean') return v ? 'true' : 'false';
+    if (t === 'number') {
+      const n = v as number;
+      if (!Number.isFinite(n)) throw new Error('non-finite number');
+      return JSON.stringify(n);
+    }
+    if (t === 'bigint') return (v as bigint).toString();
+    if (Array.isArray(v)) {
+      return `[${v.map((x) => (x === undefined ? 'null' : stringify(x))).join(',')}]`;
+    }
+    if (t === 'object') {
+      const obj = v as Record<string, unknown>;
+      const keys = Object.keys(obj).filter((k) => obj[k] !== undefined).sort();
+      return `{${keys.map((k) => `${JSON.stringify(k)}:${stringify(obj[k])}`).join(',')}}`;
+    }
+    throw new Error(`unsupported type ${t}`);
+  };
+  return stringify(value);
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const arr = new Uint8Array(digest);
+  let out = '';
+  for (let i = 0; i < arr.length; i++) out += arr[i].toString(16).padStart(2, '0');
+  return out;
+}
+
+function todayUtc(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function usedMockForFromContext(ctx: PricingContext): string[] {
+  const missing: string[] = [];
+  if (!ctx.rateCards?.length) missing.push('rateCards');
+  if (!ctx.transitionGrid?.length) missing.push('transitionGrid');
+  if (!ctx.physicalGrid?.length) missing.push('physicalGrid');
+  if (!ctx.behaviouralModels?.length) missing.push('behaviouralModels');
+  if (!ctx.sdrConfig) missing.push('sdrConfig');
+  if (!ctx.lrConfig) missing.push('lrConfig');
+  return missing;
+}
+
+function jsonResponse(body: unknown, init: ResponseInit = {}, extraHeaders: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'application/json',
+      ...extraHeaders,
+    },
+  });
+}
 
 /** Map DB yield_curves rows → YieldCurvePoint[] */
 function mapYieldCurveRows(rows: YieldCurveRow[]): YieldCurvePoint[] {
@@ -308,6 +396,9 @@ serve(async (req: Request) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  const requestId = extractRequestId(req);
+  const t0 = performance.now();
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -317,9 +408,10 @@ serve(async (req: Request) => {
     // Verify JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return jsonResponse(
+        { code: 'unauthenticated', message: 'Missing authorization header', requestId },
+        { status: 401 },
+        { 'x-request-id': requestId },
       );
     }
 
@@ -328,15 +420,46 @@ serve(async (req: Request) => {
     );
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return jsonResponse(
+        { code: 'unauthenticated', message: 'Invalid or expired token', requestId },
+        { status: 401 },
+        { 'x-request-id': requestId },
       );
     }
 
     const body = await req.json() as PricingRequestBody;
     const url = new URL(req.url);
     const isBatch = url.pathname.endsWith('/batch');
+
+    // ─── Tenancy validation (Phase 0) ──────────────────────────────────────
+    const entityId = extractEntityId(req, body);
+    if (!entityId) {
+      return jsonResponse(
+        { code: 'tenancy_missing_header', message: 'Missing x-entity-id', requestId },
+        { status: 400 },
+        { 'x-request-id': requestId },
+      );
+    }
+    const { data: entityUserRow, error: entityUserErr } = await supabase
+      .from('entity_users')
+      .select('role')
+      .eq('user_id', user.email)
+      .eq('entity_id', entityId)
+      .maybeSingle();
+    if (entityUserErr || !entityUserRow) {
+      await supabase.from('tenancy_violations').insert({
+        request_id: requestId,
+        user_email: user.email,
+        endpoint: `POST ${url.pathname}`,
+        claimed_entity: entityId,
+        error_code: 'tenancy_denied',
+      }).catch(() => { /* best effort */ });
+      return jsonResponse(
+        { code: 'tenancy_denied', message: 'User does not have access to this entity', requestId },
+        { status: 403 },
+        { 'x-request-id': requestId },
+      );
+    }
 
     // Extract approvalMatrix and shocks from request body
     const approvalMatrix = {
@@ -348,7 +471,11 @@ serve(async (req: Request) => {
     const shocks = { interestRate: 0, liquiditySpread: 0 };
     Object.assign(shocks, body.shocks);
 
-    // Load market data from Supabase
+    const asOfDate = typeof body.asOfDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate)
+      ? body.asOfDate
+      : todayUtc();
+
+    // Load market data from Supabase (scoped to caller's entity).
     const [
       { data: yieldCurveRows },
       { data: liquidityCurveRows },
@@ -357,18 +484,15 @@ serve(async (req: Request) => {
       { data: productRows },
       { data: businessUnitRows },
     ] = await Promise.all([
-      supabase.from('yield_curves').select('*'),
-      supabase.from('liquidity_curves').select('*'),
-      supabase.from('rules').select('*'),
-      supabase.from('clients').select('*'),
-      supabase.from('products').select('*'),
-      supabase.from('business_units').select('*'),
+      supabase.from('yield_curves').select('*').eq('entity_id', entityId),
+      supabase.from('liquidity_curves').select('*').eq('entity_id', entityId),
+      supabase.from('rules').select('*').eq('entity_id', entityId),
+      supabase.from('clients').select('*').eq('entity_id', entityId),
+      supabase.from('products').select('*').eq('entity_id', entityId),
+      supabase.from('business_units').select('*').eq('entity_id', entityId),
     ]);
 
     // Build PricingContext from DB rows
-    // Fields not stored in DB (rateCards, transitionGrid, physicalGrid,
-    // behaviouralModels, sdrConfig, lrConfig, incentivisationRules) will
-    // fall back to mock data inside calculatePricing when arrays are empty.
     const loadedContext: PricingContext = {
       yieldCurve: mapYieldCurveRows(yieldCurveRows ?? []),
       liquidityCurves: mapLiquidityCurveRows(liquidityCurveRows ?? []),
@@ -382,23 +506,78 @@ serve(async (req: Request) => {
       businessUnits: mapBusinessUnitRows(businessUnitRows ?? []),
     };
 
+    const usedMockFor = usedMockForFromContext(loadedContext);
+    if (usedMockFor.length > 0 && !ALLOW_MOCKS) {
+      return jsonResponse(
+        {
+          code: 'configuration_incomplete',
+          message: 'Pricing context is missing production data; set PRICING_ALLOW_MOCKS=true to allow dev fallbacks',
+          missing: usedMockFor,
+          requestId,
+        },
+        { status: 400 },
+        { 'x-request-id': requestId },
+      );
+    }
+
     if (isBatch) {
       // Batch pricing
       const { deals } = body;
 
       if (!Array.isArray(deals)) {
-        return new Response(
-          JSON.stringify({ error: 'deals must be an array' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        return jsonResponse(
+          { code: 'invalid_payload', message: 'deals must be an array', requestId },
+          { status: 400 },
+          { 'x-request-id': requestId },
         );
       }
 
-      // batchReprice returns a Map<string, FTPResult>; convert to serializable array
       const resultsMap = batchReprice(deals, approvalMatrix, loadedContext, shocks) as Map<string, Record<string, unknown>>;
       const results: Array<Record<string, unknown>> = [];
       resultsMap.forEach((result, dealId) => {
         results.push({ dealId, ...result });
       });
+
+      const durationMs = performance.now() - t0;
+
+      // Persist one snapshot per deal so each result is independently replayable.
+      const snapshotIds: string[] = [];
+      for (const [dealId, result] of resultsMap.entries()) {
+        const inputPayload = { deal: { ...(deals.find((d) => String((d as Record<string, unknown>).id) === dealId) ?? {}), id: dealId }, approvalMatrix, shocks };
+        const inputHash = await sha256Hex(await canonicalJson({ input: inputPayload, context: loadedContext }));
+        const outputHash = await sha256Hex(await canonicalJson(result));
+        const snapshotId = crypto.randomUUID();
+        const { error: snapErr } = await supabase.from('pricing_snapshots').insert({
+          id: snapshotId,
+          entity_id: entityId,
+          deal_id: UUID_RE.test(dealId) ? dealId : null,
+          request_id: requestId,
+          engine_version: ENGINE_VERSION,
+          as_of_date: asOfDate,
+          used_mock_for: usedMockFor,
+          input: inputPayload,
+          context: loadedContext,
+          output: result,
+          input_hash: inputHash,
+          output_hash: outputHash,
+        });
+        if (snapErr) {
+          await supabase.from('metrics').insert({
+            entity_id: entityId,
+            metric_name: 'snapshot_write_failures_total',
+            metric_value: 1,
+            dimensions: { request_id: requestId, endpoint: '/pricing/batch', error: snapErr.message },
+          }).catch(() => { /* best effort */ });
+        }
+        snapshotIds.push(snapshotId);
+      }
+
+      await supabase.from('metrics').insert({
+        entity_id: entityId,
+        metric_name: 'pricing_batch_latency_ms_per_deal',
+        metric_value: deals.length > 0 ? durationMs / deals.length : durationMs,
+        dimensions: { request_id: requestId, endpoint: '/pricing/batch', status_code: '200', count: String(deals.length) },
+      }).catch(() => { /* best effort */ });
 
       // Log batch pricing to audit
       await supabase.from('audit_log').insert({
@@ -409,33 +588,83 @@ serve(async (req: Request) => {
         description: `Server-side batch pricing: ${deals.length} deals, ${results.length} priced`,
       });
 
-      return new Response(
-        JSON.stringify({ results, count: results.length }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return jsonResponse(
+        { results, count: results.length, snapshotIds, requestId },
+        {},
+        {
+          'x-request-id': requestId,
+          'x-engine-version': ENGINE_VERSION,
+        },
       );
     } else {
       // Single deal pricing
       const { deal } = body;
 
       if (!deal) {
-        return new Response(
-          JSON.stringify({ error: 'deal is required' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        return jsonResponse(
+          { code: 'invalid_payload', message: 'deal is required', requestId },
+          { status: 400 },
+          { 'x-request-id': requestId },
         );
       }
 
-      const result = calculatePricing(deal, approvalMatrix, loadedContext, shocks);
+      const result = calculatePricing(deal, approvalMatrix, loadedContext, shocks) as Record<string, unknown>;
+      const durationMs = performance.now() - t0;
 
-      return new Response(
-        JSON.stringify(result),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      // Persist reproducibility snapshot.
+      const inputPayload = { deal, approvalMatrix, shocks };
+      const inputHash = await sha256Hex(await canonicalJson({ input: inputPayload, context: loadedContext }));
+      const outputHash = await sha256Hex(await canonicalJson(result));
+      const snapshotId = crypto.randomUUID();
+      const dealId = typeof (deal as Record<string, unknown>).id === 'string' && UUID_RE.test(String((deal as Record<string, unknown>).id))
+        ? String((deal as Record<string, unknown>).id)
+        : null;
+      const { error: snapErr } = await supabase.from('pricing_snapshots').insert({
+        id: snapshotId,
+        entity_id: entityId,
+        deal_id: dealId,
+        request_id: requestId,
+        engine_version: ENGINE_VERSION,
+        as_of_date: asOfDate,
+        used_mock_for: usedMockFor,
+        input: inputPayload,
+        context: loadedContext,
+        output: result,
+        input_hash: inputHash,
+        output_hash: outputHash,
+      });
+      if (snapErr) {
+        await supabase.from('metrics').insert({
+          entity_id: entityId,
+          metric_name: 'snapshot_write_failures_total',
+          metric_value: 1,
+          dimensions: { request_id: requestId, endpoint: '/pricing', error: snapErr.message },
+        }).catch(() => { /* best effort */ });
+      }
+
+      await supabase.from('metrics').insert({
+        entity_id: entityId,
+        metric_name: 'pricing_single_latency_ms',
+        metric_value: durationMs,
+        dimensions: { request_id: requestId, endpoint: '/pricing', status_code: '200' },
+      }).catch(() => { /* best effort */ });
+
+      return jsonResponse(
+        { ...result, snapshotId, requestId },
+        {},
+        {
+          'x-request-id': requestId,
+          'x-snapshot-id': snapshotId,
+          'x-engine-version': ENGINE_VERSION,
+        },
       );
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown pricing error';
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    return jsonResponse(
+      { code: 'pricing_error', message, requestId },
+      { status: 500 },
+      { 'x-request-id': requestId },
     );
   }
 });

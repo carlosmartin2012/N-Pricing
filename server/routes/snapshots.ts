@@ -1,0 +1,186 @@
+import { Router } from 'express';
+import { query, queryOne, withTenancyTransaction } from '../db';
+import { safeError } from '../middleware/errorHandler';
+import { canonicalJson } from '../../utils/canonicalJson';
+import { sha256Hex } from '../../utils/snapshotHash';
+
+/**
+ * Pricing snapshot read + replay.
+ *
+ * Replay semantics:
+ *   - Load the stored snapshot by id.
+ *   - Recompute the output hash from the stored output (no engine invocation
+ *     yet — that requires the server-side pricing runner, which will land in
+ *     a follow-up sprint). For now `current` equals `original` and the endpoint
+ *     verifies the snapshot has not been tampered with.
+ *
+ * When the full replay lands, this handler will additionally call the pricing
+ * engine with the stored input+context and compare the two outputs field by
+ * field.
+ */
+
+const router = Router();
+
+interface SnapshotRow {
+  id: string;
+  entity_id: string;
+  deal_id: string | null;
+  pricing_result_id: string | null;
+  request_id: string;
+  engine_version: string;
+  as_of_date: string;
+  used_mock_for: string[];
+  input: Record<string, unknown>;
+  context: Record<string, unknown>;
+  output: Record<string, unknown>;
+  input_hash: string;
+  output_hash: string;
+  created_at: string;
+}
+
+function rowToDto(row: SnapshotRow): Record<string, unknown> {
+  return {
+    id: row.id,
+    entityId: row.entity_id,
+    dealId: row.deal_id,
+    pricingResultId: row.pricing_result_id,
+    requestId: row.request_id,
+    engineVersion: row.engine_version,
+    asOfDate: row.as_of_date,
+    usedMockFor: row.used_mock_for,
+    input: row.input,
+    context: row.context,
+    output: row.output,
+    inputHash: row.input_hash,
+    outputHash: row.output_hash,
+    createdAt: row.created_at,
+  };
+}
+
+async function loadSnapshot(tenancyEntityId: string, id: string): Promise<SnapshotRow | null> {
+  const row = await queryOne<SnapshotRow>(
+    `SELECT id, entity_id, deal_id, pricing_result_id, request_id, engine_version,
+            as_of_date, used_mock_for, input, context, output, input_hash, output_hash, created_at
+     FROM pricing_snapshots
+     WHERE id = $1 AND entity_id = $2
+     LIMIT 1`,
+    [id, tenancyEntityId],
+  );
+  return row;
+}
+
+router.get('/:id', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const row = await loadSnapshot(req.tenancy.entityId, req.params.id);
+    if (!row) {
+      res.status(404).json({ code: 'not_found', message: 'Snapshot not found' });
+      return;
+    }
+    res.json(rowToDto(row));
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const dealId = typeof req.query.deal_id === 'string' ? req.query.deal_id : null;
+    const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '50'), 10) || 50, 1), 200);
+
+    const rows = dealId
+      ? await query<SnapshotRow>(
+          `SELECT id, entity_id, deal_id, pricing_result_id, request_id, engine_version,
+                  as_of_date, used_mock_for, input_hash, output_hash, created_at
+           FROM pricing_snapshots
+           WHERE entity_id = $1 AND deal_id = $2
+           ORDER BY created_at DESC LIMIT $3`,
+          [req.tenancy.entityId, dealId, limit],
+        )
+      : await query<SnapshotRow>(
+          `SELECT id, entity_id, deal_id, pricing_result_id, request_id, engine_version,
+                  as_of_date, used_mock_for, input_hash, output_hash, created_at
+           FROM pricing_snapshots
+           WHERE entity_id = $1
+           ORDER BY created_at DESC LIMIT $2`,
+          [req.tenancy.entityId, limit],
+        );
+
+    res.json(rows.map((r) => {
+      // List view omits heavy input/context/output blobs — they're on the detail endpoint.
+      return {
+        id: r.id,
+        dealId: r.deal_id,
+        requestId: r.request_id,
+        engineVersion: r.engine_version,
+        asOfDate: r.as_of_date,
+        usedMockFor: r.used_mock_for,
+        inputHash: r.input_hash,
+        outputHash: r.output_hash,
+        createdAt: r.created_at,
+      };
+    }));
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+/**
+ * Replay a stored snapshot. In this sprint the pricing engine isn't wired into
+ * the server (the engine is ESM and the pricing runner currently lives in the
+ * Edge Function bundle). The endpoint still:
+ *
+ *   1. Verifies the snapshot is intact: recomputes output_hash from the stored
+ *      output and flags if they don't match.
+ *   2. Returns the shape a real replay will have, so callers and tests can
+ *      start integrating today.
+ */
+router.post('/:id/replay', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const row = await withTenancyTransaction(
+      { entityId: req.tenancy.entityId, userEmail: req.tenancy.userEmail, role: req.tenancy.role },
+      (tx) => tx.queryOne<SnapshotRow>(
+        `SELECT * FROM pricing_snapshots WHERE id = $1 LIMIT 1`,
+        [req.params.id],
+      ),
+    );
+
+    if (!row) {
+      res.status(404).json({ code: 'not_found', message: 'Snapshot not found' });
+      return;
+    }
+
+    const recomputedOutputHash = await sha256Hex(canonicalJson(row.output));
+    const tampered = recomputedOutputHash !== row.output_hash;
+
+    res.json({
+      snapshotId: row.id,
+      matches: !tampered,
+      engineVersionOriginal: row.engine_version,
+      engineVersionNow: process.env.ENGINE_VERSION ?? 'server-no-engine',
+      diff: tampered
+        ? [{
+            field: 'output_hash',
+            original: row.output_hash,
+            current: recomputedOutputHash,
+          }]
+        : [],
+      note: 'Full replay (engine re-execution) lands in the next sprint. This response only verifies the stored output is intact.',
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+export default router;
