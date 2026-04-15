@@ -153,13 +153,66 @@ docs/
 
 ---
 
-## Decisión recomendada para continuar
+## Continuación (2.ª pasada con criterio del usuario)
 
-Las fases 2‑5 están en estado **"esqueleto productivo"**: el contrato y los pure helpers están en sitio, los endpoints existen, los tests defienden la lógica. Lo que falta en cada una son piezas que **requieren input externo** (banco ancla, proveedor de billing, datos históricos reales, decisiones de UX) — no más código creativo en este turno.
+Tras la pasada inicial, el usuario dio carta blanca y aclaró:
+SaaS-first con flexibilidad on-premise, **sin cross-charging por uso del SaaS**
+(NFQ no cobra a bancos por usar N-Pricing), SSO Google real, datos de
+mercado los aporta el banco. Se ejecutaron seis sprints adicionales:
 
-Las dos siguientes inversiones de mayor ratio valor/esfuerzo son:
+### Sprints A‑F entregados
 
-1. **Tests E2E con DB real** — usar `testcontainers` para levantar Postgres efímero y validar el comportamiento RLS extremo a extremo. Convierte Fase 0 de "sólido" a "demostrablemente sólido".
-2. **Bloque cliente ancla** — escoger un banco partner para Fase 4 y construir el primer adapter real (probablemente Salesforce FSC, que es el de menor riesgo y mayor impacto comercial).
+- **A · CSV importer + metering wiring** — `parsePositionsCsv` /
+  `parseMetricsCsv` puros + endpoints `POST /api/customer360/import/{positions|metrics}`
+  + `usage_events` rows escritas desde pricing/channel/governance routes.
+- **B · SSO Google real** — `GoogleSsoProvider` implementando `SsoProvider`
+  con verificación JWT + restricción opcional `GOOGLE_ALLOWED_HOSTED_DOMAIN`;
+  `/api/auth/google` resuelve `entity_users`, `/api/auth/me` introspección.
+- **C · Backtesting drift detector + adapter stubs** — `detectDrift` puro
+  con thresholds calibrados (5%/10% PnL, 1pp/2pp RAROC) + stubs
+  `SalesforceCrmAdapter` y `BloombergMarketDataAdapter` con shape correcto.
+- **Pivot · drop SaaS billing** — eliminados `buildInvoiceLines`,
+  `DEFAULT_PRICE_BOOK`, `/invoice` endpoint, tests de billing. Se conserva
+  `usage_events` para observabilidad operativa (capacity + abuse), no
+  facturable.
+- **D · Customer Pricing vista propia + mass-action UI** — Nuevas vistas
+  `/customers` y `/campaigns` cohabitando con las pantallas existentes,
+  incluyendo form de creación de campañas y transiciones de estado inline.
+- **E · Tests integración opt-in** — `utils/__tests__/integration/tenancy.integration.test.ts`
+  que se activa con `INTEGRATION_DATABASE_URL`. Sin la env var se
+  auto-skip; sin Docker en CI; doc completa en `docs/integration-tests.md`.
+- **F · Runbook templates** — 7 plantillas operativas en `docs/runbooks/`
+  (tenancy violation, latency breach, snapshot failure, mock fallback,
+  campaign exhausted, adapter down, kill switch, backtest drift) listas
+  para la wiki del banco.
 
-Ambas requieren decisión externa, así que paro aquí con el árbol limpio y push hecho.
+### Métricas finales
+
+- **17 commits** push-eados a `main`.
+- **+ ~7 700 líneas** netas (código + tests + docs + SQL) desde el
+  baseline `8a08ed2`.
+- **967 tests verdes + 5 integration skipped** sin env var → 972 total.
+- **20 migrations** (incluye limpieza de billing).
+- **8 runbook templates** + integration tests opt-in.
+
+### Estado final por fase
+
+| Fase | Estado tras esta segunda pasada |
+|---|---|
+| Fase 0 | ✅ Completa + integration tests opt-in + runbooks |
+| Fase 1 | ✅ Completa: schema + UI propia + CSV importer |
+| Fase 2 | ✅ Completa: channel API + campaigns con UI mass-action |
+| Fase 3 | ✅ Completa: governance + drift detector wired |
+| Fase 4 | ✅ Esqueleto + SSO Google real + stubs Salesforce/Bloomberg |
+| Fase 5 | ✅ Provisioning + ops metering (sin billing) + feature flags |
+
+### Pendiente (requiere input externo)
+
+- Implementación real de `SalesforceCrmAdapter` y `BloombergMarketDataAdapter`
+  (esperando credenciales del banco ancla).
+- Workflow temporal de aprobación con escalación L1→L2→Committee
+  (esperando decisión sobre tiempos máximos por entidad).
+- CI con job de integration tests (esperando elección del runner — GH
+  Actions / GitLab / Jenkins).
+- Backtesting con datos históricos reales (esperando dataset del banco;
+  mientras tanto el framework valida con seed sintética).
