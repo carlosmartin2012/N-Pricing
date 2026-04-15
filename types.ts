@@ -503,7 +503,9 @@ export type ViewState =
   | 'NOTIFICATIONS'
   | 'TARGET_GRID'
   | 'DISCIPLINE'
-  | 'WHAT_IF';
+  | 'WHAT_IF'
+  | 'CUSTOMER_360'
+  | 'CAMPAIGNS';
 export type AuditModule = ViewState | 'AUTH' | 'MASTER_DATA' | 'SYS_CONFIG' | 'SYSTEM' | (string & {});
 
 export interface YieldCurvePoint {

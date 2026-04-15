@@ -48,6 +48,8 @@ const VIEW_PATHS: Record<ViewState, string> = {
   TARGET_GRID: '/target-grid',
   DISCIPLINE: '/discipline',
   WHAT_IF: '/what-if',
+  CUSTOMER_360: '/customers',
+  CAMPAIGNS: '/campaigns',
 };
 
 const PATH_TO_VIEW: Record<string, ViewState> = {};
@@ -87,6 +89,8 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'CALCULATOR', label: t.pricingEngine, icon: Calculator, section: 'Pricing', path: '/pricing' },
     { id: 'RAROC', label: 'RAROC Terminal', icon: Percent, section: 'Pricing', path: '/raroc' },
     { id: 'SHOCKS', label: t.shocks, icon: Zap, section: 'Pricing', path: '/stress-testing' },
+    { id: 'CUSTOMER_360', label: 'Customers', icon: Users, section: 'Portfolio', path: '/customers' },
+    { id: 'CAMPAIGNS', label: 'Campaigns', icon: Target, section: 'Portfolio', path: '/campaigns' },
     { id: 'BLOTTER', label: t.dealBlotter, icon: FileText, section: 'Portfolio', path: '/blotter' },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard, section: 'Portfolio', path: '/accounting' },
     { id: 'REPORTING', label: 'Analytics', icon: BarChart4, section: 'Analytics', path: '/analytics' },
