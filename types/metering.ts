@@ -10,7 +10,8 @@ export type UsageEventKind =
   | 'dossier_sign'
   | 'batch_reprice'
   | 'elasticity_recalibrate'
-  | 'raroc_realize';
+  | 'raroc_realize'
+  | 'escalation_opened';
 
 export interface UsageEvent {
   id: number;

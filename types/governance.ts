@@ -60,4 +60,31 @@ export interface ApprovalEscalation {
   notifiedAt: string | null;
   resolvedAt: string | null;
   createdAt: string;
+  openedBy: string | null;
+  currentNotes: string | null;
+  escalatedFromId: string | null;
 }
+
+/**
+ * Per-entity configuration for the escalation workflow. One row per level,
+ * Admin-only writes via RLS. `notifyBeforeHours` drives a pre-expiry warning:
+ * e.g. L1 with timeout=24 and notify=4 pings the desk at 20h, escalates at 24h.
+ */
+export interface ApprovalEscalationConfig {
+  id: string;
+  entityId: string;
+  level: EscalationLevel;
+  timeoutHours: number;
+  notifyBeforeHours: number;
+  channelType: 'email' | 'slack' | 'pagerduty' | 'webhook' | 'opsgenie';
+  channelConfig: Record<string, unknown>;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type EscalationAction =
+  | { kind: 'none' }
+  | { kind: 'notify'; reason: 'approaching_due' }
+  | { kind: 'escalate'; fromLevel: EscalationLevel; toLevel: EscalationLevel; newDueAt: string }
+  | { kind: 'expire'; reason: 'no_next_level' };

@@ -210,8 +210,17 @@ mercado los aporta el banco. Se ejecutaron seis sprints adicionales:
 
 - Implementación real de `SalesforceCrmAdapter` y `BloombergMarketDataAdapter`
   (esperando credenciales del banco ancla).
-- Workflow temporal de aprobación con escalación L1→L2→Committee
-  (esperando decisión sobre tiempos máximos por entidad).
+- ~~Workflow temporal de aprobación con escalación L1→L2→Committee
+  (esperando decisión sobre tiempos máximos por entidad).~~
+  ✅ Entregado: migración `20260607000001_escalation_workflow.sql`
+  añade `approval_escalation_configs` (Admin-only writes vía RLS) +
+  columnas de trazabilidad en `approval_escalations`. Evaluador puro
+  `utils/governance/escalationEvaluator.ts` con 16 tests, endpoints
+  `/api/governance/escalations[/sweep|/evaluate]` y
+  `/api/governance/escalation-configs/:level`. Los tiempos son
+  configurables por entidad; defaults L1=24h, L2=48h, Committee=120h
+  seedeados para Default Entity. Sweeper idempotente, L1→L2→Committee
+  con fallback de timeout cuando el nivel destino no tiene config.
 - ~~CI con job de integration tests (esperando elección del runner — GH
   Actions / GitLab / Jenkins).~~ ✅ Entregado en `ci.yml` · job
   `integration-tests` con `postgres:16` service container, migraciones
