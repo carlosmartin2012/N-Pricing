@@ -30,6 +30,14 @@ export type {
   BudgetTarget, BudgetConsistency,
 } from './types/whatIf';
 
+// Phase 1 — Customer 360
+export type {
+  PositionCategory, PositionStatus, ClientPosition,
+  ClientMetricsSource, ClientMetricsSnapshot,
+  PricingTarget, PricingTargetLookup,
+  ClientRelationship, ClientRelationshipMetrics,
+} from './types/customer360';
+
 // Phase 0 — Tenancy, reproducibility snapshots, SLO
 export type {
   EntityRole, TenancyErrorCode, TenancyContext, TenancyViolation,

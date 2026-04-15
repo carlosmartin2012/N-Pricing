@@ -14,6 +14,7 @@ import authRouter from './routes/auth';
 import geminiRouter from './routes/gemini';
 import pricingRouter from './routes/pricing';
 import snapshotsRouter from './routes/snapshots';
+import customer360Router from './routes/customer360';
 import { authMiddleware } from './middleware/auth';
 import { requestIdMiddleware } from './middleware/requestId';
 import { tenancyMiddleware } from './middleware/tenancy';
@@ -95,6 +96,7 @@ app.use('/api/observability', ...entityScoped, observabilityRouter);
 app.use('/api/gemini', authMiddleware, geminiRouter);
 app.use('/api/pricing', ...entityScoped, pricingRouter);
 app.use('/api/snapshots', ...entityScoped, snapshotsRouter);
+app.use('/api/customer360', ...entityScoped, customer360Router);
 
 // 404 for unknown API routes — without this, the SPA fallback below would
 // swallow typos as HTML responses and a failing frontend fetch would surface
