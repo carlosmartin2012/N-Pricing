@@ -129,3 +129,15 @@ export function useWalkthrough() {
   if (!ctx) throw new Error('useWalkthrough must be used within WalkthroughProvider');
   return ctx;
 }
+
+/**
+ * Safe variant for components that may render outside the provider tree
+ * (Storybook, isolated tests, error boundaries). Returns null when no
+ * provider is present; consumers should guard their calls. Use this only
+ * when the absence of a provider is a legitimate runtime state — for
+ * normal in-app usage, prefer `useWalkthrough` and let the strict invariant
+ * surface misconfiguration.
+ */
+export function useWalkthroughOptional(): WalkthroughContextType | null {
+  return useContext(WalkthroughContext);
+}

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Bell, Languages, Menu, Monitor, Moon, Sun, Upload } from 'lucide-react';
+import { Bell, HelpCircle, Languages, Menu, Monitor, Moon, Sun, Upload } from 'lucide-react';
+import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
+import { FIRST_LOGIN_TOUR_ID } from '../../constants/walkthroughTours';
 import { ViewState, UserProfile } from '../../types';
 import type { ThemeMode } from '../../contexts/UIContext';
 import { getTranslations, Language } from '../../translations';
@@ -52,6 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const t = getTranslations(language);
+  const walkthrough = useWalkthroughOptional();
   const currentLabel =
     mainNavItems.find((item) => item.id === currentView)?.label ||
     bottomNavItems.find((item) => item.id === currentView)?.label ||
@@ -136,6 +139,18 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <ThemeIcon size={16} />
         </button>
+
+        {walkthrough && (
+          <button
+            data-testid="header-tour-btn"
+            onClick={() => walkthrough.startTour(FIRST_LOGIN_TOUR_ID)}
+            aria-label={t.walkthrough_replay ?? 'Replay product tour'}
+            title={t.walkthrough_replay ?? 'Replay product tour'}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-accent)]"
+          >
+            <HelpCircle size={17} />
+          </button>
+        )}
 
         <div className="relative">
           <button

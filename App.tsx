@@ -12,6 +12,8 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { CommandPalette } from './components/ui/CommandPalette';
 import { SkipNav } from './components/ui/SkipNav';
 import { useAuth } from './contexts/AuthContext';
+import { useWalkthrough } from './contexts/WalkthroughContext';
+import { FIRST_LOGIN_TOUR_ID } from './constants/walkthroughTours';
 import { useData } from './contexts/DataContext';
 import { useUI } from './contexts/UIContext';
 import { useSupabaseSync } from './hooks/useSupabaseSync';
@@ -79,7 +81,19 @@ const AppContent: React.FC = () => {
   const { currentUser, isAuthenticated, handleLogin, handleLogout } = useAuth();
   const data = useData();
   const ui = useUI();
+  const walkthrough = useWalkthrough();
   const handleUniversalImport = useUniversalImport();
+
+  // Auto-start the business-flow tour on the very first authenticated render
+  // for users who have never completed (nor explicitly skipped) it. Storage is
+  // persisted by WalkthroughContext, so subsequent logins do not re-trigger.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (walkthrough.isActive) return;
+    if (walkthrough.hasCompletedTour(FIRST_LOGIN_TOUR_ID)) return;
+    const timer = setTimeout(() => walkthrough.startTour(FIRST_LOGIN_TOUR_ID), 600);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, walkthrough]);
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
