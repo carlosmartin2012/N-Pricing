@@ -30,6 +30,20 @@ export type {
   BudgetTarget, BudgetConsistency,
 } from './types/whatIf';
 
+// Phase 3 — Governance
+export type {
+  ModelKind, ModelStatus, ModelInventoryEntry,
+  SignedDossier, DossierSignatureVerification,
+  EscalationLevel, EscalationStatus, ApprovalEscalation,
+} from './types/governance';
+
+// Phase 2 — Channels & Bulk Ops
+export type {
+  ChannelType, ChannelApiKey,
+  CampaignStatus, PricingCampaign, CampaignLookup,
+  ChannelRequestLogEntry,
+} from './types/channels';
+
 // Phase 1 — Customer 360
 export type {
   PositionCategory, PositionStatus, ClientPosition,
