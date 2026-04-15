@@ -86,21 +86,32 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
 
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   return [
+    // Commercial — pre-deal: relationship, offers, targets
+    { id: 'CUSTOMER_360', label: 'Customers', icon: Users, section: 'Commercial', path: '/customers' },
+    { id: 'CAMPAIGNS', label: 'Campaigns', icon: Target, section: 'Commercial', path: '/campaigns' },
+    { id: 'TARGET_GRID', label: t.targetGrid, icon: Grid3X3, section: 'Commercial', path: '/target-grid' },
+
+    // Pricing — engine execution, RAROC, scenarios
     { id: 'CALCULATOR', label: t.pricingEngine, icon: Calculator, section: 'Pricing', path: '/pricing' },
     { id: 'RAROC', label: 'RAROC Terminal', icon: Percent, section: 'Pricing', path: '/raroc' },
     { id: 'SHOCKS', label: t.shocks, icon: Zap, section: 'Pricing', path: '/stress-testing' },
-    { id: 'CUSTOMER_360', label: 'Customers', icon: Users, section: 'Portfolio', path: '/customers' },
-    { id: 'CAMPAIGNS', label: 'Campaigns', icon: Target, section: 'Portfolio', path: '/campaigns' },
+    { id: 'WHAT_IF', label: t.whatIf, icon: FlaskConical, section: 'Pricing', path: '/what-if' },
+
+    // Portfolio — post-trade: blotter, accounting, discipline check
     { id: 'BLOTTER', label: t.dealBlotter, icon: FileText, section: 'Portfolio', path: '/blotter' },
     { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard, section: 'Portfolio', path: '/accounting' },
+    { id: 'DISCIPLINE', label: t.pricingDiscipline, icon: Target, section: 'Portfolio', path: '/discipline' },
+
+    // Analytics — reporting + market data
     { id: 'REPORTING', label: 'Analytics', icon: BarChart4, section: 'Analytics', path: '/analytics' },
-    { id: 'MARKET_DATA', label: t.yieldCurves, icon: TrendingUp, section: 'Market Data', path: '/market-data' },
-    { id: 'TARGET_GRID', label: t.targetGrid, icon: Grid3X3, section: 'Methodology', path: '/target-grid' },
-    { id: 'DISCIPLINE', label: t.pricingDiscipline, icon: Target, section: 'Methodology', path: '/discipline' },
-    { id: 'WHAT_IF', label: t.whatIf, icon: FlaskConical, section: 'Methodology', path: '/what-if' },
-    { id: 'METHODOLOGY', label: 'Rules & Config', icon: GitBranch, section: 'Configuration', path: '/methodology' },
-    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity, section: 'Configuration', path: '/behavioural' },
-    { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Configuration', path: '/ai' },
+    { id: 'MARKET_DATA', label: t.yieldCurves, icon: TrendingUp, section: 'Analytics', path: '/market-data' },
+
+    // Engine Config — parameters and rules that drive the motor
+    { id: 'METHODOLOGY', label: 'Rules & Config', icon: GitBranch, section: 'Engine Config', path: '/methodology' },
+    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity, section: 'Engine Config', path: '/behavioural' },
+
+    // Assistant — copilot surface (kept in sidebar until top-bar refactor)
+    { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Assistant', path: '/ai' },
   ];
 }
 
