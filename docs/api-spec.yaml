@@ -1,26 +1,63 @@
 openapi: 3.0.3
 info:
-  title: N-Pricing FTP API
+  title: N-Pricing API
   description: |
-    Server-side Funds Transfer Pricing API.
-    Calculates internal transfer rates, RAROC, and regulatory costs.
-  version: 1.0.0
+    Bank-grade pricing platform — FTP engine, customer relationships,
+    channel quotes, governance dossiers, observability and tenant ops.
+
+    Three families of endpoints:
+      1. Pricing Edge Functions (Supabase) — POST /pricing, /pricing/batch,
+         /pricing/scenarios. Write pricing_snapshots on every call.
+      2. Express server (/api/*) — entity-scoped CRUD + read endpoints behind
+         x-entity-id tenancy middleware and JWT auth.
+      3. Channel API (/api/channel/*) — API-key authenticated, rate limited
+         per key, separate from the JWT path.
+
+    Refer to docs/phase-0-rollout.md for the env vars that gate strict
+    tenancy enforcement and mock-fallback rejection.
+  version: 2.0.0
   contact:
     name: N-Pricing Team
 
 servers:
   - url: https://{project-ref}.supabase.co/functions/v1
     description: Supabase Edge Functions
+  - url: https://{deployment}/api
+    description: Express server
 
 security:
   - bearerAuth: []
 
+tags:
+  - name: pricing
+  - name: snapshots
+  - name: customer360
+  - name: campaigns
+  - name: channel
+  - name: governance
+  - name: observability
+  - name: metering
+  - name: auth
+
 paths:
   /pricing:
     post:
+      tags: [pricing]
       summary: Price a single deal
-      description: Calculate FTP for a single transaction
+      description: |
+        Calculate FTP for a single transaction. Persists a pricing_snapshots
+        row with input + context + output + sha256 hashes. Returns
+        x-snapshot-id and x-engine-version response headers.
       operationId: priceSingleDeal
+      parameters:
+        - in: header
+          name: x-entity-id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: header
+          name: x-request-id
+          required: false
+          schema: { type: string }
       requestBody:
         required: true
         content:
@@ -57,6 +94,233 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchPricingResponse'
+
+  /snapshots/{id}:
+    get:
+      tags: [snapshots]
+      summary: Fetch a pricing snapshot
+      description: Returns the full input + context + output payload + hashes.
+      operationId: getPricingSnapshot
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Snapshot found }
+        '404': { description: Not found }
+
+  /snapshots/{id}/replay:
+    post:
+      tags: [snapshots]
+      summary: Replay a pricing snapshot
+      description: |
+        Re-executes the pricing engine against the stored input + context.
+        Returns matches=true when output is byte-identical to the stored
+        version; otherwise diff[] reports the field-level deltas
+        (deltaAbs + deltaBps for known FTPResult numeric fields).
+      operationId: replaySnapshot
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Replay verdict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  snapshotId:           { type: string }
+                  matches:              { type: boolean }
+                  engineVersionOriginal:{ type: string }
+                  engineVersionNow:     { type: string }
+                  diff:                 { type: array }
+
+  /customer360/clients/{clientId}:
+    get:
+      tags: [customer360]
+      summary: Aggregated client relationship view
+      description: |
+        Returns ClientRelationship: client + positions + metrics history +
+        applicable pricing targets + derived totals (active position count,
+        total exposure, productTypesHeld, isMultiProduct, relationshipAgeYears).
+      operationId: getClientRelationship
+      parameters:
+        - { in: path, name: clientId, required: true, schema: { type: string } }
+        - { in: query, name: as_of, required: false, schema: { type: string, format: date } }
+
+  /customer360/clients/{clientId}/positions:
+    get:
+      tags: [customer360]
+      summary: List positions for a client
+      operationId: listClientPositions
+    post:
+      tags: [customer360]
+      summary: Create a new position
+      operationId: createClientPosition
+
+  /customer360/clients/{clientId}/metrics:
+    get:
+      tags: [customer360]
+      summary: List metrics snapshots for a client
+      operationId: listClientMetrics
+    post:
+      tags: [customer360]
+      summary: Append a metrics snapshot
+      operationId: createClientMetricsSnapshot
+
+  /customer360/import/positions:
+    post:
+      tags: [customer360]
+      summary: Bulk CSV import of positions
+      description: |
+        Accepts text/csv body or { csv } JSON body. Single transaction with
+        chunked inserts; full rollback on any failure. Returns inserted count
+        + skipped + per-row errors.
+      operationId: importPositionsCsv
+      requestBody:
+        required: true
+        content:
+          text/csv:
+            schema: { type: string }
+
+  /customer360/import/metrics:
+    post:
+      tags: [customer360]
+      summary: Bulk CSV import of metrics snapshots
+      operationId: importMetricsCsv
+
+  /customer360/pricing-targets:
+    get:
+      tags: [customer360]
+      summary: List active pricing targets
+      operationId: listPricingTargets
+      parameters:
+        - { in: query, name: period, required: false, schema: { type: string } }
+        - { in: query, name: segment, required: false, schema: { type: string } }
+    post:
+      tags: [customer360]
+      summary: Author a top-down pricing target
+      operationId: createPricingTarget
+
+  /campaigns:
+    get:
+      tags: [campaigns]
+      summary: List pricing campaigns
+      operationId: listCampaigns
+      parameters:
+        - { in: query, name: status, required: false, schema: { type: string, enum: [draft, approved, active, exhausted, expired, cancelled] } }
+    post:
+      tags: [campaigns]
+      summary: Create a draft campaign
+      operationId: createCampaign
+
+  /campaigns/{id}/status:
+    patch:
+      tags: [campaigns]
+      summary: Transition campaign status
+      description: 'state machine: draft → approved → active → exhausted | expired | cancelled'
+      operationId: transitionCampaignStatus
+
+  /channel/quote:
+    post:
+      tags: [channel]
+      summary: Real-time channel pricing quote
+      description: |
+        Auth via x-channel-key (sha256 lookup against channel_api_keys).
+        Token-bucket rate limit per key. Applies the best matching active
+        campaign delta to the engine output. Persists a row to
+        channel_request_log.
+      operationId: channelQuote
+      security: []
+      parameters:
+        - { in: header, name: x-channel-key, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Quote with optional campaign delta }
+        '401': { description: Missing or invalid channel key }
+        '429': { description: Rate limit exceeded — Retry-After header set }
+
+  /governance/models:
+    get:
+      tags: [governance]
+      summary: List models in the inventory (SR 11-7 / EBA)
+      operationId: listModels
+    post:
+      tags: [governance]
+      summary: Add a model to the inventory
+      operationId: createModel
+
+  /governance/models/{id}/status:
+    patch:
+      tags: [governance]
+      summary: Transition model status (candidate → active → retired | rejected)
+      operationId: transitionModelStatus
+
+  /governance/dossiers:
+    post:
+      tags: [governance]
+      summary: Sign a committee dossier
+      description: |
+        Computes payload_hash = sha256(canonicalJson(payload)),
+        signature_hex = HMAC-SHA256(payload_hash, DOSSIER_SIGNING_SECRET).
+        Append-only — RLS forbids UPDATE / DELETE.
+      operationId: signDossier
+
+  /governance/dossiers/{id}/verify:
+    post:
+      tags: [governance]
+      summary: Verify a stored dossier signature
+      description: |
+        Recomputes the hash and HMAC and compares constant-time. Reports
+        payloadHashMatches and signatureMatches separately so callers can
+        distinguish payload tampering from signature forgery.
+      operationId: verifyDossier
+
+  /observability/summary:
+    get:
+      tags: [observability]
+      summary: Health summary (legacy — kept for backwards compatibility)
+      operationId: getHealthSummary
+
+  /observability/slo-summary:
+    get:
+      tags: [observability]
+      summary: SLO snapshot per entity
+      description: |
+        Returns per-SLI cards with target, current, status (ok/warning/breached)
+        and percentiles where applicable. Active alerts list included.
+      operationId: getSLOSummary
+      parameters:
+        - { in: query, name: window, required: false, schema: { type: string, enum: [1h, 24h, 7d, 30d], default: 1h } }
+
+  /metering/usage:
+    get:
+      tags: [metering]
+      summary: Per-day usage aggregates for a period (operational only — no billing)
+      operationId: getUsage
+      parameters:
+        - { in: query, name: period_start, required: true, schema: { type: string, format: date } }
+        - { in: query, name: period_end,   required: true, schema: { type: string, format: date } }
+
+  /metering/feature-flags:
+    get:
+      tags: [metering]
+      summary: Tenant feature flags (kill switch, channel_api_enabled, etc.)
+      operationId: getFeatureFlags
+
+  /auth/google:
+    post:
+      tags: [auth]
+      summary: Sign in with Google (verifies ID token, returns JWT)
+      description: |
+        Validates the Google ID token via OAuth2Client + GoogleSsoProvider,
+        resolves the caller's primary entity_users membership, returns a
+        JWT plus primaryEntityId so the SPA can pre-fill x-entity-id.
+      operationId: signInWithGoogle
+      security: []
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Self-introspection (entity memberships)
+      operationId: whoAmI
 
   /pricing/scenarios:
     post:

@@ -3,9 +3,7 @@
 
 # N-Pricing
 
-**Motor de Funds Transfer Pricing (FTP) de alto rendimiento**
-
-Calcula tasas de transferencia internas, RAROC, costes regulatorios y ajustes ESG para instituciones financieras.
+**Motor de pricing bancario integral — FTP, customer pricing y channel quotes en una plataforma multi-tenant**
 
 [![CI](https://github.com/carlosmartin2012/n-pricing/actions/workflows/ci.yml/badge.svg)](https://github.com/carlosmartin2012/n-pricing/actions)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
@@ -17,140 +15,211 @@ Calcula tasas de transferencia internas, RAROC, costes regulatorios y ajustes ES
 
 ---
 
-## Funcionalidades principales
+## Qué cubre
 
-| Modulo | Descripcion |
-|--------|-------------|
-| **Pricing Engine** | Motor FTP con 19 componentes (gaps): base rate, liquidity premium, LCR/NSFR charges, ESG, capital charge, RAROC |
-| **RAROC Terminal** | Calculadora RAROC standalone con desglose completo de rentabilidad ajustada al riesgo |
-| **Deal Blotter** | Gestion de operaciones con workflow de aprobacion (Draft → Pending → Approved → Booked) y committee dossier |
-| **ALM Reporting** | 10 dashboards: Overview, Executive, NII Sensitivity, Maturity Ladder, Currency Gap, PnL Attribution, Pricing Analytics, Funding Curves, Portfolio Snapshots, Behaviour Focus |
-| **Market Data** | Curvas de tipos (yield curves) con CRUD, bootstrap zero coupon, liquidity curves, market data sources |
-| **Stress Testing** | Shocks dashboard para analisis de sensibilidad con panel de control y visualizacion de impacto |
-| **Behavioural Models** | Modelos NMD (Parametric + Caterpillar) y Prepayment CPR para productos no deterministicos |
-| **Methodology Config** | Sistema de reglas, rate cards, ESG grids, master data, governance de cambios metodologicos |
-| **ESG Integration** | Grids de riesgo de transicion, riesgo fisico, Greenium/Movilización, DNSH capital discount, ISF Pillar I overlay |
-| **AI Assistant** | Asistente Gemini con grounding de contexto de cartera, mercado y chat con historial |
-| **Accounting Ledger** | Asientos contables automaticos por operacion con detalle y summary cards |
-| **User Management** | RBAC (Admin, Trader, Risk_Manager, Auditor) con audit trail inmutable y audit log con drawer de detalle |
-| **User Manual** | Documentacion integrada para usuarios finales |
+Tres ámbitos de pricing bancario en una sola plataforma:
+
+1. **FTP / ALM interno** — 19 componentes (curvas, LCR/NSFR, capital,
+   ESG Pillar I, etc.), RAROC, stress testing, accounting attribution.
+2. **Pricing comercial al cliente** — Customer 360 con relación, posiciones,
+   cross-bonus relacional, pricing targets top-down (pre-aprobado / hard floor).
+3. **Channel pricing en tiempo real** — `POST /api/channel/quote` con API
+   key, rate limit per-key (token bucket), y aplicación automática de
+   campañas comerciales versionadas.
+
+Todo opera **multi-tenant** vía RLS Postgres y produce **snapshots
+inmutables** de cada cálculo para reproducibilidad regulatoria (SR 11-7 / EBA).
+
+## Funcionalidades por bloque
+
+### Pricing core
+| Módulo | Descripción |
+|---|---|
+| **Pricing Engine** | Motor FTP con 19 componentes (gaps): base rate, liquidity premium, LCR/NSFR, ESG, capital charge, RAROC |
+| **RAROC Terminal** | Calculadora standalone con desglose de rentabilidad ajustada al riesgo |
+| **Stress Testing** | Shocks dashboard para análisis de sensibilidad |
+| **Behavioural Models** | NMD (Parametric + Caterpillar) y Prepayment CPR |
+| **Methodology Config** | Reglas, rate cards, ESG grids, master data, governance |
+| **ESG Integration** | Transición, físico, Greenium, DNSH discount, ISF Pillar I overlay |
+
+### Customer & commercial *(roadmap Phase 1‑2)*
+| Módulo | Descripción |
+|---|---|
+| **Customer Pricing** *(`/customers`)* | Vista relacional con KPI strip, posiciones, métricas periódicas y targets aplicables |
+| **Pricing Campaigns** *(`/campaigns`)* | Campañas versionadas (state machine `draft→approved→active→exhausted`) con form de creación y transiciones inline |
+| **Channel API** | `/api/channel/quote` con `x-channel-key` auth + rate limit + match automático de campaña |
+| **CSV Importer** | `POST /api/customer360/import/{positions\|metrics}` para bulk loads |
+
+### Governance & risk *(roadmap Phase 3)*
+| Módulo | Descripción |
+|---|---|
+| **Model Inventory** | SR 11-7 / EBA inventory con `kind`, `version`, `status`, owner, validation_doc_url |
+| **Signed Dossiers** | Committee dossiers con `sha256(canonicalJson) + HMAC-SHA256` tamper-evident |
+| **Backtesting + Drift** | Runner sobre histórico + `detectDrift` con thresholds calibrados |
+| **Approval Escalations** | Tracker de tiempos por nivel (L1/L2/Committee) |
+
+### Operations & SaaS readiness *(roadmap Phase 0, 4, 5)*
+| Módulo | Descripción |
+|---|---|
+| **Multi-tenancy** | Tenancy middleware + `withTenancyTransaction` + flag rollout (`TENANCY_ENFORCE`, `TENANCY_STRICT`) |
+| **Reproducibility** | Tabla `pricing_snapshots` inmutable + endpoint `POST /api/snapshots/:id/replay` que re-ejecuta el motor real |
+| **SLO + Alerts** | 8 SLIs catalogados, vista `pricing_slo_minute`, evaluator opt-in, 5 canales (email/Slack/PagerDuty/webhook/Opsgenie) |
+| **Adapter layer** | `CoreBankingAdapter`, `CrmAdapter`, `MarketDataAdapter`, `SsoProvider` con reference in-memory + stubs Salesforce/Bloomberg |
+| **SSO Google real** | `GoogleSsoProvider` con verificación JWT + restricción opcional de hosted domain |
+| **Tenant provisioning** | `scripts/provision-tenant.ts` idempotente, < 60s SLO |
+| **Ops metering** | `usage_events` + `tenant_feature_flags` (sin billing — el motor lo opera el banco) |
+
+### Misc
+| Módulo | Descripción |
+|---|---|
+| **Deal Blotter** | Gestión de operaciones con workflow Draft → Pending → Approved → Booked |
+| **ALM Reporting** | 10 dashboards (Overview, Executive, NII, Maturity Ladder, Currency Gap, P&L Attribution, Pricing Analytics, Funding, Snapshots, Behaviour) |
+| **Market Data** | Yield curves CRUD, bootstrap zero coupon, liquidity curves |
+| **Target Grid / Discipline / What-If** | Olas 1-3 metodológicas (target rates, leakage analytics, sandbox simulations) |
+| **AI Assistant** | Gemini con grounding de cartera y mercado |
+| **Accounting Ledger** | Asientos contables automáticos por operación |
+| **User Mgmt + Audit** | RBAC (Admin, Trader, Risk_Manager, Auditor) con audit trail inmutable |
+| **System Health** | Dashboard de salud con SLOPanel embebido |
 
 ## Arquitectura
 
 ```
 React 19 SPA (Vite + PWA)
-├── 7 Context Providers (Auth, Data, UI, Governance, MarketData, Entity, Walkthrough)
-├── Code-splitting con React.lazy (13 modulos lazy + Calculator eager)
-├── React Query para data fetching con cache
-├── Capa API centralizada (api/) con mappers
-├── Supabase Realtime (sync multi-usuario)
-├── PostgreSQL con RLS por rol
-├── 14 migraciones secuenciales
-└── Google OAuth + Session timeout 8h
+├── 7 Context Providers
+├── Code-splitting con React.lazy
+├── React Query para data fetching
+├── Capa API tipada (api/) con mappers
+└── Adapter layer (integrations/) para SSO + connectors
+
+Express server (server/)
+├── Postgres pool (pg) con withTenancyTransaction
+├── JWT propio HMAC + Google SSO
+├── tenancyMiddleware + requestIdMiddleware globales
+├── 13 routers de dominio
+└── alertEvaluator opt-in (setInterval loop)
+
+Supabase Edge Functions (Deno)
+├── pricing — escribe pricing_snapshots, valida tenancy
+├── realize-raroc — cron mensual, ?entity_id scoping
+└── elasticity-recalibrate — cron nocturno, ?entity_id scoping
+
+PostgreSQL (Supabase)
+├── 26 migraciones secuenciales
+├── RLS estricto por entity_id
+├── Helpers: get_current_entity_id, get_accessible_entity_ids
+└── Append-only: tenancy_violations, audit_log, *_versions, pricing_snapshots
 ```
 
-**Flujo de datos**: API layer → Supabase-first hydration → mock fallback → React Query cache → Realtime subscriptions.
+Detalles completos en [docs/architecture.md](./docs/architecture.md).
 
 ## Quick Start
 
 ### Prerrequisitos
 
 - Node.js >= 18
-- Cuenta Supabase (o modo offline con datos mock)
+- Postgres (Supabase local o cualquier instancia accesible)
+- Cuenta Supabase opcional para producción
 
-### Instalacion
+### Instalación
 
 ```bash
-# 1. Clonar el repositorio
 git clone https://github.com/carlosmartin2012/n-pricing.git
 cd n-pricing
-
-# 2. Instalar dependencias
 npm install
-
-# 3. Configurar variables de entorno
-cp .env.example .env.local
-# Editar .env.local con tus credenciales (ver seccion Variables de Entorno)
-
-# 4. Iniciar servidor de desarrollo
+cp .env.example .env.local  # edita con tus credenciales
 npm run dev
 ```
 
-### Variables de entorno
+### Variables de entorno principales
 
-| Variable | Requerida | Descripcion |
-|----------|-----------|-------------|
-| `VITE_SUPABASE_URL` | Si | URL del proyecto Supabase |
-| `VITE_SUPABASE_ANON_KEY` | Si | Anon key de Supabase |
-| `VITE_GOOGLE_CLIENT_ID` | Si | Client ID de Google OAuth |
-| `VITE_GEMINI_API_KEY` | No | API key de Gemini para el asistente IA |
-| `VITE_DEMO_USER` | No | Usuario para login demo |
-| `VITE_DEMO_PASS` | No | Password para login demo |
-| `VITE_DEMO_EMAIL` | No | Email para login demo |
+| Variable | Required | Descripción |
+|---|---|---|
+| `DATABASE_URL` | sí | Postgres connection string para el server (pg.Pool) |
+| `JWT_SECRET` | sí en prod | Secret HMAC para JWT propio |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | sí | Browser → Supabase |
+| `VITE_GOOGLE_CLIENT_ID` | sí | Habilita Google SSO |
+| `GOOGLE_ALLOWED_HOSTED_DOMAIN` | no | Restringe SSO a un Workspace |
+| `TENANCY_ENFORCE` | no (`off`) | `on` activa middleware de tenancy global |
+| `TENANCY_STRICT` | no (`off`) | `on` hace que el helper PG lance error si falta tenancy |
+| `PRICING_ALLOW_MOCKS` | no (`false`) | `true` permite fallback a mock data en pricing |
+| `ENGINE_VERSION` | no | Git sha para `pricing_snapshots.engine_version` |
+| `ALERT_EVAL_INTERVAL_MS` | no | ≥1000 activa el alert evaluator worker |
+| `DOSSIER_SIGNING_SECRET` | sí en prod | HMAC para firmar committee dossiers |
+| `INTEGRATION_DATABASE_URL` | no | Activa tests integración con DB real (opt-in) |
+| `VITE_GEMINI_API_KEY` | no | API key Gemini para AI Assistant |
 
 ### Setup de Supabase
 
-1. Crear un nuevo proyecto en [supabase.com](https://supabase.com)
-2. Ejecutar `supabase/schema_v2.sql` en el SQL Editor del proyecto
-3. Habilitar Realtime en las tablas principales (deals, rules, clients, etc.)
-4. Copiar la URL y anon key al `.env.local`
+1. Crear proyecto en [supabase.com](https://supabase.com) (o `supabase start` local).
+2. Aplicar `supabase/migrations/*.sql` en orden cronológico.
+3. Habilitar Realtime en las tablas que lo necesiten.
+4. Copiar URL + anon key a `.env.local`.
 
-> **Modo offline**: La app funciona sin Supabase usando datos mock de `constants.ts`. Ideal para desarrollo y demos.
-
-## Scripts disponibles
+### Provisioning de un nuevo tenant
 
 ```bash
-npm run dev            # Servidor de desarrollo con HMR
-npm run build          # Build de produccion optimizado (PWA incluido)
-npm run preview        # Preview del build de produccion
-npm run test           # Tests unitarios (Vitest — 676 tests)
-npm run test:e2e       # Tests E2E (Playwright — 15 specs)
-npm run typecheck      # Verificacion de tipos TypeScript
-npm run lint           # Analisis estatico (ESLint)
-npm run format         # Formateo automatico (Prettier)
-npm run verify:full    # Pipeline completo: lint + typecheck + test + build + bundle + e2e
-npm run check:sync     # Validar sync seed↔schema
-npm run check:data-quality # Validar integridad relacional y calidad del seed/config
-npm run check:security # Scan de dependencias prod con excepciones gobernadas
-npm run check:bundle   # Validar tamaños de bundle
-npm run storybook      # Storybook dev en :6006
+tsx scripts/provision-tenant.ts \
+  --short-code BANK-ES \
+  --name "Bank S.A." \
+  --legal-name "Bank, S.A." \
+  --country ES \
+  --currency EUR \
+  --admin-email admin@bank.es
+```
+
+Script idempotente, completa entity + admin user + entity_users + 4
+default feature flags en una transacción. SLO target < 60 s.
+
+## Scripts
+
+```bash
+npm run dev              # Vite HMR
+npm run build            # Build producción (PWA)
+npm run preview          # Preview del build
+npm run test             # Vitest (~967 tests)
+npm run test:e2e         # Playwright (12 specs)
+npm run typecheck        # tsc --noEmit
+npm run lint             # ESLint
+npm run format           # Prettier
+npm run verify:full      # lint + typecheck + test + build + e2e
+npm run check:sync       # Validar seed↔schema
+npm run check:bundle     # Validar tamaños de bundle
+npm run check:security   # Scan deps prod con excepciones gobernadas
+npm run storybook        # Storybook :6006
+
+# Tests integración (opt-in, requieren Postgres real):
+INTEGRATION_DATABASE_URL=postgres://… \
+  npx vitest run utils/__tests__/integration
 ```
 
 ## Estructura del proyecto
 
 ```
-├── api/                 # Capa API centralizada (CRUD Supabase + mappers)
-├── components/          # Componentes React organizados por dominio (111 archivos)
-│   ├── Calculator/      # Pricing: input, levers, receipt, scenarios, comparacion
-│   ├── Blotter/         # Deal management, committee dossier
-│   ├── Config/          # Rules, rate cards, ESG grids, master data, governance
-│   ├── MarketData/      # Yield curves, market sources
-│   ├── Reporting/       # 10 dashboards ALM
-│   ├── Risk/            # Stress testing (shocks)
-│   ├── RAROC/           # RAROC calculator, breakdown, metrics
-│   ├── Behavioural/     # NMD/CPR models
-│   ├── Intelligence/    # AI chat (Gemini) con historial
-│   ├── Accounting/      # Ledger, entries, summary
-│   ├── Admin/           # User mgmt, audit log con drawer
-│   ├── Docs/            # User manual
-│   └── ui/              # Shared: Sidebar, Header, Drawer, Toast, ErrorBoundary
-├── constants/           # Constantes regulatorias
-├── contexts/            # 7 Context providers (Auth, Data, UI, Governance, MarketData, Entity, Walkthrough)
-├── hooks/               # Custom hooks + queries/ (React Query) + supabaseSync/
-├── utils/               # Business logic: pricing engine, RAROC, rules, validation
-│   ├── pricing/         # Motor modularizado (curves, formula, liquidity)
-│   ├── supabase/        # 15 servicios Supabase especializados
-│   └── __tests__/       # 26 archivos, 67 suites, 328 tests
-├── supabase/            # SQL schemas, 14 migraciones, Edge Functions (Deno)
-├── e2e/                 # 15 specs Playwright
-├── scripts/             # Validacion: bundle sizes, seed↔schema sync, security audit, data quality
-├── docs/                # API spec, pricing methodology, Supabase setup
-└── public/              # Assets estaticos + PWA manifest
+api/                    # Cliente API tipado (browser → server)
+contexts/               # 7 React Context providers
+integrations/           # Phase 4 — adapter layer
+  types.ts registry.ts inMemory.ts sso.ts
+  sso/google.ts crm/salesforce.ts marketData/bloomberg.ts
+scripts/                # provision-tenant, check-bundle-size, ...
+server/                 # Express + pg.Pool
+  middleware/ routes/ workers/ integrations/
+components/             # React components por dominio (~120 archivos)
+  Customer360/ Campaigns/ Admin/ ...
+types/                  # Tipos por dominio (re-exportados desde types.ts)
+utils/                  # Pricing engine + helpers
+  pricing/ customer360/ channels/ governance/ metering/ backtesting/
+supabase/
+  migrations/           # 26 migraciones secuenciales
+  functions/            # 3 Edge Functions Deno
+e2e/                    # 12 specs Playwright
+docs/                   # Doc operativa + runbooks
+  runbooks/             # 7 plantillas operativas
+public/                 # PWA assets
 ```
 
 ## Motor de Pricing (FTP)
 
-El motor implementa la formula FTP completa con 19 componentes:
+Fórmula completa con 19 componentes:
 
 ```
 FTP = BaseRate + LiquidityPremium + LCR_Charge + NSFR_Charge
@@ -159,85 +228,101 @@ FTP = BaseRate + LiquidityPremium + LCR_Charge + NSFR_Charge
     - DNSH_Capital_Discount - ISF_Pillar1_Overlay
 ```
 
-Soporta 4 metodologias: **Matched Maturity**, **Moving Average**, **Rate Card** y **Zero Discount**.
+4 metodologías: **Matched Maturity**, **Moving Average**, **Rate Card**,
+**Zero Discount**.
 
-Ver documentacion detallada en [CLAUDE.md](./CLAUDE.md).
+Cada llamada al motor se materializa como un `pricing_snapshots` con
+input + context + output + sha256 hashes, garantizando que el deal puede
+re-ejecutarse byte-perfect en el futuro vía
+`POST /api/snapshots/:id/replay`.
+
+Ver detalle en [docs/pricing-methodology.md](./docs/pricing-methodology.md).
 
 ## Testing
 
-```bash
-npm run test           # Unit tests (Vitest)
-npm run test:e2e       # E2E tests (Playwright)
-npm run storybook      # Component stories (Storybook)
-```
+| Tipo | Comando | Cobertura |
+|---|---|---|
+| Unit | `npm run test` | ~967 tests · 78 archivos |
+| Integration (opt-in) | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration` | RLS + tenancy + fuzz |
+| E2E | `npm run test:e2e` | 12 specs Playwright |
+| Storybook | `npm run storybook` | Component stories |
 
-**Unit tests** (676 tests) cubriendo:
-- Motor FTP completo (activos, pasivos, multi-divisa)
-- Interpolacion de curvas de tipos
-- Resolucion de tenors efectivos (DTM, BM, RM)
-- RAROC, EVA y economic profit
-- Tablas regulatorias (LCR outflow, NSFR factors)
-- Bootstrap zero coupon
-- Rule matching engine (scoring y fallback)
-- Deal workflow (transiciones de estado)
-- Governance workflows
-- Validacion de inputs
-- Audit transport y logging
-- Portfolio snapshots y market data sources
+Cubre motor FTP completo, RAROC, curvas, rule matching, deal workflow,
+governance, validación, audit, snapshots reproducibles, drift detector,
+canales de alerta, token bucket, campaign matching, customer 360
+relationship aggregation, dossier signing.
 
-**E2E tests** (15 specs): auth, navigation, pricing flow, deal blotter, governance, shocks, market data, ESG, multi-entity, AI assistant, System Health, offline queue y RBAC.
+Detalle de integration tests en [docs/integration-tests.md](./docs/integration-tests.md).
 
-**Storybook**: component stories para desarrollo visual aislado.
+## Roles y permisos
+
+| Rol | Permisos |
+|---|---|
+| **Admin** | Acceso total: configuración, usuarios, aprobación, kill switch |
+| **Trader** | Crear/editar deals, ver reporting |
+| **Risk_Manager** | Aprobar deals, modificar deals booked, methodology + campaigns |
+| **Auditor** | Solo lectura + acceso a audit log + dossier verify |
 
 ## Deploy
 
 ### Vercel (recomendado)
 
-1. Conectar el repositorio a Vercel
-2. Configurar las variables de entorno en el dashboard de Vercel
-3. Deploy automatico en cada push a `main`
+1. Conectar el repositorio a Vercel.
+2. Configurar variables de entorno en el dashboard.
+3. Deploy automático en cada push a `main`.
 
-```json
-// vercel.json ya configurado con:
-{
-  "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npm run build"
-}
-```
+### On-premise (banco)
 
-## Roles y permisos
+El producto está diseñado para SaaS-first con flexibilidad on-premise.
+Para despliegue interno del banco:
 
-| Rol | Permisos |
-|-----|----------|
-| **Admin** | Acceso total: configuracion, usuarios, aprobacion de deals |
-| **Trader** | Crear/editar deals, ver reporting |
-| **Risk_Manager** | Aprobar deals, modificar deals booked, configurar reglas |
-| **Auditor** | Solo lectura + acceso a audit log |
+1. `Postgres` propio + aplicar las 26 migrations.
+2. `node server/index.js` (build TS) tras `npm run build:server`.
+3. Edge Functions opcionales (deploy independiente vía Supabase CLI).
+4. Adapter layer: registrar implementaciones reales en `server/index.ts`
+   bootstrap (sustituyendo los stubs Salesforce/Bloomberg).
 
 ## Tech Stack
 
 - **Frontend**: React 19.2 + TypeScript 5.8 + Tailwind CSS 3
-- **Build**: Vite 6.2 + vite-plugin-pwa (PWA con soporte offline)
-- **Data fetching**: @tanstack/react-query 5 (cache, invalidacion, query keys)
-- **Formularios**: react-hook-form 7
-- **Virtualizacion**: @tanstack/react-virtual 3 (listas grandes)
-- **Backend**: Supabase (PostgreSQL 15+, Realtime, RLS, Edge Functions)
-- **Auth**: Google OAuth (@react-oauth/google) + JWT
+- **Build**: Vite 6.2 + vite-plugin-pwa
+- **Data fetching**: @tanstack/react-query 5
+- **Server**: Express + pg.Pool
+- **Backend storage**: Supabase (PostgreSQL 15+, Realtime, RLS, Edge Functions Deno)
+- **Auth**: JWT HMAC propio + Google SSO real (`GoogleSsoProvider`)
 - **AI**: Google Generative AI (@google/genai)
 - **Charts**: Recharts 3.7
-- **Export**: SheetJS (xlsx) + PDF
+- **Export**: xlsx + PDF
 - **Testing**: Vitest 4 + Playwright 1.59 + Storybook 8.6
 - **CI/CD**: GitHub Actions + Vercel
 
-## Documentacion adicional
+## Roadmap & estado
 
-- [CLAUDE.md](./CLAUDE.md) — Contexto tecnico completo para agentes IA
-- [agents.md](./agents.md) — Guia de colaboracion para agentes IA
-- [APP_INFO.md](./APP_INFO.md) — Resumen ejecutivo del proyecto
-- [docs/pricing-methodology.md](./docs/pricing-methodology.md) — Metodologia FTP (19 gaps)
-- [docs/supabase-setup.md](./docs/supabase-setup.md) — Guia de setup Supabase
-- [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md) — Baseline de seguridad, scan de dependencias y excepciones gobernadas
-- [docs/api-spec.yaml](./docs/api-spec.yaml) — Especificacion API
+- ✅ **Phase 0** — Tenancy hardening + reproducibility snapshots + SLO
+- ✅ **Phase 1** — Customer 360 (schema + UI + CSV importer)
+- ✅ **Phase 2** — Channels & Bulk Ops (channel API + campaigns + UI)
+- ✅ **Phase 3** — Model Inventory + Signed Dossiers + Drift Detector
+- ✅ **Phase 4** — Adapter layer + GoogleSsoProvider real (+ stubs)
+- ✅ **Phase 5** — Tenant provisioning + ops metering (sin billing SaaS)
+
+Detalle fase por fase en
+[docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md).
+
+## Documentación
+
+| Para… | Lee… |
+|---|---|
+| Onboarding técnico rápido | [docs/architecture.md](./docs/architecture.md) |
+| Contexto IA / agentes | [CLAUDE.md](./CLAUDE.md) |
+| Estado del roadmap | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md) |
+| Operación / on-call | [docs/runbooks/](./docs/runbooks/) (7 plantillas) |
+| Rollout de tenancy + flags | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md) |
+| Diseño Phase 0 detallado | [docs/phase-0-design.md](./docs/phase-0-design.md) + [phase-0-technical-specs.md](./docs/phase-0-technical-specs.md) |
+| API / contratos | [docs/api-spec.yaml](./docs/api-spec.yaml) |
+| Metodología FTP | [docs/pricing-methodology.md](./docs/pricing-methodology.md) |
+| Setup Supabase | [docs/supabase-setup.md](./docs/supabase-setup.md) |
+| Tests integración | [docs/integration-tests.md](./docs/integration-tests.md) |
+| Seguridad baseline | [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md) |
 
 ## Licencia
 
