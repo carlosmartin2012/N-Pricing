@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ShieldAlert, RefreshCw, CheckCircle2, Settings2, Clock, ArrowUpRight } from 'lucide-react';
+import { ShieldAlert, RefreshCw, CheckCircle2, Settings2, Clock, ArrowUpRight, Inbox } from 'lucide-react';
 import * as escalationsApi from '../../api/escalations';
 import type {
   ApprovalEscalation,
@@ -8,6 +8,7 @@ import type {
   EscalationStatus,
 } from '../../types/governance';
 import { createLogger } from '../../utils/logger';
+import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
 
 const log = createLogger('EscalationsView');
 
@@ -51,6 +52,13 @@ const EscalationsView: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<EscalationStatus | 'all'>('open');
   const [error, setError] = useState<string | null>(null);
   const [showConfigs, setShowConfigs] = useState(false);
+
+  // Suppress transient load errors while the welcome walkthrough is active —
+  // a first-time user landing on /escalations with backend down should see a
+  // clean empty state under the centered card, not a red banner. Errors
+  // re-surface on the next reload once the tour ends.
+  const walkthrough = useWalkthroughOptional();
+  const isTourActive = walkthrough?.isActive ?? false;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -140,7 +148,7 @@ const EscalationsView: React.FC = () => {
         </div>
       </header>
 
-      {error && (
+      {error && !isTourActive && (
         <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
           {error}
         </div>
@@ -239,8 +247,28 @@ const EscalationsView: React.FC = () => {
             <tbody>
               {list.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-sm text-[color:var(--nfq-text-muted)]">
-                    No escalations match the current filter.
+                  <td colSpan={7} className="px-3 py-12">
+                    <div className="mx-auto flex max-w-md flex-col items-center text-center">
+                      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--nfq-accent-rgb),0.1)] text-[color:var(--nfq-accent)]">
+                        <Inbox size={24} />
+                      </div>
+                      <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
+                        {statusFilter === 'open' ? 'No open escalations' : `No ${statusFilter} escalations`}
+                      </h3>
+                      <p className="mt-2 text-xs leading-5 text-[color:var(--nfq-text-secondary)]">
+                        {statusFilter === 'open'
+                          ? 'The desk is clear. Escalations appear here when a deal or exception crosses its SLA window and needs attention at L1, L2 or the Committee.'
+                          : 'Nothing in this bucket yet. Try the "open" filter to see pending items.'}
+                      </p>
+                      {statusFilter !== 'open' && (
+                        <button
+                          onClick={() => setStatusFilter('open')}
+                          className="mt-4 rounded-md bg-[color:var(--nfq-accent)] px-3 py-1.5 text-xs font-semibold text-black"
+                        >
+                          Show open
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )}
