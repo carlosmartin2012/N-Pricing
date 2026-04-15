@@ -96,7 +96,9 @@ const recomputeRaroc = (deal: DealRow, curveRate: number): {
   };
 };
 
-serve(async (_req) => {
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!supabaseUrl || !serviceKey) {
@@ -104,19 +106,38 @@ serve(async (_req) => {
   }
   const supabase: SupabaseClient = createClient(supabaseUrl, serviceKey);
 
+  // Optional entity scoping — the cron scheduler fans out one call per entity
+  // by passing ?entity_id=<uuid>. When omitted, the job processes all
+  // entities together (legacy behaviour, kept for backwards compatibility).
+  const url = new URL(req.url);
+  const entityIdParam = url.searchParams.get('entity_id');
+  const scopedEntityId = entityIdParam && UUID_RE.test(entityIdParam) ? entityIdParam : null;
+  if (entityIdParam && !scopedEntityId) {
+    return new Response(
+      JSON.stringify({ ok: false, error: 'entity_id must be a UUID' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
   try {
-    const { data: deals, error: dealsError } = await supabase
+    const dealsQuery = supabase
       .from('deals')
       .select('id, product_type, amount, duration_months, margin_target, target_roe, risk_weight, capital_ratio, currency, start_date')
       .eq('status', 'Booked');
+    const { data: deals, error: dealsError } = scopedEntityId
+      ? await dealsQuery.eq('entity_id', scopedEntityId)
+      : await dealsQuery;
     if (dealsError) throw dealsError;
 
     const bookedDeals = (deals ?? []) as DealRow[];
 
-    const { data: curves, error: curvesError } = await supabase
+    const curvesQuery = supabase
       .from('yield_curves')
       .select('currency, tenor, rate, as_of_date')
       .order('as_of_date', { ascending: false });
+    const { data: curves, error: curvesError } = scopedEntityId
+      ? await curvesQuery.eq('entity_id', scopedEntityId)
+      : await curvesQuery;
     if (curvesError) throw curvesError;
 
     const curveByCurrency = new Map<string, YieldCurveRow[]>();
@@ -163,6 +184,7 @@ serve(async (_req) => {
     return new Response(
       JSON.stringify({
         ok: true,
+        entityId: scopedEntityId,
         dealsBooked: bookedDeals.length,
         realizationsInserted: rows.length,
         skippedMissingCurve: skipped,

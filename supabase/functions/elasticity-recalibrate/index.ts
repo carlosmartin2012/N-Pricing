@@ -200,7 +200,9 @@ const persistModels = async (supabase: SupabaseClient, models: CalibratedModel[]
   return { deactivated: segmentKeys.length, inserted: rows.length };
 };
 
-serve(async (_req) => {
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!supabaseUrl || !serviceKey) {
@@ -208,13 +210,28 @@ serve(async (_req) => {
   }
   const supabase = createClient(supabaseUrl, serviceKey);
 
+  // Optional entity scoping — scheduler can fan out one call per entity via
+  // ?entity_id=<uuid>. Omitted → calibrates across all entities (legacy).
+  const url = new URL(req.url);
+  const entityIdParam = url.searchParams.get('entity_id');
+  const scopedEntityId = entityIdParam && UUID_RE.test(entityIdParam) ? entityIdParam : null;
+  if (entityIdParam && !scopedEntityId) {
+    return new Response(
+      JSON.stringify({ ok: false, error: 'entity_id must be a UUID' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
   try {
     const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString();
-    const { data, error } = await supabase
+    const dealsQuery = supabase
       .from('deals')
       .select('id, product_type, client_type, amount, duration_months, won_lost, proposed_rate, margin_target, decision_date')
       .not('won_lost', 'is', null)
       .gte('decision_date', sixMonthsAgo);
+    const { data, error } = scopedEntityId
+      ? await dealsQuery.eq('entity_id', scopedEntityId)
+      : await dealsQuery;
     if (error) throw error;
 
     const deals = (data ?? []) as DealRow[];
@@ -224,6 +241,7 @@ serve(async (_req) => {
     return new Response(
       JSON.stringify({
         ok: true,
+        entityId: scopedEntityId,
         dealsConsidered: deals.length,
         segmentsCalibrated: models.length,
         ...persistence,

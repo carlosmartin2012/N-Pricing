@@ -18,6 +18,7 @@ import { authMiddleware } from './middleware/auth';
 import { requestIdMiddleware } from './middleware/requestId';
 import { tenancyMiddleware } from './middleware/tenancy';
 import { safeError } from './middleware/errorHandler';
+import { startAlertEvaluator } from './workers/alertEvaluator';
 
 import fs from 'fs';
 
@@ -157,6 +158,10 @@ async function main() {
     app.listen(PORT, '0.0.0.0', () => {
       console.info(`[server] Running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
     });
+    // Alert evaluator is opt-in: set ALERT_EVAL_INTERVAL_MS to a positive
+    // integer (milliseconds) to start the background tick. Disabled by default
+    // to avoid background work during local dev or tests.
+    startAlertEvaluator();
   } catch (err) {
     console.error('[server] Failed to start:', err);
     process.exit(1);
