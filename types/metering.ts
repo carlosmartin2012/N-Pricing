@@ -37,14 +37,3 @@ export interface TenantFeatureFlag {
   setAt: string;
   notes: string | null;
 }
-
-/** Shape of a billable invoice line — built from usage_aggregates_daily. */
-export interface UsageInvoiceLine {
-  entityId: string;
-  periodStart: string;   // YYYY-MM-DD
-  periodEnd:   string;
-  eventKind: UsageEventKind;
-  unitsTotal: number;
-  unitPriceCents: number;
-  amountCents: number;
-}

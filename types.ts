@@ -30,10 +30,12 @@ export type {
   BudgetTarget, BudgetConsistency,
 } from './types/whatIf';
 
-// Phase 5 — Metering & feature flags
+// Phase 5 — Operational metering (per-tenant usage observability) + feature flags.
+// Note: cross-charging customers for SaaS usage is intentionally OUT of scope —
+// the bank operates this engine as part of its own platform, not a metered SaaS.
 export type {
   UsageEventKind, UsageEvent, UsageAggregateDay,
-  TenantFeatureFlag, UsageInvoiceLine,
+  TenantFeatureFlag,
 } from './types/metering';
 
 // Phase 3 — Governance

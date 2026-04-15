@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { query } from '../db';
 import { safeError } from '../middleware/errorHandler';
-import { buildInvoiceLines, DEFAULT_PRICE_BOOK, totalInvoiceCents } from '../../utils/metering/billing';
 import type { UsageAggregateDay, UsageEventKind } from '../../types/metering';
 
 const router = Router();
@@ -41,47 +40,6 @@ router.get('/usage', async (req, res) => {
       unitsTotal: Number(r.units_total),
     }));
     res.json({ entityId: req.tenancy.entityId, periodStart, periodEnd, aggregates });
-  } catch (err) {
-    res.status(500).json({ error: safeError(err) });
-  }
-});
-
-router.get('/invoice', async (req, res) => {
-  try {
-    if (!req.tenancy) {
-      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
-      return;
-    }
-    const periodStart = String(req.query.period_start ?? '').trim();
-    const periodEnd   = String(req.query.period_end ?? '').trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(periodStart) || !/^\d{4}-\d{2}-\d{2}$/.test(periodEnd)) {
-      res.status(400).json({ code: 'invalid_period' });
-      return;
-    }
-    const rows = await query<AggRow>(
-      `SELECT entity_id, day::text AS day, event_kind, event_count::text AS event_count, units_total::text AS units_total
-       FROM usage_aggregates_daily
-       WHERE entity_id = $1 AND day BETWEEN $2 AND $3`,
-      [req.tenancy.entityId, periodStart, periodEnd],
-    );
-    const aggregates: UsageAggregateDay[] = rows.map((r) => ({
-      entityId:   r.entity_id,
-      day:        r.day,
-      eventKind:  r.event_kind,
-      eventCount: Number(r.event_count),
-      unitsTotal: Number(r.units_total),
-    }));
-    const lines = buildInvoiceLines({
-      entityId: req.tenancy.entityId,
-      periodStart, periodEnd, aggregates, priceBook: DEFAULT_PRICE_BOOK,
-    });
-    res.json({
-      entityId: req.tenancy.entityId,
-      periodStart, periodEnd,
-      lines,
-      totalCents: totalInvoiceCents(lines),
-      currency: 'EUR',
-    });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }

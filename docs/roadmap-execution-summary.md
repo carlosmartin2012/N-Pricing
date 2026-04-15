@@ -58,12 +58,12 @@
 - **Reference adapters**: `InMemoryCoreBanking/Crm/MarketData` (incluye fetch FX directo, inverso, identidad).
 - **SSO**: `SsoProvider` interface + `DemoSsoProvider` para tests + `deriveRoleFromGroups`.
 
-### Fase 5 — SaaS hardening (1 sprint)
+### Fase 5 — SaaS hardening + observabilidad operativa (1 sprint)
 
 - **Schema**: `tenant_feature_flags` (Admin‑only writes), `usage_events` (append‑only), `usage_aggregates_daily` (materialised view).
-- **Pure billing**: `buildInvoiceLines` con free tiers per kind, period windowing, custom price book; `totalInvoiceCents`.
 - **Provisioning**: `scripts/provision-tenant.ts` idempotente, una transacción crea entity + admin + entity_users + 4 default flags. SLO target < 60 s.
-- **API**: `/api/metering/usage`, `/api/metering/invoice`, `/api/metering/feature-flags`.
+- **API**: `/api/metering/usage`, `/api/metering/feature-flags`.
+- **Out of scope explícito**: cross-charging por uso del SaaS. El motor lo opera el banco como parte de su plataforma; las métricas de uso son operativas (capacity planning, abuse detection, observabilidad), no facturables.
 
 ---
 
