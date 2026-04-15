@@ -3,6 +3,7 @@ import {
   BarChart4,
   BookOpen,
   BookOpenCheck,
+  FileSignature,
   BrainCircuit,
   Calculator,
   FileText,
@@ -54,6 +55,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   CAMPAIGNS: '/campaigns',
   ESCALATIONS: '/escalations',
   MODEL_INVENTORY: '/models',
+  DOSSIERS: '/dossiers',
 };
 
 const PATH_TO_VIEW: Record<string, ViewState> = {};
@@ -116,6 +118,7 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
 
     // Governance — model inventory, dossiers, escalation queue
     { id: 'MODEL_INVENTORY', label: 'Model Inventory', icon: BookOpenCheck, section: 'Governance', path: '/models' },
+    { id: 'DOSSIERS', label: 'Signed Dossiers', icon: FileSignature, section: 'Governance', path: '/dossiers' },
     { id: 'ESCALATIONS', label: 'Escalations', icon: ShieldAlert, section: 'Governance', path: '/escalations' },
 
     // Assistant — copilot surface (kept in sidebar until top-bar refactor)

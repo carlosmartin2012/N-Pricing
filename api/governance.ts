@@ -3,6 +3,8 @@ import type {
   ModelInventoryEntry,
   ModelKind,
   ModelStatus,
+  SignedDossier,
+  DossierSignatureVerification,
 } from '../types/governance';
 
 /**
@@ -50,4 +52,23 @@ export async function updateModelStatus(
   status: ModelStatus,
 ): Promise<ModelInventoryEntry> {
   return apiPatch<ModelInventoryEntry>(`/governance/models/${id}/status`, { status });
+}
+
+/* ─── Signed committee dossiers ──────────────────────────────────────── */
+
+export async function listDossiers(dealId?: string): Promise<SignedDossier[]> {
+  const qs = dealId ? `?dealId=${encodeURIComponent(dealId)}` : '';
+  const res = await apiGet<{ dossiers: SignedDossier[] }>(`/governance/dossiers${qs}`);
+  return res.dossiers ?? [];
+}
+
+export async function getDossier(id: string): Promise<SignedDossier> {
+  const res = await apiGet<{ dossier: SignedDossier }>(`/governance/dossiers/${id}`);
+  return res.dossier;
+}
+
+export async function verifyDossier(
+  id: string,
+): Promise<{ dossier: SignedDossier; verification: DossierSignatureVerification }> {
+  return apiPost(`/governance/dossiers/${id}/verify`, {});
 }

@@ -194,6 +194,48 @@ router.post('/dossiers', async (req, res) => {
   }
 });
 
+router.get('/dossiers', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const dealId = typeof req.query.dealId === 'string' ? req.query.dealId : null;
+    const conditions = ['entity_id = $1'];
+    const params: unknown[] = [req.tenancy.entityId];
+    if (dealId) { params.push(dealId); conditions.push(`deal_id = $${params.length}`); }
+    const rows = await query<DossierRow>(
+      `SELECT * FROM signed_committee_dossiers
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY signed_at DESC LIMIT 500`,
+      params,
+    );
+    res.json({ dossiers: rows.map(mapDossier) });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.get('/dossiers/:id', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const row = await queryOne<DossierRow>(
+      'SELECT * FROM signed_committee_dossiers WHERE id = $1 AND entity_id = $2',
+      [req.params.id, req.tenancy.entityId],
+    );
+    if (!row) {
+      res.status(404).json({ code: 'not_found' });
+      return;
+    }
+    res.json({ dossier: mapDossier(row) });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 router.post('/dossiers/:id/verify', async (req, res) => {
   try {
     if (!req.tenancy) {
