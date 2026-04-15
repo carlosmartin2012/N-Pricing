@@ -5,6 +5,7 @@ import { useUI } from '../../contexts/UIContext';
 import * as observability from '../../api/observability';
 import type { AlertRule } from '../../types/alertRule';
 import { createLogger } from '../../utils/logger';
+import SLOPanel from './SLOPanel';
 
 const log = createLogger('HealthDashboard');
 
@@ -163,6 +164,9 @@ const HealthDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Phase 0 — SLO Summary */}
+      <SLOPanel />
     </div>
   );
 };

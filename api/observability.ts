@@ -90,3 +90,45 @@ export async function getRecentMetrics(
 export async function getHealthSummary(entityId: string): Promise<HealthSummary> {
   return apiGet<HealthSummary>(`/observability/summary?entity_id=${encodeURIComponent(entityId)}`);
 }
+
+// ---------------------------------------------------------------------------
+// Phase 0 — SLO summary
+// ---------------------------------------------------------------------------
+
+export type SLOStatus = 'ok' | 'warning' | 'breached';
+
+export interface SLOSummaryEntry {
+  name: string;
+  target: number;
+  current: number;
+  status: SLOStatus;
+  window: string;
+  percentiles?: { p50: number; p95: number; p99: number };
+  sampleCount?: number;
+}
+
+export interface SLOActiveAlert {
+  ruleId: string;
+  name: string;
+  sli: string;
+  severity: string;
+  lastTriggeredAt: string | null;
+}
+
+export interface SLOSummaryResponse {
+  entityId: string;
+  generatedAt: string;
+  window: string;
+  slos: SLOSummaryEntry[];
+  activeAlerts: SLOActiveAlert[];
+}
+
+export async function getSLOSummary(entityId: string): Promise<SLOSummaryResponse | null> {
+  try {
+    return await apiGet<SLOSummaryResponse>(
+      `/observability/slo-summary?entity_id=${encodeURIComponent(entityId)}`,
+    );
+  } catch {
+    return null;
+  }
+}

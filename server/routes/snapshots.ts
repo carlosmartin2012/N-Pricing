@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { query, queryOne, withTenancyTransaction } from '../db';
 import { safeError } from '../middleware/errorHandler';
-import { canonicalJson } from '../../utils/canonicalJson';
-import { sha256Hex } from '../../utils/snapshotHash';
+import { replaySnapshot, type SnapshotPayload } from '../workers/snapshotReplay';
 
 /**
  * Pricing snapshot read + replay.
@@ -133,14 +132,13 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * Replay a stored snapshot. In this sprint the pricing engine isn't wired into
- * the server (the engine is ESM and the pricing runner currently lives in the
- * Edge Function bundle). The endpoint still:
+ * Replay a stored snapshot. Re-runs the pricing engine against the stored
+ * input + context with the *current* engine code, then compares the resulting
+ * output hash to the one persisted at original-call time. Field-level diffs
+ * are reported in absolute and bps deltas for the numeric FTP outputs.
  *
- *   1. Verifies the snapshot is intact: recomputes output_hash from the stored
- *      output and flags if they don't match.
- *   2. Returns the shape a real replay will have, so callers and tests can
- *      start integrating today.
+ * matches = true  → engine output is byte-identical to what was recorded.
+ * matches = false → the diff array shows which fields drifted.
  */
 router.post('/:id/replay', async (req, res) => {
   try {
@@ -161,22 +159,23 @@ router.post('/:id/replay', async (req, res) => {
       return;
     }
 
-    const recomputedOutputHash = await sha256Hex(canonicalJson(row.output));
-    const tampered = recomputedOutputHash !== row.output_hash;
+    const payload: SnapshotPayload = {
+      input: row.input as unknown as SnapshotPayload['input'],
+      context: row.context,
+      output: row.output,
+      outputHash: row.output_hash,
+      engineVersion: row.engine_version,
+    };
+    const result = await replaySnapshot(payload, process.env.ENGINE_VERSION ?? 'dev-local');
 
     res.json({
       snapshotId: row.id,
-      matches: !tampered,
-      engineVersionOriginal: row.engine_version,
-      engineVersionNow: process.env.ENGINE_VERSION ?? 'server-no-engine',
-      diff: tampered
-        ? [{
-            field: 'output_hash',
-            original: row.output_hash,
-            current: recomputedOutputHash,
-          }]
-        : [],
-      note: 'Full replay (engine re-execution) lands in the next sprint. This response only verifies the stored output is intact.',
+      matches: result.matches,
+      engineVersionOriginal: result.engineVersionOriginal,
+      engineVersionNow: result.engineVersionNow,
+      originalOutputHash: result.originalOutputHash,
+      currentOutputHash: result.currentOutputHash,
+      diff: result.diff,
     });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
