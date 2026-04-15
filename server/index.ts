@@ -53,7 +53,11 @@ app.use((req, res, next) => {
 });
 
 // Public routes (no auth required)
-app.use('/api/auth', authRouter);
+// /api/auth/google is public (sign-in); /api/auth/me requires JWT.
+app.use('/api/auth', (req, res, next) => {
+  if (req.path === '/me') return authMiddleware(req, res, next);
+  next();
+}, authRouter);
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
 });
