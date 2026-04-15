@@ -2,6 +2,7 @@ import {
   Activity,
   BarChart4,
   BookOpen,
+  BookOpenCheck,
   BrainCircuit,
   Calculator,
   FileText,
@@ -52,6 +53,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   CUSTOMER_360: '/customers',
   CAMPAIGNS: '/campaigns',
   ESCALATIONS: '/escalations',
+  MODEL_INVENTORY: '/models',
 };
 
 const PATH_TO_VIEW: Record<string, ViewState> = {};
@@ -113,6 +115,7 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity, section: 'Engine Config', path: '/behavioural' },
 
     // Governance — model inventory, dossiers, escalation queue
+    { id: 'MODEL_INVENTORY', label: 'Model Inventory', icon: BookOpenCheck, section: 'Governance', path: '/models' },
     { id: 'ESCALATIONS', label: 'Escalations', icon: ShieldAlert, section: 'Governance', path: '/escalations' },
 
     // Assistant — copilot surface (kept in sidebar until top-bar refactor)
