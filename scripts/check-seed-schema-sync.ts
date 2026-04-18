@@ -2,13 +2,17 @@
  * check-seed-schema-sync.ts
  *
  * Validates that seed data fields in utils/seedData.ts match the column names
- * defined in supabase/schema.sql + supabase/schema_v2.sql.
+ * defined in the Postgres schema. The authoritative source is the ordered
+ * sequence of files under supabase/migrations/; supabase/schema_v2.sql is
+ * kept as a fallback for tables still only defined there (legacy baseline).
+ * supabase/schema.sql is LEGACY and is NOT read by this script — see the
+ * warning inside that file.
  *
  * Runs with: npx tsx scripts/check-seed-schema-sync.ts
  * Exit 0 = all good, Exit 1 = mismatches found.
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 
 // ---------------------------------------------------------------------------
@@ -47,16 +51,18 @@ function parseSchemaColumns(sql: string): Map<string, Set<string>> {
       ) {
         continue;
       }
-      // Column definition starts with an identifier followed by a SQL type
+      // Column definition starts with an identifier followed by a SQL type.
+      // Covers the types actually used across schema.sql + migrations; extend
+      // when new types are introduced.
       const colMatch = trimmed.match(
-        /^(\w+)\s+(TEXT|INTEGER|NUMERIC|BOOLEAN|BIGSERIAL|SERIAL|TIMESTAMPTZ|DATE|JSONB|BIGINT)/i,
+        /^(\w+)\s+(TEXT|INTEGER|INT|NUMERIC|BOOLEAN|BIGSERIAL|SERIAL|TIMESTAMPTZ|TIMESTAMP|DATE|JSONB|JSON|BIGINT|UUID|DECIMAL|REAL|DOUBLE|BYTEA|SMALLINT|VARCHAR|CHAR)/i,
       );
       if (colMatch) {
         cols.add(colMatch[1].toLowerCase());
       }
     }
     if (cols.size > 0) {
-      // Merge with existing (schema.sql and schema_v2.sql may both define the same table)
+      // Merge with existing — migrations + schema_v2 can each define the same table
       const existing = tables.get(tableName);
       if (existing) {
         for (const c of cols) existing.add(c);
@@ -66,8 +72,10 @@ function parseSchemaColumns(sql: string): Map<string, Set<string>> {
     }
   }
 
-  // Also pick up ALTER TABLE ... ADD COLUMN statements (schema_v2.sql uses these for deals)
-  const alterRe = /ALTER\s+TABLE\s+(\w+)\s+ADD\s+COLUMN\s+(\w+)\s+/gi;
+  // Also pick up ALTER TABLE ... ADD COLUMN (schema_v2 and migrations use these for deals + tenancy)
+  // Must consume optional IF NOT EXISTS before capturing the column name —
+  // otherwise we register "if" as a phantom column on every tenancy migration.
+  const alterRe = /ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(\w+)\s+ADD\s+COLUMN\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s+/gi;
   while ((m = alterRe.exec(sql)) !== null) {
     const tableName = m[1].toLowerCase();
     const colName = m[2].toLowerCase();
@@ -269,8 +277,8 @@ const IGNORED_SEED_FIELDS: Record<string, Set<string>> = {
     'description',               // UI-only label for demo identification
   ]),
   liquidity_curves: new Set([
-    'curveType',                 // schema.sql has curve_type but schema_v2 redefines without it
-    'lastUpdate',                // schema_v2 uses as_of_date
+    'curveType',                 // legacy alias, schema_v2 uses column name "curve_type" which camelToSnake maps correctly; kept here for old seeds
+    'lastUpdate',                // legacy alias — schema uses as_of_date
   ]),
   rules: new Set([
     'formulaSpec',               // JSONB stored differently or not persisted
@@ -285,19 +293,56 @@ const IGNORED_SEED_FIELDS: Record<string, Set<string>> = {
 // 4. Run the check
 // ---------------------------------------------------------------------------
 
+// Load every migration file in sorted order plus schema_v2.sql as fallback.
+// Explicitly skips supabase/schema.sql: that file is legacy and its column
+// set is incomplete (pre-tenancy, pre-workflow, pre-Olas). The concatenation
+// order matters: later migrations can add columns to tables declared earlier.
+function loadCanonicalSchemaSql(root: string): string {
+  const migrationsDir = resolve(root, 'supabase/migrations');
+  const migrationFiles = readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
+  const parts: string[] = [];
+  for (const file of migrationFiles) {
+    parts.push(`-- ${file}`);
+    parts.push(readFileSync(resolve(migrationsDir, file), 'utf-8'));
+  }
+  // Fallback: schema_v2.sql still declares a handful of tables (clients,
+  // products, business_units, deal_versions…) that were baselined before
+  // the first migration. Including it makes the column set complete without
+  // forcing a retroactive migration rewrite.
+  parts.push('-- schema_v2.sql (fallback for baseline tables)');
+  parts.push(readFileSync(resolve(root, 'supabase/schema_v2.sql'), 'utf-8'));
+  return parts.join('\n');
+}
+
 function main(): void {
   const root = resolve(import.meta.dirname ?? '.', '..');
 
-  const schema1 = readFileSync(resolve(root, 'supabase/schema.sql'), 'utf-8');
-  const schema2 = readFileSync(resolve(root, 'supabase/schema_v2.sql'), 'utf-8');
+  const schemaSql = loadCanonicalSchemaSql(root);
   const seedSrc = readFileSync(resolve(root, 'utils/seedData.ts'), 'utf-8');
 
   // Parse
-  const schemaCols = parseSchemaColumns(schema1 + '\n' + schema2);
+  const schemaCols = parseSchemaColumns(schemaSql);
   const seedExports = parseSeedFields(seedSrc);
 
+  // Safety net: the script used to silently regress when the schema source
+  // files moved around. If we suddenly know about fewer than 15 tables,
+  // something is badly wrong — fail loudly instead of PASSing with a false
+  // sense of security.
+  const MIN_EXPECTED_TABLES = 15;
+  if (schemaCols.size < MIN_EXPECTED_TABLES) {
+    console.error(
+      `FAIL: parsed only ${schemaCols.size} tables from migrations + schema_v2.sql ` +
+        `(expected ≥ ${MIN_EXPECTED_TABLES}). ` +
+        `Check that supabase/migrations/ is present and non-empty.`,
+    );
+    process.exit(1);
+  }
+
   console.log('=== Seed / Schema Sync Check ===\n');
-  console.log(`Schema tables found: ${[...schemaCols.keys()].join(', ')}`);
+  console.log(`Schema source:       supabase/migrations/* + supabase/schema_v2.sql`);
+  console.log(`Tables parsed:       ${schemaCols.size}`);
   console.log(`Seed exports found:  ${seedExports.map((e) => e.exportName).join(', ')}\n`);
 
   let hasErrors = false;

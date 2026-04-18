@@ -1,7 +1,29 @@
--- LEGACY: This file is kept for reference. Use supabase/migrations/ for all schema changes.
+-- ============================================================================
+-- ⚠️  LEGACY — DO NOT EXECUTE — DO NOT EDIT
+-- ============================================================================
 --
--- N PRICING SYSTEM: SUPABASE DATABASE SCHEMA
--- Execute this script in the SQL Editor of your Supabase Dashboard
+-- This file is the original pre-migration schema snapshot. It pre-dates:
+--   * multi-tenant entity_id columns (added in 20260406000001_multi_entity)
+--   * deal workflow states (20260406000002_* and schema_v2.sql)
+--   * tenancy helpers, snapshots, SLOs, customer360, campaigns, governance,
+--     escalation, metering -- everything from Phase 0..5 of the roadmap.
+--
+-- Executing this file against a database will create an incomplete schema
+-- WITHOUT RLS policies, WITHOUT tenancy, and WITHOUT 95% of the columns the
+-- server and edge functions expect. It is kept only as a historical
+-- reference so `git blame` / audits can see where the engine started.
+--
+-- The CANONICAL schema is the ordered sequence of migrations in
+-- supabase/migrations/ -- applied by server/migrate.ts at boot.
+-- `supabase/schema_v2.sql` remains as a secondary fallback for baseline
+-- tables (clients, products, business_units, deal_versions...) and is read
+-- by scripts/check-seed-schema-sync.ts together with the migrations.
+--
+-- This file is NOT read by any tool in the repo. Do not add references
+-- to it from new code.
+--
+-- N PRICING SYSTEM: LEGACY SUPABASE DATABASE SCHEMA (pre-2026-04)
+-- ============================================================================
 
 -- 1. DEALS TABLE (Pricing Blotter)
 CREATE TABLE IF NOT EXISTS deals (

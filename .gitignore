@@ -13,6 +13,7 @@ dist-ssr
 playwright-report
 test-results
 storybook-static
+coverage
 *.local
 .env
 .env.local

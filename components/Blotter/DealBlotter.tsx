@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useState } from 'react';
 import * as auditApi from '../../api/audit';
 import * as configApi from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
@@ -15,11 +15,16 @@ import BlotterFooter from './BlotterFooter';
 import BlotterHeaderActions from './BlotterHeaderActions';
 import BlotterTable from './BlotterTable';
 import BlotterToolbar from './BlotterToolbar';
-import DealBlotterDrawers from './DealBlotterDrawers';
+// Drawers only mount on user interaction (edit, dossier, import, outcome…).
+// Lazy-loading them keeps their ~30 KB out of the initial DealBlotter chunk.
+const DealBlotterDrawers = lazy(() => import('./DealBlotterDrawers'));
 import { buildDealsCsv, formatDealCurrency } from './blotterUtils';
 import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
 import { BulkActionBar } from './BulkActionBar';
-import { DealComparisonDrawer } from './DealComparisonDrawer';
+// Compare drawer opens only from the BulkActionBar — defer its chunk too.
+const DealComparisonDrawer = lazy(() =>
+  import('./DealComparisonDrawer').then((m) => ({ default: m.DealComparisonDrawer })),
+);
 import { useBlotterActions } from './hooks/useBlotterActions';
 import { useBlotterState } from './hooks/useBlotterState';
 import { canBatchRepriceDeals } from '../../utils/dealWorkflow';
@@ -306,6 +311,8 @@ const DealBlotter: React.FC = () => {
 
         <BlotterFooter deals={filteredDeals} committeeSummary={committeeSummary} />
 
+        {(isEditOpen || isNewOpen || isImportOpen || isDeleteOpen || isDossierOpen || isOutcomeOpen) && (
+        <Suspense fallback={null}>
         <DealBlotterDrawers
           isEditOpen={isEditOpen}
           isNewOpen={isNewOpen}
@@ -355,20 +362,24 @@ const DealBlotter: React.FC = () => {
             void handleExportCommitteePackage();
           }}
         />
+        </Suspense>
+        )}
       </div>
     </Panel>
 
-    {(() => {
+    {isCompareOpen && (() => {
       const ids = Array.from(selectedDealIds);
       const compareA = filteredDeals.find((d) => d.id === ids[0]) || null;
       const compareB = filteredDeals.find((d) => d.id === ids[1]) || null;
       return (
-        <DealComparisonDrawer
-          isOpen={isCompareOpen}
-          onClose={() => setIsCompareOpen(false)}
-          dealA={compareA}
-          dealB={compareB}
-        />
+        <Suspense fallback={null}>
+          <DealComparisonDrawer
+            isOpen={isCompareOpen}
+            onClose={() => setIsCompareOpen(false)}
+            dealA={compareA}
+            dealB={compareB}
+          />
+        </Suspense>
       );
     })()}
     </>

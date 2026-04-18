@@ -25,6 +25,7 @@ import { tenancyMiddleware } from './middleware/tenancy';
 import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
 import { startEscalationSweeper } from './workers/escalationSweeper';
+import { bootstrapAdapters } from './integrations/bootstrap';
 
 import fs from 'fs';
 
@@ -35,7 +36,14 @@ const PORT = parseInt(process.env.PORT ?? '3001', 10);
 
 const app = express();
 
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3001'];
+// 3000 is the Vite dev port (see vite.config.ts — 5000 is reserved by macOS
+// AirPlay). 5173 kept for ad-hoc `vite --port 5173` runs; 3001 is the
+// Express server itself when opened directly.
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:3001',
+];
 app.use(cors({
   origin: IS_PROD ? false : ALLOWED_ORIGINS,
   credentials: true,
@@ -172,6 +180,10 @@ process.on('uncaughtException', (err) => {
 async function main() {
   try {
     await runMigrations();
+    // Register integration adapters BEFORE the server starts accepting
+    // requests: the health endpoint and any pricing path that reads from
+    // MarketDataAdapter will otherwise see an empty registry.
+    bootstrapAdapters();
     app.listen(PORT, '0.0.0.0', () => {
       console.info(`[server] Running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
     });

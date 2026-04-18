@@ -6,6 +6,7 @@ import * as observability from '../../api/observability';
 import type { AlertRule } from '../../types/alertRule';
 import { createLogger } from '../../utils/logger';
 import SLOPanel from './SLOPanel';
+import AdapterHealthPanel from './AdapterHealthPanel';
 
 const log = createLogger('HealthDashboard');
 
@@ -167,6 +168,9 @@ const HealthDashboard: React.FC = () => {
 
       {/* Phase 0 — SLO Summary */}
       <SLOPanel />
+
+      {/* Phase 4 follow-up — Integration adapters */}
+      <AdapterHealthPanel />
     </div>
   );
 };
