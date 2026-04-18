@@ -7,9 +7,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
     return {
       server: {
-        // 3000, not 5000: macOS Monterey+ binds 5000 to AirPlay Receiver.
-        // Using it breaks `npm run dev` silently on stock Macs.
-        port: 3000,
+        // Port 5000 maps to external 80 in Replit (.replit [[ports]] section).
+        // This is the port the Replit preview and autoscale deployment expect.
+        port: 5000,
         strictPort: true,
         host: '0.0.0.0',
         allowedHosts: true,
