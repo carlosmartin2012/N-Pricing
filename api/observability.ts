@@ -132,3 +132,31 @@ export async function getSLOSummary(entityId: string): Promise<SLOSummaryRespons
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Phase 4 follow-up — integration adapter health
+// ---------------------------------------------------------------------------
+
+export type AdapterKind = 'core_banking' | 'crm' | 'market_data';
+
+export interface AdapterHealthEntry {
+  kind: AdapterKind;
+  name: string;
+  ok: boolean;
+  latencyMs: number | null;
+  message: string | null;
+  checkedAt: string;
+}
+
+export interface AdapterHealthResponse {
+  generatedAt: string;
+  adapters: AdapterHealthEntry[];
+}
+
+export async function getAdapterHealth(): Promise<AdapterHealthResponse | null> {
+  try {
+    return await apiGet<AdapterHealthResponse>('/observability/integrations/health');
+  } catch {
+    return null;
+  }
+}

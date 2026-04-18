@@ -11,21 +11,26 @@
 
 ## 2. Ejecutar schema
 
-1. Ir a SQL Editor en el dashboard de Supabase
-2. Ejecutar `supabase/schema_v2.sql` (schema principal de referencia — incluye tablas, RLS, workflow)
-3. Ejecutar migraciones en orden desde `supabase/migrations/`:
-   - `20240101000000_initial_schema.sql`
-   - `20240201000000_v2_extensions.sql`
-   - `20240301000000_rls_policies.sql`
-   - `20240401000000_indexes.sql`
-   - `20240501000001_rule_versioning.sql`
-   - `20240501000002_multi_tenant.sql`
-   - `20240501000003_esg_versioning.sql`
-   - `20240501000004_yield_curve_history.sql`
-   - `20240501000005_deal_comments.sql`
-4. Si hay problemas de RLS/Realtime: ejecutar `supabase/fix_rls_realtime.sql`
+La **fuente de verdad operativa** es la secuencia ordenada de ficheros en
+`supabase/migrations/`, aplicada al arranque por `server/migrate.ts`.
 
-> **Nota**: `supabase/schema.sql` es legacy — usar `schema_v2.sql` como referencia.
+**Opción A — boot local / dev (recomendada):** arrancar el servidor con
+`npm run dev` — `server/migrate.ts` corre todas las migrations en orden
+idempotentemente. No ejecutar SQL a mano.
+
+**Opción B — aplicar sobre un Supabase remoto:** desde el SQL Editor
+aplicar los ficheros de `supabase/migrations/*.sql` **en orden alfabético**
+(el prefijo `YYYYMMDDHHMMSS_` garantiza la secuencia). Hay ~36 ficheros.
+Si hay problemas de RLS/Realtime en un proyecto pre-existente:
+`supabase/fix_rls_realtime.sql`.
+
+> **Archivos de referencia (no ejecutables):**
+> - `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` en su
+>   cabecera; pre-dates tenancy, workflow y todo Phase 0-5. Solo referencia
+>   histórica.
+> - `supabase/schema_v2.sql` es un snapshot intermedio. Sigue siendo útil
+>   como fallback para onboarding y lo lee `scripts/check-seed-schema-sync.ts`,
+>   pero las policies RLS y tablas nuevas viven solo en migrations.
 
 ## 3. Habilitar Realtime
 
@@ -65,7 +70,14 @@ VITE_DEMO_EMAIL=demo@nfq.es   # Opcional
 
 ## 6. Verificar RLS
 
-Las politicas RLS estan definidas en `schema_v2.sql` Seccion 8.
+Las políticas RLS canónicas viven en `supabase/migrations/` —
+`20260406000001_multi_entity.sql` aplica las políticas entity-scoped sobre
+las tablas de negocio; migrations posteriores (`20260411000002_rls_hardening.sql`,
+`20260602000002_rls_delete_policies.sql`, `20260602000007_olas_1_3_rls_hardening.sql`)
+refinan y extienden. `schema_v2.sql` §8 conserva el baseline histórico pero
+**no** es la fuente de verdad actual — ver
+[`docs/rls-audit-2026-04.md`](./rls-audit-2026-04.md).
+
 Para verificar que funcionan:
 
 ```sql

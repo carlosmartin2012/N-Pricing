@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { Router } from 'express';
 import { execute, query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
+import { adapterRegistry } from '../../integrations/registry';
 
 const router = Router();
 
@@ -317,6 +318,30 @@ router.get('/slo-summary', async (req, res) => {
         sli: a.metric_name,
         severity: a.severity,
         lastTriggeredAt: a.last_triggered_at,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+// ─── Integrations health (Phase 4 follow-up) ───────────────────────────────
+// Returns the registry's view of each connected adapter (core banking, CRM,
+// market data, SSO when added). Not entity-scoped: adapter health is global
+// infrastructure state. Anyone authenticated may read; the UI surface is
+// gated behind the Admin/Health dashboard.
+router.get('/integrations/health', async (_req, res) => {
+  try {
+    const entries = await adapterRegistry.healthAll();
+    res.json({
+      generatedAt: new Date().toISOString(),
+      adapters: entries.map((e) => ({
+        kind: e.kind,
+        name: e.name,
+        ok: e.health.ok,
+        latencyMs: e.health.latencyMs ?? null,
+        message: e.health.message ?? null,
+        checkedAt: e.health.checkedAt,
       })),
     });
   } catch (err) {

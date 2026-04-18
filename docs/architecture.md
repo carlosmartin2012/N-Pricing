@@ -462,6 +462,7 @@ Idempotente. Se puede correr 10 veces sin daño. Logs incluyen el
 
 ## Referencias rápidas
 
+- **Integral review 2026-04-18** (hallazgos verificados + propuesta Olas 6-8): [`docs/integral-review-2026-04-18.md`](./integral-review-2026-04-18.md)
 - Roadmap fase a fase: [`docs/roadmap-execution-summary.md`](./roadmap-execution-summary.md)
 - Diseño Phase 0 detallado: [`docs/phase-0-design.md`](./phase-0-design.md)
 - SQL + tipos + ejemplos Phase 0: [`docs/phase-0-technical-specs.md`](./phase-0-technical-specs.md)

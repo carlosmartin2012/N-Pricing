@@ -8,11 +8,15 @@ import HealthDashboard from '../HealthDashboard';
 const mocks = vi.hoisted(() => ({
   getHealthSummary: vi.fn(),
   listAlertRules: vi.fn(),
+  getSLOSummary: vi.fn(),
+  getAdapterHealth: vi.fn(),
 }));
 
 vi.mock('../../../api/observability', () => ({
   getHealthSummary: mocks.getHealthSummary,
   listAlertRules: mocks.listAlertRules,
+  getSLOSummary: mocks.getSLOSummary,
+  getAdapterHealth: mocks.getAdapterHealth,
 }));
 
 vi.mock('../../../contexts/EntityContext', () => ({
@@ -25,6 +29,11 @@ describe('HealthDashboard', () => {
   beforeEach(() => {
     mocks.getHealthSummary.mockReset();
     mocks.listAlertRules.mockReset();
+    mocks.getSLOSummary.mockReset().mockResolvedValue(null);
+    mocks.getAdapterHealth.mockReset().mockResolvedValue({
+      generatedAt: new Date().toISOString(),
+      adapters: [],
+    });
   });
 
   it('renders live summary metrics and alert rules from the observability API', async () => {

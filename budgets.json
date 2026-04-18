@@ -8,6 +8,7 @@
     "CategoricalChart": 320000,
     "vendor-supabase": 200000,
     "vendor-recharts": 450000,
-    "DealBlotter": 105000
+    "DealBlotter": 60000,
+    "DealBlotterDrawers": 80000
   }
 }

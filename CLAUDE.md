@@ -1,7 +1,9 @@
 # CLAUDE.md — N-Pricing
 
 > Contexto esencial para agentes IA que trabajan en este repositorio.
-> Última actualización: 2026-04-15 (post-roadmap Phases 0-5).
+> Última actualización: 2026-04-18 (integral review post-roadmap Phases 0-5).
+> **Lectura obligatoria antes de tocar código:** [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md)
+> (hallazgos verificados, falsos positivos descartados, propuesta de evolución en 3 olas).
 
 ## Qué es N-Pricing
 
@@ -453,8 +455,17 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Pitfalls comunes
 
+- **Tenancy legacy (BLOQUEANTE para `TENANCY_STRICT=on` global, 2026-04-18):**
+  `server/routes/config.ts`, `server/routes/audit.ts` y
+  `server/routes/deals.ts GET /` todavía **no consumen `req.tenancy`**.
+  Cualquier query o mutación que toques en estos routers debe migrarse al
+  patrón de `customer360`/`campaigns`/`governance` antes de activar strict
+  en producción. Ver [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md) §1.1.
 - `seedData.ts` y Supabase pueden divergir si se cambia uno sin revisar el
-  otro. Usar `npm run check:sync`.
+  otro. Usar `npm run check:sync`. Desde 2026-04-18 el script lee la
+  **secuencia completa de migrations** + `schema_v2.sql` como fallback;
+  `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` y el script
+  ya no lo lee.
 - Las ramas antiguas pueden traer documentación útil pero también supuestos
   desactualizados.
 - Recharts y módulos lazy pueden introducir warnings no bloqueantes;

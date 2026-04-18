@@ -7,7 +7,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
     return {
       server: {
-        port: 5000,
+        // 3000, not 5000: macOS Monterey+ binds 5000 to AirPlay Receiver.
+        // Using it breaks `npm run dev` silently on stock Macs.
+        port: 3000,
         strictPort: true,
         host: '0.0.0.0',
         allowedHosts: true,
@@ -114,6 +116,58 @@ export default defineConfig(() => {
         environment: 'node',
         setupFiles: ['./utils/__tests__/setup-dom.ts'],
         exclude: ['e2e/**', 'node_modules/**'],
+        coverage: {
+          provider: 'v8',
+          reporter: ['text-summary', 'html', 'lcov'],
+          reportsDirectory: './coverage',
+          // Measure only code we actually ship or that drives pricing logic.
+          // Exclude tests, stories, integration harnesses, generated artefacts
+          // and a few demo-only scaffolds that have no runtime value.
+          include: [
+            'api/**/*.{ts,tsx}',
+            'components/**/*.{ts,tsx}',
+            'contexts/**/*.{ts,tsx}',
+            'hooks/**/*.{ts,tsx}',
+            'integrations/**/*.{ts,tsx}',
+            'server/**/*.ts',
+            'utils/**/*.{ts,tsx}',
+            'types/**/*.ts',
+            'App.tsx',
+            'appNavigation.ts',
+          ],
+          exclude: [
+            '**/__tests__/**',
+            '**/*.test.{ts,tsx}',
+            '**/*.stories.{ts,tsx}',
+            '**/*.d.ts',
+            'e2e/**',
+            'dist/**',
+            'storybook-static/**',
+            'coverage/**',
+            'playwright-report/**',
+            'scripts/**',
+            'supabase/functions/**',
+            'node_modules/**',
+            // Generated / static content with no behavioural code:
+            'translations.ts',
+            'appSummaries.ts',
+            'utils/seedData.ts',
+          ],
+          // Anti-regression thresholds calibrated against the 2026-04-18
+          // baseline (lines 23.68 / statements 23.46 / functions 18.85 /
+          // branches 21.09). Set ~1 pp below the measured values so a
+          // single regressing PR fails CI before the debt compounds.
+          // These are NOT aspirational targets — they are floors. Raise
+          // them intentionally as coverage grows; never lower them to
+          // make a broken build pass. A follow-up ticket should push the
+          // UI component tests up to 40% before bumping.
+          thresholds: {
+            lines: 22,
+            statements: 22,
+            functions: 17,
+            branches: 20,
+          },
+        },
       },
     };
 });

@@ -36,8 +36,9 @@
 **Scope**: `supabase/`, `api/`, `utils/supabase/` (15 módulos), `utils/supabaseClient.ts`, `hooks/supabaseSync/`
 
 **Reglas**:
-- Schema de referencia: `supabase/schema_v2.sql` (ignorar schema.sql, es legacy)
-- 15 migraciones en `supabase/migrations/` — ejecutar en orden
+- **Fuente de verdad**: `supabase/migrations/*.sql` (en orden) — aplicadas por `server/migrate.ts` al boot.
+- `supabase/schema_v2.sql` es snapshot parcial de referencia (leído por `check-seed-schema-sync.ts` como fallback). `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` y ningún tooling lo lee.
+- ~36 migrations hoy; siempre añadir la siguiente con prefijo `YYYYMMDDHHMMSS_`
 - Capa API centralizada en `api/` — usar `api/mappers.ts` para snake_case↔camelCase
 - Servicios especializados en `utils/supabase/`: deals, market, config, audit, approval, masterData, rules, monitoring, etc.
 - Toda nueva tabla necesita: RLS policies, realtime habilitado, suscripción en `hooks/supabaseSync/useRealtimeSync.ts`
@@ -75,7 +76,7 @@
 - Inyección SQL: Supabase SDK parametriza queries, no construir SQL raw
 - Auth: validar rol del usuario antes de operaciones destructivas
 - Audit: toda acción significativa debe llamar a `useAudit().logAction()`
-- RLS: verificar que nuevas tablas tengan policies en schema_v2.sql
+- RLS: toda tabla nueva necesita policies en una migration propia (read entity-scoped, insert con `get_current_entity_id()`, delete Admin-only). Ver patrón en `20260406000001_multi_entity.sql` y `20260602000002_rls_delete_policies.sql`.
 
 ## Flujos de trabajo
 
@@ -87,14 +88,14 @@
 4. Añadir entrada de navegación en `appNavigation.ts` (`buildMainNavItems` o `buildBottomNavItems`)
 5. Añadir traducciones en `translations.ts` (en + es, ~534 keys existentes)
 6. Si necesita datos: añadir estado en el Context apropiado (DataContext, GovernanceContext, MarketDataContext)
-7. Si necesita persistencia: crear tabla en schema_v2.sql + servicio en `utils/supabase/` + operación en `api/`
+7. Si necesita persistencia: crear **nueva migration** en `supabase/migrations/YYYYMMDDHHMMSS_*.sql` (no editar `schema_v2.sql`) + servicio en `utils/supabase/` + operación en `api/`
 8. Si necesita data fetching: añadir React Query hook en `hooks/queries/`
 
 ### Añadir un nuevo campo a Deal/Transaction
 
 1. Añadir campo en `Transaction` interface (`types.ts`)
 2. Actualizar `INITIAL_DEAL` en seed data (`utils/seedData.ts`)
-3. Añadir columna en `deals` table (`schema_v2.sql`)
+3. Añadir columna en `deals` via nueva migration `supabase/migrations/YYYYMMDDHHMMSS_add_<col>.sql` con `ALTER TABLE deals ADD COLUMN IF NOT EXISTS <col> ...`
 4. Actualizar mapeo en `api/mappers.ts` (snake_case↔camelCase) y el flujo CRUD en `api/deals.ts`
 5. Añadir input en `DealInputPanel.tsx` o `DealConfigurationPanel.tsx` si es editable
 6. Si afecta pricing: integrar en `pricingEngine.ts` (o `utils/pricing/`) + añadir test
@@ -125,5 +126,5 @@
 - [ ] Tipos: `types.ts` refleja cualquier cambio de schema
 - [ ] Mappers: `api/mappers.ts` actualizado si hay nuevos campos
 - [ ] Traducciones: textos nuevos en ambos idiomas (en/es) en `translations.ts`
-- [ ] Schema: si hay cambios de BD, actualizado `schema_v2.sql` + nueva migración en `supabase/migrations/`
+- [ ] Schema: si hay cambios de BD, **nueva migración** en `supabase/migrations/` (no editar `schema_v2.sql`)
 - [ ] Query keys: si hay nuevas queries, registradas en `hooks/queries/queryKeys.ts`

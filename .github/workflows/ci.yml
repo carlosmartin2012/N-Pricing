@@ -34,8 +34,17 @@ jobs:
       - name: Dependency security audit
         run: npm run check:security
 
-      - name: Run tests
-        run: npx vitest run
+      - name: Run tests with coverage gate
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Build
         run: npx vite build
