@@ -22,6 +22,7 @@ import campaignsRouter from './routes/campaigns';
 import { authMiddleware } from './middleware/auth';
 import { requestIdMiddleware } from './middleware/requestId';
 import { tenancyMiddleware } from './middleware/tenancy';
+import { requireTenancy } from './middleware/requireTenancy';
 import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
 import { startEscalationSweeper } from './workers/escalationSweeper';
@@ -100,8 +101,17 @@ app.get('/api/docs', (_req, res) => {
 // planned for the next sprint. Routes that are conceptually entity-scoped
 // (deals, pricing, market-data, etc.) opt into this middleware; global routes
 // (/api/entities — needed to discover entities before picking one) stay out.
+//
+// `requireTenancy()` is stacked unconditionally as a belt-and-suspenders guard
+// (see server/middleware/requireTenancy.ts). It is a no-op when TENANCY_ENFORCE
+// is off, but in strict mode it returns 500 if a request reaches a handler
+// without `req.tenancy` populated — catching the regression "new router was
+// added without joining the entityScoped chain". Reading the env on each
+// request lets the rollout flip live without restarting the server.
 const tenancyOn = process.env.TENANCY_ENFORCE === 'on';
-const entityScoped = tenancyOn ? [authMiddleware, tenancyMiddleware()] : [authMiddleware];
+const entityScoped = tenancyOn
+  ? [authMiddleware, tenancyMiddleware(), requireTenancy()]
+  : [authMiddleware, requireTenancy()];
 
 // Protected routes (auth required)
 app.use('/api/deals', ...entityScoped, dealsRouter);

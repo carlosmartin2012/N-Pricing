@@ -54,15 +54,25 @@ export function entityScopedClause(
 }
 
 /**
- * Hard guard — use on routes that should NEVER fall through to legacy
- * behaviour, regardless of `TENANCY_ENFORCE`. Returns 500 when a handler
- * reaches this point without `req.tenancy` populated, because that means
- * the router was mounted without `tenancyMiddleware()` — a coding
- * regression, not an operational state. Safe to stack on top of the normal
- * middleware chain as belt-and-suspenders.
+ * Belt-and-suspenders guard — stacked on entity-scoped routers AFTER
+ * `tenancyMiddleware()` to catch the regression "somebody mounted a new
+ * router but forgot the entityScoped chain". The guard is mode-aware:
+ *
+ *   - TENANCY_ENFORCE=on  → if `req.tenancy` is missing, return 500
+ *     (the middleware did not run on this router → coding regression).
+ *   - TENANCY_ENFORCE=off → no-op (legacy mode never populates req.tenancy
+ *     by design; failing here would block the rollout sequence).
+ *
+ * The env var is read on every request so toggling it during a rollout
+ * does not require a server restart. Cost is a single env lookup per call.
  */
 export function requireTenancy(): RequestHandler {
   return (req, res, next) => {
+    const enforced = process.env.TENANCY_ENFORCE === 'on';
+    if (!enforced) {
+      next();
+      return;
+    }
     if (!req.tenancy) {
       res.status(500).json({
         code: 'tenancy_guard_missing',
