@@ -18,6 +18,14 @@ once you know the team that operates the deployment.
 | [backtest-drift.md](./backtest-drift.md) | `detectDrift().severity === 'breached'` after a backtesting run |
 | [feature-flag-kill-switch.md](./feature-flag-kill-switch.md) | Need to halt all writes for a tenant immediately |
 
+## Proactive playbooks
+
+Not triggered by alerts — executed intentionally during rollouts.
+
+| File | Purpose |
+|---|---|
+| [tenancy-strict-flip.md](./tenancy-strict-flip.md) | Flip `TENANCY_ENFORCE=on` → `TENANCY_STRICT=on` across the 4 Phase 0 rollout steps |
+
 ## Common header to fill in each runbook
 
 ```yaml
