@@ -17,6 +17,7 @@ const PricingReceipt = React.lazy(() => import('./PricingReceipt'));
 const PricingComparison = React.lazy(() => import('./PricingComparison'));
 const CalculatorRecommendationPanel = React.lazy(() => import('./CalculatorRecommendationPanel'));
 const PricingInsightsWidget = React.lazy(() => import('./PricingInsightsWidget'));
+const CustomerRelationshipPanel = React.lazy(() => import('../Customer360/CustomerRelationshipPanel'));
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
 
@@ -131,6 +132,15 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             />
           </Suspense>
         </div>
+
+        {/* Customer 360 — relationship context for the approval/analysis flow */}
+        {dealParams.clientId && (
+          <div data-tour="customer-360-panel" className="w-full lg:col-span-12">
+            <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+              <CustomerRelationshipPanel clientId={dealParams.clientId} />
+            </Suspense>
+          </div>
+        )}
 
         {/* Phase 1: IFRS 9 Stage/SICR + Cross-bonuses inputs */}
         <div className="w-full lg:col-span-6">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, HelpCircle, Languages, Menu, Monitor, Moon, Sun, Upload } from 'lucide-react';
+import { Bell, HelpCircle, Languages, Menu, Monitor, Moon, Search, Sun, Upload } from 'lucide-react';
 import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from '../../constants/walkthroughTours';
 import { ViewState, UserProfile } from '../../types';
@@ -30,6 +30,8 @@ interface HeaderProps {
   offlinePendingCount?: number;
   offlineIsSyncing?: boolean;
   onOfflineSync?: () => void;
+  /** Opens the global command palette (\u2318K) */
+  onOpenCommandPalette?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -51,6 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
   offlinePendingCount = 0,
   offlineIsSyncing = false,
   onOfflineSync,
+  onOpenCommandPalette,
 }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const t = getTranslations(language);
@@ -114,6 +117,21 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <span className="text-xs text-[color:var(--nfq-text-secondary)]">Curve state synchronized</span>
         </div>
+
+        {onOpenCommandPalette && (
+          <button
+            onClick={onOpenCommandPalette}
+            aria-label="Open command palette"
+            className="hidden items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] md:flex"
+            title="Search views, clients, deals, snapshots (\u2318K)"
+          >
+            <Search size={14} />
+            <span>Search{'\u2026'}</span>
+            <kbd className="ml-1 rounded border border-[var(--nfq-border-ghost)] px-1.5 py-0.5 font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
+              {'\u2318'}K
+            </kbd>
+          </button>
+        )}
 
         <button
           onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}

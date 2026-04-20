@@ -186,39 +186,39 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
           <div className="max-w-3xl">
             <span className="nfq-pill mb-8">Integrated Bank Pricing Platform</span>
             <h1 className="text-[clamp(3.1rem,5vw,5.4rem)] font-semibold leading-[1.02] tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
-              Un motor. Relacional, gobernado y reproducible.
+              Pricing de banca, de extremo a extremo.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[color:var(--nfq-text-secondary)]">
-              FTP interno, pricing comercial al cliente y canales en tiempo real sobre una misma capa. Multi-tenant con RLS, snapshot-first por requerimiento regulatorio, gobierno MRM integrado.
+              Pricing cliente, pricing de canal en tiempo real y transfer pricing interno sobre un mismo motor. Multi-tenant con RLS, snapshot-first por requerimiento regulatorio, gobierno MRM integrado.
             </p>
 
             <div className="mt-12 grid max-w-3xl grid-cols-3 gap-4">
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Engine</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">FTP · 19</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Base · LP · LCR/NSFR · capital · CSRBB · ESG · output floor CRR3. Stress EBA 6 escenarios.</div>
-              </div>
-              <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Relational</div>
+                <div className="nfq-label">Customer</div>
                 <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">360°</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Customer 360 con cross-bonus, campañas versionadas y quote API para sucursal, web y móvil.</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Visión relacional, cross-bonus por posiciones reales, targets top-down y campañas versionadas por segmento.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
-                <div className="nfq-label">Governed</div>
-                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">MRM</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Snapshots inmutables + replay bitemporal, dossiers firmados HMAC, escalación L1 → L2 → Committee.</div>
+                <div className="nfq-label">Channel</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">API</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Quote en tiempo real para sucursal, web, móvil y partner — API key, rate-limit y token bucket por canal.</div>
+              </div>
+              <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
+                <div className="nfq-label">Engine</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">FTP · 19</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Base · LP · LCR/NSFR · capital · CSRBB · ESG · output floor CRR3 · RAROC · stress EBA 6 escenarios.</div>
               </div>
             </div>
           </div>
 
           <div className="grid max-w-3xl grid-cols-3 gap-6 text-sm text-[color:var(--nfq-text-secondary)]">
             <div>
-              <div className="nfq-label">Motor de cálculo</div>
-              <p className="mt-3 leading-6">19 componentes FTP parametrizables, RAROC con economic profit, stress EBA y reconciliación FTP ↔ provisión ↔ capital.</p>
+              <div className="nfq-label">Cliente y canal</div>
+              <p className="mt-3 leading-6">Customer 360 relacional con cross-bonus por posiciones reales, targets top-down, campañas con state machine y channel API con rate-limit por canal.</p>
             </div>
             <div>
-              <div className="nfq-label">Cliente y canal</div>
-              <p className="mt-3 leading-6">Customer 360 relacional, targets top-down, campañas con state machine y channel API con rate-limit y token bucket.</p>
+              <div className="nfq-label">Motor de pricing</div>
+              <p className="mt-3 leading-6">19 componentes parametrizables (base, liquidez, capital, ESG, output floor), RAROC con economic profit, stress EBA y reconciliación FTP ↔ provisión ↔ capital.</p>
             </div>
             <div>
               <div className="nfq-label">Gobierno y reproducibilidad</div>
@@ -334,16 +334,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                   </div>
                   <div className="mt-4 grid grid-cols-3 gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:var(--nfq-text-muted)]">
                     <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
-                      <span className="block text-[color:var(--nfq-accent)]">FTP</span>
-                      <span>19 comp.</span>
+                      <span className="block text-[color:var(--nfq-accent)]">360°</span>
+                      <span>customer</span>
                     </div>
                     <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
                       <span className="block text-[color:var(--nfq-accent)]">API</span>
                       <span>channels</span>
                     </div>
                     <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
-                      <span className="block text-[color:var(--nfq-accent)]">MRM</span>
-                      <span>L1/L2/C</span>
+                      <span className="block text-[color:var(--nfq-accent)]">FTP</span>
+                      <span>19 comp.</span>
                     </div>
                   </div>
                 </div>

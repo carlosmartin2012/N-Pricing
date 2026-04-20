@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Search, Users2, Upload } from 'lucide-react';
+import { useSearchParams } from 'react-router';
 import { useEntity } from '../../contexts/EntityContext';
 import { useData } from '../../contexts/DataContext';
 import CustomerRelationshipPanel from './CustomerRelationshipPanel';
@@ -16,14 +17,21 @@ import CustomerRelationshipPanel from './CustomerRelationshipPanel';
 const CustomerPricingView: React.FC = () => {
   const { activeEntity } = useEntity();
   const { clients } = useData();
+  const [searchParams] = useSearchParams();
+  const presetId = searchParams.get('id');
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(presetId);
 
   useEffect(() => {
+    // Preset wins on first load; fall back to first client
+    if (presetId && selectedId !== presetId) {
+      setSelectedId(presetId);
+      return;
+    }
     if (selectedId === null && clients.length > 0) {
       setSelectedId(clients[0].id);
     }
-  }, [clients, selectedId]);
+  }, [clients, selectedId, presetId]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();

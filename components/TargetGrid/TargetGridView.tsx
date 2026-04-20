@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Download, Filter, Grid, Table, Eye, X } from 'lucide-react';
+import { Download, Filter, GitCompare, Grid, Table, Eye, X } from 'lucide-react';
 import type { TargetGridCell, GridFilters, TenorBucket } from '../../types';
 import { TENOR_BUCKETS } from '../../types';
 import { useSnapshotsQuery, useGridCellsQuery } from '../../hooks/queries/useTargetGridQueries';
@@ -10,8 +10,9 @@ import TargetGridTable from './TargetGridTable';
 import TargetGridHeatmap from './TargetGridHeatmap';
 import GridCellDetailPanel from './GridCellDetailPanel';
 import ExportGridModal from './ExportGridModal';
+import SnapshotDiffView from './SnapshotDiffView';
 
-type ViewMode = 'table' | 'heatmap';
+type ViewMode = 'table' | 'heatmap' | 'diff';
 
 const TargetGridView: React.FC = () => {
   const { t } = useUI();
@@ -104,6 +105,20 @@ const TargetGridView: React.FC = () => {
             <Grid size={12} />
             Heatmap
           </button>
+          <button
+            onClick={() => setViewMode('diff')}
+            disabled={snapshots.length < 2}
+            className={`flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+              viewMode === 'diff'
+                ? 'bg-[var(--nfq-bg-highest)] text-[var(--nfq-accent)]'
+                : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
+            }`}
+            aria-pressed={viewMode === 'diff'}
+            title={snapshots.length < 2 ? 'Necesitas al menos 2 snapshots para comparar' : undefined}
+          >
+            <GitCompare size={12} />
+            Diff
+          </button>
         </div>
 
         <div className="flex-1" />
@@ -195,17 +210,21 @@ const TargetGridView: React.FC = () => {
       </div>
 
       {/* ============ Body ============ */}
-      {viewMode === 'table' ? (
+      {viewMode === 'table' && (
         <TargetGridTable
           cells={cells}
           onCellSelect={setSelectedCell}
           isLoading={isLoading}
         />
-      ) : (
+      )}
+      {viewMode === 'heatmap' && (
         <TargetGridHeatmap
           cells={cells}
           onCellSelect={setSelectedCell}
         />
+      )}
+      {viewMode === 'diff' && (
+        <SnapshotDiffView snapshots={snapshots} />
       )}
 
       {/* Empty state (non-loading) */}

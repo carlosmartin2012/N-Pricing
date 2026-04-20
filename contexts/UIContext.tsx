@@ -25,6 +25,10 @@ interface UIContextType {
   setIsConfigModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isAiOpen: boolean;
   setIsAiOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Customer 360 drawer — globally invocable context, not a destination */
+  customerDrawerId: string | null;
+  openCustomerDrawer: (clientId: string) => void;
+  closeCustomerDrawer: () => void;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
@@ -49,6 +53,9 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [customerDrawerId, setCustomerDrawerId] = useState<string | null>(null);
+  const openCustomerDrawer = useCallback((clientId: string) => setCustomerDrawerId(clientId), []);
+  const closeCustomerDrawer = useCallback(() => setCustomerDrawerId(null), []);
 
   // Theme: preference can be 'dark' | 'light' | 'system'
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
@@ -75,6 +82,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       isImportModalOpen, setIsImportModalOpen,
       isConfigModalOpen, setIsConfigModalOpen,
       isAiOpen, setIsAiOpen,
+      customerDrawerId, openCustomerDrawer, closeCustomerDrawer,
     }),
     [
       currentView,
@@ -88,6 +96,9 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       isImportModalOpen,
       isConfigModalOpen,
       isAiOpen,
+      customerDrawerId,
+      openCustomerDrawer,
+      closeCustomerDrawer,
     ]
   );
 

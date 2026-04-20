@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Calculator, FileText, BarChart4, TrendingUp, GitBranch, Activity, Zap,
-  Percent, LayoutDashboard, BrainCircuit, Users, ShieldCheck, BookOpen,
-  HeartPulse, Plus, Upload, Moon, Sun, Search, ArrowRight,
+  Calculator, FileText, BarChart4, TrendingUp, GitBranch, Activity,
+  LayoutDashboard, BrainCircuit, Users, ShieldCheck, BookOpen,
+  HeartPulse, Plus, Upload, Moon, Sun, Search, ArrowRight, Target,
+  Grid3X3, BookOpenCheck, FileSignature, ShieldAlert, User2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
-import { viewToPath } from '../../appNavigation';
+import { viewToPath, AUX_DESTINATIONS } from '../../appNavigation';
 import type { ViewState } from '../../types';
 
 interface CommandItem {
@@ -16,7 +17,7 @@ interface CommandItem {
   label: string;
   sublabel?: string;
   icon: LucideIcon;
-  category: 'Navigation' | 'Deal' | 'Action';
+  category: 'Navigation' | 'Deal' | 'Client' | 'Action';
   action: () => void;
 }
 
@@ -25,21 +26,26 @@ interface Props {
   onClose: () => void;
 }
 
+// Main sidebar destinations (11) — aligned with buildMainNavItems
 const VIEW_ITEMS: { id: ViewState; label: string; icon: LucideIcon }[] = [
-  { id: 'CALCULATOR', label: 'Pricing Engine', icon: Calculator },
-  { id: 'RAROC', label: 'RAROC Terminal', icon: Percent },
-  { id: 'SHOCKS', label: 'Stress Testing', icon: Zap },
-  { id: 'BLOTTER', label: 'Deal Blotter', icon: FileText },
-  { id: 'ACCOUNTING', label: 'Accounting Ledger', icon: LayoutDashboard },
-  { id: 'REPORTING', label: 'FTP Analytics', icon: BarChart4 },
-  { id: 'MARKET_DATA', label: 'Yield Curves', icon: TrendingUp },
-  { id: 'METHODOLOGY', label: 'Rules & Config', icon: GitBranch },
-  { id: 'BEHAVIOURAL', label: 'Behavioural Models', icon: Activity },
-  { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit },
-  { id: 'USER_MGMT', label: 'User Management', icon: Users },
-  { id: 'AUDIT_LOG', label: 'System Audit', icon: ShieldCheck },
-  { id: 'HEALTH', label: 'System Health', icon: HeartPulse },
-  { id: 'MANUAL', label: 'User Manual', icon: BookOpen },
+  { id: 'CUSTOMER_360',    label: 'Customers',          icon: Users },
+  { id: 'CAMPAIGNS',       label: 'Campaigns',          icon: Target },
+  { id: 'TARGET_GRID',     label: 'Target Grid',        icon: Grid3X3 },
+  { id: 'CALCULATOR',      label: 'Pricing Engine',     icon: Calculator },
+  { id: 'BLOTTER',         label: 'Deal Blotter',       icon: FileText },
+  { id: 'ACCOUNTING',      label: 'Accounting Ledger',  icon: LayoutDashboard },
+  { id: 'REPORTING',       label: 'Analytics',          icon: BarChart4 },
+  { id: 'MARKET_DATA',     label: 'Yield Curves',       icon: TrendingUp },
+  { id: 'BEHAVIOURAL',     label: 'Behavioural Models', icon: Activity },
+  { id: 'METHODOLOGY',     label: 'Methodology',        icon: GitBranch },
+  { id: 'MODEL_INVENTORY', label: 'Model Inventory',    icon: BookOpenCheck },
+  { id: 'DOSSIERS',        label: 'Signed Dossiers',    icon: FileSignature },
+  { id: 'ESCALATIONS',     label: 'Escalations',        icon: ShieldAlert },
+  { id: 'AI_LAB',          label: 'AI Assistant',       icon: BrainCircuit },
+  { id: 'USER_MGMT',       label: 'User Management',    icon: Users },
+  { id: 'AUDIT_LOG',       label: 'System Audit',       icon: ShieldCheck },
+  { id: 'HEALTH',          label: 'System Health',      icon: HeartPulse },
+  { id: 'MANUAL',          label: 'User Manual',        icon: BookOpen },
 ];
 
 function fuzzyMatch(text: string, query: string): boolean {
@@ -60,8 +66,8 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { deals } = useData();
-  const { theme, setTheme, setIsImportModalOpen } = useUI();
+  const { deals, clients } = useData();
+  const { theme, setTheme, setIsImportModalOpen, openCustomerDrawer } = useUI();
 
   // Build command items
   const items = useMemo<CommandItem[]>(() => {
@@ -74,10 +80,30 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
       action: () => { navigate(viewToPath(v.id)); onClose(); },
     }));
 
+    // Auxiliary destinations — not in sidebar but reachable via palette
+    const auxItems: CommandItem[] = AUX_DESTINATIONS.map((d) => ({
+      id: `aux-${d.id}`,
+      label: d.label,
+      sublabel: d.sublabel,
+      icon: d.icon,
+      category: 'Navigation' as const,
+      action: () => { navigate(d.path); onClose(); },
+    }));
+
+    // Clients — opens 360 drawer, not full destination
+    const clientItems: CommandItem[] = clients.slice(0, 50).map((c) => ({
+      id: `client-${c.id}`,
+      label: c.name,
+      sublabel: `${c.segment ?? 'Client'} \u00b7 ${c.rating ?? '—'} \u00b7 Open 360 drawer`,
+      icon: User2,
+      category: 'Client' as const,
+      action: () => { openCustomerDrawer(c.id); onClose(); },
+    }));
+
     const dealItems: CommandItem[] = deals.slice(0, 20).map((d) => ({
       id: `deal-${d.id}`,
       label: `${d.id || 'Draft'} — ${d.clientId}`,
-      sublabel: `${d.productType} · ${d.currency} ${((d.amount || 0) / 1e6).toFixed(1)}M`,
+      sublabel: `${d.productType} \u00b7 ${d.currency} ${((d.amount || 0) / 1e6).toFixed(1)}M`,
       icon: FileText,
       category: 'Deal' as const,
       action: () => { navigate(viewToPath('BLOTTER')); onClose(); },
@@ -110,13 +136,16 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
       },
     ];
 
-    return [...navItems, ...actionItems, ...dealItems];
-  }, [deals, navigate, onClose, theme, setTheme, setIsImportModalOpen]);
+    return [...navItems, ...auxItems, ...actionItems, ...clientItems, ...dealItems];
+  }, [deals, clients, navigate, onClose, theme, setTheme, setIsImportModalOpen, openCustomerDrawer]);
 
   // Filter by query
   const filtered = useMemo(() => {
-    if (!query.trim()) return items.filter((i) => i.category !== 'Deal').slice(0, 15);
-    return items.filter((i) => fuzzyMatch(i.label, query) || (i.sublabel && fuzzyMatch(i.sublabel, query))).slice(0, 15);
+    if (!query.trim()) {
+      // Empty query: show top navs + actions only (skip long client/deal lists)
+      return items.filter((i) => i.category === 'Navigation' || i.category === 'Action').slice(0, 20);
+    }
+    return items.filter((i) => fuzzyMatch(i.label, query) || (i.sublabel && fuzzyMatch(i.sublabel, query))).slice(0, 25);
   }, [items, query]);
 
   // Reset selection when query changes
