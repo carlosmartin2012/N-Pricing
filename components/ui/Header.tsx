@@ -15,8 +15,8 @@ interface HeaderProps {
   isSidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   currentView: ViewState;
-  mainNavItems: { id: string; label: string }[];
-  bottomNavItems: { id: string; label: string }[];
+  mainNavItems: { id: string; label: string; section?: string }[];
+  bottomNavItems: { id: string; label: string; section?: string }[];
   theme: 'dark' | 'light';
   themeMode?: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
@@ -58,10 +58,27 @@ export const Header: React.FC<HeaderProps> = ({
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const t = getTranslations(language);
   const walkthrough = useWalkthroughOptional();
-  const currentLabel =
-    mainNavItems.find((item) => item.id === currentView)?.label ||
-    bottomNavItems.find((item) => item.id === currentView)?.label ||
-    'Workspace';
+  const currentItem =
+    mainNavItems.find((item) => item.id === currentView) ||
+    bottomNavItems.find((item) => item.id === currentView);
+  const currentLabel = currentItem?.label ?? 'Workspace';
+  const currentSection = currentItem?.section;
+  const sectionAccent: Record<string, string> = {
+    Commercial: 'text-[color:var(--nfq-success)]',
+    Pricing:    'text-[color:var(--nfq-accent)]',
+    Insights:   'text-[color:var(--nfq-warning)]',
+    Governance: 'text-violet-300',
+    Assistant:  'text-fuchsia-300',
+    System:     'text-slate-400',
+  };
+  const sectionDot: Record<string, string> = {
+    Commercial: 'bg-[var(--nfq-success)]',
+    Pricing:    'bg-[var(--nfq-accent)]',
+    Insights:   'bg-[var(--nfq-warning)]',
+    Governance: 'bg-violet-400',
+    Assistant:  'bg-fuchsia-400',
+    System:     'bg-slate-400',
+  };
   const ThemeIcon = themeMode === 'system' ? Monitor : theme === 'dark' ? Moon : Sun;
   const nextTheme = (): ThemeMode => {
     if (themeMode === 'dark') return 'light';
@@ -98,8 +115,22 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="hidden h-8 w-px bg-[color:var(--nfq-border-ghost)] md:block" />
 
         <div className="min-w-0">
-          <div className="font-mono text-[12px] font-medium uppercase tracking-[0.2em] text-[color:var(--nfq-text-tertiary)]">
-            Workspace
+          <div className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em]">
+            {currentSection ? (
+              <>
+                <span
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${sectionDot[currentSection] ?? 'bg-slate-400'}`}
+                  aria-hidden="true"
+                />
+                <span className={sectionAccent[currentSection] ?? 'text-[color:var(--nfq-text-tertiary)]'}>
+                  {currentSection}
+                </span>
+                <span className="text-[color:var(--nfq-text-faint)]">{'\u203a'}</span>
+                <span className="text-[color:var(--nfq-text-tertiary)]">Workspace</span>
+              </>
+            ) : (
+              <span className="text-[color:var(--nfq-text-tertiary)]">Workspace</span>
+            )}
           </div>
           <div className="truncate text-sm font-medium text-[color:var(--nfq-text-primary)] md:text-base">
             {currentLabel}

@@ -21,7 +21,18 @@ export interface WalkthroughStep {
    */
   centered?: boolean;
   /** Optional Lucide icon name (only applied to centered cards). */
-  iconKey?: 'welcome' | 'commercial' | 'pricing' | 'portfolio' | 'analytics' | 'config' | 'governance' | 'finish';
+  iconKey?:
+    | 'welcome'
+    | 'commercial'
+    | 'pricing'
+    | 'portfolio'
+    | 'analytics'
+    | 'insights'
+    | 'config'
+    | 'governance'
+    | 'command'
+    | 'drawer'
+    | 'finish';
   /** Optional eyebrow shown above the title on centered cards. */
   eyebrowKey?: string;
 }
@@ -192,12 +203,16 @@ export const AUDITOR_TOUR: WalkthroughTour = {
 };
 
 /**
- * Business-flow tour — post-login welcome. Seven centered pop-up cards
- * walking the user through the six business stages that match the sidebar
- * grouping (Commercial → Pricing → Portfolio → Analytics → Engine Config →
- * Governance), plus an opening hero and a closing CTA. No DOM anchoring:
- * each card gives a stage-level mental model before the user dives into
- * any specific screen.
+ * Business-flow tour — post-login welcome. Matches the 4-bucket sidebar
+ * taxonomy (Commercial → Pricing → Insights → Governance) plus an opening
+ * hero, a Command Palette highlight, and a closing CTA. Each card gives a
+ * bucket-level mental model before the user dives into specific screens.
+ *
+ * Previously this tour had 6 stages (Commercial / Pricing / Portfolio /
+ * Analytics / Engine Config / Governance) which no longer matches the
+ * reorganized nav. Portfolio merged into Pricing; Analytics renamed to
+ * Insights with Market Data + Behavioural folded in; Engine Config moved
+ * into Governance under Methodology.
  */
 export const BUSINESS_FLOW_TOUR: WalkthroughTour = {
   id: 'business-flow-tour',
@@ -235,48 +250,46 @@ export const BUSINESS_FLOW_TOUR: WalkthroughTour = {
       view: 'CALCULATOR',
     },
     {
-      id: 'bf-portfolio',
+      id: 'bf-insights',
       targetSelector: '',
-      titleKey: 'walkthrough_bf_portfolio',
-      descriptionKey: 'walkthrough_bf_portfolioDesc',
+      titleKey: 'walkthrough_bf_insights',
+      descriptionKey: 'walkthrough_bf_insightsDesc',
       eyebrowKey: 'walkthrough_bf_stage3',
       placement: 'top',
       centered: true,
-      iconKey: 'portfolio',
-      view: 'BLOTTER',
-    },
-    {
-      id: 'bf-analytics',
-      targetSelector: '',
-      titleKey: 'walkthrough_bf_analytics',
-      descriptionKey: 'walkthrough_bf_analyticsDesc',
-      eyebrowKey: 'walkthrough_bf_stage4',
-      placement: 'top',
-      centered: true,
-      iconKey: 'analytics',
+      iconKey: 'insights',
       view: 'REPORTING',
-    },
-    {
-      id: 'bf-engine-config',
-      targetSelector: '',
-      titleKey: 'walkthrough_bf_engineConfig',
-      descriptionKey: 'walkthrough_bf_engineConfigDesc',
-      eyebrowKey: 'walkthrough_bf_stage5',
-      placement: 'top',
-      centered: true,
-      iconKey: 'config',
-      view: 'METHODOLOGY',
     },
     {
       id: 'bf-governance',
       targetSelector: '',
       titleKey: 'walkthrough_bf_governance',
       descriptionKey: 'walkthrough_bf_governanceDesc',
-      eyebrowKey: 'walkthrough_bf_stage6',
+      eyebrowKey: 'walkthrough_bf_stage4',
       placement: 'top',
       centered: true,
       iconKey: 'governance',
-      view: 'ESCALATIONS',
+      view: 'MODEL_INVENTORY',
+    },
+    {
+      id: 'bf-command-palette',
+      targetSelector: '',
+      titleKey: 'walkthrough_bf_command',
+      descriptionKey: 'walkthrough_bf_commandDesc',
+      eyebrowKey: 'walkthrough_bf_powerUser',
+      placement: 'top',
+      centered: true,
+      iconKey: 'command',
+    },
+    {
+      id: 'bf-customer-drawer',
+      targetSelector: '',
+      titleKey: 'walkthrough_bf_drawer',
+      descriptionKey: 'walkthrough_bf_drawerDesc',
+      eyebrowKey: 'walkthrough_bf_powerUser',
+      placement: 'top',
+      centered: true,
+      iconKey: 'drawer',
     },
     {
       id: 'bf-finish',
