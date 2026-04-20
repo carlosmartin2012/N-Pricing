@@ -4,15 +4,18 @@ import type { DataContextType } from '../../contexts/DataContext';
 import { localCache } from '../../utils/localCache';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { saveSystemConfigValue } from '../../utils/supabase/systemConfig';
+import { canPersistRemotely } from '../../utils/dataModeUtils';
 
 function useDebouncedRemotePersistence<T>({
   value,
   isLoading,
+  dataMode,
   save,
   delay = 2000,
 }: {
   value: T;
   isLoading: boolean;
+  dataMode: DataContextType['dataMode'];
   save: (value: T) => void | Promise<void>;
   delay?: number;
 }) {
@@ -24,7 +27,7 @@ function useDebouncedRemotePersistence<T>({
       return;
     }
 
-    if (!isSupabaseConfigured) return;
+    if (!canPersistRemotely({ dataMode, isSupabaseConfigured })) return;
 
     const timer = setTimeout(() => {
       if (JSON.stringify(previousValue.current) !== JSON.stringify(value)) {
@@ -34,7 +37,7 @@ function useDebouncedRemotePersistence<T>({
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [delay, isLoading, save, value]);
+  }, [dataMode, delay, isLoading, save, value]);
 }
 
 export function useConfigPersistence(data: DataContextType) {
@@ -71,72 +74,84 @@ export function useConfigPersistence(data: DataContextType) {
   useDebouncedRemotePersistence({
     value: data.ftpRateCards,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveRateCards,
   });
 
   useDebouncedRemotePersistence({
     value: data.transitionGrid,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: saveTransitionGrid,
   });
 
   useDebouncedRemotePersistence({
     value: data.physicalGrid,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: savePhysicalGrid,
   });
 
   useDebouncedRemotePersistence({
     value: data.greeniumGrid,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: saveGreeniumGrid,
   });
 
   useDebouncedRemotePersistence({
     value: data.approvalMatrix,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveApprovalMatrix,
   });
 
   useDebouncedRemotePersistence({
     value: data.shocks,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveShocks,
   });
 
   useDebouncedRemotePersistence({
     value: data.methodologyChangeRequests,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveMethodologyChangeRequests,
   });
 
   useDebouncedRemotePersistence({
     value: data.methodologyVersions,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveMethodologyVersions,
   });
 
   useDebouncedRemotePersistence({
     value: data.approvalTasks,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveApprovalTasks,
   });
 
   useDebouncedRemotePersistence({
     value: data.pricingDossiers,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.savePricingDossiers,
   });
 
   useDebouncedRemotePersistence({
     value: data.portfolioSnapshots,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.savePortfolioSnapshots,
   });
 
   useDebouncedRemotePersistence({
     value: data.marketDataSources,
     isLoading: data.isLoading,
+    dataMode: data.dataMode,
     save: configApi.saveMarketDataSources,
   });
 }

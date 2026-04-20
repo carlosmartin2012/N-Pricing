@@ -5,6 +5,8 @@ import { FIRST_LOGIN_TOUR_ID } from '../../constants/walkthroughTours';
 import { ViewState, UserProfile } from '../../types';
 import type { ThemeMode } from '../../contexts/UIContext';
 import { getTranslations, Language } from '../../translations';
+import type { DataMode } from '../../utils/dataModeUtils';
+import { describeDataModeState } from '../../utils/dataModeUtils';
 import { EntitySwitcher } from './EntitySwitcher';
 import { NotificationPanel } from './NotificationPanel';
 import { OfflineBadge } from './OfflineBadge';
@@ -30,6 +32,9 @@ interface HeaderProps {
   offlinePendingCount?: number;
   offlineIsSyncing?: boolean;
   onOfflineSync?: () => void;
+  dataMode: DataMode;
+  syncStatus: 'idle' | 'mock' | 'synced' | 'error';
+  onDataModeChange: (mode: DataMode) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -51,6 +56,9 @@ export const Header: React.FC<HeaderProps> = ({
   offlinePendingCount = 0,
   offlineIsSyncing = false,
   onOfflineSync,
+  dataMode,
+  syncStatus,
+  onDataModeChange,
 }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const t = getTranslations(language);
@@ -66,6 +74,13 @@ export const Header: React.FC<HeaderProps> = ({
     return 'dark';
   };
   const themeLabel = themeMode === 'system' ? 'System' : themeMode === 'dark' ? 'Dark' : 'Light';
+  const dataModeState = describeDataModeState({ dataMode, syncStatus });
+  const dataModeBadgeClass =
+    dataModeState.accent === 'emerald'
+      ? 'text-[color:var(--nfq-success)]'
+      : dataModeState.accent === 'amber'
+        ? 'text-[color:var(--nfq-warning)]'
+        : 'text-[color:var(--nfq-danger)]';
   const userInitials = user?.name
     ? user.name
         .split(' ')
@@ -107,12 +122,44 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2 md:gap-3">
         <div className="hidden items-center gap-3 rounded-full bg-[var(--nfq-bg-elevated)] px-4 py-2 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] xl:flex">
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[var(--nfq-success)] shadow-[0_0_0_6px_rgba(16,185,129,0.08)]" />
-            <span className="font-mono text-[12px] font-medium uppercase tracking-[0.16em] text-[color:var(--nfq-success)]">
-              {t.live}
+            <span className={`h-2 w-2 rounded-full shadow-[0_0_0_6px_rgba(16,185,129,0.08)] ${
+              dataModeState.accent === 'emerald'
+                ? 'bg-[var(--nfq-success)]'
+                : dataModeState.accent === 'amber'
+                  ? 'bg-[var(--nfq-warning)]'
+                  : 'bg-[var(--nfq-danger)]'
+            }`} />
+            <span className={`font-mono text-[12px] font-medium uppercase tracking-[0.16em] ${dataModeBadgeClass}`}>
+              {dataModeState.badgeLabel}
             </span>
           </div>
-          <span className="text-xs text-[color:var(--nfq-text-secondary)]">Curve state synchronized</span>
+          <span className="text-xs text-[color:var(--nfq-text-secondary)]">{dataModeState.detail}</span>
+        </div>
+
+        <div className="hidden items-center gap-1 rounded-full bg-[var(--nfq-bg-elevated)] p-1 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] lg:flex">
+          <span className="px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--nfq-text-muted)]">{t.dataMode}</span>
+          <button
+            type="button"
+            onClick={() => onDataModeChange('demo')}
+            className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+              dataMode === 'demo'
+                ? 'bg-amber-500/15 text-amber-300'
+                : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
+            }`}
+          >
+            {t.demo}
+          </button>
+          <button
+            type="button"
+            onClick={() => onDataModeChange('live')}
+            className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+              dataMode === 'live'
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
+            }`}
+          >
+            {t.live}
+          </button>
         </div>
 
         <button

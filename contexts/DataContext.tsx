@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import { PricingShocks } from '../utils/pricingEngine';
 import { localCache } from '../utils/localCache';
+import type { DataMode } from '../utils/dataModeUtils';
 import { useMarketData } from './MarketDataContext';
 import type { MarketDataContextType } from './MarketDataContext';
 import { useGovernance } from './GovernanceContext';
@@ -52,6 +53,8 @@ export interface CoreDataContextType {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   syncStatus: 'idle' | 'mock' | 'synced' | 'error';
   setSyncStatus: React.Dispatch<React.SetStateAction<'idle' | 'mock' | 'synced' | 'error'>>;
+  dataMode: DataMode;
+  setDataMode: React.Dispatch<React.SetStateAction<DataMode>>;
 }
 
 /**
@@ -86,6 +89,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [rarocInputs, setRarocInputs] = useState<RAROCInputs | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'mock' | 'synced' | 'error'>('idle');
+  const [dataMode, setDataMode] = useState<DataMode>(() => localCache.loadLocal('n_pricing_data_mode', 'live'));
+
+  const setPersistedDataMode = useCallback<React.Dispatch<React.SetStateAction<DataMode>>>((nextValue) => {
+    setDataMode((previous) => {
+      const resolved = typeof nextValue === 'function' ? nextValue(previous) : nextValue;
+      localCache.saveLocal('n_pricing_data_mode', resolved);
+      return resolved;
+    });
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -111,6 +123,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading,
       syncStatus,
       setSyncStatus,
+      dataMode,
+      setDataMode: setPersistedDataMode,
     }),
     [
       deals,
@@ -125,6 +139,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       rarocInputs,
       isLoading,
       syncStatus,
+      dataMode,
+      setPersistedDataMode,
     ]
   );
 

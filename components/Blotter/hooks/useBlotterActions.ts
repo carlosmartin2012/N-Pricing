@@ -4,6 +4,8 @@ import * as auditApi from '../../../api/audit';
 import * as configApi from '../../../api/config';
 import * as dealsApi from '../../../api/deals';
 import { useData } from '../../../contexts/DataContext';
+import { canPersistRemotely } from '../../../utils/dataModeUtils';
+import { isSupabaseConfigured } from '../../../utils/supabaseClient';
 import type {
   BusinessUnit,
   ClientEntity,
@@ -54,6 +56,10 @@ export function useBlotterActions({
   userRole,
 }: UseBlotterActionsOptions) {
   const data = useData();
+  const canWriteRemotely = canPersistRemotely({
+    dataMode: data.dataMode,
+    isSupabaseConfigured,
+  });
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isNewOpen, setIsNewOpen] = useState(false);
@@ -96,7 +102,9 @@ export function useBlotterActions({
         const successfulRenames: Array<{ previousId: string; nextId: string }> = [];
 
         for (const operation of renameOperations) {
-          const renamedDeal = await dealsApi.renameDealId(operation.previousId, operation.nextId);
+          const renamedDeal = canWriteRemotely
+            ? await dealsApi.renameDealId(operation.previousId, operation.nextId)
+            : { id: operation.nextId };
           if (renamedDeal?.id === operation.nextId) {
             successfulRenames.push(operation);
           }
@@ -135,27 +143,29 @@ export function useBlotterActions({
             'savePricingDossiers',
             'savePortfolioSnapshots',
           ] as const;
-          const renameOutcomes = await Promise.allSettled([
-            configApi.saveApprovalTasks(updatedReferences.nextApprovalTasks),
-            configApi.savePricingDossiers(updatedReferences.nextPricingDossiers),
-            configApi.savePortfolioSnapshots(updatedReferences.nextPortfolioSnapshots),
-          ]);
-          renameOutcomes.forEach((outcome, index) => {
-            if (outcome.status === 'rejected') {
-              errorTracker.captureException(
-                outcome.reason instanceof Error
-                  ? outcome.reason
-                  : new Error(String(outcome.reason)),
-                {
-                  module: 'BLOTTER',
-                  extra: {
-                    operation: renameOperationLabels[index],
-                    renamedCount: successfulRenames.length,
-                  },
-                }
-              );
-            }
-          });
+          if (canWriteRemotely) {
+            const renameOutcomes = await Promise.allSettled([
+              configApi.saveApprovalTasks(updatedReferences.nextApprovalTasks),
+              configApi.savePricingDossiers(updatedReferences.nextPricingDossiers),
+              configApi.savePortfolioSnapshots(updatedReferences.nextPortfolioSnapshots),
+            ]);
+            renameOutcomes.forEach((outcome, index) => {
+              if (outcome.status === 'rejected') {
+                errorTracker.captureException(
+                  outcome.reason instanceof Error
+                    ? outcome.reason
+                    : new Error(String(outcome.reason)),
+                  {
+                    module: 'BLOTTER',
+                    extra: {
+                      operation: renameOperationLabels[index],
+                      renamedCount: successfulRenames.length,
+                    },
+                  }
+                );
+              }
+            });
+          }
         }
 
         void auditApi.logAudit({
@@ -173,9 +183,9 @@ export function useBlotterActions({
         const newDeals: Transaction[] = rows.map((row) => createImportedDeal(row, products));
 
         setDeals((previous) => [...newDeals, ...previous]);
-        const upsertOutcomes = await Promise.allSettled(
-          newDeals.map((deal) => dealsApi.upsertDeal(deal))
-        );
+        const upsertOutcomes = canWriteRemotely
+          ? await Promise.allSettled(newDeals.map((deal) => dealsApi.upsertDeal(deal)))
+          : [];
         upsertOutcomes.forEach((outcome, index) => {
           if (outcome.status === 'rejected') {
             errorTracker.captureException(
@@ -202,7 +212,7 @@ export function useBlotterActions({
 
       setIsImportOpen(false);
     },
-    [data, deals, products, setDeals, user, userRole]
+    [canWriteRemotely, data, deals, products, setDeals, user, userRole]
   );
 
   const handleDownloadTemplate = useCallback(
@@ -243,7 +253,7 @@ export function useBlotterActions({
     }
 
     setDealValidationErrors([]);
-    const savedDeal = await dealsApi.upsertDeal(updated);
+    const savedDeal = canWriteRemotely ? await dealsApi.upsertDeal(updated) : null;
     setDeals((previous) => previous.map((deal) => (deal.id === updated.id ? savedDeal || updated : deal)));
     setIsEditOpen(false);
   }, [products, selectedDeal, setDeals, userRole]);
@@ -281,7 +291,7 @@ export function useBlotterActions({
     }
 
     setDealValidationErrors([]);
-    const savedDeal = await dealsApi.upsertDeal(newDeal);
+    const savedDeal = canWriteRemotely ? await dealsApi.upsertDeal(newDeal) : null;
     setDeals((previous) => [savedDeal || newDeal, ...previous]);
     setIsNewOpen(false);
   }, [products, selectedDeal, setDeals, userRole]);
@@ -296,7 +306,9 @@ export function useBlotterActions({
     if (!selectedDeal?.id) return;
     if (!canDeleteDeal(userRole)) return;
 
-    await dealsApi.deleteDeal(selectedDeal.id);
+    if (canWriteRemotely) {
+      await dealsApi.deleteDeal(selectedDeal.id);
+    }
     setDeals((previous) => previous.filter((deal) => deal.id !== selectedDeal.id));
     const nextTasks = data.approvalTasks.filter(
       (task) => !(task.scope === 'DEAL_PRICING' && task.subject.id === selectedDeal.id)
@@ -304,26 +316,28 @@ export function useBlotterActions({
     const nextDossiers = data.pricingDossiers.filter((dossier) => dossier.dealId !== selectedDeal.id);
     data.setApprovalTasks(nextTasks);
     data.setPricingDossiers(nextDossiers);
-    const deleteOutcomes = await Promise.allSettled([
-      configApi.saveApprovalTasks(nextTasks),
-      configApi.savePricingDossiers(nextDossiers),
-    ]);
-    deleteOutcomes.forEach((outcome, index) => {
-      if (outcome.status === 'rejected') {
-        errorTracker.captureException(
-          outcome.reason instanceof Error
-            ? outcome.reason
-            : new Error(String(outcome.reason)),
-          {
-            module: 'BLOTTER',
-            dealId: selectedDeal.id,
-            extra: {
-              operation: index === 0 ? 'saveApprovalTasks' : 'savePricingDossiers',
-            },
-          }
-        );
-      }
-    });
+    if (canWriteRemotely) {
+      const deleteOutcomes = await Promise.allSettled([
+        configApi.saveApprovalTasks(nextTasks),
+        configApi.savePricingDossiers(nextDossiers),
+      ]);
+      deleteOutcomes.forEach((outcome, index) => {
+        if (outcome.status === 'rejected') {
+          errorTracker.captureException(
+            outcome.reason instanceof Error
+              ? outcome.reason
+              : new Error(String(outcome.reason)),
+            {
+              module: 'BLOTTER',
+              dealId: selectedDeal.id,
+              extra: {
+                operation: index === 0 ? 'saveApprovalTasks' : 'savePricingDossiers',
+              },
+            }
+          );
+        }
+      });
+    }
     await auditApi.createAuditEntry({
       userEmail: user?.email || 'unknown',
       userName: user?.name || 'Unknown',

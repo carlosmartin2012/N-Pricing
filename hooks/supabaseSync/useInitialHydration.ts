@@ -26,6 +26,7 @@ import {
 } from '../../constants';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { createLogger } from '../../utils/logger';
+import { resolveHydrationPlan } from '../../utils/dataModeUtils';
 import { applyMockData, resolveWithFallback } from './syncUtils';
 
 import * as dealsApi from '../../api/deals';
@@ -66,9 +67,14 @@ export function useInitialHydration({
 
     const hydrate = async () => {
       const context = dataRef.current;
+      context.setIsLoading(true);
+      const hydrationPlan = resolveHydrationPlan({
+        dataMode: context.dataMode,
+        isSupabaseConfigured,
+      });
 
-      if (!isSupabaseConfigured) {
-        applyMockData(context, 'mock');
+      if (hydrationPlan.source === 'mock') {
+        applyMockData(context, hydrationPlan.syncStatus);
         context.setIsLoading(false);
         return;
       }
@@ -233,5 +239,5 @@ export function useInitialHydration({
     return () => {
       isCancelled = true;
     };
-  }, [activeEntityId, addToast, currentUser, isEntityLoading, isGroupScope, queryClient]);
+  }, [activeEntityId, addToast, currentUser, isEntityLoading, isGroupScope, queryClient, data.dataMode]);
 }

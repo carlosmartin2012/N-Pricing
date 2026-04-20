@@ -5,6 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './queryKeys';
 import * as disciplineApi from '../../api/pricingDiscipline';
+import { useData } from '../../contexts/DataContext';
 import type {
   DisciplineFilters,
   VarianceFilters,
@@ -20,9 +21,11 @@ import type {
 // ---------------------------------------------------------------------------
 
 export function useDisciplineKpisQuery(filters?: DisciplineFilters) {
+  const { dataMode } = useData();
   return useQuery({
-    queryKey: [...queryKeys.discipline.kpis(filters?.entityId), filters],
+    queryKey: [...queryKeys.discipline.kpis(filters?.entityId), dataMode, filters],
     queryFn: () => disciplineApi.getDisciplineKpis(filters),
+    enabled: dataMode === 'live',
   });
 }
 
@@ -31,9 +34,11 @@ export function useDisciplineKpisQuery(filters?: DisciplineFilters) {
 // ---------------------------------------------------------------------------
 
 export function useVariancesQuery(filters?: VarianceFilters, page?: PageOpts) {
+  const { dataMode } = useData();
   return useQuery({
-    queryKey: [...queryKeys.discipline.variances, filters, page],
+    queryKey: [...queryKeys.discipline.variances, dataMode, filters, page],
     queryFn: () => disciplineApi.listVariances(filters, page),
+    enabled: dataMode === 'live',
   });
 }
 
@@ -66,18 +71,24 @@ export function useOriginatorScorecardQuery(originatorId: string, range: DateRan
 // ---------------------------------------------------------------------------
 
 export function useToleranceBandsQuery(entityId?: string) {
+  const { dataMode } = useData();
   return useQuery({
     queryKey: entityId
-      ? [...queryKeys.discipline.bands, entityId]
-      : queryKeys.discipline.bands,
+      ? [...queryKeys.discipline.bands, dataMode, entityId]
+      : [...queryKeys.discipline.bands, dataMode],
     queryFn: () => disciplineApi.listToleranceBands(entityId),
+    enabled: dataMode === 'live',
   });
 }
 
 export function useUpsertToleranceBand() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (band: ToleranceBand) => disciplineApi.upsertToleranceBand(band),
+    mutationFn: async (band: ToleranceBand) => {
+      if (dataMode !== 'live') throw new Error('Discipline mutations are disabled in demo mode');
+      return disciplineApi.upsertToleranceBand(band);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.bands });
     },
@@ -85,9 +96,13 @@ export function useUpsertToleranceBand() {
 }
 
 export function useDeleteToleranceBand() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => disciplineApi.deleteToleranceBand(id),
+    mutationFn: async (id: string) => {
+      if (dataMode !== 'live') throw new Error('Discipline mutations are disabled in demo mode');
+      return disciplineApi.deleteToleranceBand(id);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.bands });
     },
@@ -99,19 +114,24 @@ export function useDeleteToleranceBand() {
 // ---------------------------------------------------------------------------
 
 export function useExceptionsQuery(dealId?: string) {
+  const { dataMode } = useData();
   return useQuery({
     queryKey: dealId
-      ? [...queryKeys.discipline.exceptions, dealId]
-      : queryKeys.discipline.exceptions,
+      ? [...queryKeys.discipline.exceptions, dataMode, dealId]
+      : [...queryKeys.discipline.exceptions, dataMode],
     queryFn: () => disciplineApi.listExceptions(dealId),
+    enabled: dataMode === 'live',
   });
 }
 
 export function useCreateException() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (exception: Omit<PricingException, 'id' | 'createdAt'>) =>
-      disciplineApi.createException(exception),
+    mutationFn: async (exception: Omit<PricingException, 'id' | 'createdAt'>) => {
+      if (dataMode !== 'live') throw new Error('Discipline mutations are disabled in demo mode');
+      return disciplineApi.createException(exception);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.exceptions });
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.variances });
@@ -120,10 +140,13 @@ export function useCreateException() {
 }
 
 export function useResolveException() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status, approvedBy }: { id: string; status: 'approved' | 'rejected'; approvedBy: string }) =>
-      disciplineApi.resolveException(id, status, approvedBy),
+    mutationFn: async ({ id, status, approvedBy }: { id: string; status: 'approved' | 'rejected'; approvedBy: string }) => {
+      if (dataMode !== 'live') throw new Error('Discipline mutations are disabled in demo mode');
+      return disciplineApi.resolveException(id, status, approvedBy);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.exceptions });
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.variances });
@@ -137,9 +160,13 @@ export function useResolveException() {
 // ---------------------------------------------------------------------------
 
 export function useRecomputeVariance() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (dealId: string) => disciplineApi.recomputeVariance(dealId),
+    mutationFn: async (dealId: string) => {
+      if (dataMode !== 'live') throw new Error('Discipline mutations are disabled in demo mode');
+      return disciplineApi.recomputeVariance(dealId);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.discipline.variances });
       void queryClient.invalidateQueries({ queryKey: ['discipline', 'kpis'] });

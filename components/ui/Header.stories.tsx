@@ -46,13 +46,21 @@ const meta = {
     user: mockUser,
     onLogout: action('onLogout'),
     onOpenImport: action('onOpenImport'),
+    offlinePendingCount: 2,
+    offlineIsSyncing: false,
+    onOfflineSync: action('onOfflineSync'),
+    dataMode: 'live',
+    syncStatus: 'synced',
+    onDataModeChange: action('onDataModeChange'),
   },
 } satisfies Meta<typeof Header>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {},
+};
 
 export const LightTheme: Story = {
   args: {
