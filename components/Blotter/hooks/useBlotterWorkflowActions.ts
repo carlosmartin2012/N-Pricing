@@ -3,6 +3,8 @@ import * as auditApi from '../../../api/audit';
 import * as configApi from '../../../api/config';
 import * as dealsApi from '../../../api/deals';
 import { useData } from '../../../contexts/DataContext';
+import { canPersistRemotely } from '../../../utils/dataModeUtils';
+import { isSupabaseConfigured } from '../../../utils/supabaseClient';
 import type {
   BusinessUnit,
   ClientEntity,
@@ -52,6 +54,10 @@ export function useBlotterWorkflowActions({
   userRole,
 }: UseBlotterWorkflowActionsOptions) {
   const data = useData();
+  const canWriteRemotely = canPersistRemotely({
+    dataMode: data.dataMode,
+    isSupabaseConfigured,
+  });
   const { behaviouralModels } = data;
   const [isRepricing, setIsRepricing] = useState(false);
   const [repriceCount, setRepriceCount] = useState(0);
@@ -110,7 +116,9 @@ export function useBlotterWorkflowActions({
         startDate: new Date().toISOString().split('T')[0],
         description: `Clone of ${deal.id}`,
       };
-      await dealsApi.upsertDeal(clonedDeal);
+      if (canWriteRemotely) {
+        await dealsApi.upsertDeal(clonedDeal);
+      }
       setDeals((previous) => [clonedDeal, ...previous]);
       await auditApi.createAuditEntry({
         userEmail: user?.email || 'unknown',
@@ -135,17 +143,19 @@ export function useBlotterWorkflowActions({
         return;
       }
 
-      const persistedDeal = deal.id
-        ? await dealsApi.transitionDeal({
-            dealId: deal.id,
-            newStatus: action.to,
-            userEmail: user?.email || 'unknown',
-            pricingSnapshot,
-          })
-        : await dealsApi.upsertDeal({
-            ...deal,
-            status: result.newStatus as Transaction['status'],
-          });
+      const persistedDeal = canWriteRemotely
+        ? deal.id
+          ? await dealsApi.transitionDeal({
+              dealId: deal.id,
+              newStatus: action.to,
+              userEmail: user?.email || 'unknown',
+              pricingSnapshot,
+            })
+          : await dealsApi.upsertDeal({
+              ...deal,
+              status: result.newStatus as Transaction['status'],
+            })
+        : null;
       const updatedDeal = persistedDeal || {
         ...deal,
         status: result.newStatus as Transaction['status'],
@@ -200,7 +210,9 @@ export function useBlotterWorkflowActions({
 
         data.setPricingDossiers(nextDossiers);
         data.setApprovalTasks(nextTasks);
-        await Promise.all([configApi.savePricingDossiers(nextDossiers), configApi.saveApprovalTasks(nextTasks)]);
+        if (canWriteRemotely) {
+          await Promise.all([configApi.savePricingDossiers(nextDossiers), configApi.saveApprovalTasks(nextTasks)]);
+        }
       }
 
       await auditApi.createAuditEntry({

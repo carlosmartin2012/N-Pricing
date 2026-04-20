@@ -9,6 +9,7 @@ import {
   Briefcase,
   Calculator,
   Compass,
+  DatabaseZap,
   FileSignature,
   FileText,
   GitBranch,
@@ -17,8 +18,10 @@ import {
   History,
   LayoutDashboard,
   LayoutPanelLeft,
+  LifeBuoy,
   LineChart,
   Plug,
+  Route,
   Search,
   ShieldAlert,
   Sparkles,
@@ -28,6 +31,7 @@ import {
 import { translations, getTranslations } from '../../translations';
 import { useUI } from '../../contexts/UIContext';
 import { useWalkthrough } from '../../contexts/WalkthroughContext';
+import { getUserManualContent } from '../../utils/userManualContent';
 
 /*
  * User Manual — organized by the 4 lifecycle buckets of the new nav:
@@ -101,6 +105,7 @@ const UserManual: React.FC = () => {
   const isES = language === 'es';
 
   const L = (en: string, es: string) => (isES ? es : en);
+  const guide = getUserManualContent(language);
 
   return (
     <Panel title={`N Pricing — ${t.manual}`} className="h-full">
@@ -141,6 +146,12 @@ const UserManual: React.FC = () => {
             <TocItem targetId="command-palette" label="Command Palette (⌘K)" accent="bg-fuchsia-400" />
             <TocItem targetId="customer-drawer" label="Customer 360 Drawer" accent="bg-fuchsia-400" />
             <TocItem targetId="shortcuts" label={L('Keyboard shortcuts', 'Atajos de teclado')} accent="bg-fuchsia-400" />
+
+            <TocSectionLabel label={L('Operational guide', 'Guía operativa')} accent="text-cyan-300" />
+            <TocItem targetId="quickstart" label={L('Quick start', 'Puesta en marcha')} accent="bg-cyan-400" />
+            <TocItem targetId="workflows" label={L('Workflows', 'Flujos operativos')} accent="bg-cyan-400" />
+            <TocItem targetId="data-modes" label={L('Data modes', 'Modos de datos')} accent="bg-cyan-400" />
+            <TocItem targetId="troubleshooting" label={L('Troubleshooting', 'Resolución problemas')} accent="bg-cyan-400" />
 
             <TocSectionLabel label={L('Reference', 'Referencia')} accent="text-slate-400" />
             <TocItem targetId="formulas" label={t.manual_formulasTitle} />
@@ -521,6 +532,93 @@ const UserManual: React.FC = () => {
                 <Shortcut keys="Esc" desc={L('Close drawer / modal / palette', 'Cerrar drawer / modal / palette')} />
                 <Shortcut keys="↑↓" desc={L('Navigate palette items', 'Navegar items del palette')} />
                 <Shortcut keys="↵ Enter" desc={L('Select palette item', 'Seleccionar item del palette')} />
+              </div>
+            </section>
+
+            <hr className="border-slate-800" />
+
+            {/* ═══════════════ OPERATIONAL GUIDE ═══════════════ */}
+            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-cyan-300">
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+              {L('Operational guide', 'Guía operativa')}
+            </h2>
+
+            <section id="quickstart" className="space-y-4 pt-2">
+              <SectionHeader icon={Route} title={L('Quick start', 'Puesta en marcha rápida')} color="text-cyan-300" />
+              <p className="text-slate-400">{guide.hero.subtitle}</p>
+              <ol className="space-y-3 pl-1">
+                {guide.quickStart.map((step, idx) => (
+                  <li key={step.title} className="flex gap-3 rounded-lg border border-slate-800/60 bg-slate-900/40 p-4">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 font-mono text-xs font-bold text-cyan-400">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-100">{step.title}</h4>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-400">{step.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <section id="workflows" className="space-y-4 pt-4">
+              <SectionHeader icon={Compass} title={L('Operational workflows', 'Flujos operativos')} color="text-cyan-300" />
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {guide.workflows.map((wf) => (
+                  <div key={wf.title} className="space-y-3 rounded-lg border border-slate-800 bg-slate-900 p-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-100">{wf.title}</h4>
+                      <p className="mt-1 text-[11px] uppercase tracking-widest text-cyan-400">{wf.audience}</p>
+                    </div>
+                    <ol className="list-decimal space-y-2 pl-4 text-xs leading-relaxed text-slate-400">
+                      {wf.steps.map((s) => (<li key={s}>{s}</li>))}
+                    </ol>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section id="data-modes" className="space-y-4 pt-4">
+              <SectionHeader icon={DatabaseZap} title={L('Data modes', 'Modos de datos')} color="text-cyan-300" />
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                  <h4 className="mb-2 text-sm font-bold text-amber-300">{guide.dataModes.demo.title}</h4>
+                  <ul className="space-y-1.5 pl-1 text-xs text-slate-400">
+                    {guide.dataModes.demo.bullets.map((b) => (
+                      <li key={b} className="flex gap-2"><span className="text-amber-400">•</span><span>{b}</span></li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                  <h4 className="mb-2 text-sm font-bold text-emerald-300">{guide.dataModes.live.title}</h4>
+                  <ul className="space-y-1.5 pl-1 text-xs text-slate-400">
+                    {guide.dataModes.live.bullets.map((b) => (
+                      <li key={b} className="flex gap-2"><span className="text-emerald-400">•</span><span>{b}</span></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section id="troubleshooting" className="space-y-4 pt-4">
+              <SectionHeader icon={LifeBuoy} title={L('Troubleshooting', 'Resolución de problemas')} color="text-cyan-300" />
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {guide.troubleshooting.map((item) => (
+                  <div key={item.title} className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                    <h4 className="mb-1 text-sm font-bold text-slate-200">{item.title}</h4>
+                    <p className="text-xs leading-relaxed text-slate-500">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-300">
+                  {L('Support checklist', 'Checklist de soporte')}
+                </h4>
+                <ul className="space-y-2 text-xs text-slate-400">
+                  {guide.supportChecklist.map((c) => (
+                    <li key={c} className="flex gap-2 leading-relaxed"><span className="text-cyan-400">•</span><span>{c}</span></li>
+                  ))}
+                </ul>
               </div>
             </section>
 

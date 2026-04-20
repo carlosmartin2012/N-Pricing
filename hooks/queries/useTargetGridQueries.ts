@@ -5,6 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './queryKeys';
 import * as targetGridApi from '../../api/targetGrid';
+import { useData } from '../../contexts/DataContext';
 import type { CanonicalDealTemplate, GridFilters, MethodologySnapshot } from '../../types';
 
 // ---------------------------------------------------------------------------
@@ -12,19 +13,22 @@ import type { CanonicalDealTemplate, GridFilters, MethodologySnapshot } from '..
 // ---------------------------------------------------------------------------
 
 export function useSnapshotsQuery(entityId?: string) {
+  const { dataMode } = useData();
   return useQuery({
     queryKey: entityId
-      ? [...queryKeys.targetGrid.snapshots, entityId]
-      : queryKeys.targetGrid.snapshots,
+      ? [...queryKeys.targetGrid.snapshots, dataMode, entityId]
+      : [...queryKeys.targetGrid.snapshots, dataMode],
     queryFn: () => targetGridApi.listSnapshots(entityId),
+    enabled: dataMode === 'live',
   });
 }
 
 export function useSnapshotQuery(id: string) {
+  const { dataMode } = useData();
   return useQuery({
-    queryKey: queryKeys.targetGrid.snapshot(id),
+    queryKey: [...queryKeys.targetGrid.snapshot(id), dataMode],
     queryFn: () => targetGridApi.getSnapshot(id),
-    enabled: id.length > 0,
+    enabled: dataMode === 'live' && id.length > 0,
   });
 }
 
@@ -33,10 +37,11 @@ export function useSnapshotQuery(id: string) {
 // ---------------------------------------------------------------------------
 
 export function useGridCellsQuery(snapshotId: string, filters?: GridFilters) {
+  const { dataMode } = useData();
   return useQuery({
-    queryKey: [...queryKeys.targetGrid.cells(snapshotId), filters],
+    queryKey: [...queryKeys.targetGrid.cells(snapshotId), dataMode, filters],
     queryFn: () => targetGridApi.getGridCells(snapshotId, filters),
-    enabled: snapshotId.length > 0,
+    enabled: dataMode === 'live' && snapshotId.length > 0,
   });
 }
 
@@ -57,11 +62,13 @@ export function useSnapshotDiffQuery(fromId: string, toId: string) {
 // ---------------------------------------------------------------------------
 
 export function useCanonicalTemplatesQuery(entityId?: string) {
+  const { dataMode } = useData();
   return useQuery({
     queryKey: entityId
-      ? [...queryKeys.targetGrid.templates, entityId]
-      : queryKeys.targetGrid.templates,
+      ? [...queryKeys.targetGrid.templates, dataMode, entityId]
+      : [...queryKeys.targetGrid.templates, dataMode],
     queryFn: () => targetGridApi.listCanonicalTemplates(entityId),
+    enabled: dataMode === 'live',
   });
 }
 
@@ -70,10 +77,13 @@ export function useCanonicalTemplatesQuery(entityId?: string) {
 // ---------------------------------------------------------------------------
 
 export function useCreateSnapshot() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (snapshot: Omit<MethodologySnapshot, 'id' | 'createdAt'>) =>
-      targetGridApi.createSnapshot(snapshot),
+    mutationFn: async (snapshot: Omit<MethodologySnapshot, 'id' | 'createdAt'>) => {
+      if (dataMode !== 'live') throw new Error('Target Grid mutations are disabled in demo mode');
+      return targetGridApi.createSnapshot(snapshot);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.targetGrid.snapshots });
     },
@@ -81,10 +91,13 @@ export function useCreateSnapshot() {
 }
 
 export function useSetCurrentSnapshot() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ snapshotId, entityId }: { snapshotId: string; entityId?: string }) =>
-      targetGridApi.setCurrentSnapshot(snapshotId, entityId),
+    mutationFn: async ({ snapshotId, entityId }: { snapshotId: string; entityId?: string }) => {
+      if (dataMode !== 'live') throw new Error('Target Grid mutations are disabled in demo mode');
+      return targetGridApi.setCurrentSnapshot(snapshotId, entityId);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.targetGrid.snapshots });
       void queryClient.invalidateQueries({ queryKey: ['targetGrid', 'cells'] });
@@ -95,10 +108,13 @@ export function useSetCurrentSnapshot() {
 }
 
 export function useUpsertCanonicalTemplate() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (template: CanonicalDealTemplate) =>
-      targetGridApi.upsertCanonicalTemplate(template),
+    mutationFn: async (template: CanonicalDealTemplate) => {
+      if (dataMode !== 'live') throw new Error('Target Grid mutations are disabled in demo mode');
+      return targetGridApi.upsertCanonicalTemplate(template);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.targetGrid.templates });
     },
@@ -106,9 +122,13 @@ export function useUpsertCanonicalTemplate() {
 }
 
 export function useDeleteCanonicalTemplate() {
+  const { dataMode } = useData();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => targetGridApi.deleteCanonicalTemplate(id),
+    mutationFn: async (id: string) => {
+      if (dataMode !== 'live') throw new Error('Target Grid mutations are disabled in demo mode');
+      return targetGridApi.deleteCanonicalTemplate(id);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.targetGrid.templates });
     },

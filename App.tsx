@@ -142,6 +142,10 @@ const AppContent: React.FC = () => {
 
   const [dealParams, setDealParams] = useState<Transaction>(INITIAL_DEAL);
 
+  useEffect(() => {
+    setDealParams(INITIAL_DEAL);
+  }, [data.dataMode]);
+
   const mainNavItems = useMemo(() => buildMainNavItems(ui.t), [ui.t]);
   const bottomNavItems = useMemo(() => buildBottomNavItems(ui.t), [ui.t]);
 
@@ -189,6 +193,9 @@ const AppContent: React.FC = () => {
           offlineIsSyncing={isSyncing}
           onOfflineSync={syncAll}
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          dataMode={data.dataMode}
+          syncStatus={data.syncStatus}
+          onDataModeChange={data.setDataMode}
         />
 
         <main id="main-content" className="relative flex-1 overflow-auto px-3 pb-3 pt-3 md:px-5 md:pb-5 md:pt-4 xl:px-6">
@@ -217,7 +224,7 @@ const AppContent: React.FC = () => {
                     <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
                       {data.deals.length}
                     </div>
-                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">Live book</div>
+                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{data.dataMode === 'demo' ? 'Demo book' : 'Live book'}</div>
                   </div>
                   <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
                     <div className="nfq-label">Pending</div>

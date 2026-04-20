@@ -6,6 +6,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useData } from '../../../contexts/DataContext';
 import type { ApprovalMatrixConfig, FTPResult, Transaction } from '../../../types';
 import { findLatestPortfolioSnapshotForDeal } from '../../../utils/aiGrounding';
+import { canPersistRemotely } from '../../../utils/dataModeUtils';
+import { isSupabaseConfigured } from '../../../utils/supabaseClient';
 import {
   buildApprovalTaskForPricingDossier,
   buildPricingDossier,
@@ -40,6 +42,10 @@ export function usePricingReceiptActions({
 }: UsePricingReceiptActionsOptions) {
   const data = useData();
   const { currentUser } = useAuth();
+  const canWriteRemotely = canPersistRemotely({
+    dataMode: data.dataMode,
+    isSupabaseConfigured,
+  });
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [dealSaveStatus, setDealSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,7 +74,7 @@ export function usePricingReceiptActions({
 
   useEffect(() => {
     const dealId = deal.id;
-    if (!dealId || !currentUser) return;
+    if (!dealId || !currentUser || !canWriteRemotely) return;
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     autoSaveTimer.current = setTimeout(() => {
       const userEmail = currentUser.email || 'unknown';
@@ -100,7 +106,7 @@ export function usePricingReceiptActions({
     return () => {
       if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
-  }, [currentUser, deal, result]);
+  }, [canWriteRemotely, currentUser, deal, result]);
 
   const handleSaveAsDeal = useCallback(async () => {
     if (!currentUser) return;
@@ -115,7 +121,7 @@ export function usePricingReceiptActions({
       _clcChargeDetails: result._clcChargeDetails,
     };
     try {
-      const persistedDeal = await dealsApi.upsertDeal(newDeal);
+      const persistedDeal = canWriteRemotely ? await dealsApi.upsertDeal(newDeal) : null;
       const resolvedDeal = persistedDeal || newDeal;
       data.setDeals((previous) => {
         const exists = previous.find((item) => item.id === resolvedDeal.id);
@@ -123,7 +129,9 @@ export function usePricingReceiptActions({
           ? previous.map((item) => (item.id === resolvedDeal.id ? resolvedDeal : item))
           : [...previous, resolvedDeal];
       });
-      await monitoringService.savePricingResult(resolvedDeal.id!, result, resolvedDeal, currentUser.email);
+      if (canWriteRemotely) {
+        await monitoringService.savePricingResult(resolvedDeal.id!, result, resolvedDeal, currentUser.email);
+      }
 
       const existingDossier = data.pricingDossiers.find((dossier) => dossier.dealId === resolvedDeal.id);
       let dossier = mergePricingDossier(
@@ -173,26 +181,28 @@ export function usePricingReceiptActions({
       const nextDossiers = upsertPricingDossier(data.pricingDossiers, dossier);
       data.setPricingDossiers(nextDossiers);
       data.setApprovalTasks(nextTasks);
-      const persistenceResults = await Promise.allSettled([
-        configApi.savePricingDossiers(nextDossiers),
-        configApi.saveApprovalTasks(nextTasks),
-      ]);
-      persistenceResults.forEach((outcome, index) => {
-        if (outcome.status === 'rejected') {
-          errorTracker.captureException(
-            outcome.reason instanceof Error
-              ? outcome.reason
-              : new Error(String(outcome.reason)),
-            {
-              module: 'PRICING_RECEIPT',
-              dealId: resolvedDeal.id,
-              extra: {
-                operation: index === 0 ? 'savePricingDossiers' : 'saveApprovalTasks',
-              },
-            }
-          );
-        }
-      });
+      if (canWriteRemotely) {
+        const persistenceResults = await Promise.allSettled([
+          configApi.savePricingDossiers(nextDossiers),
+          configApi.saveApprovalTasks(nextTasks),
+        ]);
+        persistenceResults.forEach((outcome, index) => {
+          if (outcome.status === 'rejected') {
+            errorTracker.captureException(
+              outcome.reason instanceof Error
+                ? outcome.reason
+                : new Error(String(outcome.reason)),
+              {
+                module: 'PRICING_RECEIPT',
+                dealId: resolvedDeal.id,
+                extra: {
+                  operation: index === 0 ? 'savePricingDossiers' : 'saveApprovalTasks',
+                },
+              }
+            );
+          }
+        });
+      }
 
       await auditApi.createAuditEntry({
         userEmail: currentUser.email,
@@ -218,7 +228,7 @@ export function usePricingReceiptActions({
     } catch {
       setDealSaveStatus('idle');
     }
-  }, [activeScenarioShocks, approvalMatrix, currentUser, data, deal, onDealSaved, result, validationErrors]);
+  }, [activeScenarioShocks, approvalMatrix, canWriteRemotely, currentUser, data, deal, onDealSaved, result, validationErrors]);
 
   const handleExportReceipt = useCallback(() => {
     const clientName = data.clients.find((client) => client.id === deal.clientId)?.name || deal.clientId;
@@ -266,17 +276,19 @@ export function usePricingReceiptActions({
     });
 
     data.setPricingDossiers(nextDossiers);
-    configApi.savePricingDossiers(nextDossiers).catch((error: unknown) => {
-      errorTracker.captureException(
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          module: 'PRICING_RECEIPT',
-          dealId: deal.id,
-          extra: { operation: 'savePricingDossiers' },
-        }
-      );
-    });
-  }, [currentUser, data, deal, result]);
+    if (canWriteRemotely) {
+      configApi.savePricingDossiers(nextDossiers).catch((error: unknown) => {
+        errorTracker.captureException(
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            module: 'PRICING_RECEIPT',
+            dealId: deal.id,
+            extra: { operation: 'savePricingDossiers' },
+          }
+        );
+      });
+    }
+  }, [canWriteRemotely, currentUser, data, deal, result]);
 
   return {
     dealSaveStatus,

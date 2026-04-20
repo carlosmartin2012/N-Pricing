@@ -2,7 +2,9 @@ import { useCallback } from 'react';
 import { useData } from '../contexts/DataContext';
 import * as dealsApi from '../api/deals';
 import type { Transaction } from '../types';
+import { canPersistRemotely } from '../utils/dataModeUtils';
 import { createLogger } from '../utils/logger';
+import { isSupabaseConfigured } from '../utils/supabaseClient';
 
 const log = createLogger('optimistic-update');
 
@@ -12,7 +14,8 @@ const log = createLogger('optimistic-update');
  * Rolls back on failure.
  */
 export function useOptimisticDealUpdate() {
-  const { deals, setDeals } = useData();
+  const { deals, setDeals, dataMode } = useData();
+  const canWriteRemotely = canPersistRemotely({ dataMode, isSupabaseConfigured });
 
   const optimisticUpdate = useCallback(
     async (updatedDeal: Transaction): Promise<{ success: boolean; error?: string }> => {
@@ -28,6 +31,10 @@ export function useOptimisticDealUpdate() {
       }
 
       try {
+        if (!canWriteRemotely) {
+          log.info('Optimistic update kept local in demo mode', { dealId: updatedDeal.id });
+          return { success: true };
+        }
         // Sync with server
         const persisted = await dealsApi.upsertDeal(updatedDeal);
         if (!persisted) {
@@ -46,7 +53,7 @@ export function useOptimisticDealUpdate() {
         return { success: false, error: err instanceof Error ? err.message : 'Sync failed' };
       }
     },
-    [deals, setDeals],
+    [canWriteRemotely, deals, setDeals],
   );
 
   const optimisticDelete = useCallback(
@@ -57,6 +64,10 @@ export function useOptimisticDealUpdate() {
       setDeals((prev) => prev.filter((d) => d.id !== dealId));
 
       try {
+        if (!canWriteRemotely) {
+          log.info('Optimistic delete kept local in demo mode', { dealId });
+          return { success: true };
+        }
         await dealsApi.deleteDeal(dealId);
         log.info('Optimistic delete synced', { dealId });
         return { success: true };
@@ -66,7 +77,7 @@ export function useOptimisticDealUpdate() {
         return { success: false, error: err instanceof Error ? err.message : 'Delete failed' };
       }
     },
-    [deals, setDeals],
+    [canWriteRemotely, deals, setDeals],
   );
 
   return { optimisticUpdate, optimisticDelete };
