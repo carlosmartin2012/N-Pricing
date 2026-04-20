@@ -9,7 +9,10 @@ import {
   Calculator,
   Briefcase,
   BarChart4,
+  Compass,
   GitBranch,
+  LayoutPanelLeft,
+  Search,
   ShieldAlert,
   Rocket,
   type LucideIcon,
@@ -25,8 +28,11 @@ const ICON_MAP: Record<NonNullable<WalkthroughStep['iconKey']>, LucideIcon> = {
   pricing: Calculator,
   portfolio: Briefcase,
   analytics: BarChart4,
+  insights: Compass,
   config: GitBranch,
   governance: ShieldAlert,
+  command: Search,
+  drawer: LayoutPanelLeft,
   finish: Rocket,
 };
 

@@ -16,7 +16,8 @@ export type SubTab =
   | 'CLIENT_PROFITABILITY'
   | 'CONCENTRATION'
   | 'PRICE_ELASTICITY'
-  | 'EX_POST_RAROC';
+  | 'EX_POST_RAROC'
+  | 'DISCIPLINE';
 
 export interface TabDefinition {
   key: SubTab;
@@ -54,6 +55,7 @@ export const TAB_GROUPS: TabDefinition[][] = [
     { key: 'CONCENTRATION', label: 'Concentration Risk', activeColor: 'purple' },
     { key: 'PRICE_ELASTICITY', label: 'Price Elasticity', activeColor: 'emerald' },
     { key: 'EX_POST_RAROC', label: 'Ex-Post RAROC', activeColor: 'purple' },
+    { key: 'DISCIPLINE', label: 'Pricing Discipline', activeColor: 'emerald' },
   ],
 ];
 

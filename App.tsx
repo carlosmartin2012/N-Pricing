@@ -23,11 +23,7 @@ import { useOfflineSync } from './hooks/useOfflineSync';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePresenceAwareness } from './hooks/usePresenceAwareness';
 
-const CalculatorWorkspace = React.lazy(() =>
-  import('./components/Calculator/CalculatorWorkspace').then((module) => ({
-    default: module.CalculatorWorkspace,
-  }))
-);
+const PricingWorkspace = React.lazy(() => import('./components/Pricing/PricingWorkspace'));
 const MethodologyConfig = React.lazy(() => import('./components/Config/MethodologyConfig'));
 const DealBlotter = React.lazy(() => import('./components/Blotter/DealBlotter'));
 const YieldCurvePanel = React.lazy(() => import('./components/MarketData/YieldCurvePanel'));
@@ -39,18 +35,18 @@ const AuditLog = React.lazy(() => import('./components/Admin/AuditLog'));
 const GeminiAssistant = React.lazy(() => import('./components/Intelligence/GeminiAssistant'));
 const GenAIChat = React.lazy(() => import('./components/Intelligence/GenAIChat'));
 const ReportingDashboard = React.lazy(() => import('./components/Reporting/ReportingDashboard'));
-const RAROCCalculator = React.lazy(() => import('./components/RAROC/RAROCCalculator'));
-const ShocksDashboard = React.lazy(() => import('./components/Risk/ShocksDashboard'));
 const NotificationCenter = React.lazy(() => import('./components/Notifications/NotificationCenter'));
 const HealthDashboard = React.lazy(() => import('./components/Admin/HealthDashboard'));
+const SLOPanel = React.lazy(() => import('./components/Admin/SLOPanel'));
+const AdapterHealthPanel = React.lazy(() => import('./components/Admin/AdapterHealthPanel'));
 const TargetGridView = React.lazy(() => import('./components/TargetGrid/TargetGridView'));
-const DisciplineDashboard = React.lazy(() => import('./components/Discipline/DisciplineDashboard'));
-const WhatIfWorkspace = React.lazy(() => import('./components/WhatIf/WhatIfWorkspace'));
 const CustomerPricingView = React.lazy(() => import('./components/Customer360/CustomerPricingView'));
 const CampaignsView = React.lazy(() => import('./components/Campaigns/CampaignsView'));
 const EscalationsView = React.lazy(() => import('./components/Governance/EscalationsView'));
 const ModelInventoryView = React.lazy(() => import('./components/Governance/ModelInventoryView'));
 const DossiersView = React.lazy(() => import('./components/Governance/DossiersView'));
+const SnapshotReplayView = React.lazy(() => import('./components/Governance/SnapshotReplayView'));
+const CustomerDrawer = React.lazy(() => import('./components/Customer360/CustomerDrawer'));
 const UserConfigModal = React.lazy(() =>
   import('./components/ui/UserConfigModal').then((module) => ({
     default: module.UserConfigModal,
@@ -196,6 +192,7 @@ const AppContent: React.FC = () => {
           offlinePendingCount={pendingCount}
           offlineIsSyncing={isSyncing}
           onOfflineSync={syncAll}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           dataMode={data.dataMode}
           syncStatus={data.syncStatus}
           onDataModeChange={data.setDataMode}
@@ -261,10 +258,14 @@ const AppContent: React.FC = () => {
               <ErrorBoundary>
                 <Suspense fallback={<ViewSkeleton />}>
                   <Routes>
-                    <Route path="/pricing" element={<CalculatorWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
+                    {/* Pricing workspace — 4 tabs share the same shell (Deal · RAROC · Stress · What-If) */}
+                    <Route path="/pricing" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
+                    <Route path="/raroc" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
+                    <Route path="/stress-testing" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
+                    <Route path="/what-if" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
                     <Route path="/blotter" element={<div className="relative z-0 h-full"><DealBlotter /></div>} />
                     <Route path="/analytics" element={<div className="relative z-0 flex h-full flex-col"><ReportingDashboard /></div>} />
-                    <Route path="/raroc" element={<div className="relative z-0 h-full"><RAROCCalculator /></div>} />
+                    <Route path="/discipline" element={<div className="relative z-0 flex h-full flex-col"><ReportingDashboard initialTab="discipline" /></div>} />
                     <Route path="/market-data" element={<div className="relative z-0 h-full"><YieldCurvePanel /></div>} />
                     <Route path="/behavioural" element={<div className="relative z-0 h-full"><BehaviouralModels /></div>} />
                     <Route path="/methodology" element={<div className="relative z-0 h-full"><MethodologyConfig mode="ALL" /></div>} />
@@ -272,18 +273,18 @@ const AppContent: React.FC = () => {
                     <Route path="/users" element={<div className="relative z-0 flex h-full flex-col"><UserManagement /></div>} />
                     <Route path="/audit" element={<div className="relative z-0 flex h-full flex-col"><AuditLog /></div>} />
                     <Route path="/health" element={<div className="relative z-0 flex h-full flex-col"><HealthDashboard /></div>} />
+                    <Route path="/slo" element={<div className="relative z-0 flex h-full flex-col"><SLOPanel /></div>} />
+                    <Route path="/adapters" element={<div className="relative z-0 flex h-full flex-col"><AdapterHealthPanel /></div>} />
                     <Route path="/manual" element={<div className="relative z-0 h-full"><UserManual /></div>} />
                     <Route path="/notifications" element={<div className="relative z-0 flex h-full flex-col"><NotificationCenter /></div>} />
                     <Route path="/ai" element={<div className="relative z-0 flex h-full flex-col"><GenAIChat /></div>} />
-                    <Route path="/stress-testing" element={<div className="relative z-0 flex h-full flex-col"><ShocksDashboard deal={dealParams} /></div>} />
                     <Route path="/target-grid" element={<div className="relative z-0 flex h-full flex-col"><TargetGridView /></div>} />
-                    <Route path="/discipline" element={<div className="relative z-0 flex h-full flex-col"><DisciplineDashboard /></div>} />
-                    <Route path="/what-if" element={<div className="relative z-0 flex h-full flex-col"><WhatIfWorkspace /></div>} />
                     <Route path="/customers" element={<div className="relative z-0 flex h-full flex-col"><CustomerPricingView /></div>} />
                     <Route path="/campaigns" element={<div className="relative z-0 flex h-full flex-col"><CampaignsView /></div>} />
                     <Route path="/escalations" element={<div className="relative z-0 flex h-full flex-col"><EscalationsView /></div>} />
                     <Route path="/models" element={<div className="relative z-0 flex h-full flex-col"><ModelInventoryView /></div>} />
                     <Route path="/dossiers" element={<div className="relative z-0 flex h-full flex-col"><DossiersView /></div>} />
+                    <Route path="/snapshots" element={<div className="relative z-0 flex h-full flex-col"><SnapshotReplayView /></div>} />
                     <Route path="/" element={<Navigate to="/pricing" replace />} />
                     <Route path="*" element={<Navigate to="/pricing" replace />} />
                   </Routes>
@@ -342,6 +343,10 @@ const AppContent: React.FC = () => {
         </Suspense>
 
         <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
+
+        <Suspense fallback={null}>
+          <CustomerDrawer />
+        </Suspense>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, LucideIcon, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, LucideIcon, Layers, MoreHorizontal } from 'lucide-react';
 import { ViewState } from '../../types';
 import { getTranslations, Language } from '../../translations';
 import { Logo } from './Logo';
@@ -11,6 +11,29 @@ export interface NavItem {
   section?: string;
   path?: string;
 }
+
+/**
+ * Visual accent per lifecycle bucket. Keeps the single-accent Active state
+ * (cyan pill) but tints the section label + separator so users feel the
+ * 4-bucket taxonomy without fighting for attention with the active chip.
+ *
+ * Colors map to NFQ semantic tokens: success (emerald), accent (cyan),
+ * warning (amber), violet. Fallback stays neutral for unknown sections.
+ */
+const SECTION_ACCENTS: Record<string, { dot: string; label: string }> = {
+  Commercial: { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]'  },
+  Pricing:    { dot: 'bg-[var(--nfq-accent)]',   label: 'text-[color:var(--nfq-accent)]'   },
+  Insights:   { dot: 'bg-[var(--nfq-warning)]',  label: 'text-[color:var(--nfq-warning)]'  },
+  Governance: { dot: 'bg-violet-400',            label: 'text-violet-300'                   },
+  Assistant:  { dot: 'bg-fuchsia-400',           label: 'text-fuchsia-300'                  },
+  System:     { dot: 'bg-slate-400',             label: 'text-slate-400'                    },
+};
+
+// Items that host internal tabs — shown as chips/hints in the sidebar entry
+const TAB_HINTS: Partial<Record<string, string[]>> = {
+  CALCULATOR: ['Deal', 'RAROC', 'Stress', 'What-If'],
+  REPORTING:  ['Overview', 'Executive', 'Discipline', '14+'],
+};
 
 interface NavButtonProps {
   item: NavItem;
@@ -66,15 +89,26 @@ const NavButton: React.FC<NavButtonProps> = ({
         <item.icon size={18} />
       </span>
       {isSidebarOpen && (
-        <span
-          className={`flex-1 truncate text-left text-[14px] font-medium tracking-normal transition-colors duration-200 ${
-            isActive
-              ? 'text-[color:var(--nfq-text-primary)]'
-              : 'text-[color:var(--nfq-text-secondary)]'
-          }`}
-        >
-          {item.label}
-        </span>
+        <>
+          <span
+            className={`flex-1 truncate text-left text-[14px] font-medium tracking-normal transition-colors duration-200 ${
+              isActive
+                ? 'text-[color:var(--nfq-text-primary)]'
+                : 'text-[color:var(--nfq-text-secondary)]'
+            }`}
+          >
+            {item.label}
+          </span>
+          {TAB_HINTS[item.id] && (
+            <span
+              className="flex items-center gap-1 rounded-full bg-[color:rgba(255,255,255,0.04)] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-[color:var(--nfq-text-muted)]"
+              title={`Tabs: ${TAB_HINTS[item.id]!.join(' \u00b7 ')}`}
+            >
+              <Layers size={9} />
+              {TAB_HINTS[item.id]!.length}
+            </span>
+          )}
+        </>
       )}
     </button>
   );
@@ -168,15 +202,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
               const showSection = item.section && item.section !== lastSection;
               if (item.section) lastSection = item.section;
 
+              const accent = item.section ? SECTION_ACCENTS[item.section] : undefined;
               return (
                 <div key={item.id}>
                   {showSection && isSidebarOpen && (
-                    <div className="px-3 pb-1.5 pt-6">
-                      <span className="nfq-section-label">{item.section}</span>
+                    <div className="flex items-center gap-2 px-3 pb-1.5 pt-6">
+                      <span
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent?.dot ?? 'bg-slate-500'}`}
+                        aria-hidden="true"
+                      />
+                      <span className={`nfq-section-label ${accent?.label ?? ''}`}>
+                        {item.section}
+                      </span>
+                      <div className="h-px flex-1 bg-[color:var(--nfq-border-ghost)]" />
                     </div>
                   )}
                   {showSection && !isSidebarOpen && (
-                    <div className="my-4" />
+                    <div className="my-3 flex justify-center">
+                      <span
+                        className={`h-1 w-1 rounded-full opacity-80 ${accent?.dot ?? 'bg-slate-500'}`}
+                        aria-hidden="true"
+                        title={item.section}
+                      />
+                    </div>
                   )}
                   <NavButton
                     item={item}

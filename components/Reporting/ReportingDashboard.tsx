@@ -52,6 +52,7 @@ const ClientProfitabilityDashboard = React.lazy(() => import('./ClientProfitabil
 const ConcentrationDashboard = React.lazy(() => import('./ConcentrationDashboard'));
 const PriceElasticityDashboard = React.lazy(() => import('./PriceElasticityDashboard'));
 const ExPostRAROCDashboard = React.lazy(() => import('./ExPostRAROCDashboard'));
+const DisciplineDashboard = React.lazy(() => import('../Discipline/DisciplineDashboard'));
 const MovedToAlquidPanel = React.lazy(() => import('../ui/MovedToAlquidPanel'));
 
 import { isAlmDeprecationEnabled } from '../../constants/alquidDeepLinks';
@@ -66,7 +67,18 @@ function downloadFile(content: string, filename: string, mimeType: string) {
   URL.revokeObjectURL(url);
 }
 
-const ReportingDashboard: React.FC = () => {
+interface ReportingDashboardProps {
+  /** Optional initial tab to deep-link into (e.g. /discipline → DISCIPLINE). */
+  initialTab?: SubTab | 'discipline';
+}
+
+const mapInitial = (t: ReportingDashboardProps['initialTab']): SubTab => {
+  if (!t) return DEFAULT_SUB_TAB;
+  if (t === 'discipline') return 'DISCIPLINE';
+  return t;
+};
+
+const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) => {
   // Granular context subscriptions: avoids re-renders from governance changes
   const { deals, products, businessUnits, clients, approvalMatrix, rules } = useCoreData();
   const marketData = useMarketData();
@@ -113,7 +125,7 @@ const ReportingDashboard: React.FC = () => {
   );
 
   // Tab state
-  const [activeSubTab, setActiveSubTab] = useState<SubTab>(DEFAULT_SUB_TAB);
+  const [activeSubTab, setActiveSubTab] = useState<SubTab>(mapInitial(initialTab));
 
   // Selection state
   const [selectedDealId, setSelectedDealId] = useState<string>('');
@@ -537,8 +549,8 @@ const ReportingDashboard: React.FC = () => {
               <PriceElasticityDashboard deals={deals} />
             ) : activeSubTab === 'EX_POST_RAROC' ? (
               <ExPostRAROCDashboard deals={deals} />
-            ) : false ? (
-              <DashboardBuilder />
+            ) : activeSubTab === 'DISCIPLINE' ? (
+              <DisciplineDashboard />
             ) : (
               <BehaviourFocusDashboard behaviouralModels={behaviouralModels} />
             )}
