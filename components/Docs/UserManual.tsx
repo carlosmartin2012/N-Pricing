@@ -1,10 +1,25 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Panel } from '../ui/LayoutComponents';
-import { BookOpen, Calculator, FileText, LineChart, Activity, Settings, LayoutDashboard, Sparkles, Compass, BookA } from 'lucide-react';
+import {
+  BookOpen,
+  Calculator,
+  FileText,
+  LineChart,
+  Activity,
+  Settings,
+  LayoutDashboard,
+  Sparkles,
+  Compass,
+  BookA,
+  Route,
+  LifeBuoy,
+  DatabaseZap,
+} from 'lucide-react';
 import { translations, getTranslations } from '../../translations';
 import { useUI } from '../../contexts/UIContext';
 import { useWalkthrough } from '../../contexts/WalkthroughContext';
+import { getUserManualContent } from '../../utils/userManualContent';
 
 // --- Helper Components ---
 
@@ -41,6 +56,34 @@ const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc })
    </div>
 );
 
+const WorkflowCard: React.FC<{ title: string; audience: string; steps: string[] }> = ({ title, audience, steps }) => (
+   <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-3">
+      <div>
+         <h4 className="text-sm font-bold text-slate-100">{title}</h4>
+         <p className="text-[11px] uppercase tracking-widest text-cyan-400 mt-1">{audience}</p>
+      </div>
+      <ol className="space-y-2 text-xs text-slate-400 list-decimal pl-4 leading-relaxed">
+         {steps.map((step) => (
+            <li key={step}>{step}</li>
+         ))}
+      </ol>
+   </div>
+);
+
+const ChecklistCard: React.FC<{ title: string; items: string[] }> = ({ title, items }) => (
+   <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+      <h4 className="text-sm font-bold text-slate-200 mb-3">{title}</h4>
+      <ul className="space-y-2 text-xs text-slate-400">
+         {items.map((item) => (
+            <li key={item} className="flex gap-2 leading-relaxed">
+               <span className="text-cyan-400">•</span>
+               <span>{item}</span>
+            </li>
+         ))}
+      </ul>
+   </div>
+);
+
 // --- Main Component ---
 
 const UserManual: React.FC = () => {
@@ -48,6 +91,7 @@ const UserManual: React.FC = () => {
    // Fallback configuration if translations are missing or partial
    const t = getTranslations(language) || translations['en'];
    const { startTour } = useWalkthrough();
+   const guide = getUserManualContent(language);
 
    const manualContentAll = {
       en: {
@@ -109,6 +153,10 @@ const UserManual: React.FC = () => {
                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Contents</h4>
                <nav className="space-y-1">
                   <TocItem targetId="intro" label={t.intro} />
+                  <TocItem targetId="quickstart" label={language === 'es' ? 'Inicio rápido' : 'Quick start'} />
+                  <TocItem targetId="data-modes" label={language === 'es' ? 'Modos de trabajo' : 'Working modes'} />
+                  <TocItem targetId="workflows" label={language === 'es' ? 'Workflows guiados' : 'Guided workflows'} />
+                  <TocItem targetId="troubleshooting" label={language === 'es' ? 'Resolución rápida' : 'Quick troubleshooting'} />
                   <TocItem targetId="collab" label={manualContent.collabTitle} />
                   <TocItem targetId="calculator" label={t.pricingEngine} />
                   <TocItem targetId="blotter" label={t.dealBlotter} />
@@ -153,6 +201,54 @@ const UserManual: React.FC = () => {
                         </p>
                      </div>
                   </button>
+
+                  <section id="quickstart" className="space-y-4 pt-4">
+                     <SectionHeader icon={Compass} title={language === 'es' ? 'Inicio rápido recomendado' : 'Recommended quick start'} color="text-cyan-400" />
+                     <div className="rounded-xl border border-cyan-900/60 bg-cyan-950/20 p-4 text-sm text-slate-300 leading-relaxed">
+                        <div className="font-semibold text-cyan-300 mb-1">{guide.hero.title}</div>
+                        <p className="text-slate-400">{guide.hero.subtitle}</p>
+                     </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
+                        {guide.quickStart.map((step) => (
+                           <FeatureCard key={step.title} title={step.title} desc={step.description} />
+                        ))}
+                     </div>
+                  </section>
+
+                  <section id="data-modes" className="space-y-4 pt-4">
+                     <SectionHeader icon={DatabaseZap} title={language === 'es' ? 'Modos de trabajo' : 'Working modes'} color="text-emerald-400" />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ChecklistCard title={guide.dataModes.demo.title} items={guide.dataModes.demo.bullets} />
+                        <ChecklistCard title={guide.dataModes.live.title} items={guide.dataModes.live.bullets} />
+                     </div>
+                  </section>
+
+                  <section id="workflows" className="space-y-4 pt-4">
+                     <SectionHeader icon={Route} title={language === 'es' ? 'Workflows guiados por rol' : 'Guided workflows by role'} color="text-amber-400" />
+                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
+                        {guide.workflows.map((workflow) => (
+                           <WorkflowCard
+                              key={workflow.title}
+                              title={workflow.title}
+                              audience={workflow.audience}
+                              steps={workflow.steps}
+                           />
+                        ))}
+                     </div>
+                  </section>
+
+                  <section id="troubleshooting" className="space-y-4 pt-4">
+                     <SectionHeader icon={LifeBuoy} title={language === 'es' ? 'Resolución rápida de dudas' : 'Quick troubleshooting'} color="text-purple-400" />
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        {guide.troubleshooting.map((issue) => (
+                           <FeatureCard key={issue.title} title={issue.title} desc={issue.description} />
+                        ))}
+                     </div>
+                     <ChecklistCard
+                        title={language === 'es' ? 'Checklist antes de pedir soporte' : 'Checklist before asking for support'}
+                        items={guide.supportChecklist}
+                     />
+                  </section>
 
                   <hr className="border-slate-800" />
 
