@@ -17,6 +17,7 @@ import {
 import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from '../../types';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { buildPricingContext } from '../../utils/pricingContext';
+import FtpLedgerSummaryCard, { type FtpLedgerSummary } from './FtpLedgerSummaryCard';
 import type {
   LcrHistoryPoint,
   PortfolioBusinessUnitSummary,
@@ -179,6 +180,47 @@ const OverviewDashboard: React.FC<Props> = ({
     [portfolioByBU],
   );
 
+  /**
+   * FTP ledger summary — derived from booked deals in the last 30 days and
+   * the weighted-average transfer rate already computed for the waterfall.
+   * Reconciliation status is "unknown" today because the reconciliation
+   * subsystem is a follow-up; once it lands we swap this to read from
+   * `observability_metrics` (BU journal vs Treasury mirror mismatches).
+   */
+  const ftpLedgerSummary = useMemo<FtpLedgerSummary | null>(() => {
+    if (!waterfallData) return null;
+    const now = Date.now();
+    const MS_30D = 30 * 86_400_000;
+    const mtdDeals = deals.filter((d) => {
+      if (d.status !== 'Booked' && d.status !== 'Approved') return false;
+      if (!d.startDate) return false;
+      const ts = Date.parse(d.startDate);
+      return Number.isFinite(ts) && now - ts <= MS_30D;
+    });
+    const mtdVolume = mtdDeals.reduce((s, d) => s + (d.amount ?? 0), 0);
+    const ftpIncomeMtdEur = mtdVolume * (waterfallData.avgFTP / 100) / 12;
+    // MoM growth vs prior 30d window — rough proxy so the card has motion.
+    const prevDeals = deals.filter((d) => {
+      if (!d.startDate) return false;
+      const ts = Date.parse(d.startDate);
+      if (!Number.isFinite(ts)) return false;
+      const age = now - ts;
+      return age > MS_30D && age <= 2 * MS_30D;
+    });
+    const prevVolume = prevDeals.reduce((s, d) => s + (d.amount ?? 0), 0);
+    const prevIncome = prevVolume * (waterfallData.avgFTP / 100) / 12;
+    const mtdGrowthPct = prevIncome > 0
+      ? ((ftpIncomeMtdEur - prevIncome) / prevIncome) * 100
+      : 0;
+    return {
+      ftpIncomeMtdEur,
+      dealsLedgerizedMtd: mtdDeals.length,
+      avgTransferRatePct: waterfallData.avgFTP,
+      mtdGrowthPct,
+      reconciliationStatus: 'unknown',
+    };
+  }, [deals, waterfallData]);
+
   if (deals.length === 0) {
     return (
       <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
@@ -197,6 +239,14 @@ const OverviewDashboard: React.FC<Props> = ({
 
   return (
     <>
+      {/* FTP Ledger summary — preserves the didactic value of the demoted
+          /accounting view as a single card + deep-link. */}
+      {ftpLedgerSummary && (
+        <div className="mb-6">
+          <FtpLedgerSummaryCard summary={ftpLedgerSummary} />
+        </div>
+      )}
+
       {/* FTP Waterfall (Portfolio Weighted Average) */}
       {waterfallData && (
         <div className="space-y-6 mb-8">
