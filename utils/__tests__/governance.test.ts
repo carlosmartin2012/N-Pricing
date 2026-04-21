@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveApprovalLevel, computeEvaBp, DEFAULT_EVA_BANDS } from '../pricing/governance';
+import { resolveApprovalLevel, computeEvaBp, DEFAULT_EVA_BANDS } from '../pricing/contexts/governance';
 import type { ApprovalMatrixConfig } from '../../types';
 
 const matrix: ApprovalMatrixConfig = {

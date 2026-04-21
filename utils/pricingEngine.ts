@@ -8,7 +8,7 @@ import {
 import { PRICING_CONSTANTS as PC, TENOR_MONTHS } from './pricingConstants';
 import { matchDealToRule, clearRuleMatchCache } from './ruleMatchingEngine';
 import { calculateRAROC, buildRAROCInputsFromDeal } from './rarocEngine';
-import { resolveApprovalLevel } from './pricing/governance';
+import { resolveApprovalLevel } from './pricing/contexts/governance';
 import {
   MOCK_TRANSITION_GRID, MOCK_PHYSICAL_GRID, MOCK_GREENIUM_GRID,
   MOCK_LIQUIDITY_CURVES,

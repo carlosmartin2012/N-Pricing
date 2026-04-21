@@ -10,7 +10,7 @@ import {
   predictConversion,
   type ElasticityModel,
 } from '../../utils/pricing/priceElasticity';
-import { computeEvaBp } from '../../utils/pricing/governance';
+import { computeEvaBp } from '../../utils/pricing/contexts/governance';
 
 interface Props {
   deal: Transaction;
