@@ -114,6 +114,38 @@ export function useConsumeNba(clientId: string) {
   });
 }
 
+/**
+ * Composite mutation: run LTV recompute + NBA generate in sequence for a
+ * client. Used by the "Initialize CLV" empty-state CTA — with a single
+ * click the banker goes from a client that has positions but no snapshot
+ * to one with CLV projection + 2-3 NBA recommendations ready in the tabs.
+ *
+ * Failure isolation: if the LTV recompute fails we skip the NBA step and
+ * surface the error; if NBA fails after LTV succeeded we keep the LTV
+ * (partial success is better than rollback here). The hook exposes both
+ * promises via `isPending`, `data` and `error` in the usual react-query
+ * shape.
+ */
+export function useInitializeClv(clientId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const snapshot = await clvApi.recomputeClientLtv(clientId);
+      if (!snapshot) {
+        throw new Error('initialize_clv_ltv_failed');
+      }
+      const nba = await clvApi.generateNba(clientId);
+      return { snapshot, nba };
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.clv.ltvHistory(clientId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.clv.nba(clientId, true) });
+      void qc.invalidateQueries({ queryKey: queryKeys.clv.nba(clientId, false) });
+      void qc.invalidateQueries({ queryKey: queryKeys.clv.timeline(clientId) });
+    },
+  });
+}
+
 export function useAppendClientEvent(clientId: string) {
   const qc = useQueryClient();
   return useMutation({

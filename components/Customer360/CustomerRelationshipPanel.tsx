@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { User2, Briefcase, Target, RefreshCw, Activity } from 'lucide-react';
 import * as customer360 from '../../api/customer360';
-import type { ClientRelationship } from '../../types/customer360';
-import { createLogger } from '../../utils/logger';
-
-const log = createLogger('CustomerRelationshipPanel');
+import { useInitializeClv } from '../../hooks/queries/useClvQueries';
+import { useUI } from '../../contexts/UIContext';
+import { clvTranslations } from '../../translations/index';
+import ClientEmptyStateBanner, { ImportIcon, InitializeIcon } from './ClientEmptyStateBanner';
 
 interface Props {
   clientId: string;
@@ -20,30 +21,39 @@ const fmtPct = (v: number | null | undefined): string => (v === null || v === un
 const fmtYears = (v: number | null | undefined): string => (v === null || v === undefined ? '—' : `${v.toFixed(1)} y`);
 
 const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
-  const [data, setData] = useState<ClientRelationship | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { language } = useUI();
+  const t = clvTranslations(language);
+  const initialize = useInitializeClv(clientId);
 
-  const load = useCallback(async () => {
-    if (!clientId) return;
-    setLoading(true);
-    try {
-      const next = await customer360.getClientRelationship(clientId);
-      setData(next);
-    } catch (error) {
-      log.warn('Failed to load relationship', { clientId, error: String(error) });
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId]);
+  // React Query replaces the previous useState+useEffect+useCallback triplet.
+  // Consistent with the rest of the CLV components migrated in Phase 6 —
+  // adds automatic caching + window-focus refetch + shared invalidation.
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ['customer360', 'relationship', clientId],
+    queryFn: () => customer360.getClientRelationship(clientId),
+    enabled: !!clientId,
+    staleTime: 30_000,
+  });
 
-  useEffect(() => { void load(); }, [load]);
+  const hasPositions = (data?.positions ?? []).length > 0;
 
-  if (!data && !loading) {
+  if (!data && !isLoading) {
     return (
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 text-center text-xs text-slate-400">
-        Customer 360 not yet populated for this client.
-      </div>
+      <ClientEmptyStateBanner
+        variant="no-data"
+        title={t.clvBannerTitleNoData}
+        body={t.clvBannerBodyNoData}
+        hint={t.clvBannerSeedHint}
+        actions={[
+          {
+            label: t.clvBannerImportCta,
+            icon: ImportIcon,
+            variant: 'primary',
+            href: '/api/customer360/import/positions',
+            onClick: () => undefined,
+          },
+        ]}
+      />
     );
   }
 
@@ -61,11 +71,34 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
             </span>
           )}
         </div>
-        <button onClick={() => void load()} disabled={loading} className="nfq-btn-ghost px-3 py-1.5 text-xs">
-          <RefreshCw className={`mr-1 inline h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+        <button onClick={() => void refetch()} disabled={isFetching} className="nfq-btn-ghost px-3 py-1.5 text-xs">
+          <RefreshCw className={`mr-1 inline h-3 w-3 ${isFetching ? 'animate-spin' : ''}`} />
           Refresh
         </button>
       </header>
+
+      {/* Client has positions but no LTV yet — proactively prompt to
+          initialize so the other tabs (LTV / Timeline / NBA) light up in
+          one click. Hidden once positions are empty (handled above) and
+          once initialize succeeds (the component unmounts-remounts via
+          query invalidation). */}
+      {data && hasPositions && (
+        <ClientEmptyStateBanner
+          variant="no-snapshot"
+          title={t.clvBannerTitleNoSnapshot}
+          body={t.clvBannerBodyNoSnapshot}
+          errorMessage={initialize.isError ? t.clvBannerInitializeError : undefined}
+          actions={[
+            {
+              label: initialize.isPending ? t.clvBannerInitializing : t.clvBannerInitializeCta,
+              icon: InitializeIcon,
+              variant: 'primary',
+              disabled: initialize.isPending,
+              onClick: () => initialize.mutate(),
+            },
+          ]}
+        />
+      )}
 
       {data && (
         <>
@@ -149,24 +182,24 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
               </div>
             ) : (
               <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                {data.applicableTargets.map((t) => (
-                  <li key={t.id} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
+                {data.applicableTargets.map((tgt) => (
+                  <li key={tgt.id} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
                     <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase text-slate-400">
-                      <span>{t.segment} · {t.productType} · {t.currency}</span>
-                      <span>{t.period}</span>
+                      <span>{tgt.segment} · {tgt.productType} · {tgt.currency}</span>
+                      <span>{tgt.period}</span>
                     </div>
                     <dl className="grid grid-cols-3 gap-2 text-[11px]">
                       <div>
                         <dt className="text-slate-500">Margin</dt>
-                        <dd className="font-mono tabular-nums text-slate-200">{fmtBps(t.targetMarginBps)}</dd>
+                        <dd className="font-mono tabular-nums text-slate-200">{fmtBps(tgt.targetMarginBps)}</dd>
                       </div>
                       <div>
                         <dt className="text-slate-500">Pre-approved</dt>
-                        <dd className="font-mono tabular-nums text-emerald-400">{fmtBps(t.preApprovedRateBps)}</dd>
+                        <dd className="font-mono tabular-nums text-emerald-400">{fmtBps(tgt.preApprovedRateBps)}</dd>
                       </div>
                       <div>
                         <dt className="text-slate-500">Hard floor</dt>
-                        <dd className="font-mono tabular-nums text-rose-400">{fmtBps(t.hardFloorRateBps)}</dd>
+                        <dd className="font-mono tabular-nums text-rose-400">{fmtBps(tgt.hardFloorRateBps)}</dd>
                       </div>
                     </dl>
                   </li>

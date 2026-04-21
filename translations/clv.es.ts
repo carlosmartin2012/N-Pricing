@@ -45,4 +45,15 @@ export const clvEs: ClvTranslationKeys = {
   clvImpactSelectClient: 'Selecciona un cliente para ver el impacto en CLV.',
   clvImpactIncompleteDeal: 'Completa producto + importe + rate para ver ΔCLV.',
   clvImpactComputing: 'calculando…',
+
+  clvBannerTitleNoData: 'Customer 360 aún sin poblar',
+  clvBannerBodyNoData: 'Este cliente no tiene posiciones registradas. Importa posiciones desde el CSV del core bancario o ejecuta el seed CLV de demo para ver la foto completa.',
+  clvBannerImportCta: 'Importar posiciones (CSV)',
+  clvBannerSeedHint: 'Pista: `npm run seed:clv-demo` inserta 3 clientes demo con posiciones, métricas y LTV precomputado.',
+
+  clvBannerTitleNoSnapshot: 'CLV aún no calculado',
+  clvBannerBodyNoSnapshot: 'Este cliente tiene posiciones pero ningún snapshot de LTV. Un click corre el motor y rankea 2-3 candidatos Next-Best-Action.',
+  clvBannerInitializeCta: 'Inicializar CLV para este cliente',
+  clvBannerInitializing: 'Calculando CLV + NBA…',
+  clvBannerInitializeError: 'Falló la inicialización. Reintenta o contacta con ops.',
 };
