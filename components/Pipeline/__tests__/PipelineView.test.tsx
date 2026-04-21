@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PipelineView from '../PipelineView';
@@ -133,5 +133,60 @@ describe('PipelineView', () => {
     fireEvent.click(screen.getByTestId('pipeline-status-consumed'));
     // The API should have been called again with status=consumed on filter flip
     expect(api.listPipelineNba).toHaveBeenCalledWith('consumed');
+  });
+
+  it('shows bulk action bar when a row is selected, hides it when cleared', async () => {
+    mount([row({ id: 'p-1', clientName: 'Alpha' })]);
+    await screen.findByText('Alpha');
+    fireEvent.click(screen.getByTestId('pipeline-row-select-p-1'));
+    expect(screen.getByTestId('pipeline-bulk-bar')).toBeInTheDocument();
+    expect(screen.getByText('1 selected')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('pipeline-bulk-clear'));
+    expect(screen.queryByTestId('pipeline-bulk-bar')).not.toBeInTheDocument();
+  });
+
+  it('select-all checkbox picks every visible row', async () => {
+    mount([
+      row({ id: 'p-1', clientName: 'A' }),
+      row({ id: 'p-2', clientName: 'B' }),
+      row({ id: 'p-3', clientName: 'C' }),
+    ]);
+    await screen.findByText('A');
+    fireEvent.click(screen.getByTestId('pipeline-select-all'));
+    expect(screen.getByText('3 selected')).toBeInTheDocument();
+  });
+
+  it('bulk consume fires consumeNba once per selected id and clears selection', async () => {
+    api.consumeNba.mockResolvedValue({ id: 'ok' });
+    mount([
+      row({ id: 'p-1', clientName: 'A' }),
+      row({ id: 'p-2', clientName: 'B' }),
+    ]);
+    await screen.findByText('A');
+    fireEvent.click(screen.getByTestId('pipeline-row-select-p-1'));
+    fireEvent.click(screen.getByTestId('pipeline-row-select-p-2'));
+    fireEvent.click(screen.getByTestId('pipeline-bulk-consume'));
+    await waitFor(() => {
+      expect(api.consumeNba).toHaveBeenCalledTimes(2);
+    });
+    expect(api.consumeNba).toHaveBeenCalledWith('p-1');
+    expect(api.consumeNba).toHaveBeenCalledWith('p-2');
+  });
+
+  it('export CSV button is disabled when feed is empty', async () => {
+    mount([]);
+    await screen.findByText(/No open recommendations/i);
+    const btn = screen.getByTestId('pipeline-export-csv');
+    expect(btn).toBeDisabled();
+  });
+
+  it('auto-refresh button toggles aria-pressed and label', async () => {
+    mount([row()]);
+    await screen.findByText('Client A');
+    const btn = screen.getByTestId('pipeline-auto-refresh');
+    expect(btn).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(btn);
+    expect(btn).toHaveAttribute('aria-pressed', 'true');
+    expect(btn.textContent).toContain('on');
   });
 });

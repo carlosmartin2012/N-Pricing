@@ -47,12 +47,21 @@ export function useClientLtvHistoryQuery(clientId: string | null) {
  * current entity. Shorter staleTime than per-client NBA because the
  * pipeline is the banker's live work queue: 10s is the right tradeoff
  * between freshness and server load.
+ *
+ * @param refetchIntervalMs - when > 0, turns on polling every N ms.
+ *   Opt-in only (default = off) so bankers who do not want the feed
+ *   to shift under their cursor see stable data until they manually
+ *   refresh or change the filter.
  */
-export function usePipelineNbaQuery(status: PipelineStatusFilter = 'open') {
+export function usePipelineNbaQuery(
+  status: PipelineStatusFilter = 'open',
+  refetchIntervalMs = 0,
+) {
   return useQuery({
     queryKey: queryKeys.clv.pipelineNba(status),
     queryFn: () => clvApi.listPipelineNba(status),
     staleTime: 10_000,
+    refetchInterval: refetchIntervalMs > 0 ? refetchIntervalMs : false,
   });
 }
 
