@@ -15,6 +15,7 @@ import geminiRouter from './routes/gemini';
 import pricingRouter from './routes/pricing';
 import snapshotsRouter from './routes/snapshots';
 import customer360Router from './routes/customer360';
+import clvRouter from './routes/clv';
 import channelPricingRouter from './routes/channelPricing';
 import governanceRouter from './routes/governance';
 import meteringRouter from './routes/metering';
@@ -26,6 +27,8 @@ import { requireTenancy } from './middleware/requireTenancy';
 import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
 import { startEscalationSweeper } from './workers/escalationSweeper';
+import { startLtvSnapshotWorker } from './workers/ltvSnapshotWorker';
+import { startCrmEventSync } from './workers/crmEventSync';
 import { bootstrapAdapters } from './integrations/bootstrap';
 
 import fs from 'fs';
@@ -125,6 +128,7 @@ app.use('/api/gemini', authMiddleware, geminiRouter);
 app.use('/api/pricing', ...entityScoped, pricingRouter);
 app.use('/api/snapshots', ...entityScoped, snapshotsRouter);
 app.use('/api/customer360', ...entityScoped, customer360Router);
+app.use('/api/clv', ...entityScoped, clvRouter);
 app.use('/api/governance', ...entityScoped, governanceRouter);
 app.use('/api/metering', ...entityScoped, meteringRouter);
 app.use('/api/campaigns', ...entityScoped, campaignsRouter);
@@ -206,6 +210,13 @@ async function main() {
     // Recommended: ≥ 60000 (one minute). The /api/governance/escalations/sweep
     // endpoint remains available for external cron triggers regardless.
     startEscalationSweeper();
+    // LTV snapshot worker — opt-in via LTV_SNAPSHOT_INTERVAL_MS (min 60000).
+    // Refreshes client_ltv_snapshots for every (entity, client) with an
+    // active position. Idempotent via unique (entity_id, client_id, as_of_date).
+    startLtvSnapshotWorker();
+    // CRM event sync — opt-in via CRM_SYNC_INTERVAL_MS. Pulls events from
+    // the registered CRM adapter into client_events for every active client.
+    startCrmEventSync();
   } catch (err) {
     console.error('[server] Failed to start:', err);
     process.exit(1);

@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { usePricingContext } from '../../hooks/usePricingContext';
+import { useOptionalPricingState } from '../../contexts/PricingStateContext';
 import { createLogger } from '../../utils/logger';
 import { ShockControlPanel } from './ShockControlPanel';
 import { ShockImpactPanel } from './ShockImpactPanel';
@@ -16,10 +17,16 @@ import { MacroScenarioPicker } from './MacroScenarioPicker';
 const log = createLogger('ShocksDashboard');
 
 interface Props {
-  deal: Transaction;
+  /** Optional — read from PricingStateContext when omitted. */
+  deal?: Transaction;
 }
 
-const ShocksDashboard: React.FC<Props> = ({ deal }) => {
+const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
+  const ctx = useOptionalPricingState();
+  const deal = dealProp ?? ctx?.dealParams;
+  if (!deal) {
+    throw new Error('ShocksDashboard: no deal available (pass as prop or wrap in <PricingStateProvider>)');
+  }
   const { currentUser: user } = useAuth();
   const { approvalMatrix, shocks, setShocks } = useData();
   const { language } = useUI();

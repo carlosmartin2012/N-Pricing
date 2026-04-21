@@ -1,7 +1,7 @@
 import {
   ok, fail,
   type CoreBankingAdapter, type CoreBankingDeal,
-  type CrmAdapter, type CrmCustomer,
+  type CrmAdapter, type CrmCustomer, type CrmPulledEvent,
   type MarketDataAdapter, type MarketYieldCurveSnapshot,
   type AdapterHealth, type AdapterResult,
 } from './types';
@@ -50,6 +50,7 @@ export class InMemoryCrm implements CrmAdapter {
   readonly kind = 'crm' as const;
   readonly name = 'in-memory';
   private customers = new Map<string, CrmCustomer>();
+  private events = new Map<string, CrmPulledEvent[]>();       // by clientExternalId
 
   async health(): Promise<AdapterHealth> {
     return { ok: true, latencyMs: 0, checkedAt: nowIso() };
@@ -57,6 +58,10 @@ export class InMemoryCrm implements CrmAdapter {
 
   seed(customers: CrmCustomer[]): void {
     for (const c of customers) this.customers.set(c.id, c);
+  }
+
+  seedEvents(clientExternalId: string, events: CrmPulledEvent[]): void {
+    this.events.set(clientExternalId, [...(this.events.get(clientExternalId) ?? []), ...events]);
   }
 
   async fetchCustomer(externalId: string): Promise<AdapterResult<CrmCustomer | null>> {
@@ -71,6 +76,15 @@ export class InMemoryCrm implements CrmAdapter {
       if (c.name.toLowerCase().includes(q) || c.id.includes(q)) matches.push(c);
     }
     return ok(matches);
+  }
+
+  async pullCrmEvents(
+    clientExternalId: string,
+    since?: string,
+  ): Promise<AdapterResult<CrmPulledEvent[]>> {
+    const all = this.events.get(clientExternalId) ?? [];
+    if (!since) return ok([...all]);
+    return ok(all.filter((e) => e.occurredAt > since));
   }
 }
 

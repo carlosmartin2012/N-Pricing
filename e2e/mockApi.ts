@@ -907,6 +907,96 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       return;
     }
 
+    // ---------- CLV + 360º temporal (Phase 6) ----------
+    const clvMatch = path.match(/^\/clv\/clients\/([^/]+)\/(timeline|ltv|nba)(?:\/generate|\/recompute)?$/);
+    if (clvMatch) {
+      const clientId = clvMatch[1];
+      const kind = clvMatch[2];
+      if (kind === 'timeline' && method === 'GET') {
+        await route.fulfill(json([
+          { id: 'evt-1', entityId: DEFAULT_ENTITY_ID, clientId, eventType: 'deal_booked', eventTs: '2026-03-01T10:00:00Z', source: 'pricing', dealId: null, positionId: null, amountEur: 500_000, payload: {}, createdBy: null, createdAt: '2026-03-01T10:00:00Z' },
+          { id: 'evt-2', entityId: DEFAULT_ENTITY_ID, clientId, eventType: 'contact',     eventTs: '2026-04-05T14:00:00Z', source: 'crm',     dealId: null, positionId: null, amountEur: null, payload: { subject: 'Review meeting' }, createdBy: null, createdAt: '2026-04-05T14:00:00Z' },
+        ]));
+        return;
+      }
+      if (kind === 'timeline' && method === 'POST') {
+        await route.fulfill(json({ id: 'evt-new', entityId: DEFAULT_ENTITY_ID, clientId, eventType: (body as { eventType?: string })?.eventType ?? 'contact', eventTs: nowIso(), source: 'manual', dealId: null, positionId: null, amountEur: null, payload: {}, createdBy: null, createdAt: nowIso() }));
+        return;
+      }
+      if (kind === 'ltv' && method === 'GET') {
+        await route.fulfill(json([
+          {
+            id: 'snap-1', entityId: DEFAULT_ENTITY_ID, clientId, asOfDate: '2026-04-15',
+            horizonYears: 10, discountRate: 0.08,
+            clvPointEur: 1_250_000, clvP5Eur: 980_000, clvP95Eur: 1_520_000,
+            churnHazardAnnual: 0.08, renewalProb: 0.65,
+            shareOfWalletEst: 0.45, shareOfWalletGap: 0.55,
+            breakdown: { niiEur: 900_000, crosssellEur: 220_000, feesEur: 180_000, churnCostEur: 50_000, perPosition: [] },
+            assumptions: { asOfDate: '2026-04-15', horizonYears: 10, discountRate: 0.08, churnHazardAnnual: 0.08, renewalProb: 0.65, crosssellProbPerYear: 0.12, capitalAllocationRate: 0.08, rarocByProduct: {}, shareOfWalletEst: 0.45, churnCostPerEur: 0.015 },
+            assumptionsHash: 'a'.repeat(64),
+            engineVersion: 'mock',
+            computedAt: nowIso(),
+            computedBy: 'mock',
+          },
+        ]));
+        return;
+      }
+      if (kind === 'ltv' && method === 'POST') {
+        await route.fulfill(json({
+          id: 'snap-new', entityId: DEFAULT_ENTITY_ID, clientId, asOfDate: new Date().toISOString().slice(0, 10),
+          horizonYears: 10, discountRate: 0.08,
+          clvPointEur: 1_300_000, clvP5Eur: 1_020_000, clvP95Eur: 1_580_000,
+          churnHazardAnnual: 0.08, renewalProb: 0.65,
+          shareOfWalletEst: 0.48, shareOfWalletGap: 0.52,
+          breakdown: { niiEur: 950_000, crosssellEur: 230_000, feesEur: 180_000, churnCostEur: 60_000, perPosition: [] },
+          assumptions: { asOfDate: new Date().toISOString().slice(0, 10), horizonYears: 10, discountRate: 0.08, churnHazardAnnual: 0.08, renewalProb: 0.65, crosssellProbPerYear: 0.12, capitalAllocationRate: 0.08, rarocByProduct: {}, shareOfWalletEst: 0.48, churnCostPerEur: 0.015 },
+          assumptionsHash: 'b'.repeat(64),
+          engineVersion: 'mock',
+          computedAt: nowIso(),
+          computedBy: 'mock',
+        }));
+        return;
+      }
+      if (kind === 'nba' && method === 'GET') {
+        await route.fulfill(json([
+          {
+            id: 'nba-1', entityId: DEFAULT_ENTITY_ID, clientId,
+            recommendedProduct: 'FX_Hedging', recommendedRateBps: 40, recommendedVolumeEur: 1_500_000, recommendedCurrency: 'EUR',
+            expectedClvDeltaEur: 320_000, confidence: 0.78,
+            reasonCodes: ['product_gap_core', 'renewal_window_open'], rationale: 'FX_Hedging ticket €1.5M → ΔCLV 2.1% · renewal window open · core product gap',
+            source: 'engine', generatedAt: nowIso(), consumedAt: null, consumedBy: null,
+          },
+        ]));
+        return;
+      }
+      if (kind === 'nba' && method === 'POST') {
+        await route.fulfill(json([{
+          id: 'nba-new', entityId: DEFAULT_ENTITY_ID, clientId,
+          recommendedProduct: 'Corporate_Loan', recommendedRateBps: 420, recommendedVolumeEur: 2_000_000, recommendedCurrency: 'EUR',
+          expectedClvDeltaEur: 410_000, confidence: 0.82,
+          reasonCodes: ['share_of_wallet_low', 'nim_below_target'], rationale: 'Corporate_Loan ticket €2M → ΔCLV 2.7% · lifts NIM toward target · share-of-wallet expansion',
+          source: 'engine', generatedAt: nowIso(), consumedAt: null, consumedBy: null,
+        }]));
+        return;
+      }
+    }
+    if (/^\/clv\/nba\/[^/]+\/consume$/.test(path) && method === 'PATCH') {
+      await route.fulfill(json({ id: 'nba-1', consumedAt: nowIso(), consumedBy: 'demo@nfq.es' }));
+      return;
+    }
+    if (path === '/clv/preview-ltv-impact' && method === 'POST') {
+      await route.fulfill(json({
+        before: { clvPointEur: 1_250_000, clvP5Eur: 980_000, clvP95Eur: 1_520_000 },
+        impact: {
+          clvBeforeEur: 1_250_000, clvAfterEur: 1_350_000,
+          deltaClvEur: 100_000, deltaClvPct: 0.08,
+          breakdown: { directNiiEur: 60_000, crosssellUpliftEur: 20_000, churnReductionEur: 15_000, capitalOpportunityEur: 5_000 },
+        },
+        assumptions: { asOfDate: new Date().toISOString().slice(0, 10), horizonYears: 10, discountRate: 0.08, churnHazardAnnual: 0.08, renewalProb: 0.65, crosssellProbPerYear: 0.12, capitalAllocationRate: 0.08, rarocByProduct: {}, shareOfWalletEst: 0.5, churnCostPerEur: 0.015 },
+      }));
+      return;
+    }
+
     await route.fulfill(json({ ok: true }));
   });
 }

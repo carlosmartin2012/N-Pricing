@@ -508,3 +508,294 @@ components:
           enum: [Auto, L1_Manager, L2_Committee, Rejected]
         matchedMethodology:
           type: string
+
+# -----------------------------------------------------------------------------
+# CLV + 360º temporal (Phase 6)
+# -----------------------------------------------------------------------------
+# Every endpoint below is entity-scoped via `x-entity-id` + JWT. Snapshots
+# are immutable (write-only via RLS); NBA rows are append + soft-consume.
+paths:
+  /clv/clients/{clientId}/timeline:
+    get:
+      summary: List timeline events for a client
+      tags: [CLV]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+      responses:
+        '200':
+          description: Chronological (desc) list of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ClientEvent' }
+        '400': { description: Tenancy header missing }
+    post:
+      summary: Append a client event (manual)
+      tags: [CLV]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientEvent' }
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientEvent' }
+
+  /clv/clients/{clientId}/ltv:
+    get:
+      summary: List CLV snapshots for a client (history)
+      tags: [CLV]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Snapshots ordered by as_of_date desc
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ClientLtvSnapshot' }
+
+  /clv/clients/{clientId}/ltv/recompute:
+    post:
+      summary: Recompute CLV snapshot for a client (idempotent per as_of_date)
+      tags: [CLV]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                asOfDate: { type: string, format: date }
+                horizonYears: { type: integer, minimum: 1, maximum: 30 }
+                discountRate: { type: number }
+                churnHazardAnnual: { type: number }
+                renewalProb: { type: number }
+      responses:
+        '201':
+          description: Snapshot (fresh or refreshed)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientLtvSnapshot' }
+
+  /clv/clients/{clientId}/nba:
+    get:
+      summary: List open Next-Best-Action recommendations for a client
+      tags: [CLV]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: open
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        '200':
+          description: Recommendations ordered by generated_at desc
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NbaRecommendation' }
+
+  /clv/clients/{clientId}/nba/generate:
+    post:
+      summary: Run engine and persist top-N NBA candidates for a client
+      tags: [CLV]
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topN: { type: integer, minimum: 1, maximum: 10, default: 3 }
+      responses:
+        '201':
+          description: Newly generated NBA rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NbaRecommendation' }
+
+  /clv/nba/{id}/consume:
+    patch:
+      summary: Mark a recommendation as consumed
+      tags: [CLV]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Updated recommendation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NbaRecommendation' }
+        '404':
+          description: Not found or already consumed
+
+  /clv/preview-ltv-impact:
+    post:
+      summary: Preview the marginal ΔCLV of a deal candidate (does NOT persist)
+      description: |
+        Killer demo endpoint. Given a client and a deal candidate (product,
+        amount, margin, tenor, capital), returns before/after CLV plus a
+        decomposition (NII + crosssell + churn reduction + capital opp.).
+        Pure function server-side — no DB mutation, safe to call on every
+        rate tweak (debounced upstream ~400ms).
+      tags: [CLV]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [clientId, candidate]
+              properties:
+                clientId: { type: string }
+                asOfDate: { type: string, format: date }
+                candidate:
+                  type: object
+                  required: [productType, amountEur, marginBps]
+                  properties:
+                    productType: { type: string }
+                    currency: { type: string, default: EUR }
+                    amountEur: { type: number }
+                    tenorYears: { type: number }
+                    rateBps: { type: number }
+                    marginBps: { type: number }
+                    capitalEur: { type: number }
+                    rarocAnnual: { type: number }
+                assumptions:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Before/after CLV + decomposition
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  before:
+                    type: object
+                    properties:
+                      clvPointEur: { type: number }
+                      clvP5Eur:    { type: number }
+                      clvP95Eur:   { type: number }
+                  impact:
+                    type: object
+                    properties:
+                      clvBeforeEur: { type: number }
+                      clvAfterEur:  { type: number }
+                      deltaClvEur:  { type: number }
+                      deltaClvPct:  { type: number }
+                      breakdown:
+                        type: object
+                        properties:
+                          directNiiEur:           { type: number }
+                          crosssellUpliftEur:     { type: number }
+                          churnReductionEur:      { type: number }
+                          capitalOpportunityEur:  { type: number }
+                  assumptions:
+                    type: object
+
+components:
+  schemas:
+    ClientEvent:
+      type: object
+      properties:
+        id:           { type: string, format: uuid }
+        entityId:     { type: string, format: uuid }
+        clientId:     { type: string }
+        eventType:
+          type: string
+          enum: [onboarding, deal_booked, deal_cancelled, crosssell_attempt, crosssell_won, claim, churn_signal, contact, price_review, committee_review, nba_generated, nba_consumed]
+        eventTs:      { type: string, format: date-time }
+        source:
+          type: string
+          enum: [manual, pricing, crm, ops, ml, adapter]
+        dealId:       { type: string, nullable: true, format: uuid }
+        positionId:   { type: string, nullable: true, format: uuid }
+        amountEur:    { type: number, nullable: true }
+        payload:      { type: object, additionalProperties: true }
+
+    ClientLtvSnapshot:
+      type: object
+      properties:
+        id:                   { type: string, format: uuid }
+        entityId:             { type: string, format: uuid }
+        clientId:             { type: string }
+        asOfDate:             { type: string, format: date }
+        horizonYears:         { type: integer }
+        discountRate:         { type: number }
+        clvPointEur:          { type: number }
+        clvP5Eur:             { type: number, nullable: true }
+        clvP95Eur:            { type: number, nullable: true }
+        churnHazardAnnual:    { type: number, nullable: true }
+        renewalProb:          { type: number, nullable: true }
+        shareOfWalletEst:     { type: number, nullable: true }
+        shareOfWalletGap:     { type: number, nullable: true }
+        breakdown:            { type: object }
+        assumptions:          { type: object }
+        assumptionsHash:      { type: string, description: sha256 hex }
+        engineVersion:        { type: string }
+        computedAt:           { type: string, format: date-time }
+
+    NbaRecommendation:
+      type: object
+      properties:
+        id:                    { type: string, format: uuid }
+        entityId:              { type: string, format: uuid }
+        clientId:              { type: string }
+        recommendedProduct:    { type: string }
+        recommendedRateBps:    { type: number, nullable: true }
+        recommendedVolumeEur:  { type: number, nullable: true }
+        recommendedCurrency:   { type: string }
+        expectedClvDeltaEur:   { type: number }
+        confidence:            { type: number, minimum: 0, maximum: 1 }
+        reasonCodes:
+          type: array
+          items:
+            type: string
+            enum: [share_of_wallet_low, renewal_window_open, nim_below_target, product_gap_core, cross_sell_cohort_signal, churn_signal_detected, price_above_market, capacity_underused, regulatory_incentive_available]
+        rationale:             { type: string, nullable: true }
+        source:
+          type: string
+          enum: [engine, ml, manual, crm]
+        generatedAt:           { type: string, format: date-time }
+        consumedAt:            { type: string, nullable: true, format: date-time }
+        consumedBy:            { type: string, nullable: true }

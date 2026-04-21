@@ -79,12 +79,41 @@ export interface CrmCustomer {
   attributes: Record<string, unknown>;
 }
 
+/**
+ * Events pulled from the CRM — contact, claim, churn signal, etc. Used by
+ * the CLV timeline worker to hydrate `client_events` without requiring the
+ * banker to log actions twice. Optional on the interface for backwards
+ * compatibility with adapters that only expose the customer master.
+ */
+export type CrmEventKind =
+  | 'contact'
+  | 'churn_signal'
+  | 'claim'
+  | 'crosssell_attempt'
+  | 'crosssell_won'
+  | 'committee_review';
+
+export interface CrmPulledEvent {
+  externalId: string;
+  clientExternalId: string;
+  kind: CrmEventKind;
+  occurredAt: string;                 // ISO timestamp
+  amountEur?: number | null;
+  payload: Record<string, unknown>;
+}
+
 export interface CrmAdapter {
   kind: 'crm';
   name: string;
   health(): Promise<AdapterHealth>;
   fetchCustomer(externalId: string): Promise<AdapterResult<CrmCustomer | null>>;
   searchCustomers(query: string, limit?: number): Promise<AdapterResult<CrmCustomer[]>>;
+  /**
+   * Pull events for a client between `since` (exclusive) and now. Adapters
+   * that don't support event ingestion return `ok([])` — callers treat the
+   * empty set as "no new events" and the worker is a no-op.
+   */
+  pullCrmEvents?(clientExternalId: string, since?: string): Promise<AdapterResult<CrmPulledEvent[]>>;
 }
 
 // ---------- Market data ----------

@@ -83,6 +83,15 @@ vi.mock('../../RAROC/WaterfallExplainerCard', () => ({
   WaterfallExplainerCard: () => <div>Waterfall</div>,
 }));
 
+// Customer360 panels bring React Query into the tree; stub them so this
+// test doesn't need a QueryClientProvider.
+vi.mock('../../Customer360/CustomerRelationshipPanel', () => ({
+  default: () => <div data-testid="customer-relationship-panel" />,
+}));
+vi.mock('../../Customer360/LtvImpactPanel', () => ({
+  default: () => <div data-testid="ltv-impact-panel" />,
+}));
+
 describe('CalculatorWorkspace', () => {
   const setDealParams = vi.fn();
 
