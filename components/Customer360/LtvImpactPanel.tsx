@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
 import { useLtvImpactPreviewQuery } from '../../hooks/queries/useClvQueries';
+import { useUI } from '../../contexts/UIContext';
+import { clvTranslations } from '../../translations/index';
 import type { DealCandidate } from '../../types/clv';
 
 /**
@@ -33,6 +35,8 @@ function candidateReady(c: Partial<DealCandidate>): c is DealCandidate {
 }
 
 const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400 }) => {
+  const { language } = useUI();
+  const t = clvTranslations(language);
   const fingerprint = useMemo(
     () => JSON.stringify({ clientId, ...candidate }),
     [clientId, candidate],
@@ -55,7 +59,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
   if (!clientId) {
     return (
       <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
-        Select a client to see CLV impact.
+        {t.clvImpactSelectClient}
       </div>
     );
   }
@@ -63,7 +67,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
   if (!candidateReady(candidate)) {
     return (
       <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
-        Complete product + amount + rate to preview ΔCLV.
+        {t.clvImpactIncompleteDeal}
       </div>
     );
   }
@@ -77,23 +81,23 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
     <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-3">
       <header className="flex items-center gap-2">
         <Zap className="h-4 w-4 text-amber-400" />
-        <span className="nfq-label text-[10px] text-slate-300">ΔCLV preview</span>
-        {loading && <span className="font-mono text-[9px] text-slate-500">computing…</span>}
+        <span className="nfq-label text-[10px] text-slate-300">{t.clvImpactTitle}</span>
+        {loading && <span className="font-mono text-[9px] text-slate-500">{t.clvImpactComputing}</span>}
       </header>
 
       {result && (
         <>
           <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
             <div className="rounded bg-white/[0.02] p-2">
-              <div className="nfq-label text-[9px] text-slate-400">Before</div>
+              <div className="nfq-label text-[9px] text-slate-400">{t.clvImpactBefore}</div>
               <div className="text-slate-200">{fmtEur(result.before.clvPointEur)}</div>
             </div>
             <div className="rounded bg-white/[0.02] p-2">
-              <div className="nfq-label text-[9px] text-slate-400">After</div>
+              <div className="nfq-label text-[9px] text-slate-400">{t.clvImpactAfter}</div>
               <div className="text-slate-200">{fmtEur(result.impact.clvAfterEur)}</div>
             </div>
             <div className="rounded bg-white/[0.02] p-2">
-              <div className="nfq-label text-[9px] text-slate-400">ΔCLV</div>
+              <div className="nfq-label text-[9px] text-slate-400">{t.clvImpactDelta}</div>
               <div className={`flex items-center gap-1 font-bold ${accent}`}>
                 <Arrow className="h-3 w-3" />
                 {fmtEur(delta)}
@@ -103,10 +107,10 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-[10px]">
-            <Contrib label="NII"        value={result.impact.breakdown.directNiiEur} />
-            <Contrib label="Crosssell"  value={result.impact.breakdown.crosssellUpliftEur} />
-            <Contrib label="Churn red." value={result.impact.breakdown.churnReductionEur} />
-            <Contrib label="Capital opp." value={result.impact.breakdown.capitalOpportunityEur} />
+            <Contrib label={t.clvImpactNii}               value={result.impact.breakdown.directNiiEur} />
+            <Contrib label={t.clvImpactCrosssell}         value={result.impact.breakdown.crosssellUpliftEur} />
+            <Contrib label={t.clvImpactChurnReduction}    value={result.impact.breakdown.churnReductionEur} />
+            <Contrib label={t.clvImpactCapitalOpportunity} value={result.impact.breakdown.capitalOpportunityEur} />
           </div>
 
           <p className="font-mono text-[9px] text-slate-500">
