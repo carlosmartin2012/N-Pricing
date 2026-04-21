@@ -159,9 +159,107 @@ CREATE TABLE IF NOT EXISTS clients (
   rating TEXT DEFAULT 'BBB',
   country TEXT DEFAULT 'ES',
   lei_code TEXT,
+  entity_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- Backfill entity_id for tables created before Phase 6
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS entity_id UUID;
+
+-- Customer 360 / CLV tables (Phase 6)
+CREATE TABLE IF NOT EXISTS client_positions (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id       UUID        NOT NULL,
+  client_id       TEXT        NOT NULL,
+  product_id      TEXT,
+  product_type    TEXT        NOT NULL,
+  category        TEXT,
+  deal_id         TEXT,
+  amount          NUMERIC(20,4),
+  currency        TEXT        DEFAULT 'EUR',
+  margin_bps      NUMERIC(10,4),
+  start_date      DATE,
+  maturity_date   DATE,
+  status          TEXT        DEFAULT 'Active',
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_client_positions_entity_client ON client_positions (entity_id, client_id);
+
+CREATE TABLE IF NOT EXISTS client_metrics_snapshots (
+  id                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id               UUID        NOT NULL,
+  client_id               TEXT        NOT NULL,
+  period                  TEXT        NOT NULL,
+  computed_at             TIMESTAMPTZ DEFAULT NOW(),
+  nim_bps                 NUMERIC(10,4),
+  fees_eur                NUMERIC(20,4),
+  eva_eur                 NUMERIC(20,4),
+  share_of_wallet_pct     NUMERIC(8,6),
+  relationship_age_years  NUMERIC(8,4),
+  nps_score               INTEGER,
+  active_position_count   INTEGER,
+  total_exposure_eur      NUMERIC(20,4),
+  source                  TEXT,
+  detail                  JSONB       DEFAULT '{}'::jsonb,
+  UNIQUE (entity_id, client_id, period)
+);
+CREATE INDEX IF NOT EXISTS idx_client_metrics_entity_client ON client_metrics_snapshots (entity_id, client_id);
+
+CREATE TABLE IF NOT EXISTS client_events (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id   UUID        NOT NULL,
+  client_id   TEXT        NOT NULL,
+  event_type  TEXT        NOT NULL,
+  event_ts    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  source      TEXT,
+  amount_eur  NUMERIC(20,4),
+  payload     JSONB       DEFAULT '{}'::jsonb,
+  created_by  TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_client_events_entity_client ON client_events (entity_id, client_id, event_ts DESC);
+
+CREATE TABLE IF NOT EXISTS client_ltv_snapshots (
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id            UUID        NOT NULL,
+  client_id            TEXT        NOT NULL,
+  as_of_date           DATE        NOT NULL,
+  computed_at          TIMESTAMPTZ DEFAULT NOW(),
+  horizon_years        NUMERIC(6,2),
+  discount_rate        NUMERIC(8,6),
+  clv_point_eur        NUMERIC(20,4),
+  clv_p5_eur           NUMERIC(20,4),
+  clv_p95_eur          NUMERIC(20,4),
+  churn_hazard_annual  NUMERIC(8,6),
+  renewal_prob         NUMERIC(8,6),
+  share_of_wallet_est  NUMERIC(8,6),
+  share_of_wallet_gap  NUMERIC(8,6),
+  breakdown            JSONB       DEFAULT '{}'::jsonb,
+  assumptions          JSONB       DEFAULT '{}'::jsonb,
+  assumptions_hash     TEXT,
+  engine_version       TEXT,
+  computed_by          TEXT,
+  UNIQUE (entity_id, client_id, as_of_date)
+);
+CREATE INDEX IF NOT EXISTS idx_client_ltv_entity_client ON client_ltv_snapshots (entity_id, client_id, as_of_date DESC);
+
+CREATE TABLE IF NOT EXISTS client_nba_recommendations (
+  id                       UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id                UUID        NOT NULL,
+  client_id                TEXT        NOT NULL,
+  recommended_product      TEXT        NOT NULL,
+  recommended_rate_bps     NUMERIC(10,4),
+  recommended_volume_eur   NUMERIC(20,4),
+  recommended_currency     TEXT        DEFAULT 'EUR',
+  expected_clv_delta_eur   NUMERIC(20,4),
+  confidence               NUMERIC(5,4),
+  reason_codes             JSONB       DEFAULT '[]'::jsonb,
+  rationale                TEXT,
+  source                   TEXT,
+  created_at               TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_client_nba_entity_client ON client_nba_recommendations (entity_id, client_id, created_at DESC);
 
 -- Products
 CREATE TABLE IF NOT EXISTS products (

@@ -1,13 +1,9 @@
 /**
  * SHA-256 hashing helpers for pricing snapshots.
  *
- * Uses Web Crypto's `crypto.subtle.digest` which is available in:
- *   - Deno (Supabase Edge Functions)
- *   - Node 19+ (global `crypto`)
- *   - Modern browsers
- *
- * Avoids depending on Node's `crypto` module so the same helper runs in the
- * Edge Function (Deno) and in the server (Node 20).
+ * Works in:
+ *   - Node.js 18+ (uses node:crypto createHash — synchronous, no globals needed)
+ *   - Browsers / Deno: falls back to globalThis.crypto.subtle if available
  */
 
 import { canonicalJson } from './canonicalJson';
@@ -22,8 +18,14 @@ export async function sha256CanonicalJson(value: unknown): Promise<string> {
 }
 
 export async function sha256Hex(input: string): Promise<string> {
+  // Node.js path — synchronous and always available in Node 18+
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    const { createHash } = await import('node:crypto');
+    return createHash('sha256').update(input, 'utf8').digest('hex');
+  }
+  // Browser / Deno path — use Web Crypto subtle
   const bytes = new TextEncoder().encode(input);
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   return toHex(new Uint8Array(digest));
 }
 
