@@ -19,6 +19,15 @@ export const queryKeys = {
       ['deals', 'paginated', page, pageSize] as const,
   },
 
+  // --- CLV + 360 (Phase 6) ---
+  clv: {
+    timeline: (clientId: string) => ['clv', 'timeline', clientId] as const,
+    ltvHistory: (clientId: string) => ['clv', 'ltv', clientId] as const,
+    nba: (clientId: string, onlyOpen: boolean) => ['clv', 'nba', clientId, onlyOpen] as const,
+    previewImpact: (clientId: string, fingerprint: string) =>
+      ['clv', 'preview-impact', clientId, fingerprint] as const,
+  },
+
   // --- Market Data ---
   marketData: {
     yieldCurves: ['marketData', 'yieldCurves'] as const,

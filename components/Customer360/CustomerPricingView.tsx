@@ -1,9 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Users2, Upload } from 'lucide-react';
+import { Search, Users2, Upload, Layers, TrendingUp, History, Sparkles } from 'lucide-react';
 import { useSearchParams } from 'react-router';
 import { useEntity } from '../../contexts/EntityContext';
 import { useData } from '../../contexts/DataContext';
 import CustomerRelationshipPanel from './CustomerRelationshipPanel';
+import LtvProjectionCard from './LtvProjectionCard';
+import ClientTimeline from './ClientTimeline';
+import NbaRecommendationCard from './NbaRecommendationCard';
+
+type CustomerTab = 'snapshot' | 'ltv' | 'timeline' | 'nba';
+
+const TABS: Array<{ id: CustomerTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { id: 'snapshot', label: 'Snapshot', icon: Layers },
+  { id: 'ltv',      label: 'LTV projection', icon: TrendingUp },
+  { id: 'timeline', label: 'Timeline', icon: History },
+  { id: 'nba',      label: 'Next-Best-Action', icon: Sparkles },
+];
 
 /**
  * Customer Pricing — full-page view that lets a banker:
@@ -21,6 +33,7 @@ const CustomerPricingView: React.FC = () => {
   const presetId = searchParams.get('id');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(presetId);
+  const [activeTab, setActiveTab] = useState<CustomerTab>('snapshot');
 
   useEffect(() => {
     // Preset wins on first load; fall back to first client
@@ -106,11 +119,39 @@ const CustomerPricingView: React.FC = () => {
           </ul>
         </aside>
 
-        <section className="rounded-lg border border-white/5 bg-white/[0.02] p-4 md:p-6">
+        <section className="space-y-4">
           {selectedId ? (
-            <CustomerRelationshipPanel clientId={selectedId} />
+            <>
+              <nav className="flex flex-wrap gap-1 rounded-lg border border-white/5 bg-white/[0.02] p-1">
+                {TABS.map(({ id, label, icon: Icon }) => {
+                  const isActive = activeTab === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setActiveTab(id)}
+                      className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider transition-colors ${
+                        isActive
+                          ? 'bg-white/[0.08] text-white'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {activeTab === 'snapshot' && <CustomerRelationshipPanel clientId={selectedId} />}
+              {activeTab === 'ltv'      && <LtvProjectionCard     clientId={selectedId} />}
+              {activeTab === 'timeline' && <ClientTimeline        clientId={selectedId} />}
+              {activeTab === 'nba'      && <NbaRecommendationCard clientId={selectedId} />}
+            </>
           ) : (
-            <div className="text-center text-xs text-slate-400">Select a client to see their relationship.</div>
+            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 text-center text-xs text-slate-400">
+              Select a client to see their relationship.
+            </div>
           )}
         </section>
       </div>

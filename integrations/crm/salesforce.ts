@@ -1,4 +1,12 @@
-import { fail, ok, type CrmAdapter, type CrmCustomer, type AdapterHealth, type AdapterResult } from '../types';
+import {
+  fail,
+  ok,
+  type CrmAdapter,
+  type CrmCustomer,
+  type CrmPulledEvent,
+  type AdapterHealth,
+  type AdapterResult,
+} from '../types';
 
 /**
  * Salesforce Financial Services Cloud adapter — STUB.
@@ -55,5 +63,32 @@ export class SalesforceCrmAdapter implements CrmAdapter {
 
   async searchCustomers(_query: string, _limit?: number): Promise<AdapterResult<CrmCustomer[]>> {
     return ok([]);
+  }
+
+  /**
+   * Pull events since `since`. Real impl maps FSC objects to CrmPulledEvent:
+   *
+   *   Task                    → 'contact'
+   *   Case (RecordType=Claim) → 'claim'
+   *   Opportunity (ClosedLost + ReasonCode like 'Churn%') → 'churn_signal'
+   *   Opportunity (ClosedWon)  → 'crosssell_won'
+   *   Opportunity (New)        → 'crosssell_attempt'
+   *
+   * Stub returns empty so the worker dispatcher can call without crashing
+   * when credentials are not yet provisioned. Returns `not_found` instead of
+   * `unreachable` so the caller can distinguish "adapter stub" from "real
+   * adapter is down and we should alert".
+   */
+  async pullCrmEvents(
+    _clientExternalId: string,
+    _since?: string,
+  ): Promise<AdapterResult<CrmPulledEvent[]>> {
+    if (!this.config.clientSecret && !this.config.privateKeyPem) {
+      return ok([]);
+    }
+    return fail(
+      'unreachable',
+      `salesforce-fsc pullCrmEvents stub — implement SOQL against Task/Case/Opportunity on ${this.config.instanceUrl}`,
+    );
   }
 }

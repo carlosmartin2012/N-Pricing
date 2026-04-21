@@ -24,6 +24,7 @@
     "check:data-quality": "npx tsx scripts/check-data-quality.ts",
     "check:security": "npx tsx scripts/check-dependency-audit.ts",
     "check:bundle": "npx tsx scripts/check-bundle-size.ts",
+    "seed:clv-demo": "npx tsx scripts/seed-clv-demo.ts",
     "format": "prettier --write \"**/*.{ts,tsx,json,css}\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

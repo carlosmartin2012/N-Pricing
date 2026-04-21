@@ -2,6 +2,7 @@ import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import type { Transaction } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
+import { useOptionalPricingState } from '../../contexts/PricingStateContext';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import DealInputPanel from './DealInputPanel';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
@@ -18,18 +19,30 @@ const PricingComparison = React.lazy(() => import('./PricingComparison'));
 const CalculatorRecommendationPanel = React.lazy(() => import('./CalculatorRecommendationPanel'));
 const PricingInsightsWidget = React.lazy(() => import('./PricingInsightsWidget'));
 const CustomerRelationshipPanel = React.lazy(() => import('../Customer360/CustomerRelationshipPanel'));
+const LtvImpactPanel = React.lazy(() => import('../Customer360/LtvImpactPanel'));
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
 
 interface Props {
-  dealParams: Transaction;
-  setDealParams: React.Dispatch<React.SetStateAction<Transaction>>;
+  /** Optional — if omitted, reads from PricingStateContext. Required for
+   *  callers not wrapped by <PricingStateProvider>. */
+  dealParams?: Transaction;
+  setDealParams?: React.Dispatch<React.SetStateAction<Transaction>>;
 }
 
 export const CalculatorWorkspace: React.FC<Props> = ({
-  dealParams,
-  setDealParams,
+  dealParams: dealParamsProp,
+  setDealParams: setDealParamsProp,
 }) => {
+  // Props win over context — preserves behaviour for tests that pass props
+  // without a provider. When both are absent, fall back to throwing via the
+  // strict hook so the regression is visible.
+  const ctx = useOptionalPricingState();
+  const dealParams = dealParamsProp ?? ctx?.dealParams;
+  const setDealParams = setDealParamsProp ?? ctx?.setDealParams;
+  if (!dealParams || !setDealParams) {
+    throw new Error('CalculatorWorkspace: no dealParams available (pass as prop or wrap in <PricingStateProvider>)');
+  }
   const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = useData();
   const { language } = useUI();
   const [matchedMethod, setMatchedMethod] = useState('Matched Maturity');
@@ -135,11 +148,30 @@ export const CalculatorWorkspace: React.FC<Props> = ({
 
         {/* Customer 360 — relationship context for the approval/analysis flow */}
         {dealParams.clientId && (
-          <div data-tour="customer-360-panel" className="w-full lg:col-span-12">
-            <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
-              <CustomerRelationshipPanel clientId={dealParams.clientId} />
-            </Suspense>
-          </div>
+          <>
+            <div data-tour="customer-360-panel" className="w-full lg:col-span-8">
+              <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                <CustomerRelationshipPanel clientId={dealParams.clientId} />
+              </Suspense>
+            </div>
+            <div data-tour="ltv-impact-panel" className="w-full lg:col-span-4">
+              <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                <LtvImpactPanel
+                  clientId={dealParams.clientId}
+                  candidate={{
+                    productType: dealParams.productType,
+                    currency: dealParams.currency,
+                    amountEur: dealParams.amount,
+                    tenorYears: (dealParams.durationMonths ?? 0) / 12,
+                    rateBps: ((currentResult?.finalClientRate ?? 0)) * 100,
+                    marginBps: (dealParams.marginTarget ?? 0) * 100,
+                    capitalEur: dealParams.amount * (dealParams.capitalRatio ?? 0.08),
+                    rarocAnnual: currentResult?.raroc ?? undefined,
+                  }}
+                />
+              </Suspense>
+            </div>
+          </>
         )}
 
         {/* Phase 1: IFRS 9 Stage/SICR + Cross-bonuses inputs */}

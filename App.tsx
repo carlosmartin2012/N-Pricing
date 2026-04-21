@@ -11,6 +11,8 @@ import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { CommandPalette } from './components/ui/CommandPalette';
 import { SkipNav } from './components/ui/SkipNav';
+import AppLayout from './components/ui/AppLayout';
+import { PricingStateProvider } from './contexts/PricingStateContext';
 import { useAuth } from './contexts/AuthContext';
 import { useWalkthrough } from './contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from './constants/walkthroughTours';
@@ -24,6 +26,13 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePresenceAwareness } from './hooks/usePresenceAwareness';
 
 const PricingWorkspace = React.lazy(() => import('./components/Pricing/PricingWorkspace'));
+const PricingLayoutShell = React.lazy(() => import('./components/Pricing/PricingLayoutShell'));
+const CalculatorWorkspaceLazy = React.lazy(() =>
+  import('./components/Calculator/CalculatorWorkspace').then((m) => ({ default: m.CalculatorWorkspace })),
+);
+const RAROCCalculatorLazy = React.lazy(() => import('./components/RAROC/RAROCCalculator'));
+const ShocksDashboardLazy = React.lazy(() => import('./components/Risk/ShocksDashboard'));
+const WhatIfWorkspaceLazy = React.lazy(() => import('./components/WhatIf/WhatIfWorkspace'));
 const MethodologyConfig = React.lazy(() => import('./components/Config/MethodologyConfig'));
 const DealBlotter = React.lazy(() => import('./components/Blotter/DealBlotter'));
 const YieldCurvePanel = React.lazy(() => import('./components/MarketData/YieldCurvePanel'));
@@ -256,39 +265,62 @@ const AppContent: React.FC = () => {
 
             <div className="relative min-h-0 flex-1">
               <ErrorBoundary>
+                {/* Pricing state provider — controlled by App.tsx's existing
+                    useState so prop-drilled components keep working. New
+                    components can read via usePricingState() without props. */}
+                <PricingStateProvider controlled={{ value: dealParams, setValue: setDealParams }}>
                 <Suspense fallback={<ViewSkeleton />}>
                   <Routes>
-                    {/* Pricing workspace — 4 tabs share the same shell (Deal · RAROC · Stress · What-If) */}
-                    <Route path="/pricing" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
-                    <Route path="/raroc" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
-                    <Route path="/stress-testing" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
-                    <Route path="/what-if" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
-                    <Route path="/blotter" element={<div className="relative z-0 h-full"><DealBlotter /></div>} />
-                    <Route path="/analytics" element={<div className="relative z-0 flex h-full flex-col"><ReportingDashboard /></div>} />
-                    <Route path="/discipline" element={<div className="relative z-0 flex h-full flex-col"><ReportingDashboard initialTab="discipline" /></div>} />
-                    <Route path="/market-data" element={<div className="relative z-0 h-full"><YieldCurvePanel /></div>} />
-                    <Route path="/behavioural" element={<div className="relative z-0 h-full"><BehaviouralModels /></div>} />
-                    <Route path="/methodology" element={<div className="relative z-0 h-full"><MethodologyConfig mode="ALL" /></div>} />
-                    <Route path="/accounting" element={<div className="relative z-0 h-full"><AccountingLedger /></div>} />
-                    <Route path="/users" element={<div className="relative z-0 flex h-full flex-col"><UserManagement /></div>} />
-                    <Route path="/audit" element={<div className="relative z-0 flex h-full flex-col"><AuditLog /></div>} />
-                    <Route path="/health" element={<div className="relative z-0 flex h-full flex-col"><HealthDashboard /></div>} />
-                    <Route path="/slo" element={<div className="relative z-0 flex h-full flex-col"><SLOPanel /></div>} />
-                    <Route path="/adapters" element={<div className="relative z-0 flex h-full flex-col"><AdapterHealthPanel /></div>} />
-                    <Route path="/manual" element={<div className="relative z-0 h-full"><UserManual /></div>} />
-                    <Route path="/notifications" element={<div className="relative z-0 flex h-full flex-col"><NotificationCenter /></div>} />
-                    <Route path="/ai" element={<div className="relative z-0 flex h-full flex-col"><GenAIChat /></div>} />
-                    <Route path="/target-grid" element={<div className="relative z-0 flex h-full flex-col"><TargetGridView /></div>} />
-                    <Route path="/customers" element={<div className="relative z-0 flex h-full flex-col"><CustomerPricingView /></div>} />
-                    <Route path="/campaigns" element={<div className="relative z-0 flex h-full flex-col"><CampaignsView /></div>} />
-                    <Route path="/escalations" element={<div className="relative z-0 flex h-full flex-col"><EscalationsView /></div>} />
-                    <Route path="/models" element={<div className="relative z-0 flex h-full flex-col"><ModelInventoryView /></div>} />
-                    <Route path="/dossiers" element={<div className="relative z-0 flex h-full flex-col"><DossiersView /></div>} />
-                    <Route path="/snapshots" element={<div className="relative z-0 flex h-full flex-col"><SnapshotReplayView /></div>} />
+                    {/* Pricing workspaces — 4 tabs share PricingLayoutShell
+                        (tab bar). Each child route reads dealParams from
+                        PricingStateContext. The PricingWorkspace wrapper
+                        (legacy shell) is preserved for rollback but no
+                        longer the default path target. */}
+                    <Route element={<PricingLayoutShell />}>
+                      <Route path="/pricing"        element={<CalculatorWorkspaceLazy />} />
+                      <Route path="/raroc"          element={<RAROCCalculatorLazy />} />
+                      <Route path="/stress-testing" element={<ShocksDashboardLazy />} />
+                      <Route path="/what-if"        element={<WhatIfWorkspaceLazy />} />
+                    </Route>
+                    {/* Legacy route — kept for emergency rollback. Remove
+                        once the nested layout above is stable in prod. */}
+                    <Route path="/pricing-legacy" element={<PricingWorkspace dealParams={dealParams} setDealParams={setDealParams} />} />
+
+                    {/* Bare layout — routes that want h-full without flex-col */}
+                    <Route element={<AppLayout variant="bare" />}>
+                      <Route path="/blotter"      element={<DealBlotter />} />
+                      <Route path="/market-data"  element={<YieldCurvePanel />} />
+                      <Route path="/behavioural"  element={<BehaviouralModels />} />
+                      <Route path="/methodology"  element={<MethodologyConfig mode="ALL" />} />
+                      <Route path="/accounting"   element={<AccountingLedger />} />
+                      <Route path="/manual"       element={<UserManual />} />
+                    </Route>
+
+                    {/* flex-col layout — routes that vertically stack toolbar + content */}
+                    <Route element={<AppLayout variant="flex-col" />}>
+                      <Route path="/analytics"     element={<ReportingDashboard />} />
+                      <Route path="/discipline"    element={<ReportingDashboard initialTab="discipline" />} />
+                      <Route path="/users"         element={<UserManagement />} />
+                      <Route path="/audit"         element={<AuditLog />} />
+                      <Route path="/health"        element={<HealthDashboard />} />
+                      <Route path="/slo"           element={<SLOPanel />} />
+                      <Route path="/adapters"      element={<AdapterHealthPanel />} />
+                      <Route path="/notifications" element={<NotificationCenter />} />
+                      <Route path="/ai"            element={<GenAIChat />} />
+                      <Route path="/target-grid"   element={<TargetGridView />} />
+                      <Route path="/customers"     element={<CustomerPricingView />} />
+                      <Route path="/campaigns"     element={<CampaignsView />} />
+                      <Route path="/escalations"   element={<EscalationsView />} />
+                      <Route path="/models"        element={<ModelInventoryView />} />
+                      <Route path="/dossiers"      element={<DossiersView />} />
+                      <Route path="/snapshots"     element={<SnapshotReplayView />} />
+                    </Route>
+
                     <Route path="/" element={<Navigate to="/pricing" replace />} />
                     <Route path="*" element={<Navigate to="/pricing" replace />} />
                   </Routes>
                 </Suspense>
+                </PricingStateProvider>
               </ErrorBoundary>
             </div>
           </div>

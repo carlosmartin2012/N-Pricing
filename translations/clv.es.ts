@@ -1,0 +1,48 @@
+import type { ClvTranslationKeys } from './clv.en';
+
+export const clvEs: ClvTranslationKeys = {
+  clvCustomerTab: 'Clientes',
+  clvSnapshotTab: 'Snapshot',
+  clvProjectionTab: 'Proyección LTV',
+  clvTimelineTab: 'Línea de tiempo',
+  clvNbaTab: 'Siguiente acción',
+
+  clvProjectionTitle: 'Valor Vida del Cliente',
+  clvCompute: 'Calcular CLV',
+  clvRecompute: 'Recalcular',
+  clvComputing: 'Calculando…',
+  clvPoint: 'CLV (puntual)',
+  clvBand: 'CLV p5 / p95',
+  clvShareOfWalletGap: 'Gap share-of-wallet',
+  clvBreakdownNii: 'NII',
+  clvBreakdownCrosssell: 'Crosssell',
+  clvBreakdownFees: 'Comisiones',
+  clvBreakdownChurnCost: 'Coste churn',
+  clvHazardRenewal: 'Hazard y renovación',
+  clvChurnLambda: 'λ churn',
+  clvRenewalProb: 'Renovación',
+  clvShareEst: 'SoW est.',
+  clvNoSnapshot: 'Aún no hay snapshot de CLV — lanza un cálculo para proyectar valor al horizonte.',
+
+  clvTimelineTitle: 'Línea de tiempo de la relación',
+  clvTimelineEmpty: 'Sin eventos todavía. Aquí aparecerán eventos de pricing, CRM y operaciones según evolucione la relación.',
+
+  clvNbaTitle: 'Siguiente Mejor Acción',
+  clvNbaGenerate: 'Generar NBA',
+  clvNbaGenerating: 'Generando…',
+  clvNbaConsume: 'Marcar consumida',
+  clvNbaConfidence: 'confianza',
+  clvNbaEmpty: 'No hay recomendaciones abiertas. Genera para rankear productos por ΔCLV esperado.',
+
+  clvImpactTitle: 'Previsualización ΔCLV',
+  clvImpactBefore: 'Antes',
+  clvImpactAfter: 'Después',
+  clvImpactDelta: 'ΔCLV',
+  clvImpactNii: 'NII',
+  clvImpactCrosssell: 'Crosssell',
+  clvImpactChurnReduction: 'Red. churn',
+  clvImpactCapitalOpportunity: 'Coste oport. capital',
+  clvImpactSelectClient: 'Selecciona un cliente para ver el impacto en CLV.',
+  clvImpactIncompleteDeal: 'Completa producto + importe + rate para ver ΔCLV.',
+  clvImpactComputing: 'calculando…',
+};

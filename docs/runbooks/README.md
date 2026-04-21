@@ -16,6 +16,7 @@ once you know the team that operates the deployment.
 | [campaign-volume-exhausted.md](./campaign-volume-exhausted.md) | Channel quote rejected because campaign hit `max_volume_eur` |
 | [adapter-down.md](./adapter-down.md) | `adapterRegistry.healthAll()` returns ok=false for a registered integration |
 | [backtest-drift.md](./backtest-drift.md) | `detectDrift().severity === 'breached'` after a backtesting run |
+| [clv-ops.md](./clv-ops.md) | LTV worker stalled · stale snapshots · NBA bias · preview-ltv-impact latency |
 | [feature-flag-kill-switch.md](./feature-flag-kill-switch.md) | Need to halt all writes for a tenant immediately |
 
 ## Proactive playbooks
