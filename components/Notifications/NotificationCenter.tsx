@@ -4,6 +4,7 @@ import { Panel } from '../ui/LayoutComponents';
 import { useNotifications } from '../../hooks/useNotifications';
 import type { Notification } from '../../types';
 import { useUI } from '../../contexts/UIContext';
+import { systemTranslations } from '../../translations/index';
 
 type FilterType = 'all' | Notification['type'];
 
@@ -35,7 +36,8 @@ function formatDate(dateStr: string): string {
 
 const NotificationCenter: React.FC = () => {
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
-  const { setCurrentView } = useUI();
+  const { setCurrentView, language } = useUI();
+  const ts = systemTranslations(language);
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
 
@@ -53,7 +55,7 @@ const NotificationCenter: React.FC = () => {
 
   return (
     <Panel
-      title="Notifications"
+      title={ts.sysNotificationsHeader}
       className="h-full"
       actions={
         <div className="flex items-center gap-2">
@@ -63,7 +65,7 @@ const NotificationCenter: React.FC = () => {
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium text-[var(--nfq-accent)] transition-colors hover:bg-[rgba(6,182,212,0.08)]"
             >
               <CheckCheck size={14} />
-              Mark all read ({unreadCount})
+              {ts.sysNotificationsMarkAllRead} ({unreadCount})
             </button>
           )}
         </div>
@@ -106,7 +108,7 @@ const NotificationCenter: React.FC = () => {
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <Inbox size={36} className="text-[var(--nfq-text-muted)] opacity-40" />
               <p className="text-sm text-[var(--nfq-text-muted)]">
-                {showUnreadOnly ? 'No unread notifications' : 'No notifications'}
+                {showUnreadOnly ? 'No unread notifications' : ts.sysNotificationsEmpty}
               </p>
             </div>
           ) : (
