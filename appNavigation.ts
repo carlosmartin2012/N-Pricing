@@ -142,7 +142,11 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'SHOCKS',      label: 'Stress Test',       icon: Zap,           section: 'Pricing', path: '/stress-testing' },
     { id: 'WHAT_IF',     label: 'What-If',           icon: FlaskConical,  section: 'Pricing', path: '/what-if' },
     { id: 'BLOTTER',     label: t.dealBlotter,       icon: FileText,      section: 'Pricing', path: '/blotter' },
-    { id: 'ACCOUNTING',  label: t.accountingLedger,  icon: LayoutDashboard, section: 'Pricing', path: '/accounting' },
+    // Accounting Ledger demoted to AUX (reachable via ⌘K) on 2026-04-22.
+    // Reason: today the view mixes a FTP-summary + T-accounts + journal
+    // ledger for no specific daily user. The valuable use case —
+    // reconciliation of BU vs Treasury entries — is a follow-up rewrite.
+    // Keep the route alive so deep links + E2E still work.
 
     // ─────────────── MARKET DATA ───────────────
     // Inputs to the motor. Methodology belongs here because it is engine
@@ -195,7 +199,8 @@ export interface AuxDestination {
 }
 
 export const AUX_DESTINATIONS: AuxDestination[] = [
-  { id: 'GOV_SNAPSHOTS', label: 'Snapshot Replay', sublabel: 'Replay grabaciones del motor',                        icon: History,    path: '/snapshots', section: 'Governance' },
-  { id: 'GOV_SLO',       label: 'SLO Dashboard',   sublabel: 'p50/p95/p99 del motor',                               icon: HeartPulse, path: '/slo',       section: 'Governance' },
-  { id: 'GOV_ADAPTERS',  label: 'Adapter Health',  sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO', icon: Plug,       path: '/adapters',  section: 'Governance' },
+  { id: 'ACCOUNTING',    label: 'Accounting Ledger', sublabel: 'FTP journal + BU vs Treasury T-accounts (legacy)',    icon: LayoutDashboard, path: '/accounting', section: 'Pricing' },
+  { id: 'GOV_SNAPSHOTS', label: 'Snapshot Replay',   sublabel: 'Replay grabaciones del motor',                        icon: History,         path: '/snapshots',  section: 'Governance' },
+  { id: 'GOV_SLO',       label: 'SLO Dashboard',     sublabel: 'p50/p95/p99 del motor',                               icon: HeartPulse,      path: '/slo',        section: 'Governance' },
+  { id: 'GOV_ADAPTERS',  label: 'Adapter Health',    sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO', icon: Plug,            path: '/adapters',   section: 'Governance' },
 ];
