@@ -120,10 +120,10 @@ const UserManual: React.FC = () => {
             <TocItem targetId="whats-new" label={L("What's new", 'Novedades')} />
             <TocItem targetId="architecture" label={L('Architecture', 'Arquitectura')} />
 
-            <TocSectionLabel label={L('Commercial', 'Comercial')} accent="text-emerald-400" />
-            <TocItem targetId="customers" label={L('Customers (360°)', 'Clientes (360°)')} accent="bg-emerald-400" />
-            <TocItem targetId="campaigns" label={L('Campaigns', 'Campañas')} accent="bg-emerald-400" />
-            <TocItem targetId="target-grid" label={L('Target Grid', 'Target Grid')} accent="bg-emerald-400" />
+            <TocSectionLabel label={L('Relationships', 'Relaciones')} accent="text-emerald-400" />
+            <TocItem targetId="customers"   label={L('Clients (360°)', 'Clientes (360°)')} accent="bg-emerald-400" />
+            <TocItem targetId="campaigns"   label={L('Campaigns', 'Campañas')}              accent="bg-emerald-400" />
+            <TocItem targetId="target-grid" label={L('Targets', 'Targets')}                 accent="bg-emerald-400" />
 
             <TocSectionLabel label="Pricing" accent="text-cyan-400" />
             <TocItem targetId="pricing-engine" label={L('Pricing Engine (4 tabs)', 'Motor de Pricing (4 tabs)')} accent="bg-cyan-400" />

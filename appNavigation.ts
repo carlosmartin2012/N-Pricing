@@ -7,15 +7,18 @@ import {
   BrainCircuit,
   Calculator,
   FileText,
+  FlaskConical,
   GitBranch,
   Grid3X3,
   HeartPulse,
   History,
   LayoutDashboard,
+  Percent,
   Plug,
   Settings,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
   Target,
   TrendingUp,
   Users,
@@ -32,21 +35,22 @@ type NavigationLabels = typeof translations.en;
 // ---------------------------------------------------------------------------
 
 const VIEW_PATHS: Record<ViewState, string> = {
-  // Pricing workspace — 4 tabs, still addressable individually for deep links
+  // Pricing workspace — 4 tabs, now surfaced as individual sidebar entries
   CALCULATOR: '/pricing',
   RAROC: '/raroc',
   SHOCKS: '/stress-testing',
   WHAT_IF: '/what-if',
-  // Commercial
+  // Relationships (was "Commercial")
   CUSTOMER_360: '/customers',
   CAMPAIGNS: '/campaigns',
   TARGET_GRID: '/target-grid',
-  // Post-trade
+  // Post-trade (kept inside Pricing bucket)
   BLOTTER: '/blotter',
   ACCOUNTING: '/accounting',
-  // Insights
+  // Insights (pure outputs)
   REPORTING: '/analytics',
   DISCIPLINE: '/discipline',
+  // Market Data (inputs)
   MARKET_DATA: '/market-data',
   BEHAVIOURAL: '/behavioural',
   // Governance
@@ -98,39 +102,66 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
 // ---------------------------------------------------------------------------
 
 /**
- * Main sidebar navigation — 4 buckets aligned with the pricing lifecycle.
+ * Main sidebar navigation — customer-centric taxonomy (Option B, 2026-04).
  *
- * 1. COMMERCIAL  → pre-deal: who we offer to and how
- * 2. PRICING     → calculate + execute (workspace with Deal/RAROC/Stress/What-If tabs + post-trade)
- * 3. INSIGHTS    → understand portfolio + market + models
- * 4. GOVERNANCE  → control + audit + reproducibility
+ * Five buckets aligned with the *relationship* lifecycle rather than the
+ * per-deal lifecycle that governed the previous 4-bucket layout:
  *
- * The 4 pricing tabs (Calculator/RAROC/Shocks/What-If) share a single entry
- * "Pricing Engine" — tabs live inside PricingWorkspace, not in the sidebar.
+ *   1. RELATIONSHIPS → who the bank prices to (Clients, Campaigns, Targets)
+ *   2. PRICING       → deal execution surface (Calculator + RAROC + Stress
+ *                      + What-If as first-class entries, plus post-trade
+ *                      Blotter + Accounting)
+ *   3. MARKET DATA   → inputs feeding the motor (Yield Curves, Behavioural
+ *                      Models, Methodology)
+ *   4. INSIGHTS      → pure outputs (Analytics, Discipline)
+ *   5. GOVERNANCE    → control + audit + reproducibility
+ *   + ASSISTANT      → standalone AI entry
+ *
+ * Rationale: Phase 6 introduced CLV + 360º temporal → the product story
+ * moved from "price every deal well" to "price every relationship well".
+ * The sidebar has to reflect that model; calling it COMMERCIAL + burying
+ * the 4 pricing tabs inside one entry made the model invisible.
+ *
+ * Granular Pricing entries (Calculator / RAROC / Stress / What-If) match
+ * the `<PricingLayoutShell>` nested routes introduced in Phase 6.1 — each
+ * workspace is a top-level route, so sidebar-level entries are coherent.
  */
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   return [
-    // ─────────────── COMMERCIAL ───────────────
-    { id: 'CUSTOMER_360', label: 'Customers', icon: Users, section: 'Commercial', path: '/customers' },
-    { id: 'CAMPAIGNS', label: 'Campaigns', icon: Target, section: 'Commercial', path: '/campaigns' },
-    { id: 'TARGET_GRID', label: t.targetGrid, icon: Grid3X3, section: 'Commercial', path: '/target-grid' },
+    // ─────────────── RELATIONSHIPS ───────────────
+    { id: 'CUSTOMER_360', label: 'Clients',     icon: Users,   section: 'Relationships', path: '/customers' },
+    { id: 'CAMPAIGNS',    label: 'Campaigns',   icon: Target,  section: 'Relationships', path: '/campaigns' },
+    { id: 'TARGET_GRID',  label: 'Targets',     icon: Grid3X3, section: 'Relationships', path: '/target-grid' },
 
     // ─────────────── PRICING ───────────────
-    // Single entry — tabs live inside PricingWorkspace
-    { id: 'CALCULATOR', label: t.pricingEngine, icon: Calculator, section: 'Pricing', path: '/pricing' },
-    { id: 'BLOTTER', label: t.dealBlotter, icon: FileText, section: 'Pricing', path: '/blotter' },
-    { id: 'ACCOUNTING', label: t.accountingLedger, icon: LayoutDashboard, section: 'Pricing', path: '/accounting' },
+    // The 4 workspaces are now first-class entries (nested routes under
+    // <PricingLayoutShell>). Post-trade stays in this bucket because its
+    // gravity is pricing-adjacent, not an insight or governance artefact.
+    { id: 'CALCULATOR',  label: 'Calculator',        icon: Calculator,    section: 'Pricing', path: '/pricing' },
+    { id: 'RAROC',       label: 'RAROC',             icon: Percent,       section: 'Pricing', path: '/raroc' },
+    { id: 'SHOCKS',      label: 'Stress Test',       icon: Zap,           section: 'Pricing', path: '/stress-testing' },
+    { id: 'WHAT_IF',     label: 'What-If',           icon: FlaskConical,  section: 'Pricing', path: '/what-if' },
+    { id: 'BLOTTER',     label: t.dealBlotter,       icon: FileText,      section: 'Pricing', path: '/blotter' },
+    { id: 'ACCOUNTING',  label: t.accountingLedger,  icon: LayoutDashboard, section: 'Pricing', path: '/accounting' },
+
+    // ─────────────── MARKET DATA ───────────────
+    // Inputs to the motor. Methodology belongs here because it is engine
+    // *configuration*, not a control artefact — and it sits upstream of
+    // every pricing call.
+    { id: 'MARKET_DATA', label: t.yieldCurves,       icon: TrendingUp, section: 'Market Data', path: '/market-data' },
+    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity,   section: 'Market Data', path: '/behavioural' },
+    { id: 'METHODOLOGY', label: 'Methodology',       icon: GitBranch,  section: 'Market Data', path: '/methodology' },
 
     // ─────────────── INSIGHTS ───────────────
-    { id: 'REPORTING', label: 'Analytics', icon: BarChart4, section: 'Insights', path: '/analytics' },
-    { id: 'MARKET_DATA', label: t.yieldCurves, icon: TrendingUp, section: 'Insights', path: '/market-data' },
-    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity, section: 'Insights', path: '/behavioural' },
+    // Outputs only: portfolio analytics + pricing discipline variance.
+    // Discipline used to live in AUX — it's analytics, belongs here.
+    { id: 'REPORTING',  label: 'Analytics',          icon: BarChart4, section: 'Insights', path: '/analytics' },
+    { id: 'DISCIPLINE', label: 'Pricing Discipline', icon: Sparkles,  section: 'Insights', path: '/discipline' },
 
     // ─────────────── GOVERNANCE ───────────────
-    { id: 'METHODOLOGY', label: 'Methodology', icon: GitBranch, section: 'Governance', path: '/methodology' },
     { id: 'MODEL_INVENTORY', label: 'Model Inventory', icon: BookOpenCheck, section: 'Governance', path: '/models' },
-    { id: 'DOSSIERS', label: 'Dossiers', icon: FileSignature, section: 'Governance', path: '/dossiers' },
-    { id: 'ESCALATIONS', label: 'Escalations', icon: ShieldAlert, section: 'Governance', path: '/escalations' },
+    { id: 'DOSSIERS',        label: 'Dossiers',        icon: FileSignature, section: 'Governance', path: '/dossiers' },
+    { id: 'ESCALATIONS',     label: 'Escalations',     icon: ShieldAlert,   section: 'Governance', path: '/escalations' },
 
     // ─────────────── ASSISTANT ───────────────
     { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Assistant', path: '/ai' },
@@ -140,21 +171,19 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
 export function buildBottomNavItems(t: NavigationLabels): NavItem[] {
   return [
     { id: 'USER_CONFIG', label: t.userConfig, icon: Settings },
-    { id: 'USER_MGMT', label: t.userMgmt, icon: Users, path: '/users' },
-    { id: 'AUDIT_LOG', label: t.auditLog, icon: ShieldCheck, path: '/audit' },
-    { id: 'HEALTH', label: t.systemHealth, icon: HeartPulse, section: 'System', path: '/health' },
-    { id: 'MANUAL', label: t.manual, icon: BookOpen, path: '/manual' },
+    { id: 'USER_MGMT',   label: t.userMgmt,   icon: Users,       path: '/users' },
+    { id: 'AUDIT_LOG',   label: t.auditLog,   icon: ShieldCheck, path: '/audit' },
+    { id: 'HEALTH',      label: t.systemHealth, icon: HeartPulse, section: 'System', path: '/health' },
+    { id: 'MANUAL',      label: t.manual,     icon: BookOpen,    path: '/manual' },
   ];
 }
 
 /**
- * Additional destinations that are NOT in the main sidebar but are reachable
- * via Command Palette (⌘K). Keeps the sidebar at ~11 items while still
- * exposing niche destinations for power users.
+ * Additional destinations reachable via Command Palette (⌘K) only.
  *
- * SLO, Adapter Health and Snapshot Replay are operational views for
- * governance/MRM roles — too specialized for the main nav but essential to
- * have discoverable.
+ * After the Option B evolution: RAROC / Stress / What-If / Discipline are
+ * no longer aux — they are first-class sidebar entries. AUX is reduced to
+ * operational / MRM-only destinations too specialised for daily use.
  */
 export interface AuxDestination {
   id: string;
@@ -166,11 +195,7 @@ export interface AuxDestination {
 }
 
 export const AUX_DESTINATIONS: AuxDestination[] = [
-  { id: 'PRICING_RAROC',     label: 'RAROC Terminal',    sublabel: 'Pricing \u2192 tab RAROC',    icon: Calculator,    path: '/raroc',          section: 'Pricing' },
-  { id: 'PRICING_STRESS',    label: 'Stress Testing',    sublabel: 'Pricing \u2192 tab Stress',   icon: Zap,           path: '/stress-testing', section: 'Pricing' },
-  { id: 'PRICING_WHAT_IF',   label: 'What-If',           sublabel: 'Pricing \u2192 tab What-If',  icon: Calculator,    path: '/what-if',        section: 'Pricing' },
-  { id: 'INSIGHTS_DISCIPLINE', label: 'Pricing Discipline', sublabel: 'Analytics \u2192 tab Discipline', icon: Target,  path: '/discipline',     section: 'Insights' },
-  { id: 'GOV_SNAPSHOTS',     label: 'Snapshot Replay',   sublabel: 'Replay grabaciones del motor',  icon: History,   path: '/snapshots',      section: 'Governance' },
-  { id: 'GOV_SLO',           label: 'SLO Dashboard',     sublabel: 'p50/p95/p99 del motor',         icon: HeartPulse,path: '/slo',            section: 'Governance' },
-  { id: 'GOV_ADAPTERS',      label: 'Adapter Health',    sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO', icon: Plug, path: '/adapters', section: 'Governance' },
+  { id: 'GOV_SNAPSHOTS', label: 'Snapshot Replay', sublabel: 'Replay grabaciones del motor',                        icon: History,    path: '/snapshots', section: 'Governance' },
+  { id: 'GOV_SLO',       label: 'SLO Dashboard',   sublabel: 'p50/p95/p99 del motor',                               icon: HeartPulse, path: '/slo',       section: 'Governance' },
+  { id: 'GOV_ADAPTERS',  label: 'Adapter Health',  sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO', icon: Plug,       path: '/adapters',  section: 'Governance' },
 ];
