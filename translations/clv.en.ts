@@ -59,6 +59,18 @@ export const clvEn: ClvPack = {
   clvImpactSelectClient: 'Select a client to see CLV impact.',
   clvImpactIncompleteDeal: 'Complete product + amount + rate to preview ΔCLV.',
   clvImpactComputing: 'computing…',
+
+  // Empty-state / initialize banner
+  clvBannerTitleNoData: 'Customer 360 not yet populated',
+  clvBannerBodyNoData: 'This client has no positions on file. Import positions from your core banking CSV or run the CLV demo seed to see the full picture.',
+  clvBannerImportCta: 'Import positions (CSV)',
+  clvBannerSeedHint: 'Tip: `npm run seed:clv-demo` inserts 3 demo clients with positions, metrics and LTV precomputed.',
+
+  clvBannerTitleNoSnapshot: 'CLV not computed yet',
+  clvBannerBodyNoSnapshot: 'This client has positions but no LTV snapshot. One click runs the engine and ranks 2-3 Next-Best-Action candidates.',
+  clvBannerInitializeCta: 'Initialize CLV for this client',
+  clvBannerInitializing: 'Computing CLV + NBA…',
+  clvBannerInitializeError: 'Initialization failed. Retry or contact ops.',
 };
 
 export type ClvTranslationKeys = typeof clvEn;
