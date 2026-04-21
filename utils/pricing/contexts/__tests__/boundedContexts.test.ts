@@ -11,13 +11,26 @@ import * as pricing from '../..';
  */
 
 describe('utils/pricing root barrel exposes bounded contexts', () => {
-  it('exposes the 6 bounded contexts as namespace exports', () => {
+  it('exposes the 7 bounded contexts as namespace exports', () => {
     expect(pricing.market).toBeDefined();
     expect(pricing.governance).toBeDefined();
     expect(pricing.capital).toBeDefined();
     expect(pricing.liquidity).toBeDefined();
     expect(pricing.credit).toBeDefined();
     expect(pricing.analytics).toBeDefined();
+    expect(pricing.core).toBeDefined();
+  });
+});
+
+describe('core context', () => {
+  it('exposes the orchestrator + formula + bitemporal + model inventory', () => {
+    expect(typeof pricing.core.calculatePricing).toBe('function');
+    expect(typeof pricing.core.batchReprice).toBe('function');
+    expect(typeof pricing.core.resolveEffectiveTenors).toBe('function');
+    expect(pricing.core.DEFAULT_PRICING_SHOCKS).toBeDefined();
+    expect(typeof pricing.core.inferFormulaFromProduct).toBe('function');
+    expect(pricing.core.bitemporal).toBeDefined();
+    expect(pricing.core.modelInventory).toBeDefined();
   });
 });
 

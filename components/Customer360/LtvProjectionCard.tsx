@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { TrendingUp, RefreshCw, Gauge, BarChart3 } from 'lucide-react';
 import { useClientLtvHistoryQuery, useRecomputeLtv } from '../../hooks/queries/useClvQueries';
+import { useUI } from '../../contexts/UIContext';
+import { clvTranslations } from '../../translations/index';
 
 interface Props {
   clientId: string;
@@ -13,6 +15,8 @@ const fmtEur = (v: number | null | undefined): string => {
 const fmtPct = (v: number | null | undefined): string => (v === null || v === undefined ? '—' : `${(v * 100).toFixed(1)}%`);
 
 const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
+  const { language } = useUI();
+  const t = clvTranslations(language);
   const { data: history = [], isLoading: loading } = useClientLtvHistoryQuery(clientId);
   const recomputeMutation = useRecomputeLtv(clientId);
   const recomputing = recomputeMutation.isPending;
@@ -35,7 +39,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-emerald-400" />
-            <span className="nfq-label text-[10px] text-slate-300">Customer Lifetime Value</span>
+            <span className="nfq-label text-[10px] text-slate-300">{t.clvProjectionTitle}</span>
           </div>
           <button
             type="button"
@@ -44,7 +48,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
             className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
           >
             <RefreshCw className={`h-3 w-3 ${recomputing ? 'animate-spin' : ''}`} />
-            {recomputing ? 'Computing…' : 'Compute CLV'}
+            {recomputing ? t.clvComputing : t.clvCompute}
           </button>
         </div>
         <p className="mt-4 text-center text-xs text-slate-400">
@@ -73,16 +77,16 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
           className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
         >
           <RefreshCw className={`h-3 w-3 ${recomputing ? 'animate-spin' : ''}`} />
-          Recompute
+          {t.clvRecompute}
         </button>
       </header>
 
       {latest && bandRange && (
         <>
           <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <Metric label="CLV (point)"    value={fmtEur(latest.clvPointEur)} accent="emerald" />
-            <Metric label="CLV p5 / p95"   value={`${fmtEur(bandRange.p5)} – ${fmtEur(bandRange.p95)}`} accent="sky" />
-            <Metric label="Share of wallet gap" value={fmtPct(latest.shareOfWalletGap)} accent="amber" />
+            <Metric label={t.clvPoint}              value={fmtEur(latest.clvPointEur)} accent="emerald" />
+            <Metric label={t.clvBand}               value={`${fmtEur(bandRange.p5)} – ${fmtEur(bandRange.p95)}`} accent="sky" />
+            <Metric label={t.clvShareOfWalletGap}   value={fmtPct(latest.shareOfWalletGap)} accent="amber" />
           </section>
 
           <section className="space-y-2">
@@ -114,7 +118,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
 
           <section className="rounded border border-white/5 bg-white/[0.02] p-3">
             <div className="nfq-label text-[9px] text-slate-400 mb-2 flex items-center gap-2">
-              <Gauge className="h-3 w-3" /> Hazard & renewal
+              <Gauge className="h-3 w-3" /> {t.clvHazardRenewal}
             </div>
             <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-200 sm:grid-cols-4">
               <span>Churn λ {fmtPct(latest.churnHazardAnnual ?? undefined)}</span>
