@@ -36,14 +36,23 @@ shallow (`...shared, ...commercial, ...pricing, ...`) y expone
 
 El consumidor sigue usando `translations.es.xxx` — cero breaking change.
 
-## Plan de migración
+## Plan de migración — estado actual
 
-1. **Sprint A** (1 día): este scaffolding + `clv.*.ts` (namespace nuevo, no
-   hay que mover nada existente).
-2. **Sprint B** (2 días): extraer `governance` + `insights` (secciones que
-   cambian poco → menor riesgo).
-3. **Sprint C** (2 días): `commercial` + `pricing`.
-4. **Sprint D** (1 día): borrar `translations.ts` raíz.
+| Ola | Namespace | Estado | Claves |
+|---|---|---|---|
+| T-A | `clv` | ✅ Done | ~30 |
+| T-B | `commercial` | ✅ Done | ~16 |
+| T-C | `pricing` | ✅ Done | ~20 |
+| T-D | `governance` | ✅ Done | ~25 |
+| T-E | `insights` | ✅ Done | ~15 |
+| T-F | `system` + `shared` | ✅ Done | ~50 |
+| T-G | Migrar componentes del monolito a estos namespaces | Pendiente (mecánico) |
+| T-H | Borrar `translations.ts` raíz | Pendiente (bloqueado por T-G) |
+
+Los 7 namespaces están en producción como **source of truth** para
+cualquier clave nueva. La sweep de migración de claves existentes
+(T-G → T-H) es puramente mecánica: localizar consumidores en
+componentes, actualizar `import` y regenerar.
 
 Cada sprint sólo toca UN namespace y es verificable con `npm run typecheck`.
 

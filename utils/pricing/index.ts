@@ -7,3 +7,5 @@ export * as market     from './contexts/market';
 export * as governance from './contexts/governance';
 export * as capital    from './contexts/capital';
 export * as liquidity  from './contexts/liquidity';
+export * as credit     from './contexts/credit';
+export * as analytics  from './contexts/analytics';

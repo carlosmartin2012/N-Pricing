@@ -67,8 +67,8 @@ liquidity) — eso indicaría que la frontera está mal dibujada.
 | C-2 | `market/` | Barrel re-exportando curveUtils + interpolation + NSS | ✅ **Done** (re-export phase) |
 | C-3 | `capital/` | Barrel: CRR3 output floor + buffers | ✅ **Done** (re-export phase) |
 | C-4 | `liquidity/` | Barrel: LCR + NSFR + LP curves + SDR | ✅ **Done** (re-export phase) |
-| C-5 | `credit/` | Mayor: `creditRiskEngine`, `creditLifecycle`, `delegationEngine`, IFRS9 | Pendiente |
-| C-6 | `analytics/` | Post-trade (expostRaroc, rarocRealization) | Pendiente |
+| C-5 | `credit/` | Barrel: creditRiskEngine + creditLifecycle + delegationEngine | ✅ **Done** (re-export phase) |
+| C-6 | `analytics/` | Barrel: expostRaroc + rarocRealization + priceElasticity + elasticityCalibration | ✅ **Done** (re-export phase) |
 | C-7 | `core/` | Orquestador y tipos compartidos al final | Pendiente |
 
 **Acceso unificado**: desde cualquier caller nuevo se puede importar los
