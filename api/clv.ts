@@ -7,6 +7,8 @@ import type {
   LtvAssumptions,
   MarginalLtvImpact,
   LtvComputation,
+  PipelineNbaRow,
+  PipelineStatusFilter,
 } from '../types/clv';
 
 /**
@@ -72,6 +74,21 @@ export async function recomputeClientLtv(
 }
 
 // ---------- NBA ----------
+
+/**
+ * Firmwide Pipeline: every NBA (default = open only) for the entity,
+ * enriched with client name/segment/rating. Powers the /pipeline view.
+ */
+export async function listPipelineNba(
+  status: PipelineStatusFilter = 'open',
+): Promise<PipelineNbaRow[]> {
+  try {
+    const rows = await apiGet<PipelineNbaRow[]>(`/clv/nba?status=${status}`);
+    return Array.isArray(rows) ? rows : [];
+  } catch {
+    return [];
+  }
+}
 
 export async function listClientNba(
   clientId: string,

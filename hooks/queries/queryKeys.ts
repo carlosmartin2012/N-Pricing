@@ -24,6 +24,7 @@ export const queryKeys = {
     timeline: (clientId: string) => ['clv', 'timeline', clientId] as const,
     ltvHistory: (clientId: string) => ['clv', 'ltv', clientId] as const,
     nba: (clientId: string, onlyOpen: boolean) => ['clv', 'nba', clientId, onlyOpen] as const,
+    pipelineNba: (status: string) => ['clv', 'pipeline', 'nba', status] as const,
     previewImpact: (clientId: string, fingerprint: string) =>
       ['clv', 'preview-impact', clientId, fingerprint] as const,
   },

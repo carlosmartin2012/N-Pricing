@@ -124,6 +124,12 @@ describe('appNavigation routing helpers', () => {
       const main = items.find((i) => i.id === 'ACCOUNTING');
       expect(main).toBeUndefined();
     });
+
+    it('includes PIPELINE under Relationships (Phase 6.8)', () => {
+      const pipeline = items.find((i) => i.id === 'PIPELINE');
+      expect(pipeline?.section).toBe('Relationships');
+      expect(pipeline?.path).toBe('/pipeline');
+    });
   });
 
   describe('AUX_DESTINATIONS', () => {

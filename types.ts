@@ -505,6 +505,7 @@ export type ViewState =
   | 'DISCIPLINE'
   | 'WHAT_IF'
   | 'CUSTOMER_360'
+  | 'PIPELINE'
   | 'CAMPAIGNS'
   | 'ESCALATIONS'
   | 'MODEL_INVENTORY'

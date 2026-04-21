@@ -146,6 +146,19 @@ export interface NbaRecommendation {
   consumedBy: string | null;
 }
 
+/**
+ * Firmwide Pipeline row — a NbaRecommendation enriched with the client's
+ * name / segment / rating (server-side JOIN). Shape expected by the
+ * `/pipeline` view; not persisted anywhere (derived projection).
+ */
+export interface PipelineNbaRow extends NbaRecommendation {
+  clientName: string;
+  clientSegment: string | null;
+  clientRating: string | null;
+}
+
+export type PipelineStatusFilter = 'open' | 'consumed' | 'all';
+
 // ---------------------------------------------------------------------------
 // Engine inputs / outputs — no I/O
 // ---------------------------------------------------------------------------

@@ -365,6 +365,56 @@ router.post('/clients/:clientId/ltv/recompute', async (req, res) => {
 
 // ---------- NBA ----------
 
+/**
+ * Firmwide Pipeline — cross-client NBA feed (Phase 6.8).
+ *
+ * Returns every open NBA recommendation for the current entity enriched
+ * with the client name + segment + rating (JOIN clients). Powers the
+ * new /pipeline sidebar view — the banker's landing page for "what
+ * actions need my attention across the book today".
+ *
+ * Design choices:
+ *   - JOIN done server-side (1 query) instead of N+1 on the client.
+ *   - Defaults to open only; ?status=consumed|all opt into other rows.
+ *   - LIMIT high (500) because pipeline is a work queue, not a page —
+ *     filtering happens client-side in the UI.
+ *   - Entity-scoped via the usual req.tenancy guard.
+ */
+router.get('/nba', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const statusParam = String(req.query.status ?? 'open');
+    let statusClause = 'AND nba.consumed_at IS NULL';
+    if (statusParam === 'consumed') statusClause = 'AND nba.consumed_at IS NOT NULL';
+    else if (statusParam === 'all') statusClause = '';
+
+    const rows = await query<NbaRow & { client_name: string; client_segment: string | null; client_rating: string | null }>(
+      `SELECT nba.*,
+              c.name    AS client_name,
+              c.segment AS client_segment,
+              c.rating  AS client_rating
+       FROM client_nba_recommendations nba
+       JOIN clients c ON c.id = nba.client_id
+       WHERE nba.entity_id = $1
+         ${statusClause}
+       ORDER BY nba.generated_at DESC
+       LIMIT 500`,
+      [req.tenancy.entityId],
+    );
+    res.json(rows.map((row) => ({
+      ...mapNba(row),
+      clientName:    row.client_name,
+      clientSegment: row.client_segment,
+      clientRating:  row.client_rating,
+    })));
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 router.get('/clients/:clientId/nba', async (req, res) => {
   try {
     if (!req.tenancy) {
