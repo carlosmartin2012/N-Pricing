@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Target, RefreshCw, Plus, CheckCircle2, XCircle } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
+import { useUI } from '../../contexts/UIContext';
+import { commercialTranslations } from '../../translations/index';
 import * as campaignsApi from '../../api/campaigns';
 import type { PricingCampaign, CampaignStatus, ChannelType } from '../../types/channels';
 import { createLogger } from '../../utils/logger';
@@ -47,6 +49,8 @@ const EMPTY_FORM: NewCampaignForm = {
 
 const CampaignsView: React.FC = () => {
   const { activeEntity } = useEntity();
+  const { language } = useUI();
+  const t = commercialTranslations(language);
   const [list, setList] = useState<PricingCampaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -104,7 +108,7 @@ const CampaignsView: React.FC = () => {
         <div className="flex items-center gap-3">
           <Target className="h-5 w-5 text-amber-400" />
           <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
-            Pricing Campaigns
+            {t.commercialCampaignsHeader}
           </h2>
           {activeEntity && <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>}
         </div>
@@ -115,7 +119,7 @@ const CampaignsView: React.FC = () => {
           </button>
           <button onClick={() => setShowForm((v) => !v)} className="nfq-btn-primary flex items-center gap-1 px-3 py-1.5 text-xs">
             <Plus className="h-3 w-3" />
-            New campaign
+            {t.commercialCampaignNew}
           </button>
         </div>
       </header>
@@ -176,7 +180,7 @@ const CampaignsView: React.FC = () => {
 
       {list.length === 0 && !loading ? (
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-8 text-center text-xs text-slate-400">
-          No campaigns yet. Create one to start delivering pricing deltas through the channel API.
+          {t.commercialCampaignsEmpty}
         </div>
       ) : (
         <div className="space-y-4">

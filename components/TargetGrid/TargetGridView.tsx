@@ -5,6 +5,7 @@ import { TENOR_BUCKETS } from '../../types';
 import { useSnapshotsQuery, useGridCellsQuery } from '../../hooks/queries/useTargetGridQueries';
 import { useUI } from '../../contexts/UIContext';
 import { useEntity } from '../../contexts/EntityContext';
+import { commercialTranslations } from '../../translations/index';
 import SnapshotSelector from './SnapshotSelector';
 import TargetGridTable from './TargetGridTable';
 import TargetGridHeatmap from './TargetGridHeatmap';
@@ -15,7 +16,8 @@ import SnapshotDiffView from './SnapshotDiffView';
 type ViewMode = 'table' | 'heatmap' | 'diff';
 
 const TargetGridView: React.FC = () => {
-  const { t } = useUI();
+  const { t, language } = useUI();
+  const tc = commercialTranslations(language);
   const { activeEntity } = useEntity();
   const entityId = activeEntity?.id;
 
@@ -91,7 +93,7 @@ const TargetGridView: React.FC = () => {
             aria-pressed={viewMode === 'table'}
           >
             <Table size={12} />
-            Table
+            {tc.commercialTargetGridTableMode}
           </button>
           <button
             onClick={() => setViewMode('heatmap')}
@@ -103,7 +105,7 @@ const TargetGridView: React.FC = () => {
             aria-pressed={viewMode === 'heatmap'}
           >
             <Grid size={12} />
-            Heatmap
+            {tc.commercialTargetGridHeatmapMode}
           </button>
           <button
             onClick={() => setViewMode('diff')}
