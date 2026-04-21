@@ -69,7 +69,12 @@ liquidity) — eso indicaría que la frontera está mal dibujada.
 | C-4 | `liquidity/` | Barrel: LCR + NSFR + LP curves + SDR | ✅ **Done** (re-export phase) |
 | C-5 | `credit/` | Barrel: creditRiskEngine + creditLifecycle + delegationEngine | ✅ **Done** (re-export phase) |
 | C-6 | `analytics/` | Barrel: expostRaroc + rarocRealization + priceElasticity + elasticityCalibration | ✅ **Done** (re-export phase) |
-| C-7 | `core/` | Orquestador y tipos compartidos al final | Pendiente |
+| C-7 | `core/` | Barrel: calculatePricing + batchReprice + formulaEngine + bitemporal + modelInventory | ✅ **Done** (re-export phase) |
+
+**Estado global**: las 7 olas publicadas en fase de **re-export barrel**.
+Fase 2 (mover físicamente cada módulo bajo `contexts/<ctx>/*.ts` y cambiar
+los imports del orquestador para que consuma los barrels) es PR dedicado
+con test baseline completa.
 
 **Acceso unificado**: desde cualquier caller nuevo se puede importar los
 contextos vía el barrel raíz del motor:
