@@ -119,6 +119,20 @@ describe('appNavigation routing helpers', () => {
       const discipline = items.find((i) => i.id === 'DISCIPLINE');
       expect(discipline?.section).toBe('Insights');
     });
+
+    it('demotes ACCOUNTING from sidebar to AUX (reachable via ⌘K only)', () => {
+      const main = items.find((i) => i.id === 'ACCOUNTING');
+      expect(main).toBeUndefined();
+    });
+  });
+
+  describe('AUX_DESTINATIONS', () => {
+    it('includes ACCOUNTING after its demotion from main sidebar', async () => {
+      const { AUX_DESTINATIONS } = await import('../../appNavigation');
+      const accounting = AUX_DESTINATIONS.find((d) => d.id === 'ACCOUNTING');
+      expect(accounting).toBeDefined();
+      expect(accounting?.path).toBe('/accounting');
+    });
   });
 
   describe('round-trip consistency', () => {
