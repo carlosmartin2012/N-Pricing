@@ -238,11 +238,52 @@ export const BUSINESS_FLOW_TOUR: WalkthroughTour = {
       iconKey: 'commercial',
       view: 'CUSTOMER_360',
     },
+    // Phase 6 addition — CLV 4-tab lens surfaced inside the Clients view.
+    // The banker sees Snapshot + LTV + Timeline + NBA, not just a static
+    // 360 dashboard. Navigate to CUSTOMER_360 so the tab bar is visible
+    // even though the card is centered.
+    {
+      id: 'bf-clv-tabs',
+      targetSelector: '',
+      titleKey: 'walkthrough_bf_clvTabs',
+      descriptionKey: 'walkthrough_bf_clvTabsDesc',
+      eyebrowKey: 'walkthrough_bf_stage1',
+      placement: 'top',
+      centered: true,
+      iconKey: 'commercial',
+      view: 'CUSTOMER_360',
+    },
+    // Phase 6.8 addition — firmwide NBA pipeline as the RM's morning feed.
+    {
+      id: 'bf-pipeline',
+      targetSelector: '',
+      titleKey: 'walkthrough_bf_pipeline',
+      descriptionKey: 'walkthrough_bf_pipelineDesc',
+      eyebrowKey: 'walkthrough_bf_stage1',
+      placement: 'top',
+      centered: true,
+      iconKey: 'commercial',
+      view: 'PIPELINE',
+    },
     {
       id: 'bf-pricing',
       targetSelector: '',
       titleKey: 'walkthrough_bf_pricing',
       descriptionKey: 'walkthrough_bf_pricingDesc',
+      eyebrowKey: 'walkthrough_bf_stage2',
+      placement: 'top',
+      centered: true,
+      iconKey: 'pricing',
+      view: 'CALCULATOR',
+    },
+    // Phase 6 addition — ΔCLV preview in the Calculator is the killer
+    // commercial move (live relational pricing). Keep the user in the
+    // Calculator so the LtvImpactPanel is already visible behind the card.
+    {
+      id: 'bf-ltv-preview',
+      targetSelector: '',
+      titleKey: 'walkthrough_bf_ltvPreview',
+      descriptionKey: 'walkthrough_bf_ltvPreviewDesc',
       eyebrowKey: 'walkthrough_bf_stage2',
       placement: 'top',
       centered: true,
