@@ -5,6 +5,8 @@ import {
   useGenerateNba,
   useConsumeNba,
 } from '../../hooks/queries/useClvQueries';
+import { useUI } from '../../contexts/UIContext';
+import { clvTranslations } from '../../translations/index';
 import type { NbaReasonCode } from '../../types/clv';
 
 const REASON_LABEL: Record<NbaReasonCode, string> = {
@@ -27,6 +29,8 @@ const fmtPct = (v: number | null): string => v === null ? '—' : `${(v * 100).t
 const fmtBps = (v: number | null): string => v === null ? '—' : `${v.toFixed(0)} bps`;
 
 const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
+  const { language } = useUI();
+  const t = clvTranslations(language);
   const { data: recs = [], isLoading: loading } = useClientNbaQuery(clientId, true);
   const generateMutation = useGenerateNba(clientId);
   const consumeMutation = useConsumeNba(clientId);
@@ -43,7 +47,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-violet-400" />
-          <span className="nfq-label text-[10px] text-slate-300">Next-Best-Action</span>
+          <span className="nfq-label text-[10px] text-slate-300">{t.clvNbaTitle}</span>
         </div>
         <button
           type="button"
@@ -52,13 +56,13 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
           className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
         >
           <RefreshCw className={`h-3 w-3 ${busy === 'generate' ? 'animate-spin' : ''}`} />
-          {busy === 'generate' ? 'Generating…' : 'Generate NBA'}
+          {busy === 'generate' ? t.clvNbaGenerating : t.clvNbaGenerate}
         </button>
       </header>
 
       {!loading && recs.length === 0 && (
         <p className="text-center text-xs text-slate-400">
-          No open recommendations. Generate to rank products by expected ΔCLV.
+          {t.clvNbaEmpty}
         </p>
       )}
 
@@ -86,7 +90,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
                   +{fmtEur(r.expectedClvDeltaEur)}
                 </div>
                 <div className="font-mono text-[10px] text-slate-500">
-                  confidence {fmtPct(r.confidence)}
+                  {t.clvNbaConfidence} {fmtPct(r.confidence)}
                 </div>
               </div>
             </div>
@@ -112,7 +116,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
                 className="nfq-btn-ghost flex items-center gap-2 px-3 py-1 text-[10px] disabled:opacity-60"
               >
                 <Check className="h-3 w-3" />
-                Mark consumed
+                {t.clvNbaConsume}
               </button>
             </div>
           </li>

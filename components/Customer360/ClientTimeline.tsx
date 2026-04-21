@@ -12,6 +12,8 @@ import {
   MessageSquareWarning,
 } from 'lucide-react';
 import { useClientTimelineQuery } from '../../hooks/queries/useClvQueries';
+import { useUI } from '../../contexts/UIContext';
+import { clvTranslations } from '../../translations/index';
 import type { ClientEvent, ClientEventType } from '../../types/clv';
 
 const EVENT_META: Record<ClientEventType, { icon: React.ComponentType<{ className?: string }>; tone: string; label: string }> = {
@@ -35,6 +37,8 @@ const fmtEur = (v: number | null): string =>
   v === null ? '' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
 
 const ClientTimeline: React.FC<Props> = ({ clientId }) => {
+  const { language } = useUI();
+  const t = clvTranslations(language);
   const { data: events = [], isLoading: loading } = useClientTimelineQuery(clientId);
 
   const grouped = useMemo(() => {
@@ -52,14 +56,14 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-sky-400" />
-          <span className="nfq-label text-[10px] text-slate-300">Relationship timeline</span>
+          <span className="nfq-label text-[10px] text-slate-300">{t.clvTimelineTitle}</span>
         </div>
         <span className="font-mono text-[10px] text-slate-500">{events.length} events</span>
       </header>
 
       {!loading && events.length === 0 && (
         <p className="text-center text-xs text-slate-400">
-          No events yet. Events from pricing, CRM and ops will appear here as the relationship unfolds.
+          {t.clvTimelineEmpty}
         </p>
       )}
 
