@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, RotateCcw, Send, Target, Trash2, XCircle } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, RotateCcw, Send, Target, Trash2, XCircle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '../ui/LayoutComponents';
 import {
@@ -12,7 +12,7 @@ import {
   type WorkflowAction,
 } from '../../utils/dealWorkflow';
 import { getOutcomeStyle } from '../../utils/dealOutcome';
-import type { BehaviouralModel, Transaction } from '../../types';
+import type { BehaviouralModel, DealVariance, Transaction } from '../../types';
 
 const VIRTUAL_THRESHOLD = 50;
 const ROW_HEIGHT_ESTIMATE = 48;
@@ -30,6 +30,7 @@ interface Props {
   formatCurrency: (value: number, currency: string) => string;
   selectedDealIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
+  varianceMap?: Map<string, DealVariance>;
 }
 
 const getActionIcon = (label: string) => {
@@ -66,6 +67,33 @@ const getStatusStyle = (status: string | undefined) => {
   }
 };
 
+const VarianceChip: React.FC<{ variance?: DealVariance }> = ({ variance }) => {
+  if (!variance || variance.ftpVarianceBps == null) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-bg-elevated)] px-2 py-0.5 font-mono text-[10px] font-medium text-[color:var(--nfq-text-muted)]">
+        --
+      </span>
+    );
+  }
+  const bps = variance.ftpVarianceBps;
+  const sign = bps >= 0 ? '+' : '';
+  const label = `${sign}${bps.toFixed(0)}bp`;
+
+  if (variance.outOfBand) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--nfq-danger)]">
+        <AlertTriangle size={10} aria-hidden="true" />
+        {label}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--nfq-success)]">
+      {label}
+    </span>
+  );
+};
+
 const DealRow: React.FC<{
   deal: Transaction;
   userRole: UserRole;
@@ -80,7 +108,8 @@ const DealRow: React.FC<{
   style?: React.CSSProperties;
   isSelected?: boolean;
   onToggleSelect?: () => void;
-}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, onCaptureOutcome, formatCurrency, style, isSelected, onToggleSelect }) => {
+  variance?: DealVariance;
+}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, onCaptureOutcome, formatCurrency, style, isSelected, onToggleSelect, variance }) => {
   const availableActions = getAvailableActions(deal.status || 'Draft', userRole);
   const canEdit = canEditDeal(deal, userRole);
   const canClone = canCreateOrCloneDeals(userRole);
@@ -128,6 +157,9 @@ const DealRow: React.FC<{
         <div className="max-w-[200px] truncate text-[10px] text-[color:var(--nfq-text-muted)]">
           {modelNames.get(deal.behaviouralModelId || '') || '-'}
         </div>
+      </td>
+      <td className="hidden whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center lg:table-cell">
+        <VarianceChip variance={variance} />
       </td>
       <td className="whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center">
         <span className="inline-flex items-center gap-1.5">
@@ -253,6 +285,9 @@ const TableHeader: React.FC<{ hasSelection?: boolean; allSelected?: boolean; onT
       <th scope="col" className="hidden border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-left nfq-label xl:table-cell">
         Model
       </th>
+      <th scope="col" className="hidden border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center nfq-label lg:table-cell">
+        Variance
+      </th>
       <th scope="col" className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center nfq-label">
         Status
       </th>
@@ -280,6 +315,7 @@ const BlotterTable: React.FC<Props> = ({
   formatCurrency,
   selectedDealIds = new Set(),
   onSelectionChange,
+  varianceMap,
 }) => {
   const toggleDeal = (dealId: string) => {
     if (!onSelectionChange) return;
@@ -356,6 +392,7 @@ const BlotterTable: React.FC<Props> = ({
                   {...rowProps}
                   isSelected={deal.id ? selectedDealIds.has(deal.id) : false}
                   onToggleSelect={onSelectionChange && deal.id ? () => toggleDeal(deal.id!) : undefined}
+                  variance={deal.id ? varianceMap?.get(deal.id) : undefined}
                 />
               ))}
             </tbody>
@@ -388,7 +425,7 @@ const BlotterTable: React.FC<Props> = ({
           <tbody>
             {paddingTop > 0 && (
               <tr>
-                <td style={{ height: paddingTop, padding: 0, border: 0 }} colSpan={11} />
+                <td style={{ height: paddingTop, padding: 0, border: 0 }} colSpan={12} />
               </tr>
             )}
             {virtualItems.map((virtualRow) => {
@@ -401,6 +438,7 @@ const BlotterTable: React.FC<Props> = ({
                   {...rowProps}
                   isSelected={deal.id ? selectedDealIds.has(deal.id) : false}
                   onToggleSelect={onSelectionChange && deal.id ? () => toggleDeal(deal.id!) : undefined}
+                  variance={deal.id ? varianceMap?.get(deal.id) : undefined}
                   style={{
                     height: `${virtualRow.size}px`,
                   }}
@@ -409,7 +447,7 @@ const BlotterTable: React.FC<Props> = ({
             })}
             {paddingBottom > 0 && (
               <tr>
-                <td style={{ height: paddingBottom, padding: 0, border: 0 }} colSpan={11} />
+                <td style={{ height: paddingBottom, padding: 0, border: 0 }} colSpan={12} />
               </tr>
             )}
           </tbody>

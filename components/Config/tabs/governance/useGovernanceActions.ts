@@ -238,6 +238,7 @@ export function useGovernanceActions({
       data.setMethodologyChangeRequests(nextRequests);
       data.setApprovalTasks(nextTasks);
       data.setMethodologyVersions(nextVersions);
+      data.onMethodologyApproved(originalRequestId, user.email);
 
       await Promise.all([
         configApi.saveMethodologyChangeRequests(nextRequests),
@@ -253,6 +254,7 @@ export function useGovernanceActions({
           changeRequestId: originalRequestId,
           methodologyVersionId: nextVersion.id,
           correlationId: resultRequest.correlation.correlationId,
+          snapshotTriggered: true,
         },
       });
     },

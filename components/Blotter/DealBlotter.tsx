@@ -1,9 +1,10 @@
-import React, { lazy, Suspense, useCallback, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import * as auditApi from '../../api/audit';
 import * as configApi from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
 import { exportDealsToExcel } from '../../utils/excelUtils';
 import type {
+  DealVariance,
   Transaction,
 } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +12,7 @@ import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { errorTracker } from '../../utils/errorTracking';
 import type { UserRole } from '../../utils/dealWorkflow';
+import { useVariancesQuery } from '../../hooks/queries/useDisciplineQueries';
 import BlotterFooter from './BlotterFooter';
 import BlotterHeaderActions from './BlotterHeaderActions';
 import BlotterTable from './BlotterTable';
@@ -97,6 +99,18 @@ const DealBlotter: React.FC = () => {
     user,
     userRole,
   });
+
+  // Variance data for discipline chips
+  const { data: variancePage } = useVariancesQuery(undefined, { page: 1, pageSize: 5000 });
+  const varianceMap = useMemo(() => {
+    const map = new Map<string, DealVariance>();
+    if (variancePage?.data) {
+      for (const v of variancePage.data) {
+        map.set(v.dealId, v);
+      }
+    }
+    return map;
+  }, [variancePage]);
 
   const handleOpenDossier = useCallback(
     (deal: Transaction) => {
@@ -307,6 +321,7 @@ const DealBlotter: React.FC = () => {
           formatCurrency={formatDealCurrency}
           selectedDealIds={selectedDealIds}
           onSelectionChange={setSelectedDealIds}
+          varianceMap={varianceMap}
         />
 
         <BlotterFooter deals={filteredDeals} committeeSummary={committeeSummary} />

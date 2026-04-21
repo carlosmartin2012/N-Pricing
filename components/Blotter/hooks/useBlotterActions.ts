@@ -3,6 +3,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import * as auditApi from '../../../api/audit';
 import * as configApi from '../../../api/config';
 import * as dealsApi from '../../../api/deals';
+import * as pricingDiscipline from '../../../api/pricingDiscipline';
 import { useData } from '../../../contexts/DataContext';
 import { canPersistRemotely } from '../../../utils/dataModeUtils';
 import { isSupabaseConfigured } from '../../../utils/supabaseClient';
@@ -255,6 +256,7 @@ export function useBlotterActions({
     setDealValidationErrors([]);
     const savedDeal = canWriteRemotely ? await dealsApi.upsertDeal(updated) : null;
     setDeals((previous) => previous.map((deal) => (deal.id === updated.id ? savedDeal || updated : deal)));
+    if (updated.id) void pricingDiscipline.recomputeVariance(updated.id);
     setIsEditOpen(false);
   }, [products, selectedDeal, setDeals, userRole]);
 
@@ -293,6 +295,7 @@ export function useBlotterActions({
     setDealValidationErrors([]);
     const savedDeal = canWriteRemotely ? await dealsApi.upsertDeal(newDeal) : null;
     setDeals((previous) => [savedDeal || newDeal, ...previous]);
+    if (newDeal.id) void pricingDiscipline.recomputeVariance(newDeal.id);
     setIsNewOpen(false);
   }, [products, selectedDeal, setDeals, userRole]);
 
