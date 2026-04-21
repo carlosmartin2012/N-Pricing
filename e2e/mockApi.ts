@@ -984,6 +984,49 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       await route.fulfill(json({ id: 'nba-1', consumedAt: nowIso(), consumedBy: 'demo@nfq.es' }));
       return;
     }
+    // Cross-client firmwide pipeline feed — powers /pipeline.
+    if (path === '/clv/nba' && method === 'GET') {
+      const statusParam = url.searchParams.get('status') ?? 'open';
+      const open = [
+        {
+          id: 'pnba-1', entityId: DEFAULT_ENTITY_ID, clientId: 'DEMO-ACME-001',
+          clientName: 'Acme Industrial SA', clientSegment: 'Large Corporate', clientRating: 'A',
+          recommendedProduct: 'FX_Hedging', recommendedRateBps: 40, recommendedVolumeEur: 1_500_000, recommendedCurrency: 'EUR',
+          expectedClvDeltaEur: 320_000, confidence: 0.82,
+          reasonCodes: ['product_gap_core', 'renewal_window_open'],
+          rationale: 'FX_Hedging €1.5M → ΔCLV 2.1% · renewal window open · core product gap',
+          source: 'engine', generatedAt: nowIso(), consumedAt: null, consumedBy: null,
+        },
+        {
+          id: 'pnba-2', entityId: DEFAULT_ENTITY_ID, clientId: 'DEMO-BETASOLAR-002',
+          clientName: 'Beta Solar Energy SL', clientSegment: 'Mid-market', clientRating: 'BBB',
+          recommendedProduct: 'ESG_Green_Loan', recommendedRateBps: 360, recommendedVolumeEur: 3_000_000, recommendedCurrency: 'EUR',
+          expectedClvDeltaEur: 410_000, confidence: 0.75,
+          reasonCodes: ['regulatory_incentive_available', 'nim_below_target'],
+          rationale: 'ESG_Green_Loan €3M → ΔCLV 4.6% · regulatory incentive · NIM lift',
+          source: 'engine', generatedAt: nowIso(), consumedAt: null, consumedBy: null,
+        },
+      ];
+      const consumed = [
+        {
+          id: 'pnba-3', entityId: DEFAULT_ENTITY_ID, clientId: 'DEMO-GAMMAHEALTH-003',
+          clientName: 'Gamma Healthcare Group', clientSegment: 'Mid-market', clientRating: 'BB',
+          recommendedProduct: 'Trade_Finance', recommendedRateBps: 300, recommendedVolumeEur: 800_000, recommendedCurrency: 'EUR',
+          expectedClvDeltaEur: 90_000, confidence: 0.55,
+          reasonCodes: ['capacity_underused'],
+          rationale: 'Trade finance €800K → ΔCLV 1.2% · capacity underused',
+          source: 'engine', generatedAt: nowIso(), consumedAt: nowIso(), consumedBy: 'demo@nfq.es',
+        },
+      ];
+      if (statusParam === 'consumed') {
+        await route.fulfill(json(consumed));
+      } else if (statusParam === 'all') {
+        await route.fulfill(json([...open, ...consumed]));
+      } else {
+        await route.fulfill(json(open));
+      }
+      return;
+    }
     if (path === '/clv/preview-ltv-impact' && method === 'POST') {
       await route.fulfill(json({
         before: { clvPointEur: 1_250_000, clvP5Eur: 980_000, clvP95Eur: 1_520_000 },

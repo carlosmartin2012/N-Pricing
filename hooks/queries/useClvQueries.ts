@@ -18,7 +18,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as clvApi from '../../api/clv';
 import { queryKeys } from './queryKeys';
-import type { DealCandidate, LtvAssumptions } from '../../types/clv';
+import type { DealCandidate, LtvAssumptions, PipelineStatusFilter } from '../../types/clv';
 
 // ---------------------------------------------------------------------------
 // Queries
@@ -39,6 +39,20 @@ export function useClientLtvHistoryQuery(clientId: string | null) {
     queryFn: () => clvApi.listClientLtvSnapshots(clientId!),
     enabled: !!clientId,
     staleTime: 30_000,
+  });
+}
+
+/**
+ * Firmwide Pipeline — aggregated NBA feed across every client for the
+ * current entity. Shorter staleTime than per-client NBA because the
+ * pipeline is the banker's live work queue: 10s is the right tradeoff
+ * between freshness and server load.
+ */
+export function usePipelineNbaQuery(status: PipelineStatusFilter = 'open') {
+  return useQuery({
+    queryKey: queryKeys.clv.pipelineNba(status),
+    queryFn: () => clvApi.listPipelineNba(status),
+    staleTime: 10_000,
   });
 }
 
@@ -110,6 +124,24 @@ export function useConsumeNba(clientId: string) {
       void qc.invalidateQueries({ queryKey: queryKeys.clv.nba(clientId, true) });
       void qc.invalidateQueries({ queryKey: queryKeys.clv.nba(clientId, false) });
       void qc.invalidateQueries({ queryKey: queryKeys.clv.timeline(clientId) });
+      // Pipeline view is firmwide — refetch all status buckets.
+      void qc.invalidateQueries({ queryKey: ['clv', 'pipeline', 'nba'] });
+    },
+  });
+}
+
+/**
+ * Standalone consume used from the Pipeline view — client-id agnostic.
+ * Invalidates every NBA query and the pipeline feed so the row disappears
+ * from "open" immediately and reappears under "consumed".
+ */
+export function useConsumeNbaPipeline() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => clvApi.consumeNba(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['clv', 'pipeline', 'nba'] });
+      void qc.invalidateQueries({ queryKey: ['clv', 'nba'] });
     },
   });
 }

@@ -50,6 +50,7 @@ const SLOPanel = React.lazy(() => import('./components/Admin/SLOPanel'));
 const AdapterHealthPanel = React.lazy(() => import('./components/Admin/AdapterHealthPanel'));
 const TargetGridView = React.lazy(() => import('./components/TargetGrid/TargetGridView'));
 const CustomerPricingView = React.lazy(() => import('./components/Customer360/CustomerPricingView'));
+const PipelineView = React.lazy(() => import('./components/Pipeline/PipelineView'));
 const CampaignsView = React.lazy(() => import('./components/Campaigns/CampaignsView'));
 const EscalationsView = React.lazy(() => import('./components/Governance/EscalationsView'));
 const ModelInventoryView = React.lazy(() => import('./components/Governance/ModelInventoryView'));
@@ -309,6 +310,7 @@ const AppContent: React.FC = () => {
                       <Route path="/ai"            element={<GenAIChat />} />
                       <Route path="/target-grid"   element={<TargetGridView />} />
                       <Route path="/customers"     element={<CustomerPricingView />} />
+                      <Route path="/pipeline"      element={<PipelineView />} />
                       <Route path="/campaigns"     element={<CampaignsView />} />
                       <Route path="/escalations"   element={<EscalationsView />} />
                       <Route path="/models"        element={<ModelInventoryView />} />

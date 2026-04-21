@@ -4,6 +4,7 @@ import {
   BookOpen,
   BookOpenCheck,
   FileSignature,
+  GitPullRequestArrow,
   BrainCircuit,
   Calculator,
   FileText,
@@ -42,6 +43,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   WHAT_IF: '/what-if',
   // Relationships (was "Commercial")
   CUSTOMER_360: '/customers',
+  PIPELINE: '/pipeline',
   CAMPAIGNS: '/campaigns',
   TARGET_GRID: '/target-grid',
   // Post-trade (kept inside Pricing bucket)
@@ -129,9 +131,10 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   return [
     // ─────────────── RELATIONSHIPS ───────────────
-    { id: 'CUSTOMER_360', label: 'Clients',     icon: Users,   section: 'Relationships', path: '/customers' },
-    { id: 'CAMPAIGNS',    label: 'Campaigns',   icon: Target,  section: 'Relationships', path: '/campaigns' },
-    { id: 'TARGET_GRID',  label: 'Targets',     icon: Grid3X3, section: 'Relationships', path: '/target-grid' },
+    { id: 'CUSTOMER_360', label: 'Clients',     icon: Users,                 section: 'Relationships', path: '/customers' },
+    { id: 'PIPELINE',     label: 'Pipeline',    icon: GitPullRequestArrow,   section: 'Relationships', path: '/pipeline' },
+    { id: 'CAMPAIGNS',    label: 'Campaigns',   icon: Target,                section: 'Relationships', path: '/campaigns' },
+    { id: 'TARGET_GRID',  label: 'Targets',     icon: Grid3X3,               section: 'Relationships', path: '/target-grid' },
 
     // ─────────────── PRICING ───────────────
     // The 4 workspaces are now first-class entries (nested routes under
