@@ -13,26 +13,40 @@ export interface NavItem {
 }
 
 /**
- * Visual accent per lifecycle bucket. Keeps the single-accent Active state
- * (cyan pill) but tints the section label + separator so users feel the
- * 4-bucket taxonomy without fighting for attention with the active chip.
+ * Visual accent per bucket. Keeps the single-accent Active state (cyan
+ * pill) but tints the section label + separator so users feel the
+ * taxonomy without fighting for attention with the active chip.
  *
  * Colors map to NFQ semantic tokens: success (emerald), accent (cyan),
  * warning (amber), violet. Fallback stays neutral for unknown sections.
+ *
+ * 2026-04 (Option B evolution): taxonomy shifted from a per-deal
+ * lifecycle (Commercial → Pricing → Insights → Governance) to a
+ * relationship-centric one (Relationships → Pricing → Market Data →
+ * Insights → Governance → Assistant). "Commercial" kept as a backwards-
+ * compat alias so any component still referencing the old name does not
+ * render un-styled.
  */
 const SECTION_ACCENTS: Record<string, { dot: string; label: string }> = {
-  Commercial: { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]'  },
-  Pricing:    { dot: 'bg-[var(--nfq-accent)]',   label: 'text-[color:var(--nfq-accent)]'   },
-  Insights:   { dot: 'bg-[var(--nfq-warning)]',  label: 'text-[color:var(--nfq-warning)]'  },
-  Governance: { dot: 'bg-violet-400',            label: 'text-violet-300'                   },
-  Assistant:  { dot: 'bg-fuchsia-400',           label: 'text-fuchsia-300'                  },
-  System:     { dot: 'bg-slate-400',             label: 'text-slate-400'                    },
+  Relationships: { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]' },
+  Commercial:    { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]' },
+  Pricing:       { dot: 'bg-[var(--nfq-accent)]',   label: 'text-[color:var(--nfq-accent)]'  },
+  'Market Data': { dot: 'bg-sky-400',               label: 'text-sky-300'                     },
+  Insights:      { dot: 'bg-[var(--nfq-warning)]',  label: 'text-[color:var(--nfq-warning)]' },
+  Governance:    { dot: 'bg-violet-400',            label: 'text-violet-300'                  },
+  Assistant:     { dot: 'bg-fuchsia-400',           label: 'text-fuchsia-300'                 },
+  System:        { dot: 'bg-slate-400',             label: 'text-slate-400'                   },
 };
 
-// Items that host internal tabs — shown as chips/hints in the sidebar entry
+/**
+ * Items that host internal tabs — shown as chips/hints in the sidebar
+ * entry. Used to be applied to CALCULATOR (the old "Pricing Engine (4)")
+ * but Phase 6.1 promoted each workspace to a first-class route, so that
+ * hint is now obsolete. REPORTING kept because Analytics still hosts
+ * 4 internal tabs that are not (yet) first-class.
+ */
 const TAB_HINTS: Partial<Record<string, string[]>> = {
-  CALCULATOR: ['Deal', 'RAROC', 'Stress', 'What-If'],
-  REPORTING:  ['Overview', 'Executive', 'Discipline', '14+'],
+  REPORTING: ['Overview', 'Executive', 'Discipline', '14+'],
 };
 
 interface NavButtonProps {
