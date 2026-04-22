@@ -11,19 +11,20 @@
 - Nunca modificar la fórmula FTP sin entender los 19 gaps (ver CLAUDE.md y `docs/pricing-methodology.md`)
 - Cada gap tiene dependencias cruzadas — cambiar uno puede afectar otros
 - El motor está modularizado: `utils/pricing/curveUtils.ts`, `formulaEngine.ts`, `liquidityEngine.ts`
-- Siempre ejecutar `npm run test` tras cualquier cambio — 328 tests cubren interpolación, tenors, regulatory tables, RAROC, deal workflow, governance, credit risk y el cálculo completo
+- Siempre ejecutar `npm run test` tras cualquier cambio — ~1.0k tests cubren interpolación, tenors, regulatory tables, RAROC, deal workflow, governance, credit risk, snapshots, drift, CLV y el cálculo completo
 - Las tablas regulatorias (LCR outflow, NSFR ASF/RSF) están en `pricingConstants.ts` — son estándar de Basilea III, no inventar valores
 - Constantes regulatorias adicionales en `constants/regulations.ts`
 - Si añades un nuevo gap, documentarlo con el patrón `// Gap N: descripción` y añadir test
 - RAROC engine (`rarocEngine.ts`) consume outputs del pricing engine — cambios en FTP pueden afectar RAROC
+- Toda ejecución del motor que toque producción debe emitir `pricing_snapshots` — revisar `supabase/functions/pricing/index.ts` como referencia
 
 ### 2. Agente de UI/Componentes
-**Scope**: `components/` (111 archivos), `App.tsx`, `contexts/UIContext.tsx`
+**Scope**: `components/` (227 archivos), `App.tsx`, `contexts/UIContext.tsx`
 
 **Reglas**:
 - Tailwind CSS utility-first, tema dark por defecto — diseño NFQ Meridian Obsidian
 - Componentes lazy-loaded via `React.lazy()` — mantener este patrón para nuevas vistas
-- Todo texto visible al usuario debe usar `translations.ts` via `ui.t.clave` (~534 keys, en/es)
+- Todo texto visible al usuario debe usar `translations.ts` via `ui.t.clave`
 - Iconos: solo `lucide-react`, no añadir otras librerías de iconos
 - Cada componente exporta `default` para code-splitting
 - No crear componentes wrapper innecesarios — Tailwind inline es preferible
@@ -33,39 +34,38 @@
 - Storybook stories (`*.stories.tsx`) junto al componente para desarrollo visual aislado
 
 ### 3. Agente de Base de Datos
-**Scope**: `supabase/`, `api/`, `utils/supabase/` (15 módulos), `utils/supabaseClient.ts`, `hooks/supabaseSync/`
+**Scope**: `supabase/`, `api/`, `utils/supabase/`, `server/db.ts`, `server/migrate.ts`, `hooks/supabaseSync/`
 
 **Reglas**:
-- **Fuente de verdad**: `supabase/migrations/*.sql` (en orden) — aplicadas por `server/migrate.ts` al boot.
+- **Fuente de verdad Supabase**: `supabase/migrations/*.sql` (38 migrations en orden cronológico). Última: `20260608000001_clv_360.sql`.
+- **Server inline schema**: `server/migrate.ts` es un subconjunto para el arranque Node-only (dev + Replit). Si tocas una tabla que el server necesita al boot, actualiza ambos.
 - `supabase/schema_v2.sql` es snapshot parcial de referencia (leído por `check-seed-schema-sync.ts` como fallback). `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` y ningún tooling lo lee.
-- ~36 migrations hoy; siempre añadir la siguiente con prefijo `YYYYMMDDHHMMSS_`
-- Capa API centralizada en `api/` — usar `api/mappers.ts` para snake_case↔camelCase
+- Siempre añadir la siguiente migration con prefijo `YYYYMMDDHHMMSS_`
+- Capa API centralizada en `api/` (21 módulos) — usar `api/mappers.ts` para snake_case↔camelCase
 - Servicios especializados en `utils/supabase/`: deals, market, config, audit, approval, masterData, rules, monitoring, etc.
-- Toda nueva tabla necesita: RLS policies, realtime habilitado, suscripción en `hooks/supabaseSync/useRealtimeSync.ts`
-- Los tipos TypeScript (`types.ts`, 64+ interfaces) deben reflejar exactamente las columnas de la tabla
+- Toda nueva tabla entity-scoped necesita: columna `entity_id UUID REFERENCES entities(id)`, RLS policies (read accesible / insert current / delete Admin), realtime si la UI la consume, suscripción en `hooks/supabaseSync/useRealtimeSync.ts`
+- Los tipos TypeScript deben reflejar exactamente las columnas (`types.ts` + re-exports en `types/*.ts`)
 - Sync descompuesto en `hooks/supabaseSync/`: hydration, realtime, config persistence, presence
 - React Query wrappers en `hooks/queries/` — usar query keys de `queryKeys.ts`
 - Usar `safeSupabaseCall()` wrapper para manejo de errores
 - Nunca exponer service_role key en el frontend — solo anon key
-- Edge Function de pricing en `supabase/functions/pricing/` (Deno runtime)
+- 3 Edge Functions Deno en `supabase/functions/` (pricing, realize-raroc, elasticity-recalibrate)
+- Server routes entity-scoped: usar `entityScopedClause(req, N)` para reads y `tenancyScope(req)` para writes/deletes (ver `server/middleware/requireTenancy.ts`)
 
 ### 4. Agente de Testing
-**Scope**: `utils/__tests__/` (23 archivos), `components/*/__tests__/` (3 archivos), `e2e/` (12 specs)
+**Scope**: `utils/__tests__/` (80 archivos), `components/*/__tests__/`, `e2e/` (20 specs)
 
 **Reglas**:
-- **Unit**: Vitest 4 (no Jest) — 328 tests en 67 suites, 26 archivos
-- **E2E**: Playwright 1.59 — 12 specs (`ai-assistant`, `auth`, `brochure-screenshots`, `deal-blotter`, `esg-grid`, `example`, `market-data`, `multi-entity`, `navigation`, `pricing-flow`, `rules-governance`, `shocks-reporting`)
+- **Unit**: Vitest 4 (no Jest) — ~1.0k tests en ~80 archivos
+- **Integration (opt-in)**: `utils/__tests__/integration/` — corre sólo con `INTEGRATION_DATABASE_URL` set. RLS + tenancy + fuzz
+- **E2E**: Playwright 1.59 — 20 specs (auth, pricing-flow, deal-blotter, esg-grid, market-data, multi-entity, navigation, rules-governance, shocks-reporting, ai-assistant, offline-pwa, rbac, reconciliation, pipeline, clv, brochure-screenshots, ...)
 - **Component**: Storybook 8.6 — stories junto al componente
 - Tests colocados en `__tests__/` junto al módulo
 - Patrón de test existente: describe → it → expect con datos inline
-- Suites ya cubiertas: pricingEngine, ruleMatchingEngine, validation, dealWorkflow, RAROC metrics, blotter toolbar, pricing scenarios, creditRiskEngine, entityScoping, conflictDetection, governanceWorkflows, auditTransport, pagination, offlineStore, aiGrounding, genAIChatUtils, regulatoryExport, accountingLedgerUtils, committeeDossierUtils, marketDataSourcesUtils, portfolioSnapshotsUtils, userManagementUtils, aiAnalytics, metrics, auditLogUtils
-- Prioridades de cobertura pendiente:
-  1. `portfolioAnalytics.ts` — agregaciones
-  2. `utils/pricing/` — motor modularizado (curveUtils, formulaEngine, liquidityEngine)
-  3. `api/mappers.ts` — conversión snake_case↔camelCase
-  4. Más component tests (solo 3 componentes tienen tests)
+- Para cálculos financieros: `toBeCloseTo` con tolerancia explícita
 - No mockear Supabase en tests unitarios — testear lógica pura
 - Config vitest en `vite.config.ts` (node environment, setup-dom.ts)
+- Antes de push: `npm run verify:full`
 
 ### 5. Agente de Seguridad
 **Scope**: Transversal
@@ -77,6 +77,8 @@
 - Auth: validar rol del usuario antes de operaciones destructivas
 - Audit: toda acción significativa debe llamar a `useAudit().logAction()`
 - RLS: toda tabla nueva necesita policies en una migration propia (read entity-scoped, insert con `get_current_entity_id()`, delete Admin-only). Ver patrón en `20260406000001_multi_entity.sql` y `20260602000002_rls_delete_policies.sql`.
+- Append-only: omitir UPDATE/DELETE policies en tablas audit / snapshots.
+- Integrations (`integrations/`): jamás `throw` — devolver `AdapterResult<T>` discriminado.
 
 ## Flujos de trabajo
 

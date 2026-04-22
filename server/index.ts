@@ -31,6 +31,7 @@ import { startEscalationSweeper } from './workers/escalationSweeper';
 import { startLtvSnapshotWorker } from './workers/ltvSnapshotWorker';
 import { startCrmEventSync } from './workers/crmEventSync';
 import { bootstrapAdapters } from './integrations/bootstrap';
+import { spawn } from 'child_process';
 
 import fs from 'fs';
 
@@ -194,9 +195,35 @@ process.on('uncaughtException', (err) => {
   console.error('[server] Uncaught exception', err);
 });
 
+// Spawn the demo seed script as a detached child process. Runs fire-and-forget
+// so the HTTP listener can start without waiting for the seed — the script is
+// idempotent (ON CONFLICT DO NOTHING), so repeated runs are cheap. Stdout/stderr
+// are forwarded so Replit's console surfaces progress.
+function seedDemoOnBoot(): void {
+  const child = spawn('npx', ['tsx', 'scripts/seed-demo-dataset.ts'], {
+    stdio: 'inherit',
+    env: process.env,
+    shell: false,
+  });
+  child.on('error', (err) => {
+    console.error('[server] seed-demo-dataset failed to spawn', err);
+  });
+  child.on('exit', (code) => {
+    if (code !== 0) console.error(`[server] seed-demo-dataset exited with code ${code}`);
+  });
+}
+
 async function main() {
   try {
     await runMigrations();
+    // Opt-in demo seed (Replit + local quickstart). Gated by env so local dev
+    // against a real DB does not clobber it. Runs AFTER migrations so every
+    // target table exists; safe to launch in background because the seed
+    // only writes reference rows (clients / deals / Customer 360 / grid) that
+    // are required for demo-mode UI rendering.
+    if (process.env.SEED_DEMO_ON_BOOT === 'true') {
+      seedDemoOnBoot();
+    }
     // Register integration adapters BEFORE the server starts accepting
     // requests: the health endpoint and any pricing path that reads from
     // MarketDataAdapter will otherwise see an empty registry.

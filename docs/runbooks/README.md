@@ -18,14 +18,17 @@ once you know the team that operates the deployment.
 | [backtest-drift.md](./backtest-drift.md) | `detectDrift().severity === 'breached'` after a backtesting run |
 | [clv-ops.md](./clv-ops.md) | LTV worker stalled · stale snapshots · NBA bias · preview-ltv-impact latency |
 | [feature-flag-kill-switch.md](./feature-flag-kill-switch.md) | Need to halt all writes for a tenant immediately |
+| [escalation-timeouts.md](./escalation-timeouts.md) | Approval escalations stuck past SLA |
 
 ## Proactive playbooks
 
-Not triggered by alerts — executed intentionally during rollouts.
+Not triggered by alerts — executed intentionally during rollouts / demos.
 
 | File | Purpose |
 |---|---|
 | [tenancy-strict-flip.md](./tenancy-strict-flip.md) | Flip `TENANCY_ENFORCE=on` → `TENANCY_STRICT=on` across the 4 Phase 0 rollout steps |
+| [seed-demo.md](./seed-demo.md) | Re-seed `DEFAULT_ENTITY_ID` with the demo catalogue |
+| [replit-demo.md](./replit-demo.md) | End-to-end Replit demo flow + troubleshooting |
 
 ## Common header to fill in each runbook
 
