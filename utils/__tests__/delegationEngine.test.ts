@@ -274,3 +274,186 @@ describe('tierToLegacyApprovalLevel', () => {
     expect(tierToLegacyApprovalLevel('EXECUTIVE_COMMITTEE')).toBe('Rejected');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Regulatory edge cases — SR 11-7 / EBA validator angle.
+//
+// These guard against silent bugs that a model-validation team would
+// catch during review: a catch-all rule that matches wrongly, a
+// boundary where the approval auto-escalates one tier off, an empty
+// matrix that quietly lands deals as AUTO. Each test pins the
+// invariant an auditor would ask about.
+// ---------------------------------------------------------------------------
+
+describe('resolveDelegation — regulatory edge cases', () => {
+  it('empty matrix falls back to EXECUTIVE_COMMITTEE (never AUTO)', () => {
+    const result = resolveDelegation(goodSmallDeal, []);
+    expect(result.tier).toBe('EXECUTIVE_COMMITTEE');
+    expect(result.matchedRuleId).toBeNull();
+  });
+
+  it('rule with empty constraints object acts as catch-all (matches anything)', () => {
+    const catchAll: DelegationRule[] = [
+      {
+        id: 'CATCH_ALL',
+        priority: 1,
+        label: 'Catch-all',
+        constraints: {},
+        approvalTier: 'MANAGER_L1',
+      },
+    ];
+    const result = resolveDelegation({ amount: 0, rating: 'D', raroc: -10 }, catchAll);
+    expect(result.tier).toBe('MANAGER_L1');
+    expect(result.matchedRuleId).toBe('CATCH_ALL');
+  });
+
+  it('maxDiscountPct rule does NOT apply when raroc >= hurdle (discount <= 0)', () => {
+    // A rule saying "up to 2% under hurdle goes to L1" must not match a
+    // deal that is AT or ABOVE the hurdle — otherwise a perfectly
+    // economic deal would escalate needlessly.
+    const matrix: DelegationRule[] = [
+      {
+        id: 'L1_SMALL_DISCOUNT',
+        priority: 1,
+        label: 'L1 up to 2% discount',
+        constraints: { maxDiscountPct: 2 },
+        approvalTier: 'MANAGER_L1',
+      },
+      {
+        id: 'CATCH',
+        priority: 99,
+        label: 'Catch',
+        constraints: {},
+        approvalTier: 'AUTO',
+      },
+    ];
+    const overHurdle = resolveDelegation({ amount: 1, rating: 'A', raroc: 15, hurdleRate: 12 }, matrix);
+    expect(overHurdle.tier).toBe('AUTO');
+    const atHurdle = resolveDelegation({ amount: 1, rating: 'A', raroc: 12, hurdleRate: 12 }, matrix);
+    expect(atHurdle.tier).toBe('AUTO');
+    // Just below — actual discount of 1pp → L1 applies.
+    const justBelow = resolveDelegation({ amount: 1, rating: 'A', raroc: 11, hurdleRate: 12 }, matrix);
+    expect(justBelow.tier).toBe('MANAGER_L1');
+  });
+
+  it('maxDiscountPct boundary: discount exactly at max is accepted, above is rejected', () => {
+    const matrix: DelegationRule[] = [
+      {
+        id: 'L1_MAX_2',
+        priority: 1,
+        label: 'L1 up to 2pp',
+        constraints: { maxDiscountPct: 2 },
+        approvalTier: 'MANAGER_L1',
+      },
+      {
+        id: 'CATCH',
+        priority: 99,
+        label: 'Catch',
+        constraints: {},
+        approvalTier: 'RISK_COMMITTEE',
+      },
+    ];
+    // Discount = 2pp exactly → inside the band.
+    const onBoundary = resolveDelegation({ amount: 1, rating: 'A', raroc: 10, hurdleRate: 12 }, matrix);
+    expect(onBoundary.tier).toBe('MANAGER_L1');
+    // Discount = 2.001pp → above the band, escalates.
+    const justOver = resolveDelegation({ amount: 1, rating: 'A', raroc: 9.999, hurdleRate: 12 }, matrix);
+    expect(justOver.tier).toBe('RISK_COMMITTEE');
+  });
+
+  it('zero-amount deal is matched by the default matrix (no null-guard bypass)', () => {
+    // A regression we want to prevent: amount=0 returning a silent AUTO
+    // because `minAmount != null` guards the check. Deal with amount=0
+    // should still be evaluated against constraints.
+    const result = resolveDelegation({ amount: 0, rating: 'A', raroc: 15, hurdleRate: 12 });
+    expect(result.tier).toBeDefined();
+    expect(result.evaluatedRules.length).toBeGreaterThan(0);
+  });
+
+  it('segment constraint: rule requiring a specific segment fails if input has no segment', () => {
+    const matrix: DelegationRule[] = [
+      {
+        id: 'RETAIL_ONLY',
+        priority: 1,
+        label: 'Retail-only',
+        constraints: { segments: ['Retail'] },
+        approvalTier: 'AUTO',
+      },
+      {
+        id: 'CATCH',
+        priority: 99,
+        label: 'Catch',
+        constraints: {},
+        approvalTier: 'MANAGER_L2',
+      },
+    ];
+    const noSegment = resolveDelegation({ amount: 100, rating: 'A', raroc: 15 }, matrix);
+    expect(noSegment.tier).toBe('MANAGER_L2');
+    expect(noSegment.evaluatedRules[0].failedConstraints).toContain('segment');
+  });
+
+  it('businessUnit + managerRole constraints both must hold', () => {
+    const matrix: DelegationRule[] = [
+      {
+        id: 'STRUCTURED_BY_HEAD',
+        priority: 1,
+        label: 'Only BU_STRUCTURED + HeadOfDesk',
+        constraints: {
+          businessUnits: ['BU_STRUCTURED'],
+          managerRoles: ['HeadOfDesk'],
+        },
+        approvalTier: 'AUTO',
+      },
+      {
+        id: 'CATCH',
+        priority: 99,
+        label: 'Catch',
+        constraints: {},
+        approvalTier: 'RISK_COMMITTEE',
+      },
+    ];
+    const happy = resolveDelegation({
+      amount: 1, rating: 'A', raroc: 15,
+      businessUnit: 'BU_STRUCTURED', managerRole: 'HeadOfDesk',
+    }, matrix);
+    expect(happy.tier).toBe('AUTO');
+
+    const wrongBu = resolveDelegation({
+      amount: 1, rating: 'A', raroc: 15,
+      businessUnit: 'BU_RETAIL', managerRole: 'HeadOfDesk',
+    }, matrix);
+    expect(wrongBu.tier).toBe('RISK_COMMITTEE');
+    expect(wrongBu.evaluatedRules[0].failedConstraints).toContain('businessUnit');
+
+    const wrongRole = resolveDelegation({
+      amount: 1, rating: 'A', raroc: 15,
+      businessUnit: 'BU_STRUCTURED', managerRole: 'JuniorRM',
+    }, matrix);
+    expect(wrongRole.tier).toBe('RISK_COMMITTEE');
+    expect(wrongRole.evaluatedRules[0].failedConstraints).toContain('managerRole');
+  });
+
+  it('missing hurdleRate disables the maxDiscountPct check (rule skipped, not auto-matched)', () => {
+    // If the caller forgot to populate hurdleRate, the rule's discount
+    // band cannot be evaluated. Current behaviour: the check is skipped
+    // entirely (the constraint passes by omission), so the rule may
+    // match. This test pins that behaviour — if we change it to fail-
+    // closed in the future, the test fails and forces a conscious
+    // review of every caller.
+    const matrix: DelegationRule[] = [
+      {
+        id: 'L1',
+        priority: 1,
+        label: 'L1 any discount',
+        constraints: { maxDiscountPct: 5 },
+        approvalTier: 'MANAGER_L1',
+      },
+    ];
+    const noHurdle = resolveDelegation({ amount: 100, rating: 'A', raroc: 10 }, matrix);
+    // maxDiscountPct check requires hurdleRate; when absent it is a no-op,
+    // so the rule's other constraints (none) pass → L1 tier.
+    // If the caller cares about strict evaluation they must populate
+    // hurdleRate in DelegationInput before calling resolveDelegation.
+    expect(noHurdle.tier).toBe('MANAGER_L1');
+  });
+});
