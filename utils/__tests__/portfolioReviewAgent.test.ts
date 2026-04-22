@@ -377,3 +377,123 @@ describe('buildPortfolioReviewPrompt', () => {
     expect(prompt).toContain('English');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Regulatory edge cases — pin invariants a MRM validator would check.
+// The worst failure mode for a portfolio agent is a silent false-positive:
+// a cluster that lands in the committee pack when it shouldn't, or a
+// cluster that *doesn't* land when it should.
+// ---------------------------------------------------------------------------
+
+describe('detectUnderpricingClusters — regulatory edge cases', () => {
+  it('drops clusters whose total amount sums to zero (avoids NaN weighted avg)', () => {
+    // Three deals with amount=0 form a cluster but the weighted mean
+    // would divide by zero. The agent must skip silently.
+    const portfolio = [
+      makeDeal({ deal: { id: 'A', amount: 0 }, result: { raroc: 5 } }),
+      makeDeal({ deal: { id: 'B', amount: 0 }, result: { raroc: 5 } }),
+      makeDeal({ deal: { id: 'C', amount: 0 }, result: { raroc: 5 } }),
+    ];
+    expect(detectUnderpricingClusters(portfolio, 2, 3)).toEqual([]);
+  });
+
+  it('severity boundary: avgDelta exactly -5pp is MEDIUM, not HIGH', () => {
+    // avgDelta = -5.0 should fall into MEDIUM (the code uses strict `<`).
+    const portfolio = Array.from({ length: 3 }, (_, i) =>
+      makeDeal({
+        deal: { id: `D-${i}`, amount: 1_000_000, targetROE: 15 },
+        result: { raroc: 10 }, // avgDelta = -5.0
+      }),
+    );
+    const clusters = detectUnderpricingClusters(portfolio, 2, 3);
+    expect(clusters).toHaveLength(1);
+    expect(clusters[0].severity).toBe('MEDIUM');
+    expect(clusters[0].avgDelta).toBeCloseTo(-5, 4);
+  });
+
+  it('severity boundary: avgDelta below -5pp by a hair is HIGH', () => {
+    const portfolio = Array.from({ length: 3 }, (_, i) =>
+      makeDeal({
+        deal: { id: `D-${i}`, amount: 1_000_000, targetROE: 15 },
+        result: { raroc: 9.99 }, // avgDelta ~ -5.01 → HIGH
+      }),
+    );
+    const clusters = detectUnderpricingClusters(portfolio, 2, 3);
+    expect(clusters[0].severity).toBe('HIGH');
+  });
+
+  it('underpricingThreshold of 0 still excludes clusters above hurdle (no inversion)', () => {
+    // A threshold of 0 should NOT flag deals that are at or above hurdle.
+    // Regression guard: early versions could treat threshold=0 as
+    // "everything is underpriced".
+    const portfolio = Array.from({ length: 3 }, (_, i) =>
+      makeDeal({
+        deal: { id: `D-${i}`, amount: 1_000_000, targetROE: 15 },
+        result: { raroc: 18 }, // above hurdle
+      }),
+    );
+    const clusters = detectUnderpricingClusters(portfolio, 0, 3);
+    expect(clusters).toEqual([]);
+  });
+
+  it('sorts HIGH severity clusters ahead of MEDIUM regardless of amount', () => {
+    const portfolio = [
+      // MEDIUM, huge amount (€50M)
+      ...Array.from({ length: 3 }, (_, i) => makeDeal({
+        deal: { id: `M-${i}`, productType: 'LOAN_PYME', amount: 50_000_000, targetROE: 15 },
+        result: { raroc: 10 },
+      })),
+      // HIGH, small amount (€1M)
+      ...Array.from({ length: 3 }, (_, i) => makeDeal({
+        deal: { id: `H-${i}`, productType: 'LOAN_MORT', amount: 1_000_000, targetROE: 15 },
+        result: { raroc: 5 },
+      })),
+    ];
+    const clusters = detectUnderpricingClusters(portfolio, 2, 3);
+    expect(clusters[0].severity).toBe('HIGH');
+    expect(clusters[1].severity).toBe('MEDIUM');
+  });
+
+  it('produces at most 5 sample deal ids for drilldown (committee packs manageable)', () => {
+    const portfolio = Array.from({ length: 10 }, (_, i) =>
+      makeDeal({
+        deal: { id: `D-${i}`, amount: 1_000_000, targetROE: 15 },
+        result: { raroc: 5 },
+      }),
+    );
+    const clusters = detectUnderpricingClusters(portfolio, 2, 3);
+    expect(clusters[0].sampleDealIds.length).toBeLessThanOrEqual(5);
+  });
+});
+
+describe('runPortfolioReview — consolidated invariants', () => {
+  it('summary.underpricedCount equals the number of deals below hurdle - threshold', () => {
+    const portfolio = [
+      // 2 below hurdle by >2pp
+      makeDeal({ deal: { id: 'A', amount: 1_000_000, targetROE: 15 }, result: { raroc: 5 } }),
+      makeDeal({ deal: { id: 'B', amount: 1_000_000, targetROE: 15 }, result: { raroc: 6 } }),
+      // 1 above hurdle
+      makeDeal({ deal: { id: 'C', amount: 1_000_000, targetROE: 15 }, result: { raroc: 18 } }),
+    ];
+    const review = runPortfolioReview(portfolio, '2026-04-09');
+    expect(review.summary.underpricedDealCount).toBe(2);
+  });
+
+  it('summary.underpricedAmount stays finite even when raroc inputs are NaN/Infinity', () => {
+    // Regression note (2026-04-23): averagePortfolioRaroc currently
+    // propagates NaN when deals contain NaN raroc — a resilience gap
+    // flagged here but out of scope for this test PR. The amount
+    // aggregates (which drive committee packs) remain finite because
+    // they only sum amounts, not rarocs. Track the propagation fix
+    // under utils/pricing/portfolioReviewAgent.ts weightedRaroc guard.
+    const portfolio = [
+      makeDeal({ deal: { id: 'X', amount: 1_000_000 }, result: { raroc: Number.NaN } }),
+      makeDeal({ deal: { id: 'Y', amount: 1_000_000 }, result: { raroc: Number.POSITIVE_INFINITY } }),
+    ];
+    const review = runPortfolioReview(portfolio, '2026-04-09');
+    // The aggregate amount is always finite (sum of finite amounts).
+    expect(Number.isFinite(review.summary.underpricedAmount)).toBe(true);
+    expect(Number.isFinite(review.summary.underpricedAmountPct)).toBe(true);
+    expect(review.summary.clustersDetected).toBeGreaterThanOrEqual(0);
+  });
+});
