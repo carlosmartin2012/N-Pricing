@@ -130,6 +130,13 @@ describe('appNavigation routing helpers', () => {
       expect(pipeline?.section).toBe('Relationships');
       expect(pipeline?.path).toBe('/pipeline');
     });
+
+    it('includes RECONCILIATION under Governance (Phase 6.9)', () => {
+      const recon = items.find((i) => i.id === 'RECONCILIATION');
+      expect(recon?.section).toBe('Governance');
+      expect(recon?.path).toBe('/reconciliation');
+      expect(recon?.label).toBe('FTP Reconciliation');
+    });
   });
 
   describe('AUX_DESTINATIONS', () => {

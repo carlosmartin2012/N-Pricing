@@ -51,6 +51,7 @@ const AdapterHealthPanel = React.lazy(() => import('./components/Admin/AdapterHe
 const TargetGridView = React.lazy(() => import('./components/TargetGrid/TargetGridView'));
 const CustomerPricingView = React.lazy(() => import('./components/Customer360/CustomerPricingView'));
 const PipelineView = React.lazy(() => import('./components/Pipeline/PipelineView'));
+const ReconciliationView = React.lazy(() => import('./components/Reconciliation/ReconciliationView'));
 const CampaignsView = React.lazy(() => import('./components/Campaigns/CampaignsView'));
 const EscalationsView = React.lazy(() => import('./components/Governance/EscalationsView'));
 const ModelInventoryView = React.lazy(() => import('./components/Governance/ModelInventoryView'));
@@ -313,6 +314,7 @@ const AppContent: React.FC = () => {
                       <Route path="/pipeline"      element={<PipelineView />} />
                       <Route path="/campaigns"     element={<CampaignsView />} />
                       <Route path="/escalations"   element={<EscalationsView />} />
+                      <Route path="/reconciliation" element={<ReconciliationView />} />
                       <Route path="/models"        element={<ModelInventoryView />} />
                       <Route path="/dossiers"      element={<DossiersView />} />
                       <Route path="/snapshots"     element={<SnapshotReplayView />} />

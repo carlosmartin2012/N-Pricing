@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   Percent,
   Plug,
+  Scale,
   Settings,
   ShieldAlert,
   ShieldCheck,
@@ -49,6 +50,8 @@ const VIEW_PATHS: Record<ViewState, string> = {
   // Post-trade (kept inside Pricing bucket)
   BLOTTER: '/blotter',
   ACCOUNTING: '/accounting',
+  // Controller-grade FTP reconciliation (Phase 6.9)
+  RECONCILIATION: '/reconciliation',
   // Insights (pure outputs)
   REPORTING: '/analytics',
   DISCIPLINE: '/discipline',
@@ -166,9 +169,10 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'DISCIPLINE', label: 'Pricing Discipline', icon: Sparkles,  section: 'Insights', path: '/discipline' },
 
     // ─────────────── GOVERNANCE ───────────────
-    { id: 'MODEL_INVENTORY', label: 'Model Inventory', icon: BookOpenCheck, section: 'Governance', path: '/models' },
-    { id: 'DOSSIERS',        label: 'Dossiers',        icon: FileSignature, section: 'Governance', path: '/dossiers' },
-    { id: 'ESCALATIONS',     label: 'Escalations',     icon: ShieldAlert,   section: 'Governance', path: '/escalations' },
+    { id: 'MODEL_INVENTORY', label: 'Model Inventory',   icon: BookOpenCheck, section: 'Governance', path: '/models' },
+    { id: 'DOSSIERS',        label: 'Dossiers',          icon: FileSignature, section: 'Governance', path: '/dossiers' },
+    { id: 'ESCALATIONS',     label: 'Escalations',       icon: ShieldAlert,   section: 'Governance', path: '/escalations' },
+    { id: 'RECONCILIATION',  label: 'FTP Reconciliation',icon: Scale,         section: 'Governance', path: '/reconciliation' },
 
     // ─────────────── ASSISTANT ───────────────
     { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Assistant', path: '/ai' },

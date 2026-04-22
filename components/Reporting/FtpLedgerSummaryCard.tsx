@@ -61,7 +61,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
   summary,
   title = 'FTP Ledger — this month',
   linkLabel = 'Open full ledger',
-  linkTo = '/accounting',
+  linkTo = '/reconciliation',
 }) => {
   const statusCfg = STATUS_CONFIG[summary.reconciliationStatus];
   const StatusIcon = statusCfg.icon;
