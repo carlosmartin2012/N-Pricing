@@ -42,10 +42,10 @@ describe('FtpLedgerSummaryCard', () => {
     expect(screen.getByText(/Reconciliation/i)).toBeInTheDocument();
   });
 
-  it('renders the "Open full ledger" link pointing to /accounting', () => {
+  it('renders the "Open full ledger" link pointing to /reconciliation', () => {
     renderCard(baseSummary());
     const link = screen.getByTestId('ftp-ledger-summary-link');
-    expect(link).toHaveAttribute('href', '/accounting');
+    expect(link).toHaveAttribute('href', '/reconciliation');
   });
 
   it('shows positive growth indicator with + sign for positive mtdGrowthPct', () => {

@@ -29,6 +29,13 @@ export const queryKeys = {
       ['clv', 'preview-impact', clientId, fingerprint] as const,
   },
 
+  // --- Reconciliation (Phase 6.9) ---
+  reconciliation: {
+    summary: (asOfPeriod: string) => ['reconciliation', 'summary', asOfPeriod] as const,
+    entries: (status: string, asOfPeriod: string) =>
+      ['reconciliation', 'entries', status, asOfPeriod] as const,
+  },
+
   // --- Market Data ---
   marketData: {
     yieldCurves: ['marketData', 'yieldCurves'] as const,

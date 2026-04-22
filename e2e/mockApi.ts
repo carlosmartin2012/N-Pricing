@@ -1027,6 +1027,56 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       }
       return;
     }
+    // FTP Reconciliation — controller view (Phase 6.9).
+    if (path === '/reconciliation/summary' && method === 'GET') {
+      const period = url.searchParams.get('asOf') ?? new Date().toISOString().slice(0, 7);
+      const matched = {
+        dealId: 'D-MATCH-001', clientId: 'C-1', clientName: 'Acme Industrial SA',
+        businessUnit: 'BU_CORP', productType: 'Corporate_Loan',
+        bu:       { dealId: 'D-MATCH-001', amountEur: 5_000_000, currency: 'EUR', ratePct: 4.250, postedAt: '2026-04-12' },
+        treasury: { dealId: 'D-MATCH-001', amountEur: 5_000_000, currency: 'EUR', ratePct: 4.250, postedAt: '2026-04-12' },
+        matchStatus: 'matched', amountDeltaEur: 0, rateDeltaPct: 0, hint: null,
+      };
+      const amountMis = {
+        dealId: 'D-AMT-002', clientId: 'C-2', clientName: 'Beta Solar Energy SL',
+        businessUnit: 'BU_MID', productType: 'ESG_Green_Loan',
+        bu:       { dealId: 'D-AMT-002', amountEur: 3_000_000, currency: 'EUR', ratePct: 3.6, postedAt: '2026-04-15' },
+        treasury: { dealId: 'D-AMT-002', amountEur: 3_002_500, currency: 'EUR', ratePct: 3.6, postedAt: '2026-04-15' },
+        matchStatus: 'amount_mismatch', amountDeltaEur: 2500, rateDeltaPct: 0,
+        hint: 'Amount delta €2500 — expected tolerance €1',
+      };
+      const buOnly = {
+        dealId: 'D-BU-003', clientId: 'C-3', clientName: 'Gamma Healthcare Group',
+        businessUnit: 'BU_MID', productType: 'Trade_Finance',
+        bu:       { dealId: 'D-BU-003', amountEur: 800_000, currency: 'EUR', ratePct: 3.0, postedAt: '2026-04-14' },
+        treasury: null,
+        matchStatus: 'bu_only', amountDeltaEur: 0, rateDeltaPct: 0,
+        hint: 'Treasury mirror missing — open Treasury Ops',
+      };
+      const pairs = [matched, amountMis, buOnly];
+      await route.fulfill(json({
+        summary: {
+          asOfPeriod: period,
+          computedAt: nowIso(),
+          totalEntries: 3,
+          matched: 1,
+          unmatched: 2,
+          unknown: 0,
+          amountMismatchEur: 2500,
+          maxSingleDeltaEur: 2500,
+          byStatus: {
+            matched: 1, amount_mismatch: 1, rate_mismatch: 0, currency_mismatch: 0,
+            bu_only: 1, treasury_only: 0, unknown: 0,
+          },
+        },
+        pairs,
+      }));
+      return;
+    }
+    if (path === '/reconciliation/entries' && method === 'GET') {
+      await route.fulfill(json({ asOfPeriod: new Date().toISOString().slice(0, 7), pairs: [] }));
+      return;
+    }
     if (path === '/clv/preview-ltv-impact' && method === 'POST') {
       await route.fulfill(json({
         before: { clvPointEur: 1_250_000, clvP5Eur: 980_000, clvP95Eur: 1_520_000 },
