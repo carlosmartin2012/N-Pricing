@@ -275,10 +275,20 @@ export function runPortfolioReview(
 ): PortfolioReviewResult {
   const dealsAnalyzed = portfolio.length;
   const totalPortfolioAmount = portfolio.reduce((s, pd) => s + pd.deal.amount, 0);
+  // Guard against NaN/Infinity raroc inputs: a single corrupted row
+  // must not contaminate the portfolio-level aggregate that feeds
+  // committee packs. Filter the rows whose raroc is non-finite AND
+  // also divide only by the corresponding amount so the weighted mean
+  // remains consistent. Same semantics as `weightedRaroc` inside
+  // detectUnderpricingClusters (keeps both entry points symmetric).
+  const finiteRows = portfolio.filter(
+    (pd) => Number.isFinite(pd.result.raroc) && Number.isFinite(pd.deal.amount),
+  );
+  const finiteWeightedAmount = finiteRows.reduce((s, pd) => s + pd.deal.amount, 0);
   const averagePortfolioRaroc =
-    totalPortfolioAmount > 0
-      ? portfolio.reduce((s, pd) => s + pd.result.raroc * pd.deal.amount, 0) /
-        totalPortfolioAmount
+    finiteWeightedAmount > 0
+      ? finiteRows.reduce((s, pd) => s + pd.result.raroc * pd.deal.amount, 0) /
+        finiteWeightedAmount
       : 0;
 
   const underpricingClusters = detectUnderpricingClusters(portfolio);
