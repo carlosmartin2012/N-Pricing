@@ -84,6 +84,38 @@ function isValidRole(role: string | undefined): role is EntityRole {
   return role === 'Admin' || role === 'Trader' || role === 'Risk_Manager' || role === 'Auditor';
 }
 
+/**
+ * Lite tenancy middleware — always populates req.tenancy from the x-entity-id
+ * header without a DB membership check. Used in development / non-strict mode
+ * so route handlers that require req.tenancy work without TENANCY_ENFORCE=on.
+ *
+ * The role is taken from the JWT (req.user.role) already validated by
+ * authMiddleware, defaulting to 'Trader'. No entity_users lookup is performed.
+ */
+export function liteTenancyMiddleware(): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const { raw, uuid } = extractEntityId(req);
+    if (!raw || !uuid) {
+      res.status(400).json({
+        code: 'tenancy_missing_header',
+        message: 'x-entity-id required (must be a valid UUID)',
+        requestId: req.requestId,
+      });
+      return;
+    }
+    const userEmail = req.user?.email ?? 'anonymous';
+    const rawRole = req.user?.role ?? 'Trader';
+    const role: EntityRole = isValidRole(rawRole) ? rawRole : 'Trader';
+    req.tenancy = {
+      entityId: uuid,
+      userEmail,
+      role,
+      requestId: req.requestId ?? 'missing',
+    };
+    next();
+  };
+}
+
 export function tenancyMiddleware(): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const endpoint = `${req.method} ${req.path}`;

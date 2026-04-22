@@ -343,6 +343,28 @@ CREATE TABLE IF NOT EXISTS tolerance_bands (
 );
 CREATE INDEX IF NOT EXISTS idx_tolerance_entity ON tolerance_bands (entity_id, active, priority);
 
+-- Pricing targets — per-entity segment/product benchmarks for Customer 360
+CREATE TABLE IF NOT EXISTS pricing_targets (
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id            UUID        NOT NULL,
+  segment              TEXT        NOT NULL,
+  product_type         TEXT        NOT NULL,
+  currency             TEXT        DEFAULT 'EUR',
+  period               TEXT        NOT NULL,
+  target_margin_bps    NUMERIC(10,4),
+  target_raroc_pct     NUMERIC(10,4),
+  target_volume_eur    NUMERIC(20,2),
+  pre_approved_rate_bps NUMERIC(10,4),
+  hard_floor_rate_bps  NUMERIC(10,4),
+  active_from          DATE,
+  active_to            DATE,
+  is_active            BOOLEAN     DEFAULT true,
+  created_by           TEXT,
+  created_at           TIMESTAMPTZ DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pricing_targets_entity ON pricing_targets (entity_id, is_active, segment, product_type);
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,

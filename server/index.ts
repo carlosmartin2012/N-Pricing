@@ -22,8 +22,8 @@ import governanceRouter from './routes/governance';
 import meteringRouter from './routes/metering';
 import campaignsRouter from './routes/campaigns';
 import { authMiddleware } from './middleware/auth';
+import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
-import { tenancyMiddleware } from './middleware/tenancy';
 import { requireTenancy } from './middleware/requireTenancy';
 import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
@@ -115,9 +115,12 @@ app.get('/api/docs', (_req, res) => {
 // added without joining the entityScoped chain". Reading the env on each
 // request lets the rollout flip live without restarting the server.
 const tenancyOn = process.env.TENANCY_ENFORCE === 'on';
+// Always populate req.tenancy so downstream route handlers can rely on it.
+// Strict mode does a DB membership check in entity_users; lite mode trusts the
+// JWT role and just validates the UUID format of x-entity-id.
 const entityScoped = tenancyOn
   ? [authMiddleware, tenancyMiddleware(), requireTenancy()]
-  : [authMiddleware, requireTenancy()];
+  : [authMiddleware, liteTenancyMiddleware(), requireTenancy()];
 
 // Protected routes (auth required)
 app.use('/api/deals', ...entityScoped, dealsRouter);
