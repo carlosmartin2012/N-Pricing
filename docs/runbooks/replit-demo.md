@@ -15,8 +15,10 @@
    2. Ejecuta `runMigrations()` → schema inline + Default Entity
       (`00000000-0000-0000-0000-000000000010`) + `demo@nfq.es` linkado a
       `entity_users`.
-   3. Si `SEED_DEMO_ON_BOOT=true`, spawnea `npx tsx scripts/seed-demo-dataset.ts`
-      como proceso hijo (stdout/stderr se ven en la consola de Replit).
+   3. Si `SEED_DEMO_ON_BOOT=true`, llama **inline** a `seedDemoDataset(pool)`
+      (importado desde `scripts/seed-demo-dataset.ts`) reutilizando el pool
+      del server. Cada paso tiene su propio try/catch, así un error en una
+      tabla no aborta el resto — verás todos los totales en la consola.
    4. `bootstrapAdapters()` registra in-memory adapters.
    5. `app.listen(3001)`.
 5. Vite, al detectar `:5000` activo, satisface `waitForPort = 5000` del workflow
@@ -78,16 +80,29 @@ Replit inyecta `DATABASE_URL` automáticamente porque `modules` incluye
 
 ### 5. Entras pero todas las vistas están vacías (`No results`)
 
-- Causa: el seed no se ejecutó. Checks:
-  1. `SEED_DEMO_ON_BOOT` ¿realmente está a `true`?
-  2. ¿Aparece en la consola del server la línea
-     `[seed-demo-dataset] entity=… reset=false dryRun=false`?
-  3. ¿Termina con `[seed-demo-dataset] ✅ {…}` o con error?
-- Fix manual: abre la Shell de Replit y corre:
-  ```bash
-  npm run seed:demo
-  ```
-  (idempotente — lo puedes correr cuantas veces quieras).
+Causa raíz más común: **seleccionaste un cliente que el seed no poblamos**. El
+seed solo crea Customer 360 data (positions / metrics / LTV / NBA) para
+**CL-1001** (Acme Corp Industries), **CL-1002** (Globex Retail Group) y
+**CL-2001** (John Doe Properties). Los demás clientes que aparecen en la
+sidebar (de `seed:clv-demo` u otros) aparecerán vacíos por diseño.
+
+Si **Targets** y **Campaigns** también están vacíos, entonces el seed
+falló antes de llegar a methodology/grid. Checks:
+
+1. `SEED_DEMO_ON_BOOT` ¿está a `true` y el workflow reinició **tras** editar
+   `.replit`? Las variables de `[userenv.shared]` se leen solo al arrancar.
+2. Busca en la consola del server: `[seed-demo-dataset] entity=… reset=…`.
+   Si NO aparece, el flag no llegó al proceso Node — reinicia el workflow.
+3. Si aparece pero no hay `[seed-demo-dataset] ✅ {…}`, busca líneas
+   `[seed-demo-dataset] <step> failed:` — cada paso tiene try/catch y el
+   error queda visible.
+
+Fix manual (abre Shell de Replit):
+
+```bash
+npm run seed:demo           # Idempotente (ON CONFLICT DO NOTHING)
+npm run seed:demo -- --reset # Si quieres limpiar las filas demo antes
+```
 
 ### 6. El seed falla con `relation "client_positions" does not exist`
 
