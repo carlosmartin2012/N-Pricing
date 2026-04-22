@@ -21,6 +21,7 @@ import channelPricingRouter from './routes/channelPricing';
 import governanceRouter from './routes/governance';
 import meteringRouter from './routes/metering';
 import campaignsRouter from './routes/campaigns';
+import targetGridRouter from './routes/targetGrid';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -139,6 +140,7 @@ app.use('/api/reconciliation', ...entityScoped, reconciliationRouter);
 app.use('/api/governance', ...entityScoped, governanceRouter);
 app.use('/api/metering', ...entityScoped, meteringRouter);
 app.use('/api/campaigns', ...entityScoped, campaignsRouter);
+app.use('/api/target-grid', ...entityScoped, targetGridRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

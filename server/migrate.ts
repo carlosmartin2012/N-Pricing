@@ -257,6 +257,9 @@ CREATE TABLE IF NOT EXISTS client_nba_recommendations (
   reason_codes             JSONB       DEFAULT '[]'::jsonb,
   rationale                TEXT,
   source                   TEXT,
+  generated_at             TIMESTAMPTZ DEFAULT NOW(),
+  consumed_at              TIMESTAMPTZ,
+  consumed_by              TEXT,
   created_at               TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_client_nba_entity_client ON client_nba_recommendations (entity_id, client_id, created_at DESC);
@@ -564,6 +567,230 @@ BEGIN
   RETURN coalesce(current_setting('app.current_user_role', true), '');
 END;
 $fn$;
+
+-- -----------------------------------------------------------------------
+-- Incremental ALTER TABLE for columns added after initial schema deployment
+-- These are idempotent — they succeed when the column already exists too.
+-- -----------------------------------------------------------------------
+ALTER TABLE client_nba_recommendations
+  ADD COLUMN IF NOT EXISTS generated_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS consumed_at  TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS consumed_by  TEXT;
+
+ALTER TABLE rules
+  ADD COLUMN IF NOT EXISTS entity_id UUID;
+
+ALTER TABLE target_grid_cells
+  ADD COLUMN IF NOT EXISTS computed_at TIMESTAMPTZ DEFAULT NOW();
+
+-- -----------------------------------------------------------------------
+-- Campaigns: per-entity promotional pricing campaigns
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS pricing_campaigns (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id         UUID        NOT NULL,
+  code              TEXT        NOT NULL,
+  name              TEXT        NOT NULL,
+  segment           TEXT        NOT NULL,
+  product_type      TEXT        NOT NULL,
+  currency          TEXT        DEFAULT 'EUR',
+  channel           TEXT,
+  rate_delta_bps    NUMERIC(10,4) NOT NULL DEFAULT 0,
+  max_volume_eur    NUMERIC(20,2),
+  consumed_volume_eur NUMERIC(20,2) NOT NULL DEFAULT 0,
+  active_from       DATE        NOT NULL DEFAULT CURRENT_DATE,
+  active_to         DATE        NOT NULL DEFAULT (CURRENT_DATE + INTERVAL '90 days'),
+  status            TEXT        NOT NULL DEFAULT 'draft',
+  version           INT         NOT NULL DEFAULT 1,
+  parent_version_id UUID,
+  created_by        TEXT,
+  approved_by       TEXT,
+  approved_at       TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pricing_campaigns_code_entity ON pricing_campaigns (entity_id, code);
+CREATE INDEX IF NOT EXISTS idx_pricing_campaigns_entity_status ON pricing_campaigns (entity_id, status);
+
+-- -----------------------------------------------------------------------
+-- Model inventory: governance model tracking (MRM)
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS model_inventory (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id         UUID,
+  kind              TEXT        NOT NULL,
+  name              TEXT        NOT NULL,
+  version           TEXT        NOT NULL,
+  status            TEXT        NOT NULL DEFAULT 'candidate',
+  owner_email       TEXT,
+  validation_doc_url TEXT,
+  validated_at      DATE,
+  effective_from    DATE        NOT NULL DEFAULT CURRENT_DATE,
+  effective_to      DATE,
+  notes             TEXT,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_model_inventory_entity ON model_inventory (entity_id, status);
+
+-- -----------------------------------------------------------------------
+-- Signed committee dossiers: cryptographically signed deal approvals
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS signed_committee_dossiers (
+  id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id           UUID        NOT NULL,
+  deal_id             TEXT,
+  pricing_snapshot_id UUID,
+  dossier_payload     JSONB       NOT NULL DEFAULT '{}',
+  payload_hash        TEXT        NOT NULL,
+  signature_hex       TEXT        NOT NULL,
+  signed_by_email     TEXT,
+  signed_at           TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_signed_dossiers_entity ON signed_committee_dossiers (entity_id, signed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_signed_dossiers_deal ON signed_committee_dossiers (deal_id);
+
+-- -----------------------------------------------------------------------
+-- Approval escalations
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS approval_escalations (
+  id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id     UUID        NOT NULL,
+  deal_id       TEXT,
+  exception_id  TEXT,
+  level         TEXT        NOT NULL DEFAULT 'L1',
+  due_at        TIMESTAMPTZ,
+  status        TEXT        NOT NULL DEFAULT 'open',
+  opened_by     TEXT,
+  current_notes TEXT,
+  resolved_at   TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_approval_escalations_entity ON approval_escalations (entity_id, status);
+
+CREATE TABLE IF NOT EXISTS approval_escalation_configs (
+  id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id           UUID        NOT NULL,
+  level               TEXT        NOT NULL,
+  timeout_hours       INT         NOT NULL DEFAULT 24,
+  notify_before_hours INT         NOT NULL DEFAULT 0,
+  channel_type        TEXT        NOT NULL DEFAULT 'email',
+  channel_config      JSONB       NOT NULL DEFAULT '{}',
+  is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (entity_id, level)
+);
+
+-- -----------------------------------------------------------------------
+-- Pricing snapshots: immutable engine input/output records
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS pricing_snapshots (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id         UUID        NOT NULL,
+  deal_id           TEXT,
+  pricing_result_id UUID,
+  request_id        TEXT,
+  engine_version    TEXT        NOT NULL DEFAULT '0.0.0',
+  as_of_date        DATE,
+  used_mock_for     TEXT[]      NOT NULL DEFAULT '{}',
+  input             JSONB       NOT NULL DEFAULT '{}',
+  context           JSONB       NOT NULL DEFAULT '{}',
+  output            JSONB       NOT NULL DEFAULT '{}',
+  input_hash        TEXT        NOT NULL DEFAULT '',
+  output_hash       TEXT        NOT NULL DEFAULT '',
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pricing_snapshots_entity ON pricing_snapshots (entity_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_pricing_snapshots_deal ON pricing_snapshots (deal_id);
+
+-- -----------------------------------------------------------------------
+-- Metering: daily usage aggregates and feature flags
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS usage_aggregates_daily (
+  entity_id     UUID        NOT NULL,
+  day           DATE        NOT NULL,
+  event_kind    TEXT        NOT NULL,
+  event_count   BIGINT      NOT NULL DEFAULT 0,
+  units_total   NUMERIC(20,4) NOT NULL DEFAULT 0,
+  PRIMARY KEY (entity_id, day, event_kind)
+);
+
+CREATE TABLE IF NOT EXISTS tenant_feature_flags (
+  entity_id UUID        NOT NULL,
+  flag      TEXT        NOT NULL,
+  enabled   BOOLEAN     NOT NULL DEFAULT FALSE,
+  set_by    TEXT,
+  set_at    TIMESTAMPTZ DEFAULT NOW(),
+  notes     TEXT,
+  PRIMARY KEY (entity_id, flag)
+);
+
+-- -----------------------------------------------------------------------
+-- Channel API: keys and request log for external channel integrations
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS channel_api_keys (
+  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id        UUID        NOT NULL,
+  channel          TEXT        NOT NULL,
+  key_hash         TEXT        NOT NULL UNIQUE,
+  rate_limit_rpm   INT         NOT NULL DEFAULT 60,
+  rate_limit_burst INT         NOT NULL DEFAULT 10,
+  daily_quota      INT,
+  is_active        BOOLEAN     NOT NULL DEFAULT TRUE,
+  revoked_at       TIMESTAMPTZ,
+  last_used_at     TIMESTAMPTZ,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_channel_api_keys_entity ON channel_api_keys (entity_id);
+
+CREATE TABLE IF NOT EXISTS channel_request_log (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id   UUID        NOT NULL,
+  api_key_id  UUID,
+  channel     TEXT,
+  endpoint    TEXT,
+  status_code INT,
+  duration_ms INT,
+  request_id  TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_channel_request_log_entity ON channel_request_log (entity_id, created_at DESC);
+
+-- -----------------------------------------------------------------------
+-- Canonical deal templates: reference inputs per product/segment/tenor
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS canonical_deal_templates (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id       UUID,
+  product         TEXT        NOT NULL,
+  segment         TEXT        NOT NULL,
+  tenor_bucket    TEXT        NOT NULL,
+  currency        TEXT        NOT NULL DEFAULT 'EUR',
+  template        JSONB       NOT NULL DEFAULT '{}',
+  editable_by_role JSONB      NOT NULL DEFAULT '["methodologist","admin"]',
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_canonical_templates_entity ON canonical_deal_templates (entity_id, product, segment);
+
+-- -----------------------------------------------------------------------
+-- Observability: alert rules
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS alert_rules (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id   UUID,
+  name        TEXT        NOT NULL,
+  metric_name TEXT        NOT NULL,
+  operator    TEXT        NOT NULL DEFAULT '>',
+  threshold   NUMERIC(20,6) NOT NULL DEFAULT 0,
+  recipients  JSONB       NOT NULL DEFAULT '[]',
+  is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_alert_rules_entity ON alert_rules (entity_id, is_active);
 `;
 
 export async function runMigrations(): Promise<void> {

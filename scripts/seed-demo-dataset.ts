@@ -530,6 +530,135 @@ async function resetDemo(pool: Pool, entityId: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Campaigns — demo promotional pricing campaigns
+// ---------------------------------------------------------------------------
+
+async function seedCampaigns(pool: Pool, entityId: string): Promise<number> {
+  const rows = [
+    {
+      id: '00000000-0000-0000-0000-000000000c01',
+      code: 'CAMP-PYME-2026-Q2',
+      name: 'Campaña PYME Q2 2026',
+      segment: 'PYME',
+      product_type: 'Lending',
+      currency: 'EUR',
+      channel: 'branch',
+      rate_delta_bps: -25,
+      max_volume_eur: 5000000,
+      active_from: '2026-04-01',
+      active_to: '2026-06-30',
+      status: 'active',
+      created_by: 'demo@nfq.es',
+    },
+    {
+      id: '00000000-0000-0000-0000-000000000c02',
+      code: 'CAMP-CORP-FX-2026',
+      name: 'FX Corporativo Spring',
+      segment: 'Large Corporate',
+      product_type: 'FX',
+      currency: 'EUR',
+      channel: 'digital',
+      rate_delta_bps: -10,
+      max_volume_eur: 20000000,
+      active_from: '2026-03-15',
+      active_to: '2026-09-30',
+      status: 'active',
+      created_by: 'demo@nfq.es',
+    },
+    {
+      id: '00000000-0000-0000-0000-000000000c03',
+      code: 'CAMP-RETAIL-MORT',
+      name: 'Hipotecas Primavera',
+      segment: 'Retail',
+      product_type: 'Mortgage',
+      currency: 'EUR',
+      channel: 'branch',
+      rate_delta_bps: -30,
+      max_volume_eur: 10000000,
+      active_from: '2026-04-15',
+      active_to: '2026-07-31',
+      status: 'draft',
+      created_by: 'demo@nfq.es',
+    },
+  ];
+  let count = 0;
+  for (const r of rows) {
+    const result = await pool.query(
+      `INSERT INTO pricing_campaigns
+         (id, entity_id, code, name, segment, product_type, currency, channel,
+          rate_delta_bps, max_volume_eur, active_from, active_to, status, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       ON CONFLICT (id) DO NOTHING`,
+      [r.id, entityId, r.code, r.name, r.segment, r.product_type, r.currency, r.channel,
+       r.rate_delta_bps, r.max_volume_eur, r.active_from, r.active_to, r.status, r.created_by],
+    );
+    count += result.rowCount ?? 0;
+  }
+  return count;
+}
+
+// ---------------------------------------------------------------------------
+// Model Inventory — demo MRM models
+// ---------------------------------------------------------------------------
+
+async function seedModelInventory(pool: Pool, entityId: string): Promise<number> {
+  const rows = [
+    {
+      id: '00000000-0000-0000-0000-00000000e001',
+      kind: 'FTP',
+      name: 'Pooled Cost of Funds FTP',
+      version: '3.2.1',
+      status: 'active',
+      owner_email: 'treasury@nfq.es',
+      effective_from: '2025-01-01',
+      notes: 'Modelo de transfer pricing basado en curvas de financiación del pool',
+    },
+    {
+      id: '00000000-0000-0000-0000-00000000e002',
+      kind: 'LTV',
+      name: 'Client Lifetime Value Engine',
+      version: '1.4.0',
+      status: 'active',
+      owner_email: 'analytics@nfq.es',
+      effective_from: '2025-06-01',
+      notes: 'Motor de estimación de LTV con horizonte de 5 años',
+    },
+    {
+      id: '00000000-0000-0000-0000-00000000e003',
+      kind: 'PD',
+      name: 'PD Retail — Logistic v2',
+      version: '2.1.0',
+      status: 'active',
+      owner_email: 'risk@nfq.es',
+      effective_from: '2024-09-01',
+      notes: 'Modelo de probabilidad de default para cartera retail',
+    },
+    {
+      id: '00000000-0000-0000-0000-00000000e004',
+      kind: 'RAROC',
+      name: 'RAROC Attribution Model',
+      version: '1.0.2',
+      status: 'candidate',
+      owner_email: 'finance@nfq.es',
+      effective_from: '2026-01-01',
+      notes: 'Candidato para reemplazar el modelo de atribución de capital actual',
+    },
+  ];
+  let count = 0;
+  for (const r of rows) {
+    const result = await pool.query(
+      `INSERT INTO model_inventory
+         (id, entity_id, kind, name, version, status, owner_email, effective_from, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (id) DO NOTHING`,
+      [r.id, entityId, r.kind, r.name, r.version, r.status, r.owner_email, r.effective_from, r.notes],
+    );
+    count += result.rowCount ?? 0;
+  }
+  return count;
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -538,6 +667,7 @@ export interface SeedTotals {
   deals: number;
   positions: number; metrics: number; events: number; ltv: number; nba: number;
   methodologySnapshot: number; gridCells: number; toleranceBands: number;
+  campaigns: number; modelInventory: number;
 }
 
 export interface SeedOptions {
@@ -575,6 +705,7 @@ export async function seedDemoDataset(
     clients: 0, products: 0, businessUnits: 0, deals: 0,
     positions: 0, metrics: 0, events: 0, ltv: 0, nba: 0,
     methodologySnapshot: 0, gridCells: 0, toleranceBands: 0,
+    campaigns: 0, modelInventory: 0,
   };
 
   const step = async <K extends keyof SeedTotals>(
@@ -619,6 +750,8 @@ export async function seedDemoDataset(
   }
   await step('gridCells',      () => seedGridCells(pool, entityId));
   await step('toleranceBands', () => seedToleranceBands(pool, entityId));
+  await step('campaigns',      () => seedCampaigns(pool, entityId));
+  await step('modelInventory', () => seedModelInventory(pool, entityId));
 
   console.info(`[seed-demo-dataset] ✅ ${JSON.stringify(totals)}`);
   return totals;
