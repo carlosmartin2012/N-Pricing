@@ -479,21 +479,34 @@ describe('runPortfolioReview — consolidated invariants', () => {
     expect(review.summary.underpricedDealCount).toBe(2);
   });
 
-  it('summary.underpricedAmount stays finite even when raroc inputs are NaN/Infinity', () => {
-    // Regression note (2026-04-23): averagePortfolioRaroc currently
-    // propagates NaN when deals contain NaN raroc — a resilience gap
-    // flagged here but out of scope for this test PR. The amount
-    // aggregates (which drive committee packs) remain finite because
-    // they only sum amounts, not rarocs. Track the propagation fix
-    // under utils/pricing/portfolioReviewAgent.ts weightedRaroc guard.
+  it('averagePortfolioRaroc stays finite when raroc inputs are NaN/Infinity', () => {
+    // Fixed in this PR: non-finite rows are filtered before the
+    // weighted mean so the portfolio-level aggregate survives a single
+    // corrupted row. When every row is corrupted, the aggregate
+    // collapses to 0 (no data rather than NaN).
     const portfolio = [
       makeDeal({ deal: { id: 'X', amount: 1_000_000 }, result: { raroc: Number.NaN } }),
       makeDeal({ deal: { id: 'Y', amount: 1_000_000 }, result: { raroc: Number.POSITIVE_INFINITY } }),
     ];
     const review = runPortfolioReview(portfolio, '2026-04-09');
-    // The aggregate amount is always finite (sum of finite amounts).
+    expect(Number.isFinite(review.averagePortfolioRaroc)).toBe(true);
+    expect(review.averagePortfolioRaroc).toBe(0);
     expect(Number.isFinite(review.summary.underpricedAmount)).toBe(true);
     expect(Number.isFinite(review.summary.underpricedAmountPct)).toBe(true);
-    expect(review.summary.clustersDetected).toBeGreaterThanOrEqual(0);
+  });
+
+  it('averagePortfolioRaroc ignores corrupted rows but keeps the healthy weighted mean', () => {
+    // Mix of healthy + corrupted rows: the corrupted one is filtered
+    // out, and the weighted mean of the healthy rows stands. This pins
+    // the fix against the alternative (returning 0 whenever any row
+    // is corrupted), which would mask real portfolio state.
+    const portfolio = [
+      makeDeal({ deal: { id: 'A', amount: 2_000_000, targetROE: 15 }, result: { raroc: 12 } }),
+      makeDeal({ deal: { id: 'B', amount: 2_000_000, targetROE: 15 }, result: { raroc: 8 } }),
+      makeDeal({ deal: { id: 'C', amount: 1_000_000, targetROE: 15 }, result: { raroc: Number.NaN } }),
+    ];
+    const review = runPortfolioReview(portfolio, '2026-04-09');
+    // Weighted mean of A (12 × 2M) + B (8 × 2M) over 4M = 10. C is dropped.
+    expect(review.averagePortfolioRaroc).toBeCloseTo(10, 4);
   });
 });
