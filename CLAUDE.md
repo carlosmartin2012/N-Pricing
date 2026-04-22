@@ -1,9 +1,10 @@
 # CLAUDE.md — N-Pricing
 
 > Contexto esencial para agentes IA que trabajan en este repositorio.
-> Última actualización: 2026-04-18 (integral review post-roadmap Phases 0-5).
+> Última actualización: 2026-04-22 (post Phase 6 CLV / Pipeline / Reconciliation + unificación demo↔live sobre DB).
 > **Lectura obligatoria antes de tocar código:** [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md)
 > (hallazgos verificados, falsos positivos descartados, propuesta de evolución en 3 olas).
+> **Siguiente ola:** [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md).
 
 ## Qué es N-Pricing
 
@@ -34,7 +35,7 @@ PWA con soporte offline. **Multi-tenant** vía RLS Postgres.
 | Backend | Express + pg.Pool sobre Postgres (Supabase para client/Edge) |
 | Edge Functions | Deno (Supabase Edge) — pricing, realize-raroc, elasticity-recalibrate |
 | Auth | JWT propio HMAC + Google SSO real (`GoogleSsoProvider`) |
-| Testing | Vitest 4 (~972 tests) + Playwright 1.59 (12 specs) |
+| Testing | Vitest 4 (~1.0k tests, 80 archivos) + Playwright 1.59 (20 specs) |
 | Storybook | Storybook 8.6 (React Vite) |
 | IA | Google Generative AI (@google/genai) |
 | Charts | Recharts 3.7 |
@@ -46,16 +47,22 @@ PWA con soporte offline. **Multi-tenant** vía RLS Postgres.
 
 ```bash
 npm install
-npm run dev          # Servidor desarrollo (Vite HMR)
-npm run build        # Build producción (PWA incluido)
-npm run lint         # ESLint
-npm run typecheck    # tsc --noEmit
-npm run test         # Vitest (~972 tests, 78 archivos)
-npm run test:e2e     # Playwright
-npm run verify:full  # lint + typecheck + test + build + e2e
-npm run check:sync   # Validar seed↔schema sync
-npm run check:bundle # Validar tamaños de bundle
-npm run storybook    # Storybook dev en :6006
+npm run dev              # Vite HMR (:5000) + Express (:3001) vía concurrently
+npm run build            # Build producción (PWA incluido)
+npm run lint             # ESLint
+npm run typecheck        # tsc --noEmit
+npm run typecheck:edge   # Build + deno check de Edge Functions
+npm run test             # Vitest (~1.0k tests, 80 archivos)
+npm run test:e2e         # Playwright (20 specs)
+npm run verify           # lint + typecheck + edge + sync + data + security + test + build + bundle
+npm run verify:full      # verify + test:e2e
+npm run check:sync       # Validar seed↔schema (lee migrations + schema_v2 fallback)
+npm run check:bundle     # Validar tamaños de bundle
+npm run check:data-quality
+npm run check:security   # Audit de deps prod
+npm run seed:demo        # Poblar DEFAULT_ENTITY_ID con catalogo demo (idempotente)
+npm run seed:clv-demo    # Subset CLV Phase 6
+npm run storybook        # Storybook dev en :6006
 
 # Tests integración (opt-in, requieren Postgres real):
 INTEGRATION_DATABASE_URL=postgres://... npx vitest run utils/__tests__/integration
@@ -63,6 +70,22 @@ INTEGRATION_DATABASE_URL=postgres://... npx vitest run utils/__tests__/integrati
 # Tenant provisioning (Phase 5):
 tsx scripts/provision-tenant.ts --short-code BANK-ES --name "Bank S.A." --admin-email admin@bank.es
 ```
+
+### Puertos (dev + Replit)
+
+- **Vite** `:5000` — host `0.0.0.0`, `strictPort: true` (mapea a external `:80` en Replit). Fijado así para que la webview de Replit funcione; no es el `:3000` histórico.
+- **Express** `:3001` — API. Vite proxya `/api/*` a este puerto.
+- En Replit ambos arrancan con `npm run dev` (concurrently). El workflow espera `waitForPort = 5000`.
+
+### Arranque en Replit
+
+`.replit` deja listos los env vars mínimos en `[userenv.shared]`:
+`VITE_DEMO_USER`, `VITE_DEMO_PASS`, `VITE_DEMO_EMAIL`, `VITE_GOOGLE_CLIENT_ID`,
+`SEED_DEMO_ON_BOOT=true`. Con `postgresql-16` activo, `DATABASE_URL` lo inyecta
+Replit automáticamente. El server ejecuta `runMigrations()` al boot y, si
+`SEED_DEMO_ON_BOOT=true`, lanza `scripts/seed-demo-dataset.ts` como proceso
+hijo idempotente para poblar clientes/deals/posiciones/targets antes de que
+el usuario abra la UI. Ver [`docs/runbooks/replit-demo.md`](docs/runbooks/replit-demo.md).
 
 ## Estructura del proyecto (post-roadmap)
 
@@ -76,8 +99,9 @@ api/                       # Cliente API tipado (browser → server)
   index.ts                 # Re-exports
   deals.ts marketData.ts config.ts audit.ts entities.ts
   reportSchedules.ts observability.ts mappers.ts
-  customer360.ts           # NUEVO — Phase 1
-  campaigns.ts             # NUEVO — Phase 2
+  customer360.ts           # Phase 1
+  campaigns.ts             # Phase 2
+  clv.ts reconciliation.ts # Phase 6
 
 contexts/                  # React Context (sin cambios estructurales)
 
@@ -91,34 +115,46 @@ integrations/              # NUEVO — Phase 4: connector adapter layer
   marketData/bloomberg.ts  # BloombergMarketDataAdapter (STUB)
 
 scripts/
-  provision-tenant.ts      # NUEVO — Phase 5, idempotente, < 60s SLO
+  provision-tenant.ts          # Phase 5, idempotente, < 60s SLO
+  seed-demo-dataset.ts         # Demo catalogue — clientes + deals + Customer 360 + grid
+  seed-clv-demo.ts             # Subset CLV Phase 6
+  seed-tenancy-alerts.ts       # Alert rules demo
   check-bundle-size.ts
   check-seed-schema-sync.ts
+  check-data-quality.ts
+  check-dependency-audit.ts
+  recapture-brochure.mjs       # Regenera screenshots del brochure HTML
 
 server/                    # Express server
-  index.ts                 # Bootstrap + routers + middlewares
-  db.ts                    # pg.Pool + withTransaction + withTenancyTransaction (NUEVO)
-  migrate.ts               # Schema inline para arranque local
+  index.ts                 # Bootstrap + runMigrations + seed-on-boot opcional + routers + middlewares
+  db.ts                    # pg.Pool + withTransaction + withTenancyTransaction
+  migrate.ts               # Schema inline + seed Default Entity + demo user/entity_user
   middleware/
     auth.ts                # JWT HMAC propio
-    requestId.ts           # NUEVO — Phase 0, x-request-id correlación
-    tenancy.ts             # NUEVO — Phase 0, valida x-entity-id contra entity_users
+    requestId.ts           # Phase 0, x-request-id correlación
+    tenancy.ts             # Phase 0, valida x-entity-id contra entity_users
+    requireTenancy.ts      # Belt-and-suspenders guard + helpers tenancyScope / entityScopedClause
     errorHandler.ts validate.ts
   routes/
     deals.ts audit.ts config.ts marketData.ts entities.ts
     reportSchedules.ts observability.ts auth.ts gemini.ts pricing.ts
-    snapshots.ts           # NUEVO — Phase 0, replay endpoint
-    customer360.ts         # NUEVO — Phase 1, CRUD + CSV import
-    channelPricing.ts      # NUEVO — Phase 2, /api/channel/quote
-    campaigns.ts           # NUEVO — Phase 2, CRUD + state machine
-    governance.ts          # NUEVO — Phase 3, model inventory + signed dossiers
-    metering.ts            # NUEVO — Phase 5, ops usage observability
-  workers/                 # NUEVO — Phase 0
+    snapshots.ts           # Phase 0, replay endpoint
+    customer360.ts         # Phase 1, CRUD + CSV import
+    channelPricing.ts      # Phase 2, /api/channel/quote
+    campaigns.ts           # Phase 2, CRUD + state machine
+    governance.ts          # Phase 3, model inventory + signed dossiers
+    metering.ts            # Phase 5, ops usage observability
+    clv.ts reconciliation.ts   # Phase 6 — CLV + FTP reconciliation
+  workers/
     alertEvaluatorCore.ts  # Pure evaluation (testable sin DB)
     alertEvaluator.ts      # DB adapters + setInterval loop opt-in
     snapshotReplay.ts      # Re-ejecuta motor con snapshot guardado
+    escalationSweeper.ts   # Phase 3.5 — temporal approval escalations
+    ltvSnapshotWorker.ts   # Phase 6 — refresca client_ltv_snapshots
+    crmEventSync.ts        # Phase 6 — tira eventos CRM → client_events
   integrations/
     alertChannels.ts       # email/slack/pagerduty/webhook/opsgenie
+    bootstrap.ts           # Registra adapters (inMemory | salesforce | bloomberg) al boot
 
 components/
   Calculator/ Blotter/ Config/ MarketData/ Behavioural/
@@ -171,14 +207,17 @@ utils/
   __tests__/                        # ~78 archivos · ~967 tests + 5 integration
 
 supabase/
-  schema.sql schema_v2.sql fix_rls_realtime.sql
-  migrations/                       # 26 migraciones secuenciales
+  schema.sql (LEGACY — DO NOT EXECUTE) schema_v2.sql fix_rls_realtime.sql
+  migrations/                       # 38 migraciones secuenciales (cronológicas)
   functions/
     pricing/                        # +tenancy + snapshot write + scoping (Phase 0)
     realize-raroc/                  # +entity_id query param (Phase 0)
     elasticity-recalibrate/         # +entity_id query param (Phase 0)
 
-e2e/                                # 12 specs Playwright
+e2e/                                # 20 specs Playwright (ai-assistant, auth, pricing-flow,
+                                    # deal-blotter, esg-grid, market-data, multi-entity,
+                                    # navigation, rules-governance, shocks-reporting,
+                                    # reconciliation, pipeline, clv, offline-pwa, rbac, …)
 
 docs/                               # Doc operativa (ver índice abajo)
   api-spec.yaml                     # OpenAPI v2 (refresh tras Phase 0-5)
@@ -193,14 +232,18 @@ docs/                               # Doc operativa (ver índice abajo)
   phase-0-design.md                 # NUEVO — Phase 0 diseño conceptual
   phase-0-technical-specs.md        # NUEVO — SQL + tipos + OpenAPI delta + ejemplos
   phase-0-rollout.md                # NUEVO — env vars + secuencia rollout
-  roadmap-execution-summary.md      # NUEVO — estado por fase tras roadmap
-  integration-tests.md              # NUEVO — cómo correr tests opt-in
-  architecture.md                   # NUEVO — overview maestro post-roadmap
-  runbooks/                         # NUEVO — 7 plantillas operativas
-    README.md tenancy-violation.md pricing-latency.md
-    snapshot-write-failure.md mock-fallback.md
+  roadmap-execution-summary.md      # Estado por fase tras roadmap
+  integration-tests.md              # Cómo correr tests opt-in
+  architecture.md                   # Overview maestro post-roadmap
+  integral-review-2026-04-18.md     # Hallazgos + 3 olas de evolución
+  ola-6-tenancy-strict-stress-pricing.md   # Siguiente ola en marcha
+  pivot/ superpowers/               # Material exploratorio
+  runbooks/                         # 12 plantillas operativas
+    README.md tenancy-violation.md tenancy-strict-flip.md
+    pricing-latency.md snapshot-write-failure.md mock-fallback.md
     campaign-volume-exhausted.md adapter-down.md
     feature-flag-kill-switch.md backtest-drift.md
+    clv-ops.md escalation-timeouts.md seed-demo.md replit-demo.md
 ```
 
 ## Arquitectura y flujo de datos
@@ -392,8 +435,8 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Testing
 
-- **Unit (Vitest 4):** ~78 archivos, ~967 tests + 5 integration opt-in.
-- **E2E (Playwright 1.59):** 12 specs.
+- **Unit (Vitest 4):** ~80 archivos, ~1.0k tests + 2 integration opt-in.
+- **E2E (Playwright 1.59):** 20 specs.
 - **Component (Storybook 8.6):** stories en `*.stories.tsx`.
 - **Integration RLS (opt-in):** `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration`.
 - Para cálculos financieros usar `toBeCloseTo`.
@@ -403,31 +446,46 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Base de datos y Supabase
 
-- 26 migrations secuenciales en `supabase/migrations/`.
+- 38 migrations secuenciales en `supabase/migrations/` (última:
+  `20260608000001_clv_360.sql`).
 - Schema principal: `supabase/schema_v2.sql` (referencia legacy),
   migrations es la verdad operativa.
+- `supabase/schema.sql` está marcado **LEGACY — DO NOT EXECUTE** y ningún
+  tooling lo lee.
 - `api/` (cliente) usa `api/mappers.ts` para snake_case ↔ camelCase.
 - `utils/supabase/` queda para servicios especializados (approval, audit,
   monitoring, methodology, reporting).
 - Edge Function de pricing valida tenancy explícitamente antes de tocar
   service role; ver `supabase/functions/pricing/index.ts`.
+- `server/migrate.ts` incluye el schema inline para el arranque Node-only
+  (dev + Replit). Es un subconjunto de las migrations Supabase; cualquier
+  tabla nueva que el server necesite al boot debe añadirse a los dos sitios.
 
 ## Variables de entorno clave
 
 | Var | Default | Efecto |
 |---|---|---|
-| `DATABASE_URL` | required | Postgres connection (pg.Pool) |
+| `DATABASE_URL` | required | Postgres connection (pg.Pool). Replit la inyecta con `postgresql-16` |
 | `JWT_SECRET` | dev fallback | Required en producción |
-| `VITE_GOOGLE_CLIENT_ID` | — | Habilita Google SSO |
+| `VITE_GOOGLE_CLIENT_ID` | — | Habilita botón Google SSO en Login |
 | `GOOGLE_ALLOWED_HOSTED_DOMAIN` | unset | Restringe SSO a un Workspace domain |
+| `VITE_DEMO_USER` / `VITE_DEMO_PASS` / `VITE_DEMO_EMAIL` | unset | Sin los dos primeros NO se renderiza el formulario demo (`components/ui/Login.tsx`). El server responde 503 en `/api/auth/demo` si faltan |
+| `SEED_DEMO_ON_BOOT` | unset | `true` dispara `scripts/seed-demo-dataset.ts` tras `runMigrations()` (idempotente). Usado en Replit |
 | `TENANCY_ENFORCE` | `off` | `on` activa `tenancyMiddleware` global |
 | `TENANCY_STRICT` | `off` | `on` hace que `get_current_entity_id()` lance error |
 | `PRICING_ALLOW_MOCKS` | unset (false) | `true` permite fallbacks a mock data |
 | `ENGINE_VERSION` | `dev-local` | Git sha grabado en pricing_snapshots |
 | `ALERT_EVAL_INTERVAL_MS` | unset (off) | ≥1000 activa el alert worker |
+| `ESCALATION_SWEEP_INTERVAL_MS` | unset (off) | ≥1000 activa el escalation sweeper |
+| `LTV_SNAPSHOT_INTERVAL_MS` | unset (off) | ≥60000 activa el worker de refresh CLV |
+| `CRM_SYNC_INTERVAL_MS` | unset (off) | ≥1000 activa el pull CRM → client_events |
+| `ADAPTER_CRM` | `in-memory` | `salesforce` usa el stub real (Phase 4) |
+| `ADAPTER_MARKET_DATA` | `in-memory` | `bloomberg` usa el stub real (Phase 4) |
 | `DOSSIER_SIGNING_SECRET` | dev fallback | Required en producción |
 | `INTEGRATION_DATABASE_URL` | unset | Activa tests de integración (opt-in) |
 | `ALLOWED_ORIGINS` | localhost dev | CORS allowlist |
+| `VITE_NPRICING_DEPRECATE_ALM` / `VITE_ALQUID_BASE_URL` | false / prod | Pivot flags ALM → Alquid |
+| `VITE_GEMINI_API_KEY` | — | AI Assistant |
 
 ## Git y cambios
 
@@ -455,17 +513,30 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Pitfalls comunes
 
-- **Tenancy legacy (BLOQUEANTE para `TENANCY_STRICT=on` global, 2026-04-18):**
+- **Tenancy legacy (RESUELTO 2026-04-22, mantener el patrón):**
   `server/routes/config.ts`, `server/routes/audit.ts` y
-  `server/routes/deals.ts GET /` todavía **no consumen `req.tenancy`**.
-  Cualquier query o mutación que toques en estos routers debe migrarse al
-  patrón de `customer360`/`campaigns`/`governance` antes de activar strict
-  en producción. Ver [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md) §1.1.
+  `server/routes/deals.ts` ya consumen `entityScopedClause(req, N)` para
+  reads y `tenancyScope(req)` para writes/deletes. Cualquier nuevo router
+  entity-scoped debe reutilizar estos helpers de
+  `server/middleware/requireTenancy.ts` — no interpolar `entity_id` del
+  body. Ver el patrón vivo en `server/routes/customer360.ts`,
+  `campaigns.ts`, `governance.ts`, `metering.ts`.
 - `seedData.ts` y Supabase pueden divergir si se cambia uno sin revisar el
-  otro. Usar `npm run check:sync`. Desde 2026-04-18 el script lee la
-  **secuencia completa de migrations** + `schema_v2.sql` como fallback;
-  `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` y el script
-  ya no lo lee.
+  otro. Usar `npm run check:sync`. El script lee la **secuencia completa
+  de migrations** + `schema_v2.sql` como fallback; `supabase/schema.sql`
+  está marcado `LEGACY — DO NOT EXECUTE` y el script ya no lo lee.
+- `server/migrate.ts` (schema inline para dev/Replit) es un **subconjunto**
+  de `supabase/migrations/`. Si añades una tabla que el server necesita al
+  arrancar (p.ej. `tenancy_violations`, entity_users default seed), tócala
+  en los dos sitios o Replit arrancará con una DB rota.
+- **Demo login en Replit:** `components/ui/Login.tsx:287` sólo renderiza
+  el form si **ambos** `VITE_DEMO_USER` y `VITE_DEMO_PASS` están definidos
+  en el bundle del cliente. Están ya cableados en `.replit` `[userenv.shared]`.
+  Si se borran, el usuario verá únicamente el botón Google.
+- **Demo data:** el botón Sign In funciona, pero si
+  `SEED_DEMO_ON_BOOT` está desactivado contra una DB vacía las vistas
+  Customer Pricing / Blotter / Target Grid aparecerán sin filas. Ver
+  [`docs/runbooks/replit-demo.md`](docs/runbooks/replit-demo.md).
 - Las ramas antiguas pueden traer documentación útil pero también supuestos
   desactualizados.
 - Recharts y módulos lazy pueden introducir warnings no bloqueantes;
@@ -502,11 +573,15 @@ Rules & Config, Behavioural Models, AI Assistant.
 |---|---|
 | `README.md` | Overview ejecutivo del producto |
 | `docs/architecture.md` | **Overview maestro** post-roadmap (lectura recomendada) |
-| `docs/api-spec.yaml` | OpenAPI v2 (refresh tras Phase 0-5) |
-| `docs/roadmap-execution-summary.md` | Estado fase por fase tras 19 commits |
+| `docs/api-spec.yaml` | OpenAPI v2 |
+| `docs/roadmap-execution-summary.md` | Estado fase por fase |
+| `docs/integral-review-2026-04-18.md` | Hallazgos + 3 olas de evolución |
+| `docs/ola-6-tenancy-strict-stress-pricing.md` | Siguiente ola |
 | `docs/phase-0-design.md` + `phase-0-technical-specs.md` + `phase-0-rollout.md` | Tenancy/snapshots/SLO completo |
 | `docs/integration-tests.md` | Cómo correr los tests integración opt-in |
-| `docs/runbooks/` | 7 plantillas operativas para on-call |
+| `docs/runbooks/` | 12 plantillas operativas para on-call |
+| `docs/runbooks/replit-demo.md` | **Demo data flow + troubleshooting Replit** |
+| `docs/runbooks/seed-demo.md` | Cómo re-seedar Default Entity manualmente |
 | `docs/pricing-methodology.md` | Metodología FTP detallada |
 | `docs/security-baseline-2026-04.md` | Baseline de seguridad |
 | `docs/rls-audit-2026-04.md` | Auditoría RLS preexistente |

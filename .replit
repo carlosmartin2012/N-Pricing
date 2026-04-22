@@ -61,8 +61,15 @@ externalPort = 5173
 
 [userenv.shared]
 VITE_DEMO_USER = "demo"
+VITE_DEMO_PASS = "n-pricing-demo"
 VITE_DEMO_EMAIL = "demo@nfq.es"
 VITE_GOOGLE_CLIENT_ID = "655770399950-5urs5vun75q59gffv0o0fu18rpivnb86.apps.googleusercontent.com"
+# When true, the Express server runs scripts/seed-demo-dataset.ts after
+# runMigrations() so the UI has clients / deals / positions / campaigns
+# visible from the first page load. Safe because the seed is idempotent
+# (ON CONFLICT DO NOTHING). Set to "false" to skip re-seeding once the
+# dataset is already in place.
+SEED_DEMO_ON_BOOT = "true"
 
 [deployment]
 deploymentTarget = "autoscale"

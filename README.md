@@ -84,19 +84,24 @@ inmutables** de cada cálculo para reproducibilidad regulatoria (SR 11-7 / EBA).
 ## Arquitectura
 
 ```
-React 19 SPA (Vite + PWA)
+React 19 SPA (Vite :5000 + PWA)
 ├── 7 Context Providers
 ├── Code-splitting con React.lazy
 ├── React Query para data fetching
 ├── Capa API tipada (api/) con mappers
 └── Adapter layer (integrations/) para SSO + connectors
 
-Express server (server/)
+Express server (server/ :3001)
 ├── Postgres pool (pg) con withTenancyTransaction
+├── runMigrations() + seed-on-boot opcional al arrancar
 ├── JWT propio HMAC + Google SSO
-├── tenancyMiddleware + requestIdMiddleware globales
-├── 13 routers de dominio
-└── alertEvaluator opt-in (setInterval loop)
+├── tenancyMiddleware + requireTenancy + requestIdMiddleware
+├── 18 routers de dominio (deals, audit, config, pricing, snapshots,
+│   customer360, clv, reconciliation, channels, campaigns, governance,
+│   metering, entities, marketData, reportSchedules, observability,
+│   auth, gemini)
+└── 4 workers opt-in (alertEvaluator, escalationSweeper, ltvSnapshotWorker,
+    crmEventSync) + bootstrapAdapters
 
 Supabase Edge Functions (Deno)
 ├── pricing — escribe pricing_snapshots, valida tenancy
@@ -104,7 +109,7 @@ Supabase Edge Functions (Deno)
 └── elasticity-recalibrate — cron nocturno, ?entity_id scoping
 
 PostgreSQL (Supabase)
-├── 26 migraciones secuenciales
+├── 38 migraciones secuenciales
 ├── RLS estricto por entity_id
 ├── Helpers: get_current_entity_id, get_accessible_entity_ids
 └── Append-only: tenancy_violations, audit_log, *_versions, pricing_snapshots
@@ -120,15 +125,44 @@ Detalles completos en [docs/architecture.md](./docs/architecture.md).
 - Postgres (Supabase local o cualquier instancia accesible)
 - Cuenta Supabase opcional para producción
 
-### Instalación
+### Instalación local
 
 ```bash
 git clone https://github.com/carlosmartin2012/n-pricing.git
 cd n-pricing
 npm install
 cp .env.example .env.local  # edita con tus credenciales
-npm run dev
+npm run dev                 # Vite :5000 + Express :3001 (concurrently)
+
+# Una vez arrancado, en otra pestaña (opcional pero recomendado):
+npm run seed:demo           # Puebla DEFAULT_ENTITY_ID con clientes + deals + posiciones + grid
 ```
+
+### Quickstart en Replit
+
+`.replit` ya trae preconfigurado:
+
+- **Módulo `postgresql-16`** → `DATABASE_URL` se inyecta automáticamente.
+- **`[userenv.shared]`** con `VITE_DEMO_USER=demo`, `VITE_DEMO_PASS=n-pricing-demo`,
+  `VITE_DEMO_EMAIL=demo@nfq.es`, `VITE_GOOGLE_CLIENT_ID` y `SEED_DEMO_ON_BOOT=true`.
+- **Workflow "Project"** → corre `npm run dev` esperando `port 5000` (Vite).
+- **Puerto `5000` mapeado a `:80`** para la webview.
+
+Flujo de arranque:
+
+1. Pulsa **Run** en Replit.
+2. `server/index.ts` ejecuta `runMigrations()` (crea schema + Default Entity +
+   demo user + `entity_users` link).
+3. Con `SEED_DEMO_ON_BOOT=true`, el server lanza `scripts/seed-demo-dataset.ts`
+   como proceso hijo — idempotente, rellena `clients`, `products`, `deals`,
+   `client_positions`, `client_metrics_snapshots`, `client_events`,
+   `client_ltv_snapshots`, `client_nba_recommendations`, `target_grid_cells`,
+   `tolerance_bands`.
+4. Abre la webview → Login → usa `demo / n-pricing-demo`.
+5. Todas las vistas (Customer Pricing, Pipeline, Reconciliation, Target Grid,
+   Deal Blotter) deben mostrar datos.
+
+Troubleshooting en [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md).
 
 ### Variables de entorno principales
 
@@ -139,11 +173,17 @@ npm run dev
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | sí | Browser → Supabase |
 | `VITE_GOOGLE_CLIENT_ID` | sí | Habilita Google SSO |
 | `GOOGLE_ALLOWED_HOSTED_DOMAIN` | no | Restringe SSO a un Workspace |
+| `VITE_DEMO_USER` / `VITE_DEMO_PASS` / `VITE_DEMO_EMAIL` | demo | Sin los dos primeros el formulario de login demo NO se renderiza (`components/ui/Login.tsx:287`) |
+| `SEED_DEMO_ON_BOOT` | no | `true` ejecuta `scripts/seed-demo-dataset.ts` tras `runMigrations()` (idempotente). Usado en Replit |
 | `TENANCY_ENFORCE` | no (`off`) | `on` activa middleware de tenancy global |
 | `TENANCY_STRICT` | no (`off`) | `on` hace que el helper PG lance error si falta tenancy |
 | `PRICING_ALLOW_MOCKS` | no (`false`) | `true` permite fallback a mock data en pricing |
 | `ENGINE_VERSION` | no | Git sha para `pricing_snapshots.engine_version` |
 | `ALERT_EVAL_INTERVAL_MS` | no | ≥1000 activa el alert evaluator worker |
+| `ESCALATION_SWEEP_INTERVAL_MS` | no | ≥1000 activa el escalation sweeper |
+| `LTV_SNAPSHOT_INTERVAL_MS` | no | ≥60000 activa refresco de `client_ltv_snapshots` |
+| `CRM_SYNC_INTERVAL_MS` | no | ≥1000 activa pull CRM → `client_events` |
+| `ADAPTER_CRM` / `ADAPTER_MARKET_DATA` | `in-memory` | `salesforce` / `bloomberg` para stubs reales |
 | `DOSSIER_SIGNING_SECRET` | sí en prod | HMAC para firmar committee dossiers |
 | `INTEGRATION_DATABASE_URL` | no | Activa tests integración con DB real (opt-in) |
 | `VITE_GEMINI_API_KEY` | no | API key Gemini para AI Assistant |
@@ -173,18 +213,23 @@ default feature flags en una transacción. SLO target < 60 s.
 ## Scripts
 
 ```bash
-npm run dev              # Vite HMR
+npm run dev              # Vite :5000 + Express :3001 (concurrently)
 npm run build            # Build producción (PWA)
 npm run preview          # Preview del build
-npm run test             # Vitest (~967 tests)
-npm run test:e2e         # Playwright (12 specs)
+npm run test             # Vitest (~1.0k tests, 80 archivos)
+npm run test:e2e         # Playwright (20 specs)
 npm run typecheck        # tsc --noEmit
+npm run typecheck:edge   # build Edge + deno check
 npm run lint             # ESLint
 npm run format           # Prettier
-npm run verify:full      # lint + typecheck + test + build + e2e
-npm run check:sync       # Validar seed↔schema
+npm run verify           # lint+typecheck+edge+sync+data+security+test+build+bundle
+npm run verify:full      # verify + test:e2e
+npm run check:sync       # Validar seed↔schema (migrations + schema_v2 fallback)
 npm run check:bundle     # Validar tamaños de bundle
+npm run check:data-quality
 npm run check:security   # Scan deps prod con excepciones gobernadas
+npm run seed:demo        # Puebla DEFAULT_ENTITY_ID (idempotente)
+npm run seed:clv-demo    # Subset CLV Phase 6
 npm run storybook        # Storybook :6006
 
 # Tests integración (opt-in, requieren Postgres real):
@@ -200,20 +245,21 @@ contexts/               # 7 React Context providers
 integrations/           # Phase 4 — adapter layer
   types.ts registry.ts inMemory.ts sso.ts
   sso/google.ts crm/salesforce.ts marketData/bloomberg.ts
-scripts/                # provision-tenant, check-bundle-size, ...
+scripts/                # provision-tenant, seed-demo-dataset, seed-clv-demo,
+                        # check-{bundle-size,seed-schema-sync,data-quality,dependency-audit}
 server/                 # Express + pg.Pool
   middleware/ routes/ workers/ integrations/
-components/             # React components por dominio (~120 archivos)
-  Customer360/ Campaigns/ Admin/ ...
+components/             # React components por dominio
+  Customer360/ Campaigns/ Admin/ CLV/ Pipeline/ Reconciliation/ ...
 types/                  # Tipos por dominio (re-exportados desde types.ts)
 utils/                  # Pricing engine + helpers
-  pricing/ customer360/ channels/ governance/ metering/ backtesting/
+  pricing/ customer360/ channels/ governance/ metering/ backtesting/ clv/
 supabase/
-  migrations/           # 26 migraciones secuenciales
+  migrations/           # 38 migraciones secuenciales
   functions/            # 3 Edge Functions Deno
-e2e/                    # 12 specs Playwright
+e2e/                    # 20 specs Playwright
 docs/                   # Doc operativa + runbooks
-  runbooks/             # 7 plantillas operativas
+  runbooks/             # 12 plantillas operativas (incluye replit-demo.md)
 public/                 # PWA assets
 ```
 
@@ -242,9 +288,9 @@ Ver detalle en [docs/pricing-methodology.md](./docs/pricing-methodology.md).
 
 | Tipo | Comando | Cobertura |
 |---|---|---|
-| Unit | `npm run test` | ~967 tests · 78 archivos |
+| Unit | `npm run test` | ~1.0k tests · 80 archivos |
 | Integration (opt-in) | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration` | RLS + tenancy + fuzz |
-| E2E | `npm run test:e2e` | 12 specs Playwright |
+| E2E | `npm run test:e2e` | 20 specs Playwright |
 | Storybook | `npm run storybook` | Component stories |
 
 Cubre motor FTP completo, RAROC, curvas, rule matching, deal workflow,
@@ -276,7 +322,7 @@ Detalle de integration tests en [docs/integration-tests.md](./docs/integration-t
 El producto está diseñado para SaaS-first con flexibilidad on-premise.
 Para despliegue interno del banco:
 
-1. `Postgres` propio + aplicar las 26 migrations.
+1. `Postgres` propio + aplicar las 38 migrations.
 2. `node server/index.js` (build TS) tras `npm run build:server`.
 3. Edge Functions opcionales (deploy independiente vía Supabase CLI).
 4. Adapter layer: registrar implementaciones reales en `server/index.ts`
@@ -304,6 +350,9 @@ Para despliegue interno del banco:
 - ✅ **Phase 3** — Model Inventory + Signed Dossiers + Drift Detector
 - ✅ **Phase 4** — Adapter layer + GoogleSsoProvider real (+ stubs)
 - ✅ **Phase 5** — Tenant provisioning + ops metering (sin billing SaaS)
+- ✅ **Phase 6** — CLV 360 (ltvEngine + NBA + Pipeline) + FTP Reconciliation
+- ✅ **Unificación demo↔live** — MOCK_DEALS y Customer 360 viven en DB bajo `DEFAULT_ENTITY_ID`
+- 🚧 **Ola 6** — TENANCY_STRICT global + Stress EBA 6 escenarios ([detalle](./docs/ola-6-tenancy-strict-stress-pricing.md))
 
 Detalle fase por fase en
 [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md).
@@ -314,8 +363,11 @@ Detalle fase por fase en
 |---|---|
 | Onboarding técnico rápido | [docs/architecture.md](./docs/architecture.md) |
 | Contexto IA / agentes | [CLAUDE.md](./CLAUDE.md) |
+| Demo en Replit (troubleshooting) | [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md) |
 | Estado del roadmap | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md) |
-| Operación / on-call | [docs/runbooks/](./docs/runbooks/) (7 plantillas) |
+| Siguiente ola en marcha | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md) |
+| Integral review 2026-04 | [docs/integral-review-2026-04-18.md](./docs/integral-review-2026-04-18.md) |
+| Operación / on-call | [docs/runbooks/](./docs/runbooks/) (12 plantillas) |
 | Rollout de tenancy + flags | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md) |
 | Diseño Phase 0 detallado | [docs/phase-0-design.md](./docs/phase-0-design.md) + [phase-0-technical-specs.md](./docs/phase-0-technical-specs.md) |
 | API / contratos | [docs/api-spec.yaml](./docs/api-spec.yaml) |
