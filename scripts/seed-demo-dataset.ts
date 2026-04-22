@@ -533,15 +533,106 @@ async function resetDemo(pool: Pool, entityId: string): Promise<void> {
 // Main
 // ---------------------------------------------------------------------------
 
-async function main() {
+export interface SeedTotals {
+  clients: number; products: number; businessUnits: number;
+  deals: number;
+  positions: number; metrics: number; events: number; ltv: number; nba: number;
+  methodologySnapshot: number; gridCells: number; toleranceBands: number;
+}
+
+export interface SeedOptions {
+  entityId?: string;
+  reset?: boolean;
+}
+
+/**
+ * Seed the DEFAULT (or given) entity with the full demo catalogue.
+ *
+ * Exported for the server boot path (server/index.ts) and wrapped by the CLI
+ * below. Runs each per-table step under its own try/catch so a single missing
+ * table (e.g. tenancy_violations not yet migrated in a stale DB) does not
+ * abort the whole catalogue — the caller gets a totals report plus any
+ * per-step errors logged to console.
+ *
+ * The caller provides the Pool so the server can reuse its existing
+ * pg.Pool instead of opening a second connection pool per boot.
+ */
+export async function seedDemoDataset(
+  pool: Pool,
+  options: SeedOptions = {},
+): Promise<SeedTotals> {
+  const entityId = options.entityId ?? DEFAULT_ENTITY_ID;
+  const reset = options.reset ?? false;
+
+  console.info(`[seed-demo-dataset] entity=${entityId} reset=${reset}`);
+
+  if (reset) {
+    console.info('[seed-demo-dataset] Resetting Phase 6 demo rows…');
+    await resetDemo(pool, entityId);
+  }
+
+  const totals: SeedTotals = {
+    clients: 0, products: 0, businessUnits: 0, deals: 0,
+    positions: 0, metrics: 0, events: 0, ltv: 0, nba: 0,
+    methodologySnapshot: 0, gridCells: 0, toleranceBands: 0,
+  };
+
+  const step = async <K extends keyof SeedTotals>(
+    name: K,
+    run: () => Promise<number>,
+  ): Promise<void> => {
+    try {
+      totals[name] = await run();
+    } catch (err) {
+      console.error(`[seed-demo-dataset] ${name} failed:`, err instanceof Error ? err.message : err);
+    }
+  };
+
+  await step('clients',       () => ensureClients(pool, entityId));
+  await step('products',      () => ensureProducts(pool, entityId));
+  await step('businessUnits', () => ensureBusinessUnits(pool, entityId));
+  await step('deals',         () => seedDeals(pool, entityId));
+
+  // Phase 6 per-client data — only for the clients we have profiles for.
+  for (const [clientId, profile] of Object.entries(PROFILES)) {
+    const client = MOCK_CLIENTS.find((c) => c.id === clientId);
+    if (!client) continue;
+    try {
+      totals.positions += await seedPositions(pool, entityId, clientId, profile);
+      totals.metrics   += await seedMetrics(pool, entityId, clientId, profile);
+      totals.events    += await seedEvents(pool, entityId, clientId, profile);
+      if (await seedLtvSnapshot(pool, entityId, clientId, profile, client.name, client.segment, client.rating)) {
+        totals.ltv++;
+      }
+      totals.nba       += await seedNba(pool, entityId, clientId, profile);
+    } catch (err) {
+      console.error(`[seed-demo-dataset] profile ${clientId} failed:`, err instanceof Error ? err.message : err);
+    }
+  }
+
+  // Wave 1–3: target grid + tolerance bands. Methodology snapshot must
+  // exist before grid cells (FK dependency).
+  try {
+    if (await seedMethodologySnapshot(pool, entityId)) totals.methodologySnapshot++;
+  } catch (err) {
+    console.error('[seed-demo-dataset] methodologySnapshot failed:', err instanceof Error ? err.message : err);
+  }
+  await step('gridCells',      () => seedGridCells(pool, entityId));
+  await step('toleranceBands', () => seedToleranceBands(pool, entityId));
+
+  console.info(`[seed-demo-dataset] ✅ ${JSON.stringify(totals)}`);
+  return totals;
+}
+
+async function runCli(): Promise<void> {
   const args = parseArgs();
   if (!process.env.DATABASE_URL) {
     console.error('DATABASE_URL env var required');
     process.exit(1);
   }
 
-  console.info(`[seed-demo-dataset] entity=${args.entityId} reset=${args.reset} dryRun=${args.dryRun}`);
   if (args.dryRun) {
+    console.info(`[seed-demo-dataset] entity=${args.entityId} dryRun=true`);
     console.info(`[seed-demo-dataset] Would seed:`);
     console.info(`  ${MOCK_CLIENTS.length} clients`);
     console.info(`  ${MOCK_PRODUCT_DEFS.length} products`);
@@ -555,53 +646,27 @@ async function main() {
   }
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
   try {
-    if (args.reset) {
-      console.info('[seed-demo-dataset] Resetting Phase 6 demo rows…');
-      await resetDemo(pool, args.entityId);
-    }
-
-    const totals = {
-      clients: 0, products: 0, businessUnits: 0,
-      positions: 0, metrics: 0, events: 0, ltv: 0, nba: 0,
-      methodologySnapshot: 0, gridCells: 0, toleranceBands: 0,
-      deals: 0,
-    };
-
-    totals.clients       = await ensureClients(pool, args.entityId);
-    totals.products      = await ensureProducts(pool, args.entityId);
-    totals.businessUnits = await ensureBusinessUnits(pool, args.entityId);
-    totals.deals         = await seedDeals(pool, args.entityId);
-
-    // Phase 6 per-client data — only for the clients we have profiles for.
-    for (const [clientId, profile] of Object.entries(PROFILES)) {
-      const client = MOCK_CLIENTS.find((c) => c.id === clientId);
-      if (!client) continue;
-      totals.positions += await seedPositions(pool, args.entityId, clientId, profile);
-      totals.metrics   += await seedMetrics(pool, args.entityId, clientId, profile);
-      totals.events    += await seedEvents(pool, args.entityId, clientId, profile);
-      if (await seedLtvSnapshot(pool, args.entityId, clientId, profile, client.name, client.segment, client.rating)) {
-        totals.ltv++;
-      }
-      totals.nba       += await seedNba(pool, args.entityId, clientId, profile);
-    }
-
-    // Wave 1–3: target grid + tolerance bands. Methodology snapshot must
-    // exist before grid cells (FK dependency).
-    if (await seedMethodologySnapshot(pool, args.entityId)) {
-      totals.methodologySnapshot++;
-    }
-    totals.gridCells      = await seedGridCells(pool, args.entityId);
-    totals.toleranceBands = await seedToleranceBands(pool, args.entityId);
-
-    console.info(`[seed-demo-dataset] ✅ ${JSON.stringify(totals)}`);
+    await seedDemoDataset(pool, { entityId: args.entityId, reset: args.reset });
   } finally {
     await pool.end();
   }
 }
 
-main().catch((err) => {
-  console.error('[seed-demo-dataset] failed', err);
-  process.exit(1);
-});
+// CLI entry — only execute when this file is invoked directly, not on import.
+// import.meta.url vs process.argv[1] is the canonical Node ESM pattern.
+const isCli = (() => {
+  try {
+    const invoked = process.argv[1] ? new URL(`file://${process.argv[1]}`).href : '';
+    return invoked === import.meta.url;
+  } catch {
+    return false;
+  }
+})();
+
+if (isCli) {
+  runCli().catch((err) => {
+    console.error('[seed-demo-dataset] failed', err);
+    process.exit(1);
+  });
+}
