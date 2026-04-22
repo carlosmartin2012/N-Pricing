@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type {
   Transaction,
   ClientEntity,
@@ -90,14 +91,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'mock' | 'synced' | 'error'>('idle');
   const [dataMode, setDataMode] = useState<DataMode>(() => localCache.loadLocal('n_pricing_data_mode', 'live'));
+  const queryClient = useQueryClient();
 
   const setPersistedDataMode = useCallback<React.Dispatch<React.SetStateAction<DataMode>>>((nextValue) => {
     setDataMode((previous) => {
       const resolved = typeof nextValue === 'function' ? nextValue(previous) : nextValue;
       localCache.saveLocal('n_pricing_data_mode', resolved);
+      if (resolved !== previous) {
+        // Toggling demo/live changes the x-entity-id header the next fetch
+        // will send (see utils/activeEntity.ts). Clear the React Query cache
+        // so every subscribed view refetches against the new entity.
+        queryClient.clear();
+      }
       return resolved;
     });
-  }, []);
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({

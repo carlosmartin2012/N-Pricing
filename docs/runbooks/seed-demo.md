@@ -1,14 +1,15 @@
 # Runbook — Seed unified demo dataset
 
 > **Purpose:** populate Postgres with a coherent demo dataset under the
-> `DEFAULT_ENTITY_ID` so the UI's "Demo" mode can be switched to read from
-> the real DB (same path as "Live" mode) without diverging from the in-memory
-> JS mocks (`MOCK_CLIENTS`, `MOCK_PRODUCT_DEFS`, `MOCK_BUSINESS_UNITS`).
+> `DEFAULT_ENTITY_ID` so the UI's "Demo" mode reads from the real DB (same
+> path as "Live" mode) without diverging from the in-memory JS mocks
+> (`MOCK_CLIENTS`, `MOCK_PRODUCT_DEFS`, `MOCK_BUSINESS_UNITS`).
 >
-> This is **PR A** of a 2-PR plan. PR B will refactor `DataContext` to send
-> `x-entity-id = DEFAULT_ENTITY_ID` in Demo mode, dropping the
-> `enabled: dataMode === 'live'` guard on hooks. Until PR B lands, this seed
-> is visible only to tooling/tests that query the DB directly.
+> This is **PR A** of a 2-PR plan. **PR B landed** alongside: it wires the
+> `x-entity-id` header to `DEFAULT_ENTITY_ID` when `dataMode === 'demo'`,
+> drops the `enabled: dataMode === 'live'` guards on queries, and clears
+> the React Query cache on mode toggles so every view refetches against the
+> new entity. See [`utils/activeEntity.ts`](../../utils/activeEntity.ts).
 
 ## TL;DR
 

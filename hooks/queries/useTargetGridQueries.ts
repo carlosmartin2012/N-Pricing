@@ -19,7 +19,6 @@ export function useSnapshotsQuery(entityId?: string) {
       ? [...queryKeys.targetGrid.snapshots, dataMode, entityId]
       : [...queryKeys.targetGrid.snapshots, dataMode],
     queryFn: () => targetGridApi.listSnapshots(entityId),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -28,7 +27,7 @@ export function useSnapshotQuery(id: string) {
   return useQuery({
     queryKey: [...queryKeys.targetGrid.snapshot(id), dataMode],
     queryFn: () => targetGridApi.getSnapshot(id),
-    enabled: dataMode === 'live' && id.length > 0,
+    enabled: id.length > 0,
   });
 }
 
@@ -41,7 +40,7 @@ export function useGridCellsQuery(snapshotId: string, filters?: GridFilters) {
   return useQuery({
     queryKey: [...queryKeys.targetGrid.cells(snapshotId), dataMode, filters],
     queryFn: () => targetGridApi.getGridCells(snapshotId, filters),
-    enabled: dataMode === 'live' && snapshotId.length > 0,
+    enabled: snapshotId.length > 0,
   });
 }
 
@@ -68,7 +67,6 @@ export function useCanonicalTemplatesQuery(entityId?: string) {
       ? [...queryKeys.targetGrid.templates, dataMode, entityId]
       : [...queryKeys.targetGrid.templates, dataMode],
     queryFn: () => targetGridApi.listCanonicalTemplates(entityId),
-    enabled: dataMode === 'live',
   });
 }
 

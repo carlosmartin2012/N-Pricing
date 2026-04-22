@@ -25,7 +25,6 @@ export function useDisciplineKpisQuery(filters?: DisciplineFilters) {
   return useQuery({
     queryKey: [...queryKeys.discipline.kpis(filters?.entityId), dataMode, filters],
     queryFn: () => disciplineApi.getDisciplineKpis(filters),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -38,7 +37,6 @@ export function useVariancesQuery(filters?: VarianceFilters, page?: PageOpts) {
   return useQuery({
     queryKey: [...queryKeys.discipline.variances, dataMode, filters, page],
     queryFn: () => disciplineApi.listVariances(filters, page),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -77,7 +75,6 @@ export function useToleranceBandsQuery(entityId?: string) {
       ? [...queryKeys.discipline.bands, dataMode, entityId]
       : [...queryKeys.discipline.bands, dataMode],
     queryFn: () => disciplineApi.listToleranceBands(entityId),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -120,7 +117,6 @@ export function useExceptionsQuery(dealId?: string) {
       ? [...queryKeys.discipline.exceptions, dataMode, dealId]
       : [...queryKeys.discipline.exceptions, dataMode],
     queryFn: () => disciplineApi.listExceptions(dealId),
-    enabled: dataMode === 'live',
   });
 }
 

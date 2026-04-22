@@ -1,3 +1,5 @@
+import { resolveActiveEntityId } from './activeEntity';
+
 const BASE = '/api';
 
 function getAuthToken(): string | null {
@@ -10,11 +12,13 @@ function getAuthToken(): string | null {
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
+  const entityId = resolveActiveEntityId();
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'x-entity-id': entityId,
       ...(options?.headers ?? {}),
     },
   });
