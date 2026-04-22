@@ -6,15 +6,26 @@ import {
 } from '../dataModeUtils';
 
 describe('dataModeUtils', () => {
-  it('forces demo hydration plan when demo mode is selected', () => {
+  it('uses remote hydration for demo mode when supabase is configured (DB-backed demo)', () => {
     const plan = resolveHydrationPlan({
       dataMode: 'demo',
       isSupabaseConfigured: true,
     });
 
+    expect(plan.source).toBe('remote');
+    expect(plan.syncStatus).toBe('idle');
+    expect(plan.reason).toBe('demo-mode-db');
+  });
+
+  it('falls back to mock hydration for demo mode when supabase is unconfigured (offline)', () => {
+    const plan = resolveHydrationPlan({
+      dataMode: 'demo',
+      isSupabaseConfigured: false,
+    });
+
     expect(plan.source).toBe('mock');
     expect(plan.syncStatus).toBe('mock');
-    expect(plan.reason).toBe('demo-mode');
+    expect(plan.reason).toBe('demo-mode-offline');
   });
 
   it('uses remote hydration when live mode is selected and supabase is configured', () => {
@@ -45,10 +56,18 @@ describe('dataModeUtils', () => {
   });
 
   it('describes the current data mode state for the UI badge', () => {
-    expect(describeDataModeState({ dataMode: 'demo', syncStatus: 'mock' })).toEqual({
+    // Demo + synced = DB-backed demo (the new default)
+    expect(describeDataModeState({ dataMode: 'demo', syncStatus: 'synced' })).toEqual({
       badgeLabel: 'DEMO',
       accent: 'amber',
-      detail: 'Using coherent demo dataset across the workspace.',
+      detail: 'Using coherent demo dataset from the database.',
+    });
+
+    // Demo + mock = fallback (DB unreachable)
+    expect(describeDataModeState({ dataMode: 'demo', syncStatus: 'mock' })).toEqual({
+      badgeLabel: 'DEMO · FALLBACK',
+      accent: 'amber',
+      detail: 'Demo mode using JS fallback dataset (DB unreachable).',
     });
 
     expect(describeDataModeState({ dataMode: 'live', syncStatus: 'synced' })).toEqual({

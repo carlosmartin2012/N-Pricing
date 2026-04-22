@@ -4,7 +4,7 @@ export type SyncStatus = 'idle' | 'mock' | 'synced' | 'error';
 export interface HydrationPlan {
   source: 'remote' | 'mock';
   syncStatus: SyncStatus;
-  reason: 'demo-mode' | 'live-mode' | 'supabase-unconfigured';
+  reason: 'demo-mode-db' | 'demo-mode-offline' | 'live-mode' | 'supabase-unconfigured';
 }
 
 export function resolveHydrationPlan({
@@ -14,8 +14,18 @@ export function resolveHydrationPlan({
   dataMode: DataMode;
   isSupabaseConfigured: boolean;
 }): HydrationPlan {
+  // Demo mode prefers the DB path when available — the JS mock catalogue and
+  // the seeded DEFAULT_ENTITY_ID rows are byte-compatible (same IDs, same
+  // shape), so reading from DB keeps demo coherent with live's code path.
+  // The remote fetch in useInitialHydration already falls back to MOCK_* via
+  // resolveWithFallback when an endpoint returns null, so this is safe even
+  // if the DB is partially empty. Full offline (no Supabase config) keeps
+  // the legacy mock-only path.
   if (dataMode === 'demo') {
-    return { source: 'mock', syncStatus: 'mock', reason: 'demo-mode' };
+    if (!isSupabaseConfigured) {
+      return { source: 'mock', syncStatus: 'mock', reason: 'demo-mode-offline' };
+    }
+    return { source: 'remote', syncStatus: 'idle', reason: 'demo-mode-db' };
   }
 
   if (!isSupabaseConfigured) {
@@ -43,10 +53,17 @@ export function describeDataModeState({
   syncStatus: SyncStatus;
 }): { badgeLabel: string; accent: 'amber' | 'emerald' | 'rose'; detail: string } {
   if (dataMode === 'demo') {
+    if (syncStatus === 'mock') {
+      return {
+        badgeLabel: 'DEMO · FALLBACK',
+        accent: 'amber',
+        detail: 'Demo mode using JS fallback dataset (DB unreachable).',
+      };
+    }
     return {
       badgeLabel: 'DEMO',
       accent: 'amber',
-      detail: 'Using coherent demo dataset across the workspace.',
+      detail: 'Using coherent demo dataset from the database.',
     };
   }
 
