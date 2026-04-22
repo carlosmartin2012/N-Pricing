@@ -270,8 +270,10 @@ CREATE TABLE IF NOT EXISTS products (
   default_repricing TEXT DEFAULT 'Fixed',
   description TEXT,
   is_active BOOLEAN DEFAULT true,
+  entity_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE products ADD COLUMN IF NOT EXISTS entity_id UUID;
 
 -- Business units
 CREATE TABLE IF NOT EXISTS business_units (
@@ -280,8 +282,66 @@ CREATE TABLE IF NOT EXISTS business_units (
   code TEXT NOT NULL,
   parent_id TEXT REFERENCES business_units(id),
   is_funding_unit BOOLEAN DEFAULT false,
+  entity_id UUID,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE business_units ADD COLUMN IF NOT EXISTS entity_id UUID;
+
+-- Governance / Pricing Methodology (Phase 6 Wave 1)
+CREATE TABLE IF NOT EXISTS methodology_snapshots (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  version         TEXT        NOT NULL,
+  approved_at     TIMESTAMPTZ,
+  approved_by     UUID,
+  governance_request_id UUID,
+  methodology_hash TEXT,
+  notes           TEXT,
+  entity_id       UUID,
+  is_current      BOOLEAN     DEFAULT false,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_methodology_entity ON methodology_snapshots (entity_id, is_current);
+
+-- Target grid cells — per snapshot, entity-scoped (Phase 6 Wave 2)
+CREATE TABLE IF NOT EXISTS target_grid_cells (
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  snapshot_id          UUID        NOT NULL REFERENCES methodology_snapshots(id) ON DELETE CASCADE,
+  entity_id            UUID        NOT NULL,
+  product              TEXT        NOT NULL,
+  segment              TEXT        NOT NULL,
+  tenor_bucket         TEXT        NOT NULL,
+  currency             TEXT        DEFAULT 'EUR',
+  canonical_deal_input JSONB       DEFAULT '{}'::jsonb,
+  ftp                  NUMERIC(10,6),
+  liquidity_premium    NUMERIC(10,6),
+  capital_charge       NUMERIC(10,6),
+  esg_adjustment       NUMERIC(10,6),
+  target_margin        NUMERIC(10,6),
+  target_client_rate   NUMERIC(10,6),
+  target_raroc         NUMERIC(10,6),
+  components           JSONB       DEFAULT '{}'::jsonb,
+  created_at           TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_tgc_snapshot ON target_grid_cells (snapshot_id, entity_id);
+
+-- Tolerance bands — pricing discipline thresholds (Phase 6 Wave 3)
+CREATE TABLE IF NOT EXISTS tolerance_bands (
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id            UUID        NOT NULL,
+  product              TEXT,
+  segment              TEXT,
+  tenor_bucket         TEXT,
+  currency             TEXT        DEFAULT 'EUR',
+  ftp_bps_tolerance    NUMERIC(10,4),
+  raroc_pp_tolerance   NUMERIC(10,4),
+  margin_bps_tolerance NUMERIC(10,4),
+  priority             INTEGER     DEFAULT 1000,
+  active               BOOLEAN     DEFAULT true,
+  effective_from       DATE,
+  effective_to         DATE,
+  created_at           TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_tolerance_entity ON tolerance_bands (entity_id, active, priority);
 
 -- Users
 CREATE TABLE IF NOT EXISTS users (
