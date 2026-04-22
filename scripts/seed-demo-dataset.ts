@@ -42,6 +42,7 @@ import {
   MOCK_CLIENTS,
   MOCK_PRODUCT_DEFS,
   MOCK_BUSINESS_UNITS,
+  MOCK_DEALS,
 } from '../utils/seedData';
 import { DEFAULT_ENTITY_ID } from '../utils/seedData.entities';
 import { computeLtv, defaultAssumptions } from '../utils/clv/ltvEngine';
@@ -441,6 +442,56 @@ const TOLERANCE_BANDS: ToleranceBand[] = [
   { product: null, segment: null, tenorBucket: null, ftpBpsTolerance: 30, rarocPpTolerance: 4.0, marginBpsTolerance: 40, priority: 1000 },
 ];
 
+// ---------------------------------------------------------------------------
+// Deals — the main Pricing Blotter + Calculator catalogue.
+//
+// Reuses MOCK_DEALS (Transaction[]) from utils/seedData so every deal the UI
+// already knows by string ID (TRD-HYPER-001, DL-DEMO-001, etc.) exists in the
+// DB under the same ID. The local schema (server/migrate.ts) has `deals.id
+// TEXT PRIMARY KEY` and no FK on business_unit, so the string IDs persist
+// cleanly.
+//
+// Note on the dual-schema gotcha: supabase/migrations/20240101… declares
+// deals.id as UUID; server/migrate.ts declares it as TEXT. This seeder
+// targets the latter (the dev/Express path). Running against a strict
+// Supabase UUID schema would require generating deterministic UUIDs from
+// the string IDs — out of scope here.
+// ---------------------------------------------------------------------------
+
+async function seedDeals(pool: Pool, entityId: string): Promise<number> {
+  let inserted = 0;
+  for (const d of MOCK_DEALS) {
+    const res = await pool.query(
+      `INSERT INTO deals (
+         id, status, client_id, client_type, business_unit, funding_business_unit,
+         business_line, product_type, currency, amount, start_date, duration_months,
+         amortization, repricing_freq, margin_target, risk_weight, capital_ratio,
+         target_roe, operational_cost_bps, lcr_outflow_pct, category,
+         drawn_amount, undrawn_amount, is_committed,
+         transition_risk, physical_risk, entity_id
+       ) VALUES (
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
+         $22,$23,$24,$25,$26,$27::uuid
+       )
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        d.id, d.status, d.clientId, d.clientType ?? null,
+        d.businessUnit ?? null, d.fundingBusinessUnit ?? null,
+        d.businessLine ?? null, d.productType, d.currency, d.amount,
+        d.startDate, d.durationMonths,
+        d.amortization ?? null, d.repricingFreq ?? null, d.marginTarget ?? null,
+        d.riskWeight ?? null, d.capitalRatio ?? null,
+        d.targetROE ?? null, d.operationalCostBps ?? null, d.lcrOutflowPct ?? 0,
+        d.category ?? null,
+        d.drawnAmount ?? 0, d.undrawnAmount ?? 0, d.isCommitted ?? false,
+        d.transitionRisk ?? null, d.physicalRisk ?? null, entityId,
+      ],
+    );
+    inserted += res.rowCount ?? 0;
+  }
+  return inserted;
+}
+
 async function seedToleranceBands(pool: Pool, entityId: string): Promise<number> {
   let inserted = 0;
   for (const band of TOLERANCE_BANDS) {
@@ -471,6 +522,10 @@ async function resetDemo(pool: Pool, entityId: string): Promise<void> {
   await pool.query(`DELETE FROM tolerance_bands           WHERE entity_id = $1::uuid`, [entityId]);
   await pool.query(`DELETE FROM target_grid_cells        WHERE snapshot_id = $1::uuid`, [DEMO_METHODOLOGY_SNAPSHOT_ID]);
   await pool.query(`DELETE FROM methodology_snapshots    WHERE id = $1::uuid`, [DEMO_METHODOLOGY_SNAPSHOT_ID]);
+  // Deals — only those seeded from MOCK_DEALS (by ID list, not a blanket wipe,
+  // so any deal the user created manually in dev survives).
+  const dealIds = MOCK_DEALS.map((d) => d.id);
+  await pool.query(`DELETE FROM deals WHERE id = ANY($1) AND entity_id = $2::uuid`, [dealIds, entityId]);
   // Reference data left in place — it is conceptually owned by the entity.
 }
 
@@ -491,6 +546,7 @@ async function main() {
     console.info(`  ${MOCK_CLIENTS.length} clients`);
     console.info(`  ${MOCK_PRODUCT_DEFS.length} products`);
     console.info(`  ${MOCK_BUSINESS_UNITS.length} business units`);
+    console.info(`  ${MOCK_DEALS.length} deals (Blotter + Calculator catalogue)`);
     console.info(`  ${Object.keys(PROFILES).length} clients with Phase 6 data (positions + metrics + events + LTV + NBA)`);
     console.info(`  1 methodology snapshot`);
     console.info(`  ${GRID_CELLS.length} target grid cells`);
@@ -510,11 +566,13 @@ async function main() {
       clients: 0, products: 0, businessUnits: 0,
       positions: 0, metrics: 0, events: 0, ltv: 0, nba: 0,
       methodologySnapshot: 0, gridCells: 0, toleranceBands: 0,
+      deals: 0,
     };
 
     totals.clients       = await ensureClients(pool, args.entityId);
     totals.products      = await ensureProducts(pool, args.entityId);
     totals.businessUnits = await ensureBusinessUnits(pool, args.entityId);
+    totals.deals         = await seedDeals(pool, args.entityId);
 
     // Phase 6 per-client data — only for the clients we have profiles for.
     for (const [clientId, profile] of Object.entries(PROFILES)) {

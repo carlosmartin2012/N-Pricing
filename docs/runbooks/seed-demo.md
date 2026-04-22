@@ -30,6 +30,7 @@ unique key).
 | `clients` | `MOCK_CLIENTS.length` (5) | CL-1001 … CL-4099. IDs match the JS catalogue. |
 | `products` | `MOCK_PRODUCT_DEFS.length` (7) | LOAN_COMM, LOAN_MORT, DEP_CHECK, … |
 | `business_units` | `MOCK_BUSINESS_UNITS.length` (5) | CORP, RETAIL, SME, PRIVBANK, TREAS |
+| `deals` | `MOCK_DEALS.length` (~12) | TRD-HYPER-001 … DL-DEMO-*. IDs match the JS catalogue. Powers Blotter + Pricing Calculator in demo mode. Dual-schema gotcha: local `server/migrate.ts` has `deals.id TEXT`; Supabase migrations have `UUID`. Seeder targets the local schema. |
 | `client_positions` | ~6 | Three rich profiles: CL-1001 (Acme), CL-1002 (Globex ESG), CL-2001 (churn risk) |
 | `client_metrics_snapshots` | 12 | 4 quarters × 3 clients (2025-Q3 … 2026-Q2) |
 | `client_events` | 14 | Onboarding, deals, contact, churn signals, crosssell attempts |
