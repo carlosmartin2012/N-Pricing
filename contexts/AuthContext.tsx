@@ -33,8 +33,26 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => localCache.loadCurrentUser());
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localCache.loadCurrentUser());
+  // Validate cached session on mount — if the session expiry has elapsed or the
+  // JWT token is gone, start with a clean slate so hydration does not fire API
+  // calls with a stale/missing token and then get stuck in FALLBACK mode.
+  const initialUser = (() => {
+    const user = localCache.loadCurrentUser();
+    if (!user) return null;
+    const expires = localCache.loadLocal<number | null>('n_pricing_session_expires', null);
+    const hasToken = !!localStorage.getItem('n_pricing_auth_token');
+    if (!hasToken || !expires || expires <= Date.now()) {
+      // Stale cached user — wipe it so we don't ghost-authenticate
+      localCache.saveCurrentUser(null);
+      localCache.saveLocal('n_pricing_session_expires', null);
+      localStorage.removeItem('n_pricing_auth_token');
+      return null;
+    }
+    return user;
+  })();
+
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(initialUser);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!initialUser);
   const [sessionExpiresAt, setSessionExpiresAt] = useState<number | null>(() => {
     const stored = localCache.loadLocal<number | null>('n_pricing_session_expires', null);
     if (stored && stored > Date.now()) return stored;
@@ -72,6 +90,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
   }, [currentUser]);
+
+  // When any API call receives a 401, apiFetch dispatches this event so we
+  // can tear down the session and show the login screen rather than leaving
+  // the app stuck in FALLBACK mode with a ghost "logged-in" state.
+  useEffect(() => {
+    const onTokenExpired = () => {
+      if (isAuthenticated) {
+        clearSession();
+      }
+    };
+    window.addEventListener('auth:token-expired', onTokenExpired);
+    return () => window.removeEventListener('auth:token-expired', onTokenExpired);
+  }, [clearSession, isAuthenticated]);
 
   // Track user activity to extend session. The previous version wired up the
   // listeners but never consumed `lastActivity`, so sessions always expired at

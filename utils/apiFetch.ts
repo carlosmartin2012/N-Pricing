@@ -24,8 +24,12 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     if (res.status === 401) {
-      // Token expired or invalid — clear and let auth context handle redirect
-      try { localStorage.removeItem('n_pricing_auth_token'); } catch { /* SSR/test safe */ }
+      // Token expired or invalid — clear token and signal the auth context to
+      // end the session so the login screen is shown instead of FALLBACK mode.
+      try {
+        localStorage.removeItem('n_pricing_auth_token');
+        window.dispatchEvent(new CustomEvent('auth:token-expired'));
+      } catch { /* SSR/test safe */ }
     }
     const text = await res.text().catch(() => '');
     throw new Error(`API ${options?.method ?? 'GET'} ${path} failed (${res.status}): ${text}`);
