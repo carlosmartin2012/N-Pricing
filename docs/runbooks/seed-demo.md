@@ -35,6 +35,9 @@ unique key).
 | `client_events` | 14 | Onboarding, deals, contact, churn signals, crosssell attempts |
 | `client_ltv_snapshots` | 3 | Computed via real `computeLtv` with `defaultAssumptions`; hash-stable |
 | `client_nba_recommendations` | 4 | Engine-sourced, open status (no `consumed_at`) |
+| `methodology_snapshots` | 1 | Fixed ID `…0a01`, version `2026.04.demo`, `is_current=true` |
+| `target_grid_cells` | 6 | Corporate_Loan, ESG_Green_Loan, FX_Hedging, Trade_Finance cohorts |
+| `tolerance_bands` | 5 | 4 product-specific + 1 catch-all fallback |
 
 **Deliberately out of scope:**
 

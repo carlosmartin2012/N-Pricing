@@ -343,6 +343,122 @@ async function seedNba(pool: Pool, entityId: string, clientId: string, profile: 
   return inserted;
 }
 
+// ---------------------------------------------------------------------------
+// Wave 1–3 seeds — Target Grid + Discipline
+//
+// Scope: enough data to make the /target-grid and /discipline views
+// render non-empty in demo mode. What-If tables (sandboxes, backtests,
+// benchmarks) intentionally left unseeded — they are power-user and carry
+// their own creation flow. Deal-linked tables (deal_variance_snapshots)
+// are out of scope because MOCK_DEALS are UI-only strings without DB UUIDs;
+// that would require migrating the deals catalogue to the DB first.
+// ---------------------------------------------------------------------------
+
+const DEMO_METHODOLOGY_SNAPSHOT_ID = '00000000-0000-0000-0000-000000000a01';
+
+async function seedMethodologySnapshot(pool: Pool, entityId: string): Promise<boolean> {
+  const res = await pool.query(
+    `INSERT INTO methodology_snapshots (
+       id, version, approved_at, approved_by, governance_request_id,
+       methodology_hash, notes, entity_id, is_current
+     ) VALUES ($1, '2026.04.demo', '2026-04-01T00:00:00Z', NULL, NULL,
+              'demo-hash-v1', 'Seeded demo snapshot — not production methodology', $2::uuid, true)
+     ON CONFLICT (id) DO NOTHING
+     RETURNING id`,
+    [DEMO_METHODOLOGY_SNAPSHOT_ID, entityId],
+  );
+  return (res.rowCount ?? 0) > 0;
+}
+
+interface GridCell {
+  product: string;
+  segment: string;
+  tenorBucket: string;
+  currency: string;
+  ftp: number;
+  liquidityPremium: number;
+  capitalCharge: number;
+  esgAdjustment: number;
+  targetMargin: number;
+  targetClientRate: number;
+  targetRaroc: number;
+}
+
+const GRID_CELLS: GridCell[] = [
+  { product: 'Corporate_Loan',  segment: 'Large Corporate', tenorBucket: '1-3Y',  currency: 'EUR', ftp: 0.032, liquidityPremium: 0.0025, capitalCharge: 0.0060, esgAdjustment: 0,       targetMargin: 0.0180, targetClientRate: 0.0505, targetRaroc: 0.1650 },
+  { product: 'Corporate_Loan',  segment: 'Mid-market',      tenorBucket: '1-3Y',  currency: 'EUR', ftp: 0.034, liquidityPremium: 0.0030, capitalCharge: 0.0080, esgAdjustment: 0,       targetMargin: 0.0210, targetClientRate: 0.0560, targetRaroc: 0.1550 },
+  { product: 'Corporate_Loan',  segment: 'SME',             tenorBucket: '0-1Y',  currency: 'EUR', ftp: 0.030, liquidityPremium: 0.0020, capitalCharge: 0.0100, esgAdjustment: 0,       targetMargin: 0.0250, targetClientRate: 0.0600, targetRaroc: 0.1450 },
+  { product: 'ESG_Green_Loan',  segment: 'Large Corporate', tenorBucket: '3-5Y',  currency: 'EUR', ftp: 0.035, liquidityPremium: 0.0030, capitalCharge: 0.0055, esgAdjustment: -0.0025, targetMargin: 0.0190, targetClientRate: 0.0525, targetRaroc: 0.1800 },
+  { product: 'FX_Hedging',      segment: 'Large Corporate', tenorBucket: '0-1Y',  currency: 'EUR', ftp: 0.028, liquidityPremium: 0.0015, capitalCharge: 0.0020, esgAdjustment: 0,       targetMargin: 0.0040, targetClientRate: 0.0320, targetRaroc: 0.2200 },
+  { product: 'Trade_Finance',   segment: 'Mid-market',      tenorBucket: '0-1Y',  currency: 'EUR', ftp: 0.029, liquidityPremium: 0.0018, capitalCharge: 0.0035, esgAdjustment: 0,       targetMargin: 0.0140, targetClientRate: 0.0440, targetRaroc: 0.1700 },
+];
+
+async function seedGridCells(pool: Pool, entityId: string): Promise<number> {
+  let inserted = 0;
+  for (const cell of GRID_CELLS) {
+    const canonical = { product: cell.product, segment: cell.segment, amount: 1_000_000, currency: cell.currency, tenor_years: 3 };
+    const components = {
+      ftp: cell.ftp,
+      liquidity_premium: cell.liquidityPremium,
+      capital_charge: cell.capitalCharge,
+      esg_adjustment: cell.esgAdjustment,
+      target_margin: cell.targetMargin,
+    };
+    const res = await pool.query(
+      `INSERT INTO target_grid_cells (
+         snapshot_id, product, segment, tenor_bucket, currency, entity_id,
+         canonical_deal_input, ftp, liquidity_premium, capital_charge,
+         esg_adjustment, target_margin, target_client_rate, target_raroc, components
+       ) VALUES ($1, $2, $3, $4, $5, $6::uuid, $7::jsonb, $8, $9, $10, $11, $12, $13, $14, $15::jsonb)
+       ON CONFLICT DO NOTHING`,
+      [DEMO_METHODOLOGY_SNAPSHOT_ID, cell.product, cell.segment, cell.tenorBucket, cell.currency, entityId,
+       JSON.stringify(canonical), cell.ftp, cell.liquidityPremium, cell.capitalCharge,
+       cell.esgAdjustment, cell.targetMargin, cell.targetClientRate, cell.targetRaroc,
+       JSON.stringify(components)],
+    );
+    inserted += res.rowCount ?? 0;
+  }
+  return inserted;
+}
+
+interface ToleranceBand {
+  product: string | null;
+  segment: string | null;
+  tenorBucket: string | null;
+  ftpBpsTolerance: number;
+  rarocPpTolerance: number;
+  marginBpsTolerance: number;
+  priority: number;
+}
+
+const TOLERANCE_BANDS: ToleranceBand[] = [
+  // Product-specific bands (more restrictive, higher priority)
+  { product: 'Corporate_Loan', segment: null, tenorBucket: null, ftpBpsTolerance: 15, rarocPpTolerance: 2.0, marginBpsTolerance: 20, priority: 10 },
+  { product: 'ESG_Green_Loan', segment: null, tenorBucket: null, ftpBpsTolerance: 10, rarocPpTolerance: 1.5, marginBpsTolerance: 15, priority: 10 },
+  { product: 'FX_Hedging',     segment: null, tenorBucket: null, ftpBpsTolerance: 25, rarocPpTolerance: 3.0, marginBpsTolerance: 30, priority: 10 },
+  { product: 'Trade_Finance',  segment: null, tenorBucket: null, ftpBpsTolerance: 20, rarocPpTolerance: 2.5, marginBpsTolerance: 25, priority: 10 },
+  // Catch-all fallback (lowest priority)
+  { product: null, segment: null, tenorBucket: null, ftpBpsTolerance: 30, rarocPpTolerance: 4.0, marginBpsTolerance: 40, priority: 1000 },
+];
+
+async function seedToleranceBands(pool: Pool, entityId: string): Promise<number> {
+  let inserted = 0;
+  for (const band of TOLERANCE_BANDS) {
+    const res = await pool.query(
+      `INSERT INTO tolerance_bands (
+         product, segment, tenor_bucket, currency, entity_id,
+         ftp_bps_tolerance, raroc_pp_tolerance, margin_bps_tolerance,
+         priority, active, effective_from
+       ) VALUES ($1, $2, $3, 'EUR', $4::uuid, $5, $6, $7, $8, true, '2026-01-01')
+       ON CONFLICT DO NOTHING`,
+      [band.product, band.segment, band.tenorBucket, entityId,
+       band.ftpBpsTolerance, band.rarocPpTolerance, band.marginBpsTolerance, band.priority],
+    );
+    inserted += res.rowCount ?? 0;
+  }
+  return inserted;
+}
+
 async function resetDemo(pool: Pool, entityId: string): Promise<void> {
   // Delete children first (respect FK cascade paths).
   const clientIds = Object.keys(PROFILES);
@@ -351,6 +467,10 @@ async function resetDemo(pool: Pool, entityId: string): Promise<void> {
   await pool.query(`DELETE FROM client_events              WHERE entity_id = $1 AND client_id = ANY($2)`, [entityId, clientIds]);
   await pool.query(`DELETE FROM client_metrics_snapshots   WHERE entity_id = $1 AND client_id = ANY($2)`, [entityId, clientIds]);
   await pool.query(`DELETE FROM client_positions           WHERE entity_id = $1 AND client_id = ANY($2)`, [entityId, clientIds]);
+  // Wave 1-3: tolerance_bands + target_grid_cells + methodology_snapshots
+  await pool.query(`DELETE FROM tolerance_bands           WHERE entity_id = $1::uuid`, [entityId]);
+  await pool.query(`DELETE FROM target_grid_cells        WHERE snapshot_id = $1::uuid`, [DEMO_METHODOLOGY_SNAPSHOT_ID]);
+  await pool.query(`DELETE FROM methodology_snapshots    WHERE id = $1::uuid`, [DEMO_METHODOLOGY_SNAPSHOT_ID]);
   // Reference data left in place — it is conceptually owned by the entity.
 }
 
@@ -372,6 +492,9 @@ async function main() {
     console.info(`  ${MOCK_PRODUCT_DEFS.length} products`);
     console.info(`  ${MOCK_BUSINESS_UNITS.length} business units`);
     console.info(`  ${Object.keys(PROFILES).length} clients with Phase 6 data (positions + metrics + events + LTV + NBA)`);
+    console.info(`  1 methodology snapshot`);
+    console.info(`  ${GRID_CELLS.length} target grid cells`);
+    console.info(`  ${TOLERANCE_BANDS.length} tolerance bands`);
     return;
   }
 
@@ -386,6 +509,7 @@ async function main() {
     const totals = {
       clients: 0, products: 0, businessUnits: 0,
       positions: 0, metrics: 0, events: 0, ltv: 0, nba: 0,
+      methodologySnapshot: 0, gridCells: 0, toleranceBands: 0,
     };
 
     totals.clients       = await ensureClients(pool, args.entityId);
@@ -404,6 +528,14 @@ async function main() {
       }
       totals.nba       += await seedNba(pool, args.entityId, clientId, profile);
     }
+
+    // Wave 1–3: target grid + tolerance bands. Methodology snapshot must
+    // exist before grid cells (FK dependency).
+    if (await seedMethodologySnapshot(pool, args.entityId)) {
+      totals.methodologySnapshot++;
+    }
+    totals.gridCells      = await seedGridCells(pool, args.entityId);
+    totals.toleranceBands = await seedToleranceBands(pool, args.entityId);
 
     console.info(`[seed-demo-dataset] ✅ ${JSON.stringify(totals)}`);
   } finally {
