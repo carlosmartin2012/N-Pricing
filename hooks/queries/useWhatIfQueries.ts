@@ -24,7 +24,6 @@ export function useSandboxesQuery(entityId?: string) {
       ? [...queryKeys.whatIf.sandboxes, dataMode, entityId]
       : [...queryKeys.whatIf.sandboxes, dataMode],
     queryFn: () => whatIfApi.listSandboxes(entityId),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -33,7 +32,7 @@ export function useSandboxQuery(id: string) {
   return useQuery({
     queryKey: [...queryKeys.whatIf.sandbox(id), dataMode],
     queryFn: () => whatIfApi.getSandbox(id),
-    enabled: dataMode === 'live' && id.length > 0,
+    enabled: id.length > 0,
   });
 }
 
@@ -104,7 +103,7 @@ export function useImpactReportQuery(sandboxId: string) {
   return useQuery({
     queryKey: [...queryKeys.whatIf.impact(sandboxId), dataMode],
     queryFn: () => whatIfApi.getImpactReport(sandboxId),
-    enabled: dataMode === 'live' && sandboxId.length > 0,
+    enabled: sandboxId.length > 0,
   });
 }
 
@@ -135,7 +134,6 @@ export function useElasticityModelsQuery(entityId?: string) {
       ? [...queryKeys.whatIf.elasticity, dataMode, entityId]
       : [...queryKeys.whatIf.elasticity, dataMode],
     queryFn: () => whatIfApi.listElasticityModels(entityId),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -178,7 +176,6 @@ export function useBacktestRunsQuery(entityId?: string) {
       ? [...queryKeys.whatIf.backtests, dataMode, entityId]
       : [...queryKeys.whatIf.backtests, dataMode],
     queryFn: () => whatIfApi.listBacktestRuns(entityId),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -187,7 +184,7 @@ export function useBacktestResultQuery(runId: string) {
   return useQuery({
     queryKey: [...queryKeys.whatIf.backtestResult(runId), dataMode],
     queryFn: () => whatIfApi.getBacktestResult(runId),
-    enabled: dataMode === 'live' && runId.length > 0,
+    enabled: runId.length > 0,
   });
 }
 
@@ -214,7 +211,6 @@ export function useBenchmarksQuery(filters?: GridFilters) {
   return useQuery({
     queryKey: [...queryKeys.whatIf.benchmarks, dataMode, filters],
     queryFn: () => whatIfApi.listBenchmarks(filters),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -223,7 +219,7 @@ export function useBenchmarkComparisonQuery(snapshotId: string, asOfDate?: strin
   return useQuery({
     queryKey: [...queryKeys.whatIf.benchmarkComparison(snapshotId), dataMode, asOfDate],
     queryFn: () => whatIfApi.compareBenchmarks(snapshotId, asOfDate),
-    enabled: dataMode === 'live' && snapshotId.length > 0,
+    enabled: snapshotId.length > 0,
   });
 }
 
@@ -238,7 +234,6 @@ export function useBudgetTargetsQuery(entityId?: string) {
       ? [...queryKeys.whatIf.budget, dataMode, entityId]
       : [...queryKeys.whatIf.budget, dataMode],
     queryFn: () => whatIfApi.listBudgetTargets(entityId),
-    enabled: dataMode === 'live',
   });
 }
 
@@ -247,6 +242,6 @@ export function useBudgetConsistencyQuery(snapshotId: string, entityId?: string)
   return useQuery({
     queryKey: [...queryKeys.whatIf.budgetConsistency(snapshotId), dataMode, entityId],
     queryFn: () => whatIfApi.checkBudgetConsistency(snapshotId, entityId),
-    enabled: dataMode === 'live' && snapshotId.length > 0,
+    enabled: snapshotId.length > 0,
   });
 }
