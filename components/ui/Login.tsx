@@ -154,15 +154,25 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
     }, 3000);
   };
 
-  const handleDemoLogin = (event: React.FormEvent) => {
+  const handleDemoLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (username === DEMO_USER && password === DEMO_PASS) {
-      setError(null);
-      localStorage.setItem('n_pricing_auth_token', 'demo-token');
-      onLogin(DEMO_EMAIL);
-      return;
+    setError(null);
+    try {
+      const res = await fetch('/api/auth/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json() as { token?: string; email?: string; name?: string; error?: string };
+      if (!res.ok || !data.token) {
+        setError(data.error ?? 'Invalid credentials.');
+        return;
+      }
+      localStorage.setItem('n_pricing_auth_token', data.token);
+      onLogin(data.email ?? DEMO_EMAIL);
+    } catch {
+      setError('Could not reach the server. Please try again.');
     }
-    setError('Invalid credentials.');
   };
 
   return (

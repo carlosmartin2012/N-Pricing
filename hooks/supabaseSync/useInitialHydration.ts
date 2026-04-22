@@ -73,6 +73,15 @@ export function useInitialHydration({
     const hydrate = async () => {
       const context = dataRef.current;
       context.setIsLoading(true);
+
+      // No authenticated user yet — serve mock data so the login page renders
+      // instantly without firing API calls that would return 401 and pollute logs.
+      if (!currentUser) {
+        applyMockData(context, 'mock', queryClient);
+        context.setIsLoading(false);
+        return;
+      }
+
       const hydrationPlan = resolveHydrationPlan({
         dataMode: context.dataMode,
         isSupabaseConfigured,

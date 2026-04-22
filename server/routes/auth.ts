@@ -97,4 +97,36 @@ router.get('/me', async (req, res) => {
   });
 });
 
+/**
+ * Demo login — accepts the VITE_DEMO_USER / VITE_DEMO_PASS credentials and
+ * returns a real signed JWT so the API auth middleware lets the request through.
+ * This endpoint is intentionally unauthenticated (it IS the login).
+ */
+router.post('/demo', (req, res) => {
+  const DEMO_USER = process.env.VITE_DEMO_USER ?? '';
+  const DEMO_PASS = process.env.VITE_DEMO_PASS ?? '';
+  const DEMO_EMAIL = process.env.VITE_DEMO_EMAIL ?? 'demo@example.com';
+  const DEMO_NAME = process.env.VITE_DEMO_USER ?? 'Demo User';
+
+  if (!DEMO_USER || !DEMO_PASS) {
+    res.status(503).json({ error: 'Demo mode not configured on server' });
+    return;
+  }
+
+  const { username, password } = req.body as { username?: string; password?: string };
+  if (username !== DEMO_USER || password !== DEMO_PASS) {
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
+  }
+
+  const token = signToken({ email: DEMO_EMAIL, name: DEMO_NAME, role: 'Trader' });
+  res.json({
+    email: DEMO_EMAIL,
+    name: DEMO_NAME,
+    role: 'Trader',
+    primaryEntityId: '00000000-0000-0000-0000-000000000010',
+    token,
+  });
+});
+
 export default router;
