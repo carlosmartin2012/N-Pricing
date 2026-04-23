@@ -267,6 +267,70 @@ async function sha256Hex(input: string): Promise<string> {
   return out;
 }
 
+/**
+ * Ola 6 Bloque C — writer side of the snapshot hash chain.
+ *
+ * Reads the last `output_hash` persisted for this tenant, attaches it as
+ * `prev_output_hash`, and inserts. If two concurrent pricing calls both
+ * read the same last hash they will collide on the partial UNIQUE index
+ * `(entity_id, prev_output_hash) WHERE prev_output_hash IS NOT NULL`
+ * (see migration 20260619000003). On that specific conflict we retry —
+ * re-reading the last hash reflects the winning writer's row, so the
+ * loser extends the chain without a fork.
+ *
+ * Backoff: 10 ms → 40 ms → 160 ms. Kept short because pricing is not a
+ * realtime batch path; contention windows are sub-second.
+ *
+ * Non-unique-violation errors bubble back to the caller unchanged so
+ * the existing snapshot_write_failures_total metric keeps working.
+ */
+async function insertSnapshotWithChain(
+  // Supabase v2.95's generics require threading `PostgrestVersion` through
+  // every call site — we erase to any here to match the rest of this file,
+  // which also treats the client as a loose untyped handle.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  row: Record<string, unknown>,
+  entityId: string,
+  maxRetries = 3,
+): Promise<{ error: { code?: string; message: string } | null; attempts: number }> {
+  const MAX_ATTEMPTS = maxRetries + 1;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const { data: lastRows } = await supabase
+      .from('pricing_snapshots')
+      .select('output_hash')
+      .eq('entity_id', entityId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const prevOutputHash = lastRows && lastRows.length > 0
+      ? ((lastRows[0] as { output_hash: string }).output_hash ?? null)
+      : null;
+
+    const { error: insErr } = await supabase
+      .from('pricing_snapshots')
+      .insert({ ...row, prev_output_hash: prevOutputHash });
+
+    if (!insErr) return { error: null, attempts: attempt };
+
+    const code = (insErr as { code?: string }).code;
+    const message = insErr.message ?? '';
+    const isChainConflict = code === '23505'
+      || /uniq_pricing_snapshots_prev_hash/i.test(message);
+
+    if (!isChainConflict || attempt >= MAX_ATTEMPTS) {
+      return { error: insErr, attempts: attempt };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 10 * Math.pow(4, attempt - 1)));
+  }
+
+  return {
+    error: { code: 'chain_retry_exhausted', message: 'snapshot chain write retries exhausted' },
+    attempts: MAX_ATTEMPTS,
+  };
+}
+
 function todayUtc(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -550,7 +614,7 @@ serve(async (req: Request) => {
         const shocksRecord = (shocks as Record<string, unknown> | undefined) ?? {};
         const scenarioId = typeof shocksRecord.id === 'string' ? shocksRecord.id : null;
         const scenarioSource = typeof shocksRecord.source === 'string' ? shocksRecord.source : null;
-        const { error: snapErr } = await supabase.from('pricing_snapshots').insert({
+        const { error: snapErr, attempts: snapAttempts } = await insertSnapshotWithChain(supabase, {
           id: snapshotId,
           entity_id: entityId,
           deal_id: UUID_RE.test(dealId) ? dealId : null,
@@ -565,13 +629,13 @@ serve(async (req: Request) => {
           output_hash: outputHash,
           scenario_id: scenarioId,
           scenario_source: scenarioSource,
-        });
+        }, entityId);
         if (snapErr) {
           await supabase.from('metrics').insert({
             entity_id: entityId,
             metric_name: 'snapshot_write_failures_total',
             metric_value: 1,
-            dimensions: { request_id: requestId, endpoint: '/pricing/batch', error: snapErr.message },
+            dimensions: { request_id: requestId, endpoint: '/pricing/batch', error: snapErr.message, attempts: String(snapAttempts) },
           }).catch(() => { /* best effort */ });
         }
         snapshotIds.push(snapshotId);
@@ -627,7 +691,7 @@ serve(async (req: Request) => {
       const shocksRecord = (shocks as Record<string, unknown> | undefined) ?? {};
       const scenarioId = typeof shocksRecord.id === 'string' ? shocksRecord.id : null;
       const scenarioSource = typeof shocksRecord.source === 'string' ? shocksRecord.source : null;
-      const { error: snapErr } = await supabase.from('pricing_snapshots').insert({
+      const { error: snapErr, attempts: snapAttempts } = await insertSnapshotWithChain(supabase, {
         id: snapshotId,
         entity_id: entityId,
         deal_id: dealId,
@@ -642,13 +706,13 @@ serve(async (req: Request) => {
         output_hash: outputHash,
         scenario_id: scenarioId,
         scenario_source: scenarioSource,
-      });
+      }, entityId);
       if (snapErr) {
         await supabase.from('metrics').insert({
           entity_id: entityId,
           metric_name: 'snapshot_write_failures_total',
           metric_value: 1,
-          dimensions: { request_id: requestId, endpoint: '/pricing', error: snapErr.message },
+          dimensions: { request_id: requestId, endpoint: '/pricing', error: snapErr.message, attempts: String(snapAttempts) },
         }).catch(() => { /* best effort */ });
       }
 
