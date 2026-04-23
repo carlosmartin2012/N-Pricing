@@ -111,11 +111,22 @@ jobs:
           exit 1
 
       - name: Bootstrap Supabase-specific objects (CI only)
-        # Supabase-hosted Postgres provisions a few objects that our migrations
-        # take for granted: the `supabase_realtime` publication and the roles
-        # `anon` / `authenticated` / `service_role` used by GRANT statements.
-        # A raw postgres:16 container has none of them, so we create them up
-        # front before the migration loop. All statements are idempotent.
+        # Supabase-hosted Postgres provisions objects our migrations take for
+        # granted — a raw postgres:16 container has none of them. This step
+        # creates a minimal compatible environment so the migration loop runs
+        # end-to-end. All statements are idempotent (IF NOT EXISTS / OR REPLACE).
+        #
+        # Covered:
+        #   - `supabase_realtime` publication          (ALTER PUBLICATION ADD TABLE)
+        #   - `anon` / `authenticated` / `service_role` roles  (GRANT ... TO)
+        #   - `auth` schema + stub `jwt()`/`uid()`/`users` table
+        #       → required for CREATE POLICY to parse schema-qualified calls
+        #         like `auth.jwt()->>'email'`. Policies evaluate expressions
+        #         only at row-access time, but the schema + object names must
+        #         resolve at CREATE. The stubs return empty/null so policies
+        #         never match at runtime; integration tests use pg.Pool with
+        #         the DB owner (bypasses RLS), so no coverage is lost.
+        #
         # No GitHub event data is used — only the DB URL from env above.
         run: |
           psql "$INTEGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -135,6 +146,19 @@ jobs:
             END IF;
           END
           $$;
+
+          CREATE SCHEMA IF NOT EXISTS auth;
+
+          CREATE OR REPLACE FUNCTION auth.jwt() RETURNS JSONB
+            LANGUAGE sql STABLE AS $$ SELECT '{}'::jsonb $$;
+
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS UUID
+            LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$;
+
+          CREATE TABLE IF NOT EXISTS auth.users (
+            id    UUID PRIMARY KEY,
+            email TEXT
+          );
           SQL
 
       - name: Apply migrations in order
