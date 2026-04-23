@@ -155,7 +155,12 @@ CREATE TABLE IF NOT EXISTS pricing_results (
 
 -- 8. CLIENTS TABLE
 CREATE TABLE IF NOT EXISTS clients (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    -- clients.id is TEXT, matching (a) the application-layer usage of
+    -- human-readable IDs like 'CL-1001', and (b) the server/migrate.ts
+    -- inline schema that production runs at boot. A historical typo had
+    -- this as UUID, which made it unusable on fresh CI DBs because every
+    -- later migration (Customer 360, CLV 360) declares client_id TEXT FKs.
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     type TEXT CHECK (type IN ('Corporate', 'Retail', 'SME', 'Institution', 'Gov')),
     segment TEXT,
