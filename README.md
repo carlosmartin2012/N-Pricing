@@ -38,6 +38,7 @@ inmutables** de cada cálculo para reproducibilidad regulatoria (SR 11-7 / EBA).
 | **Pricing Engine** | Motor FTP con 19 componentes (gaps): base rate, liquidity premium, LCR/NSFR, ESG, capital charge, RAROC |
 | **RAROC Terminal** | Calculadora standalone con desglose de rentabilidad ajustada al riesgo |
 | **Stress Testing** | Shocks dashboard para análisis de sensibilidad |
+| **Stress Pricing** *(`/stress-pricing`)* | 6 escenarios EBA GL 2018/02 (parallel ±200, short ±250, steepener, flattener) × deal · tabla con FTP/Margin/RAROC + deltas · CSV export · flag-gated per-tenor interpolation (Ola 6 B) |
 | **Behavioural Models** | NMD (Parametric + Caterpillar) y Prepayment CPR |
 | **Methodology Config** | Reglas, rate cards, ESG grids, master data, governance |
 | **ESG Integration** | Transición, físico, Greenium, DNSH discount, ISF Pillar I overlay |
@@ -61,9 +62,9 @@ inmutables** de cada cálculo para reproducibilidad regulatoria (SR 11-7 / EBA).
 ### Operations & SaaS readiness *(roadmap Phase 0, 4, 5)*
 | Módulo | Descripción |
 |---|---|
-| **Multi-tenancy** | Tenancy middleware + `withTenancyTransaction` + flag rollout (`TENANCY_ENFORCE`, `TENANCY_STRICT`) |
-| **Reproducibility** | Tabla `pricing_snapshots` inmutable + endpoint `POST /api/snapshots/:id/replay` que re-ejecuta el motor real |
-| **SLO + Alerts** | 8 SLIs catalogados, vista `pricing_slo_minute`, evaluator opt-in, 5 canales (email/Slack/PagerDuty/webhook/Opsgenie) |
+| **Multi-tenancy** | Tenancy middleware + `withTenancyTransaction` + flag rollout (`TENANCY_ENFORCE`, `TENANCY_STRICT`) + SLOPanel widget *Tenancy violations · last 60m* para el canary del flip |
+| **Reproducibility** | Tabla `pricing_snapshots` inmutable + `POST /api/snapshots/:id/replay` que re-ejecuta el motor real + **hash chain** (`prev_output_hash`) con writer retry-bounded y `GET /api/snapshots/verify-chain` (Ola 6 C) para tamper-evidence retroactiva |
+| **SLO + Alerts** | 8 SLIs catalogados, vista `pricing_slo_minute`, evaluator opt-in, 5 canales (email/Slack/PagerDuty/webhook/Opsgenie); 3 alertas canónicas seedeadas por migration + provisioning (Ola 6 A) |
 | **Adapter layer** | `CoreBankingAdapter`, `CrmAdapter`, `MarketDataAdapter`, `SsoProvider` con reference in-memory + stubs Salesforce/Bloomberg |
 | **SSO Google real** | `GoogleSsoProvider` con verificación JWT + restricción opcional de hosted domain |
 | **Tenant provisioning** | `scripts/provision-tenant.ts` idempotente, < 60s SLO |
@@ -109,9 +110,10 @@ Supabase Edge Functions (Deno)
 └── elasticity-recalibrate — cron nocturno, ?entity_id scoping
 
 PostgreSQL (Supabase)
-├── 38 migraciones secuenciales
+├── 40 migraciones secuenciales
 ├── RLS estricto por entity_id
 ├── Helpers: get_current_entity_id, get_accessible_entity_ids
+├── Hash chain en pricing_snapshots (prev_output_hash + partial UNIQUE)
 └── Append-only: tenancy_violations, audit_log, *_versions, pricing_snapshots
 ```
 
@@ -185,6 +187,7 @@ Troubleshooting en [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md
 | `CRM_SYNC_INTERVAL_MS` | no | ≥1000 activa pull CRM → `client_events` |
 | `ADAPTER_CRM` / `ADAPTER_MARKET_DATA` | `in-memory` | `salesforce` / `bloomberg` para stubs reales |
 | `DOSSIER_SIGNING_SECRET` | sí en prod | HMAC para firmar committee dossiers |
+| `VITE_PRICING_APPLY_CURVE_SHIFT` | no (`false`) | `true` → motor honra `ShockScenario.curveShiftBps` per-tenor (Ola 6 B.4). Off = legacy uniform shift |
 | `INTEGRATION_DATABASE_URL` | no | Activa tests integración con DB real (opt-in) |
 | `VITE_GEMINI_API_KEY` | no | API key Gemini para AI Assistant |
 
@@ -216,7 +219,7 @@ default feature flags en una transacción. SLO target < 60 s.
 npm run dev              # Vite :5000 + Express :3001 (concurrently)
 npm run build            # Build producción (PWA)
 npm run preview          # Preview del build
-npm run test             # Vitest (~1.0k tests, 80 archivos)
+npm run test             # Vitest (~1.37k tests, 85 archivos)
 npm run test:e2e         # Playwright (20 specs)
 npm run typecheck        # tsc --noEmit
 npm run typecheck:edge   # build Edge + deno check
@@ -255,11 +258,11 @@ types/                  # Tipos por dominio (re-exportados desde types.ts)
 utils/                  # Pricing engine + helpers
   pricing/ customer360/ channels/ governance/ metering/ backtesting/ clv/
 supabase/
-  migrations/           # 38 migraciones secuenciales
+  migrations/           # 40 migraciones secuenciales
   functions/            # 3 Edge Functions Deno
 e2e/                    # 20 specs Playwright
 docs/                   # Doc operativa + runbooks
-  runbooks/             # 12 plantillas operativas (incluye replit-demo.md)
+  runbooks/             # 13 plantillas operativas (incluye replit-demo.md)
 public/                 # PWA assets
 ```
 
@@ -288,7 +291,7 @@ Ver detalle en [docs/pricing-methodology.md](./docs/pricing-methodology.md).
 
 | Tipo | Comando | Cobertura |
 |---|---|---|
-| Unit | `npm run test` | ~1.0k tests · 80 archivos |
+| Unit | `npm run test` | ~1.37k tests · 85 archivos |
 | Integration (opt-in) | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration` | RLS + tenancy + fuzz |
 | E2E | `npm run test:e2e` | 20 specs Playwright |
 | Storybook | `npm run storybook` | Component stories |
@@ -322,7 +325,7 @@ Detalle de integration tests en [docs/integration-tests.md](./docs/integration-t
 El producto está diseñado para SaaS-first con flexibilidad on-premise.
 Para despliegue interno del banco:
 
-1. `Postgres` propio + aplicar las 38 migrations.
+1. `Postgres` propio + aplicar las 40 migrations.
 2. `node server/index.js` (build TS) tras `npm run build:server`.
 3. Edge Functions opcionales (deploy independiente vía Supabase CLI).
 4. Adapter layer: registrar implementaciones reales en `server/index.ts`
@@ -352,7 +355,7 @@ Para despliegue interno del banco:
 - ✅ **Phase 5** — Tenant provisioning + ops metering (sin billing SaaS)
 - ✅ **Phase 6** — CLV 360 (ltvEngine + NBA + Pipeline) + FTP Reconciliation
 - ✅ **Unificación demo↔live** — MOCK_DEALS y Customer 360 viven en DB bajo `DEFAULT_ENTITY_ID`
-- 🚧 **Ola 6** — TENANCY_STRICT global + Stress EBA 6 escenarios ([detalle](./docs/ola-6-tenancy-strict-stress-pricing.md))
+- ✅ **Ola 6** — Tenancy strict automation + Stress Pricing view + Hash chain writer ([detalle](./docs/ola-6-tenancy-strict-stress-pricing.md)) · Flip `TENANCY_STRICT=on` en prod queda como decisión operativa
 
 Detalle fase por fase en
 [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md).
@@ -365,9 +368,10 @@ Detalle fase por fase en
 | Contexto IA / agentes | [CLAUDE.md](./CLAUDE.md) |
 | Demo en Replit (troubleshooting) | [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md) |
 | Estado del roadmap | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md) |
-| Siguiente ola en marcha | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md) |
+| Ola 6 — estado por bloque + PR refs | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md) |
 | Integral review 2026-04 | [docs/integral-review-2026-04-18.md](./docs/integral-review-2026-04-18.md) |
-| Operación / on-call | [docs/runbooks/](./docs/runbooks/) (12 plantillas) |
+| Operación / on-call | [docs/runbooks/](./docs/runbooks/) (13 plantillas) |
+| Tenancy strict flip playbook | [docs/runbooks/tenancy-strict-flip.md](./docs/runbooks/tenancy-strict-flip.md) |
 | Rollout de tenancy + flags | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md) |
 | Diseño Phase 0 detallado | [docs/phase-0-design.md](./docs/phase-0-design.md) + [phase-0-technical-specs.md](./docs/phase-0-technical-specs.md) |
 | API / contratos | [docs/api-spec.yaml](./docs/api-spec.yaml) |
