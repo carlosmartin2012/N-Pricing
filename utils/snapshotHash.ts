@@ -51,3 +51,70 @@ export async function hashSnapshotInput(
 export async function hashSnapshotOutput(output: unknown): Promise<string> {
   return sha256CanonicalJson(output);
 }
+
+// ─── Chain verification (Ola 6 Bloque C) ────────────────────────────────────
+
+/**
+ * One link of the snapshot hash chain. The persistence layer is expected to
+ * expose these three fields from `pricing_snapshots` directly.
+ */
+export interface SnapshotChainLink {
+  id: string;
+  outputHash: string;
+  prevOutputHash: string | null;
+}
+
+export interface ChainBreak {
+  snapshotId: string;
+  expectedPrev: string;
+  actualPrev: string | null;
+}
+
+export interface ChainVerificationResult {
+  valid: boolean;
+  checked: number;
+  brokenAt?: ChainBreak;
+}
+
+/**
+ * Walks an ordered sequence of snapshot chain links (oldest → newest) and
+ * verifies that each non-first link's `prevOutputHash` matches the previous
+ * link's `outputHash`.
+ *
+ * The first link is always accepted: when the caller passes a partial range
+ * (e.g. last 30 days) its `prevOutputHash` legitimately references a hash
+ * outside the range — or is NULL for the tenant genesis row. Detecting
+ * whether index 0 should have been the genesis is a higher-level concern
+ * that requires knowing the full tenant history, which this pure helper
+ * deliberately does not assume.
+ *
+ * A NULL `prevOutputHash` mid-sequence IS flagged as a break: it would mean
+ * a second "genesis" appeared after the first, which is how a fork from a
+ * DB-level mutation manifests.
+ *
+ * Returns at the first break encountered — the caller can re-invoke on the
+ * tail of the sequence to find subsequent breaks if needed.
+ */
+export function verifySnapshotChain(
+  links: readonly SnapshotChainLink[],
+): ChainVerificationResult {
+  if (links.length <= 1) {
+    return { valid: true, checked: links.length };
+  }
+  for (let i = 1; i < links.length; i++) {
+    const prev = links[i - 1];
+    const cur = links[i];
+    if (cur.prevOutputHash !== prev.outputHash) {
+      return {
+        valid: false,
+        checked: i,
+        brokenAt: {
+          snapshotId: cur.id,
+          expectedPrev: prev.outputHash,
+          actualPrev: cur.prevOutputHash,
+        },
+      };
+    }
+  }
+  return { valid: true, checked: links.length };
+}

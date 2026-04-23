@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query, queryOne, withTenancyTransaction } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { replaySnapshot, type SnapshotPayload } from '../workers/snapshotReplay';
+import { verifySnapshotChain, type SnapshotChainLink } from '../../utils/snapshotHash';
 
 /**
  * Pricing snapshot read + replay.
@@ -67,6 +68,63 @@ async function loadSnapshot(tenancyEntityId: string, id: string): Promise<Snapsh
   );
   return row;
 }
+
+/**
+ * Ola 6 Bloque C — snapshot hash chain verification.
+ *
+ * Admin-only. Walks pricing_snapshots for the caller's entity in an optional
+ * date window (inclusive `from` / `to` in ISO-8601 UTC) and checks that each
+ * non-first row's `prev_output_hash` matches the predecessor's `output_hash`.
+ *
+ * A tampered historical row surfaces as `valid: false` with `brokenAt`
+ * pointing at the first snapshot whose chain link does not match.
+ *
+ * NOTE: declared BEFORE `/:id` so Express does not match "verify-chain" as
+ * a snapshot UUID.
+ */
+router.get('/verify-chain', async (req, res) => {
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    if (req.user?.role !== 'Admin') {
+      res.status(403).json({ code: 'admin_required', message: 'Admin role required' });
+      return;
+    }
+
+    const from = typeof req.query.from === 'string' ? req.query.from : null;
+    const to = typeof req.query.to === 'string' ? req.query.to : null;
+
+    const filters = ['entity_id = $1'];
+    const params: Array<string> = [req.tenancy.entityId];
+    if (from) { params.push(from); filters.push(`created_at >= $${params.length}`); }
+    if (to)   { params.push(to);   filters.push(`created_at <= $${params.length}`); }
+
+    const rows = await query<{ id: string; output_hash: string; prev_output_hash: string | null }>(
+      `SELECT id, output_hash, prev_output_hash
+       FROM pricing_snapshots
+       WHERE ${filters.join(' AND ')}
+       ORDER BY created_at ASC, id ASC`,
+      params,
+    );
+    const links: SnapshotChainLink[] = rows.map((r) => ({
+      id: r.id,
+      outputHash: r.output_hash,
+      prevOutputHash: r.prev_output_hash,
+    }));
+    const result = verifySnapshotChain(links);
+    res.json({
+      entityId: req.tenancy.entityId,
+      from,
+      to,
+      count: links.length,
+      ...result,
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
 
 router.get('/:id', async (req, res) => {
   try {

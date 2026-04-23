@@ -4,6 +4,8 @@ import {
   sha256CanonicalJson,
   hashSnapshotInput,
   hashSnapshotOutput,
+  verifySnapshotChain,
+  type SnapshotChainLink,
 } from '../snapshotHash';
 
 describe('snapshotHash', () => {
@@ -44,5 +46,85 @@ describe('snapshotHash', () => {
     expect(driftInput).not.toBe(base);
     expect(driftContext).not.toBe(base);
     expect(driftInput).not.toBe(driftContext);
+  });
+});
+
+describe('verifySnapshotChain', () => {
+  const H = (n: number): string => String(n).padStart(64, '0').slice(0, 64);
+
+  const mk = (id: string, outputHash: string, prevOutputHash: string | null): SnapshotChainLink =>
+    ({ id, outputHash, prevOutputHash });
+
+  it('accepts an empty sequence', () => {
+    expect(verifySnapshotChain([])).toEqual({ valid: true, checked: 0 });
+  });
+
+  it('accepts a single link without evaluating its prev', () => {
+    // Single link is always valid — the caller may have passed a partial
+    // range, so we cannot tell if its prev should have been null or not.
+    const res = verifySnapshotChain([mk('s1', H(1), H(99))]);
+    expect(res).toEqual({ valid: true, checked: 1 });
+  });
+
+  it('accepts a clean linear chain starting at genesis', () => {
+    const links = [
+      mk('s1', H(1), null),
+      mk('s2', H(2), H(1)),
+      mk('s3', H(3), H(2)),
+      mk('s4', H(4), H(3)),
+    ];
+    const res = verifySnapshotChain(links);
+    expect(res.valid).toBe(true);
+    expect(res.checked).toBe(4);
+    expect(res.brokenAt).toBeUndefined();
+  });
+
+  it('accepts a partial range whose first link references an out-of-range hash', () => {
+    // `H(1)` is outside the given range — caller passed a window.
+    const links = [
+      mk('s2', H(2), H(1)),
+      mk('s3', H(3), H(2)),
+    ];
+    expect(verifySnapshotChain(links).valid).toBe(true);
+  });
+
+  it('flags a tampered link in the middle', () => {
+    const links = [
+      mk('s1', H(1), null),
+      mk('s2', H(2), H(1)),
+      mk('s3', H(3), H(99)), // wrong prev
+      mk('s4', H(4), H(3)),
+    ];
+    const res = verifySnapshotChain(links);
+    expect(res.valid).toBe(false);
+    expect(res.brokenAt).toEqual({
+      snapshotId: 's3',
+      expectedPrev: H(2),
+      actualPrev: H(99),
+    });
+    expect(res.checked).toBe(2);
+  });
+
+  it('flags a mid-sequence genesis (null prev after the first link = fork)', () => {
+    const links = [
+      mk('s1', H(1), null),
+      mk('s2', H(2), H(1)),
+      mk('s3', H(3), null), // rogue second genesis
+    ];
+    const res = verifySnapshotChain(links);
+    expect(res.valid).toBe(false);
+    expect(res.brokenAt?.snapshotId).toBe('s3');
+    expect(res.brokenAt?.actualPrev).toBeNull();
+  });
+
+  it('stops at the first break (does not report subsequent ones)', () => {
+    const links = [
+      mk('s1', H(1), null),
+      mk('s2', H(2), H(88)), // break #1
+      mk('s3', H(3), H(77)), // would be break #2 but not reported
+    ];
+    const res = verifySnapshotChain(links);
+    expect(res.valid).toBe(false);
+    expect(res.brokenAt?.snapshotId).toBe('s2');
   });
 });
