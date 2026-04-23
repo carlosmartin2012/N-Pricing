@@ -2,9 +2,11 @@ import {
   ok, fail,
   type CoreBankingAdapter, type CoreBankingDeal,
   type CrmAdapter, type CrmCustomer, type CrmPulledEvent,
-  type MarketDataAdapter, type MarketYieldCurveSnapshot,
+  type MarketDataAdapter, type MarketYieldCurveSnapshot, type ShockedCurveScenarioId,
   type AdapterHealth, type AdapterResult,
 } from './types';
+import { computeEbaCurveShift } from '../utils/pricing/shockPresets';
+import type { ShockTenor } from '../types/pricingShocks';
 
 /**
  * Reference in-memory adapters. Used by tests and by `npm run dev` when no
@@ -119,5 +121,27 @@ export class InMemoryMarketData implements MarketDataAdapter {
     const inverse = this.fx.get(`${quote}/${base}`);
     if (inverse !== undefined && inverse !== 0) return ok(1 / inverse);
     return fail('not_found', `no FX rate ${base}/${quote}`);
+  }
+
+  async fetchShockedCurve(
+    scenarioId: ShockedCurveScenarioId,
+    currency: string,
+    _asOfDate?: string,
+  ): Promise<AdapterResult<MarketYieldCurveSnapshot>> {
+    const base = this.curves.get(currency);
+    if (!base) return fail('not_found', `no base curve for ${currency}`);
+    const shifts = computeEbaCurveShift(scenarioId);
+    const shiftedPoints = base.points.map((p) => {
+      const shiftBps = shifts[p.tenor as ShockTenor];
+      if (shiftBps === undefined) return { ...p };
+      // Shifts are bps; curve points store rates in percent. bps → percent = /100.
+      return { ...p, rate: p.rate + shiftBps / 100 };
+    });
+    return ok({
+      currency: base.currency,
+      asOfDate: base.asOfDate,
+      source: `${base.source} +eba:${scenarioId}`,
+      points: shiftedPoints,
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { fail, type MarketDataAdapter, type MarketYieldCurveSnapshot, type AdapterHealth, type AdapterResult } from '../types';
+import { fail, type MarketDataAdapter, type MarketYieldCurveSnapshot, type ShockedCurveScenarioId, type AdapterHealth, type AdapterResult } from '../types';
 
 /**
  * Bloomberg / BLPAPI market data adapter — STUB.
@@ -47,5 +47,13 @@ export class BloombergMarketDataAdapter implements MarketDataAdapter {
 
   async fetchFxRate(_base: string, _quote: string): Promise<AdapterResult<number>> {
     return fail('unreachable', 'bloomberg adapter is a stub');
+  }
+
+  async fetchShockedCurve(
+    _scenarioId: ShockedCurveScenarioId,
+    _currency: string,
+    _asOfDate?: string,
+  ): Promise<AdapterResult<MarketYieldCurveSnapshot>> {
+    return fail('unreachable', 'bloomberg adapter is a stub; scenario curves require BLPAPI + internal ALM feed');
   }
 }

@@ -130,12 +130,43 @@ export interface MarketYieldCurveSnapshot {
   points: MarketYieldCurvePoint[];
 }
 
+/**
+ * Named scenarios that the stress-pricing workflow can request. Mirrors
+ * `ShockScenarioId` from `types/pricingShocks.ts` without importing it, to
+ * keep the adapter layer decoupled from the domain types.
+ */
+export type ShockedCurveScenarioId =
+  | 'parallel_up_200'
+  | 'parallel_down_200'
+  | 'short_up_250'
+  | 'short_down_250'
+  | 'steepener'
+  | 'flattener';
+
 export interface MarketDataAdapter {
   kind: 'market_data';
   name: string;
   health(): Promise<AdapterHealth>;
   fetchYieldCurve(currency: string, asOfDate?: string): Promise<AdapterResult<MarketYieldCurveSnapshot>>;
   fetchFxRate(base: string, quote: string, asOfDate?: string): Promise<AdapterResult<number>>;
+  /**
+   * Return the yield curve with a named EBA GL 2018/02 scenario applied.
+   *
+   * N-Pricing consumes these curves — it does not synthesize them on its
+   * own outside the in-memory reference adapter. Real vendors (Bloomberg,
+   * Refinitiv, the bank's own ALM engine) return the already-shocked curve
+   * they computed internally. The in-memory adapter applies the closed-form
+   * EBA shifts to a base curve so dev / tests have a realistic surface.
+   *
+   * Optional on the interface for backwards compatibility with existing
+   * adapters — callers must handle absence (pricing falls back to the
+   * uniform `interestRate` legacy path).
+   */
+  fetchShockedCurve?(
+    scenarioId: ShockedCurveScenarioId,
+    currency: string,
+    asOfDate?: string,
+  ): Promise<AdapterResult<MarketYieldCurveSnapshot>>;
 }
 
 export type AnyAdapter = CoreBankingAdapter | CrmAdapter | MarketDataAdapter;
