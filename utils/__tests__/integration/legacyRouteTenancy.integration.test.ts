@@ -87,8 +87,12 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
   afterAll(async () => {
     if (server) await new Promise<void>((r) => server.close(() => r()));
     // Clean up test data. Order matters (FK).
+    //
+    // audit_log is deliberately append-only — the `prevent_audit_modification`
+    // trigger blocks UPDATE/DELETE. We skip cleanup there and tolerate the
+    // handful of 'user-a@test' / 'user-b@test' rows surviving between runs;
+    // the test DB is short-lived in CI and the rows are harmless.
     await pool.query('DELETE FROM deals WHERE id LIKE $1', ['itest-%']);
-    await pool.query('DELETE FROM audit_log WHERE user_email IN ($1, $2)', ['user-a@test', 'user-b@test']);
     await pool.query('DELETE FROM rules WHERE product = $1', ['ITEST']);
     await pool.query('DELETE FROM entity_users WHERE user_id IN ($1, $2)', ['user-a@test', 'user-b@test']);
     await pool.query('DELETE FROM entities WHERE id IN ($1, $2)', [ENTITY_A, ENTITY_B]);
