@@ -63,6 +63,29 @@ const DEFAULT_FLAGS: Array<{ flag: string; enabled: boolean; notes: string }> = 
   { flag: 'kill_switch',         enabled: false, notes: 'Set to true to halt all writes for this tenant' },
 ];
 
+/**
+ * Canonical 3-rule seed required before flipping TENANCY_STRICT=on.
+ * Mirrors supabase/migrations/20260619000004_tenancy_alerts_seed.sql so
+ * tenants provisioned *after* that migration ran still get the rules
+ * without waiting for the next deploy. channel_config is intentionally
+ * empty; scripts/seed-tenancy-alerts.ts fills in secrets when env vars
+ * are available.
+ */
+const DEFAULT_ALERT_RULES: Array<{
+  name: string;
+  metricName: string;
+  operator: 'gt' | 'lt' | 'gte' | 'lte' | 'eq';
+  threshold: number;
+  severity: 'info' | 'warning' | 'page' | 'critical';
+  windowSeconds: number;
+  cooldownSeconds: number;
+  channelType: 'email' | 'slack' | 'pagerduty' | 'webhook' | 'opsgenie';
+}> = [
+  { name: 'pricing p95 breach',      metricName: 'pricing_single_latency_ms',     operator: 'gt', threshold: 300, severity: 'warning',  windowSeconds: 300, cooldownSeconds: 600, channelType: 'slack'     },
+  { name: 'tenancy violation',       metricName: 'tenancy_violations_total',      operator: 'gt', threshold: 0,   severity: 'critical', windowSeconds: 300, cooldownSeconds: 300, channelType: 'pagerduty' },
+  { name: 'snapshot write failure',  metricName: 'snapshot_write_failures_total', operator: 'gt', threshold: 0,   severity: 'page',     windowSeconds: 300, cooldownSeconds: 300, channelType: 'pagerduty' },
+];
+
 async function provision(args: Args): Promise<{ entityId: string; userId: string }> {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is required');
@@ -115,6 +138,33 @@ async function provision(args: Args): Promise<{ entityId: string; userId: string
       );
     }
 
+    // 5. Canonical alert rules (Ola 6 Bloque A — pre-TENANCY_STRICT flip).
+    // alert_rules has no UNIQUE(entity_id, name), so we guard with NOT EXISTS.
+    for (const rule of DEFAULT_ALERT_RULES) {
+      await pool.query(
+        `INSERT INTO alert_rules (
+           entity_id, name, metric_name, operator, threshold,
+           severity, window_seconds, cooldown_seconds,
+           channel_type, channel_config, recipients, is_active
+         )
+         SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, '{}'::jsonb, '[]'::jsonb, true
+         WHERE NOT EXISTS (
+           SELECT 1 FROM alert_rules WHERE entity_id = $1 AND name = $2
+         )`,
+        [
+          finalEntityId,
+          rule.name,
+          rule.metricName,
+          rule.operator,
+          rule.threshold,
+          rule.severity,
+          rule.windowSeconds,
+          rule.cooldownSeconds,
+          rule.channelType,
+        ],
+      );
+    }
+
     await pool.query('COMMIT');
 
     return { entityId: finalEntityId, userId };
@@ -143,4 +193,4 @@ if (process.argv[1]?.endsWith('provision-tenant.ts') || process.argv[1]?.endsWit
   });
 }
 
-export { provision, parseArgs, DEFAULT_FLAGS };
+export { provision, parseArgs, DEFAULT_FLAGS, DEFAULT_ALERT_RULES };
