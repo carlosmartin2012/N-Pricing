@@ -23,8 +23,9 @@ It's safe to rehearse Phase 1-3 in a staging environment repeatedly. Phase 4 (st
 | Integration tests green | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration/legacyRouteTenancy.integration.test.ts` — 7 specs |
 | Edge Functions validate tenancy before service-role calls | Check `supabase/functions/pricing/index.ts`, `realize-raroc`, `elasticity-recalibrate` |
 | Cron jobs scoped per-tenant | `SELECT jobname, command FROM cron.job WHERE command LIKE '%realize-raroc%' OR command LIKE '%elasticity%';` — every row must include `?entity_id=<uuid>` |
-| Alert rules seeded per tenant | `tsx scripts/seed-tenancy-alerts.ts --all-active --dry-run` — reports all 3 rules present |
-| `SLOPanel` widget shows `tenancy_violations_total = 0` | Admin → System Audit → SLO panel, last 1 h |
+| Alert rules seeded per tenant | **Automatic since PR #44**: migration `20260619000004_tenancy_alerts_seed.sql` seeds all active entities at deploy time, and `scripts/provision-tenant.ts` seeds new tenants at creation. Double-check with `SELECT entity_id, array_agg(name) FROM alert_rules WHERE name IN ('pricing p95 breach','tenancy violation','snapshot write failure') GROUP BY entity_id;` — every active entity must return 3 names. The TS script `seed-tenancy-alerts.ts` is only needed to fill in `channel_config` secrets (Slack webhook URL, PagerDuty routing key). |
+| `SLOPanel` widget shows `tenancy_violations_total = 0` | **Shipped in PR #45** — `Admin → System Audit → SLO panel`. The dedicated *Tenancy violations · last 60m* section renders the total + top-10 endpoint breakdown. Empty window → "Safe to hold TENANCY_STRICT flip observation" copy. |
+| Hash chain integrity (optional but recommended) | **Writer shipped in PR #47** — new pricing calls populate `prev_output_hash`. Admin can probe with `GET /api/snapshots/verify-chain?from=<ISO>&to=<ISO>` and expect `{valid: true, brokenAt: undefined}`. |
 
 If any row fails, **stop and fix before continuing**.
 
@@ -166,6 +167,9 @@ Then find the offending path, wrap it in `withTenancyTransaction`, add an integr
 
 - [`phase-0-rollout.md`](../phase-0-rollout.md) — full rollout guide
 - [`tenancy-violation.md`](./tenancy-violation.md) — reactive runbook for the alert itself
-- [`scripts/seed-tenancy-alerts.ts`](../../scripts/seed-tenancy-alerts.ts) — idempotent seeder for the 3 canonical alert rules
+- [`supabase/migrations/20260619000004_tenancy_alerts_seed.sql`](../../supabase/migrations/20260619000004_tenancy_alerts_seed.sql) — deploy-time seed of the 3 canonical alert rules for all active entities (PR #44)
+- [`scripts/provision-tenant.ts`](../../scripts/provision-tenant.ts) — per-tenant provisioning incl. alert-rule seed (PR #49)
+- [`scripts/seed-tenancy-alerts.ts`](../../scripts/seed-tenancy-alerts.ts) — idempotent *secrets-filler* for `channel_config` (Slack / PagerDuty). Rules themselves are now migration-seeded.
+- [`components/Admin/SLOPanel.tsx`](../../components/Admin/SLOPanel.tsx) — canary widget for `tenancy_violations` (PR #45)
 - [`server/middleware/tenancy.ts`](../../server/middleware/tenancy.ts) — middleware implementation
 - [`server/middleware/requireTenancy.ts`](../../server/middleware/requireTenancy.ts) — anti-regression guard
