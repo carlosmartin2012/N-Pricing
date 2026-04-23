@@ -14,6 +14,7 @@ import {
   HeartPulse,
   History,
   LayoutDashboard,
+  LineChart,
   Percent,
   Plug,
   Scale,
@@ -41,6 +42,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   CALCULATOR: '/pricing',
   RAROC: '/raroc',
   SHOCKS: '/stress-testing',
+  STRESS_PRICING: '/stress-pricing',
   WHAT_IF: '/what-if',
   // Relationships (was "Commercial")
   CUSTOMER_360: '/customers',
@@ -145,8 +147,9 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     // gravity is pricing-adjacent, not an insight or governance artefact.
     { id: 'CALCULATOR',  label: 'Calculator',        icon: Calculator,    section: 'Pricing', path: '/pricing' },
     { id: 'RAROC',       label: 'RAROC',             icon: Percent,       section: 'Pricing', path: '/raroc' },
-    { id: 'SHOCKS',      label: 'Stress Test',       icon: Zap,           section: 'Pricing', path: '/stress-testing' },
-    { id: 'WHAT_IF',     label: 'What-If',           icon: FlaskConical,  section: 'Pricing', path: '/what-if' },
+    { id: 'SHOCKS',         label: 'Stress Test',       icon: Zap,           section: 'Pricing', path: '/stress-testing' },
+    { id: 'STRESS_PRICING', label: 'Stress Pricing',    icon: LineChart,     section: 'Pricing', path: '/stress-pricing' },
+    { id: 'WHAT_IF',        label: 'What-If',           icon: FlaskConical,  section: 'Pricing', path: '/what-if' },
     { id: 'BLOTTER',     label: t.dealBlotter,       icon: FileText,      section: 'Pricing', path: '/blotter' },
     // Accounting Ledger demoted to AUX (reachable via ⌘K) on 2026-04-22.
     // Reason: today the view mixes a FTP-summary + T-accounts + journal
