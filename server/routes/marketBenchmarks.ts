@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
+import { parseMarketBenchmarksCsv } from '../../utils/marketBenchmarks/csvImport';
 
 const router = Router();
 
@@ -120,6 +121,40 @@ router.post('/', async (req, res) => {
       [id, productType, tenorBucket, clientType, currency, rate, source, asOfDate, body.notes ?? null],
     );
     res.status(201).json(row ? mapRow(row) : null);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/import/csv', async (req, res) => {
+  try {
+    const guard = requireAdmin(req);
+    if (guard) { res.status(403).json({ code: guard }); return; }
+    const body = req.body as { csv?: unknown } | undefined;
+    const csv = typeof body?.csv === 'string' ? body.csv : '';
+    if (!csv) { res.status(400).json({ code: 'missing_csv' }); return; }
+
+    const { rows, errors } = parseMarketBenchmarksCsv(csv);
+    if (rows.length === 0) {
+      res.status(400).json({ code: 'no_valid_rows', errors });
+      return;
+    }
+
+    let inserted = 0;
+    let updated = 0;
+    for (const r of rows) {
+      const result = await queryOne<{ inserted: boolean }>(
+        `INSERT INTO market_benchmarks (product_type, tenor_bucket, client_type, currency, rate, source, as_of_date, notes)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (product_type, tenor_bucket, client_type, currency, as_of_date)
+         DO UPDATE SET rate = EXCLUDED.rate, source = EXCLUDED.source, notes = EXCLUDED.notes
+         RETURNING (xmax = 0) AS inserted`,
+        [r.productType, r.tenorBucket, r.clientType, r.currency, r.rate, r.source, r.asOfDate, r.notes],
+      );
+      if (result?.inserted) inserted++;
+      else updated++;
+    }
+    res.status(200).json({ inserted, updated, errors });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
