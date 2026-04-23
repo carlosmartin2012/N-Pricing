@@ -22,6 +22,7 @@ import governanceRouter from './routes/governance';
 import meteringRouter from './routes/metering';
 import campaignsRouter from './routes/campaigns';
 import targetGridRouter from './routes/targetGrid';
+import marketBenchmarksRouter from './routes/marketBenchmarks';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -141,6 +142,9 @@ app.use('/api/governance', ...entityScoped, governanceRouter);
 app.use('/api/metering', ...entityScoped, meteringRouter);
 app.use('/api/campaigns', ...entityScoped, campaignsRouter);
 app.use('/api/target-grid', ...entityScoped, targetGridRouter);
+// Market benchmarks are cross-tenant reference data (BBG/BdE/EBA surveys).
+// Read is open to any authenticated user; write is admin-gated inside the router.
+app.use('/api/market-benchmarks', authMiddleware, marketBenchmarksRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

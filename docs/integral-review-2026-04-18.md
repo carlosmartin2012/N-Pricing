@@ -201,6 +201,10 @@ Ordenado por ROI/esfuerzo:
 
 Total: ~10 jornadas-persona distribuibles en 2 semanas con 2 perfiles.
 
+### 4.1 Gap añadido a posteriori (2026-04-23) — Market benchmarks completion
+
+Durante el sweep del roadmap se detectó que la comparativa de precios de competencia (pivot §Bloque H) quedó a medias: migration + util + tests ✅, pero server route huérfano, sin seed, sin chip en Calculator. Se formalizó como **Ola 6 Bloque D** — ver [`ola-6-tenancy-strict-stress-pricing.md`](./ola-6-tenancy-strict-stress-pricing.md#bloque-d--market-benchmarks-completion-gap-encontrado-2026-04-23). Primer slice (route + seed + chip) entregado en rama `feat/market-benchmarks-completion`.
+
 ---
 
 ## 5. Lo que NO hay que hacer

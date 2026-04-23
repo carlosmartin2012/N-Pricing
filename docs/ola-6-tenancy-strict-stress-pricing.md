@@ -293,6 +293,61 @@ Cada semana cierra con un PR mergeable a main. Si se bloquea Bloque B, Bloque A 
 
 ---
 
+## Bloque D — Market benchmarks completion (gap encontrado 2026-04-23)
+
+### Contexto
+
+El pivot §Bloque H cerró migration + util (`utils/marketBenchmarks.ts`), tests (8) y captura de `competitor_rate` en `DealOutcomeDrawer`. El gap detectado:
+
+- `api/whatIf.ts:213` apunta a `/what-if/benchmarks` — **el server route no existe**.
+- Tabla `market_benchmarks` **sin seed**, así que la vista vacía sería permanente aunque la llamada respondiera.
+- Ninguno de los 20 componentes `components/Calculator/*` muestra "Market X.XX% • your Δbps" — el chip diseñado en PIVOT §Bloque H no se cableó.
+- No hay vista admin/CSV importer para alimentar feed manual.
+- Integral review 2026-04-18 cerró Olas 6-8 sin incluir este trabajo.
+
+### Objetivo
+
+Cerrar el círculo de "pricing decision support con referencia externa": que un trader vea al cotizar si su rate está `±Nbps` del benchmark BBG/BdE más reciente para su tuple `product × tenor × client × currency`.
+
+### Diseño (cross-tenant por naturaleza)
+
+`market_benchmarks` **no tiene `entity_id` ni RLS** — es referencia externa compartida. Todos los tenants ven los mismos benchmarks (BBG, BdE, EBA surveys). Esto es correcto:
+
+- **Read**: `authMiddleware` sin `entityScoped` (patrón de `/api/entities`).
+- **Write (upsert / delete)**: admin global only — `req.user?.role === 'Admin'`. Un tenant no debería poder inyectar rates que otros tenants vean como verdad.
+- **Audit**: cada upsert registra `user_id` + `user_entity_id` + timestamp en `audit_log` (campo `resource_type='market_benchmark'`).
+
+### Entregables Bloque D
+
+1. **Server route `server/routes/marketBenchmarks.ts`** — GET (list, con filtros product/currency/client), POST (upsert admin-only), DELETE (admin-only), GET by id.
+2. **Registro en `server/index.ts`** fuera de la cadena `entityScoped`.
+3. **Módulo cliente `api/marketBenchmarks.ts`** nuevo, retirando `listBenchmarks/upsertBenchmark` de `api/whatIf.ts` (son de este dominio, no de WhatIf).
+4. **Query hook `hooks/queries/useMarketBenchmarksQuery.ts`** + query keys.
+5. **Seed script `scripts/seed-market-benchmarks.ts`** idempotente con ~30 benchmarks realistas (LOAN_COMM/MORTGAGE/DEPOSIT × ST/MT/LT × Retail/SME/Corporate × EUR/USD, fuentes BBG/BdE/EBA).
+6. **Chip en Calculator** — componente nuevo `MarketRateChip.tsx` renderizado en `PricingReceipt` junto al `finalClientRate` output, mostrando "Market 4.22% (BBG) · +13bp vs market" con semantic color (ABOVE/ON_MARKET/BELOW).
+7. **Tests** — route (happy + admin guard + filters), hook (query key + invalidation), chip (3 states).
+8. **Runbook opcional** — `docs/runbooks/market-benchmarks-feed.md` (cómo actualizar manualmente, validación de rangos).
+
+### Fuera de scope Bloque D
+
+- CSV importer UI → Bloque D2 follow-up.
+- Vista admin `MarketBenchmarksView.tsx` con CRUD visual → D2.
+- Auto-ingest de BBG/Refinitiv → D3 (requiere contrato con banco piloto).
+
+### Dependencias
+
+- Ninguna hacia bloques A/B/C. Mergeable en paralelo.
+
+### KPIs Bloque D
+
+| KPI | Target |
+|---|---|
+| Benchmarks seed en DB | ≥ 24 tuples |
+| `findBenchmark` cobertura para productos core | ≥ 80% de pricing calls encuentran match |
+| Chip visible en PricingReceipt | 100% de deals con product/client soportado |
+
+---
+
 ## 8. Referencias
 
 - [`integral-review-2026-04-18.md`](./integral-review-2026-04-18.md) §3 Ola 6 (revisada post-challenge)

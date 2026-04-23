@@ -97,6 +97,13 @@ export const queryKeys = {
       ['discipline', 'cohort', product, segment] as const,
   },
 
+  // --- Market Benchmarks (Pivot §H · Ola 6 Bloque D) ---
+  marketBenchmarks: {
+    all: ['marketBenchmarks'] as const,
+    filtered: (filters: { products?: string[]; currencies?: string[]; clients?: string[] }) =>
+      ['marketBenchmarks', filters.products ?? [], filters.currencies ?? [], filters.clients ?? []] as const,
+  },
+
   // --- What-If (Ola 3) ---
   whatIf: {
     sandboxes: ['whatIf', 'sandboxes'] as const,
