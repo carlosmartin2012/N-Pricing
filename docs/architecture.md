@@ -1,7 +1,19 @@
 # N-Pricing — Architecture overview
 
 > Lectura recomendada como primer documento técnico tras el README.
-> Fecha: 2026-04-15. Refleja el estado del repo tras 19 commits del roadmap.
+> Última actualización: 2026-04-23 — Ola 6 completa (A + B + C merged).
+>
+> **Cambios clave desde el último refresh (2026-04-15)**:
+> - +17 vistas (Stress Pricing view añadida en Ola 6 B.5).
+> - 40 migrations (+3 vs previo: scenario cols, hash chain, tenancy alerts seed).
+> - Hash chain tamper-evidence activo: `prev_output_hash` + partial UNIQUE + verifier puro + endpoint admin + Edge writer con retry.
+> - Stress Pricing: 6 escenarios EBA GL 2018/02 cableados al motor (feature flag `VITE_PRICING_APPLY_CURVE_SHIFT`), con vista `/stress-pricing` y CSV export.
+> - SLOPanel: widget `Tenancy violations · last 60m` para el flip canary.
+> - Provisioning seedea 3 alertas canónicas automáticamente (`tenancy-strict-flip` sin prereq manuales).
+> - CI: build-and-test verde, integration-tests tras 7 compat fixes (supabase_realtime, roles, auth schema stubs, reserved word, type mismatches).
+> - Bundle: budget 520 KB + primer lazy-load (CommandPalette).
+>
+> Ver [`docs/ola-6-tenancy-strict-stress-pricing.md`](./ola-6-tenancy-strict-stress-pricing.md) para detalle por bloque.
 
 ---
 
@@ -31,7 +43,7 @@ está modelada como SLOs con 5 canales de alertas.
 │  │              Walkthrough                                          │
 │  ├─ React Query (cache + invalidación)                              │
 │  ├─ api/* (cliente tipado + mappers)                                │
-│  └─ 16 vistas, code-split con React.lazy                            │
+│  └─ 17 vistas, code-split con React.lazy (CommandPalette lazy)      │
 └────────────────────┬────────────────────────────────────────────────┘
                      │ HTTPS · JWT bearer · x-entity-id · x-request-id
                      ▼
@@ -55,7 +67,7 @@ está modelada como SLOs con 5 canales de alertas.
          ▼                                                     ▼
 ┌────────────────────────────┐         ┌───────────────────────────────┐
 │  PostgreSQL (Supabase)     │         │  Channel API (server/routes/  │
-│  ├─ 26 migraciones         │◀───────▶│   channelPricing.ts)          │
+│  ├─ 40 migraciones         │◀───────▶│   channelPricing.ts)          │
 │  ├─ RLS estricto           │         │  · x-channel-key auth         │
 │  ├─ Helpers tenancy:       │         │  · token bucket per key       │
 │  │    get_current_entity_id│         │  · campaign delta apply       │
@@ -152,6 +164,21 @@ Kill switch: flip las dos env vars a `off`, sin migración inversa.
 
 Inmutable por RLS (sin UPDATE/DELETE) + trigger `enforce_snapshot_hashes`.
 
+**Hash chain (Ola 6 C).** Tres columnas adicionales (`scenario_id`,
+`scenario_source`, `prev_output_hash`) documentadas en migrations
+`20260619000002` / `20260619000003`. Cada snapshot extiende la cadena
+vinculando su `output_hash` con el anterior del mismo tenant via
+`prev_output_hash`. Partial UNIQUE index sobre `(entity_id, prev_output_hash)
+WHERE prev_output_hash IS NOT NULL` previene forks silentes por writers
+concurrentes. Edge writer (`supabase/functions/pricing/index.ts`)
+implementa retry exponencial (10 → 40 → 160 ms, max 3) ante conflict
+23505 — el loser extiende sin dividir la cadena.
+
+**Verificación.** `verifySnapshotChain(links)` puro en
+`utils/snapshotHash.ts` + endpoint admin `GET /api/snapshots/verify-chain`
+barren el rango y detectan tampering retroactivo (devuelve `brokenAt`
+al primer mismatch).
+
 ### Replay
 
 `POST /api/snapshots/:id/replay`:
@@ -203,6 +230,13 @@ T0 puede demostrarse byte-perfect en T+N.
 
 `GET /api/observability/slo-summary?entity_id=…` devuelve un payload
 estructurado para la UI (`SLOPanel.tsx` embebido en `HealthDashboard`).
+
+**Tenancy violations canary (Ola 6 A).** `GET /api/observability/tenancy-violations?window_minutes=60`
+devuelve total + top-10 breakdown por `(endpoint, error_code)` para el
+tenant solicitante. El widget dedicado *Tenancy violations · last 60m*
+en `SLOPanel` renderiza cero → mensaje "Safe to hold TENANCY_STRICT flip
+observation" y >0 → tabla con counts. Diseñado para la ventana de 48h de
+observación descrita en [`docs/runbooks/tenancy-strict-flip.md`](./runbooks/tenancy-strict-flip.md).
 
 ---
 
@@ -355,15 +389,51 @@ facturables**. La capa de billing del SaaS se eliminó explícitamente.
 
 ---
 
+## Stress Pricing (Ola 6 B)
+
+### Escenarios EBA GL 2018/02
+
+Tipos en `types/pricingShocks.ts`: `ShockScenario` lleva `curveShiftBps`
+per-tenor (8 buckets: 1M, 3M, 6M, 1Y, 2Y, 5Y, 10Y, 20Y), `interestRate`
+(legacy uniform), `liquiditySpread`, `source` (`preset_eba_2018_02`,
+`market_adapter`, `user_custom`), y `id` del escenario.
+
+Presets en `utils/pricing/shockPresets.ts` — 6 escenarios canónicos:
+parallel ±200, short ±250, steepener, flattener. Steepener/flattener
+computados con la fórmula Annex III (decay `exp(-t/4)`).
+
+### Cableado al motor
+
+`calculatePricing(deal, approvalMatrix, context, shocks)` acepta un
+`ShockScenario` completo (además del `PricingShocks` legacy). Cuando el
+flag `VITE_PRICING_APPLY_CURVE_SHIFT=true` Y `shocks.curveShiftBps` está
+presente, el motor interpola per-tenor al `RM` del deal; si no, fallback
+al shift uniforme. **100% retrocompatible**.
+
+### Adapter
+
+`MarketDataAdapter.fetchShockedCurve(scenarioId, asOfDate)` — aplica
+`curveShiftBps` sobre la curva base in-memory (reference) o delega al
+proveedor (Bloomberg stub firma el contrato).
+
+### Vista
+
+`/stress-pricing` — selector de deal + tabla 7×7 (base + 6 EBA presets ×
+FTP/ΔFTP/Margin/ΔMargin/RAROC/ΔRAROC). Chip en header muestra estado del
+flag. CSV export via pure builder. Footer disclaimer: "no sustituye
+cálculo IRRBB regulatorio (ΔEVE, SOT, ΔNII runoff)".
+
+---
+
 ## Testing
 
 ### Suite por capas
 
 | Tipo | Tooling | Cuándo correr |
 |---|---|---|
-| Unit | Vitest 4 (~967 tests) | Cada commit |
+| Unit | Vitest 4 (~1.37k tests) | Cada commit |
 | Integration RLS | Vitest + Postgres real | Opt-in, cuando se cambian helpers PG |
-| E2E | Playwright (12 specs) | Pre-PR |
+| E2E | Playwright (20 specs) | Pre-PR |
 | Component | Storybook 8.6 | Diseño visual aislado |
 
 ### Integration tests opt-in
@@ -397,14 +467,16 @@ Setup: `supabase start` o Docker Postgres, exportar `INTEGRATION_DATABASE_URL`,
 | `ENGINE_VERSION` | `dev-local` | grabado en `pricing_snapshots` |
 | `ALERT_EVAL_INTERVAL_MS` | unset | activa alert worker |
 | `DOSSIER_SIGNING_SECRET` | dev fallback | required en prod |
+| `VITE_PRICING_APPLY_CURVE_SHIFT` | unset (false) | `true` → motor interpola per-tenor con `ShockScenario.curveShiftBps` (Ola 6 B.4). Off = legacy uniform shift |
 | `INTEGRATION_DATABASE_URL` | unset | activa tests integración |
 
 ### Runbooks
 
-7 plantillas en [`docs/runbooks/`](./runbooks/) cubren los eventos más
-probables: tenancy violation, pricing latency, snapshot write failure,
-mock fallback, campaign volume exhausted, adapter down, kill switch,
-backtest drift.
+13 plantillas en [`docs/runbooks/`](./runbooks/) cubren los eventos más
+probables: tenancy violation · tenancy-strict-flip · pricing latency ·
+snapshot write failure · mock fallback · campaign volume exhausted ·
+adapter down · feature flag kill switch · backtest drift · escalation
+timeouts · CLV ops · seed demo · Replit demo.
 
 Cada runbook trae las queries SQL de diagnóstico y los criterios de
 mitigación.

@@ -1,10 +1,13 @@
 # CLAUDE.md — N-Pricing
 
 > Contexto esencial para agentes IA que trabajan en este repositorio.
-> Última actualización: 2026-04-22 (post Phase 6 CLV / Pipeline / Reconciliation + unificación demo↔live sobre DB).
+> Última actualización: 2026-04-23 (Ola 6 completa en `main` — A + B + C merged).
 > **Lectura obligatoria antes de tocar código:** [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md)
 > (hallazgos verificados, falsos positivos descartados, propuesta de evolución en 3 olas).
-> **Siguiente ola:** [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md).
+> **Ola 6 completa (16 PRs merged, `#42–#57`):** estado por bloque en
+> [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md);
+> resumen ejecutivo y follow-ups en
+> [`docs/roadmap-execution-summary.md`](docs/roadmap-execution-summary.md).
 
 ## Qué es N-Pricing
 
@@ -91,7 +94,7 @@ el usuario abra la UI. Ver [`docs/runbooks/replit-demo.md`](docs/runbooks/replit
 
 ```text
 App.tsx                    # Shell principal, lazy loading, routing
-appNavigation.ts           # Navegación (16 vistas)
+appNavigation.ts           # Navegación (17 vistas — +Stress Pricing en Ola 6 B.5)
 types.ts                   # Tipos de dominio + re-exports de types/*
 translations.ts            # i18n (en/es)
 
@@ -423,9 +426,10 @@ Plus, post-roadmap:
 - Campaign delta aplicado a `finalClientRate` en channel quotes.
 - Snapshot inmutable de cada ejecución para reproducibilidad regulatoria.
 
-## Vistas y navegación (16 vistas)
+## Vistas y navegación (17 vistas)
 
-**Principales (12):** Pricing Engine, RAROC Terminal, Stress Testing,
+**Principales (13):** Pricing Engine, RAROC Terminal, Stress Testing,
+**Stress Pricing** (`/stress-pricing` — 6 presets EBA × deal, Ola 6 B.5),
 **Customer Pricing**, **Campaigns**, Deal Blotter, Accounting Ledger,
 ALM Reporting, Yield Curves, Target Grid, Pricing Discipline, What-If,
 Rules & Config, Behavioural Models, AI Assistant.
@@ -435,7 +439,7 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Testing
 
-- **Unit (Vitest 4):** ~80 archivos, ~1.0k tests + 2 integration opt-in.
+- **Unit (Vitest 4):** ~85 archivos, ~1.37k tests + 17 integration opt-in.
 - **E2E (Playwright 1.59):** 20 specs.
 - **Component (Storybook 8.6):** stories en `*.stories.tsx`.
 - **Integration RLS (opt-in):** `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration`.
@@ -446,8 +450,9 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Base de datos y Supabase
 
-- 38 migrations secuenciales en `supabase/migrations/` (última:
-  `20260608000001_clv_360.sql`).
+- 40 migrations secuenciales en `supabase/migrations/` (última:
+  `20260619000004_tenancy_alerts_seed.sql`; la anterior es
+  `20260619000003_pricing_snapshots_hash_chain.sql`).
 - Schema principal: `supabase/schema_v2.sql` (referencia legacy),
   migrations es la verdad operativa.
 - `supabase/schema.sql` está marcado **LEGACY — DO NOT EXECUTE** y ningún
@@ -482,6 +487,7 @@ Rules & Config, Behavioural Models, AI Assistant.
 | `ADAPTER_CRM` | `in-memory` | `salesforce` usa el stub real (Phase 4) |
 | `ADAPTER_MARKET_DATA` | `in-memory` | `bloomberg` usa el stub real (Phase 4) |
 | `DOSSIER_SIGNING_SECRET` | dev fallback | Required en producción |
+| `VITE_PRICING_APPLY_CURVE_SHIFT` | unset (false) | `true` → motor honra `ShockScenario.curveShiftBps` per-tenor (Ola 6 B.4). Off = legacy uniform `interestRate` shift. El chip del header de `/stress-pricing` lo surfacea |
 | `INTEGRATION_DATABASE_URL` | unset | Activa tests de integración (opt-in) |
 | `ALLOWED_ORIGINS` | localhost dev | CORS allowlist |
 | `VITE_NPRICING_DEPRECATE_ALM` / `VITE_ALQUID_BASE_URL` | false / prod | Pivot flags ALM → Alquid |
@@ -529,6 +535,22 @@ Rules & Config, Behavioural Models, AI Assistant.
   de `supabase/migrations/`. Si añades una tabla que el server necesita al
   arrancar (p.ej. `tenancy_violations`, entity_users default seed), tócala
   en los dos sitios o Replit arrancará con una DB rota.
+- **Migrations históricas vs inline schema** (diagnosticado durante Ola 6,
+  PRs #55/#56/#57): `server/migrate.ts` es la **verdad operativa** en
+  producción. Las migrations en `supabase/migrations/` son la verdad
+  *canónica* para envs que corren la secuencia completa (sólo CI lo
+  hace hoy). Divergencias entre ambas eran bugs silentes hasta que
+  `integration-tests` los destapó. Ejemplos detectados y corregidos:
+  `clients.id` (UUID en migration, TEXT en inline), `deals.client_id`
+  (idem), FK UUID→BIGSERIAL en `pricing_snapshots`, variable `strict` como
+  identifier (reserved en PG 16). **Al añadir columnas con FK o tipos
+  concretos, verificar en ambos sitios y en `utils/seedData.ts`.**
+- **Integration-tests en CI** necesita `postgres:16` con un bootstrap
+  Supabase-compat (`.github/workflows/ci.yml` lo hace explícito): la
+  publication `supabase_realtime`, los roles `anon`/`authenticated`/
+  `service_role`, el schema `auth` con stubs `jwt()`/`uid()`/`users`.
+  Cualquier migration nueva que asuma un objeto Supabase-hosted que no
+  esté en esa lista debe extender el bootstrap step, no el migration.
 - **Demo login en Replit:** `components/ui/Login.tsx:287` sólo renderiza
   el form si **ambos** `VITE_DEMO_USER` y `VITE_DEMO_PASS` están definidos
   en el bundle del cliente. Están ya cableados en `.replit` `[userenv.shared]`.
@@ -576,10 +598,11 @@ Rules & Config, Behavioural Models, AI Assistant.
 | `docs/api-spec.yaml` | OpenAPI v2 |
 | `docs/roadmap-execution-summary.md` | Estado fase por fase |
 | `docs/integral-review-2026-04-18.md` | Hallazgos + 3 olas de evolución |
-| `docs/ola-6-tenancy-strict-stress-pricing.md` | Siguiente ola |
+| `docs/ola-6-tenancy-strict-stress-pricing.md` | **Ola 6 completa** · estado A/B/C con PR refs |
 | `docs/phase-0-design.md` + `phase-0-technical-specs.md` + `phase-0-rollout.md` | Tenancy/snapshots/SLO completo |
 | `docs/integration-tests.md` | Cómo correr los tests integración opt-in |
-| `docs/runbooks/` | 12 plantillas operativas para on-call |
+| `docs/runbooks/` | 13 plantillas operativas para on-call |
+| `docs/runbooks/tenancy-strict-flip.md` | Playbook del flip strict (prereqs automatizados post Ola 6) |
 | `docs/runbooks/replit-demo.md` | **Demo data flow + troubleshooting Replit** |
 | `docs/runbooks/seed-demo.md` | Cómo re-seedar Default Entity manualmente |
 | `docs/pricing-methodology.md` | Metodología FTP detallada |

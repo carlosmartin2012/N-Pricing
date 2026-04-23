@@ -1,8 +1,34 @@
 # Ola 6 — Tenancy strict global + pricing bajo estrés
 
-> **Estado:** draft de diseño · **Creado:** 2026-04-19 · **Predecesor:** [`integral-review-2026-04-18.md`](./integral-review-2026-04-18.md) §3 Ola 6
+> **Estado:** ✅ **Completa (código)** — 2026-04-23 · **Creado:** 2026-04-19 · **Predecesor:** [`integral-review-2026-04-18.md`](./integral-review-2026-04-18.md) §3 Ola 6
 > **Dependencias cerradas:** PR [#6](https://github.com/carlosmartin2012/N-Pricing/pull/6) (EntityOnboarding split + `.env.example`) · PR [#7](https://github.com/carlosmartin2012/N-Pricing/pull/7) (guard `requireTenancy()` mode-aware)
 > **Esta ola NO es:** un motor IRRBB regulatorio (ΔEVE, SOT, NII runoff). Ver §"Fuera de scope".
+>
+> ## Estado por bloque (2026-04-23)
+>
+> | Bloque | Pieza | Estado | PR |
+> |---|---|---|---|
+> | **A — Tenancy strict** | Runbook flip | ✅ | #8 |
+> | A | Seed alertas como migration | ✅ | [#44](https://github.com/carlosmartin2012/N-Pricing/pull/44) |
+> | A | SLOPanel widget `Tenancy violations · last 60m` | ✅ | [#45](https://github.com/carlosmartin2012/N-Pricing/pull/45) |
+> | A | Provision-tenant hook (seed en creación) | ✅ | [#49](https://github.com/carlosmartin2012/N-Pricing/pull/49) |
+> | A | Runbook refresh (auto-prereqs) | ✅ | [#52](https://github.com/carlosmartin2012/N-Pricing/pull/52) |
+> | A | Flip `TENANCY_ENFORCE=on` canary → prod | 🟡 **ops decision** | — |
+> | **B — Stress Pricing** | B.1 tipo `ShockScenario` + B.2 presets EBA | ✅ | #38 (pre-sesión) |
+> | B | B.3 `MarketDataAdapter.fetchShockedCurve` | ✅ | #39 (pre-sesión) |
+> | B | B.4 motor honra `curveShiftBps` (flag-gated) | ✅ | #40 (pre-sesión) |
+> | B | B.5 vista `/stress-pricing` | ✅ | [#42](https://github.com/carlosmartin2012/N-Pricing/pull/42) |
+> | B | B.6 `pricing_snapshots.scenario_id/source` | ✅ | #41 (pre-sesión) |
+> | B | Playwright e2e + Storybook story | ❌ polish | — |
+> | **C — Hash chain** | Schema + UNIQUE + verifier + endpoint | ✅ | [#43](https://github.com/carlosmartin2012/N-Pricing/pull/43) |
+> | C | Edge writer (retry + chain) | ✅ | [#47](https://github.com/carlosmartin2012/N-Pricing/pull/47) |
+> | C | Backfill histórico (opt-in script) | ❌ polish | — |
+> | **D — Market benchmarks** | Route + seed + chip + CSV importer | ✅ | #37 (pre-sesión) |
+> | D | Vista admin CRUD (D2) + auto-ingest (D3) | ❌ follow-up | — |
+>
+> **Conclusión:** todo el código de Ola 6 está en `main`. Sólo pendiente la
+> decisión operativa del flip `TENANCY_STRICT=on` en producción y polish
+> opcional (e2e, backfill, admin UI).
 
 ---
 
