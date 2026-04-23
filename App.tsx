@@ -57,6 +57,7 @@ const EscalationsView = React.lazy(() => import('./components/Governance/Escalat
 const ModelInventoryView = React.lazy(() => import('./components/Governance/ModelInventoryView'));
 const DossiersView = React.lazy(() => import('./components/Governance/DossiersView'));
 const SnapshotReplayView = React.lazy(() => import('./components/Governance/SnapshotReplayView'));
+const StressPricingView = React.lazy(() => import('./components/StressPricing/StressPricingView'));
 const CustomerDrawer = React.lazy(() => import('./components/Customer360/CustomerDrawer'));
 const UserConfigModal = React.lazy(() =>
   import('./components/ui/UserConfigModal').then((module) => ({
@@ -80,7 +81,7 @@ const ViewSkeleton: React.FC = () => {
   const path = window.location.pathname;
   if (path === '/pricing') return <CalculatorSkeleton />;
   if (path === '/blotter' || path === '/users' || path === '/audit') return <TableSkeleton />;
-  if (path === '/analytics' || path === '/raroc' || path === '/stress-testing' || path === '/health' || path === '/discipline' || path === '/what-if') return <DashboardSkeleton />;
+  if (path === '/analytics' || path === '/raroc' || path === '/stress-testing' || path === '/stress-pricing' || path === '/health' || path === '/discipline' || path === '/what-if') return <DashboardSkeleton />;
   if (path === '/target-grid') return <TableSkeleton />;
   if (path === '/methodology' || path === '/behavioural') return <ConfigSkeleton />;
   return <DashboardSkeleton />;
@@ -318,6 +319,7 @@ const AppContent: React.FC = () => {
                       <Route path="/models"        element={<ModelInventoryView />} />
                       <Route path="/dossiers"      element={<DossiersView />} />
                       <Route path="/snapshots"     element={<SnapshotReplayView />} />
+                      <Route path="/stress-pricing" element={<StressPricingView />} />
                     </Route>
 
                     <Route path="/" element={<Navigate to="/pricing" replace />} />
