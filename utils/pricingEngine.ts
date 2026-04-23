@@ -23,6 +23,7 @@ export type { FormulaResult } from './pricing/formulaEngine';
 
 // ── Import sub-module functions used internally ──
 import { interpolateYieldCurve } from './pricing/curveUtils';
+import { interpolateShockShiftBps } from './pricing/shockPresets';
 import {
   interpolateLiquidityCurve,
   calculateBlendedLP,
@@ -80,6 +81,33 @@ export const DEFAULT_PRICING_SHOCKS: PricingShocks = {
   interestRate: 0,
   liquiditySpread: 0,
 };
+
+/**
+ * Feature-flag-gated resolver: returns the interest-rate shift in
+ * percentage points (NOT bps) that should be added to `rawBaseRate`.
+ *
+ * - Legacy path (default): `shocks.interestRate / 100` — uniform shift.
+ * - Curve-shift path: if `VITE_PRICING_APPLY_CURVE_SHIFT === 'true'` AND
+ *   the shocks object is a `ShockScenario` with non-null `curveShiftBps`,
+ *   interpolate the per-tenor shift at the deal's effective repricing
+ *   tenor (`RM` months) and return it in percent.
+ *
+ * Pure: env is read on every call so tests can mutate `import.meta.env`
+ * between cases. Reading shocks.curveShiftBps does not require a type
+ * guard — it's just a duck-typed optional property access.
+ */
+function resolveRateShockPct(
+  shocks: PricingShocks | { curveShiftBps?: Partial<Record<string, number>> | null; interestRate: number },
+  repricingMonths: number,
+): number {
+  const flagOn = String(import.meta.env?.VITE_PRICING_APPLY_CURVE_SHIFT ?? '').toLowerCase() === 'true';
+  const shifts = (shocks as { curveShiftBps?: Partial<Record<string, number>> | null }).curveShiftBps;
+  if (!flagOn || !shifts || Object.keys(shifts).length === 0) {
+    return shocks.interestRate / 100;
+  }
+  const bps = interpolateShockShiftBps(shifts, repricingMonths);
+  return bps / 100;
+}
 
 // ─── Effective Tenors (Gap 9, 15) ───────────────────────────────────────────
 
@@ -290,7 +318,12 @@ export const calculatePricing = (
     contingentLiquidityCharge;
 
   // ── Apply Shocks ──────────────────────────────────────────────────────────
-  const baseRate = rawBaseRate + (shocks.interestRate / 100);
+  // Curve-shift (per-tenor) path runs behind a feature flag. When disabled
+  // or when the incoming shocks object lacks `curveShiftBps`, the motor
+  // falls back to the uniform legacy shift so existing snapshots replay
+  // bit-exact. Enable with `VITE_PRICING_APPLY_CURVE_SHIFT=true`.
+  const rateShockPct = resolveRateShockPct(shocks, tenors.rm);
+  const baseRate = rawBaseRate + rateShockPct;
   const liquidity = totalLiquidityCost + (shocks.liquiditySpread / 100);
   const ftp = baseRate + liquidity;
 

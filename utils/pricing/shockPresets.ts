@@ -194,3 +194,48 @@ export const EBA_STRESS_PRESETS: ShockScenario[] = [
   EBA_SHOCK_PRESETS.steepener,
   EBA_SHOCK_PRESETS.flattener,
 ];
+
+// Months-to-tenor mapping used for interpolating per-tenor shifts at a
+// deal's effective repricing horizon. Kept local (not imported from
+// pricingConstants.TENOR_MONTHS) because this subset is the contract the
+// EBA presets ship — extending the shock grid to extra tenors is a
+// roadmap decision, not an incidental lookup.
+const TENOR_MONTHS: Record<ShockTenor, number> = {
+  '1M': 1, '3M': 3, '6M': 6, '1Y': 12, '2Y': 24, '5Y': 60, '10Y': 120, '20Y': 240,
+};
+
+/**
+ * Interpolate a per-tenor shock (bps) at an arbitrary month count.
+ *
+ * Used by the motor when it needs the shift at the deal's effective
+ * repricing tenor (`RM` months) rather than at one of the 8 preset buckets.
+ * Returns 0 when the shifts dict is empty (base / custom scenarios) so the
+ * caller can always apply the result without null-checks.
+ *
+ * Linear interpolation between adjacent buckets; flat extrapolation
+ * outside the min/max tenor (shorter than 1M uses the 1M shift, longer
+ * than 20Y uses the 20Y shift) — consistent with how `interpolateYieldCurve`
+ * handles out-of-range queries.
+ */
+export function interpolateShockShiftBps(
+  shifts: Partial<Record<ShockTenor, number>>,
+  targetMonths: number,
+): number {
+  const ordered = (Object.keys(shifts) as ShockTenor[])
+    .filter((t) => shifts[t] !== undefined)
+    .map((t) => ({ months: TENOR_MONTHS[t], bps: shifts[t] as number }))
+    .sort((a, b) => a.months - b.months);
+  if (ordered.length === 0) return 0;
+  if (targetMonths <= ordered[0].months) return ordered[0].bps;
+  const last = ordered[ordered.length - 1];
+  if (targetMonths >= last.months) return last.bps;
+  for (let i = 1; i < ordered.length; i++) {
+    const a = ordered[i - 1];
+    const b = ordered[i];
+    if (targetMonths <= b.months) {
+      const t = (targetMonths - a.months) / (b.months - a.months);
+      return a.bps + t * (b.bps - a.bps);
+    }
+  }
+  return last.bps;
+}
