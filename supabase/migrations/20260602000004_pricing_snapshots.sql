@@ -6,7 +6,12 @@ CREATE TABLE IF NOT EXISTS pricing_snapshots (
   id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id         UUID        NOT NULL REFERENCES entities(id),
   deal_id           UUID        REFERENCES deals(id) ON DELETE SET NULL,
-  pricing_result_id UUID        REFERENCES pricing_results(id) ON DELETE SET NULL,
+  pricing_result_id UUID,
+  -- NOTE: deliberately NOT a FK to pricing_results(id). pricing_results.id is
+  -- BIGSERIAL (legacy schema from 20240101000000_initial_schema.sql) and the
+  -- types are incompatible. Linking is best-effort at the application layer.
+  -- server/migrate.ts inline schema already omits the FK; this migration now
+  -- matches.
 
   request_id        TEXT        NOT NULL,
   engine_version    TEXT        NOT NULL,
