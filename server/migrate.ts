@@ -702,16 +702,22 @@ CREATE TABLE IF NOT EXISTS pricing_snapshots (
   output_hash       TEXT        NOT NULL DEFAULT '',
   scenario_id       TEXT,
   scenario_source   TEXT,
+  prev_output_hash  TEXT,
   created_at        TIMESTAMPTZ DEFAULT NOW()
 );
 -- Handle dev DBs created before the scenario columns landed.
 ALTER TABLE pricing_snapshots ADD COLUMN IF NOT EXISTS scenario_id     TEXT;
 ALTER TABLE pricing_snapshots ADD COLUMN IF NOT EXISTS scenario_source TEXT;
+-- Ola 6 Bloque C — hash chain link.
+ALTER TABLE pricing_snapshots ADD COLUMN IF NOT EXISTS prev_output_hash TEXT;
 CREATE INDEX IF NOT EXISTS idx_pricing_snapshots_entity ON pricing_snapshots (entity_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_pricing_snapshots_deal ON pricing_snapshots (deal_id);
 CREATE INDEX IF NOT EXISTS idx_pricing_snapshots_scenario
   ON pricing_snapshots (entity_id, scenario_id, created_at DESC)
   WHERE scenario_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_pricing_snapshots_prev_hash
+  ON pricing_snapshots (entity_id, prev_output_hash)
+  WHERE prev_output_hash IS NOT NULL;
 
 -- -----------------------------------------------------------------------
 -- Metering: daily usage aggregates and feature flags
