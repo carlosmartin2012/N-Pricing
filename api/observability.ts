@@ -134,6 +134,37 @@ export async function getSLOSummary(entityId: string): Promise<SLOSummaryRespons
 }
 
 // ---------------------------------------------------------------------------
+// Ola 6 Bloque A — tenancy violations canary widget
+// ---------------------------------------------------------------------------
+
+export interface TenancyViolationEndpoint {
+  endpoint: string;
+  errorCode: string;
+  count: number;
+}
+
+export interface TenancyViolationsResponse {
+  entityId: string;
+  windowMinutes: number;
+  since: string;
+  total: number;
+  topEndpoints: TenancyViolationEndpoint[];
+}
+
+export async function getTenancyViolations(
+  entityId: string,
+  windowMinutes: number = 60,
+): Promise<TenancyViolationsResponse | null> {
+  try {
+    return await apiGet<TenancyViolationsResponse>(
+      `/observability/tenancy-violations?entity_id=${encodeURIComponent(entityId)}&window_minutes=${windowMinutes}`,
+    );
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Phase 4 follow-up — integration adapter health
 // ---------------------------------------------------------------------------
 

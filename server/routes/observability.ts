@@ -325,6 +325,60 @@ router.get('/slo-summary', async (req, res) => {
   }
 });
 
+// ─── Tenancy violations (Ola 6 Bloque A — canary widget) ───────────────────
+// Groups-by-endpoint breakdown of tenancy_violations for the caller's entity
+// over a configurable window (default 1 h). Feeds the SLOPanel widget used
+// during the 48-h warn-mode observation before flipping TENANCY_STRICT=on.
+// The SLO summary already reports the total count; this endpoint adds the
+// per-endpoint rollup needed to pinpoint which code paths are leaking.
+router.get('/tenancy-violations', async (req, res) => {
+  try {
+    const entityId = String(req.query.entity_id ?? req.tenancy?.entityId ?? '').trim();
+    if (!entityId) {
+      return res.status(400).json({ code: 'tenancy_missing_header', message: 'entity_id required' });
+    }
+    const rawWindow = parseInt(String(req.query.window_minutes ?? '60'), 10);
+    const windowMinutes = Math.min(Math.max(Number.isFinite(rawWindow) ? rawWindow : 60, 1), 1440);
+
+    const [totalRow, breakdown] = await Promise.all([
+      queryOne<{ n: string }>(
+        `SELECT COUNT(*)::text AS n
+         FROM tenancy_violations
+         WHERE occurred_at >= NOW() - ($2::int || ' minutes')::interval
+           AND (claimed_entity = $1 OR $1 = ANY (actual_entities))`,
+        [entityId, windowMinutes],
+      ),
+      query<{ endpoint: string | null; error_code: string; n: string }>(
+        `SELECT
+           COALESCE(endpoint, '(unknown)') AS endpoint,
+           error_code,
+           COUNT(*)::text AS n
+         FROM tenancy_violations
+         WHERE occurred_at >= NOW() - ($2::int || ' minutes')::interval
+           AND (claimed_entity = $1 OR $1 = ANY (actual_entities))
+         GROUP BY endpoint, error_code
+         ORDER BY COUNT(*) DESC
+         LIMIT 10`,
+        [entityId, windowMinutes],
+      ),
+    ]);
+
+    res.json({
+      entityId,
+      windowMinutes,
+      since: new Date(Date.now() - windowMinutes * 60_000).toISOString(),
+      total: Number(totalRow?.n ?? '0'),
+      topEndpoints: breakdown.map((r) => ({
+        endpoint: r.endpoint ?? '(unknown)',
+        errorCode: r.error_code,
+        count: Number(r.n),
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 // ─── Integrations health (Phase 4 follow-up) ───────────────────────────────
 // Returns the registry's view of each connected adapter (core banking, CRM,
 // market data, SSO when added). Not entity-scoped: adapter health is global
