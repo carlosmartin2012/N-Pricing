@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS client_positions (
   product_id    TEXT        REFERENCES products(id),
   product_type  TEXT        NOT NULL,
   category      TEXT        NOT NULL CHECK (category IN ('Asset', 'Liability', 'Off-Balance', 'Service')),
-  deal_id       UUID        REFERENCES deals(id) ON DELETE SET NULL,
+  deal_id       TEXT        REFERENCES deals(id) ON DELETE SET NULL,
 
   amount         NUMERIC(20,2) NOT NULL,
   currency       TEXT          NOT NULL DEFAULT 'EUR',

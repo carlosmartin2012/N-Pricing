@@ -120,7 +120,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS deal_versions (
     id BIGSERIAL PRIMARY KEY,
-    deal_id UUID NOT NULL,
+    deal_id TEXT NOT NULL,  -- matches deals.id TEXT (see #57 successor)
     version INTEGER NOT NULL,
     snapshot JSONB NOT NULL,
     pricing_result JSONB,

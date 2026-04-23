@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS client_events (
   source          TEXT        NOT NULL DEFAULT 'manual'
                     CHECK (source IN ('manual', 'pricing', 'crm', 'ops', 'ml', 'adapter')),
 
-  deal_id         UUID        REFERENCES deals(id) ON DELETE SET NULL,
+  deal_id         TEXT        REFERENCES deals(id) ON DELETE SET NULL,
   position_id     UUID        REFERENCES client_positions(id) ON DELETE SET NULL,
 
   amount_eur      NUMERIC(20, 2),

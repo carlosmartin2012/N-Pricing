@@ -69,7 +69,7 @@ COMMENT ON TABLE model_inventory IS
 CREATE TABLE IF NOT EXISTS signed_committee_dossiers (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id       UUID        NOT NULL REFERENCES entities(id),
-  deal_id         UUID        REFERENCES deals(id),
+  deal_id         TEXT        REFERENCES deals(id),
   pricing_snapshot_id UUID    REFERENCES pricing_snapshots(id),
   dossier_payload JSONB       NOT NULL,
   payload_hash    TEXT        NOT NULL,    -- sha256 of canonical dossier_payload
@@ -106,7 +106,7 @@ CREATE POLICY dossiers_insert ON signed_committee_dossiers
 CREATE TABLE IF NOT EXISTS approval_escalations (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id       UUID        NOT NULL REFERENCES entities(id),
-  deal_id         UUID        REFERENCES deals(id),
+  deal_id         TEXT        REFERENCES deals(id),
   exception_id    UUID        REFERENCES pricing_exceptions(id),
   level           TEXT        NOT NULL CHECK (level IN ('L1','L2','Committee')),
   due_at          TIMESTAMPTZ NOT NULL,
