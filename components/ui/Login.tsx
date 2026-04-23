@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, LockKeyhole, Loader2, ShieldCheck } from 'lucide-react';
+import { AlertCircle, ArrowRight, LockKeyhole, Loader2, ShieldCheck } from 'lucide-react';
 import { getTranslations, Language } from '../../translations';
 import { Logo } from './Logo';
 
@@ -199,24 +199,39 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
               Pricing de banca, de extremo a extremo.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[color:var(--nfq-text-secondary)]">
-              Pricing cliente, pricing de canal en tiempo real y transfer pricing interno sobre un mismo motor. Multi-tenant con RLS, snapshot-first por requerimiento regulatorio, gobierno MRM integrado.
+              Pricing cliente, canal en tiempo real y transfer pricing interno sobre un mismo motor. Multi-tenant con RLS estricto, snapshot inmutable con <span className="text-[color:var(--nfq-text-primary)]">tamper-evidence chain</span> por requerimiento regulatorio, stress EBA de 6 escenarios y gobierno MRM integrado.
             </p>
 
-            <div className="mt-12 grid max-w-3xl grid-cols-3 gap-4">
+            <div className="mt-12 grid max-w-3xl grid-cols-2 gap-4 xl:grid-cols-4 xl:gap-3">
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
                 <div className="nfq-label">Customer</div>
                 <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">360°</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Visión relacional, cross-bonus por posiciones reales, targets top-down y campañas versionadas por segmento.</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Visión relacional, cross-bonus por posiciones reales, targets top-down y campañas versionadas.</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
                 <div className="nfq-label">Channel</div>
                 <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">API</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Quote en tiempo real para sucursal, web, móvil y partner — API key, rate-limit y token bucket por canal.</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Quote en tiempo real — API key, rate-limit y token bucket por canal (sucursal, web, móvil, partner).</div>
               </div>
               <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
                 <div className="nfq-label">Engine</div>
                 <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">FTP · 19</div>
-                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Base · LP · LCR/NSFR · capital · CSRBB · ESG · output floor CRR3 · RAROC · stress EBA 6 escenarios.</div>
+                <div className="mt-3 flex flex-wrap gap-1 font-mono text-[10px] uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">Base</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">LP</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">LCR</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">NSFR</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">Capital</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">CSRBB</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">ESG</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">Floor CRR3</span>
+                  <span className="rounded-md bg-white/[0.035] px-1.5 py-0.5">RAROC</span>
+                </div>
+              </div>
+              <div className="rounded-[24px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)]">
+                <div className="nfq-label">Stress</div>
+                <div className="mt-3 font-mono text-[34px] font-bold tracking-[var(--nfq-tracking-tight)] text-cyan-300">EBA · 6</div>
+                <div className="mt-2 text-sm text-[color:var(--nfq-text-secondary)]">Parallel ±200, short ±250, steepener, flattener — ΔFTP, ΔMargin, ΔRAROC per-tenor, no solo ΔEVE.</div>
               </div>
             </div>
           </div>
@@ -224,15 +239,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
           <div className="grid max-w-3xl grid-cols-3 gap-6 text-sm text-[color:var(--nfq-text-secondary)]">
             <div>
               <div className="nfq-label">Cliente y canal</div>
-              <p className="mt-3 leading-6">Customer 360 relacional con cross-bonus por posiciones reales, targets top-down, campañas con state machine y channel API con rate-limit por canal.</p>
+              <p className="mt-3 leading-6">Customer 360 relacional con cross-bonus por posiciones reales, targets top-down, campañas con state machine y channel API con rate-limit + token bucket por canal.</p>
             </div>
             <div>
               <div className="nfq-label">Motor de pricing</div>
-              <p className="mt-3 leading-6">19 componentes parametrizables (base, liquidez, capital, ESG, output floor), RAROC con economic profit, stress EBA y reconciliación FTP ↔ provisión ↔ capital.</p>
+              <p className="mt-3 leading-6">19 componentes parametrizables (base, liquidez, capital, ESG, output floor CRR3), RAROC con economic profit, stress EBA 6 escenarios y reconciliación FTP ↔ provisión ↔ capital.</p>
             </div>
             <div>
               <div className="nfq-label">Gobierno y reproducibilidad</div>
-              <p className="mt-3 leading-6">Multi-tenant estricto, snapshot por ejecución con replay diff bitemporal, MRM SR 11-7 / EBA y SLO con alertas en 5 canales.</p>
+              <p className="mt-3 leading-6">Multi-tenant strict RLS, snapshot por ejecución con <span className="text-[color:var(--nfq-text-primary)]">hash chain + replay diff</span>, MRM SR 11-7 / EBA, y SLO con alertas auto-seeded en 5 canales + widget de tenancy violations.</p>
             </div>
           </div>
         </section>
@@ -326,9 +341,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                 {error && (
                   <div
                     data-testid="login-error"
-                    className="rounded-[20px] bg-[var(--nfq-danger-subtle)] px-4 py-3 text-center text-xs text-[color:var(--nfq-danger)]"
+                    role="alert"
+                    aria-live="polite"
+                    className="flex items-start gap-3 rounded-[20px] bg-[var(--nfq-danger-subtle)] px-4 py-3 text-left text-xs leading-5 text-[color:var(--nfq-danger)]"
                   >
-                    {error}
+                    <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                    <span>{error}</span>
                   </div>
                 )}
 
@@ -339,10 +357,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Workspace posture</div>
-                      <div className="text-xs text-[color:var(--nfq-text-secondary)]">Multi-tenant RLS · snapshot replay · MRM inventory · SLO alerting</div>
+                      <div className="text-xs text-[color:var(--nfq-text-secondary)]">Strict RLS · hash-chain snapshots · MRM inventory · SLO alerting</div>
                     </div>
                   </div>
-                  <div className="mt-4 grid grid-cols-3 gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:var(--nfq-text-muted)]">
+                  <div className="mt-4 grid grid-cols-4 gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:var(--nfq-text-muted)]">
                     <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
                       <span className="block text-[color:var(--nfq-accent)]">360°</span>
                       <span>customer</span>
@@ -352,8 +370,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                       <span>channels</span>
                     </div>
                     <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
-                      <span className="block text-[color:var(--nfq-accent)]">FTP</span>
-                      <span>19 comp.</span>
+                      <span className="block text-[color:var(--nfq-accent)]">FTP · 19</span>
+                      <span>engine</span>
+                    </div>
+                    <div className="rounded-lg bg-[rgba(var(--nfq-accent-rgb),0.06)] px-2 py-1.5 text-center">
+                      <span className="block text-[color:var(--nfq-accent)]">EBA · 6</span>
+                      <span>stress</span>
                     </div>
                   </div>
                 </div>
