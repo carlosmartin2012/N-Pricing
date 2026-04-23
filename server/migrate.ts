@@ -791,6 +791,40 @@ CREATE TABLE IF NOT EXISTS alert_rules (
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_alert_rules_entity ON alert_rules (entity_id, is_active);
+
+-- -----------------------------------------------------------------------
+-- Market benchmarks (pivot §Bloque H, Ola 6 §Bloque D)
+-- Cross-tenant reference data (BBG / Refinitiv / BdE / EBA surveys).
+-- No entity_id / no RLS — shared across tenants by design.
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS market_benchmarks (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_type TEXT NOT NULL,
+  tenor_bucket TEXT NOT NULL,
+  client_type  TEXT NOT NULL,
+  currency     TEXT NOT NULL,
+  rate         NUMERIC NOT NULL,
+  source       TEXT NOT NULL,
+  as_of_date   DATE NOT NULL DEFAULT CURRENT_DATE,
+  notes        TEXT
+);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'market_benchmarks' AND constraint_name = 'market_benchmarks_tenor_check') THEN
+    ALTER TABLE market_benchmarks ADD CONSTRAINT market_benchmarks_tenor_check
+      CHECK (tenor_bucket IN ('ST', 'MT', 'LT'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'market_benchmarks' AND constraint_name = 'market_benchmarks_rate_check') THEN
+    ALTER TABLE market_benchmarks ADD CONSTRAINT market_benchmarks_rate_check
+      CHECK (rate >= 0 AND rate <= 50);
+  END IF;
+END $$;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_market_benchmarks_latest
+  ON market_benchmarks (product_type, tenor_bucket, client_type, currency, as_of_date);
+CREATE INDEX IF NOT EXISTS idx_market_benchmarks_lookup
+  ON market_benchmarks (product_type, client_type, currency, as_of_date DESC);
 `;
 
 export async function runMigrations(): Promise<void> {

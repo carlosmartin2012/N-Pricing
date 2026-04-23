@@ -23,6 +23,7 @@ import {
 } from './PricingReceiptChrome';
 import { PricingReceiptWaterfall } from './PricingReceiptWaterfall';
 import { usePricingReceiptActions } from './hooks/usePricingReceiptActions';
+import MarketRateChip from './MarketRateChip';
 
 interface Props {
   deal: Transaction;
@@ -174,6 +175,10 @@ const PricingReceipt: React.FC<Props> = ({
           deal={deal}
           result={result}
         />
+
+        {validationErrors.length === 0 && (
+          <MarketRateChip deal={deal} finalClientRatePct={result.finalClientRate} />
+        )}
 
         <PricingReceiptWaterfall
           applyShocks={applyShocks}
