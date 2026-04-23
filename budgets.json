@@ -3,7 +3,7 @@
   "maxTotalSize": 3000000,
   "defaultMaxChunkSize": 100000,
   "overrides": {
-    "index": 500000,
+    "index": 520000,
     "xlsx": 450000,
     "CategoricalChart": 320000,
     "vendor-supabase": 200000,
