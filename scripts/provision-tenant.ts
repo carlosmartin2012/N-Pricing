@@ -68,7 +68,7 @@ const DEFAULT_FLAGS: Array<{ flag: string; enabled: boolean; notes: string }> = 
  * Mirrors supabase/migrations/20260619000004_tenancy_alerts_seed.sql so
  * tenants provisioned *after* that migration ran still get the rules
  * without waiting for the next deploy. channel_config is intentionally
- * empty; scripts/seed-tenancy-alerts.ts fills in secrets when env vars
+ * empty; scripts/fill-tenancy-alert-secrets.ts fills in secrets when env vars
  * are available.
  */
 const DEFAULT_ALERT_RULES: Array<{

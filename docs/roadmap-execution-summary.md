@@ -243,8 +243,10 @@ completada en sesión única con **16 PRs merged** a `main` (#42–#57).
   - Seed de 3 alertas canónicas (pricing p95, tenancy violation,
     snapshot write failure) como migration
     `20260619000004_tenancy_alerts_seed.sql` (#44). Idempotente,
-    deploy-time. El script `seed-tenancy-alerts.ts` queda sólo para
-    rellenar `channel_config` con secretos.
+    deploy-time. El script — ahora renombrado a
+    `fill-tenancy-alert-secrets.ts` — queda sólo para rellenar
+    `channel_config` con secretos (Slack webhook URL, PagerDuty routing
+    key) cuando las env vars están disponibles.
   - Widget `Tenancy violations · last 60m` en SLOPanel (#45): total +
     top-10 breakdown por (endpoint, error_code) + copy "Safe to hold
     TENANCY_STRICT flip observation" en cero. Endpoint de soporte
@@ -330,5 +332,6 @@ completada en sesión única con **16 PRs merged** a `main` (#42–#57).
 - Playwright e2e para `/stress-pricing`.
 - Runbook `adapter-down.md` con sección stress pricing.
 - Backfill histórico opt-in para `prev_output_hash`.
-- Deprecar o renombrar `scripts/seed-tenancy-alerts.ts` → 
-  `fill-tenancy-alert-secrets.ts` (la seed ya es migration).
+- ~~Deprecar o renombrar `scripts/seed-tenancy-alerts.ts` →
+  `fill-tenancy-alert-secrets.ts` (la seed ya es migration).~~ ✅
+  Entregado en commit posterior.
