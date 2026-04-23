@@ -547,6 +547,9 @@ serve(async (req: Request) => {
         const inputHash = await sha256Hex(await canonicalJson({ input: inputPayload, context: loadedContext }));
         const outputHash = await sha256Hex(await canonicalJson(result));
         const snapshotId = crypto.randomUUID();
+        const shocksRecord = (shocks as Record<string, unknown> | undefined) ?? {};
+        const scenarioId = typeof shocksRecord.id === 'string' ? shocksRecord.id : null;
+        const scenarioSource = typeof shocksRecord.source === 'string' ? shocksRecord.source : null;
         const { error: snapErr } = await supabase.from('pricing_snapshots').insert({
           id: snapshotId,
           entity_id: entityId,
@@ -560,6 +563,8 @@ serve(async (req: Request) => {
           output: result,
           input_hash: inputHash,
           output_hash: outputHash,
+          scenario_id: scenarioId,
+          scenario_source: scenarioSource,
         });
         if (snapErr) {
           await supabase.from('metrics').insert({
@@ -619,6 +624,9 @@ serve(async (req: Request) => {
       const dealId = typeof (deal as Record<string, unknown>).id === 'string' && UUID_RE.test(String((deal as Record<string, unknown>).id))
         ? String((deal as Record<string, unknown>).id)
         : null;
+      const shocksRecord = (shocks as Record<string, unknown> | undefined) ?? {};
+      const scenarioId = typeof shocksRecord.id === 'string' ? shocksRecord.id : null;
+      const scenarioSource = typeof shocksRecord.source === 'string' ? shocksRecord.source : null;
       const { error: snapErr } = await supabase.from('pricing_snapshots').insert({
         id: snapshotId,
         entity_id: entityId,
@@ -632,6 +640,8 @@ serve(async (req: Request) => {
         output: result,
         input_hash: inputHash,
         output_hash: outputHash,
+        scenario_id: scenarioId,
+        scenario_source: scenarioSource,
       });
       if (snapErr) {
         await supabase.from('metrics').insert({
