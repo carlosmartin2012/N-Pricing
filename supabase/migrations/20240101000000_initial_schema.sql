@@ -23,7 +23,11 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE IF NOT EXISTS deals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status TEXT DEFAULT 'Pending' CHECK (status IN ('Booked', 'Pending', 'Rejected', 'Review')),
-    client_id UUID,
+    -- client_id references clients.id which is TEXT (see #56). Historical
+    -- typo had this as UUID, which blocked integration tests that insert
+    -- human-readable client IDs like 'CLIENT-1'. Inline server/migrate.ts
+    -- schema has always declared this as TEXT; this line now matches.
+    client_id TEXT,
     client_type TEXT,
     business_unit TEXT,
     funding_business_unit TEXT,
