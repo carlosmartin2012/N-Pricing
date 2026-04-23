@@ -4,7 +4,7 @@
 > Última actualización: 2026-04-23 (Ola 6 completa en `main` — A + B + C merged).
 > **Lectura obligatoria antes de tocar código:** [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md)
 > (hallazgos verificados, falsos positivos descartados, propuesta de evolución en 3 olas).
-> **Ola 6 completa (16 PRs merged, `#42–#57`):** estado por bloque en
+> **Ola 6 completa (22 PRs merged, `#42–#63`):** estado por bloque en
 > [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md);
 > resumen ejecutivo y follow-ups en
 > [`docs/roadmap-execution-summary.md`](docs/roadmap-execution-summary.md).
@@ -38,7 +38,7 @@ PWA con soporte offline. **Multi-tenant** vía RLS Postgres.
 | Backend | Express + pg.Pool sobre Postgres (Supabase para client/Edge) |
 | Edge Functions | Deno (Supabase Edge) — pricing, realize-raroc, elasticity-recalibrate |
 | Auth | JWT propio HMAC + Google SSO real (`GoogleSsoProvider`) |
-| Testing | Vitest 4 (~1.0k tests, 80 archivos) + Playwright 1.59 (20 specs) |
+| Testing | Vitest 4 (~1.37k tests, ~85 archivos) + Playwright 1.59 (20 specs) |
 | Storybook | Storybook 8.6 (React Vite) |
 | IA | Google Generative AI (@google/genai) |
 | Charts | Recharts 3.7 |
@@ -55,7 +55,7 @@ npm run build            # Build producción (PWA incluido)
 npm run lint             # ESLint
 npm run typecheck        # tsc --noEmit
 npm run typecheck:edge   # Build + deno check de Edge Functions
-npm run test             # Vitest (~1.0k tests, 80 archivos)
+npm run test             # Vitest (~1.37k tests, ~85 archivos)
 npm run test:e2e         # Playwright (20 specs)
 npm run verify           # lint + typecheck + edge + sync + data + security + test + build + bundle
 npm run verify:full      # verify + test:e2e
@@ -207,11 +207,11 @@ utils/
     driftDetector.ts                # NUEVO — Phase 3
     index.ts
   supabase/                         # Servicios especializados (preexistente)
-  __tests__/                        # ~78 archivos · ~967 tests + 5 integration
+  __tests__/                        # ~85 archivos · ~1 373 tests + 17 integration opt-in
 
 supabase/
   schema.sql (LEGACY — DO NOT EXECUTE) schema_v2.sql fix_rls_realtime.sql
-  migrations/                       # 38 migraciones secuenciales (cronológicas)
+  migrations/                       # 40 migraciones secuenciales (cronológicas)
   functions/
     pricing/                        # +tenancy + snapshot write + scoping (Phase 0)
     realize-raroc/                  # +entity_id query param (Phase 0)
@@ -241,7 +241,7 @@ docs/                               # Doc operativa (ver índice abajo)
   integral-review-2026-04-18.md     # Hallazgos + 3 olas de evolución
   ola-6-tenancy-strict-stress-pricing.md   # Siguiente ola en marcha
   pivot/ superpowers/               # Material exploratorio
-  runbooks/                         # 12 plantillas operativas
+  runbooks/                         # 13 plantillas operativas
     README.md tenancy-violation.md tenancy-strict-flip.md
     pricing-latency.md snapshot-write-failure.md mock-fallback.md
     campaign-volume-exhausted.md adapter-down.md
