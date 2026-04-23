@@ -9,7 +9,6 @@ import { Login } from './components/ui/Login';
 import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
-import { CommandPalette } from './components/ui/CommandPalette';
 import { SkipNav } from './components/ui/SkipNav';
 import AppLayout from './components/ui/AppLayout';
 import { PricingStateProvider } from './contexts/PricingStateContext';
@@ -58,6 +57,13 @@ const ModelInventoryView = React.lazy(() => import('./components/Governance/Mode
 const DossiersView = React.lazy(() => import('./components/Governance/DossiersView'));
 const SnapshotReplayView = React.lazy(() => import('./components/Governance/SnapshotReplayView'));
 const StressPricingView = React.lazy(() => import('./components/StressPricing/StressPricingView'));
+// CommandPalette is only rendered on demand (⌘K). Lazy-loading it pulls
+// ~12 KB of source + lucide-react icon barrel out of the initial `index`
+// chunk — cheap win toward the 520 KB budget. The button that opens it
+// only triggers the import when the user first presses ⌘K.
+const CommandPalette = React.lazy(() =>
+  import('./components/ui/CommandPalette').then((m) => ({ default: m.CommandPalette })),
+);
 const CustomerDrawer = React.lazy(() => import('./components/Customer360/CustomerDrawer'));
 const UserConfigModal = React.lazy(() =>
   import('./components/ui/UserConfigModal').then((module) => ({
@@ -380,7 +386,9 @@ const AppContent: React.FC = () => {
           <WalkthroughOverlay language={ui.language} />
         </Suspense>
 
-        <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
+        <Suspense fallback={null}>
+          <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
+        </Suspense>
 
         <Suspense fallback={null}>
           <CustomerDrawer />
