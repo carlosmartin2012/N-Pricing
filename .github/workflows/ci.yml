@@ -110,6 +110,25 @@ jobs:
           echo "Postgres did not become ready" >&2
           exit 1
 
+      - name: Bootstrap Supabase-specific objects (CI only)
+        # supabase/migrations/20240101000000_initial_schema.sql extends the
+        # `supabase_realtime` publication that Supabase provisions on hosted
+        # projects. A raw postgres:16 container has no such publication, so
+        # we create an empty one up front. The subsequent ALTER PUBLICATION
+        # ADD TABLE statements in the migrations then attach tables to it
+        # without changing any migration file. Idempotent via IF NOT EXISTS.
+        # No GitHub event data is used — only the DB URL from env above.
+        run: |
+          psql "$INTEGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+              CREATE PUBLICATION supabase_realtime;
+            END IF;
+          END
+          $$;
+          SQL
+
       - name: Apply migrations in order
         run: |
           for f in $(ls supabase/migrations/*.sql | sort); do
