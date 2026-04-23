@@ -21,12 +21,15 @@ DROP TABLE IF EXISTS users CASCADE;
 
 -- 1. DEALS TABLE (Pricing Blotter)
 CREATE TABLE IF NOT EXISTS deals (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    -- deals.id is TEXT, matching the reality that production uses
+    -- human-readable deal IDs ('TRD-HYPER-001', 'itest-deal-a') and
+    -- the inline server/migrate.ts schema has always declared this as
+    -- TEXT. Historical UUID + gen_random_uuid() default was a bug that
+    -- never actually ran anywhere — CREATE TABLE IF NOT EXISTS was
+    -- a no-op on every existing env. Every downstream FK (8 tables,
+    -- 12 refs) must also use TEXT for deal_id — see PRs #55/#56/#57.
+    id TEXT PRIMARY KEY,
     status TEXT DEFAULT 'Pending' CHECK (status IN ('Booked', 'Pending', 'Rejected', 'Review')),
-    -- client_id references clients.id which is TEXT (see #56). Historical
-    -- typo had this as UUID, which blocked integration tests that insert
-    -- human-readable client IDs like 'CLIENT-1'. Inline server/migrate.ts
-    -- schema has always declared this as TEXT; this line now matches.
     client_id TEXT,
     client_type TEXT,
     business_unit TEXT,
@@ -125,7 +128,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- 7. PRICING RESULTS TABLE
 CREATE TABLE IF NOT EXISTS pricing_results (
     id BIGSERIAL PRIMARY KEY,
-    deal_id UUID NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
+    deal_id TEXT NOT NULL REFERENCES deals(id) ON DELETE CASCADE,
     version INTEGER DEFAULT 1,
     base_rate NUMERIC,
     liquidity_spread NUMERIC,

@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS deal_comments (
   id SERIAL PRIMARY KEY,
-  deal_id UUID NOT NULL,
+  deal_id TEXT NOT NULL,
   user_email TEXT NOT NULL,
   user_name TEXT,
   action TEXT NOT NULL,         -- 'COMMENT', 'APPROVE', 'REJECT', 'SUBMIT', 'REWORK'
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   type TEXT NOT NULL,           -- 'APPROVAL_REQUEST', 'APPROVED', 'REJECTED', 'COMMENT'
   title TEXT NOT NULL,
   message TEXT,
-  deal_id UUID,
+  deal_id TEXT,
   is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );

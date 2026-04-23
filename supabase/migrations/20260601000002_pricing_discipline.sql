@@ -39,7 +39,7 @@ COMMENT ON TABLE tolerance_bands IS
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS deal_variance_snapshots (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  deal_id UUID NOT NULL,
+  deal_id TEXT NOT NULL,
   snapshot_id UUID NOT NULL REFERENCES methodology_snapshots(id),
   cohort JSONB NOT NULL,
   target_ftp NUMERIC(10,6),
@@ -76,7 +76,7 @@ COMMENT ON TABLE deal_variance_snapshots IS
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pricing_exceptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  deal_id UUID NOT NULL,
+  deal_id TEXT NOT NULL,
   reason_code TEXT NOT NULL,
   reason_detail TEXT NOT NULL,
   requested_by UUID NOT NULL,

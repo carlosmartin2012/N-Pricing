@@ -9,7 +9,7 @@
 -- current curves + any ECL updates vs. origination assumptions.
 
 CREATE TABLE IF NOT EXISTS deal_realizations (
-  deal_id UUID NOT NULL,
+  deal_id TEXT NOT NULL,  -- matches deals.id TEXT
   snapshot_date DATE NOT NULL,
   realized_ftp_rate NUMERIC,
   realized_margin NUMERIC,
