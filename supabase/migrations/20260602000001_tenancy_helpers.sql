@@ -14,14 +14,14 @@ RETURNS UUID
 LANGUAGE plpgsql STABLE SECURITY DEFINER
 AS $$
 DECLARE
-  raw    TEXT;
-  strict TEXT;
+  raw       TEXT;
+  is_strict TEXT;
 BEGIN
-  raw    := current_setting('app.current_entity_id', true);
-  strict := coalesce(current_setting('app.tenancy_strict', true), 'off');
+  raw       := current_setting('app.current_entity_id', true);
+  is_strict := coalesce(current_setting('app.tenancy_strict', true), 'off');
 
   IF raw IS NULL OR raw = '' THEN
-    IF strict = 'on' THEN
+    IF is_strict = 'on' THEN
       RAISE EXCEPTION 'tenancy_not_set'
         USING ERRCODE = '42501',
               HINT = 'Server must set app.current_entity_id before running queries.';
@@ -32,7 +32,7 @@ BEGIN
   RETURN raw::UUID;
 EXCEPTION
   WHEN invalid_text_representation THEN
-    IF strict = 'on' THEN
+    IF is_strict = 'on' THEN
       RAISE EXCEPTION 'tenancy_invalid_uuid' USING ERRCODE = '42501';
     END IF;
     RETURN '00000000-0000-0000-0000-000000000010'::UUID;
