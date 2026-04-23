@@ -133,6 +133,56 @@ paths:
                   engineVersionNow:     { type: string }
                   diff:                 { type: array }
 
+  /snapshots/verify-chain:
+    get:
+      tags: [snapshots]
+      summary: Verify the snapshot hash chain for the caller's entity
+      description: |
+        Admin-only. Walks pricing_snapshots for the caller's entity
+        (oldest→newest) in an optional date window and checks that each
+        non-first row's prev_output_hash matches the previous row's
+        output_hash. Detects tampering of historical snapshots as
+        valid=false with brokenAt pointing at the first mismatch.
+
+        Concurrency invariant: the partial UNIQUE index
+        (entity_id, prev_output_hash) WHERE prev_output_hash IS NOT NULL
+        prevents two concurrent pricing calls from forking the chain
+        by claiming the same predecessor. The Edge writer retries on
+        conflict 23505 with exponential backoff (10/40/160ms, 3 retries).
+
+        Genesis semantics: the first snapshot per tenant has
+        prev_output_hash = NULL. When the caller passes a partial window,
+        the first row in the result is accepted (its prev references a
+        hash outside the window — that's expected, not a break).
+      operationId: verifySnapshotChain
+      parameters:
+        - { in: query, name: from, required: false, schema: { type: string, format: date-time },
+            description: "ISO-8601 UTC lower bound (inclusive)" }
+        - { in: query, name: to,   required: false, schema: { type: string, format: date-time },
+            description: "ISO-8601 UTC upper bound (inclusive)" }
+      responses:
+        '200':
+          description: Chain verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entityId: { type: string, format: uuid }
+                  from:     { type: string, nullable: true }
+                  to:       { type: string, nullable: true }
+                  count:    { type: integer, description: "number of snapshots in the window" }
+                  valid:    { type: boolean }
+                  checked:  { type: integer, description: "number of links actually compared" }
+                  brokenAt:
+                    type: object
+                    nullable: true
+                    properties:
+                      snapshotId:   { type: string, format: uuid }
+                      expectedPrev: { type: string }
+                      actualPrev:   { type: string, nullable: true }
+        '403': { description: "Admin role required" }
+
   /customer360/clients/{clientId}:
     get:
       tags: [customer360]
@@ -289,6 +339,47 @@ paths:
       operationId: getSLOSummary
       parameters:
         - { in: query, name: window, required: false, schema: { type: string, enum: [1h, 24h, 7d, 30d], default: 1h } }
+
+  /observability/tenancy-violations:
+    get:
+      tags: [observability]
+      summary: Tenancy violations canary (window + top-endpoints)
+      description: |
+        Returns the total and top-10 (endpoint, error_code) breakdown of
+        tenancy_violations for the caller's entity over the requested
+        window (default 60 min, clamped to [1, 1440]).
+
+        Feeds the SLOPanel widget "Tenancy violations · last 60m" used
+        during the 48h observation window before flipping
+        TENANCY_STRICT=on (see docs/runbooks/tenancy-strict-flip.md).
+
+        Same entity-scoping predicate as slo-summary: a tenant sees both
+        "I claimed the wrong entity" and "someone else claimed mine".
+      operationId: getTenancyViolations
+      parameters:
+        - { in: query, name: entity_id,       required: false, schema: { type: string, format: uuid } }
+        - { in: query, name: window_minutes,  required: false, schema: { type: integer, minimum: 1, maximum: 1440, default: 60 } }
+      responses:
+        '200':
+          description: Violation breakdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entityId:      { type: string, format: uuid }
+                  windowMinutes: { type: integer }
+                  since:         { type: string, format: date-time }
+                  total:         { type: integer, description: "total violations in the window" }
+                  topEndpoints:
+                    type: array
+                    maxItems: 10
+                    items:
+                      type: object
+                      properties:
+                        endpoint:  { type: string }
+                        errorCode: { type: string }
+                        count:     { type: integer }
 
   /metering/usage:
     get:
