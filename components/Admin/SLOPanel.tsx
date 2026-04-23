@@ -1,8 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Gauge, ShieldCheck, ShieldAlert, AlertOctagon, RefreshCw } from 'lucide-react';
+import { Gauge, ShieldCheck, ShieldAlert, AlertOctagon, RefreshCw, Lock } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
 import * as observability from '../../api/observability';
-import type { SLOSummaryResponse, SLOStatus } from '../../api/observability';
+import type {
+  SLOSummaryResponse,
+  SLOStatus,
+  TenancyViolationsResponse,
+} from '../../api/observability';
 import { createLogger } from '../../utils/logger';
 
 const log = createLogger('SLOPanel');
@@ -36,17 +40,23 @@ function formatTarget(name: string, target: number): string {
 const SLOPanel: React.FC = () => {
   const { activeEntity } = useEntity();
   const [summary, setSummary] = useState<SLOSummaryResponse | null>(null);
+  const [violations, setViolations] = useState<TenancyViolationsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const load = useCallback(async () => {
     if (!activeEntity) return;
     setIsLoading(true);
     try {
-      const next = await observability.getSLOSummary(activeEntity.id);
-      setSummary(next);
+      const [nextSummary, nextViolations] = await Promise.all([
+        observability.getSLOSummary(activeEntity.id),
+        observability.getTenancyViolations(activeEntity.id, 60),
+      ]);
+      setSummary(nextSummary);
+      setViolations(nextViolations);
     } catch (error) {
       log.warn('Failed to load SLO summary', { entity: activeEntity?.id, error: String(error) });
       setSummary(null);
+      setViolations(null);
     } finally {
       setIsLoading(false);
     }
@@ -134,6 +144,54 @@ const SLOPanel: React.FC = () => {
               </article>
             );
           })}
+        </div>
+      )}
+
+      {violations && (
+        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+          <header className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lock
+                className="h-4 w-4"
+                style={{ color: violations.total === 0 ? STATUS_COLOR.ok : STATUS_COLOR.breached }}
+              />
+              <h4 className="font-mono text-[11px] uppercase tracking-wider text-slate-300">
+                Tenancy violations · last {violations.windowMinutes}m
+              </h4>
+            </div>
+            <span
+              className="font-mono text-2xl font-semibold tabular-nums"
+              style={{ color: violations.total === 0 ? STATUS_COLOR.ok : STATUS_COLOR.breached }}
+              data-testid="tenancy-violations-total"
+            >
+              {violations.total}
+            </span>
+          </header>
+          {violations.total === 0 ? (
+            <p className="font-mono text-[10px] text-slate-500">
+              Clean window. Safe to hold TENANCY_STRICT flip observation.
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {violations.topEndpoints.map((row, idx) => (
+                <li
+                  key={`${row.endpoint}-${row.errorCode}-${idx}`}
+                  className="flex items-center justify-between rounded border border-white/5 bg-black/20 px-3 py-1.5 text-xs"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <code className="truncate font-mono text-slate-200">{row.endpoint}</code>
+                    <span
+                      className="rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-rose-300"
+                      style={{ background: 'rgba(244,63,94,0.08)' }}
+                    >
+                      {row.errorCode}
+                    </span>
+                  </div>
+                  <span className="font-mono tabular-nums text-slate-200">{row.count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
