@@ -111,12 +111,11 @@ jobs:
           exit 1
 
       - name: Bootstrap Supabase-specific objects (CI only)
-        # supabase/migrations/20240101000000_initial_schema.sql extends the
-        # `supabase_realtime` publication that Supabase provisions on hosted
-        # projects. A raw postgres:16 container has no such publication, so
-        # we create an empty one up front. The subsequent ALTER PUBLICATION
-        # ADD TABLE statements in the migrations then attach tables to it
-        # without changing any migration file. Idempotent via IF NOT EXISTS.
+        # Supabase-hosted Postgres provisions a few objects that our migrations
+        # take for granted: the `supabase_realtime` publication and the roles
+        # `anon` / `authenticated` / `service_role` used by GRANT statements.
+        # A raw postgres:16 container has none of them, so we create them up
+        # front before the migration loop. All statements are idempotent.
         # No GitHub event data is used — only the DB URL from env above.
         run: |
           psql "$INTEGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -124,6 +123,15 @@ jobs:
           BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
               CREATE PUBLICATION supabase_realtime;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+              CREATE ROLE anon NOLOGIN NOINHERIT;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+              CREATE ROLE authenticated NOLOGIN NOINHERIT;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+              CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS;
             END IF;
           END
           $$;
