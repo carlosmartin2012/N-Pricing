@@ -45,7 +45,64 @@ adapter `ok: true` automatically. No manual intervention needed unless
 you swapped to a fallback during the outage — in that case re-register
 the real adapter via the deployment config and restart the API server.
 
+## Stress Pricing path (Ola 6 B)
+
+The `/stress-pricing` view calls `MarketDataAdapter.fetchShockedCurve`
+per scenario. If the market-data adapter is down, symptoms are:
+
+- The 6-row EBA preset table still renders, but populated from the
+  in-memory curve shifted by the hardcoded `curveShiftBps` — no call
+  to the real feed happened.
+- The header chip reads `CURVE SHIFT · ON` (if flag is set) but the
+  curve underneath is the reference curve, not the bank's feed.
+- No observable error in the UI; the adapter failure is silent from
+  the user's perspective. Only the integrations/health endpoint
+  exposes the state.
+
+**Contain**:
+
+1. Verify which path was taken: check `pricing_snapshots.scenario_source`
+   for the last hour. `preset_eba_2018_02` + in-memory = fallback path.
+   `market_adapter` entries = real feed was reached.
+
+   ```sql
+   SELECT scenario_id, scenario_source, count(*)
+   FROM pricing_snapshots
+   WHERE entity_id = $1
+     AND created_at >= NOW() - INTERVAL '1 hour'
+     AND scenario_id IS NOT NULL
+   GROUP BY scenario_id, scenario_source
+   ORDER BY count DESC;
+   ```
+
+2. While the adapter is down, `/stress-pricing` is still useful as a
+   **qualitative** what-if (the EBA closed-form scenarios don't need
+   the bank's feed). Do **not** surface stress-pricing results as
+   regulatory figures during an adapter outage.
+
+3. The IRRBB disclaimer footer in the view already states explicitly
+   that this is price-testing, not regulatory ΔEVE/SOT. No extra user
+   messaging is required.
+
+**Resolve**: when the adapter comes back, scenarios with `source =
+'market_adapter'` start flowing again. No manual intervention.
+
+## Hash chain path (Ola 6 C)
+
+Adapter outages do not affect the hash chain — snapshots continue to
+be written and chained regardless of which curve source was used. The
+`scenario_source` column records which path the deal took, so audit can
+distinguish later.
+
+If you see `snapshot_write_failures_total > 0` during an adapter outage,
+the root cause is almost never the adapter — check DB contention first
+(see [`snapshot-write-failure.md`](./snapshot-write-failure.md)).
+
 ## Related
 
 - Code: `integrations/registry.ts`, `integrations/types.ts`
 - Stubs: `integrations/crm/salesforce.ts`, `integrations/marketData/bloomberg.ts`
+- Stress pricing: `components/StressPricing/StressPricingView.tsx`,
+  `utils/pricing/shockPresets.ts`, `supabase/functions/pricing/index.ts`
+  (Edge writer with chain + scenario metadata)
+- Related runbooks: `snapshot-write-failure.md`, `pricing-latency.md`

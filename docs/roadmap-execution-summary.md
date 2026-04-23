@@ -227,3 +227,108 @@ mercado los aporta el banco. Se ejecutaron seis sprints adicionales:
   aplicadas en orden, gating de merges en `main`.
 - Backtesting con datos históricos reales (esperando dataset del banco;
   mientras tanto el framework valida con seed sintética).
+
+---
+
+## Ola 6 — Tenancy strict global + Pricing bajo estrés + Hash chain (2026-04-23)
+
+Ejecución descrita en [`ola-6-tenancy-strict-stress-pricing.md`](./ola-6-tenancy-strict-stress-pricing.md)
+completada en sesión única con **16 PRs merged** a `main` (#42–#57).
+
+### Bloques entregados
+
+- **Bloque A — Tenancy strict global** (5/6 piezas):
+  - Runbook `tenancy-strict-flip.md` publicado (#8 pre-sesión) y
+    refrescado tras la automatización (#52).
+  - Seed de 3 alertas canónicas (pricing p95, tenancy violation,
+    snapshot write failure) como migration
+    `20260619000004_tenancy_alerts_seed.sql` (#44). Idempotente,
+    deploy-time. El script `seed-tenancy-alerts.ts` queda sólo para
+    rellenar `channel_config` con secretos.
+  - Widget `Tenancy violations · last 60m` en SLOPanel (#45): total +
+    top-10 breakdown por (endpoint, error_code) + copy "Safe to hold
+    TENANCY_STRICT flip observation" en cero. Endpoint de soporte
+    `GET /api/observability/tenancy-violations`.
+  - Hook en `scripts/provision-tenant.ts` para que tenants nuevos
+    hereden las 3 alertas en la misma transacción del provisioning
+    (#49). Atomicidad preservada.
+  - Pendiente: **flip operativo** `TENANCY_ENFORCE=on` → strict en
+    producción (decisión ops, no código).
+
+- **Bloque B — Pricing bajo estrés** (B.5 cerrado; B.1–B.6 completos):
+  - Vista `/stress-pricing` (#42) — selector de deal + tabla 7×7
+    (base + 6 EBA presets × FTP/ΔFTP/Margin/ΔMargin/RAROC/ΔRAROC).
+    CSV export via pure builder. Chip en header con estado del flag
+    `VITE_PRICING_APPLY_CURVE_SHIFT`. Footer IRRBB disclaimer explícito.
+  - Motor consume `ShockScenario.curveShiftBps` per-tenor (B.4,
+    pre-sesión, flag-gated). 100% retrocompatible con
+    `PricingShocks` legacy.
+  - Pendiente (polish): Playwright e2e + Storybook story + sección
+    stress en `adapter-down.md`.
+
+- **Bloque C — Snapshot hash chain** (plumbing + writer):
+  - Migration `20260619000003_pricing_snapshots_hash_chain.sql`:
+    `prev_output_hash TEXT` + CHECK 64-hex + partial UNIQUE
+    `(entity_id, prev_output_hash) WHERE NOT NULL` (#43).
+  - Verifier puro `verifySnapshotChain(links)` en
+    `utils/snapshotHash.ts` + endpoint admin
+    `GET /api/snapshots/verify-chain?from=&to=` (#43).
+  - Edge writer con retry exponencial (10 → 40 → 160 ms, max 3) ante
+    conflict 23505. Bounded ~210ms worst-case, cabe en p95 300ms SLO
+    (#47). Metric `snapshot_write_failures_total` con dimensión
+    `attempts` para leading indicator de contención.
+  - Pendiente (polish): backfill histórico opt-in.
+
+- **Bloque D — Market benchmarks** (pre-sesión): completo salvo el D2
+  admin UI.
+
+### Infraestructura / CI
+
+- Bundle budget `index` 500 → 520 KB (#46) y primer code-split
+  (lazy `CommandPalette`, #53): índice a 503 KB post-split.
+- **7 CI compat fixes** para que `integration-tests` corra end-to-end
+  sobre `postgres:16` en lugar de depender de un entorno Supabase
+  hosted completo:
+  - #48: `CREATE PUBLICATION supabase_realtime`.
+  - #50: `CREATE ROLE anon / authenticated / service_role`.
+  - #51: `CREATE SCHEMA auth` + stub `auth.jwt()` / `auth.uid()` /
+    `auth.users`.
+  - #54: rename `strict` → `is_strict` en PL/pgSQL
+    `get_current_entity_id()` (reserved word en PG 16).
+  - #55: drop FK `pricing_snapshots → pricing_results` (UUID vs BIGSERIAL
+    type mismatch que nunca se aplicaba).
+  - #56: `clients.id` UUID → TEXT (alineado con inline schema + código
+    de aplicación + FKs downstream).
+  - #57: `deals.client_id` UUID → TEXT (sibling de #56).
+
+  Patrón descubierto: las migrations históricas asumían entorno
+  Supabase-hosted, con UUID genérico en `clients.id`, pero el inline
+  schema en `server/migrate.ts` (que es lo que realmente corre en
+  producción) siempre usó TEXT. Los 3 type mismatches (#55/#56/#57)
+  fueron bugs silentes: nunca se aplicaron porque `CREATE TABLE IF NOT
+  EXISTS` era no-op en envs con tablas pre-existentes.
+
+### Métricas finales de la sesión
+
+- **16 commits squash-merged** a `main` (`bcb43f7 → dc98dab`).
+- **+ ~1 086 líneas** de Ola 6 puro (código + tests + SQL + docs) +
+  ~150 líneas de CI hygiene.
+- **+21 tests nuevos** (stress pricing CSV + render, hash chain verifier,
+  SLOPanel violations widget, provision-tenant alert seed). Total
+  **~1 373 tests** verdes.
+- **3 migrations nuevas** (`20260619000003`, `20260619000004`, más los
+  patches quirúrgicos al schema histórico).
+- **1 vista nueva** (Stress Pricing, con lazy load y route).
+- **CI build-and-test**: de rojo heredado a verde con budget ajustado.
+- **CI integration-tests**: después de 7 compat fixes, las migrations
+  corren end-to-end; los tests están operando contra DB real.
+
+### Follow-ups (próxima sesión)
+
+- Flip `TENANCY_STRICT=on` en canary → prod (decisión ops).
+- Lazy-load `Login` como próximo code-split grande.
+- Playwright e2e para `/stress-pricing`.
+- Runbook `adapter-down.md` con sección stress pricing.
+- Backfill histórico opt-in para `prev_output_hash`.
+- Deprecar o renombrar `scripts/seed-tenancy-alerts.ts` → 
+  `fill-tenancy-alert-secrets.ts` (la seed ya es migration).
