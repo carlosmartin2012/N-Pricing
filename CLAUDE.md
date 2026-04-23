@@ -121,7 +121,7 @@ scripts/
   provision-tenant.ts          # Phase 5, idempotente, < 60s SLO
   seed-demo-dataset.ts         # Demo catalogue — clientes + deals + Customer 360 + grid
   seed-clv-demo.ts             # Subset CLV Phase 6
-  seed-tenancy-alerts.ts       # Alert rules demo
+  fill-tenancy-alert-secrets.ts # Ops-time secrets filler for tenancy alert channel_config (Ola 6 A: rules themselves seeded by migration)
   check-bundle-size.ts
   check-seed-schema-sync.ts
   check-data-quality.ts
