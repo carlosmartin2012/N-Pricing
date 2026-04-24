@@ -5,7 +5,6 @@ import { Sparkles } from 'lucide-react';
 import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
 import { buildBottomNavItems, buildMainNavItems } from './appNavigation';
-import { Login } from './components/ui/Login';
 import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
@@ -63,6 +62,14 @@ const StressPricingView = React.lazy(() => import('./components/StressPricing/St
 // only triggers the import when the user first presses ⌘K.
 const CommandPalette = React.lazy(() =>
   import('./components/ui/CommandPalette').then((m) => ({ default: m.CommandPalette })),
+);
+// Login is only rendered on the unauthenticated path. Repeat users with a
+// valid JWT in localStorage never mount this tree, so there is no reason
+// to ship its 400-line source + Google SSO helpers + lucide icons in the
+// initial `index` chunk. The Suspense fallback below holds the NFQ dark
+// canvas for the sub-100ms chunk fetch so the first paint does not flash.
+const Login = React.lazy(() =>
+  import('./components/ui/Login').then((m) => ({ default: m.Login })),
 );
 const CustomerDrawer = React.lazy(() => import('./components/Customer360/CustomerDrawer'));
 const UserConfigModal = React.lazy(() =>
@@ -168,7 +175,18 @@ const AppContent: React.FC = () => {
   const bottomNavItems = useMemo(() => buildBottomNavItems(ui.t), [ui.t]);
 
   if (!isAuthenticated) {
-    return <Login onLogin={(email: string) => handleLogin(email, data.users)} language={ui.language} />;
+    return (
+      <Suspense
+        fallback={
+          <div
+            aria-hidden="true"
+            className="min-h-screen bg-[color:var(--nfq-bg-base,#0e0e0e)]"
+          />
+        }
+      >
+        <Login onLogin={(email: string) => handleLogin(email, data.users)} language={ui.language} />
+      </Suspense>
+    );
   }
 
   return (
