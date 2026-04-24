@@ -89,13 +89,14 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
     // Clean up test data. Order matters (FK).
     //
     // audit_log is deliberately append-only — the `prevent_audit_modification`
-    // trigger blocks UPDATE/DELETE. We skip cleanup there and tolerate the
-    // handful of 'user-a@test' / 'user-b@test' rows surviving between runs;
-    // the test DB is short-lived in CI and the rows are harmless.
+    // trigger blocks UPDATE/DELETE, and audit_log.entity_id has an FK to
+    // entities. That means we can neither delete the audit rows nor delete
+    // the seeded entities they reference. Both are left in place: entity
+    // INSERTs use ON CONFLICT DO NOTHING so reruns are idempotent, and the
+    // test DB is short-lived in CI.
     await pool.query('DELETE FROM deals WHERE id LIKE $1', ['itest-%']);
     await pool.query('DELETE FROM rules WHERE product = $1', ['ITEST']);
     await pool.query('DELETE FROM entity_users WHERE user_id IN ($1, $2)', ['user-a@test', 'user-b@test']);
-    await pool.query('DELETE FROM entities WHERE id IN ($1, $2)', [ENTITY_A, ENTITY_B]);
     await pool.end();
   });
 
