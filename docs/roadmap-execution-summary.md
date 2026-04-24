@@ -327,11 +327,25 @@ completada en sesión única con **16 PRs merged** a `main` (#42–#57).
 
 ### Follow-ups (próxima sesión)
 
-- Flip `TENANCY_STRICT=on` en canary → prod (decisión ops).
-- Lazy-load `Login` como próximo code-split grande.
-- Playwright e2e para `/stress-pricing`.
-- Runbook `adapter-down.md` con sección stress pricing.
-- Backfill histórico opt-in para `prev_output_hash`.
+- Flip `TENANCY_STRICT=on` en canary → prod (decisión ops, no código).
+- ~~Lazy-load `Login` como próximo code-split grande.~~ ✅ PR #66
+  (`index` 506.09 → 495.85 KB, −10.24 KB; nuevo chunk `Login-*.js` de
+  10.45 KB cargado sólo en el path unauth).
+- ~~Playwright e2e para `/stress-pricing`.~~ ✅ PR #67 (4 specs:
+  7×7 matrix, canary chip, IRRBB disclaimer, CSV download).
+- ~~Runbook `adapter-down.md` con sección stress pricing.~~ ✅ ya
+  entregado en PR #58 (sección "Stress Pricing path (Ola 6 B)" con
+  SQL de diagnóstico sobre `pricing_snapshots.scenario_source`).
+- ~~Backfill histórico opt-in para `prev_output_hash`.~~ ✅ PR #68
+  (`scripts/backfill-snapshot-hash-chain.ts`; idempotente, soporta
+  `--entity-id` y `--dry-run`, verifica con `verifySnapshotChain` al
+  finalizar; requiere rol DB con BYPASSRLS).
 - ~~Deprecar o renombrar `scripts/seed-tenancy-alerts.ts` →
   `fill-tenancy-alert-secrets.ts` (la seed ya es migration).~~ ✅
   Entregado en commit posterior.
+
+Bloqueados por input externo:
+
+- Implementación real `SalesforceCrmAdapter` / `BloombergMarketDataAdapter`
+  (esperando credenciales del banco ancla).
+- Backtesting con datos históricos reales (esperando dataset del banco).
