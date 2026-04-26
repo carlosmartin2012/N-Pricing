@@ -80,12 +80,12 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                                 <button
                                     key={id}
                                     onClick={() => setTheme(id)}
-                                    className={`rounded-2xl border p-4 text-left transition-all ${theme === id
+                                    className={`rounded-[var(--nfq-radius-card)] border p-4 text-left transition-all ${theme === id
                                         ? 'border-cyan-500/40 bg-cyan-500/10 shadow-[0_16px_28px_rgba(6,182,212,0.08)]'
                                         : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] hover:border-cyan-500/20'
                                         }`}
                                 >
-                                    <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${tone}`}>
+                                    <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-[var(--nfq-radius-card)] ${tone}`}>
                                         <Icon size={16} />
                                     </div>
                                     <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">{label}</div>
@@ -108,7 +108,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                                 <button
                                     key={lang}
                                     onClick={() => setLanguage(lang)}
-                                    className={`flex items-center justify-between rounded-2xl border p-4 transition-all ${language === lang
+                                    className={`flex items-center justify-between rounded-[var(--nfq-radius-card)] border p-4 transition-all ${language === lang
                                         ? 'border-cyan-500/40 bg-cyan-500/10 text-[color:var(--nfq-text-primary)]'
                                         : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] hover:border-cyan-500/20'
                                         }`}
@@ -130,7 +130,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                     </section>
 
                     {/* Contrast Note */}
-                    <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+                    <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
                         <p className="text-xs italic leading-relaxed text-[color:var(--nfq-text-muted)]">
                             {t.configNote}
                         </p>
@@ -138,7 +138,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-[color:var(--nfq-border-ghost)] p-6">
+                <div className="border-t border-[color:var(--nfq-border-ghost)] p-4">
                     <button
                         onClick={onClose}
                         className="nfq-button nfq-button-primary w-full justify-center text-sm"

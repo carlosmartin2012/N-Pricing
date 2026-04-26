@@ -130,7 +130,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+    <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
       <Panel
         title="Snapshot Factory"
         icon={<Archive className="h-4 w-4 text-cyan-400" />}
@@ -162,7 +162,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-white/[0.03] p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
                 Approval Lens
@@ -173,7 +173,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               <div className="mt-1 text-xs text-slate-400">Auto-approval threshold currently enforced.</div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-white/[0.03] p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
                 <Layers3 className="h-4 w-4 text-cyan-400" />
                 Scenario Definition
@@ -184,7 +184,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-white/[0.03] p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-amber-400" />
                 Shock Pack
@@ -233,7 +233,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
           {selectedSnapshot ? (
             <>
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-white/[0.03] p-4">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Exposure</div>
                   <div className="mt-2 text-xl font-semibold text-white">
                     {formatNominal(selectedSnapshot.totals.exposure)}
@@ -243,7 +243,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                     {formatNominal(delta.exposureDelta)}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-white/[0.03] p-4">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Average RAROC</div>
                   <div className="mt-2 text-xl font-semibold text-white">
                     {percentageFormatter.format(selectedSnapshot.totals.averageRaroc)}%
@@ -253,7 +253,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                     {percentageFormatter.format(delta.rarocDelta)}%
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-white/[0.03] p-4">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Average Client Rate</div>
                   <div className="mt-2 text-xl font-semibold text-white">
                     {percentageFormatter.format(selectedSnapshot.totals.averageFinalRate)}%
@@ -266,7 +266,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
 
               <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-black/20 p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-sm font-semibold text-white">Recent Snapshots</h4>
@@ -281,7 +281,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                         key={snapshot.id}
                         type="button"
                         onClick={() => setSelectedSnapshotId(snapshot.id)}
-                        className={`w-full rounded-2xl border p-4 text-left transition ${
+                        className={`w-full rounded-[var(--nfq-radius-card)] border p-4 text-left transition ${
                           snapshot.id === selectedSnapshot.id
                             ? 'border-cyan-500/40 bg-cyan-500/10'
                             : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
@@ -306,7 +306,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-black/20 p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-sm font-semibold text-white">Selected Snapshot Detail</h4>
@@ -326,7 +326,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                     {selectedSnapshot.results.slice(0, 8).map((result) => (
                       <div
                         key={`${selectedSnapshot.id}-${result.dealId}`}
-                        className="grid grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 text-sm"
+                        className="grid grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] gap-3 rounded-[var(--nfq-radius-card)] border border-white/5 bg-white/[0.02] px-3 py-2 text-sm"
                       >
                         <div>
                           <div className="truncate font-medium text-white">{result.dealId}</div>
@@ -356,7 +356,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
             </>
           ) : (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-sm text-slate-400">
+            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-white/10 bg-white/[0.02] p-4 text-sm text-slate-400">
               No portfolio snapshot yet. Create one to freeze a governed pricing state for reporting and committee.
             </div>
           )}

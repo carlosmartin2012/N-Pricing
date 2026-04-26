@@ -79,7 +79,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
   const attachedCount = attachments.length;
 
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6">
+    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <div className="mb-5">
         <h3 className="text-sm font-semibold text-slate-200">
@@ -145,7 +145,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
               </div>
 
               {/* Rate discount badge */}
-              <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--nfq-coral)]/10 text-[var(--nfq-coral)] shrink-0">
+              <span className="text-[10px] font-mono tracking-normal px-2 py-0.5 rounded bg-[var(--nfq-coral)]/10 text-[var(--nfq-coral)] shrink-0">
                 {`-${rule.rateDiscountBps}bp`}
               </span>
 
@@ -203,7 +203,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
 
       {/* Summary */}
       <div className="mt-5 flex items-center justify-between rounded-[8px] bg-[var(--nfq-bg-elevated)] px-4 py-3">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--nfq-text-muted)]">
+        <span className="text-[10px] font-mono tracking-normal text-[var(--nfq-text-muted)]">
           Total esperado
         </span>
         <span className="font-mono text-xs font-bold text-slate-100">

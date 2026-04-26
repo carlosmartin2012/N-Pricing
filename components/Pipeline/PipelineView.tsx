@@ -211,7 +211,7 @@ const PipelineView: React.FC = () => {
                 onClick={() => setStatus(s)}
                 aria-pressed={status === s}
                 data-testid={`pipeline-status-${s}`}
-                className={`rounded-md px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+                className={`rounded-md px-3 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                   status === s
                     ? 'bg-white/[0.08] text-white'
                     : 'text-slate-400 hover:text-slate-200'
@@ -306,7 +306,7 @@ const PipelineView: React.FC = () => {
       )}
 
       {!isLoading && sorted.length === 0 && (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-8 text-center text-xs text-slate-400">
+        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400">
           {t.clvNbaEmpty}
         </div>
       )}

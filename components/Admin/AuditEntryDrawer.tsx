@@ -35,7 +35,7 @@ export const AuditEntryDrawer: React.FC<Props> = ({ entry, isOpen, onClose }) =>
       {entry && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--nfq-text-muted)]">
                 Timestamp
               </div>
@@ -43,7 +43,7 @@ export const AuditEntryDrawer: React.FC<Props> = ({ entry, isOpen, onClose }) =>
                 {formatAuditTimestamp(entry.timestamp)}
               </div>
             </div>
-            <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--nfq-text-muted)]">
                 User
               </div>
@@ -54,7 +54,7 @@ export const AuditEntryDrawer: React.FC<Props> = ({ entry, isOpen, onClose }) =>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={getAuditBadgeVariant(entry.action)}>{entry.module}</Badge>
               <span className={`font-mono text-xs font-bold ${getAuditActionTextClass(entry.action)}`}>
@@ -66,11 +66,11 @@ export const AuditEntryDrawer: React.FC<Props> = ({ entry, isOpen, onClose }) =>
             </p>
           </div>
 
-          <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--nfq-text-muted)]">
               Payload
             </div>
-            <pre className="mt-3 overflow-auto rounded-xl bg-slate-950/70 p-4 text-xs leading-relaxed text-[color:var(--nfq-text-secondary)]">
+            <pre className="mt-3 overflow-auto rounded-[var(--nfq-radius-card)] bg-slate-950/70 p-4 text-xs leading-relaxed text-[color:var(--nfq-text-secondary)]">
               {formatAuditDetails(entry.details)}
             </pre>
           </div>

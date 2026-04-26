@@ -29,7 +29,7 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
     approvalMatrixDraft && JSON.stringify(approvalMatrixDraft) !== JSON.stringify(approvalMatrix);
 
   return (
-    <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 relative overflow-hidden">
+    <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-10">
         <ShieldCheck size={120} className="text-amber-500" />
       </div>

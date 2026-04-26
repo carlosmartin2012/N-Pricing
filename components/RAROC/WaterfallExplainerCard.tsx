@@ -139,14 +139,14 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
 
   if (empty) {
     return (
-      <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6">
+      <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
         <div className="mb-2 text-base font-semibold text-[color:var(--nfq-text-primary)]">
           Explicación del waterfall
         </div>
         <div className="text-xs text-[color:var(--nfq-text-secondary)]">
           Desglose componente a componente del cálculo FTP
         </div>
-        <div className="mt-6 rounded-[10px] bg-[var(--nfq-bg-elevated)]/50 p-6 text-center text-sm text-[color:var(--nfq-text-muted)]">
+        <div className="mt-6 rounded-[10px] bg-[var(--nfq-bg-elevated)]/50 p-4 text-center text-sm text-[color:var(--nfq-text-muted)]">
           Calcula un precio para ver el waterfall
         </div>
       </div>
@@ -154,7 +154,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
   }
 
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6">
+    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>

@@ -32,7 +32,7 @@ export function CategoryBadge({ category }: { category: ModelCategory }) {
   const config = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.OTHER;
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider ${config.bg} ${config.text}`}
+      className={`inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[11px] tracking-normal ${config.bg} ${config.text}`}
     >
       {config.label}
     </span>
@@ -43,7 +43,7 @@ export function StatusBadge({ status }: { status: ModelStatus }) {
   const config = STATUS_COLORS[status] ?? STATUS_COLORS.DRAFT;
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider ${config.bg} ${config.text}`}
+      className={`inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[11px] tracking-normal ${config.bg} ${config.text}`}
     >
       {STATUS_LABELS[status]}
     </span>

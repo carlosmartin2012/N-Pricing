@@ -215,7 +215,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
     <div className="space-y-6">
       {/* ── KPI Row ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-1">Avg Technical Price</div>
           <div className="font-mono text-2xl font-bold text-[color:var(--nfq-text-primary)]">
             {fmtPct(kpis.avgTechnical)}
@@ -225,7 +225,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-1">Avg Final Rate</div>
           <div className="font-mono text-2xl font-bold text-[color:var(--nfq-text-primary)]">
             {fmtPct(kpis.avgFinal)}
@@ -235,7 +235,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-1">Pricing Gap</div>
           <div className="font-mono text-2xl font-bold" style={{ color: gapColor }}>
             {kpis.pricingGap >= 0 ? '+' : ''}{fmtPct(kpis.pricingGap)}
@@ -245,7 +245,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-1">Deals Below Floor</div>
           <div className="font-mono text-2xl font-bold" style={{ color: belowFloorColor }}>
             {kpis.belowFloor}
@@ -257,7 +257,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
       </div>
 
       {/* ── Scatter: Technical vs Final ──────────────────────────────────── */}
-      <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+      <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
         <div className="nfq-label mb-3">Technical Price vs Final Rate</div>
         <div className="h-[340px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -349,7 +349,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
 
       {/* ── Drift Over Time ──────────────────────────────────────────────── */}
       {monthlyDrift.length > 1 && (
-        <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-3">Pricing Drift Over Time</div>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">

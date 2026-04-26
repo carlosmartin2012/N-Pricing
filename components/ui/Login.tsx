@@ -182,7 +182,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
       <div className="relative z-10 grid min-h-screen lg:grid-cols-[1.12fr_0.88fr]">
         <section className="hidden min-h-screen flex-col justify-between px-10 py-10 lg:flex xl:px-14">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[color:rgba(var(--nfq-accent-rgb),0.12)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)]">
+            <div className="flex h-11 w-14 items-center justify-center rounded-[18px] bg-[color:rgba(var(--nfq-accent-rgb),0.12)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)]">
               <Logo className="h-8 w-8" />
             </div>
             <div>
@@ -236,7 +236,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
             </div>
           </div>
 
-          <div className="grid max-w-3xl grid-cols-3 gap-6 text-sm text-[color:var(--nfq-text-secondary)]">
+          <div className="grid max-w-3xl grid-cols-3 gap-4 text-sm text-[color:var(--nfq-text-secondary)]">
             <div>
               <div className="nfq-label">Cliente y canal</div>
               <p className="mt-3 leading-6">Customer 360 relacional con cross-bonus por posiciones reales, targets top-down, campañas con state machine y channel API con rate-limit + token bucket por canal.</p>

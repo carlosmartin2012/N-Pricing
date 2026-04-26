@@ -179,7 +179,7 @@ const CampaignsView: React.FC = () => {
       )}
 
       {list.length === 0 && !loading ? (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-8 text-center text-xs text-slate-400">
+        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400">
           {t.commercialCampaignsEmpty}
         </div>
       ) : (

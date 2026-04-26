@@ -35,7 +35,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
 
   if (!latest && !loading) {
     return (
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6">
+      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -59,7 +59,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
   }
 
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-5">
+    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-5">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-emerald-400" />

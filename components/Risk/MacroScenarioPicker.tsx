@@ -50,7 +50,7 @@ export const MacroScenarioPicker: React.FC<MacroScenarioPickerProps> = ({
   const scenarios = Object.values(MACRO_SCENARIOS);
 
   return (
-    <section className="rounded-[14px] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-6">
+    <section className="rounded-[14px] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
       <header className="mb-5">
         <h2 className="text-base font-semibold text-[var(--nfq-text-primary)]">
           Escenarios de stress EBA

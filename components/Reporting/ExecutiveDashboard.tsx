@@ -74,7 +74,7 @@ const ExecutiveDashboard: React.FC<Props> = ({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="nfq-kpi-card">
           <h4 className="nfq-kpi-label mb-4">Volume by Business Unit</h4>
           <div className="space-y-3">

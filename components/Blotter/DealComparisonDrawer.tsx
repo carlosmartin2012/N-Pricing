@@ -90,12 +90,12 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
         <div className="space-y-6">
           {/* Deal headers */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-xs font-semibold uppercase tracking-wider text-[var(--nfq-text-muted)]">Metric</div>
-            <div className="rounded-xl bg-[var(--nfq-bg-elevated)] p-3 text-center">
+            <div className="text-xs font-semibold tracking-normal text-[var(--nfq-text-muted)]">Metric</div>
+            <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3 text-center">
               <div className="font-mono text-xs font-bold text-[var(--nfq-accent)]">{dealA.id || 'Deal A'}</div>
               <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">{dealA.clientId} · {dealA.productType}</div>
             </div>
-            <div className="rounded-xl bg-[var(--nfq-bg-elevated)] p-3 text-center">
+            <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3 text-center">
               <div className="font-mono text-xs font-bold text-violet-400">{dealB.id || 'Deal B'}</div>
               <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">{dealB.clientId} · {dealB.productType}</div>
             </div>
@@ -103,8 +103,8 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
 
           {/* Deal parameters diff */}
           <div>
-            <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-faint)]">Parameters</h3>
-            <div className="rounded-xl border border-[var(--nfq-border-ghost)] overflow-hidden">
+            <h3 className="mb-2 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">Parameters</h3>
+            <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] overflow-hidden">
               <table className="w-full text-xs">
                 <tbody>
                   {[
@@ -129,8 +129,8 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
 
           {/* FTP Results diff */}
           <div>
-            <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-faint)]">FTP Decomposition</h3>
-            <div className="rounded-xl border border-[var(--nfq-border-ghost)] overflow-hidden">
+            <h3 className="mb-2 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">FTP Decomposition</h3>
+            <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] overflow-hidden">
               <table className="w-full text-xs">
                 <tbody>
                   {results.diff.map((row) => (

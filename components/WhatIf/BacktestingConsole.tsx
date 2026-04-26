@@ -285,7 +285,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
         {/* --- P&L comparison cards --- */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Simulated P&L
             </div>
             <div className="mt-1 text-lg font-mono font-bold text-[color:var(--nfq-text-primary)]">
@@ -293,7 +293,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
             </div>
           </div>
           <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Actual P&L
             </div>
             <div className="mt-1 text-lg font-mono font-bold text-[color:var(--nfq-text-primary)]">
@@ -301,7 +301,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
             </div>
           </div>
           <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               P&L Delta
             </div>
             <div className={`mt-1 text-lg font-mono font-bold ${pnlDeltaColor}`}>
@@ -313,7 +313,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
         {/* RAROC summary */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Simulated RAROC
             </div>
             <div className="mt-1 text-lg font-mono font-bold text-[color:var(--nfq-text-primary)]">
@@ -321,7 +321,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
             </div>
           </div>
           <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Actual RAROC
             </div>
             <div className="mt-1 text-lg font-mono font-bold text-[color:var(--nfq-text-primary)]">
@@ -329,7 +329,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
             </div>
           </div>
           <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               RAROC Delta
             </div>
             <div className={`mt-1 text-lg font-mono font-bold ${rarocDeltaColor}`}>
@@ -341,7 +341,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
         {/* --- Period breakdown chart --- */}
         {result.periodBreakdown.length > 0 && (
           <div>
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Period Breakdown
             </h4>
             <div className="h-56 w-full">
@@ -377,7 +377,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
         {/* --- Cohort breakdown table --- */}
         {result.cohortBreakdown.length > 0 && (
           <div>
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Cohort Breakdown
             </h4>
             <div className="max-h-64 overflow-auto rounded-[16px] border border-white/5">

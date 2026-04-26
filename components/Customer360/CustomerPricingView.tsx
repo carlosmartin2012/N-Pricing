@@ -79,7 +79,7 @@ const CustomerPricingView: React.FC = () => {
         </a>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
         <aside className="space-y-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
@@ -130,7 +130,7 @@ const CustomerPricingView: React.FC = () => {
                       key={id}
                       type="button"
                       onClick={() => setActiveTab(id)}
-                      className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider transition-colors ${
+                      className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[11px] font-mono tracking-normal transition-colors ${
                         isActive
                           ? 'bg-white/[0.08] text-white'
                           : 'text-slate-400 hover:text-slate-200'
@@ -149,7 +149,7 @@ const CustomerPricingView: React.FC = () => {
               {activeTab === 'nba'      && <NbaRecommendationCard clientId={selectedId} />}
             </>
           ) : (
-            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 text-center text-xs text-slate-400">
+            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400">
               Select a client to see their relationship.
             </div>
           )}

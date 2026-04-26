@@ -231,7 +231,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
                     {isDone ? <CheckCircle2 size={14} /> : <Icon size={14} />}
                   </div>
                   <span
-                    className={`hidden text-[9px] font-mono uppercase tracking-widest sm:block ${
+                    className={`hidden text-[9px] font-mono tracking-normal sm:block ${
                       isActive
                         ? 'text-amber-400'
                         : isDone

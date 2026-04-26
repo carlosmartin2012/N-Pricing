@@ -229,7 +229,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
           </div>
           <div className="custom-scrollbar max-h-[150px] overflow-auto xl:max-h-none xl:flex-1">
             {snapshotKeys.length === 0 ? (
-              <div className="p-8 text-center text-[10px] font-bold uppercase opacity-30">No snapshots</div>
+              <div className="p-4 text-center text-[10px] font-bold uppercase opacity-30">No snapshots</div>
             ) : (
               snapshotKeys.map((key) => {
                 const date = getCurveDateFromKey(key);

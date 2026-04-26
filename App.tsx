@@ -359,7 +359,7 @@ const AppContent: React.FC = () => {
         <button
           onClick={() => ui.setIsAiOpen(true)}
           aria-label="Open AI assistant"
-          className={`fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white transition-transform duration-200 hover:scale-105 ${ui.isAiOpen ? 'scale-0' : 'scale-100'}`}
+          className={`fixed bottom-6 right-6 z-40 flex h-10 w-12 items-center justify-center rounded-full text-white transition-transform duration-200 hover:scale-105 ${ui.isAiOpen ? 'scale-0' : 'scale-100'}`}
           style={{
             background: 'var(--nfq-accent-gradient)',
             boxShadow: '0 20px 40px rgba(6, 182, 212, 0.22)',

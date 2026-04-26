@@ -63,7 +63,7 @@ const SnapshotReplayView: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-full flex-col gap-4 p-6">
+    <div className="flex h-full flex-col gap-4 p-4">
       {/* Header */}
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -89,7 +89,7 @@ const SnapshotReplayView: React.FC = () => {
           </div>
           <div className="flex-1 overflow-y-auto">
             {snapshots.length === 0 && !loading && (
-              <div className="p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">
+              <div className="p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
                 No snapshots recorded yet. Run a pricing calculation to generate one.
               </div>
             )}

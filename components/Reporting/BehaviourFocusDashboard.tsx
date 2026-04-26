@@ -55,12 +55,12 @@ const buildModelData = (model: BehaviouralModel) => (
 );
 
 const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
-  <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
     {behaviouralModels.map(model => {
       const data = buildModelData(model);
 
       return (
-        <div key={model.id} className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#0f172a]/40 p-6">
+        <div key={model.id} className="flex flex-col gap-4 rounded-[var(--nfq-radius-card)] border border-white/10 bg-[#0f172a]/40 p-4">
           <div className="flex items-start justify-between">
             <div>
               <h4 className="text-sm font-bold uppercase text-white">{model.name}</h4>

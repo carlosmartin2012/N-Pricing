@@ -97,7 +97,7 @@ export const InverseOptimizerPanel: React.FC<InverseOptimizerPanelProps> = ({
     >
       {/* Header */}
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)]">
+        <div className="flex h-7 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)]">
           <Target size={18} />
         </div>
         <div className="min-w-0 flex-1">

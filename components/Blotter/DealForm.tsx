@@ -363,7 +363,7 @@ const DealForm: React.FC<Props> = ({
 
       <div className="space-y-2">
         <h4 className="text-xs font-bold uppercase text-slate-400">{t.workflowStatus}</h4>
-        <div className={`rounded border p-3 text-center text-xs font-bold uppercase tracking-wider ${getStatusColor(selectedDeal.status || 'Draft')}`}>
+        <div className={`rounded border p-3 text-center text-xs font-medium ${getStatusColor(selectedDeal.status || 'Draft')}`}>
           {formatStatus(selectedDeal.status || 'Draft')}
         </div>
         <p className="text-[10px] text-slate-600">

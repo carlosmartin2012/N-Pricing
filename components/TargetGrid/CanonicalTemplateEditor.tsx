@@ -110,7 +110,7 @@ const CanonicalTemplateEditor: React.FC = () => {
       <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
         <div className="h-10 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-12 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
+          <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
         ))}
       </div>
     );
@@ -128,7 +128,7 @@ const CanonicalTemplateEditor: React.FC = () => {
         </div>
         <button
           onClick={handleNew}
-          className="nfq-button nfq-button-primary flex items-center gap-1.5 px-4 py-2 text-[10px] font-bold uppercase tracking-wider"
+          className="nfq-button nfq-button-primary flex items-center gap-1.5 px-4 py-2 text-[11px] font-medium"
         >
           <Plus size={12} />
           Add Template
@@ -366,14 +366,14 @@ const CanonicalTemplateEditor: React.FC = () => {
             <div className="flex items-center justify-end gap-3 bg-[var(--nfq-bg-elevated)] px-6 py-4 rounded-b-[22px]">
               <button
                 onClick={() => setEditingTemplate(null)}
-                className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
+                className="px-4 py-2 text-[11px] font-medium text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={!editingTemplate.product || !editingTemplate.segment}
-                className="nfq-button nfq-button-primary flex items-center gap-1.5 px-5 py-2 text-[10px] font-bold uppercase tracking-wider disabled:opacity-40"
+                className="nfq-button nfq-button-primary flex items-center gap-1.5 px-5 py-2 text-[11px] font-medium disabled:opacity-40"
               >
                 <Check size={12} />
                 {t.save ?? 'Save'}

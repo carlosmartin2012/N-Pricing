@@ -87,7 +87,7 @@ const ExPostRAROCDashboard: React.FC<Props> = ({ deals }) => {
     <div className="space-y-4">
       {/* Underpricing alert */}
       {underpriced.length > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-amber-500/20 bg-amber-500/5 px-4 py-3">
           <AlertTriangle size={16} className="text-amber-400 shrink-0" />
           <p className="text-xs text-amber-300">
             {underpriced.length} deal(s) show systematic underpricing (realized RAROC &gt; expected by 200+bp).
@@ -97,21 +97,21 @@ const ExPostRAROCDashboard: React.FC<Props> = ({ deals }) => {
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Deals Analyzed</div>
           <div className="font-mono text-2xl font-bold text-[var(--nfq-text-primary)] mt-2">{comparisons.length}</div>
         </div>
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Avg RAROC Delta</div>
           <div className={`font-mono text-2xl font-bold mt-2 ${avgDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {avgDelta >= 0 ? '+' : ''}{(avgDelta * 100).toFixed(0)}bp
           </div>
         </div>
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">RMSE</div>
           <div className="font-mono text-2xl font-bold text-amber-400 mt-2">{(rmse * 100).toFixed(0)}bp</div>
         </div>
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Accuracy</div>
           <div className="font-mono text-2xl font-bold text-[var(--nfq-accent)] mt-2">
             {((comparisons.filter((c) => Math.abs(c.rarocDelta) < 2).length / comparisons.length) * 100).toFixed(0)}%
@@ -121,10 +121,10 @@ const ExPostRAROCDashboard: React.FC<Props> = ({ deals }) => {
       </div>
 
       {/* Comparison table */}
-      <div className="rounded-2xl border border-[var(--nfq-border-ghost)] overflow-hidden">
+      <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] overflow-hidden">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[var(--nfq-bg-surface)] text-[10px] uppercase tracking-wider text-[var(--nfq-text-muted)]">
+            <tr className="bg-[var(--nfq-bg-surface)] text-[10px] tracking-normal text-[var(--nfq-text-muted)]">
               <th className="px-4 py-3 text-left font-medium">Deal</th>
               <th className="px-3 py-3 text-left font-medium">Product</th>
               <th className="px-3 py-3 text-right font-medium">Expected RAROC</th>

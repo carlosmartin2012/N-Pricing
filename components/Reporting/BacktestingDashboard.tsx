@@ -162,7 +162,7 @@ const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
   if (bookedDeals.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <ShieldCheck className="w-12 h-12 text-[color:var(--nfq-text-faint)] mb-4" />
+        <ShieldCheck className="w-12 h-10 text-[color:var(--nfq-text-faint)] mb-4" />
         <h3 className="text-sm font-bold text-[color:var(--nfq-text-secondary)] mb-2">{t.modelBacktest}</h3>
         <p className="text-xs text-[color:var(--nfq-text-muted)]">
           Book or approve deals to see model backtesting results.
@@ -280,7 +280,7 @@ const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
       </div>
 
       {/* 3. Scatter Chart: Predicted EL vs Actual Loss */}
-      <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+      <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
         <div className="nfq-label mb-3">Predicted EL vs Actual Loss (per deal)</div>
         <div className="h-[380px]">
           <ResponsiveContainer width="100%" height="100%">

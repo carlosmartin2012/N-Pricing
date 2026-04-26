@@ -122,7 +122,7 @@ const DiffCard: React.FC<{
       <div className="rounded-[16px] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Label</label>
+            <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">Label</label>
             <input
               className="nfq-input-field mt-1 w-full text-xs"
               value={label}
@@ -130,7 +130,7 @@ const DiffCard: React.FC<{
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Type</label>
+            <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">Type</label>
             <select
               className="nfq-select-field mt-1 w-full text-xs"
               value={changeType}
@@ -142,7 +142,7 @@ const DiffCard: React.FC<{
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Current Value</label>
+            <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">Current Value</label>
             <input
               className="nfq-input-field mt-1 w-full text-xs"
               value={currentVal}
@@ -150,7 +150,7 @@ const DiffCard: React.FC<{
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">Proposed Value</label>
+            <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">Proposed Value</label>
             <input
               className="nfq-input-field mt-1 w-full text-xs"
               value={proposedVal}
@@ -469,7 +469,7 @@ const WhatIfWorkspace: React.FC = () => {
 
               {/* Base snapshot */}
               <div className="rounded-[12px] bg-[var(--nfq-bg-elevated)] px-4 py-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+                <span className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                   Base Snapshot
                 </span>
                 <div className="mt-1 text-xs font-mono text-[color:var(--nfq-text-primary)]">
@@ -480,7 +480,7 @@ const WhatIfWorkspace: React.FC = () => {
               {/* Diff list */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+                  <span className="text-xs font-medium text-[color:var(--nfq-text-secondary)]">
                     Parameter Changes ({sandbox.diffs.length})
                   </span>
                   <Button

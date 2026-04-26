@@ -89,7 +89,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
   }, [selectedModel]);
 
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6">
+    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
@@ -101,7 +101,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
           </p>
         </div>
         <div className="hidden flex-col items-end gap-0.5 md:flex">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+          <p className="font-mono text-[10px] tracking-normal text-neutral-500">
             Modelos registrados
           </p>
           <p className="font-mono text-xl text-white">{models.length}</p>
@@ -145,7 +145,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
       <div className="overflow-x-auto rounded-[10px]">
         <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+            <tr className="font-mono text-[10px] tracking-normal text-neutral-500">
               <th className="px-3 py-2 font-normal">Model ID</th>
               <th className="px-3 py-2 font-normal">Nombre</th>
               <th className="px-3 py-2 font-normal">Categoría</th>
@@ -196,7 +196,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
                       {backtest ? (
                         <div className="flex items-center gap-1.5">
                           <TrafficLightDot light={backtest.trafficLight} />
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
+                          <span className="font-mono text-[10px] tracking-normal text-neutral-400">
                             {backtest.trafficLight}
                           </span>
                         </div>
@@ -208,7 +208,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => setSelectedId(model.id)}
-                        className="inline-flex h-7 items-center rounded-md bg-white/5 px-2.5 font-mono text-[10px] uppercase tracking-wider text-neutral-200 transition hover:bg-white/10"
+                        className="inline-flex h-7 items-center rounded-md bg-white/5 px-2.5 font-mono text-[10px] tracking-normal text-neutral-200 transition hover:bg-white/10"
                       >
                         Ver detalles
                       </button>
@@ -252,7 +252,7 @@ function FilterSelect({
     <div className="flex items-center gap-2">
       <label
         htmlFor={id}
-        className="font-mono text-[10px] uppercase tracking-wider text-neutral-500"
+        className="font-mono text-[10px] tracking-normal text-neutral-500"
       >
         {label}
       </label>
@@ -260,7 +260,7 @@ function FilterSelect({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-9 rounded-md border border-white/10 bg-[var(--nfq-bg-elevated)] px-3 font-mono text-xs text-neutral-200 focus:border-nfq-amber focus:outline-none"
+        className="h-7 rounded-md border border-white/10 bg-[var(--nfq-bg-elevated)] px-3 font-mono text-xs text-neutral-200 focus:border-nfq-amber focus:outline-none"
       >
         {children}
       </select>

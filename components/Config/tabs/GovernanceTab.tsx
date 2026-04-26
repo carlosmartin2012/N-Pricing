@@ -43,7 +43,7 @@ const GovernanceTab: React.FC<Props> = ({ approvalMatrix, setApprovalMatrix, use
   const requests = useMemo(() => sortRequests(data.methodologyChangeRequests), [data.methodologyChangeRequests]);
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
+    <div className="flex-1 p-4 overflow-auto">
       <div className="max-w-5xl mx-auto space-y-8">
         <ApprovalMatrixEditor
           approvalMatrix={approvalMatrix}

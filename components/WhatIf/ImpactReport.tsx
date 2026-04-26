@@ -96,7 +96,7 @@ const SummaryCard: React.FC<{
     <div className="absolute right-0 top-0 p-3 opacity-10 transition-opacity group-hover:opacity-20">
       {icon}
     </div>
-    <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+    <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
       {label}
     </div>
     <div className={`mt-1 text-lg font-mono font-bold ${tone}`}>{value}</div>
@@ -229,7 +229,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
         {/* --- Sensitivity bar chart --- */}
         {cohortBars.length > 0 && (
           <div>
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               FTP Delta by Cohort (bps)
             </h4>
             <div className="h-52 w-full">
@@ -257,7 +257,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
 
         {/* --- Portfolio impact --- */}
         <div>
-          <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+          <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
             Portfolio Impact
           </h4>
           <div className="overflow-hidden rounded-[16px] border border-white/5">
@@ -315,7 +315,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
         {/* --- Cell-by-cell impact table --- */}
         {cellImpacts.length > 0 && (
           <div>
-            <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Cell-by-Cell Impact ({cellImpacts.length})
             </h4>
             <div className="max-h-64 overflow-auto rounded-[16px] border border-white/5">

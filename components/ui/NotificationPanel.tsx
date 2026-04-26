@@ -62,7 +62,7 @@ export const NotificationPanel: React.FC<Props> = ({ isOpen, onClose }) => {
       ref={panelRef}
       role="dialog"
       aria-label="Notifications"
-      className="absolute right-0 top-full z-50 mt-2 w-[380px] rounded-2xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[0_20px_60px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-top-2 duration-200"
+      className="absolute right-0 top-full z-50 mt-2 w-[380px] rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[0_20px_60px_rgba(0,0,0,0.5)] animate-in fade-in slide-in-from-top-2 duration-200"
     >
       <div className="flex items-center justify-between border-b border-[var(--nfq-border-ghost)] px-4 py-3">
         <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export const NotificationPanel: React.FC<Props> = ({ isOpen, onClose }) => {
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[var(--nfq-text-muted)] transition-colors hover:bg-[var(--nfq-bg-elevated)] hover:text-[var(--nfq-text-secondary)]"
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-medium tracking-normal text-[var(--nfq-text-muted)] transition-colors hover:bg-[var(--nfq-bg-elevated)] hover:text-[var(--nfq-text-secondary)]"
             >
               <CheckCheck size={12} />
               Mark all
@@ -113,7 +113,7 @@ export const NotificationPanel: React.FC<Props> = ({ isOpen, onClose }) => {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${TYPE_COLORS[n.type]}`}>
+                    <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium ${TYPE_COLORS[n.type]}`}>
                       {TYPE_LABELS[n.type]}
                     </span>
                     <span className="font-mono text-[10px] text-[var(--nfq-text-faint)]">

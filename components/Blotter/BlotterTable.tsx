@@ -352,7 +352,7 @@ const BlotterTable: React.FC<Props> = ({
   if (deals.length === 0) {
     return (
       <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--nfq-bg-elevated)]">
+        <div className="flex h-16 w-16 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]">
           <FileText size={28} className="text-[var(--nfq-text-muted)] opacity-60" />
         </div>
         <div>

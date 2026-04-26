@@ -144,7 +144,7 @@ const DealInputPanel: React.FC<Props> = ({
           >
             <div className="flex items-center gap-2">
               <Settings size={14} />
-              <span className="font-bold uppercase tracking-wider">
+              <span className="font-medium">
                 {t.dealConfigAssumptions}
               </span>
             </div>

@@ -116,11 +116,11 @@ function saveLayout(layout: LayoutItem[]) {
 const WidgetCard: React.FC<{ def: WidgetDef; value: string; isLocked: boolean }> = ({ def, value, isLocked }) => {
   const Icon = def.icon;
   return (
-    <div className="flex h-full flex-col justify-between rounded-2xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex h-full flex-col justify-between rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon size={14} style={{ color: def.color }} />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-muted)]">
+          <span className="text-[10px] font-semibold tracking-normal text-[var(--nfq-text-muted)]">
             {def.title}
           </span>
         </div>
@@ -189,7 +189,7 @@ export const DashboardBuilder: React.FC = () => {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-faint)]">
+        <span className="text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">
           Custom Dashboard
         </span>
         <div className="flex items-center gap-2">

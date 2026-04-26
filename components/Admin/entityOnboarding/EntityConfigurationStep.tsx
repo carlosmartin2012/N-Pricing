@@ -21,7 +21,7 @@ export const EntityConfigurationStep: React.FC<Props> = ({ value, onChange }) =>
     </div>
 
     <div className="rounded border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] p-4">
-      <p className="mb-4 font-mono text-[10px] uppercase tracking-widest text-[color:var(--nfq-text-faint)]">
+      <p className="mb-4 font-mono text-[10px] tracking-normal text-[color:var(--nfq-text-faint)]">
         Approval Matrix
       </p>
       <div className="grid grid-cols-3 gap-4">

@@ -59,7 +59,7 @@ const SnapshotDiffView: React.FC<Props> = ({ snapshots }) => {
 
         <button
           onClick={() => setOnlySignificant((v) => !v)}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors ${
             onlySignificant
               ? 'bg-[var(--nfq-accent)]/20 text-[var(--nfq-accent)]'
               : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
@@ -69,7 +69,7 @@ const SnapshotDiffView: React.FC<Props> = ({ snapshots }) => {
           Significant only
         </button>
 
-        <span className="ml-auto text-[10px] font-mono uppercase tracking-widest text-[color:var(--nfq-text-muted)]">
+        <span className="ml-auto text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">
           {filtered.length} {filtered.length === 1 ? 'change' : 'changes'}
         </span>
       </div>
@@ -152,17 +152,17 @@ const SnapshotDiffView: React.FC<Props> = ({ snapshots }) => {
                   </td>
                   <td className="whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-center">
                     {d.isNew && (
-                      <span className="rounded-full bg-[var(--nfq-info)]/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--nfq-info)]">
+                      <span className="rounded-full bg-[var(--nfq-info)]/20 px-2 py-0.5 text-[9px] font-medium text-[var(--nfq-info)]">
                         New
                       </span>
                     )}
                     {d.isRemoved && (
-                      <span className="rounded-full bg-[var(--nfq-danger)]/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--nfq-danger)]">
+                      <span className="rounded-full bg-[var(--nfq-danger)]/20 px-2 py-0.5 text-[9px] font-medium text-[var(--nfq-danger)]">
                         Removed
                       </span>
                     )}
                     {!d.isNew && !d.isRemoved && d.isSignificant && (
-                      <span className="rounded-full bg-[var(--nfq-warning)]/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--nfq-warning)]">
+                      <span className="rounded-full bg-[var(--nfq-warning)]/20 px-2 py-0.5 text-[9px] font-medium text-[var(--nfq-warning)]">
                         Changed
                       </span>
                     )}

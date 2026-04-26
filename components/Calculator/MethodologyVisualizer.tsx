@@ -26,7 +26,7 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
             </div>
 
             {!hasDeal ? (
-               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center text-[color:var(--nfq-text-muted)]">
+               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 text-center text-[color:var(--nfq-text-muted)]">
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]">
                      <GitBranch size={24} className="text-[color:var(--nfq-text-faint)]" />
                   </div>

@@ -284,7 +284,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <button
             onClick={onLogout}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:rgba(var(--nfq-accent-rgb),0.14)] text-xs font-bold text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)] transition-transform hover:scale-[1.03]"
+            className="flex h-7 w-9 items-center justify-center rounded-full bg-[color:rgba(var(--nfq-accent-rgb),0.14)] text-xs font-bold text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)] transition-transform hover:scale-[1.03]"
             title="Logout"
           >
             {userInitials}

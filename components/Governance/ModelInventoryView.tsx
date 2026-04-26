@@ -180,7 +180,7 @@ const ModelInventoryView: React.FC = () => {
   }, [list]);
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4 p-4">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-[color:var(--nfq-text-primary)]">
@@ -218,7 +218,7 @@ const ModelInventoryView: React.FC = () => {
         ] as const).map(([label, value, color]) => (
           <div
             key={label}
-            className="rounded-xl border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4"
+            className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4"
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
               {label}
@@ -232,7 +232,7 @@ const ModelInventoryView: React.FC = () => {
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="grid gap-3 rounded-xl border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4 sm:grid-cols-3"
+          className="grid gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4 sm:grid-cols-3"
         >
           <label className="flex flex-col gap-1 text-xs">
             <span className="font-mono uppercase tracking-[0.12em] text-[color:var(--nfq-text-muted)]">Kind</span>
@@ -364,7 +364,7 @@ const ModelInventoryView: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-[color:var(--nfq-border-subtle)]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)]">
         <table className="min-w-full text-sm">
           <thead className="bg-[rgba(255,255,255,0.02)]">
             <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
@@ -383,7 +383,7 @@ const ModelInventoryView: React.FC = () => {
               <tr>
                 <td colSpan={8} className="px-3 py-12">
                   <div className="mx-auto flex max-w-md flex-col items-center text-center">
-                    <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--nfq-accent-rgb),0.1)] text-[color:var(--nfq-accent)]">
+                    <div className="mb-3 flex h-11 w-14 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[rgba(var(--nfq-accent-rgb),0.1)] text-[color:var(--nfq-accent)]">
                       <Inbox size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
@@ -418,7 +418,7 @@ const ModelInventoryView: React.FC = () => {
                   <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{m.version}</td>
                   <td className="px-3 py-2">
                     {m.entityId === null ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cyan-300">
+                      <span className="inline-flex items-center gap-1 rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] tracking-normal text-cyan-300">
                         <Globe size={10} /> global
                       </span>
                     ) : (

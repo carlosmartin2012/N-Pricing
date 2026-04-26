@@ -196,7 +196,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
       {isGroupScope && (
         <div className="flex items-center gap-2 bg-cyan-500/10 border-b border-cyan-500/20 px-4 md:px-6 py-2">
           <Globe className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
+          <span className="text-xs font-mono font-medium text-cyan-400">
             Group Consolidated View
           </span>
           <span className="text-xs text-slate-400 ml-2">
@@ -259,7 +259,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setExportMenuOpen((prev) => !prev)}
-              className="nfq-btn-ghost flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider"
+              className="nfq-btn-ghost flex items-center gap-1.5 text-xs font-mono tracking-normal"
               title={t.regulatoryExport}
             >
               <Download className="w-3.5 h-3.5" />
@@ -466,7 +466,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--nfq-bg-root)] p-8 space-y-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--nfq-bg-root)] p-4 space-y-8">
           <Suspense fallback={<LoadingSpinner />}>
             {activeSubTab === 'OVERVIEW' ? (
               <OverviewDashboard
@@ -560,7 +560,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
 
       {/* Status Bar */}
       <div className="h-8 border-t border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] px-6 flex items-center justify-between font-mono text-[10px]">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--nfq-success)] animate-pulse" />
             <span className="text-[color:var(--nfq-success)] font-bold">SYSTEMS: ACTIVE</span>

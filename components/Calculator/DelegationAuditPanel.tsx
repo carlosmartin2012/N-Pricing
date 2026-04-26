@@ -114,7 +114,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
     return (
       <section
         aria-labelledby="delegation-audit-heading"
-        className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6"
+        className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4"
       >
         <header className="mb-4 flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[var(--nfq-bg-elevated)]">
@@ -148,7 +148,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
   return (
     <section
       aria-labelledby="delegation-audit-heading"
-      className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6"
+      className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4"
     >
       <header className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
@@ -171,7 +171,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
           type="button"
           onClick={() => void runDelegationCheck()}
           disabled={reevaluating}
-          className="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--nfq-bg-elevated)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-bg-surface-hover,_var(--nfq-bg-elevated))] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--nfq-bg-elevated)] px-3 py-1.5 text-[11px] font-semibold tracking-normal text-[var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-bg-surface-hover,_var(--nfq-bg-elevated))] disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Reevaluar delegación"
         >
           <RefreshCw
@@ -186,7 +186,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
       <div className="mb-5 rounded-[10px] bg-[var(--nfq-bg-elevated)] p-4">
         <div className="mb-2 flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider ${tierConfig.bg} ${tierConfig.text}`}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold tracking-normal ${tierConfig.bg} ${tierConfig.text}`}
           >
             <Shield className="h-3 w-3" aria-hidden="true" />
             {tierConfig.label}

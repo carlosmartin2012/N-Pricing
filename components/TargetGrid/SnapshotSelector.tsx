@@ -88,7 +88,7 @@ const SnapshotDropdown: React.FC<{
                     v{snap.version}
                   </span>
                   {snap.isCurrent && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-success)]/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--nfq-success)]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-success)]/20 px-2 py-0.5 text-[9px] font-medium text-[var(--nfq-success)]">
                       Current
                     </span>
                   )}
@@ -135,7 +135,7 @@ const SnapshotSelector: React.FC<Props> = ({
 
       {compareMode && onCompareSelect && (
         <>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--nfq-text-faint)]">
+          <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)]">
             vs
           </span>
           <SnapshotDropdown

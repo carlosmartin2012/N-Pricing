@@ -182,7 +182,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-500">
         <Activity size={40} className="mb-4 opacity-30" />
-        <div className="text-sm font-bold uppercase tracking-wider">No Booked Deals</div>
+        <div className="text-sm font-medium">No Booked Deals</div>
         <div className="text-xs mt-1 text-slate-600">Book deals to populate pricing analytics</div>
       </div>
     );
@@ -209,7 +209,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
       </div>
 
       {/* ── Section 2 & 3: Charts Row ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* RAROC Distribution */}
         <div className="nfq-kpi-card">
           <h4 className="nfq-kpi-label mb-4 flex items-center gap-2">
@@ -257,7 +257,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
       </div>
 
       {/* ── Section 4: Product Volume Pie ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="nfq-kpi-card">
           <h4 className="nfq-kpi-label mb-4 flex items-center gap-2">
             <PieIcon size={14} className="text-[color:var(--nfq-warning)]" />
@@ -302,7 +302,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
                   <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
                   <span className="text-xs text-[color:var(--nfq-text-secondary)] font-medium">{pv.name}</span>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                   <span className="text-xs font-mono text-[color:var(--nfq-text-muted)]">{pv.count} deals</span>
                   <span className="text-xs font-mono font-bold text-[color:var(--nfq-text-primary)]">{fmtM(pv.volume)}</span>
                 </div>

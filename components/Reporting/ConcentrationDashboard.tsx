@@ -18,9 +18,9 @@ const ConcentrationCard: React.FC<{ metrics: ConcentrationMetrics }> = ({ metric
   const hhiClass = classifyHHI(metrics.hhi);
 
   return (
-    <div className="rounded-2xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--nfq-text-muted)]">
+        <h4 className="text-xs font-semibold tracking-normal text-[var(--nfq-text-muted)]">
           {metrics.dimension}
         </h4>
         <div className="flex items-center gap-1.5">
@@ -82,7 +82,7 @@ const ConcentrationDashboard: React.FC<Props> = ({ deals }) => {
     <div className="space-y-4">
       {/* Alert banner for high concentration */}
       {highConcentration.length > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-rose-500/20 bg-rose-500/5 px-4 py-3">
           <AlertTriangle size={16} className="text-rose-400 shrink-0" />
           <p className="text-xs text-rose-300">
             High concentration detected in: {highConcentration.map((m) => m.dimension).join(', ')}.

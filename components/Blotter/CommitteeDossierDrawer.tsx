@@ -82,14 +82,14 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
       }
     >
       {!deal || !dossier ? (
-        <div className="rounded-2xl border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-6 text-sm text-[color:var(--nfq-text-secondary)]">
+        <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 text-sm text-[color:var(--nfq-text-secondary)]">
           No governed dossier is available for this transaction yet. Submit it for approval first to generate the full
           committee pack.
         </div>
       ) : (
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-4">
-            <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="nfq-label">Status</div>
               <div className="mt-2 text-lg font-semibold text-[color:var(--nfq-text-primary)]">{dossier.status}</div>
               <div className="mt-2">
@@ -98,7 +98,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                 </Badge>
               </div>
             </div>
-            <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="nfq-label">Final Client Rate</div>
               <div className="mt-2 text-lg font-semibold text-[color:var(--nfq-text-primary)]">
                 {(dossier.pricingResult?.finalClientRate ?? 0).toFixed(2)}%
@@ -107,7 +107,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                 RAROC {(dossier.pricingResult?.raroc ?? 0).toFixed(2)}%
               </div>
             </div>
-            <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="nfq-label">Methodology</div>
               <div className="mt-2 text-sm font-semibold text-[color:var(--nfq-text-primary)]">
                 {methodologyVersion?.label || dossier.methodologyVersionId}
@@ -116,7 +116,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                 {dossier.pricingResult.matchedMethodology}
               </div>
             </div>
-            <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="nfq-label">Committee Support</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Badge variant="secondary">{dossier.evidence.length} evidence items</Badge>
@@ -125,9 +125,9 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
             <div className="space-y-6">
-              <section className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
+              <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <div className="mb-4 flex items-center gap-2">
                   <FileSearch className="h-4 w-4 text-cyan-400" />
                   <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Pricing Narrative</h3>
@@ -168,7 +168,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
+              <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <div className="mb-4 flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-emerald-400" />
                   <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Approval Context</h3>
@@ -216,7 +216,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                 )}
               </section>
 
-              <section className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
+              <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <div className="mb-4 flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-amber-400" />
                   <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">AI Support</h3>
@@ -229,7 +229,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                       .map((trace) => (
                         <div
                           key={trace.id}
-                          className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4"
+                          className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4"
                         >
                           <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="outline">{trace.model}</Badge>
@@ -255,13 +255,13 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
             </div>
 
             <div className="space-y-6">
-              <section className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
+              <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Evidence Pack</h3>
                 <div className="mt-4 space-y-3">
                   {dossier.evidence.map((evidence) => (
                     <div
                       key={evidence.id}
-                      className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4"
+                      className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div>
@@ -281,7 +281,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
+              <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Grounding</h3>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {dossier.groundedContext?.methodologyVersionId && (
@@ -297,7 +297,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
                   ))}
                 </div>
                 {portfolioSnapshot && (
-                  <div className="mt-4 rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4 text-sm">
+                  <div className="mt-4 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4 text-sm">
                     <div className="font-medium text-[color:var(--nfq-text-primary)]">{portfolioSnapshot.name}</div>
                     <div className="mt-1 text-[color:var(--nfq-text-secondary)]">
                       {portfolioSnapshot.results.length} deals • Avg RAROC{' '}
@@ -312,7 +312,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
           {/* Audit Timeline */}
           {deal?.id && (
             <div className="mt-6 border-t border-[color:var(--nfq-border-ghost)] pt-4">
-              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[color:var(--nfq-text-muted)]">
+              <h3 className="mb-3 text-xs font-semibold tracking-normal text-[color:var(--nfq-text-muted)]">
                 Audit Trail
               </h3>
               <AuditTimeline dealId={deal.id} />

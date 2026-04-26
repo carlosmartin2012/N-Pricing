@@ -76,7 +76,7 @@ const SLOPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Gauge className="h-5 w-5" style={{ color: STATUS_COLOR[overallStatus] }} />
-          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+          <h3 className="font-mono text-xs font-medium text-white">
             SLO Summary
           </h3>
           <span className="nfq-label text-[10px] text-slate-400">
@@ -112,7 +112,7 @@ const SLOPanel: React.FC = () => {
               >
                 <header className="mb-3 flex items-center gap-2">
                   <Icon className="h-4 w-4" style={{ color }} />
-                  <span className="font-mono text-[11px] uppercase tracking-wider text-slate-300">
+                  <span className="font-mono text-[11px] tracking-normal text-slate-300">
                     {slo.name}
                   </span>
                 </header>
@@ -120,7 +120,7 @@ const SLOPanel: React.FC = () => {
                   <span className="font-mono text-2xl font-semibold tabular-nums" style={{ color }}>
                     {formatValue(slo.name, slo.current)}
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
+                  <span className="font-mono text-[10px] tracking-normal text-slate-500">
                     target {formatTarget(slo.name, slo.target)}
                   </span>
                 </div>
@@ -128,7 +128,7 @@ const SLOPanel: React.FC = () => {
                   <dl className="mt-3 grid grid-cols-3 gap-2 text-[10px]">
                     {(['p50', 'p95', 'p99'] as const).map((p) => (
                       <div key={p}>
-                        <dt className="font-mono uppercase tracking-wider text-slate-500">{p}</dt>
+                        <dt className="font-mono tracking-normal text-slate-500">{p}</dt>
                         <dd className="font-mono tabular-nums text-slate-200">
                           {formatValue(slo.name, slo.percentiles![p])}
                         </dd>
@@ -155,7 +155,7 @@ const SLOPanel: React.FC = () => {
                 className="h-4 w-4"
                 style={{ color: violations.total === 0 ? STATUS_COLOR.ok : STATUS_COLOR.breached }}
               />
-              <h4 className="font-mono text-[11px] uppercase tracking-wider text-slate-300">
+              <h4 className="font-mono text-[11px] tracking-normal text-slate-300">
                 Tenancy violations · last {violations.windowMinutes}m
               </h4>
             </div>
@@ -181,7 +181,7 @@ const SLOPanel: React.FC = () => {
                   <div className="flex items-center gap-2 min-w-0">
                     <code className="truncate font-mono text-slate-200">{row.endpoint}</code>
                     <span
-                      className="rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-rose-300"
+                      className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-normal text-rose-300"
                       style={{ background: 'rgba(244,63,94,0.08)' }}
                     >
                       {row.errorCode}
@@ -197,7 +197,7 @@ const SLOPanel: React.FC = () => {
 
       {summary && summary.activeAlerts.length > 0 && (
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-          <h4 className="mb-3 font-mono text-[11px] uppercase tracking-wider text-slate-300">
+          <h4 className="mb-3 font-mono text-[11px] tracking-normal text-slate-300">
             Active alerts
           </h4>
           <ul className="space-y-2">
@@ -208,7 +208,7 @@ const SLOPanel: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   <span
-                    className="rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider"
+                    className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-normal"
                     style={{
                       color: a.severity === 'critical' || a.severity === 'page' ? '#f43f5e' : '#f59e0b',
                       background: 'rgba(255,255,255,0.04)',

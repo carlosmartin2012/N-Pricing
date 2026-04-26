@@ -82,7 +82,7 @@ export const AccountingLedgerTable: React.FC<Props> = ({
 
           {entries.length === 0 && (
             <tr>
-              <td colSpan={8} className="p-8 text-center text-[color:var(--nfq-text-muted)]">
+              <td colSpan={8} className="p-4 text-center text-[color:var(--nfq-text-muted)]">
                 No booked deals found. Book deals in the Blotter to see GL entries here.
               </td>
             </tr>

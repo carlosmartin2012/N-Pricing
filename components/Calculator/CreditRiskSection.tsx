@@ -53,7 +53,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-slate-300"
+        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs font-semibold tracking-normal text-slate-400 hover:bg-slate-800/40 hover:text-slate-300"
       >
         {t.creditRiskGuarantees}
         <span className="ml-2 text-[10px]">{open ? '▲' : '▼'}</span>
@@ -235,7 +235,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
             <div className="overflow-hidden rounded-lg border border-[var(--nfq-border-ghost)]">
               <table className="w-full text-[11px] font-mono">
                 <thead>
-                  <tr className="border-b border-slate-800/50 text-[10px] uppercase tracking-wider text-[var(--nfq-text-muted)]">
+                  <tr className="border-b border-slate-800/50 text-[10px] tracking-normal text-[var(--nfq-text-muted)]">
                     <th className="px-3 py-1.5 text-left font-medium">Scenario</th>
                     <th className="px-3 py-1.5 text-right font-medium">{t.scenarioWeight}</th>
                     <th className="px-3 py-1.5 text-right font-medium">{t.scenarioCoverageFactor}</th>
@@ -259,7 +259,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                 </tbody>
                 <tfoot>
                   <tr className="border-t border-slate-800/50">
-                    <td className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-muted)]">
+                    <td className="px-3 py-1.5 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-muted)]">
                       Weighted
                     </td>
                     <td className="px-3 py-1.5 text-right text-slate-300 font-semibold">100%</td>

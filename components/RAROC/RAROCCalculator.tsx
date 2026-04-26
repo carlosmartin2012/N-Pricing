@@ -73,10 +73,10 @@ const RAROCCalculator: React.FC = () => {
     const commercialRows = useMemo(() => buildCommercialBreakdown(inputs, results), [inputs, results]);
 
     return (
-        <div className="flex flex-col gap-6 p-2 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between bg-slate-900/40 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+        <div className="flex flex-col gap-4 p-2 animate-in fade-in duration-500">
+            <div className="flex items-center justify-between bg-slate-900/40 p-4 rounded-[var(--nfq-radius-card)] border border-white/10 backdrop-blur-sm">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-cyan-500/20 rounded-xl">
+                    <div className="p-3 bg-cyan-500/20 rounded-[var(--nfq-radius-card)]">
                         <Calculator className="text-cyan-400 w-6 h-6" />
                     </div>
                     <div>
@@ -94,7 +94,7 @@ const RAROCCalculator: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
                 <div className="xl:col-span-4 space-y-6">
                     <Panel title="Configuration Inputs" icon={<Settings size={18} className="text-cyan-500" />}>
                         <div className="space-y-6 p-2">
@@ -107,7 +107,7 @@ const RAROCCalculator: React.FC = () => {
                                 />
                             ))}
 
-                            <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/6 p-4">
+                            <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/15 bg-cyan-500/6 p-4">
                                 <div className="flex items-center gap-2 text-cyan-400">
                                     <Info size={14} />
                                     <span className="text-[10px] font-bold uppercase tracking-[0.22em]">
@@ -128,14 +128,14 @@ const RAROCCalculator: React.FC = () => {
                     </Panel>
                 </div>
 
-                <div className="xl:col-span-8 flex flex-col gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div className="xl:col-span-8 flex flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                         {metricCards.map((card) => (
                             <RAROCMetricCard key={card.title} {...card} />
                         ))}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <RAROCBreakdownPanel
                             title="Revenue & Costs"
                             icon={<Zap size={16} className="text-amber-500" />}
@@ -155,7 +155,7 @@ const RAROCCalculator: React.FC = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <RAROCBreakdownPanel
                             title="Commercial Stack"
                             icon={<Shield size={16} className="text-cyan-500" />}
@@ -165,10 +165,10 @@ const RAROCCalculator: React.FC = () => {
                             totalToneClass={results.eva >= 0 ? 'text-emerald-400' : 'text-rose-400'}
                         />
 
-                        <div className="bg-cyan-900/10 border border-cyan-500/20 rounded-2xl p-6 flex flex-col gap-3">
+                        <div className="bg-cyan-900/10 border border-cyan-500/20 rounded-[var(--nfq-radius-card)] p-4 flex flex-col gap-3">
                             <div className="flex items-center gap-2 text-cyan-500">
                                 <Info size={16} />
-                                <h5 className="text-xs font-bold uppercase tracking-wider">Methodology Note</h5>
+                                <h5 className="text-xs font-medium">Methodology Note</h5>
                             </div>
                             <p className="text-xs text-slate-400 font-mono italic leading-relaxed">
                                 RAROC = (Spread Revenue + Fees - FTP - ECL - OpCost + Capital Income) / Total Regulatory Capital
@@ -177,7 +177,7 @@ const RAROCCalculator: React.FC = () => {
                                 Capital income is now computed from the same engine used by pricing, and spread revenue is
                                 derived from commercial spread instead of duplicating a separate client-rate formula.
                             </p>
-                            <div className="mt-auto rounded-xl border border-white/5 bg-slate-950/40 p-4">
+                            <div className="mt-auto rounded-[var(--nfq-radius-card)] border border-white/5 bg-slate-950/40 p-4">
                                 <div className="nfq-label">Current Margin Stack</div>
                                 <div className="mt-3 flex items-end justify-between gap-4">
                                     <div>

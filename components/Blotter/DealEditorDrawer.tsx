@@ -73,7 +73,7 @@ const DealEditorDrawer: React.FC<DealEditorDrawerProps> = ({
     >
       {validationErrors.length > 0 && (
         <div className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
-          <div className="mb-1 text-xs font-bold uppercase tracking-wider text-red-400">Validation Errors</div>
+          <div className="mb-1 text-xs font-medium text-red-400">Validation Errors</div>
           <ul className="space-y-0.5">
             {validationErrors.map((err) => (
               <li key={err.field} className="text-[11px] text-red-300">

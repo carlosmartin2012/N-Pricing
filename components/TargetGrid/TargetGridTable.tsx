@@ -146,7 +146,7 @@ const TargetGridTable: React.FC<Props> = ({ cells, onCellSelect, isLoading }) =>
     return (
       <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-64 animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
+          <div className="h-7 w-64 animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
         </div>
         <div className="h-10 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
         {Array.from({ length: 6 }).map((_, i) => (
@@ -170,7 +170,7 @@ const TargetGridTable: React.FC<Props> = ({ cells, onCellSelect, isLoading }) =>
             className="nfq-input w-full pl-9 pr-3 py-2 text-xs"
           />
         </div>
-        <span className="text-[10px] font-mono uppercase tracking-widest text-[color:var(--nfq-text-muted)]">
+        <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">
           {sorted.length} {sorted.length === 1 ? 'cell' : 'cells'}
         </span>
       </div>

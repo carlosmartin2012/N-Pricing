@@ -118,7 +118,7 @@ const OriginatorScorecardComponent: React.FC<Props> = ({ scorecard, isLoading })
       </div>
 
       {/* Additional metrics */}
-      <div className="mb-4 flex gap-6 text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
+      <div className="mb-4 flex gap-4 text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
         <span>Avg FTP Var: <span className="text-[color:var(--nfq-text-secondary)]">{fmtBps(scorecard.avgFtpVarianceBps)}</span></span>
         <span>Avg RAROC Var: <span className="text-[color:var(--nfq-text-secondary)]">{fmtBps(scorecard.avgRarocVariancePp * 100)}</span></span>
       </div>

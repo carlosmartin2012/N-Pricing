@@ -23,9 +23,9 @@ export const ChartTooltip: React.FC<Props> = ({ active, payload, label, formatte
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+    <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
       {label && (
-        <div className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-faint)]">
+        <div className="mb-1.5 font-mono text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">
           {label}
         </div>
       )}

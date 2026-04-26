@@ -117,7 +117,7 @@ const ToleranceBandEditor: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Product</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Product</span>
               <input
                 type="text"
                 value={editingBand.product ?? ''}
@@ -127,7 +127,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Segment</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Segment</span>
               <input
                 type="text"
                 value={editingBand.segment ?? ''}
@@ -137,7 +137,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Tenor Bucket</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Tenor Bucket</span>
               <select
                 value={editingBand.tenorBucket ?? ''}
                 onChange={(e) => updateField('tenorBucket', e.target.value)}
@@ -150,7 +150,7 @@ const ToleranceBandEditor: React.FC = () => {
               </select>
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Currency</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Currency</span>
               <input
                 type="text"
                 value={editingBand.currency ?? ''}
@@ -161,7 +161,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">FTP Tol. (bps)</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">FTP Tol. (bps)</span>
               <input
                 type="number"
                 value={editingBand.ftpBpsTolerance}
@@ -172,7 +172,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">RAROC Tol. (pp)</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">RAROC Tol. (pp)</span>
               <input
                 type="number"
                 value={editingBand.rarocPpTolerance}
@@ -183,7 +183,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Priority</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Priority</span>
               <input
                 type="number"
                 value={editingBand.priority}
@@ -194,7 +194,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Active</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Active</span>
               <button
                 type="button"
                 onClick={() => updateField('active', !editingBand.active)}
@@ -210,7 +210,7 @@ const ToleranceBandEditor: React.FC = () => {
           </div>
           <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Effective From</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Effective From</span>
               <input
                 type="date"
                 value={editingBand.effectiveFrom.slice(0, 10)}
@@ -219,7 +219,7 @@ const ToleranceBandEditor: React.FC = () => {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[color:var(--nfq-text-muted)]">Effective To</span>
+              <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">Effective To</span>
               <input
                 type="date"
                 value={editingBand.effectiveTo?.slice(0, 10) ?? ''}

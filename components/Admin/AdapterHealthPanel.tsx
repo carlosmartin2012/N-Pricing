@@ -81,7 +81,7 @@ export const AdapterHealthPanel: React.FC = () => {
           ) : (
             <Plug className="h-5 w-5 text-slate-500" />
           )}
-          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+          <h3 className="font-mono text-xs font-medium text-white">
             Integration Adapters
           </h3>
           {data?.generatedAt && (

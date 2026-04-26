@@ -112,7 +112,7 @@ const UserManual: React.FC = () => {
       <div className="flex h-full">
         {/* Table of Contents */}
         <div className="hidden w-72 space-y-1 overflow-y-auto border-r border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/50 lg:block">
-          <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">
+          <h4 className="mb-3 text-xs font-medium text-slate-500">
             {L('Contents', 'Contenidos')}
           </h4>
           <nav className="space-y-0.5">
@@ -160,7 +160,7 @@ const UserManual: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto scroll-smooth p-6" id="manual-content">
+        <div className="flex-1 overflow-y-auto scroll-smooth p-4" id="manual-content">
           <div className="mx-auto max-w-4xl space-y-12">
 
             {/* Introduction */}
@@ -181,7 +181,7 @@ const UserManual: React.FC = () => {
               </p>
               <button
                 onClick={() => startTour('business-flow-tour')}
-                className="flex w-full items-center gap-3 rounded-xl border border-[var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/10 px-4 py-3 text-left transition-colors hover:bg-[var(--nfq-accent)]/20"
+                className="flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] border border-[var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/10 px-4 py-3 text-left transition-colors hover:bg-[var(--nfq-accent)]/20"
               >
                 <Compass size={20} className="shrink-0 text-[var(--nfq-accent)]" />
                 <div>
@@ -568,7 +568,7 @@ const UserManual: React.FC = () => {
                   <div key={wf.title} className="space-y-3 rounded-lg border border-slate-800 bg-slate-900 p-4">
                     <div>
                       <h4 className="text-sm font-bold text-slate-100">{wf.title}</h4>
-                      <p className="mt-1 text-[11px] uppercase tracking-widest text-cyan-400">{wf.audience}</p>
+                      <p className="mt-1 text-[11px] tracking-normal text-cyan-400">{wf.audience}</p>
                     </div>
                     <ol className="list-decimal space-y-2 pl-4 text-xs leading-relaxed text-slate-400">
                       {wf.steps.map((s) => (<li key={s}>{s}</li>))}
@@ -611,7 +611,7 @@ const UserManual: React.FC = () => {
                 ))}
               </div>
               <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-                <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-300">
+                <h4 className="mb-3 text-xs font-medium text-slate-300">
                   {L('Support checklist', 'Checklist de soporte')}
                 </h4>
                 <ul className="space-y-2 text-xs text-slate-400">
@@ -632,10 +632,10 @@ const UserManual: React.FC = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-800 bg-slate-900/80">
-                      <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-slate-500">
+                      <th className="px-4 py-3 text-left font-mono text-[11px] text-slate-500">
                         {L('Component', 'Componente')}
                       </th>
-                      <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-slate-500">
+                      <th className="px-4 py-3 text-left font-mono text-[11px] text-slate-500">
                         {L('Formula', 'Fórmula')}
                       </th>
                     </tr>

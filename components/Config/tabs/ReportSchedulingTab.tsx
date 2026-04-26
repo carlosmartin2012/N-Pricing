@@ -119,7 +119,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
       <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900">
         <div className="flex items-center gap-2">
           <Clock size={14} className="text-cyan-400" />
-          <span className="text-xs text-slate-400 font-mono uppercase tracking-widest">
+          <span className="text-xs text-slate-400 font-mono tracking-normal">
             {schedules.length} {t.reportSchedules}
           </span>
         </div>
@@ -134,9 +134,9 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
       {/* Table */}
       <div className="overflow-auto flex-1">
         {loading ? (
-          <div className="p-8 text-center text-xs text-slate-500 font-mono">Loading…</div>
+          <div className="p-4 text-center text-xs text-slate-500 font-mono">Loading…</div>
         ) : schedules.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-500 font-mono">
+          <div className="p-4 text-center text-xs text-slate-500 font-mono">
             No schedules configured. Click «{t.newSchedule}» to create one.
           </div>
         ) : (
@@ -146,7 +146,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                 {['NAME', t.reportType.toUpperCase(), t.frequency.toUpperCase(), 'FORMAT', t.recipients.toUpperCase(), t.lastRun.toUpperCase(), 'ACTIVE', ''].map((h, i) => (
                   <th
                     key={i}
-                    className="px-4 py-2 text-left font-mono text-slate-500 uppercase tracking-widest text-[10px]"
+                    className="px-4 py-2 text-left font-mono text-slate-500 tracking-normal text-[10px]"
                   >
                     {h}
                   </th>
@@ -219,7 +219,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
                   Name
                 </label>
                 <input
@@ -233,7 +233,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Report Type */}
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
                   {t.reportType}
                 </label>
                 <select
@@ -249,7 +249,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Frequency */}
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
                   {t.frequency}
                 </label>
                 <div className="flex gap-2">
@@ -257,7 +257,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                     <button
                       key={f}
                       onClick={() => setDraft((d) => ({ ...d, frequency: f }))}
-                      className={`flex-1 py-1.5 rounded text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+                      className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.frequency === f
                           ? 'bg-cyan-900/50 border-cyan-700 text-cyan-300'
                           : 'border-slate-700 text-slate-500 hover:border-slate-500'
@@ -271,7 +271,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Format */}
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
                   Format
                 </label>
                 <div className="flex gap-2">
@@ -279,7 +279,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                     <button
                       key={f}
                       onClick={() => setDraft((d) => ({ ...d, format: f }))}
-                      className={`flex-1 py-1.5 rounded text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+                      className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.format === f
                           ? 'bg-amber-900/40 border-amber-700 text-amber-300'
                           : 'border-slate-700 text-slate-500 hover:border-slate-500'
@@ -293,7 +293,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Recipients */}
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
                   {t.recipients} <span className="text-slate-600">(comma-separated emails)</span>
                 </label>
                 <textarea
@@ -307,7 +307,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Active toggle */}
               <div className="flex items-center gap-3">
-                <label className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Active</label>
+                <label className="text-[10px] font-mono tracking-normal text-slate-500">Active</label>
                 <button
                   onClick={() => setDraft((d) => ({ ...d, isActive: !d.isActive }))}
                   className="focus:outline-none"

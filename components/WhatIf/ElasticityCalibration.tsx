@@ -194,7 +194,7 @@ const ElasticityCalibration: React.FC = () => {
         {/* --- Form --- */}
         {showForm && (
           <div className="rounded-[16px] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+            <h4 className="text-xs font-medium text-[color:var(--nfq-text-secondary)]">
               {editingId ? 'Edit Model' : 'New Expert Model'}
             </h4>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">

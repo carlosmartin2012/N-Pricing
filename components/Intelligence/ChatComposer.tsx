@@ -24,7 +24,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
 
   return (
     <>
-      <div className="flex h-14 items-center justify-between border-b border-slate-800 bg-slate-900/50 px-6 backdrop-blur">
+      <div className="flex h-11 items-center justify-between border-b border-slate-800 bg-slate-900/50 px-6 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded border border-cyan-900 bg-cyan-950">
             <Terminal size={16} className="text-cyan-400" />
@@ -68,7 +68,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
               onChange={(event) => onChangeInput(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && onSendMessage()}
               placeholder="Ask about pricing, RAROC, credit risk, or specific deal IDs..."
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 py-4 pl-12 pr-12 font-mono text-sm text-slate-200 placeholder-slate-600 shadow-inner transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
+              className="w-full rounded-[var(--nfq-radius-card)] border border-slate-700 bg-slate-950 py-4 pl-12 pr-12 font-mono text-sm text-slate-200 placeholder-slate-600 shadow-inner transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
               <Terminal size={18} />

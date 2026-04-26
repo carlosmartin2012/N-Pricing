@@ -67,7 +67,7 @@ export const ShockControlPanel: React.FC<Props> = ({
 
   return (
     <Panel title={t.shocksConfig || 'Shocks Configuration'} className="h-full bg-white dark:bg-[#0a0a0a]">
-      <div className="space-y-8 p-6">
+      <div className="space-y-8 p-4">
         <div className="rounded-lg border border-slate-200 bg-slate-100 p-3 dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-1 text-[10px] font-bold uppercase text-slate-500">
             {t.targetTransaction}

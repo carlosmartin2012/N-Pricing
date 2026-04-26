@@ -113,7 +113,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
 
       {/* Segment selector */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--nfq-text-faint)]">Segment</span>
+        <span className="text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">Segment</span>
         {SEGMENTS.map((seg) => (
           <button
             key={seg}
@@ -131,7 +131,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
 
       <div className="grid gap-4 md:grid-cols-3">
         {/* Model stats */}
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Calibration</div>
           <div className="mt-2 font-mono text-lg font-bold text-[var(--nfq-text-primary)]">
             {activeModel ? `${activeModel.sampleSize} deals` : '—'}
@@ -142,7 +142,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
         </div>
 
         {/* Optimal price */}
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="flex items-center gap-1.5 nfq-label"><Target size={12} /> Optimal Rate</div>
           <div className="mt-2 font-mono text-lg font-bold text-emerald-400">
             {optimalPrice ? fmtPct(optimalPrice.rate) : '—'}
@@ -153,7 +153,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
         </div>
 
         {/* Model parameters */}
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="flex items-center gap-1.5 nfq-label"><Zap size={12} /> Elasticity</div>
           <div className="mt-2 font-mono text-lg font-bold text-amber-400">
             {activeModel ? activeModel.elasticity.toFixed(3) : '—'}
@@ -166,7 +166,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
 
       {/* Response curve as simple ASCII-style visualization */}
       {responseCurve.length > 0 && (
-        <div className="rounded-2xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-3">Price Response Curve</div>
           <div className="space-y-1">
             {responseCurve.filter((_, i) => i % 2 === 0).map((point) => (

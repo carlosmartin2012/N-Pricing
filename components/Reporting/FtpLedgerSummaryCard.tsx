@@ -75,7 +75,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <LayoutDashboard className="h-4 w-4 text-amber-400" />
-          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+          <h3 className="font-mono text-xs font-medium text-white">
             {title}
           </h3>
         </div>

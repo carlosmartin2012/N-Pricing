@@ -8,7 +8,7 @@ const ReviewSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   children,
 }) => (
   <div className="rounded border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] p-4">
-    <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[color:var(--nfq-text-faint)]">
+    <p className="mb-3 font-mono text-[10px] tracking-normal text-[color:var(--nfq-text-faint)]">
       {title}
     </p>
     <div className="space-y-2">{children}</div>

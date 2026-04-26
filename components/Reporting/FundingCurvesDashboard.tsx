@@ -53,8 +53,8 @@ const FundingCurvesDashboard: React.FC<Props> = ({
   }, [fundingCurveData]);
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-      <div className="relative rounded-2xl border border-white/5 bg-[#0f172a]/30 p-6 lg:col-span-8">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+      <div className="relative rounded-[var(--nfq-radius-card)] border border-white/5 bg-[#0f172a]/30 p-4 lg:col-span-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h4 className="flex items-center gap-3 text-lg font-bold uppercase tracking-tight text-white">
@@ -114,7 +114,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-6 lg:col-span-4">
-        <div className="rounded-2xl border border-white/10 bg-[#0f172a]/40 p-6">
+        <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-[#0f172a]/40 p-4">
           <h5 className="nfq-label mb-4">Summary Yield/Spread</h5>
           <div className="space-y-4">
             {summaryItems.map(item => (
@@ -140,7 +140,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-900/10 p-5">
+        <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-cyan-900/10 p-5">
           <h5 className="mb-3 text-[10px] font-bold uppercase text-cyan-500">Portfolio Alignment</h5>
           <div className="space-y-3">
             <div className="flex items-center justify-between">

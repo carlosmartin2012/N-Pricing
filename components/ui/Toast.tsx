@@ -95,7 +95,7 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
   return (
     <div
       className={`
-        flex w-full max-w-sm items-start gap-3 rounded-xl border px-4 py-3 backdrop-blur-sm
+        flex w-full max-w-sm items-start gap-3 rounded-[var(--nfq-radius-card)] border px-4 py-3 backdrop-blur-sm
         shadow-toast
         animate-slide-in-right
         ${colors.bg} ${colors.border}

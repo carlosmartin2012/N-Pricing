@@ -230,7 +230,7 @@ const DossiersView: React.FC = () => {
   }, [list, verifications]);
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-4 p-4">
       <header className="flex items-start justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold text-[color:var(--nfq-text-primary)]">
@@ -266,22 +266,22 @@ const DossiersView: React.FC = () => {
 
       {/* KPI strip */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Dossiers</div>
           <div className="mt-1 font-mono text-2xl font-semibold text-[color:var(--nfq-text-primary)]">{counts.total}</div>
         </div>
-        <div className="rounded-xl border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Verified OK</div>
           <div className="mt-1 font-mono text-2xl font-semibold text-emerald-300">{counts.verified}</div>
         </div>
-        <div className="rounded-xl border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Tampered</div>
           <div className="mt-1 font-mono text-2xl font-semibold text-rose-300">{counts.tampered}</div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-[color:var(--nfq-border-subtle)]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)]">
         <table className="min-w-full text-sm">
           <thead className="bg-[rgba(255,255,255,0.02)]">
             <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
@@ -300,7 +300,7 @@ const DossiersView: React.FC = () => {
               <tr>
                 <td colSpan={8} className="px-3 py-12">
                   <div className="mx-auto flex max-w-md flex-col items-center text-center">
-                    <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--nfq-accent-rgb),0.1)] text-[color:var(--nfq-accent)]">
+                    <div className="mb-3 flex h-11 w-14 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[rgba(var(--nfq-accent-rgb),0.1)] text-[color:var(--nfq-accent)]">
                       <Inbox size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">

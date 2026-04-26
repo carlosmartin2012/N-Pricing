@@ -56,7 +56,7 @@ export const UserCard: React.FC<Props> = React.memo(({
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-bold text-slate-200">{user.name}</h4>
             {isOnline && (
-              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-500">
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-medium text-emerald-500">
                 Online
               </span>
             )}

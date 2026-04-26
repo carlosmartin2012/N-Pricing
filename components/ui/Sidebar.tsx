@@ -195,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Brand header */}
         <div className="px-3 py-5">
           <div className="flex items-center gap-3 px-1">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color:rgba(var(--nfq-accent-rgb),0.12)]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[color:rgba(var(--nfq-accent-rgb),0.12)]">
               <Logo className="h-6 w-6" />
             </div>
             {isSidebarOpen && (

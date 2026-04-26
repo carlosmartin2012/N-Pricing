@@ -150,7 +150,7 @@ const VarianceDistributionChart: React.FC<Props> = ({ variances, toleranceBps = 
         </BarChart>
       </ResponsiveContainer>
 
-      <div className="mt-2 flex items-center justify-center gap-6 text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
+      <div className="mt-2 flex items-center justify-center gap-4 text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-cyan-400 opacity-65" />
           In-band

@@ -35,11 +35,11 @@ export const ScenarioLibraryPanel: React.FC<Props> = ({ currentScenarios, onLoad
   };
 
   return (
-    <div className="rounded-2xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Archive size={14} className="text-[var(--nfq-accent)]" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--nfq-text-muted)]">
+          <span className="text-xs font-semibold tracking-normal text-[var(--nfq-text-muted)]">
             Scenario Library
           </span>
         </div>

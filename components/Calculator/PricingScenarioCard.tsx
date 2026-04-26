@@ -69,7 +69,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">
           {t.interestRateBps}
         </label>
         <input
@@ -81,7 +81,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">
           {t.liquiditySpreadBps}
         </label>
         <input
@@ -93,7 +93,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">
           {t.marginTargetPct}
         </label>
         <input
@@ -106,7 +106,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">
           {t.collateralType}
         </label>
         <select

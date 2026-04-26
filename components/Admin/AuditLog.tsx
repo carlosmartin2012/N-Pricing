@@ -23,7 +23,7 @@ const SummaryTile: React.FC<{
     value: number;
     toneClass: string;
 }> = ({ label, value, toneClass }) => (
-    <div className="rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-4 py-3">
+    <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-4 py-3">
         <div className="nfq-label">{label}</div>
         <div className={`mt-2 font-mono-nums text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>

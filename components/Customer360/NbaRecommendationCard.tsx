@@ -43,7 +43,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
   const onConsume = (id: string) => consumeMutation.mutate(id);
 
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6">
+    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-violet-400" />

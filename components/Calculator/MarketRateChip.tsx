@@ -71,7 +71,7 @@ const MarketRateChip: React.FC<Props> = ({ deal, finalClientRatePct }) => {
       title={`As of ${match.benchmark.asOfDate} · ${match.benchmark.source}`}
     >
       <Icon size={14} aria-hidden="true" />
-      <span className="uppercase tracking-wider opacity-80">Market</span>
+      <span className="tracking-normal opacity-80">Market</span>
       <span className="font-semibold">{match.benchmark.rate.toFixed(2)}%</span>
       <span className="opacity-60">({match.benchmark.source})</span>
       <span className="ml-auto font-semibold">{deltaLabel}</span>

@@ -156,14 +156,14 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
   );
 
   return (
-    <div className="flex h-full flex-col gap-6">
+    <div className="flex h-full flex-col gap-4">
       {/* Macro scenario picker (EBA-style) */}
       <MacroScenarioPicker
         activeScenarioId={activeScenarioId}
         onSelectScenario={handleSelectMacroScenario}
       />
 
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-12">
         <div className="h-full lg:col-span-4">
           <ShockControlPanel
             deal={deal}

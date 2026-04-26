@@ -345,7 +345,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
   if (pricingResults.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Calendar className="w-12 h-12 text-[color:var(--nfq-text-faint)] mb-4" />
+        <Calendar className="w-12 h-10 text-[color:var(--nfq-text-faint)] mb-4" />
         <h3 className="text-sm font-bold text-[color:var(--nfq-text-secondary)] mb-2">No Vintage Data</h3>
         <p className="text-xs text-[color:var(--nfq-text-muted)]">
           Book or approve deals to see vintage analysis by origination cohort.
@@ -499,7 +499,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
       </div>
 
       {/* 3. Channel / Segment Breakdown */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* By Client Type */}
         <div className="nfq-kpi-card">
           <h4 className="nfq-kpi-label mb-4 flex items-center gap-2">

@@ -152,18 +152,18 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
-            <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-[var(--nfq-radius-card)] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
                     <div className="flex items-center gap-3">
                         <Upload size={18} className="text-cyan-500" />
-                        <h3 id="file-upload-modal-title" className="text-sm font-bold text-white uppercase tracking-wider">{title}</h3>
+                        <h3 id="file-upload-modal-title" className="text-sm font-bold text-white tracking-normal">{title}</h3>
                     </div>
                     <button onClick={onClose} aria-label="Close upload dialog" className="text-slate-500 hover:text-white transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="p-6">
+                <div className="p-4">
                     {status === 'idle' || status === 'parsing' ? (
                         <div
                             onDragEnter={handleDrag}
@@ -171,7 +171,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-cyan-500 bg-cyan-950/20' : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/50'
+                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-cyan-500 bg-cyan-950/20' : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/50'
                                 }`}
                         >
                             <input
@@ -184,7 +184,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
 
                             {status === 'parsing' ? (
                                 <div className="flex flex-col items-center">
-                                    <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
+                                    <div className="w-12 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
                                     <p className="text-sm text-cyan-400 font-medium">{t.parsingValidating}</p>
                                 </div>
                             ) : (

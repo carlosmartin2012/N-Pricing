@@ -153,7 +153,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
           {/* Active filters summary */}
           {filters && (filters.products?.length || filters.segments?.length || filters.tenorBuckets?.length || filters.currencies?.length) ? (
             <div className="mb-4 rounded-[12px] bg-[var(--nfq-bg-elevated)] p-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-muted)] mb-1.5">
+              <div className="text-[11px] font-medium text-[color:var(--nfq-text-muted)] mb-1.5">
                 Active Filters
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -203,14 +203,14 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
         <div className="flex items-center justify-end gap-3 bg-[var(--nfq-bg-elevated)] px-6 py-4 rounded-b-[22px]">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
+            className="px-4 py-2 text-[11px] font-medium text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
           >
             Cancel
           </button>
           <button
             onClick={handleExport}
             disabled={isExporting || cellCount === 0}
-            className="nfq-button nfq-button-primary flex items-center gap-1.5 px-5 py-2 text-[10px] font-bold uppercase tracking-wider disabled:opacity-40"
+            className="nfq-button nfq-button-primary flex items-center gap-1.5 px-5 py-2 text-[11px] font-medium disabled:opacity-40"
           >
             {isExporting ? (
               <>

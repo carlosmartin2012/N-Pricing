@@ -33,8 +33,8 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
   const openTasks = approvalTasks.filter((task) => task.status === 'Pending');
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+    <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
         <div className="flex items-start justify-between gap-4 mb-5">
           <div>
             <h3 className="text-lg font-bold text-white">Methodology Governance Queue</h3>
@@ -43,7 +43,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
             </p>
           </div>
           <div className="text-right">
-            <div className="text-[10px] uppercase tracking-widest text-slate-500">Active Ruleset</div>
+            <div className="text-[10px] tracking-normal text-slate-500">Active Ruleset</div>
             <div className="text-sm font-semibold text-cyan-400">
               {currentVersion?.label || 'Live governance baseline'}
             </div>
@@ -55,7 +55,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
 
         <div className="space-y-3">
           {requests.length === 0 && (
-            <div className="rounded-lg border border-dashed border-slate-700 p-6 text-center text-sm text-slate-500">
+            <div className="rounded-lg border border-dashed border-slate-700 p-4 text-center text-sm text-slate-500">
               No methodology requests yet.
             </div>
           )}
@@ -85,7 +85,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
       </div>
 
       <div className="space-y-6">
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
             <History size={16} className="text-cyan-400" />
             <h3 className="text-base font-bold text-white">Methodology Version Log</h3>
@@ -117,7 +117,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
             <ClipboardList size={16} className="text-amber-400" />
             <h3 className="text-base font-bold text-white">Open Approval Tasks</h3>
@@ -135,7 +135,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs font-semibold text-slate-100">{task.title}</div>
-                    <div className="text-[10px] uppercase tracking-widest text-slate-500">
+                    <div className="text-[10px] tracking-normal text-slate-500">
                       {task.scope} • {task.requiredRole}
                     </div>
                   </div>

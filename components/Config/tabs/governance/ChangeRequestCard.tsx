@@ -23,7 +23,7 @@ const ChangeRequestCard: React.FC<ChangeRequestCardProps> = ({
   onRollback,
 }) => {
   return (
-    <div className={`rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-6 ${statusTone[request.status]}`}>
+    <div className={`rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4 ${statusTone[request.status]}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="nfq-label">

@@ -147,7 +147,7 @@ const GridCellDetailPanel: React.FC<Props> = ({ cell, onClose }) => {
           </section>
 
           {/* Computed timestamp */}
-          <p className="mt-6 text-center text-[10px] font-mono uppercase tracking-widest text-[color:var(--nfq-text-faint)]">
+          <p className="mt-6 text-center text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)]">
             Computed {new Date(cell.computedAt).toLocaleString()}
           </p>
         </div>

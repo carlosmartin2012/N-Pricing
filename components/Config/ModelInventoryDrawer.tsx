@@ -66,7 +66,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
               <StatusBadge status={model.status} />
             </div>
             <h3 className="truncate text-lg font-semibold text-white">{model.name}</h3>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-neutral-400">
+            <p className="mt-1 font-mono text-[11px] tracking-normal text-neutral-400">
               {model.id} · v{model.version}
             </p>
           </div>
@@ -82,7 +82,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
 
         <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
           <section>
-            <h4 className="mb-2 font-mono text-[11px] uppercase tracking-wider text-neutral-400">
+            <h4 className="mb-2 font-mono text-[11px] tracking-normal text-neutral-400">
               Descripción
             </h4>
             <p className="text-sm leading-relaxed text-neutral-200">
@@ -114,7 +114,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
 
           {model.methodologyRef && (
             <section>
-              <h4 className="mb-2 font-mono text-[11px] uppercase tracking-wider text-neutral-400">
+              <h4 className="mb-2 font-mono text-[11px] tracking-normal text-neutral-400">
                 Referencia metodológica
               </h4>
               <p className="break-all font-mono text-xs text-neutral-300">
@@ -142,7 +142,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
 
           <section className="rounded-[10px] bg-[var(--nfq-bg-surface)]/60 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h4 className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-neutral-400">
+              <h4 className="flex items-center gap-1.5 font-mono text-[11px] tracking-normal text-neutral-400">
                 <ClipboardList size={12} />
                 Backtest sintético
               </h4>
@@ -177,7 +177,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <TrafficLightDot light={backtest.trafficLight} />
-                  <span className="font-mono text-xs uppercase tracking-wider text-neutral-200">
+                  <span className="font-mono text-[11px] text-neutral-200">
                     {backtest.trafficLight}
                   </span>
                   <span className="ml-auto font-mono text-[11px] text-neutral-500">
@@ -200,7 +200,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
 
                 {backtest.findings.length > 0 && (
                   <div>
-                    <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+                    <p className="mb-1 font-mono text-[10px] tracking-normal text-neutral-500">
                       Hallazgos
                     </p>
                     <ul className="space-y-1">
@@ -248,7 +248,7 @@ function MetadataField({
 }) {
   return (
     <div>
-      <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+      <p className="mb-1 font-mono text-[10px] tracking-normal text-neutral-500">
         {label}
       </p>
       <p className="font-mono text-sm text-neutral-200">{children}</p>
@@ -266,7 +266,7 @@ function TagSection({
   if (!items || items.length === 0) return null;
   return (
     <section>
-      <h4 className="mb-2 font-mono text-[11px] uppercase tracking-wider text-neutral-400">
+      <h4 className="mb-2 font-mono text-[11px] tracking-normal text-neutral-400">
         {title}
       </h4>
       <div className="flex flex-wrap gap-1.5">
@@ -298,7 +298,7 @@ function ListSection({
   return (
     <section>
       <h4
-        className={`mb-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider ${titleClassName}`}
+        className={`mb-2 flex items-center gap-1.5 font-mono text-[11px] tracking-normal ${titleClassName}`}
       >
         {icon}
         {title}
@@ -323,7 +323,7 @@ function BacktestMetric({
 }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+      <p className="font-mono text-[10px] tracking-normal text-neutral-500">
         {label}
       </p>
       <p className="font-mono text-sm text-neutral-200">{value}%</p>

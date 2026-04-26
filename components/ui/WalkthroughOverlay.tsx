@@ -71,7 +71,7 @@ const StepCard: React.FC<StepCardProps> = ({
       ref={cardRef}
       role="dialog"
       aria-modal="false"
-      className="fixed z-[62] w-80 animate-[fadeIn_200ms_ease-out] rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-5 shadow-[var(--nfq-shadow-dialog)]"
+      className="fixed z-[62] w-80 animate-[fadeIn_200ms_ease-out] rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-5 shadow-[var(--nfq-shadow-dialog)]"
       style={{ top: pos.top, left: pos.left }}
     >
       {/* Header */}
@@ -197,7 +197,7 @@ const CenteredCard: React.FC<CenteredCardProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="walkthrough-title"
-      className="fixed left-1/2 top-1/2 z-[62] w-[min(92vw,520px)] -translate-x-1/2 -translate-y-1/2 animate-[fadeIn_220ms_ease-out] rounded-2xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-7 shadow-[var(--nfq-shadow-dialog)]"
+      className="fixed left-1/2 top-1/2 z-[62] w-[min(92vw,520px)] -translate-x-1/2 -translate-y-1/2 animate-[fadeIn_220ms_ease-out] rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-7 shadow-[var(--nfq-shadow-dialog)]"
     >
       {/* Close */}
       <button
@@ -210,7 +210,7 @@ const CenteredCard: React.FC<CenteredCardProps> = ({
 
       {/* Icon */}
       {Icon && (
-        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(var(--nfq-accent-rgb),0.12)] text-[color:var(--nfq-accent)]">
+        <div className="mb-5 flex h-11 w-14 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[rgba(var(--nfq-accent-rgb),0.12)] text-[color:var(--nfq-accent)]">
           <Icon size={26} />
         </div>
       )}
@@ -391,7 +391,7 @@ export const WalkthroughOverlay: React.FC<{ language: Language }> = ({ language 
 
       {/* Fallback when an anchored target is not found */}
       {!isCentered && !targetRect && isActive && (
-        <div className="fixed left-1/2 top-1/2 z-[62] w-80 -translate-x-1/2 -translate-y-1/2 animate-[fadeIn_200ms_ease-out] rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-5 shadow-[var(--nfq-shadow-dialog)]">
+        <div className="fixed left-1/2 top-1/2 z-[62] w-80 -translate-x-1/2 -translate-y-1/2 animate-[fadeIn_200ms_ease-out] rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-5 shadow-[var(--nfq-shadow-dialog)]">
           <p className="mb-4 text-xs text-[color:var(--nfq-text-secondary)]">
             {t[step.descriptionKey as keyof typeof t] as string ?? step.descriptionKey}
           </p>

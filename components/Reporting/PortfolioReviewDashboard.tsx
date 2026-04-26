@@ -142,13 +142,13 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
     : 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {/* Header card */}
-      <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6 shadow-sm">
+      <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--nfq-accent)]/15 text-[var(--nfq-accent)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-accent)]/15 text-[var(--nfq-accent)]">
                 <TrendingDown className="h-5 w-5" />
               </div>
               <h2 className="text-xl font-semibold text-[var(--nfq-text-primary)]">
@@ -166,7 +166,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
               type="button"
               onClick={analyzePortfolio}
               disabled={isAnalyzing || portfolio.length === 0}
-              className="inline-flex h-9 items-center gap-2 rounded-[10px] bg-[var(--nfq-accent)] px-4 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-2 rounded-[10px] bg-[var(--nfq-accent)] px-4 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isAnalyzing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -179,7 +179,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
               type="button"
               onClick={generateNarrative}
               disabled={!review || isGenerating}
-              className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-[var(--nfq-border)] bg-transparent px-4 text-sm font-medium text-[var(--nfq-text-primary)] transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-2 rounded-[10px] border border-[var(--nfq-border)] bg-transparent px-4 text-sm font-medium text-[var(--nfq-text-primary)] transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isGenerating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -506,7 +506,7 @@ const RenegotiationTable: React.FC<{ candidates: RenegotiationCandidate[] }> = (
 };
 
 const EmptyState: React.FC<{ message: string }> = ({ message }) => (
-  <div className="rounded-[10px] border border-dashed border-[var(--nfq-border)] p-6 text-center text-sm text-[var(--nfq-text-secondary)]">
+  <div className="rounded-[10px] border border-dashed border-[var(--nfq-border)] p-4 text-center text-sm text-[var(--nfq-text-secondary)]">
     {message}
   </div>
 );

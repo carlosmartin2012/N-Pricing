@@ -80,7 +80,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
   };
 
   return (
-    <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-6">
+    <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
@@ -109,7 +109,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
                 type="button"
                 onClick={() => handleStageClick(stage)}
                 className={[
-                  'px-4 py-2 rounded-full cursor-pointer border text-xs font-semibold uppercase tracking-wider transition-all',
+                  'px-4 py-2 rounded-full cursor-pointer border text-xs font-semibold tracking-normal transition-all',
                   style.bg,
                   style.text,
                   isSelected
@@ -233,7 +233,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
       </div>
 
       {/* Bottom: Live SICR result */}
-      <div className="rounded-xl bg-black/20 p-4 ring-1 ring-white/5">
+      <div className="rounded-[var(--nfq-radius-card)] bg-black/20 p-4 ring-1 ring-white/5">
         <div className="mb-3 flex items-center justify-between">
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
             Detección SICR en vivo
@@ -248,7 +248,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
         <div className="flex items-center gap-3">
           <span
             className={[
-              'px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider',
+              'px-3 py-1 rounded-full text-[11px] font-semibold tracking-normal',
               detectedStyle.bg,
               detectedStyle.text,
             ].join(' ')}

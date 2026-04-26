@@ -80,7 +80,7 @@ const NotificationCenter: React.FC = () => {
               <button
                 key={type}
                 onClick={() => setFilterType(type)}
-                className={`rounded-lg px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider transition-colors ${
+                className={`rounded-lg px-2.5 py-1 text-[10px] font-medium tracking-normal transition-colors ${
                   filterType === type
                     ? 'bg-[rgba(6,182,212,0.12)] text-[var(--nfq-accent)]'
                     : 'text-[var(--nfq-text-muted)] hover:text-[var(--nfq-text-secondary)]'
@@ -122,7 +122,7 @@ const NotificationCenter: React.FC = () => {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${TYPE_COLORS[n.type]}`}>
+                      <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[9px] font-medium ${TYPE_COLORS[n.type]}`}>
                         {TYPE_LABELS[n.type]}
                       </span>
                       {!n.isRead && (

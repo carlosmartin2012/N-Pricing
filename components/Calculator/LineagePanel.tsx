@@ -254,7 +254,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
   };
 
   return (
-    <section className="rounded-[14px] bg-[var(--nfq-bg-surface,#171717)] p-6 text-white/90">
+    <section className="rounded-[14px] bg-[var(--nfq-bg-surface,#171717)] p-4 text-white/90">
       {/* Heading */}
       <header className="mb-5 flex items-start justify-between gap-4">
         <div>

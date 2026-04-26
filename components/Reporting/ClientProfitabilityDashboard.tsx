@@ -120,21 +120,21 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
     <div className="space-y-4">
       {/* KPI Summary */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Clients</div>
           <div className="font-mono text-2xl font-bold text-[var(--nfq-text-primary)] mt-2">{clientMetrics.length}</div>
         </div>
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Total Exposure</div>
           <div className="font-mono text-2xl font-bold text-[var(--nfq-accent)] mt-2">{fmtAmount(totalPortfolio)}</div>
         </div>
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Avg RAROC</div>
           <div className="font-mono text-2xl font-bold text-emerald-400 mt-2">
             {(clientMetrics.reduce((s, c) => s + c.weightedAvgRaroc, 0) / clientMetrics.length).toFixed(1)}%
           </div>
         </div>
-        <div className="rounded-2xl bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">FTP Income</div>
           <div className="font-mono text-2xl font-bold text-violet-400 mt-2">
             {fmtAmount(clientMetrics.reduce((s, c) => s + c.totalFtpIncome, 0))}
@@ -143,10 +143,10 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
       </div>
 
       {/* Client Table */}
-      <div className="rounded-2xl border border-[var(--nfq-border-ghost)] overflow-hidden">
+      <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] overflow-hidden">
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[var(--nfq-bg-surface)] text-[10px] uppercase tracking-wider text-[var(--nfq-text-muted)]">
+            <tr className="bg-[var(--nfq-bg-surface)] text-[10px] tracking-normal text-[var(--nfq-text-muted)]">
               <th className="px-4 py-3 text-left font-medium">Client</th>
               <th className="px-3 py-3 text-center font-medium cursor-pointer" onClick={() => handleSort('dealCount')}>
                 Deals <ArrowUpDown size={10} className="inline ml-0.5" />

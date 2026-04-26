@@ -68,7 +68,7 @@ const ClientEmptyStateBanner: React.FC<Props> = ({
       <div className="flex items-start gap-3">
         <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${accent}`} />
         <div className="min-w-0 space-y-1">
-          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">{title}</h3>
+          <h3 className="font-mono text-xs font-medium text-white">{title}</h3>
           <p className="text-xs leading-relaxed text-slate-300">{body}</p>
           {hint && (
             <p className="font-mono text-[10px] text-slate-500">{hint}</p>

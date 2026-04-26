@@ -158,7 +158,7 @@ const DisciplineDashboard: React.FC = () => {
   }, [variances]);
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-auto p-6">
+    <div className="flex h-full flex-col gap-4 overflow-auto p-4">
       {/* ── Header & Filters ── */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
@@ -175,7 +175,7 @@ const DisciplineDashboard: React.FC = () => {
               <button
                 key={p.value}
                 onClick={() => setPreset(p.value)}
-                className={`rounded-md px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                className={`rounded-md px-2.5 py-1.5 text-[10px] font-mono tracking-normal transition-colors ${
                   preset === p.value
                     ? 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-primary)]'
                     : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
@@ -248,7 +248,7 @@ const DisciplineDashboard: React.FC = () => {
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-[11px] font-mono uppercase tracking-wider transition-colors ${
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-[11px] font-mono tracking-normal transition-colors ${
                 activeTab === tab.value
                   ? 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-primary)]'
                   : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
@@ -287,7 +287,7 @@ const DisciplineDashboard: React.FC = () => {
         {activeTab === 'scorecards' && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+              <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Originator
               </label>
               {originatorIds.length > 0 ? (

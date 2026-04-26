@@ -61,7 +61,7 @@ export function PricingReceiptCreditDetail({
 
       {creditDetail.capitalParams && (
         <div className="border-t border-slate-800 pt-2">
-          <div className="mb-1 text-[10px] uppercase tracking-widest text-slate-500">
+          <div className="mb-1 text-[10px] tracking-normal text-slate-500">
             {t.creditCapitalParams || 'Capital Params'}
           </div>
           <div className="font-mono text-[11px] leading-relaxed text-slate-400">
@@ -92,7 +92,7 @@ export function PricingReceiptCreditDetail({
 function Metric({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-widest text-slate-500">{label}</div>
+      <div className="text-[10px] tracking-normal text-slate-500">{label}</div>
       <div className="font-mono text-xs text-slate-300">{children}</div>
     </div>
   );
@@ -131,7 +131,7 @@ function PlainMetric({
 }) {
   return (
     <div className="flex items-center justify-between pl-2 text-[10px]">
-      <span className="uppercase tracking-widest text-slate-500">{label}</span>
+      <span className="tracking-normal text-slate-500">{label}</span>
       <span className={valueClassName || 'font-mono text-xs text-slate-300'}>{children}</span>
     </div>
   );

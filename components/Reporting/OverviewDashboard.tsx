@@ -224,7 +224,7 @@ const OverviewDashboard: React.FC<Props> = ({
   if (deals.length === 0) {
     return (
       <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--nfq-bg-elevated)]">
+        <div className="flex h-16 w-16 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]">
           <BarChart4 size={28} className="text-[var(--nfq-text-muted)] opacity-60" />
         </div>
         <div>
@@ -344,7 +344,7 @@ const OverviewDashboard: React.FC<Props> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-5">
         <div className="group relative overflow-hidden nfq-kpi-card">
           <div className="absolute right-0 top-0 p-3 opacity-10 transition-opacity group-hover:opacity-20">
             <ShieldCheck size={48} className="text-[color:var(--nfq-accent)]" />
@@ -406,7 +406,7 @@ const OverviewDashboard: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="nfq-kpi-card">
           <h4 className="nfq-kpi-label mb-6">LCR Stress Simulation</h4>
           <div className="h-[280px] w-full">

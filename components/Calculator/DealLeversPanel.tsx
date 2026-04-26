@@ -112,7 +112,7 @@ export const DealLeversPanel: React.FC<Props> = ({
       >
         <div className="flex items-center gap-2">
           <div className="w-1/2">
-            <span className="mb-1 flex items-center text-[9px] text-[color:var(--nfq-text-muted)] font-mono uppercase tracking-wider">
+            <span className="mb-1 flex items-center text-[9px] text-[color:var(--nfq-text-muted)] font-mono tracking-normal">
               {t.amortization}
               <TooltipTrigger content={t.tooltip_calc_amortization} size={11} />
             </span>

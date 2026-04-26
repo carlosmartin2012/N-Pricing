@@ -44,7 +44,7 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-amber-500/30 bg-[var(--nfq-bg-surface)] p-6 shadow-2xl">
+      <div className="w-full max-w-lg rounded-[var(--nfq-radius-card)] border border-amber-500/30 bg-[var(--nfq-bg-surface)] p-4 shadow-2xl">
         <div className="flex items-center gap-3 mb-4">
           <AlertTriangle className="h-6 w-6 text-amber-400" />
           <h3 className="text-lg font-bold text-white">Conflict Detected</h3>

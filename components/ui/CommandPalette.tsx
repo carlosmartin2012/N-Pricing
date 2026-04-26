@@ -201,7 +201,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[540px] overflow-hidden rounded-2xl border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[0_25px_80px_rgba(0,0,0,0.6)] animate-in fade-in zoom-in-95 duration-150"
+        className="relative w-full max-w-[540px] overflow-hidden rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[0_25px_80px_rgba(0,0,0,0.6)] animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Search input */}
         <div className="flex items-center gap-3 border-b border-[var(--nfq-border-ghost)] px-4 py-3">

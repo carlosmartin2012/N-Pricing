@@ -183,7 +183,7 @@ const ReconciliationView: React.FC = () => {
               onClick={() => setStatusFilter(s)}
               aria-pressed={active}
               data-testid={`reconciliation-filter-${s}`}
-              className={`rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+              className={`rounded-md px-2 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                 active
                   ? 'bg-white/[0.08] text-white ring-1 ring-violet-400/40'
                   : 'text-slate-400 hover:text-slate-200'
@@ -198,7 +198,7 @@ const ReconciliationView: React.FC = () => {
       {!isLoading && filtered.length === 0 && (
         <div
           data-testid="reconciliation-empty"
-          className="rounded-lg border border-white/5 bg-white/[0.02] p-8 text-center text-xs text-slate-400"
+          className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400"
         >
           No entries for the current filter. Try a different period or widen the status filter.
         </div>

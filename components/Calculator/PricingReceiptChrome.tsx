@@ -114,7 +114,7 @@ export function PricingReceiptFooter({
         data-testid="save-deal-btn"
         onClick={onSaveAsDeal}
         disabled={dealSaveStatus === 'saving' || validationErrorCount > 0}
-        className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+        className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-medium transition-all ${
           validationErrorCount > 0
             ? 'cursor-not-allowed bg-slate-700 text-slate-500'
             : dealSaveStatus === 'saved'

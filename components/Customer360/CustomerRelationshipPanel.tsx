@@ -62,7 +62,7 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <User2 className="h-5 w-5 text-emerald-400" />
-          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+          <h3 className="font-mono text-xs font-medium text-white">
             Customer 360
           </h3>
           {data?.client && (

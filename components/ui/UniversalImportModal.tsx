@@ -129,7 +129,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="universal-import-modal-title">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-slate-900 border border-slate-700 rounded-[var(--nfq-radius-card)] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
                     <div className="flex items-center gap-3">
@@ -147,11 +147,11 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto space-y-6">
+                <div className="p-4 overflow-y-auto space-y-6">
                     {/* STEP 1: MODULE SELECTION */}
                     {status === 'idle' && (
                         <div className="space-y-4">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.selectImportDestination}</label>
+                            <label className="text-xs font-bold text-slate-400 tracking-normal">{t.selectImportDestination}</label>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {MODULES.map((mod) => {
                                     const Icon = mod.icon;
@@ -194,7 +194,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                     {/* STEP 2: PARSING */}
                     {status === 'parsing' && (
                         <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                            <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
+                            <div className="w-12 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
                             <div className="text-center">
                                 <h3 className="text-lg font-bold text-white">{t.analyzingFile}</h3>
                                 <p className="text-sm text-slate-500">{t.validatingFormat}</p>
@@ -217,7 +217,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                             </div>
 
                             <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">{t.dataPreview}</h4>
+                                <h4 className="text-[10px] font-bold text-slate-500 tracking-normal mb-3">{t.dataPreview}</h4>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-[10px] text-slate-400">
                                         <thead>
@@ -246,7 +246,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
                     {status === 'importing' && (
                         <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                            <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                            <div className="w-12 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
                             <div className="text-center">
                                 <h3 className="text-lg font-bold text-white">{t.importingData}</h3>
                                 <p className="text-sm text-slate-500">{t.updatingRecords}</p>

@@ -85,7 +85,7 @@ export function PricingReceiptWaterfall({
         <div className="mx-4 mt-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
           <div className="mb-1 flex items-center gap-2">
             <XCircle size={14} className="shrink-0 text-red-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-red-400">
+            <span className="text-xs font-medium text-red-400">
               Validation Errors
             </span>
           </div>
@@ -102,7 +102,7 @@ export function PricingReceiptWaterfall({
       <div className="flex-1 space-y-1 overflow-auto bg-[var(--nfq-bg-surface)] p-4">
         {result.formulaUsed && (
           <div className="mb-3 rounded-lg border border-indigo-800/50 bg-indigo-950/30 p-2">
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+            <div className="mb-1 text-[11px] font-medium text-indigo-400">
               Applied Formula
             </div>
             <div className="font-mono text-xs text-indigo-300">{result.formulaUsed}</div>
@@ -116,7 +116,7 @@ export function PricingReceiptWaterfall({
           </div>
         )}
 
-        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+        <div className="mb-2 text-[11px] font-medium text-slate-500">
           Pricing Construction Flow
         </div>
 
@@ -200,7 +200,7 @@ export function PricingReceiptWaterfall({
             <div className="ml-2 mt-1">
               <button
                 onClick={onToggleCreditDetail}
-                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-300"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 transition-colors hover:text-slate-300"
               >
                 {showCreditDetail ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 {t.creditRiskDetail || 'Credit Risk Detail'}

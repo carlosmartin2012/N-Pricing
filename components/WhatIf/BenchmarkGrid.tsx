@@ -238,7 +238,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
         {stats && (
           <div className="grid grid-cols-4 gap-3">
             <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+              <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Total Cells
               </div>
               <div className="mt-1 text-lg font-mono font-bold text-[color:var(--nfq-text-primary)]">
@@ -246,7 +246,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
               </div>
             </div>
             <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+              <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Competitive
               </div>
               <div className="mt-1 flex items-center gap-2">
@@ -255,7 +255,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
               </div>
             </div>
             <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+              <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Above Market
               </div>
               <div className="mt-1 flex items-center gap-2">
@@ -264,7 +264,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
               </div>
             </div>
             <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+              <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Avg Delta
               </div>
               <div className={`mt-1 text-lg font-mono font-bold ${deltaTone(stats.avgDelta)}`}>
@@ -276,7 +276,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
 
         {/* --- Benchmark comparison table --- */}
         <div>
-          <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+          <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
             Target vs Market Benchmarks
           </h4>
           {loadingComparisons ? (
@@ -292,7 +292,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
 
         {/* --- Budget consistency section --- */}
         <div>
-          <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-[color:var(--nfq-text-secondary)]">
+          <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
             Budget Consistency
           </h4>
           {loadingBudget ? (

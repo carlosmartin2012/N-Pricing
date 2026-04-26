@@ -159,7 +159,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
     <div className="fixed bottom-20 right-6 w-96 h-[600px] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right-10 fade-in duration-300">
       <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl border border-cyan-500/30 rounded-lg shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="h-12 border-b border-cyan-900/50 bg-cyan-950/20 flex items-center justify-between px-4 shrink-0">
+        <div className="h-10 border-b border-cyan-900/50 bg-cyan-950/20 flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-2 text-cyan-400">
             <Sparkles size={16} className="animate-pulse" />
             <span className="font-bold text-sm tracking-wider uppercase">Gemini Intelligence</span>

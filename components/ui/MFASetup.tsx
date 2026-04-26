@@ -34,7 +34,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-[var(--nfq-bg-surface)] p-4">
       <div className="flex items-center gap-3 mb-4">
         {mfaState.isVerified ? (
           <ShieldCheck className="h-5 w-5 text-emerald-400" />
