@@ -4,7 +4,7 @@
 > **Dependencias cerradas:** PR [#6](https://github.com/carlosmartin2012/N-Pricing/pull/6) (EntityOnboarding split + `.env.example`) · PR [#7](https://github.com/carlosmartin2012/N-Pricing/pull/7) (guard `requireTenancy()` mode-aware)
 > **Esta ola NO es:** un motor IRRBB regulatorio (ΔEVE, SOT, NII runoff). Ver §"Fuera de scope".
 >
-> ## Estado por bloque (2026-04-23)
+> ## Estado por bloque (2026-04-28)
 >
 > | Bloque | Pieza | Estado | PR |
 > |---|---|---|---|
@@ -19,16 +19,17 @@
 > | B | B.4 motor honra `curveShiftBps` (flag-gated) | ✅ | #40 (pre-sesión) |
 > | B | B.5 vista `/stress-pricing` | ✅ | [#42](https://github.com/carlosmartin2012/N-Pricing/pull/42) |
 > | B | B.6 `pricing_snapshots.scenario_id/source` | ✅ | #41 (pre-sesión) |
-> | B | Playwright e2e + Storybook story | ❌ polish | — |
+> | B | Playwright e2e | ✅ | [#67](https://github.com/carlosmartin2012/N-Pricing/pull/67) |
+> | B | Storybook story `StressPricingView` | ✅ | [#70](https://github.com/carlosmartin2012/N-Pricing/pull/70) |
 > | **C — Hash chain** | Schema + UNIQUE + verifier + endpoint | ✅ | [#43](https://github.com/carlosmartin2012/N-Pricing/pull/43) |
 > | C | Edge writer (retry + chain) | ✅ | [#47](https://github.com/carlosmartin2012/N-Pricing/pull/47) |
-> | C | Backfill histórico (opt-in script) | ❌ polish | — |
+> | C | Backfill histórico (opt-in script) | ✅ | [#68](https://github.com/carlosmartin2012/N-Pricing/pull/68) |
 > | **D — Market benchmarks** | Route + seed + chip + CSV importer | ✅ | #37 (pre-sesión) |
 > | D | Vista admin CRUD (D2) + auto-ingest (D3) | ❌ follow-up | — |
 >
-> **Conclusión:** todo el código de Ola 6 está en `main`. Sólo pendiente la
-> decisión operativa del flip `TENANCY_STRICT=on` en producción y polish
-> opcional (e2e, backfill, admin UI).
+> **Conclusión:** Ola 6 cerrada al 100% en código (incluyendo polish e2e + Storybook + backfill histórico). Sólo pendiente la decisión operativa del flip `TENANCY_STRICT=on` en producción y los follow-ups del bloque D (admin UI CRUD + auto-ingest), ambos bloqueados por input externo / decisión ops.
+>
+> **Siguiente ola:** [`ola-7-collaborative-ux.md`](./ola-7-collaborative-ux.md) (plan).
 
 ---
 
