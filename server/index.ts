@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { runMigrations } from './migrate';
 import dealsRouter from './routes/deals';
+import dealTimelineRouter from './routes/dealTimeline';
 import auditRouter from './routes/audit';
 import configRouter from './routes/config';
 import marketDataRouter from './routes/marketData';
@@ -126,6 +127,10 @@ const entityScoped = tenancyOn
 
 // Protected routes (auth required)
 app.use('/api/deals', ...entityScoped, dealsRouter);
+// Deal timeline aggregator (Ola 7 Bloque A). Mounted *after* dealsRouter
+// so GET /api/deals/:id keeps matching the deal lookup; the timeline
+// router only handles the deeper /:id/timeline path.
+app.use('/api/deals', ...entityScoped, dealTimelineRouter);
 app.use('/api/audit', ...entityScoped, auditRouter);
 app.use('/api/config', ...entityScoped, configRouter);
 app.use('/api/market-data', ...entityScoped, marketDataRouter);

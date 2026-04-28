@@ -386,12 +386,12 @@ Cada bloque cierra con un PR mergeable a `main`. **A puede empezar antes que ter
 
 ---
 
-## 7. Decisiones que necesitan input antes de empezar
+## 7. Decisiones — resueltas 2026-04-28
 
-1. **¿Eliminar `EscalationsView` y `DossiersView` del sidebar tras Bloque A?** Recomendación: sí, a los 30 días post-merge si métricas confirman migración. Reduce de 16 → 14 vistas (cumple §3 integral review).
-2. **¿Cursors siempre on o opt-in por tenant?** Recomendación: feature flag per-tenant `LIVE_CURSORS_ENABLED` default `true` con kill switch documentado.
-3. **¿Redactar PII en prompts a Gemini?** Recomendación: sí por defecto, opt-in para inhibir vía `COPILOT_REDACT_CLIENT_PII=false` per tenant.
-4. **¿Mantener tab Ask separado o fusionar con `/ai` (GenAIChat)?** Recomendación: separar por intención — `/ai` es para sesión larga; Cmd+K es para "respuesta rápida con contexto del momento". Pueden compartir `ai_response_traces`.
+1. **Eliminación de `EscalationsView` / `DossiersView` del sidebar: sí, con deprecation gradual.** Durante 30 días post-merge cada vista standalone muestra banner "Open in Timeline" enlazando al deal. Después se eliminan del sidebar (rutas mantienen compatibilidad deep-link 90 días más). Reduce de 16 → 14 vistas y respeta el principio §3 del integral review ("Ola 7 reduce, no añade").
+2. **Cursors: feature flag per-tenant `LIVE_CURSORS_ENABLED` default `true`** + kill switch global `LIVE_CURSORS_KILL=true` (env var) para rollback en <1 min si hay incidente. Default `on` porque el ROI de presence solo se ve con masa crítica de adopción.
+3. **PII en prompts a Gemini: redactar por defecto.** Prompt builder sustituye `clientName` y `clientId` por `<CLIENT_REDACTED>` antes de enviar; el snapshot original queda intacto en DB. Override per-tenant vía `COPILOT_REDACT_CLIENT_PII=false` documentado pero **no recomendado**. Failing closed protege ante un GDPR-incident por una opción de UX.
+4. **Tab Ask vs `/ai`: separar por intención.** Cmd+K Ask = "quick ask con snapshot del momento como contexto"; `/ai` (GenAIChat) = "sesión larga libre". Ambos persisten en `ai_response_traces` con discriminator `kind='copilot'` vs `kind='chat'`.
 
 ---
 
