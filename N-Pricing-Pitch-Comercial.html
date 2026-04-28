@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N-Pricing — Pitch Comercial NFQ Advisory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif'],mono:['"JetBrains Mono"','monospace']},colors:{navy:{DEFAULT:'#0B1026',light:'#1A2340',mid:'#2A3558'},slate:{50:'#F8F9FB',100:'#F0F1F5',200:'#E2E4EB',300:'#C8CBD6',400:'#9DA2B3',500:'#6B7185',600:'#4A4F63'},nfq:{amber:'#F48B4A',coral:'#E04870',violet:'#9B59B6',steel:'#5B7FC7',azure:'#3B82F6'}}}}}
+</script>
+<style>
+  /* ─── Theme CSS Variables ─── */
+  :root {
+    --sl-bg: #FFFFFF;
+    --sl-bg-card: #FFFFFF;
+    --sl-bg-alt: #F8F9FB;
+    --sl-text: #0B1026;
+    --sl-text-sec: #6B7185;
+    --sl-text-muted: #9DA2B3;
+    --sl-accent: #0B1026;
+    --sl-progress: #0B1026;
+    --sl-border: #E2E4EB;
+    --sl-nav-bg: #0B1026;
+    --sl-nav-text: #9DA2B3;
+    --sl-dark-bg: #0B1026;
+    --sl-dark-accent: #0B1026;
+    --sl-dark-text-sec: rgba(255,255,255,0.7);
+    --sl-dark-text-mut: rgba(255,255,255,0.4);
+    --sl-dark-module-bg: rgba(255,255,255,0.06);
+  }
+
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{font-family:'Inter',system-ui,sans-serif;background:#FFF;color:#0B1026;overflow:hidden}
+  .deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+  .slide{position:absolute;inset:0;opacity:0;transform:translateX(40px);transition:opacity .45s cubic-bezier(.25,1,.5,1),transform .45s cubic-bezier(.25,1,.5,1);display:flex;align-items:center;justify-content:center;padding:3.5rem 5.5rem;pointer-events:none}
+  .slide.active{opacity:1;transform:translateX(0);z-index:10;pointer-events:auto}
+  .slide.prev{opacity:0;transform:translateX(-40px)}
+
+  /* Themed slides use CSS variables */
+  .slide-themed{background:var(--sl-bg);color:var(--sl-text);transition:background-color 0.3s ease,color 0.3s ease}
+  .slide-themed .ex-num{color:var(--sl-text-muted)}
+  .slide-themed .ex-title{color:var(--sl-text)}
+  .slide-themed .ex-sub{color:var(--sl-text-sec)}
+  .slide-themed .box{border-color:var(--sl-border);background:var(--sl-bg-card)}
+  .slide-themed .box-m{border-color:var(--sl-border);background:var(--sl-bg-alt)}
+  .slide-themed .takeaway{border-top-color:var(--sl-accent)}
+  .slide-themed .takeaway p{color:var(--sl-text)}
+  .slide-themed .kpi-label{color:var(--sl-text-muted)}
+  .slide-themed .row-l{border-bottom-color:var(--sl-border)}
+  .slide-themed .tbl-header{background:var(--sl-bg-alt);color:var(--sl-text-muted)}
+  .slide-themed .tbl-row{border-bottom-color:var(--sl-border);color:var(--sl-text-sec)}
+  .slide-themed .tbl-row span.val{color:var(--sl-text)}
+  .slide-themed .screenshot-frame{border-color:var(--sl-border)}
+  .slide-themed .browser-bar{background:var(--sl-bg-alt);border-bottom-color:var(--sl-border)}
+  .slide-themed .flow-box{border-color:var(--sl-border);background:var(--sl-bg-card);color:var(--sl-text)}
+  .slide-themed .flow-conn{background:var(--sl-text-muted)}
+  .slide-themed .flow-conn::after{border-left-color:var(--sl-text-muted)}
+  .slide-themed .feat-box{border-color:var(--sl-border);background:var(--sl-bg-card)}
+  .slide-themed .feat-title{color:var(--sl-text)}
+  .slide-themed .feat-desc{color:var(--sl-text-sec)}
+
+  /* Dark slides — cover, divider, closing (theme-aware) */
+  .slide-dark{background:var(--sl-dark-bg);color:#FFF}
+  .slide-dark .ex-num{color:var(--sl-dark-text-mut)}.slide-dark .ex-title{color:#FFF}.slide-dark .ex-sub{color:var(--sl-dark-text-sec)}
+  .slide-div{background:var(--sl-dark-bg);color:#FFF}
+  .slide-div .ex-sub,.slide-div p{color:var(--sl-dark-text-sec)}
+  .slide-dark .takeaway{border-top-color:var(--sl-dark-accent)}
+
+  #progress-track{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:#F0F1F5}
+  #progress-fill{height:100%;width:0;transition:width .4s ease;background:var(--sl-progress)}
+  #section-tag{display:none}
+  .nav-bar{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:200;display:flex;align-items:center;gap:.75rem;background:var(--sl-nav-bg);border-radius:6px;padding:.4rem 1.25rem;box-shadow:0 2px 12px rgba(11,16,38,.15)}
+  .nav-bar button{background:none;border:none;color:var(--sl-nav-text);cursor:pointer;font-size:.85rem;padding:.2rem .35rem;transition:color .15s;font-family:'Inter',sans-serif}
+  .nav-bar button:hover{color:#FFF}
+  .nav-bar .cnt{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.5);min-width:3.5rem;text-align:center}
+  .nav-bar .sep{width:1px;height:14px;background:rgba(255,255,255,.15)}
+  .theme-btn{font-size:.55rem !important;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .5rem !important;border-radius:3px;transition:all .15s !important}
+  .theme-btn.active{background:rgba(255,255,255,.15);color:#FFF !important}
+  #kb-hint{position:fixed;bottom:4.25rem;left:50%;transform:translateX(-50%);z-index:200;font-size:.55rem;color:#9DA2B3;font-family:'JetBrains Mono';transition:opacity .8s;letter-spacing:.08em}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .ex-num{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9DA2B3;margin-bottom:.75rem}
+  .ex-title{font-size:clamp(1.4rem,2.6vw,2rem);font-weight:700;line-height:1.2;color:#0B1026;margin-bottom:.5rem}
+  .ex-sub{font-size:.85rem;color:#6B7185;line-height:1.6;max-width:38rem}
+  .box{border:1px solid #E2E4EB;border-radius:4px;padding:1.25rem;background:#FFF}
+  .box-m{border:1px solid #E2E4EB;border-radius:4px;padding:1.25rem;background:#F8F9FB}
+  .takeaway{border-top:2px solid var(--sl-accent);padding-top:.85rem;margin-top:1.25rem}
+  .takeaway p{font-size:.75rem;font-weight:600;color:#0B1026}
+  .kpi{font-family:'JetBrains Mono',monospace;font-weight:700;line-height:1}
+  .kpi-label{font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#9DA2B3;margin-top:.3rem}
+  .tag{display:inline-block;padding:.15rem .5rem;border-radius:3px;font-size:.55rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .row-l{border-bottom:1px solid #E2E4EB;padding-bottom:.6rem;margin-bottom:.6rem}
+  .row-l:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+  .ico-s{width:1.75rem;height:1.75rem;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ico-s svg{width:.9rem;height:.9rem;stroke-width:1.75;stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .si{width:100%;max-width:68rem}
+
+  /* ─── Visualization helpers ─── */
+  .viz-node{display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:.6rem;font-weight:600;text-align:center;line-height:1.2}
+  .viz-arrow{color:#C8CBD6;font-size:.75rem;display:flex;align-items:center}
+  .viz-line{background:#E2E4EB}
+  .viz-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+  /* Flow connector */
+  .flow-h{display:flex;align-items:center;gap:0}
+  .flow-box{padding:.35rem .7rem;border:1.5px solid #E2E4EB;border-radius:4px;font-size:.6rem;font-weight:600;background:#FFF;white-space:nowrap;position:relative;z-index:1}
+  .flow-conn{width:24px;height:1.5px;background:#C8CBD6;position:relative}
+  .flow-conn::after{content:'';position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:5px solid #C8CBD6}
+
+  /* ─── Architecture layers ─── */
+  .arch-layer{padding:.6rem 1rem;border:1.5px solid var(--sl-border);border-radius:4px;background:var(--sl-bg-card);font-size:.6rem;font-weight:600;text-align:center;margin-bottom:.35rem}
+  .arch-layer:last-child{margin-bottom:0}
+  .arch-conn{display:flex;justify-content:center;padding:.15rem 0;color:var(--sl-text-muted);font-size:.55rem}
+
+  /* ─── Screenshot browser frame ─── */
+  .screenshot-frame{border:1px solid #E2E4EB;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+  .screenshot-frame .browser-bar{background:#F8F9FB;padding:8px 12px;display:flex;gap:6px;align-items:center;border-bottom:1px solid #E2E4EB}
+  .screenshot-frame .dot{width:8px;height:8px;border-radius:50%}
+  .screenshot-frame .dot-red{background:#FF5F57}
+  .screenshot-frame .dot-yellow{background:#FFBD2E}
+  .screenshot-frame .dot-green{background:#28C840}
+
+  /* ─── Data table ─── */
+  .data-tbl{width:100%;border-collapse:collapse;font-size:.65rem}
+  .data-tbl th{text-align:left;padding:.5rem .6rem;font-size:.5rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;background:var(--sl-bg-alt);color:var(--sl-text-muted);border-bottom:1px solid var(--sl-border)}
+  .data-tbl td{padding:.45rem .6rem;border-bottom:1px solid var(--sl-border);color:var(--sl-text-sec)}
+  .data-tbl td.val{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--sl-text);font-size:.6rem}
+  .data-tbl tr:last-child td{border-bottom:none}
+  .tbl-wrap{border:1px solid var(--sl-border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+
+  /* ─── Matrix / Multi-axis grid ─── */
+  .matrix-wrap{border:1px solid var(--sl-border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+  .matrix-wrap .m-head{background:var(--sl-bg-alt);padding:10px 12px;font-weight:700;text-align:center}
+  .matrix-wrap .m-cell{background:var(--sl-bg-card);padding:10px 12px;text-align:center;border-top:1px solid var(--sl-border)}
+  .matrix-wrap .m-row-head{background:var(--sl-bg-card);padding:10px 14px;font-weight:600;text-align:left;border-top:1px solid var(--sl-border)}
+
+  /* ─── Section Navigator ─── */
+  .sec-nav{position:fixed;top:1rem;left:0;right:0;z-index:190;display:flex;align-items:center;justify-content:center;gap:0;padding:6px 5.5rem;background:transparent;border-bottom:none;transition:all .3s;transform:translateY(-100%)}
+  .sec-nav.visible{transform:translateY(0)}
+  .sec-nav-btn{background:none;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;color:var(--sl-text-muted);transition:all .15s;white-space:nowrap;position:relative}
+  .sec-nav-btn:hover{color:var(--sl-text)}
+  .sec-nav-btn.active{color:var(--sl-accent);font-weight:600}
+  .sec-nav-btn.active::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:2px;background:var(--sl-accent)}
+  .sec-nav.on-dark{background:transparent;border-bottom:none}
+  .sec-nav.on-dark .sec-nav-btn{color:rgba(255,255,255,.3)}
+  .sec-nav.on-dark .sec-nav-btn:hover{color:rgba(255,255,255,.7)}
+  .sec-nav.on-dark .sec-nav-btn.active{color:#fff}
+  .sec-nav.on-dark .sec-nav-btn.active::after{background:#fff}
+
+  /* ─── Export button styles ─── */
+  .export-btn{font-size:.5rem !important;letter-spacing:.06em;text-transform:uppercase;padding:.15rem .45rem !important;border-radius:3px;transition:all .15s !important;opacity:.6}
+  .export-btn:hover{opacity:1;background:rgba(255,255,255,.12) !important}
+  .export-btn svg{vertical-align:middle;margin-right:3px}
+
+  /* ─── Glass mode — Apple Liquid Glass ─── */
+  /* Glass background — Minimal (Apple Liquid Glass) */
+  body.glass-active{
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(100,120,160,0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 60%, rgba(80,100,140,0.15) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 80%, rgba(110,130,170,0.1) 0%, transparent 40%),
+      linear-gradient(145deg, #d8dae0 0%, #d0d4dc 50%, #d4d6de 100%);
+  }
+  /* Liquid glass cards — ultra-transparent, color comes from background */
+  body.glass-active .slide-themed .box,
+  body.glass-active .slide-themed .box-m,
+  body.glass-active .slide-themed .feat-box{
+    background:rgba(255,255,255,0.18) !important;
+    border:0.5px solid rgba(255,255,255,0.35) !important;
+    backdrop-filter:blur(20px) saturate(120%) brightness(1.08);
+    -webkit-backdrop-filter:blur(20px) saturate(120%) brightness(1.08);
+    box-shadow:
+      0 4px 20px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.45);
+    border-radius:22px !important;
+  }
+  /* Flow/arch elements */
+  body.glass-active .flow-box,
+  body.glass-active .arch-layer{
+    background:rgba(255,255,255,0.2) !important;
+    border:0.5px solid rgba(255,255,255,0.3) !important;
+    backdrop-filter:blur(16px) saturate(120%) brightness(1.06);
+    -webkit-backdrop-filter:blur(16px) saturate(120%) brightness(1.06);
+    box-shadow:0 2px 10px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.35);
+    border-radius:14px !important;
+  }
+  /* Screenshot frame */
+  body.glass-active .slide-themed .screenshot-frame{
+    border:0.5px solid rgba(255,255,255,0.3) !important;
+    background:rgba(255,255,255,0.15) !important;
+    backdrop-filter:blur(16px) brightness(1.05);
+    -webkit-backdrop-filter:blur(16px) brightness(1.05);
+    box-shadow:0 4px 24px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.3);
+    border-radius:22px !important;
+    overflow:hidden;
+  }
+  body.glass-active .slide-themed .browser-bar{
+    background:rgba(255,255,255,0.12) !important;
+    border-bottom:0.5px solid rgba(255,255,255,0.15) !important;
+  }
+  /* Nav bar — liquid glass pill */
+  body.glass-active .nav-bar{
+    background:rgba(255,255,255,0.2) !important;
+    backdrop-filter:blur(20px) saturate(120%) brightness(1.08);
+    -webkit-backdrop-filter:blur(20px) saturate(120%) brightness(1.08);
+    border:0.5px solid rgba(255,255,255,0.35);
+    box-shadow:0 2px 14px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.35);
+    color:#3d4255 !important;
+  }
+  body.glass-active .nav-bar button{color:#5a6070 !important}
+  body.glass-active .nav-bar button:hover{color:#1a1d28 !important}
+  body.glass-active .nav-bar .cnt{color:rgba(0,0,0,0.35) !important}
+  body.glass-active .nav-bar .sep{background:rgba(0,0,0,0.1) !important}
+  body.glass-active .theme-btn.active{background:rgba(0,0,0,0.08) !important;color:#1a1d28 !important}
+  /* Data table */
+  body.glass-active .slide-themed .data-tbl th{
+    background:rgba(255,255,255,0.25) !important;
+    border-bottom-color:rgba(0,0,0,0.05) !important;
+    color:#6b7085 !important;
+  }
+  body.glass-active .slide-themed .data-tbl td{
+    border-bottom-color:rgba(0,0,0,0.04) !important;
+    color:#3d4255 !important;
+  }
+  body.glass-active .slide-themed .row-l{
+    border-bottom-color:rgba(0,0,0,0.05) !important;
+  }
+  body.glass-active .tag{
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+  /* Takeaway */
+  body.glass-active .slide-themed .takeaway{
+    border-top-color:rgba(11,16,38,0.15) !important;
+  }
+  body.glass-active .slide-themed .kpi-label{
+    color:#6b7085 !important;
+  }
+  /* Glass: matrix-wrap, tbl-wrap, sec-nav */
+  body.glass-active .matrix-wrap,body.glass-active .tbl-wrap{background:rgba(255,255,255,0.12) !important;border:0.5px solid rgba(255,255,255,0.3) !important;backdrop-filter:blur(16px) saturate(120%) brightness(1.06);-webkit-backdrop-filter:blur(16px) saturate(120%) brightness(1.06);box-shadow:0 4px 20px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.4);border-radius:22px !important}
+  body.glass-active .matrix-wrap .m-head{background:rgba(255,255,255,0.15) !important;border-color:rgba(0,0,0,0.04) !important}
+  body.glass-active .matrix-wrap .m-cell,body.glass-active .matrix-wrap .m-row-head{background:transparent !important;border-color:rgba(0,0,0,0.04) !important}
+  body.glass-active .tbl-wrap .data-tbl th{background:rgba(255,255,255,0.15) !important;border-color:rgba(0,0,0,0.04) !important}
+  body.glass-active .tbl-wrap .data-tbl td{background:transparent !important;border-color:rgba(0,0,0,0.04) !important}
+  body.glass-active .sec-nav{background:transparent !important;border-bottom:none !important}
+  body.glass-active .sec-nav .sec-nav-btn{color:#6b7085 !important}
+  body.glass-active .sec-nav .sec-nav-btn:hover{color:#1a1d28 !important}
+  body.glass-active .sec-nav .sec-nav-btn.active{color:#0B1026 !important}
+  body.glass-active .sec-nav .sec-nav-btn.active::after{background:#0B1026 !important}
+
+  /* ─── Divider & cover geometric backgrounds ─── */
+  /* Note: .slide already has position:absolute — pseudo-elements work within it */
+  .slide-div::before {
+    content: '';position: absolute;inset: 0;
+    background:
+      radial-gradient(ellipse 50% 70% at 85% 20%, rgba(244,139,74,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(155,89,182,0.05) 0%, transparent 70%),
+      radial-gradient(ellipse 30% 40% at 50% 50%, rgba(91,127,199,0.03) 0%, transparent 60%);
+    pointer-events: none;z-index: 0;
+  }
+  .slide-div::after {
+    content: '';position: absolute;bottom: 3rem;right: 5.5rem;
+    width: 80px;height: 80px;
+    border-right: 1.5px solid rgba(255,255,255,0.06);
+    border-bottom: 1.5px solid rgba(255,255,255,0.06);
+    pointer-events: none;z-index: 0;
+  }
+  .slide-dark::before {
+    content: '';position: absolute;inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 90% 30%, rgba(244,139,74,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 5% 90%, rgba(91,127,199,0.04) 0%, transparent 50%);
+    pointer-events: none;z-index: 0;
+  }
+  .slide-div .si, .slide-dark .si { position: relative; z-index: 1; }
+  body.glass-active .slide-div::before {
+    background:
+      radial-gradient(ellipse 50% 70% at 85% 20%, rgba(83,221,252,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(155,89,182,0.04) 0%, transparent 70%);
+  }
+
+  /* ─── Staggered entrance animations ─── */
+  .slide.active .box,
+  .slide.active .feat-box,
+  .slide.active .flow-box,
+  .slide.active .arch-layer {
+    animation: cardReveal 0.5s cubic-bezier(.25,1,.5,1) both;
+  }
+  .slide.active .box:nth-child(1), .slide.active .feat-box:nth-child(1) { animation-delay: 0.08s; }
+  .slide.active .box:nth-child(2), .slide.active .feat-box:nth-child(2) { animation-delay: 0.16s; }
+  .slide.active .box:nth-child(3), .slide.active .feat-box:nth-child(3) { animation-delay: 0.24s; }
+  .slide.active .box:nth-child(4), .slide.active .feat-box:nth-child(4) { animation-delay: 0.32s; }
+  .slide.active .flow-box:nth-child(1) { animation-delay: 0.1s; }
+  .slide.active .flow-box:nth-child(3) { animation-delay: 0.2s; }
+  .slide.active .flow-box:nth-child(5) { animation-delay: 0.3s; }
+  .slide.active .flow-box:nth-child(7) { animation-delay: 0.4s; }
+  @keyframes cardReveal {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active .box, .slide.active .feat-box,
+    .slide.active .flow-box, .slide.active .arch-layer { animation: none; }
+  }
+  body.exporting .slide .box, body.exporting .slide .feat-box,
+  body.exporting .slide .flow-box, body.exporting .slide .arch-layer {
+    animation: none !important; opacity: 1 !important; transform: none !important;
+  }
+
+  /* ─── Table row hover ─── */
+  .data-tbl tbody tr { transition: background-color 0.15s ease; }
+  .slide-themed .data-tbl tbody tr:hover { background-color: var(--sl-bg-alt); }
+  body.glass-active .data-tbl tbody tr:hover { background-color: rgba(255,255,255,0.06); }
+
+  /* ─── Card hover lift ─── */
+  .box, .feat-box { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .box:hover, .feat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  @media print { .box:hover, .feat-box:hover { transform: none; box-shadow: none; } }
+
+  /* ─── Progress bar visualization ─── */
+  /* Usage: <div class="bar-wrap"><span class="bar-label">IRRBB</span><div class="bar-track"><div class="bar-fill" style="width:85%;background:#F48B4A"></div></div><span class="bar-value" style="color:#F48B4A">85%</span></div> */
+  .bar-wrap { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .bar-label { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sl-text-sec); min-width: 5rem; }
+  .bar-track { flex: 1; height: 6px; background: var(--sl-bg-alt); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(.25,1,.5,1); }
+  .bar-value { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; min-width: 2.5rem; text-align: right; }
+
+  /* ─── Edit mode ─── */
+  .edit-mode .slide.active [contenteditable="true"]{outline:1px dashed var(--sl-accent);outline-offset:3px;cursor:text;border-radius:2px}
+  .edit-mode .slide-dark [contenteditable="true"]{outline-color:rgba(255,255,255,.35)}
+  .edit-mode .slide-div [contenteditable="true"]{outline-color:rgba(255,255,255,.35)}
+  .export-btn.active-tool{opacity:1 !important;background:rgba(255,255,255,.2) !important;color:#FFF !important}
+
+  /* ─── Post-it notes ─── */
+  .postit{position:absolute;width:170px;min-height:80px;background:#fef08a;border-radius:2px;padding:26px 12px 12px;font-size:.7rem;font-family:var(--nfq-font-sans);color:#1a1a1a;box-shadow:2px 4px 12px rgba(0,0,0,.18);cursor:grab;z-index:100;line-height:1.4;user-select:none}
+  .postit:nth-child(odd){transform:rotate(-1.5deg)}
+  .postit:nth-child(even){transform:rotate(1deg)}
+  .postit.dragging{cursor:grabbing;box-shadow:4px 8px 20px rgba(0,0,0,.25);z-index:150}
+  .postit .postit-close{position:absolute;top:5px;right:8px;cursor:pointer;font-size:.75rem;color:#999;font-weight:bold;line-height:1;padding:2px}
+  .postit .postit-close:hover{color:#e11d48}
+  .postit .postit-text{outline:none;min-height:36px;word-break:break-word}
+  .postit .postit-label{position:absolute;top:6px;left:10px;font-size:.45rem;text-transform:uppercase;letter-spacing:.08em;color:#b8860b;font-weight:600}
+  .notes-hint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;background:rgba(0,0,0,.7);color:#fff;padding:12px 24px;border-radius:6px;font-size:.75rem;pointer-events:none;opacity:0;transition:opacity .3s}
+  .notes-hint.show{opacity:1}
+
+  /* ─── Print / PDF ─── */
+  @media print {
+    @page { size: landscape; margin: 0; }
+    body { overflow: visible !important; background: #fff !important; }
+    body.glass-active { background: #fff !important; }
+    .nav-bar, #kb-hint, #progress-track, #section-tag, #slide-logo, .sec-nav,
+    .notes-hint, .postit, #export-overlay { display: none !important; }
+    .deck { position: static !important; width: auto !important; height: auto !important; overflow: visible !important; }
+    .slide {
+      position: static !important; opacity: 1 !important; transform: none !important;
+      pointer-events: auto !important; display: flex !important;
+      width: 100vw !important; height: 100vh !important;
+      page-break-after: always; break-after: page;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .slide:last-child { page-break-after: auto; break-after: auto; }
+    /* Force light theme for readability */
+    .slide-themed { background: #fff !important; color: #0B1026 !important; }
+    .slide-themed .ex-num { color: #9DA2B3 !important; }
+    .slide-themed .ex-title { color: #0B1026 !important; }
+    .slide-themed .ex-sub { color: #6B7185 !important; }
+    .slide-themed .box, .slide-themed .feat-box { background: #fff !important; border-color: #E2E4EB !important; }
+    .slide-themed .box-m { background: #F8F9FB !important; border-color: #E2E4EB !important; }
+    .slide-themed .takeaway { border-top-color: #0B1026 !important; }
+    .slide-themed .takeaway p { color: #0B1026 !important; }
+    .slide-themed .kpi-label { color: #9DA2B3 !important; }
+    .slide-themed .screenshot-frame { border-color: #E2E4EB !important; }
+    .slide-themed .browser-bar { background: #F8F9FB !important; border-color: #E2E4EB !important; }
+    .slide-themed .flow-box { background: #fff !important; border-color: #E2E4EB !important; color: #0B1026 !important; }
+    .slide-themed .data-tbl th { background: #F8F9FB !important; color: #9DA2B3 !important; }
+    .slide-themed .data-tbl td { color: #6B7185 !important; }
+    .slide-themed .row-l { border-bottom-color: #E2E4EB !important; }
+  }
+</style>
+<!-- Export libraries -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+</head>
+<body>
+<div id="progress-track"><div id="progress-fill"></div></div>
+<div id="slide-logo" style="position:fixed;top:1.5rem;left:3rem;z-index:200;opacity:0.7;transition:opacity .3s">
+  <svg width="20" height="25"><use href="#nfq-iso"/></svg>
+</div>
+<div id="section-tag" style="left:5.5rem"></div>
+<!-- NFQ Isotipo — global gradient defs + symbol -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <linearGradient id="ng1" x1="16.08" y1="5222.41" x2="16.08" y2="5313.37" gradientTransform="translate(0 5329.63) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset=".25" stop-color="#ec683e"/><stop offset="1" stop-color="#d13b5f"/>
+    </linearGradient>
+    <linearGradient id="ng2" x1="16.08" y1="5252.89" x2="16.08" y2="5329.29" gradientTransform="translate(0 5329.63) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="ng3" x1="14.82" y1="5318" x2="81.61" y2="5220.63" gradientTransform="translate(0 5329.63) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset=".25" stop-color="#d13b5f"/><stop offset="1" stop-color="#217bee"/>
+    </linearGradient>
+    <linearGradient id="ng4" x1="46.31" y1="5272.31" x2="80.07" y2="5219.19" gradientTransform="translate(0 5329.63) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <symbol id="nfq-iso" viewBox="0 0 96.64 120.34">
+      <path fill="url(#ng1)" d="M32.16,101.78L0,120.34V18.9L32.15.34v101.44Z"/>
+      <path fill="url(#ng2)" fill-opacity=".3" d="M32.16,101.78L0,120.34V18.9L32.15.34v101.44Z"/>
+      <path fill="url(#ng3)" d="M96.46,101.78l-32.16,18.56L0,18.9,32.15.34l64.31,101.44Z"/>
+      <path fill="url(#ng4)" fill-opacity=".2" d="M96.46,101.78l-32.16,18.56L0,18.9,32.15.34l64.31,101.44Z"/>
+      <path fill="#217bee" d="M96.46,101.78l-32.16,18.56V18.9L96.46.34v101.44Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="deck" id="deck">
+
+<!-- ━━━ 0 · COVER ━━━ -->
+<div class="slide slide-dark" data-section="">
+  <div class="si">
+    <div class="flex items-center justify-between mb-16">
+      <svg width="28" height="35" class="opacity-90"><use href="#nfq-iso"/></svg>
+      <p class="mono text-[.6rem] tracking-[.2em] uppercase" style="color:var(--sl-dark-text-mut)">Confidencial · Abril 2026</p>
+    </div>
+    <div class="flex items-end justify-between">
+      <div>
+        <h1 class="text-[clamp(3.5rem,7vw,5.5rem)] font-black tracking-tight leading-[.95] mb-5">N-Pricing</h1>
+        <div class="w-16 h-[3px] mb-5" style="background:var(--sl-dark-accent)"></div>
+        <p class="text-xl font-light max-w-md leading-relaxed mb-2" style="color:var(--sl-dark-text-sec)">El motor de pricing bancario integral que realmente se integra</p>
+        <p class="text-sm max-w-lg leading-relaxed" style="color:var(--sl-dark-text-mut)">FTP · Customer Pricing · Channel Quotes en una sola plataforma con reproducibilidad regulatoria byte-perfect</p>
+      </div>
+      <div class="flex-shrink-0 ml-8 opacity-80">
+        <div class="grid grid-cols-3 gap-[3px]" style="width:240px">
+          <div class="h-14 rounded-[3px] flex flex-col items-center justify-center" style="background:rgba(244,139,74,0.18)"><p class="text-[.55rem] font-bold text-nfq-amber/90 mono tracking-wider">FTP</p><p class="text-[.45rem] mt-0.5 text-nfq-amber/70">Interno</p></div>
+          <div class="h-14 rounded-[3px] flex flex-col items-center justify-center" style="background:rgba(224,72,112,0.18)"><p class="text-[.55rem] font-bold text-nfq-coral/90 mono tracking-wider">CLIENTE</p><p class="text-[.45rem] mt-0.5 text-nfq-coral/70">Relacional</p></div>
+          <div class="h-14 rounded-[3px] flex flex-col items-center justify-center" style="background:rgba(155,89,182,0.18)"><p class="text-[.55rem] font-bold text-nfq-violet/90 mono tracking-wider">CANAL</p><p class="text-[.45rem] mt-0.5 text-nfq-violet/70">Realtime</p></div>
+          <div class="col-span-3 h-10 rounded-[3px] flex items-center justify-center text-[.55rem] font-medium" style="background:var(--sl-dark-module-bg);color:var(--sl-dark-text-mut)">Motor único · 19 componentes · ESG nativo</div>
+          <div class="col-span-3 h-9 rounded-[3px] flex items-center justify-center text-[.5rem]" style="background:var(--sl-dark-module-bg);color:var(--sl-dark-text-mut);opacity:0.8">Snapshots inmutables · Hash chain · Replay</div>
+          <div class="col-span-3 h-7 rounded-[3px] flex items-center justify-center text-[.45rem]" style="background:var(--sl-dark-module-bg);color:var(--sl-dark-text-mut);opacity:0.6">Multi-tenant · SR 11-7 · EBA · SLO · RBAC</div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-14">
+      <p class="mono text-[.55rem] tracking-[.15em] uppercase" style="color:var(--sl-dark-text-mut);opacity:0.5">NFQ Advisory — Proceso y Tecnología para Entidades Financieras</p>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ 1 · DIVIDER · El Problema ━━━ -->
+<div class="slide slide-div" data-section="El problema">
+  <div class="si">
+    <p class="mono text-[.6rem] tracking-[.2em] uppercase mb-4" style="color:var(--sl-dark-text-mut)">Sección 01</p>
+    <h2 class="text-[clamp(2.5rem,5vw,4rem)] font-black leading-tight mb-4">El pricing bancario<br>está fragmentado</h2>
+    <div class="w-12 h-[3px] mb-6" style="background:var(--sl-dark-accent)"></div>
+    <p class="text-base max-w-lg" style="color:var(--sl-dark-text-sec)">Tres motores · Tres equipos · Tres verdades · Arbitraje silencioso dentro de casa</p>
+  </div>
+</div>
+
+<!-- ━━━ 2 · CONTENT · Tres silos ━━━ -->
+<div class="slide slide-themed" data-section="El problema">
+  <div class="si">
+    <div class="ex-num">Exhibit 01 — Diagnóstico</div>
+    <div class="ex-title">Tres motores de pricing, tres equipos, tres verdades</div>
+    <p class="ex-sub mb-6">La realidad operativa de la mayoría de entidades: Tesorería calcula FTP en una herramienta, Banca de Negocio pricing comercial en otra, y Canales cotiza con una tercera. Nada cuadra al final del mes.</p>
+
+    <div class="grid grid-cols-3 gap-4 mb-5">
+      <div class="box p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="ico-s bg-nfq-amber/10 text-nfq-amber"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></div>
+          <span class="mono text-[.55rem] font-semibold uppercase tracking-wider text-nfq-amber">Tesorería · ALM</span>
+        </div>
+        <p class="text-[.75rem] font-bold mb-2" style="color:var(--sl-text)">FTP en Excel o monolito legacy</p>
+        <p class="text-[.65rem]" style="color:var(--sl-text-sec)">Curvas, LCR/NSFR y capital en hojas separadas. Cambiar una metodología requiere semanas y dos comités.</p>
+      </div>
+      <div class="box p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="ico-s bg-nfq-coral/10 text-nfq-coral"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <span class="mono text-[.55rem] font-semibold uppercase tracking-wider text-nfq-coral">Banca Negocio</span>
+        </div>
+        <p class="text-[.75rem] font-bold mb-2" style="color:var(--sl-text)">Pricing deal-a-deal sin relación</p>
+        <p class="text-[.65rem]" style="color:var(--sl-text-sec)">No hay visión del cliente completo. Cross-bonus manual, targets top-down no se aplican, leakage invisible.</p>
+      </div>
+      <div class="box p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="ico-s bg-nfq-violet/10 text-nfq-violet"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/></svg></div>
+          <span class="mono text-[.55rem] font-semibold uppercase tracking-wider text-nfq-violet">Canales</span>
+        </div>
+        <p class="text-[.75rem] font-bold mb-2" style="color:var(--sl-text)">Cotización batch, no realtime</p>
+        <p class="text-[.65rem]" style="color:var(--sl-text-sec)">Cargar una campaña nueva tarda semanas. El canal web usa precios de ayer; la sucursal, los de hace un mes.</p>
+      </div>
+    </div>
+
+    <div class="box-m p-4">
+      <div class="grid grid-cols-4 gap-3">
+        <div class="text-center">
+          <p class="kpi text-[1.5rem] text-nfq-coral">3x</p>
+          <p class="kpi-label">Motores distintos</p>
+        </div>
+        <div class="text-center">
+          <p class="kpi text-[1.5rem] text-nfq-coral">0</p>
+          <p class="kpi-label">Trazabilidad cross-silo</p>
+        </div>
+        <div class="text-center">
+          <p class="kpi text-[1.5rem] text-nfq-coral">&gt;4 sem</p>
+          <p class="kpi-label">Cambio metodología</p>
+        </div>
+        <div class="text-center">
+          <p class="kpi text-[1.5rem] text-nfq-coral">?</p>
+          <p class="kpi-label">Margen real por cliente</p>
+        </div>
+      </div>
+    </div>
+    <div class="takeaway"><p>Cuando FTP, Customer y Canal hablan idiomas distintos, el banco arbitra contra sí mismo — y lo descubre meses después en un informe de rentabilidad que ya no se puede reconstruir.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 3 · CONTENT · Pain Points ━━━ -->
+<div class="slide slide-themed" data-section="El problema">
+  <div class="si">
+    <div class="ex-num">Exhibit 02 — Pain points</div>
+    <div class="ex-title">Los seis dolores que nos encontramos en cada entidad</div>
+    <p class="ex-sub mb-6">Síntomas recurrentes en Tier-1 y Tier-2. Todos ellos tienen el mismo origen: herramientas fragmentadas con dueño de negocio distinto al dueño técnico.</p>
+
+    <div class="grid grid-cols-3 gap-3">
+      <div class="feat-box box p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="ico-s bg-nfq-amber/10 text-nfq-amber"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <h3 class="feat-title text-[.65rem] font-bold uppercase">Reproducibilidad</h3>
+        </div>
+        <p class="feat-desc text-[.6rem]">Reconstruir un pricing de hace 6 meses para un ejercicio EBA o una reclamación: imposible sin parar al equipo dos semanas.</p>
+      </div>
+      <div class="feat-box box p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="ico-s bg-nfq-coral/10 text-nfq-coral"><svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
+          <h3 class="feat-title text-[.65rem] font-bold uppercase">Leakage invisible</h3>
+        </div>
+        <p class="feat-desc text-[.6rem]">Deals que salen fuera de banda sin alerta. Nadie sabe cuánto margen se pierde ni qué originador lo provoca.</p>
+      </div>
+      <div class="feat-box box p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="ico-s bg-nfq-violet/10 text-nfq-violet"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <h3 class="feat-title text-[.65rem] font-bold uppercase">ESG pegado con cinta</h3>
+        </div>
+        <p class="feat-desc text-[.6rem]">Greenium, DNSH, ISF Pillar I son post-procesos en Excel. Ni Pillar I ni Art. 501a CRR2 están integrados en el motor.</p>
+      </div>
+      <div class="feat-box box p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="ico-s bg-nfq-steel/10 text-nfq-steel"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <h3 class="feat-title text-[.65rem] font-bold uppercase">Time-to-market canal</h3>
+        </div>
+        <p class="feat-desc text-[.6rem]">Activar una campaña comercial en web + mobile + sucursal tarda 6-8 semanas. El ciclo comercial se pierde.</p>
+      </div>
+      <div class="feat-box box p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="ico-s bg-nfq-azure/10" style="color:#3B82F6"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <h3 class="feat-title text-[.65rem] font-bold uppercase">Gobierno manual</h3>
+        </div>
+        <p class="feat-desc text-[.6rem]">Model inventory en Word, dossiers sin firma criptográfica, backtesting en hojas de cálculo que nadie versiona.</p>
+      </div>
+      <div class="feat-box box p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="ico-s" style="background:rgba(16,185,129,0.1);color:#10b981"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+          <h3 class="feat-title text-[.65rem] font-bold uppercase">Stress desconectado</h3>
+        </div>
+        <p class="feat-desc text-[.6rem]">Los 6 shocks EBA se ejecutan aparte del pricing. No hay vista deal-level de cómo reacciona el margen ante cada shock.</p>
+      </div>
+    </div>
+    <div class="takeaway"><p>Cada uno de estos dolores es fácil de señalar; lo difícil es resolverlos a la vez sin romper los procesos regulatorios que ya funcionan.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 4 · DIVIDER · La plataforma ━━━ -->
+<div class="slide slide-div" data-section="La plataforma">
+  <div class="si">
+    <p class="mono text-[.6rem] tracking-[.2em] uppercase mb-4" style="color:var(--sl-dark-text-mut)">Sección 02</p>
+    <h2 class="text-[clamp(2.5rem,5vw,4rem)] font-black leading-tight mb-4">Una plataforma,<br>tres ámbitos</h2>
+    <div class="w-12 h-[3px] mb-6" style="background:var(--sl-dark-accent)"></div>
+    <p class="text-base max-w-lg" style="color:var(--sl-dark-text-sec)">Mismo motor · Mismas curvas · Mismas reglas · Mismo snapshot para siempre</p>
+  </div>
+</div>
+
+<!-- ━━━ 5 · CONTENT · Motor único ━━━ -->
+<div class="slide slide-themed" data-section="La plataforma">
+  <div class="si">
+    <div class="ex-num">Exhibit 03 — Arquitectura</div>
+    <div class="flex gap-8 items-start">
+      <div class="w-[38%] flex-shrink-0">
+        <div class="ex-title">Un motor. Tres canales de consumo. Cero inconsistencias.</div>
+        <p class="ex-sub mb-5">FTP interno, Customer Pricing relacional y Channel Quote en tiempo real se sirven de la misma implementación de <span class="mono text-[.7rem]">pricingEngine.calculatePricing()</span>. Cambiar una curva impacta a los tres simultáneamente.</p>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="box text-center py-3"><p class="kpi text-[1.4rem] text-nfq-amber">19</p><p class="kpi-label">Componentes FTP</p></div>
+          <div class="box text-center py-3"><p class="kpi text-[1.4rem] text-nfq-coral">4</p><p class="kpi-label">Metodologías</p></div>
+          <div class="box text-center py-3"><p class="kpi text-[1.4rem] text-nfq-violet">&lt;200ms</p><p class="kpi-label">Quote p95</p></div>
+          <div class="box text-center py-3"><p class="kpi text-[1.4rem] text-nfq-steel">100%</p><p class="kpi-label">Replay exacto</p></div>
+        </div>
+        <div class="takeaway"><p>Una sola fuente de verdad para pricing. Si dos canales muestran precios distintos, es imposible — por diseño.</p></div>
+      </div>
+      <div class="flex-1 flex flex-col items-center justify-center gap-5">
+        <!-- Central engine visualization -->
+        <div class="w-full flex flex-col items-center">
+          <!-- Top: Three consumers -->
+          <div class="grid grid-cols-3 gap-4 w-full mb-5">
+            <div class="flow-box text-center" style="border-color:#F48B4A;color:#F48B4A;background:rgba(244,139,74,0.06);padding:.6rem">
+              <p class="mono text-[.55rem] font-bold uppercase tracking-wider">Tesorería</p>
+              <p class="text-[.55rem] mt-1" style="color:var(--sl-text-sec)">FTP · RAROC · Stress</p>
+            </div>
+            <div class="flow-box text-center" style="border-color:#E04870;color:#E04870;background:rgba(224,72,112,0.06);padding:.6rem">
+              <p class="mono text-[.55rem] font-bold uppercase tracking-wider">Banca Negocio</p>
+              <p class="text-[.55rem] mt-1" style="color:var(--sl-text-sec)">Customer 360 · CLV · Targets</p>
+            </div>
+            <div class="flow-box text-center" style="border-color:#9B59B6;color:#9B59B6;background:rgba(155,89,182,0.06);padding:.6rem">
+              <p class="mono text-[.55rem] font-bold uppercase tracking-wider">Canales</p>
+              <p class="text-[.55rem] mt-1" style="color:var(--sl-text-sec)">Quote API · Campañas</p>
+            </div>
+          </div>
+
+          <!-- Connectors down -->
+          <div class="flex justify-around w-full mb-2" style="color:var(--sl-text-muted)">
+            <span class="text-[.7rem]">↓</span>
+            <span class="text-[.7rem]">↓</span>
+            <span class="text-[.7rem]">↓</span>
+          </div>
+
+          <!-- Core engine -->
+          <div class="w-full p-4 rounded-[6px] mb-5" style="background:linear-gradient(135deg,rgba(244,139,74,0.08) 0%,rgba(224,72,112,0.08) 50%,rgba(155,89,182,0.08) 100%);border:1.5px solid var(--sl-border)">
+            <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-center mb-2" style="color:var(--sl-text)">pricingEngine.calculatePricing()</p>
+            <div class="grid grid-cols-4 gap-1.5">
+              <span class="tag text-center" style="background:rgba(244,139,74,0.12);color:#F48B4A">Base Rate</span>
+              <span class="tag text-center" style="background:rgba(244,139,74,0.12);color:#F48B4A">Liquidity</span>
+              <span class="tag text-center" style="background:rgba(224,72,112,0.12);color:#E04870">LCR/NSFR</span>
+              <span class="tag text-center" style="background:rgba(224,72,112,0.12);color:#E04870">Capital</span>
+              <span class="tag text-center" style="background:rgba(155,89,182,0.12);color:#9B59B6">ESG I+II</span>
+              <span class="tag text-center" style="background:rgba(155,89,182,0.12);color:#9B59B6">Greenium</span>
+              <span class="tag text-center" style="background:rgba(91,127,199,0.12);color:#5B7FC7">DNSH</span>
+              <span class="tag text-center" style="background:rgba(91,127,199,0.12);color:#5B7FC7">RAROC</span>
+            </div>
+          </div>
+
+          <!-- Bottom: immutable snapshot -->
+          <div class="flow-box w-full text-center" style="border-color:var(--sl-text);background:var(--sl-bg-alt);padding:.55rem">
+            <p class="mono text-[.55rem] font-bold uppercase tracking-wider" style="color:var(--sl-text)">⚡ Snapshot inmutable + hash chain</p>
+            <p class="text-[.55rem] mt-0.5" style="color:var(--sl-text-sec)">Cada cálculo se materializa con SHA-256 y es re-ejecutable byte-perfect</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ 6 · CONTENT · Motor FTP 19 componentes ━━━ -->
+<div class="slide slide-themed" data-section="La plataforma">
+  <div class="si">
+    <div class="ex-num">Exhibit 04 — Motor FTP</div>
+    <div class="ex-title">19 componentes configurables · ESG regulatorio nativo · 4 metodologías</div>
+    <p class="ex-sub mb-5">No es un motor FTP con «ESG añadido». Es un motor donde Pillar I (ISF Art. 501a CRR2), Pillar II (Transition + Physical), DNSH y Greenium son ciudadanos de primera clase con su propia configuración versionada.</p>
+
+    <div class="grid grid-cols-2 gap-5 mb-4">
+      <!-- Left: formula -->
+      <div class="box-m p-4">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Fórmula completa</p>
+        <div class="mono text-[.6rem] leading-relaxed p-3 rounded" style="background:var(--sl-bg-card);color:var(--sl-text);border:1px solid var(--sl-border)">
+          FTP = BaseRate<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;+ LiquidityPremium<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;+ LCR_Charge + NSFR_Charge<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;+ CapitalCharge + CreditCost<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;+ CurrencyBasis + OperCost<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#10b981">+ ESG_Pillar_II + Greenium</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#10b981">− DNSH_Discount − ISF_Overlay</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;± Incentivisation ± SDR
+        </div>
+        <div class="mt-3 grid grid-cols-4 gap-1.5">
+          <span class="tag text-center" style="background:rgba(244,139,74,0.15);color:#F48B4A">Matched Maturity</span>
+          <span class="tag text-center" style="background:rgba(224,72,112,0.15);color:#E04870">Moving Average</span>
+          <span class="tag text-center" style="background:rgba(155,89,182,0.15);color:#9B59B6">Rate Card</span>
+          <span class="tag text-center" style="background:rgba(91,127,199,0.15);color:#5B7FC7">Zero Discount</span>
+        </div>
+      </div>
+
+      <!-- Right: components breakdown -->
+      <div>
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Cobertura por bloque</p>
+        <div class="bar-wrap"><span class="bar-label">Liquidez</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#F48B4A"></div></div><span class="bar-value" style="color:#F48B4A">LCR+NSFR+Recharge</span></div>
+        <div class="bar-wrap"><span class="bar-label">Capital</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#E04870"></div></div><span class="bar-value" style="color:#E04870">Charge+Income</span></div>
+        <div class="bar-wrap"><span class="bar-label">ESG Pillar II</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#9B59B6"></div></div><span class="bar-value" style="color:#9B59B6">Transit+Physical</span></div>
+        <div class="bar-wrap"><span class="bar-label">ESG Pillar I</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#5B7FC7"></div></div><span class="bar-value" style="color:#5B7FC7">ISF 501a CRR2</span></div>
+        <div class="bar-wrap"><span class="bar-label">Tenors</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#3B82F6"></div></div><span class="bar-value" style="color:#3B82F6">DTM · RM · BM</span></div>
+        <div class="bar-wrap"><span class="bar-label">FX Basis</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#10b981"></div></div><span class="bar-value" style="color:#10b981">Multi-currency</span></div>
+        <div class="bar-wrap"><span class="bar-label">Behaviour</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#F48B4A"></div></div><span class="bar-value" style="color:#F48B4A">NMD+CPR</span></div>
+        <div class="bar-wrap"><span class="bar-label">RAROC</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#E04870"></div></div><span class="bar-value" style="color:#E04870">Econ. profit</span></div>
+
+        <div class="mt-4 p-3 rounded" style="background:rgba(16,185,129,0.08);border-left:3px solid #10b981">
+          <p class="text-[.62rem]" style="color:var(--sl-text)"><span class="font-bold">ESG-ready day 1:</span> el banco configura grids ESG por segmento/producto sin tocar código. Los shocks EBA incluyen escenario climático Pillar II.</p>
+        </div>
+      </div>
+    </div>
+    <div class="takeaway"><p>Mientras los competidores vendiendo FTP en 2018 están todavía añadiendo ESG en 2026 como módulo externo, en N-Pricing es parte de la fórmula desde la primera línea.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 7 · CONTENT · Customer 360 ━━━ -->
+<div class="slide slide-themed" data-section="La plataforma">
+  <div class="si">
+    <div class="ex-num">Exhibit 05 — Customer 360</div>
+    <div class="flex gap-8 items-start">
+      <div class="w-[40%] flex-shrink-0">
+        <div class="ex-title">Pricing relacional, no deal-a-deal</div>
+        <p class="ex-sub mb-5">La vista Customer 360 agrega posiciones, métricas periódicas, targets pre-aprobados y CLV en un único panel. El cross-bonus se deriva automáticamente de las posiciones reales del cliente.</p>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="feat-box box py-3 px-3">
+            <div class="flex items-center gap-2 mb-1.5">
+              <div class="ico-s bg-nfq-amber/10 text-nfq-amber"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <h3 class="feat-title text-[.6rem] font-bold uppercase">Relación</h3>
+            </div>
+            <p class="feat-desc text-[.55rem]">Posiciones + métricas + eventos CRM en una vista viva.</p>
+          </div>
+          <div class="feat-box box py-3 px-3">
+            <div class="flex items-center gap-2 mb-1.5">
+              <div class="ico-s bg-nfq-coral/10 text-nfq-coral"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <h3 class="feat-title text-[.6rem] font-bold uppercase">CLV Engine</h3>
+            </div>
+            <p class="feat-desc text-[.55rem]">LTV con p5/p95, assumptions hash y NBA recommendations.</p>
+          </div>
+          <div class="feat-box box py-3 px-3">
+            <div class="flex items-center gap-2 mb-1.5">
+              <div class="ico-s bg-nfq-violet/10 text-nfq-violet"><svg viewBox="0 0 24 24"><path d="M9 11H5a2 2 0 00-2 2v7a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2h-4"/><path d="M12 2v10M8 6l4-4 4 4"/></svg></div>
+              <h3 class="feat-title text-[.6rem] font-bold uppercase">Targets</h3>
+            </div>
+            <p class="feat-desc text-[.55rem]">Pricing targets top-down como pre-aprobado o hard floor.</p>
+          </div>
+          <div class="feat-box box py-3 px-3">
+            <div class="flex items-center gap-2 mb-1.5">
+              <div class="ico-s bg-nfq-steel/10 text-nfq-steel"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <h3 class="feat-title text-[.6rem] font-bold uppercase">CSV Import</h3>
+            </div>
+            <p class="feat-desc text-[.55rem]">Bulk load de posiciones y métricas para on-boarding rápido.</p>
+          </div>
+        </div>
+        <div class="takeaway"><p>El gestor deja de pricear deals aislados: pricea la relación. Y lo hace sabiendo exactamente cuánto vale el cliente hoy y a 5 años.</p></div>
+      </div>
+
+      <div class="flex-1">
+        <div class="screenshot-frame">
+          <div class="browser-bar">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+            <span class="ml-3 text-[.55rem] mono" style="color:var(--sl-text-muted)">n-pricing.app/customers/CLT-4821</span>
+          </div>
+          <div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#0B1026 0%,#1A2340 30%,#2A3558 60%,#5B7FC7 100%);position:relative;overflow:hidden">
+            <!-- Header strip -->
+            <div style="position:absolute;top:6%;left:4%;right:4%;height:10%;display:flex;gap:2%;align-items:center">
+              <div style="width:52px;height:52px;border-radius:50%;background:rgba(244,139,74,0.35);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;color:#F48B4A;font-size:.7rem">AC</div>
+              <div style="flex:1">
+                <div style="height:10px;width:180px;background:rgba(255,255,255,0.25);border-radius:3px;margin-bottom:6px"></div>
+                <div style="height:6px;width:120px;background:rgba(255,255,255,0.12);border-radius:3px"></div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <div style="padding:3px 8px;background:rgba(16,185,129,0.25);border-radius:3px;font-size:.45rem;color:#86efac;font-family:'JetBrains Mono'">ACTIVE</div>
+                <div style="padding:3px 8px;background:rgba(244,139,74,0.25);border-radius:3px;font-size:.45rem;color:#fbbf77;font-family:'JetBrains Mono'">TIER 1</div>
+              </div>
+            </div>
+            <!-- KPI strip -->
+            <div style="position:absolute;top:20%;left:4%;right:4%;display:flex;gap:2%;height:14%">
+              <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:4px;padding:8px;border:1px solid rgba(255,255,255,0.1)">
+                <div style="font-size:.45rem;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono';letter-spacing:.1em">CLV</div>
+                <div style="font-size:.9rem;color:#F48B4A;font-family:'JetBrains Mono';font-weight:700;margin-top:3px">€4.2M</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:4px;padding:8px;border:1px solid rgba(255,255,255,0.1)">
+                <div style="font-size:.45rem;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono';letter-spacing:.1em">NII TTM</div>
+                <div style="font-size:.9rem;color:#E04870;font-family:'JetBrains Mono';font-weight:700;margin-top:3px">€142K</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:4px;padding:8px;border:1px solid rgba(255,255,255,0.1)">
+                <div style="font-size:.45rem;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono';letter-spacing:.1em">RAROC</div>
+                <div style="font-size:.9rem;color:#9B59B6;font-family:'JetBrains Mono';font-weight:700;margin-top:3px">18.4%</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:4px;padding:8px;border:1px solid rgba(255,255,255,0.1)">
+                <div style="font-size:.45rem;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono';letter-spacing:.1em">CHURN</div>
+                <div style="font-size:.9rem;color:#10b981;font-family:'JetBrains Mono';font-weight:700;margin-top:3px">12%</div>
+              </div>
+            </div>
+            <!-- Positions + target -->
+            <div style="position:absolute;top:38%;left:4%;width:58%;height:50%;background:rgba(255,255,255,0.06);border-radius:4px;border:1px solid rgba(255,255,255,0.1);padding:10px">
+              <div style="font-size:.48rem;color:rgba(255,255,255,0.5);font-family:'JetBrains Mono';letter-spacing:.1em;margin-bottom:8px">POSICIONES · 7 ACTIVAS</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <div style="font-size:.5rem;color:rgba(255,255,255,0.75)">Hipoteca Variable</div>
+                  <div style="font-family:'JetBrains Mono';font-size:.5rem;color:#F48B4A">€1.2M</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <div style="font-size:.5rem;color:rgba(255,255,255,0.75)">Préstamo ICO</div>
+                  <div style="font-family:'JetBrains Mono';font-size:.5rem;color:#F48B4A">€480K</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                  <div style="font-size:.5rem;color:rgba(255,255,255,0.75)">Cuenta Corriente</div>
+                  <div style="font-family:'JetBrains Mono';font-size:.5rem;color:#E04870">€215K</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0">
+                  <div style="font-size:.5rem;color:rgba(255,255,255,0.75)">Depósito 12M</div>
+                  <div style="font-family:'JetBrains Mono';font-size:.5rem;color:#E04870">€850K</div>
+                </div>
+              </div>
+            </div>
+            <div style="position:absolute;top:38%;right:4%;width:32%;height:50%;background:rgba(244,139,74,0.08);border-radius:4px;border:1px solid rgba(244,139,74,0.25);padding:10px">
+              <div style="font-size:.48rem;color:rgba(244,139,74,0.7);font-family:'JetBrains Mono';letter-spacing:.1em;margin-bottom:8px">TARGET APLICABLE</div>
+              <div style="font-family:'JetBrains Mono';font-size:1.2rem;font-weight:700;color:#F48B4A">3.85%</div>
+              <div style="font-size:.5rem;color:rgba(255,255,255,0.6);margin-top:4px">Pre-aprobado · Válido hasta 2026-07-30</div>
+              <div style="margin-top:10px;padding:6px;background:rgba(16,185,129,0.1);border-radius:3px;border:1px solid rgba(16,185,129,0.2)">
+                <div style="font-size:.45rem;color:#10b981;font-family:'JetBrains Mono';letter-spacing:.08em">NBA SUGERIDA</div>
+                <div style="font-size:.5rem;color:rgba(255,255,255,0.85);margin-top:3px">Cross-sell seguro vinculado</div>
+              </div>
+            </div>
+            <!-- Sidebar -->
+            <div style="position:absolute;top:0;left:0;width:3%;height:100%;background:rgba(255,255,255,0.04)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ 8 · CONTENT · Channel Pricing ━━━ -->
+<div class="slide slide-themed" data-section="La plataforma">
+  <div class="si">
+    <div class="ex-num">Exhibit 06 — Channel Pricing</div>
+    <div class="ex-title">Cotización en tiempo real · API-first · Campañas en minutos, no semanas</div>
+    <p class="ex-sub mb-5">Web, mobile, sucursal, call center y partner consumen el mismo endpoint <span class="mono text-[.7rem]">POST /api/channel/quote</span>. Cada canal tiene su API key con rate limit token-bucket y las campañas se aplican automáticamente según segmento × producto × divisa × canal × ventana.</p>
+
+    <div class="flex gap-6 items-stretch mb-4">
+      <!-- Left: flow -->
+      <div class="flex-1">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Flujo de cotización realtime</p>
+        <div class="flow-h mb-4 justify-center">
+          <div class="flow-box" style="border-color:#F48B4A;color:#F48B4A;background:rgba(244,139,74,0.06)">Canal + x-channel-key</div>
+          <div class="flow-conn" style="background:#F48B4A"><div style="position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:5px solid #F48B4A"></div></div>
+          <div class="flow-box" style="border-color:#E04870;color:#E04870;background:rgba(224,72,112,0.06)">Rate limit bucket</div>
+          <div class="flow-conn" style="background:#E04870"><div style="position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:5px solid #E04870"></div></div>
+          <div class="flow-box" style="border-color:#9B59B6;color:#9B59B6;background:rgba(155,89,182,0.06)">Motor FTP</div>
+          <div class="flow-conn" style="background:#9B59B6"><div style="position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:5px solid #9B59B6"></div></div>
+          <div class="flow-box" style="border-color:#5B7FC7;color:#5B7FC7;background:rgba(91,127,199,0.06)">Match campaña</div>
+          <div class="flow-conn" style="background:#5B7FC7"><div style="position:absolute;right:-1px;top:-3px;border:4px solid transparent;border-left:5px solid #5B7FC7"></div></div>
+          <div class="flow-box" style="border-color:var(--sl-text);color:var(--sl-text);background:var(--sl-bg-alt)">Quote + snapshot</div>
+        </div>
+
+        <div class="box-m p-3 mt-4">
+          <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-2" style="color:var(--sl-text-muted)">State machine de campañas</p>
+          <div class="flex items-center justify-around text-[.55rem] mono font-semibold">
+            <span class="tag" style="background:rgba(156,163,175,0.15);color:#6b7280">draft</span>
+            <span style="color:var(--sl-text-muted)">→</span>
+            <span class="tag" style="background:rgba(244,139,74,0.15);color:#F48B4A">approved</span>
+            <span style="color:var(--sl-text-muted)">→</span>
+            <span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">active</span>
+            <span style="color:var(--sl-text-muted)">→</span>
+            <span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">exhausted</span>
+          </div>
+          <p class="text-[.55rem] mt-2" style="color:var(--sl-text-sec)">Segmento × producto × divisa × canal × ventana × volumen. Delta aplicado al <span class="mono">finalClientRate</span>.</p>
+        </div>
+      </div>
+
+      <!-- Right: KPIs -->
+      <div class="w-[240px] flex-shrink-0 flex flex-col gap-3">
+        <div class="box text-center py-4"><p class="kpi text-[1.5rem] text-nfq-amber">&lt;200ms</p><p class="kpi-label">Latencia p95</p></div>
+        <div class="box text-center py-4"><p class="kpi text-[1.5rem] text-nfq-coral">5</p><p class="kpi-label">Canales soportados</p></div>
+        <div class="box text-center py-4"><p class="kpi text-[1.5rem] text-nfq-violet">∞</p><p class="kpi-label">Campañas paralelas</p></div>
+      </div>
+    </div>
+    <div class="takeaway"><p>Marketing lanza una campaña el lunes por la mañana; el cajero del canal la ve en la cotización del primer cliente de la tarde — con trazabilidad completa de qué reglas se aplicaron.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 9 · DIVIDER · Diferenciales regulatorios ━━━ -->
+<div class="slide slide-div" data-section="Diferenciales regulatorios">
+  <div class="si">
+    <p class="mono text-[.6rem] tracking-[.2em] uppercase mb-4" style="color:var(--sl-dark-text-mut)">Sección 03</p>
+    <h2 class="text-[clamp(2.5rem,5vw,4rem)] font-black leading-tight mb-4">Listo para el<br>regulador el día 1</h2>
+    <div class="w-12 h-[3px] mb-6" style="background:var(--sl-dark-accent)"></div>
+    <p class="text-base max-w-lg" style="color:var(--sl-dark-text-sec)">Reproducibilidad byte-perfect · Tamper-evident hash chain · Governance SR 11-7 / EBA embebida</p>
+  </div>
+</div>
+
+<!-- ━━━ 10 · CONTENT · Reproducibilidad ━━━ -->
+<div class="slide slide-themed" data-section="Diferenciales regulatorios">
+  <div class="si">
+    <div class="ex-num">Exhibit 07 — Reproducibilidad</div>
+    <div class="ex-title">Hash chain inmutable · Replay byte-perfect · Tamper-evident</div>
+    <p class="ex-sub mb-5">Cada llamada al motor escribe un <span class="mono text-[.7rem]">pricing_snapshot</span> con input + context + output + SHA-256 hashes + engine version + as-of-date. Un endpoint <span class="mono text-[.7rem]">POST /api/snapshots/:id/replay</span> re-ejecuta el motor real con el snapshot y devuelve diff field-level.</p>
+
+    <div class="grid grid-cols-5 gap-3 mb-5">
+      <div class="box p-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full mx-auto mb-2" style="background:rgba(244,139,74,0.15)">
+          <span class="mono text-[.6rem] font-bold text-nfq-amber">1</span>
+        </div>
+        <p class="text-[.6rem] font-bold text-center mb-1" style="color:var(--sl-text)">Pricing</p>
+        <p class="text-[.55rem] text-center" style="color:var(--sl-text-sec)">Motor calcula y serializa input+output</p>
+      </div>
+      <div class="flex items-center justify-center text-[1.2rem]" style="color:var(--sl-text-muted)">→</div>
+      <div class="box p-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full mx-auto mb-2" style="background:rgba(224,72,112,0.15)">
+          <span class="mono text-[.6rem] font-bold text-nfq-coral">2</span>
+        </div>
+        <p class="text-[.6rem] font-bold text-center mb-1" style="color:var(--sl-text)">Hash + Chain</p>
+        <p class="text-[.55rem] text-center" style="color:var(--sl-text-sec)">SHA-256 + prev_output_hash (chain)</p>
+      </div>
+      <div class="flex items-center justify-center text-[1.2rem]" style="color:var(--sl-text-muted)">→</div>
+      <div class="box p-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full mx-auto mb-2" style="background:rgba(155,89,182,0.15)">
+          <span class="mono text-[.6rem] font-bold text-nfq-violet">3</span>
+        </div>
+        <p class="text-[.6rem] font-bold text-center mb-1" style="color:var(--sl-text)">Inmutable</p>
+        <p class="text-[.55rem] text-center" style="color:var(--sl-text-sec)">RLS sin UPDATE/DELETE · append-only</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-5">
+      <div class="box p-4">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Snapshot record</p>
+        <div class="mono text-[.55rem] leading-relaxed p-3 rounded" style="background:var(--sl-bg-alt);color:var(--sl-text);border:1px solid var(--sl-border)">
+          <span style="color:#9B59B6">snapshot_id</span>: 8f3a2c1…<br>
+          <span style="color:#9B59B6">engine_version</span>: v2.4.1-a8b9c<br>
+          <span style="color:#9B59B6">as_of_date</span>: 2026-04-24T10:32:18Z<br>
+          <span style="color:#9B59B6">input_hash</span>: a1b2c3…<br>
+          <span style="color:#9B59B6">context_hash</span>: d4e5f6…<br>
+          <span style="color:#9B59B6">output_hash</span>: 7a8b9c…<br>
+          <span style="color:#F48B4A">prev_output_hash</span>: <span style="color:#F48B4A">6z7y8x…</span> ← chain<br>
+          <span style="color:#9B59B6">entity_id</span>: BANK-ES
+        </div>
+      </div>
+      <div class="box p-4">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Replay endpoint · qué devuelve</p>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-start gap-2">
+            <span class="mono text-[.6rem] font-bold text-nfq-amber flex-shrink-0">✓</span>
+            <p class="text-[.62rem]" style="color:var(--sl-text)">Re-ejecuta motor <span class="mono">real</span> (no snapshot mock), con misma engine_version o la actual</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mono text-[.6rem] font-bold text-nfq-amber flex-shrink-0">✓</span>
+            <p class="text-[.62rem]" style="color:var(--sl-text)">Devuelve <span class="mono">deltaAbs</span> + <span class="mono">deltaBps</span> por campo si hay diff</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mono text-[.6rem] font-bold text-nfq-amber flex-shrink-0">✓</span>
+            <p class="text-[.62rem]" style="color:var(--sl-text)">Verify-chain: detecta cualquier snapshot insertado fuera de orden o modificado</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mono text-[.6rem] font-bold text-nfq-amber flex-shrink-0">✓</span>
+            <p class="text-[.62rem]" style="color:var(--sl-text)">Audit trail preservado: quién, cuándo, con qué datos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="takeaway"><p>Cuando el regulador pida reconstruir un pricing de hace 18 meses, N-Pricing responde con un diff field-level en segundos — no con un ticket al equipo y dos semanas de espera.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 11 · CONTENT · Governance ━━━ -->
+<div class="slide slide-themed" data-section="Diferenciales regulatorios">
+  <div class="si">
+    <div class="ex-num">Exhibit 08 — Governance</div>
+    <div class="ex-title">Model risk management SR 11-7 / EBA — nativo, no bolt-on</div>
+    <p class="ex-sub mb-5">Model inventory, signed dossiers tamper-evident, backtesting con drift detector y approval escalations con sweep worker. Cuando el validador de modelos pida evidencia, está todo firmado y versionado.</p>
+
+    <div class="grid grid-cols-4 gap-3 mb-4">
+      <div class="box p-4">
+        <div class="ico-s bg-nfq-amber/10 text-nfq-amber mb-3"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <p class="text-[.65rem] font-bold mb-1" style="color:var(--sl-text)">Model Inventory</p>
+        <p class="text-[.55rem] mb-2" style="color:var(--sl-text-sec)">Cada modelo con kind, version, status, owner, validation_doc_url. SR 11-7 + EBA.</p>
+        <span class="tag" style="background:rgba(244,139,74,0.15);color:#F48B4A">Inventory</span>
+      </div>
+      <div class="box p-4">
+        <div class="ico-s bg-nfq-coral/10 text-nfq-coral mb-3"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <p class="text-[.65rem] font-bold mb-1" style="color:var(--sl-text)">Signed Dossiers</p>
+        <p class="text-[.55rem] mb-2" style="color:var(--sl-text-sec)">sha256(canonicalJson) + HMAC-SHA256. Verificable sin acceso a la plataforma.</p>
+        <span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Tamper-evident</span>
+      </div>
+      <div class="box p-4">
+        <div class="ico-s bg-nfq-violet/10 text-nfq-violet mb-3"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <p class="text-[.65rem] font-bold mb-1" style="color:var(--sl-text)">Backtest + Drift</p>
+        <p class="text-[.55rem] mb-2" style="color:var(--sl-text-sec)">Runner sobre histórico. Thresholds 5%/10% PnL, 1pp/2pp RAROC.</p>
+        <span class="tag" style="background:rgba(155,89,182,0.15);color:#9B59B6">Alerting</span>
+      </div>
+      <div class="box p-4">
+        <div class="ico-s bg-nfq-steel/10 text-nfq-steel mb-3"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <p class="text-[.65rem] font-bold mb-1" style="color:var(--sl-text)">Escalations</p>
+        <p class="text-[.55rem] mb-2" style="color:var(--sl-text-sec)">L1 → L2 → Committee con sweep worker temporal. Nada se queda bloqueado.</p>
+        <span class="tag" style="background:rgba(91,127,199,0.15);color:#5B7FC7">Approval</span>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table class="data-tbl">
+        <thead>
+          <tr>
+            <th scope="col">Control regulatorio</th>
+            <th scope="col">Fuente normativa</th>
+            <th scope="col">Implementación N-Pricing</th>
+            <th scope="col">Evidencia generada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="val">Reproducibilidad de modelos</td>
+            <td>SR 11-7 Fed · EBA GL 2021</td>
+            <td>pricing_snapshots + replay</td>
+            <td><span class="tag" style="background:rgba(16,185,129,0.12);color:#10b981">Diff field-level</span></td>
+          </tr>
+          <tr>
+            <td class="val">IRRBB stress scenarios</td>
+            <td>EBA GL 2018/02</td>
+            <td>6 shocks × deal con FTP/Margin/RAROC</td>
+            <td><span class="tag" style="background:rgba(16,185,129,0.12);color:#10b981">CSV + dashboard</span></td>
+          </tr>
+          <tr>
+            <td class="val">Validación independiente</td>
+            <td>SR 11-7 Section V</td>
+            <td>Signed dossiers HMAC</td>
+            <td><span class="tag" style="background:rgba(16,185,129,0.12);color:#10b981">Verify endpoint</span></td>
+          </tr>
+          <tr>
+            <td class="val">Audit trail operativo</td>
+            <td>CRR Art. 166 · SOX</td>
+            <td>audit_log append-only + RBAC</td>
+            <td><span class="tag" style="background:rgba(16,185,129,0.12);color:#10b981">Inmutable</span></td>
+          </tr>
+          <tr>
+            <td class="val">ESG Pillar I</td>
+            <td>CRR2 Art. 501a (ISF)</td>
+            <td>ISF overlay en fórmula FTP</td>
+            <td><span class="tag" style="background:rgba(16,185,129,0.12);color:#10b981">Traceable</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="takeaway"><p>No es "compliant-ready" en PowerPoint: es compliant-built en cada línea de código, con la evidencia que Supervisión pide ya generada por defecto.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 12 · DIVIDER · Por qué nosotros ━━━ -->
+<div class="slide slide-div" data-section="Por qué nosotros">
+  <div class="si">
+    <p class="mono text-[.6rem] tracking-[.2em] uppercase mb-4" style="color:var(--sl-dark-text-mut)">Sección 04</p>
+    <h2 class="text-[clamp(2.5rem,5vw,4rem)] font-black leading-tight mb-4">Por qué N-Pricing<br>es la mejor opción</h2>
+    <div class="w-12 h-[3px] mb-6" style="background:var(--sl-dark-accent)"></div>
+    <p class="text-base max-w-lg" style="color:var(--sl-dark-text-sec)">Stack moderno · Conocimiento regulatorio incorporado · Proceso y tecnología juntos</p>
+  </div>
+</div>
+
+<!-- ━━━ 13 · CONTENT · 6 diferenciales ━━━ -->
+<div class="slide slide-themed" data-section="Por qué nosotros">
+  <div class="si">
+    <div class="ex-num">Exhibit 09 — Diferenciales</div>
+    <div class="ex-title">Seis razones por las que N-Pricing gana — no solo técnicas</div>
+    <p class="ex-sub mb-5">Un banco no compra un motor; compra una combinación de motor + metodología + proceso + soporte. Esto es lo que ponemos en la mesa que los demás no pueden.</p>
+
+    <div class="grid grid-cols-3 gap-4">
+      <div class="box p-4 border-l-4" style="border-left-color:#F48B4A">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-amber mb-2">01 · Motor único</p>
+        <p class="text-[.68rem] font-bold mb-2" style="color:var(--sl-text)">FTP + Customer + Canal en un solo runtime</p>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Los competidores venden tres productos distintos. Aquí es uno. Cambias una curva y los tres canales lo reflejan en la siguiente cotización.</p>
+      </div>
+      <div class="box p-4 border-l-4" style="border-left-color:#E04870">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-coral mb-2">02 · Regulación embebida</p>
+        <p class="text-[.68rem] font-bold mb-2" style="color:var(--sl-text)">ESG Pillar I · SR 11-7 · EBA · IRRBB</p>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">No es un checklist comercial. Art. 501a CRR2 (ISF), DNSH Capital Discount, 6 shocks EBA y signed dossiers están en el modelo de datos.</p>
+      </div>
+      <div class="box p-4 border-l-4" style="border-left-color:#9B59B6">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-violet mb-2">03 · Tamper-evidence</p>
+        <p class="text-[.68rem] font-bold mb-2" style="color:var(--sl-text)">Hash chain + replay byte-perfect</p>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Cualquier snapshot se re-ejecuta con el motor real. Verify-chain detecta ataques retroactivos. Ningún SaaS del mercado lo ofrece así.</p>
+      </div>
+      <div class="box p-4 border-l-4" style="border-left-color:#5B7FC7">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-steel mb-2">04 · Stack moderno</p>
+        <p class="text-[.68rem] font-bold mb-2" style="color:var(--sl-text)">React 19 · TS 5.8 · Supabase · Edge · PWA</p>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Cero deuda legacy. Build en <60s, PWA offline, 1.37k tests unitarios + 20 specs E2E. UX de producto, no de ERP de los 90.</p>
+      </div>
+      <div class="box p-4 border-l-4" style="border-left-color:#3B82F6">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider" style="color:#3B82F6">05 · Multi-tenant real</p>
+        <p class="text-[.68rem] font-bold mb-2" style="color:var(--sl-text)">RLS estricto + provisioning <60s</p>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Para grupos con varias entidades: un script idempotente despliega un tenant nuevo con admin user y 4 feature flags. Cross-leak imposible.</p>
+      </div>
+      <div class="box p-4 border-l-4" style="border-left-color:#10b981">
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider" style="color:#10b981">06 · NFQ detrás</p>
+        <p class="text-[.68rem] font-bold mb-2" style="color:var(--sl-text)">Consultor especializado, no SaaS genérico</p>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Construido por el equipo que lleva 20+ años asesorando ALM/IRRBB en BBVA, Santander, Sabadell, Bankinter. La metodología viene incluida.</p>
+      </div>
+    </div>
+    <div class="takeaway"><p>No se trata de tener la mejor tecnología. Se trata de tener la tecnología correcta, construida por la gente correcta, que llega con la metodología y el proceso incluidos desde la propuesta.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 14 · CONTENT · Comparativa ━━━ -->
+<div class="slide slide-themed" data-section="Por qué nosotros">
+  <div class="si">
+    <div class="ex-num">Exhibit 10 — Comparativa</div>
+    <div class="ex-title">Frente a vendors legacy, Big Tech SaaS y desarrollo in-house</div>
+    <p class="ex-sub mb-5">Resumen honesto de dónde N-Pricing encaja mejor. No es la opción universal, pero sí la óptima cuando el banco quiere integración profunda, regulación sólida y tiempo a valor corto.</p>
+
+    <div class="tbl-wrap">
+      <table class="data-tbl">
+        <thead>
+          <tr>
+            <th scope="col">Capacidad</th>
+            <th scope="col" class="text-center">Vendor legacy FTP</th>
+            <th scope="col" class="text-center">SaaS Big Tech</th>
+            <th scope="col" class="text-center">Desarrollo in-house</th>
+            <th scope="col" class="text-center" style="color:#F48B4A;font-weight:700">N-Pricing</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="val">FTP + Customer + Canal integrados</td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Silos</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Solo un ámbito</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Posible · caro</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">Nativo</span></td>
+          </tr>
+          <tr>
+            <td class="val">Reproducibilidad byte-perfect</td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Logs sin replay</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Parcial</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Depende</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">Hash chain</span></td>
+          </tr>
+          <tr>
+            <td class="val">ESG Pillar I + DNSH + Greenium</td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Bolt-on</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Roadmap</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">3-6m build</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">En fórmula</span></td>
+          </tr>
+          <tr>
+            <td class="val">Channel realtime + campañas</td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">No</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Addon licencia</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">6-12m</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">API incluida</span></td>
+          </tr>
+          <tr>
+            <td class="val">Signed dossiers SR 11-7</td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Manual</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Workflow</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Raro</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">HMAC-SHA256</span></td>
+          </tr>
+          <tr>
+            <td class="val">Metodología ALM/IRRBB incluida</td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Se contrata aparte</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">No</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">In-house</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">NFQ Advisory</span></td>
+          </tr>
+          <tr>
+            <td class="val">Time-to-value primer piloto</td>
+            <td class="text-center val">12-18 meses</td>
+            <td class="text-center val">6-9 meses</td>
+            <td class="text-center val">12-24 meses</td>
+            <td class="text-center val" style="color:#10b981;font-weight:700">8-12 sem</td>
+          </tr>
+          <tr>
+            <td class="val">Stack y UX</td>
+            <td class="text-center"><span class="tag" style="background:rgba(224,72,112,0.15);color:#E04870">Legacy .NET/Java</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">Moderno</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b">Variable</span></td>
+            <td class="text-center"><span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981">React 19 · PWA</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="takeaway"><p>Contra legacy ganamos en stack e integración. Contra Big Tech, en metodología y regulación. Contra in-house, en tiempo a valor. El match perfecto es un banco que quiere las tres cosas a la vez.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 15 · DIVIDER · Valor entregado ━━━ -->
+<div class="slide slide-div" data-section="Valor entregado">
+  <div class="si">
+    <p class="mono text-[.6rem] tracking-[.2em] uppercase mb-4" style="color:var(--sl-dark-text-mut)">Sección 05</p>
+    <h2 class="text-[clamp(2.5rem,5vw,4rem)] font-black leading-tight mb-4">Del piloto<br>a producción</h2>
+    <div class="w-12 h-[3px] mb-6" style="background:var(--sl-dark-accent)"></div>
+    <p class="text-base max-w-lg" style="color:var(--sl-dark-text-sec)">Enterprise-ready el día 1 · Métricas que mueven el P&L · Soporte NFQ integral</p>
+  </div>
+</div>
+
+<!-- ━━━ 16 · CONTENT · ROI + Time-to-value ━━━ -->
+<div class="slide slide-themed" data-section="Valor entregado">
+  <div class="si">
+    <div class="ex-num">Exhibit 11 — ROI</div>
+    <div class="ex-title">Impacto tangible en los primeros 90 días</div>
+    <p class="ex-sub mb-6">Rangos observados en implementaciones piloto en entidades Tier-2 españolas. El upside real depende del tamaño de balance, pero el orden de magnitud es consistente.</p>
+
+    <div class="grid grid-cols-4 gap-4 mb-5">
+      <div class="box text-center py-5">
+        <p class="kpi text-[1.8rem] text-nfq-amber">+5-12 bps</p>
+        <p class="kpi-label mt-2">Margen recuperado</p>
+        <p class="text-[.55rem] mt-2" style="color:var(--sl-text-sec)">Eliminación de leakage sistemático en deals fuera de banda</p>
+      </div>
+      <div class="box text-center py-5">
+        <p class="kpi text-[1.8rem] text-nfq-coral">−75%</p>
+        <p class="kpi-label mt-2">Time-to-market campaña</p>
+        <p class="text-[.55rem] mt-2" style="color:var(--sl-text-sec)">De 6 semanas a <2 días end-to-end</p>
+      </div>
+      <div class="box text-center py-5">
+        <p class="kpi text-[1.8rem] text-nfq-violet">&lt;2 min</p>
+        <p class="kpi-label mt-2">Replay deal histórico</p>
+        <p class="text-[.55rem] mt-2" style="color:var(--sl-text-sec)">Reconstrucción byte-perfect vs semanas</p>
+      </div>
+      <div class="box text-center py-5">
+        <p class="kpi text-[1.8rem] text-nfq-steel">8-12 sem</p>
+        <p class="kpi-label mt-2">Primer piloto en prod</p>
+        <p class="text-[.55rem] mt-2" style="color:var(--sl-text-sec)">Un segmento × dos productos × una entidad</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+      <div class="box-m p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-1.5 h-8 rounded" style="background:#F48B4A"></div>
+          <div>
+            <p class="mono text-[.5rem] uppercase tracking-wider" style="color:var(--sl-text-muted)">Fase 1 · Semanas 1-4</p>
+            <p class="text-[.65rem] font-bold" style="color:var(--sl-text)">Onboarding + fit</p>
+          </div>
+        </div>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Provisioning tenant, import posiciones/métricas, configuración curvas y metodología, seed demo navegable para el comité.</p>
+      </div>
+      <div class="box-m p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-1.5 h-8 rounded" style="background:#E04870"></div>
+          <div>
+            <p class="mono text-[.5rem] uppercase tracking-wider" style="color:var(--sl-text-muted)">Fase 2 · Semanas 5-8</p>
+            <p class="text-[.65rem] font-bold" style="color:var(--sl-text)">Piloto funcional</p>
+          </div>
+        </div>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Pricing real sobre un segmento acotado, Customer 360 para relationship managers, primer dashboard de leakage contra banco actual.</p>
+      </div>
+      <div class="box-m p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-1.5 h-8 rounded" style="background:#9B59B6"></div>
+          <div>
+            <p class="mono text-[.5rem] uppercase tracking-wider" style="color:var(--sl-text-muted)">Fase 3 · Semanas 9-12</p>
+            <p class="text-[.65rem] font-bold" style="color:var(--sl-text)">Go-live + escalado</p>
+          </div>
+        </div>
+        <p class="text-[.58rem]" style="color:var(--sl-text-sec)">Channel API conectada, campañas activas, signed dossiers operativos. Handover a equipo banco con 13 runbooks on-call.</p>
+      </div>
+    </div>
+    <div class="takeaway"><p>A los tres meses hay piloto en producción con una métrica concreta de impacto; a los seis, extensión a segundo segmento. El banco ve el negocio antes de comprometer al resto de la casa.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 17 · CONTENT · Enterprise-ready ━━━ -->
+<div class="slide slide-themed" data-section="Valor entregado">
+  <div class="si">
+    <div class="ex-num">Exhibit 12 — Enterprise readiness</div>
+    <div class="ex-title">Listo para producción sin esperar a las versiones 2.0</div>
+    <p class="ex-sub mb-5">No es un MVP. Multi-tenancy, observability, audit, RBAC, integraciones y runbooks operativos ya están en el producto porque los bancos los necesitan antes del go-live, no después.</p>
+
+    <div class="grid grid-cols-2 gap-5 mb-4">
+      <!-- Left: technical readiness -->
+      <div>
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Técnico · Operaciones</p>
+        <div class="flex flex-col gap-2">
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s bg-nfq-amber/10 text-nfq-amber flex-shrink-0"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">Multi-tenancy estricto · RLS Postgres</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">Provisioning idempotente <60s. Flag TENANCY_STRICT en 4 fases de rollout con canary.</p>
+            </div>
+          </div>
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s bg-nfq-coral/10 text-nfq-coral flex-shrink-0"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">SLO + alertas · 5 canales</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">8 SLIs catalogados, evaluator opt-in, email/Slack/PagerDuty/webhook/Opsgenie.</p>
+            </div>
+          </div>
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s bg-nfq-violet/10 text-nfq-violet flex-shrink-0"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">1.37k tests · 20 specs E2E</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">Vitest + Playwright + Storybook. Integration tests opt-in contra Postgres real.</p>
+            </div>
+          </div>
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s bg-nfq-steel/10 text-nfq-steel flex-shrink-0"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">13 runbooks on-call</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">Tenancy violation · latency · snapshot failure · kill switch · escalation timeouts · seed demo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: business readiness -->
+      <div>
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-3" style="color:var(--sl-text-muted)">Negocio · Seguridad</p>
+        <div class="flex flex-col gap-2">
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s" style="background:rgba(16,185,129,0.1);color:#10b981;flex-shrink:0"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">RBAC · 4 roles</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">Admin · Trader · Risk_Manager · Auditor. Audit trail inmutable append-only.</p>
+            </div>
+          </div>
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s" style="background:rgba(59,130,246,0.1);color:#3B82F6;flex-shrink:0"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><polyline points="9 12 12 15 17 10"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">Google SSO real + JWT propio</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">GoogleSsoProvider con JWKS y hosted domain restriction. JWT HMAC interno.</p>
+            </div>
+          </div>
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s bg-nfq-amber/10 text-nfq-amber flex-shrink-0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">Adapter layer productiva</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">CoreBanking · CRM · MarketData · SSO con stubs Salesforce y Bloomberg listos.</p>
+            </div>
+          </div>
+          <div class="row-l flex items-start gap-3">
+            <div class="ico-s bg-nfq-coral/10 text-nfq-coral flex-shrink-0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+            <div>
+              <p class="text-[.62rem] font-bold" style="color:var(--sl-text)">SaaS-first · on-premise opcional</p>
+              <p class="text-[.55rem]" style="color:var(--sl-text-sec)">Postgres propio + deploy Node + Edge opcionales. Soberanía de datos donde haga falta.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="takeaway"><p>Cuando empiezas el piloto, ya tienes lo que otros vendors prometen para "una futura versión enterprise". Lo que se entrega el día 1 ya es el producto que operará el banco cinco años después.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ 18 · CONTENT · Next steps ━━━ -->
+<div class="slide slide-themed" data-section="Valor entregado">
+  <div class="si">
+    <div class="ex-num">Exhibit 13 — Next steps</div>
+    <div class="ex-title">Del deck al piloto: cómo empezamos</div>
+    <p class="ex-sub mb-6">Una propuesta simple, acotada en tiempo y reversible. El banco decide si avanza sin comprometer la hoja de ruta entera en la primera reunión.</p>
+
+    <div class="grid grid-cols-4 gap-3 mb-5">
+      <div class="box p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-amber">Paso 01</p>
+          <div class="mono text-[.55rem] font-bold px-2 py-0.5 rounded" style="background:rgba(244,139,74,0.1);color:#F48B4A">1-2 sem</div>
+        </div>
+        <p class="text-[.7rem] font-bold mb-2" style="color:var(--sl-text)">Discovery workshop</p>
+        <p class="text-[.6rem]" style="color:var(--sl-text-sec)">Dos sesiones con Tesorería, Banca Negocio y Riesgos. Mapeo de gaps reales del banco contra capacidades N-Pricing.</p>
+      </div>
+      <div class="box p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-coral">Paso 02</p>
+          <div class="mono text-[.55rem] font-bold px-2 py-0.5 rounded" style="background:rgba(224,72,112,0.1);color:#E04870">2-3 sem</div>
+        </div>
+        <p class="text-[.7rem] font-bold mb-2" style="color:var(--sl-text)">Demo con datos del banco</p>
+        <p class="text-[.6rem]" style="color:var(--sl-text-sec)">Setup de tenant dedicado con CSV de posiciones reales anonimizadas. Comparativa FTP/Margen contra herramienta actual.</p>
+      </div>
+      <div class="box p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-violet">Paso 03</p>
+          <div class="mono text-[.55rem] font-bold px-2 py-0.5 rounded" style="background:rgba(155,89,182,0.1);color:#9B59B6">8-12 sem</div>
+        </div>
+        <p class="text-[.7rem] font-bold mb-2" style="color:var(--sl-text)">Piloto productivo acotado</p>
+        <p class="text-[.6rem]" style="color:var(--sl-text-sec)">Un segmento × dos productos × una entidad. Integración CoreBanking en modo read-only. Primeras métricas de impacto.</p>
+      </div>
+      <div class="box p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="mono text-[.55rem] font-bold uppercase tracking-wider text-nfq-steel">Paso 04</p>
+          <div class="mono text-[.55rem] font-bold px-2 py-0.5 rounded" style="background:rgba(91,127,199,0.1);color:#5B7FC7">Escalado</div>
+        </div>
+        <p class="text-[.7rem] font-bold mb-2" style="color:var(--sl-text)">Roll-out por olas</p>
+        <p class="text-[.6rem]" style="color:var(--sl-text-sec)">Segmentos adicionales → Channel API → Campañas → Entidades del grupo. Con decision gate tras cada ola.</p>
+      </div>
+    </div>
+
+    <div class="box-m p-5 flex items-center justify-between">
+      <div>
+        <p class="mono text-[.55rem] font-bold uppercase tracking-wider mb-2" style="color:var(--sl-text-muted)">Contacto directo</p>
+        <p class="text-[.85rem] font-bold" style="color:var(--sl-text)">Gregorio Gonzalo — Partner NFQ Advisory</p>
+        <p class="text-[.65rem] mt-1" style="color:var(--sl-text-sec)">ALM · IRRBB · Riesgos estructurales · Liquidez</p>
+      </div>
+      <div class="text-right">
+        <p class="mono text-[.6rem]" style="color:var(--sl-text-muted)">gregorio.gonzalo@nfq.es</p>
+        <p class="mono text-[.55rem] mt-1" style="color:var(--sl-text-muted)">20+ proyectos activos en Tier-1 europeos</p>
+      </div>
+    </div>
+    <div class="takeaway"><p>Cuatro pasos. Cada uno con entregable claro y posibilidad de parar. Entre el primer workshop y las primeras métricas de impacto pasan, como máximo, cuatro meses.</p></div>
+  </div>
+</div>
+
+<!-- ━━━ CLOSING (always dark) ━━━ -->
+<div class="slide slide-dark" data-section="">
+  <div class="si">
+    <div class="flex flex-col items-center justify-center text-center" style="min-height:60vh">
+      <svg width="36" height="45" class="mb-8 opacity-80"><use href="#nfq-iso"/></svg>
+      <h2 class="text-[clamp(2.5rem,5vw,4rem)] font-black tracking-tight leading-[.95] mb-4">Hablemos.</h2>
+      <div class="w-12 h-[3px] mx-auto mb-6" style="background:var(--sl-dark-accent)"></div>
+      <p class="text-base font-light mb-2" style="color:var(--sl-dark-text-sec)">N-Pricing está listo. La pregunta es qué segmento queréis pricear primero.</p>
+      <p class="mono text-[.6rem] tracking-[.15em] uppercase mt-3" style="color:var(--sl-dark-text-mut)">gregorio.gonzalo@nfq.es</p>
+      <p class="mono text-[.55rem] tracking-[.15em] uppercase mt-12" style="color:var(--sl-dark-text-mut);opacity:0.5">NFQ Advisory — Proceso y Tecnología para Entidades Financieras</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="nav-bar">
+  <button id="btn-prev" aria-label="Anterior">&#8592;</button>
+  <span class="cnt" id="counter">1 / 5</span>
+  <button id="btn-next" aria-label="Siguiente">&#8594;</button>
+  <div class="sep"></div>
+  <button class="theme-btn active" data-theme="light">Light</button>
+  <button class="theme-btn" data-theme="dark">Dark</button>
+  <button class="theme-btn" data-theme="glass">Glass</button>
+  <div class="sep"></div>
+  <button class="theme-btn active" data-lang="es" id="lang-es" style="font-size:.5rem !important">ES</button>
+  <button class="theme-btn" data-lang="en" id="lang-en" style="font-size:.5rem !important">EN</button>
+  <div class="sep"></div>
+  <button class="export-btn" id="btn-pdf" title="Descargar PDF (generado al vuelo)" aria-label="Descargar PDF">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF
+  </button>
+  <button class="export-btn" id="btn-print" title="Imprimir (respeta zoom del navegador)" aria-label="Imprimir">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir
+  </button>
+  <button class="export-btn" id="btn-pptx" title="Exportar como imagen" aria-label="Exportar como imagen">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>IMG
+  </button>
+  <button class="export-btn" id="btn-slides" title="Exportar editable (Google Slides / PowerPoint)" aria-label="Exportar PPTX editable">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M7 10h4"/><path d="M7 13h6"/></svg>PPTX
+  </button>
+  <div class="sep"></div>
+  <button class="export-btn" id="btn-edit" title="Editar texto de las slides" aria-label="Editar texto de las slides">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
+  </button>
+  <button class="export-btn" id="btn-notes" title="Anadir notas post-it" aria-label="Anadir notas post-it">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Notes
+  </button>
+</div>
+<div class="notes-hint" id="notes-hint">Doble-click en la slide para anadir una nota</div>
+<div id="kb-hint">&#8592; &#8594; o Space para navegar</div>
+
+<script>
+(function(){
+  /* ─── Pre-captured slides (set by capture-slides.mjs) ─── */
+  /* When populated, PDF/IMG/PPTX use these pixel-perfect images instead of html2canvas */
+  var _PRECAPTURED = null;
+  var _PRECAPTURED_EN = null;
+
+  /* ─── Theme definitions ─── */
+  var themes = {
+    light: {
+      '--sl-bg': '#FFFFFF',
+      '--sl-bg-card': '#FFFFFF',
+      '--sl-bg-alt': '#F8F9FB',
+      '--sl-text': '#0B1026',
+      '--sl-text-sec': '#6B7185',
+      '--sl-text-muted': '#9DA2B3',
+      '--sl-accent': '#0B1026',
+      '--sl-progress': '#0B1026',
+      '--sl-border': '#E2E4EB',
+      '--sl-nav-bg': '#0B1026',
+      '--sl-nav-text': '#9DA2B3',
+      '--sl-dark-bg': '#0B1026',
+      '--sl-dark-accent': '#0B1026',
+      '--sl-dark-text-sec': 'rgba(255,255,255,0.7)',
+      '--sl-dark-text-mut': 'rgba(255,255,255,0.4)',
+      '--sl-dark-module-bg': 'rgba(255,255,255,0.06)'
+    },
+    dark: {
+      '--sl-bg': '#0e0e0e',
+      '--sl-bg-card': '#1a1919',
+      '--sl-bg-alt': '#201f1f',
+      '--sl-text': '#ffffff',
+      '--sl-text-sec': '#adaaaa',
+      '--sl-text-muted': '#64605e',
+      '--sl-accent': '#F48B4A',
+      '--sl-progress': '#ffffff',
+      '--sl-border': '#2a2827',
+      '--sl-nav-bg': '#1a1919',
+      '--sl-nav-text': '#adaaaa',
+      '--sl-dark-bg': '#0a0a0a',
+      '--sl-dark-accent': '#F48B4A',
+      '--sl-dark-text-sec': '#adaaaa',
+      '--sl-dark-text-mut': '#64605e',
+      '--sl-dark-module-bg': 'rgba(255,255,255,0.04)'
+    },
+    glass: {
+      '--sl-bg': 'transparent',
+      '--sl-bg-card': 'rgba(255,255,255,0.18)',
+      '--sl-bg-alt': 'rgba(255,255,255,0.1)',
+      '--sl-text': '#1a1d28',
+      '--sl-text-sec': '#3d4255',
+      '--sl-text-muted': '#6b7085',
+      '--sl-accent': '#0B1026',
+      '--sl-progress': '#0B1026',
+      '--sl-border': 'rgba(0,0,0,0.06)',
+      '--sl-nav-bg': 'rgba(255,255,255,0.45)',
+      '--sl-nav-text': '#5a6070',
+      '--sl-dark-bg': '#1a1d28',
+      '--sl-dark-accent': '#0B1026',
+      '--sl-dark-text-sec': 'rgba(255,255,255,0.7)',
+      '--sl-dark-text-mut': 'rgba(255,255,255,0.4)',
+      '--sl-dark-module-bg': 'rgba(255,255,255,0.08)'
+    }
+  };
+
+  var currentTheme = 'light';
+
+  function applyTheme(name) {
+    currentTheme = name;
+    var t = themes[name];
+    var root = document.documentElement;
+    // Smooth transition for theme change
+    document.body.style.transition = 'background-color 0.3s ease';
+    for (var k in t) { root.style.setProperty(k, t[k]); }
+    setTimeout(function() { document.body.style.transition = ''; }, 350);
+    // Toggle glass-active class for animated background + blur effects
+    document.body.classList.toggle('glass-active', name === 'glass');
+    // Update theme buttons
+    document.querySelectorAll('.theme-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-theme') === name);
+    });
+    // Re-apply slide styling for current slide
+    go(C);
+  }
+
+  document.querySelectorAll('.theme-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      applyTheme(btn.getAttribute('data-theme'));
+    });
+  });
+
+  /* ─── Navigation ─── */
+  var S = document.querySelectorAll('.slide'), T = S.length, C = 0, H = true;
+  var F = document.getElementById('progress-fill'), N = document.getElementById('counter'),
+      G = document.getElementById('section-tag'), K = document.getElementById('kb-hint'),
+      PT = document.getElementById('progress-track');
+
+  // Phase 4.2: keyboard hint timeout — hide after 5s or on first nav keypress
+  var kbHintTimer = setTimeout(function() { if (K) K.style.opacity = '0'; }, 5000);
+
+  function go(i) {
+    if (i < 0 || i >= T) return; C = i;
+    for (var j = 0; j < T; j++) {
+      S[j].classList.remove('active', 'prev');
+      if (j === C) S[j].classList.add('active');
+      else if (j < C) S[j].classList.add('prev');
+    }
+    F.style.width = ((C + 1) / T * 100) + '%';
+    N.textContent = (C + 1) + ' / ' + T;
+    G.textContent = S[C].getAttribute('data-section') || '';
+
+    // Dark slides always override theme colors for nav elements
+    var isDark = S[C].classList.contains('slide-dark') || S[C].classList.contains('slide-div');
+    if (isDark) {
+      G.style.color = 'rgba(255,255,255,.3)';
+      F.style.background = '#FFF';
+      PT.style.background = 'rgba(255,255,255,.08)';
+    } else {
+      var t = themes[currentTheme];
+      G.style.color = t['--sl-text-muted'];
+      F.style.background = t['--sl-progress'];
+      PT.style.background = currentTheme === 'light' ? '#F0F1F5' : (currentTheme === 'dark' ? '#201f1f' : 'rgba(30,33,58,0.5)');
+    }
+
+    history.replaceState(null, '', '#slide-' + (C + 1));
+    // Phase 4.2: hide keyboard hint on first navigation (before 5s timeout)
+    if (H) { H = false; clearTimeout(kbHintTimer); K.style.opacity = '0'; }
+
+    // Phase 2.1: set focus on active slide for accessibility
+    S[C].setAttribute('tabindex', '-1');
+    S[C].focus({ preventScroll: true });
+
+    // Phase 1.2: update section navigator active state
+    var curSection = S[C].getAttribute('data-section') || '';
+    var secNavEl = document.getElementById('sec-nav');
+    if (secNavEl) {
+      var secBtns = secNavEl.querySelectorAll('.sec-nav-btn');
+      secBtns.forEach(function(btn) {
+        var isActive = btn.getAttribute('data-go-section') === curSection && curSection !== '';
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      // Show/hide section nav
+      if (curSection) {
+        secNavEl.classList.add('visible');
+      } else {
+        secNavEl.classList.remove('visible');
+      }
+      // Toggle on-dark class
+      secNavEl.classList.toggle('on-dark', isDark);
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    var tag = e.target.tagName;
+    if (e.target.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(C + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(C - 1); }
+  });
+  document.getElementById('btn-prev').addEventListener('click', function() { go(C - 1); });
+  document.getElementById('btn-next').addEventListener('click', function() { go(C + 1); });
+
+  // Touch support
+  var tx = 0;
+  document.addEventListener('touchstart', function(e) { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', function(e) {
+    var d = tx - e.changedTouches[0].clientX;
+    if (Math.abs(d) > 80) d > 0 ? go(C + 1) : go(C - 1);
+  });
+
+  // Hash-based initial slide
+  var h = window.location.hash;
+  if (h && h.indexOf('#slide-') === 0) {
+    var n = parseInt(h.replace('#slide-', '')) - 1;
+    if (n >= 0 && n < T) C = n;
+  }
+  go(C);
+
+  // ── Export progress overlay ───────────────────────────
+  var exportOverlay = document.createElement('div');
+  exportOverlay.id = 'export-overlay';
+  exportOverlay.setAttribute('role', 'status');
+  exportOverlay.setAttribute('aria-live', 'polite');
+  exportOverlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(11,16,38,0.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem';
+  var exportMsg = document.createElement('p');
+  exportMsg.style.cssText = "font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#fff;letter-spacing:.08em;text-transform:uppercase";
+  var exportBar = document.createElement('div');
+  exportBar.style.cssText = 'width:240px;height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden';
+  var exportFill = document.createElement('div');
+  exportFill.style.cssText = 'height:100%;width:0;background:#F48B4A;transition:width .3s ease';
+  exportBar.appendChild(exportFill);
+  exportOverlay.appendChild(exportMsg);
+  exportOverlay.appendChild(exportBar);
+  document.body.appendChild(exportOverlay);
+
+  function showExportProgress(label, current, total) {
+    exportOverlay.style.display = 'flex';
+    exportMsg.textContent = label + ' ' + current + ' / ' + total;
+    exportFill.style.width = (current / total * 100) + '%';
+  }
+  function hideExportProgress() { exportOverlay.style.display = 'none'; }
+
+  // ── html2canvas workarounds ─────────────────────────
+  // Fix: html2canvas misrenders letter-spacing, word-spacing, text-align
+  // Proven approach from BBVA presentation: inject <style> with !important resets
+  function injectH2cFix() {
+    if (document.getElementById('h2c-fix')) return;
+    var s = document.createElement('style');
+    s.id = 'h2c-fix';
+    s.textContent = '* { letter-spacing: normal !important; text-align: left !important; word-spacing: normal !important; } .mono, .ex-num, .kpi-label, .tag, .sec-nav-btn, .theme-btn, [class*="tracking-"] { letter-spacing: 0.04em !important; } .kpi { letter-spacing: -0.02em !important; }';
+    document.head.appendChild(s);
+  }
+  function removeH2cFix() {
+    var s = document.getElementById('h2c-fix');
+    if (s && s.parentNode) s.parentNode.removeChild(s);
+  }
+  // Fix 2: SVG <use href="#id"> not rendered by html2canvas
+  // Also copies <defs> (gradients) into the inline SVG so html2canvas can find them
+  function inlineSvgUses(el) {
+    var uses = el.querySelectorAll('use[href]');
+    var saved = [];
+    // Find the global defs container (the hidden SVG with gradient definitions)
+    var globalDefs = document.querySelector('svg[style*="position:absolute"] defs');
+    uses.forEach(function(use) {
+      var svg = use.closest('svg');
+      if (!svg) return;
+      var href = use.getAttribute('href') || '';
+      var symbolId = href.replace('#', '');
+      var symbol = document.getElementById(symbolId);
+      if (!symbol) return;
+      var vb = symbol.getAttribute('viewBox');
+      var origContent = svg.cloneNode(true);
+      saved.push({ svg: svg, clone: origContent, parent: svg.parentNode, nextSib: svg.nextSibling });
+      // Build new SVG with defs + symbol paths
+      if (vb) svg.setAttribute('viewBox', vb);
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      // Copy gradient defs into this SVG so html2canvas can resolve fill="url(#ng1)"
+      if (globalDefs) {
+        var defsClone = globalDefs.cloneNode(true);
+        svg.appendChild(defsClone);
+      }
+      // Copy symbol children (the actual paths)
+      Array.from(symbol.children).forEach(function(child) {
+        svg.appendChild(child.cloneNode(true));
+      });
+    });
+    return saved;
+  }
+  function restoreSvgUses(saved) {
+    saved.forEach(function(item) {
+      if (item.parent) {
+        if (item.nextSib) {
+          item.parent.insertBefore(item.clone, item.nextSib);
+        } else {
+          item.parent.appendChild(item.clone);
+        }
+        if (item.svg.parentNode) item.svg.parentNode.removeChild(item.svg);
+      }
+    });
+  }
+
+  // ── Imprimir — abre diálogo nativo (respeta zoom del navegador) ──
+  document.getElementById('btn-print').addEventListener('click', function() { window.print(); });
+
+  // ── Helpers: safe button state swap (no innerHTML) ──
+  function snapshotButton(btn) { var kids = []; for (var i = 0; i < btn.childNodes.length; i++) kids.push(btn.childNodes[i].cloneNode(true)); return kids; }
+  function setButtonLabel(btn, label) { while (btn.firstChild) btn.removeChild(btn.firstChild); btn.appendChild(document.createTextNode(label)); }
+  function restoreButton(btn, kids) { while (btn.firstChild) btn.removeChild(btn.firstChild); kids.forEach(function(k) { btn.appendChild(k); }); }
+
+  // ── PDF Export (precaptured → instant jsPDF | fallback → html2canvas+jsPDF on the fly | último fallback → window.print) ──
+  document.getElementById('btn-pdf').addEventListener('click', async function() {
+    var docTitle = (document.title.split(' — ')[0] || 'Presentacion NFQ');
+    var _pc = getPrecaptured();
+    // Fast path: pre-captured slides exist → assemble PDF instantly
+    if (_pc && _pc.length > 0) {
+      if (!window.jspdf) { alert('jsPDF no disponible. Usando impresión.'); window.print(); return; }
+      var img = new Image(); img.src = _pc[0];
+      await new Promise(function(r) { img.onload = r; img.onerror = r; });
+      var pw = img.naturalWidth / 2, ph = img.naturalHeight / 2;
+      var pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'px', format: [pw, ph], hotfixes: ['px_scaling'] });
+      for (var i = 0; i < _pc.length; i++) {
+        if (i > 0) pdf.addPage([pw, ph], 'landscape');
+        pdf.addImage(_pc[i], 'JPEG', 0, 0, pw, ph);
+      }
+      pdf.save(docTitle + '.pdf');
+      return;
+    }
+    // Slow path: html2canvas + jsPDF on the fly → actually saves a PDF file
+    if (typeof html2canvas !== 'function' || !window.jspdf) {
+      alert('Librerías no disponibles. Usando impresión.'); window.print(); return;
+    }
+    var btn = this; var snap = snapshotButton(btn);
+    setButtonLabel(btn, 'Generando...'); btn.style.pointerEvents = 'none';
+    document.body.classList.add('exporting'); injectH2cFix(); showExportProgress('Generando PDF', 0, T);
+    var savedC = C;
+    try {
+      var pdf2 = null, pw2 = 0, ph2 = 0;
+      for (var j = 0; j < T; j++) {
+        showExportProgress('Generando PDF', j + 1, T); go(j);
+        await new Promise(function(r) { setTimeout(r, 280); });
+        var svgState = inlineSvgUses(S[j]); var txtState = fixTextInline(S[j]);
+        var canvas;
+        try {
+          canvas = await Promise.race([
+            html2canvas(S[j], { scale: 2, useCORS: true, backgroundColor: null, foreignObjectRendering: true, width: window.innerWidth, height: window.innerHeight, windowWidth: window.innerWidth, windowHeight: window.innerHeight, scrollX: 0, scrollY: 0 }),
+            new Promise(function(_, rej) { setTimeout(function() { rej(new Error('timeout')); }, 20000); })
+          ]);
+        } catch (e) { canvas = null; console.warn('PDF slide ' + (j + 1) + ' failed', e); }
+        restoreTextInline(txtState); restoreSvgUses(svgState);
+        if (!canvas) continue;
+        var imgData = canvas.toDataURL('image/jpeg', 0.92);
+        if (!pdf2) {
+          pw2 = canvas.width / 2; ph2 = canvas.height / 2;
+          pdf2 = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'px', format: [pw2, ph2], hotfixes: ['px_scaling'] });
+        } else {
+          pdf2.addPage([pw2, ph2], 'landscape');
+        }
+        pdf2.addImage(imgData, 'JPEG', 0, 0, pw2, ph2);
+      }
+      if (pdf2) pdf2.save(docTitle + '.pdf');
+      else alert('No se pudo capturar ninguna slide.');
+      go(savedC);
+    } catch (err) { console.error('PDF export:', err); alert('Error export: ' + err.message); go(savedC); }
+    removeH2cFix(); hideExportProgress(); document.body.classList.remove('exporting');
+    restoreButton(btn, snap); btn.style.pointerEvents = 'auto';
+  });
+
+  // ── IMG Export (precaptured → instant | fallback → html2canvas) ──
+  document.getElementById('btn-pptx').addEventListener('click', async function() {
+    if (typeof PptxGenJS === 'undefined') { alert('PptxGenJS no disponible.'); return; }
+    var docTitle = (document.title.split(' — ')[0] || 'Presentacion NFQ');
+    // Fast path: pre-captured slides
+    var _pc2 = getPrecaptured();
+    if (_pc2 && _pc2.length > 0) {
+      var pptx = new PptxGenJS();
+      pptx.defineLayout({ name: 'NFQ', width: 10, height: 5.625 });
+      pptx.layout = 'NFQ'; pptx.author = 'NFQ Advisory';
+      for (var i = 0; i < _pc2.length; i++) {
+        var ps = pptx.addSlide();
+        ps.addImage({ data: _pc2[i], x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', w: 10, h: 5.625 } });
+      }
+      pptx.writeFile({ fileName: docTitle + '.pptx' });
+      return;
+    }
+    // Slow path: html2canvas fallback
+    if (typeof html2canvas !== 'function') { alert('html2canvas no disponible.'); return; }
+    var btn = this;
+    var originalNodes = Array.from(btn.childNodes).map(function(n) { return n.cloneNode(true); });
+    while (btn.firstChild) btn.removeChild(btn.firstChild);
+    btn.appendChild(document.createTextNode('Generando...'));
+    btn.style.opacity = '1'; btn.style.pointerEvents = 'none';
+    document.body.classList.add('exporting');
+    injectH2cFix();
+    showExportProgress('Generando IMG', 0, T);
+    try {
+      var pptx = new PptxGenJS();
+      pptx.defineLayout({ name: 'NFQ', width: 10, height: 5.625 });
+      pptx.layout = 'NFQ'; pptx.author = 'NFQ Advisory';
+      var saved = C;
+      for (var i = 0; i < T; i++) {
+        showExportProgress('Generando IMG', i + 1, T);
+        go(i); await new Promise(function(r) { setTimeout(r, 300); });
+        var svgState = inlineSvgUses(S[i]);
+        var txtState = fixTextInline(S[i]);
+        var hasScreenshots = S[i].querySelector('img[src^="data:image"]') !== null;
+        var imgState = hasScreenshots ? hideBase64Images(S[i]) : null;
+        var h2cOpts = { scale: 2, useCORS: true, backgroundColor: null, width: window.innerWidth, height: window.innerHeight };
+        if (!hasScreenshots) h2cOpts.foreignObjectRendering = true;
+        try {
+          var canvas = await Promise.race([html2canvas(S[i], h2cOpts), new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'))},15000)})]);
+          var pSlide = pptx.addSlide();
+          pSlide.addImage({ data: canvas.toDataURL('image/jpeg', 0.92), x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', w: 10, h: 5.625 } });
+        } catch(err) { console.warn('IMG: skip slide ' + (i+1), err); pptx.addSlide(); }
+        if (imgState) restoreBase64Images(imgState);
+        restoreTextInline(txtState);
+        restoreSvgUses(svgState);
+      }
+      go(saved);
+      pptx.writeFile({ fileName: docTitle + '.pptx' });
+    } catch(err) { console.error('IMG export error:', err); alert('Error al exportar: ' + err.message); }
+    removeH2cFix();
+    hideExportProgress();
+    document.body.classList.remove('exporting');
+    while (btn.firstChild) btn.removeChild(btn.firstChild);
+    originalNodes.forEach(function(n) { btn.appendChild(n); });
+    btn.style.pointerEvents = 'auto';
+    btn.style.opacity = '';
+  });
+
+  // ── EDITABLE PPTX EXPORT (Google Slides compatible) ──
+  document.getElementById('btn-slides').addEventListener('click', function() {
+    if (typeof PptxGenJS === 'undefined') {
+      alert('PptxGenJS no disponible. Verifica tu conexion a internet.');
+      return;
+    }
+    if (typeof html2canvas !== 'function') {
+      alert('html2canvas no disponible. Verifica tu conexion a internet.');
+      return;
+    }
+    var btn = document.getElementById('btn-slides');
+    var savedBtn = btn.cloneNode(true);
+    btn.textContent = 'Generando...';
+    btn.disabled = true;
+
+    function restoreBtn() {
+      while (btn.firstChild) btn.removeChild(btn.firstChild);
+      while (savedBtn.firstChild) btn.appendChild(savedBtn.firstChild);
+      btn.disabled = false;
+    }
+
+    exportEditablePptx().then(restoreBtn).catch(function(err) {
+      console.error('Editable PPTX export error:', err);
+      restoreBtn();
+      alert('Error al exportar: ' + err.message);
+    });
+  });
+
+  async function exportEditablePptx() {
+    document.body.classList.add('exporting');
+    injectH2cFix();
+    var pptx = new PptxGenJS();
+    pptx.defineLayout({ name: 'NFQ', width: 10, height: 5.625 });
+    pptx.layout = 'NFQ';
+    pptx.author = 'NFQ Advisory';
+    pptx.company = 'NFQ Advisory';
+
+    var FILL_LIGHT = 'FFFFFF';
+    var FILL_DARK = '0B1026';
+    var CLR_WHITE = 'FFFFFF';
+    var CLR_TEXT = '0B1026';
+    var CLR_TEXT_SEC = '6B7185';
+    var CLR_TEXT_MUT = '9DA2B3';
+
+    var allSlides = document.querySelectorAll('.slide');
+    var savedC = C;
+    var activeThemeBtn = document.querySelector('.theme-btn.active');
+    var savedTheme = activeThemeBtn ? activeThemeBtn.getAttribute('data-theme') : 'light';
+    if (savedTheme !== 'light') {
+      var lightBtn = document.querySelector('[data-theme="light"]');
+      if (lightBtn) lightBtn.click();
+    }
+    var uiEls = [
+      document.querySelector('.nav-bar'), document.getElementById('kb-hint'),
+      document.getElementById('progress-track'), document.getElementById('slide-logo'),
+      document.getElementById('section-tag'), document.querySelector('.sec-nav')
+    ];
+    uiEls.forEach(function(el) { if (el) el.style.display = 'none'; });
+
+    function waitRender(ms) {
+      return new Promise(function(r) { requestAnimationFrame(function() { setTimeout(r, ms || 100); }); });
+    }
+    function showSlideFor(idx) {
+      allSlides.forEach(function(s, j) {
+        s.style.transition = 'none';
+        if (j === idx) {
+          s.classList.add('active'); s.classList.remove('prev');
+          s.style.opacity = '1'; s.style.transform = 'none'; s.style.pointerEvents = 'auto';
+        } else {
+          s.classList.remove('active', 'prev');
+          s.style.opacity = '0'; s.style.pointerEvents = 'none';
+        }
+      });
+    }
+    async function captureSlide() {
+      try {
+        // Phase 1.1: 15-second timeout for editable export
+        var canvas = await Promise.race([
+          html2canvas(document.body, {
+            scale: 2, useCORS: true, backgroundColor: null,
+            width: window.innerWidth, height: window.innerHeight
+          }),
+          new Promise(function(_, reject) {
+            setTimeout(function() { reject(new Error('html2canvas timeout')); }, 15000);
+          })
+        ]);
+        try {
+          return canvas.toDataURL('image/jpeg', 0.92);
+        } catch (e) {
+          console.warn('toDataURL failed in editable export:', e);
+          return '';
+        }
+      } catch (err) {
+        console.warn('captureSlide error in editable export:', err);
+        return '';
+      }
+    }
+    function getRect(el, slideEl) {
+      if (!el) return null;
+      var sr = slideEl.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      var sx = 10 / sr.width, sy = 5.625 / sr.height;
+      return {
+        x: Math.max(0, (er.left - sr.left) * sx),
+        y: Math.max(0, (er.top - sr.top) * sy),
+        w: Math.min(er.width * sx, 10),
+        h: Math.min(er.height * sy + 0.06, 5.625)
+      };
+    }
+    function addOverlay(ps, text, rect, opts) {
+      if (!text || !rect || rect.w < 0.1) return;
+      var x = Math.max(0, rect.x), y = Math.max(0, rect.y);
+      var w = Math.min(rect.w + 0.05, 10 - x);
+      var h = Math.min(rect.h, 5.5 - y);
+      if (h < 0.05 || y > 5.5) return;
+      ps.addText(text, Object.assign({
+        x: x, y: y, w: w, h: h,
+        fontFace: 'Calibri', valign: 'top', margin: 0, wrap: true
+      }, opts));
+    }
+
+    // Phase 1.1: centralized restore for editable export
+    function restoreEditable() {
+      removeH2cFix();
+      allSlides.forEach(function(s) {
+        s.style.transition = ''; s.style.opacity = ''; s.style.transform = ''; s.style.pointerEvents = '';
+        s.classList.remove('active', 'prev');
+      });
+      uiEls.forEach(function(el) { if (el) el.style.display = ''; });
+      go(savedC);
+      if (savedTheme !== 'light') {
+        var rb = document.querySelector('[data-theme="' + savedTheme + '"]');
+        if (rb) rb.click();
+      }
+      document.body.classList.remove('exporting');
+    }
+
+    await waitRender(300);
+
+    try {
+      for (var i = 0; i < allSlides.length; i++) {
+        var sl = allSlides[i];
+        var isDark = sl.classList.contains('slide-dark');
+        var isDiv = sl.classList.contains('slide-div');
+        var isThemed = sl.classList.contains('slide-themed');
+
+        showSlideFor(i);
+        await waitRender(150);
+        var imgData;
+        var _pc3 = getPrecaptured();
+        if (_pc3 && _pc3[i]) {
+          imgData = _pc3[i];
+        } else {
+          var svgState = inlineSvgUses(sl);
+          imgData = await captureSlide();
+          restoreSvgUses(svgState);
+        }
+        var ps = pptx.addSlide();
+        if (imgData) {
+          ps.addImage({ data: imgData, x: 0, y: 0, w: 10, h: 5.625 });
+        }
+
+        if (isDark && !isDiv && i === 0) {
+          // ═══ COVER ═══
+          var h1 = sl.querySelector('h1');
+          if (h1) addOverlay(ps, (h1.innerText || h1.textContent).trim(), getRect(h1, sl), {
+            fontSize: 40, bold: true, color: CLR_WHITE, fill: { color: FILL_DARK }, lineSpacing: 44
+          });
+          var coverPs = Array.from(sl.querySelectorAll('p')).filter(function(p) {
+            return !p.closest('.mono') && !p.classList.contains('mono') && !p.closest('.grid') && p.textContent.trim().length > 15;
+          });
+          if (coverPs[0]) addOverlay(ps, coverPs[0].textContent.trim(), getRect(coverPs[0], sl), {
+            fontSize: 11, color: 'C0C5D0', fill: { color: FILL_DARK }, lineSpacing: 16
+          });
+          if (coverPs[1]) addOverlay(ps, coverPs[1].textContent.trim(), getRect(coverPs[1], sl), {
+            fontSize: 8, color: '9095A0', fill: { color: FILL_DARK }, lineSpacing: 12
+          });
+
+        } else if (isDiv) {
+          // ═══ SECTION DIVIDER ═══
+          var h2 = sl.querySelector('h2');
+          if (h2) addOverlay(ps, (h2.innerText || h2.textContent).trim(), getRect(h2, sl), {
+            fontSize: 34, bold: true, color: CLR_WHITE, fill: { color: FILL_DARK }, lineSpacing: 40
+          });
+          var divDesc = Array.from(sl.querySelectorAll('p')).filter(function(p) {
+            return !p.classList.contains('mono') && p.textContent.trim().length > 5;
+          });
+          if (divDesc[0]) addOverlay(ps, divDesc[0].textContent.trim(), getRect(divDesc[0], sl), {
+            fontSize: 10, color: 'C0C5D0', fill: { color: FILL_DARK }
+          });
+
+        } else if (isThemed) {
+          // ═══ CONTENT ═══
+          var splitLeft = sl.querySelector('[class*="w-[40%]"], [class*="w-[42%]"], [class*="w-[45%]"], [class*="w-[38%]"]');
+          var textScope = splitLeft || sl;
+
+          var eyebrow = sl.querySelector('.ex-num');
+          if (eyebrow) addOverlay(ps, eyebrow.textContent.trim(), getRect(eyebrow, sl), {
+            fontSize: 6.5, color: CLR_TEXT_MUT, fill: { color: FILL_LIGHT }, charSpacing: 1.5
+          });
+          var title = sl.querySelector('.ex-title') || sl.querySelector('.si > h2');
+          if (title) addOverlay(ps, title.textContent.trim(), getRect(title, sl), {
+            fontSize: 13, bold: true, color: CLR_TEXT, fill: { color: FILL_LIGHT }, lineSpacing: 16, autoFit: true
+          });
+          var sub = textScope.querySelector('.ex-sub');
+          if (sub) addOverlay(ps, sub.textContent.trim(), getRect(sub, sl), {
+            fontSize: 8, color: CLR_TEXT_SEC, fill: { color: FILL_LIGHT }, lineSpacing: 12
+          });
+          var takeaway = sl.querySelector('.takeaway p');
+          if (takeaway) addOverlay(ps, takeaway.textContent.trim(), getRect(takeaway, sl), {
+            fontSize: 7.5, bold: true, color: CLR_TEXT, fill: { color: FILL_LIGHT }, lineSpacing: 11
+          });
+        }
+        // CLOSING / OTHER DARK: image-only, no overlays
+
+        ps.addText(String(i + 1), {
+          x: 9.2, y: 5.2, w: 0.6, h: 0.3, fontSize: 8, fontFace: 'Calibri',
+          color: (isDark || isDiv) ? '555555' : CLR_TEXT_MUT, align: 'right', valign: 'bottom'
+        });
+      }
+
+      var docTitle = document.title.split(' — ')[0] || 'Presentacion NFQ';
+      await pptx.writeFile({ fileName: docTitle + ' (editable).pptx' });
+    } finally {
+      restoreEditable();
+    }
+  }
+
+  // ── EDIT MODE ──────────────────────────────────────
+  var editActive = false;
+  var editBtn = document.getElementById('btn-edit');
+  var editableSelectors = '.ex-title, .ex-sub, .ex-num, .takeaway p, .kpi, .kpi-label, h1, h2, .feat-title, .feat-desc';
+
+  editBtn.addEventListener('click', function() {
+    editActive = !editActive;
+    document.body.classList.toggle('edit-mode', editActive);
+    editBtn.classList.toggle('active-tool', editActive);
+    editBtn.querySelector('svg').nextSibling.textContent = editActive ? 'Editing' : 'Edit';
+
+    var elements = document.querySelectorAll(editableSelectors);
+    elements.forEach(function(el) {
+      if (editActive) {
+        el.setAttribute('contenteditable', 'true');
+      } else {
+        el.removeAttribute('contenteditable');
+      }
+    });
+
+    // Disable notes mode if switching to edit
+    if (editActive && notesActive) {
+      toggleNotes();
+    }
+  });
+
+  // ── POST-IT NOTES ─────────────────────────────────
+  var notesActive = false;
+  var notesBtn = document.getElementById('btn-notes');
+  var notesHint = document.getElementById('notes-hint');
+  var notesData = {}; // { slideIndex: [{ id, x, y, text }] }
+  var noteIdCounter = 0;
+  var lastNoteX = 200, lastNoteY = 200; // Phase 4.1: track last note position
+  var notesContainer = document.createElement('div');
+  notesContainer.id = 'notes-container';
+  notesContainer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99';
+  document.body.appendChild(notesContainer);
+
+  // Phase 4.4: localStorage helpers
+  function getDeckHash() {
+    var title = document.title || 'untitled';
+    var hash = 0;
+    for (var i = 0; i < title.length; i++) {
+      hash = ((hash << 5) - hash) + title.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(36);
+  }
+  var deckHash = getDeckHash();
+
+  function saveNotesToStorage() {
+    try {
+      localStorage.setItem('nfq-deck-' + deckHash + '-notes', JSON.stringify(notesData));
+    } catch (e) { /* quota exceeded or unavailable */ }
+  }
+
+  function loadNotesFromStorage() {
+    try {
+      var raw = localStorage.getItem('nfq-deck-' + deckHash + '-notes');
+      if (raw) {
+        var data = JSON.parse(raw);
+        for (var slideIdx in data) {
+          if (data.hasOwnProperty(slideIdx)) {
+            var notes = data[slideIdx];
+            for (var n = 0; n < notes.length; n++) {
+              var nd = notes[n];
+              notesData[slideIdx] = notesData[slideIdx] || [];
+              notesData[slideIdx].push(nd);
+              createPostit(parseInt(slideIdx), nd.x, nd.y, nd.text, nd.id);
+              if (nd.id) {
+                var num = parseInt(nd.id.replace('note-', ''));
+                if (num > noteIdCounter) noteIdCounter = num;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) { /* parse error or unavailable */ }
+  }
+
+  // Phase 2.2: Delegated drag listeners (registered ONCE, not per-note)
+  var currentDragging = null;
+  var dragOffX = 0, dragOffY = 0;
+
+  document.addEventListener('mousemove', function(e) {
+    if (!currentDragging) return;
+    var nx = e.clientX - dragOffX;
+    var ny = e.clientY - dragOffY;
+    currentDragging.style.left = nx + 'px';
+    currentDragging.style.top = ny + 'px';
+    var slideIdx = parseInt(currentDragging.dataset.slide);
+    var noteId = currentDragging.id;
+    var entries = notesData[slideIdx];
+    if (entries) {
+      var entry = entries.find(function(n) { return n.id === noteId; });
+      if (entry) { entry.x = nx; entry.y = ny; }
+    }
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (currentDragging) {
+      currentDragging.classList.remove('dragging');
+      currentDragging = null;
+      saveNotesToStorage();
+    }
+  });
+
+  function toggleNotes() {
+    notesActive = !notesActive;
+    notesBtn.classList.toggle('active-tool', notesActive);
+    notesBtn.querySelector('svg').nextSibling.textContent = notesActive ? 'Notes ON' : 'Notes';
+    notesContainer.style.pointerEvents = notesActive ? 'auto' : 'none';
+
+    // Show hint briefly
+    if (notesActive) {
+      notesHint.classList.add('show');
+      setTimeout(function() { notesHint.classList.remove('show'); }, 2000);
+      // Disable edit mode if switching to notes
+      if (editActive) {
+        editBtn.click();
+      }
+    }
+  }
+
+  notesBtn.addEventListener('click', toggleNotes);
+
+  function createPostit(slideIdx, x, y, text, existingId) {
+    var id = existingId || ('note-' + (++noteIdCounter));
+    if (!notesData[slideIdx]) notesData[slideIdx] = [];
+
+    var note = document.createElement('div');
+    note.className = 'postit';
+    note.id = id;
+    note.dataset.slide = slideIdx;
+    note.style.left = x + 'px';
+    note.style.top = y + 'px';
+    note.style.pointerEvents = 'auto';
+
+    var label = document.createElement('div');
+    label.className = 'postit-label';
+    label.textContent = 'NOTA';
+
+    var closeBtn = document.createElement('span');
+    closeBtn.className = 'postit-close';
+    closeBtn.textContent = '\u00d7';
+    closeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      note.remove();
+      // Phase 2.2: clear currentDragging if it matches
+      if (currentDragging === note) currentDragging = null;
+      notesData[slideIdx] = notesData[slideIdx].filter(function(n) { return n.id !== id; });
+      saveNotesToStorage();
+    });
+
+    var textDiv = document.createElement('div');
+    textDiv.className = 'postit-text';
+    textDiv.setAttribute('contenteditable', 'true');
+    textDiv.textContent = text || 'Escribe tu nota aqui...';
+    textDiv.addEventListener('focus', function() {
+      if (textDiv.textContent === 'Escribe tu nota aqui...') textDiv.textContent = '';
+    });
+    textDiv.addEventListener('input', function() {
+      var entry = notesData[slideIdx].find(function(n) { return n.id === id; });
+      if (entry) entry.text = textDiv.textContent;
+      saveNotesToStorage();
+    });
+
+    note.appendChild(label);
+    note.appendChild(closeBtn);
+    note.appendChild(textDiv);
+    notesContainer.appendChild(note);
+
+    // Phase 2.2: Drag via delegated listener — only store reference on mousedown
+    note.addEventListener('mousedown', function(e) {
+      if (e.target === textDiv || e.target === closeBtn) return;
+      currentDragging = note;
+      note.classList.add('dragging');
+      dragOffX = e.clientX - note.offsetLeft;
+      dragOffY = e.clientY - note.offsetTop;
+      e.preventDefault();
+    });
+
+    // Show only if on current slide
+    note.style.display = (parseInt(slideIdx) === C) ? 'block' : 'none';
+
+    if (!existingId) {
+      notesData[slideIdx].push({ id: id, x: x, y: y, text: text || '' });
+      // Phase 4.1: track last note position
+      lastNoteX = x;
+      lastNoteY = y;
+      saveNotesToStorage();
+    }
+
+    return note;
+  }
+
+  // Double-click to create note
+  document.addEventListener('dblclick', function(e) {
+    if (!notesActive) return;
+    // Don't create on nav bar or existing post-its
+    if (e.target.closest('.nav-bar') || e.target.closest('.postit') || e.target.closest('#progress-track')) return;
+    // Phase 4.1: offset from last created note by +15px
+    var newX = e.clientX - 85;
+    var newY = e.clientY - 40;
+    if (Math.abs(newX - lastNoteX) < 20 && Math.abs(newY - lastNoteY) < 20) {
+      newX = lastNoteX + 15;
+      newY = lastNoteY + 15;
+    }
+    createPostit(C, newX, newY, '', null);
+  });
+
+  // Show/hide notes on slide change — patch the go() function
+  var originalGo = go;
+  go = function(i) {
+    originalGo(i);
+    // Update post-it visibility
+    var allNotes = notesContainer.querySelectorAll('.postit');
+    allNotes.forEach(function(n) {
+      n.style.display = (parseInt(n.dataset.slide) === C) ? 'block' : 'none';
+    });
+  };
+
+  // ── Phase 1.2: Section Navigator — auto-generated from data-section ──
+  (function buildSectionNav() {
+    var sections = [];
+    var seen = {};
+    for (var si = 0; si < S.length; si++) {
+      var sec = S[si].getAttribute('data-section') || '';
+      if (sec && !seen[sec]) {
+        seen[sec] = true;
+        sections.push(sec);
+      }
+    }
+    if (sections.length === 0) return;
+
+    var nav = document.createElement('nav');
+    nav.className = 'sec-nav';
+    nav.id = 'sec-nav';
+    nav.setAttribute('role', 'tablist');
+
+    sections.forEach(function(secName) {
+      var btn = document.createElement('button');
+      btn.className = 'sec-nav-btn';
+      btn.setAttribute('data-go-section', secName);
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', 'false');
+      btn.textContent = secName;
+      btn.addEventListener('click', function() {
+        // Find first slide with matching data-section
+        for (var k = 0; k < S.length; k++) {
+          if (S[k].getAttribute('data-section') === secName) {
+            go(k);
+            break;
+          }
+        }
+      });
+      nav.appendChild(btn);
+    });
+
+    document.body.appendChild(nav);
+    // Trigger initial state
+    go(C);
+  })();
+
+  // ── Phase 4.4: localStorage persistence for Edit Mode ──
+  function saveEditsToStorage() {
+    var edits = {};
+    S.forEach(function(slide, idx) {
+      var editables = slide.querySelectorAll(editableSelectors);
+      var slideEdits = [];
+      editables.forEach(function(el) {
+        slideEdits.push(el.textContent);
+      });
+      if (slideEdits.length > 0) edits[idx] = slideEdits;
+    });
+    try {
+      localStorage.setItem('nfq-deck-' + deckHash + '-edits', JSON.stringify(edits));
+    } catch (e) { /* quota exceeded or unavailable */ }
+  }
+
+  function loadEditsFromStorage() {
+    try {
+      var raw = localStorage.getItem('nfq-deck-' + deckHash + '-edits');
+      if (!raw) return;
+      var edits = JSON.parse(raw);
+      for (var idx in edits) {
+        if (edits.hasOwnProperty(idx)) {
+          var slideEdits = edits[idx];
+          var slide = S[parseInt(idx)];
+          if (!slide) continue;
+          var editables = slide.querySelectorAll(editableSelectors);
+          for (var e = 0; e < editables.length && e < slideEdits.length; e++) {
+            if (slideEdits[e]) editables[e].textContent = slideEdits[e];
+          }
+        }
+      }
+    } catch (e) { /* parse error or unavailable */ }
+  }
+
+  // Patch edit mode toggle to save on deactivation
+  var originalEditClick = editBtn.onclick;
+  var editBtnHandler = editBtn;
+  editBtnHandler.addEventListener('click', function() {
+    // Save edits when toggling OFF (editActive was already toggled in the main handler)
+    if (!editActive) {
+      saveEditsToStorage();
+    }
+  });
+
+  // Load persisted data on page load
+  loadEditsFromStorage();
+  loadNotesFromStorage();
+
+  // ── Helper functions for html2canvas workarounds ──
+  function fixTextInline(slideEl) {
+    var all = slideEl.querySelectorAll('*');
+    var saved = [];
+    all.forEach(function(el) {
+      var cs = window.getComputedStyle(el);
+      var ls = cs.letterSpacing;
+      var ws = cs.wordSpacing;
+      var ta = cs.textAlign;
+      if (ls !== 'normal' && ls !== '0px' || ws !== 'normal' && ws !== '0px' || ta === 'justify') {
+        saved.push({ el: el, letterSpacing: el.style.letterSpacing, wordSpacing: el.style.wordSpacing, textAlign: el.style.textAlign });
+        el.style.letterSpacing = 'normal';
+        el.style.wordSpacing = 'normal';
+        if (ta === 'justify') el.style.textAlign = 'left';
+      }
+    });
+    return saved;
+  }
+  function restoreTextInline(saved) {
+    saved.forEach(function(item) {
+      item.el.style.letterSpacing = item.letterSpacing;
+      item.el.style.wordSpacing = item.wordSpacing;
+      item.el.style.textAlign = item.textAlign;
+    });
+  }
+  function hideBase64Images(slideEl) {
+    var imgs = slideEl.querySelectorAll('img[src^="data:image"]');
+    var saved = [];
+    imgs.forEach(function(img) {
+      try {
+        var c = document.createElement('canvas');
+        c.width = img.offsetWidth * 2;
+        c.height = img.offsetHeight * 2;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        c.style.width = img.offsetWidth + 'px';
+        c.style.height = img.offsetHeight + 'px';
+        var smallSrc = c.toDataURL('image/jpeg', 0.88);
+        saved.push({ img: img, originalSrc: img.src });
+        img.src = smallSrc;
+      } catch(e) { console.warn('hideBase64Images: skip', e); }
+    });
+    return saved;
+  }
+  function restoreBase64Images(saved) {
+    saved.forEach(function(item) { item.img.src = item.originalSrc; });
+  }
+
+  // ── Language Toggle (ES/EN) ──────────────────────
+  // Override `translations` in your presentation with slide-specific text mappings.
+  // Format: { 'Spanish text': 'English text', ... }
+  var translations = {};
+  var currentLang = 'es';
+  var originalTexts = new Map();
+
+  function collectTexts() {
+    var selectors = '.ex-title, .ex-sub, .ex-num, .takeaway p, h1, h2, .feat-title, .feat-desc, .kpi-label, .slide-div p, .slide-dark p, .row-l p, .arch-layer';
+    document.querySelectorAll(selectors).forEach(function(el) {
+      if (!originalTexts.has(el)) originalTexts.set(el, el.textContent.trim());
+    });
+  }
+
+  function applyLang(lang) {
+    currentLang = lang;
+    collectTexts();
+    originalTexts.forEach(function(origText, el) {
+      if (lang === 'en') {
+        var translated = translations[origText];
+        if (translated !== undefined) el.textContent = translated || el.textContent;
+      } else {
+        el.textContent = origText;
+      }
+    });
+    document.querySelectorAll('[data-lang]').forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Get precaptured images for current language
+  function getPrecaptured() {
+    if (currentLang === 'en' && _PRECAPTURED_EN) return _PRECAPTURED_EN;
+    return _PRECAPTURED;
+  }
+
+  document.getElementById('lang-es').addEventListener('click', function() { applyLang('es'); });
+  document.getElementById('lang-en').addEventListener('click', function() { applyLang('en'); });
+
+})();
+</script>
+</body>
+</html>
