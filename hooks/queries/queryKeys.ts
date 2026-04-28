@@ -17,6 +17,7 @@ export const queryKeys = {
     versions: (dealId: string) => ['deals', dealId, 'versions'] as const,
     paginated: (page: number, pageSize: number) =>
       ['deals', 'paginated', page, pageSize] as const,
+    timeline: (dealId: string) => ['deals', dealId, 'timeline'] as const,
   },
 
   // --- CLV + 360 (Phase 6) ---
