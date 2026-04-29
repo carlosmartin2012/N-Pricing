@@ -4,6 +4,7 @@ import {
   LayoutDashboard, BrainCircuit, Users, ShieldCheck, BookOpen,
   HeartPulse, Plus, Upload, Moon, Sun, Search, ArrowRight, Target,
   Grid3X3, BookOpenCheck, FileSignature, ShieldAlert, User2,
+  MessageSquare, Compass,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
@@ -11,6 +12,8 @@ import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { viewToPath, AUX_DESTINATIONS } from '../../appNavigation';
 import type { ViewState } from '../../types';
+import type { CopilotContextSummary } from '../../types/copilot';
+import CopilotAskPanel from './CopilotAskPanel';
 
 interface CommandItem {
   id: string;
@@ -63,11 +66,29 @@ function fuzzyMatch(text: string, query: string): boolean {
 export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [mode, setMode] = useState<'navigate' | 'ask'>('navigate');
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { deals, clients } = useData();
-  const { theme, setTheme, setIsImportModalOpen, openCustomerDrawer } = useUI();
+  const { theme, setTheme, setIsImportModalOpen, openCustomerDrawer, language } = useUI();
+
+  // Compose the copilot context from the user's surroundings. dealId
+  // comes from the Calculator selection (last deal in `deals` array
+  // is a heuristic — the real source of truth is dealParams in
+  // PricingStateContext, but pulling it here would require a deeper
+  // refactor that does not pay off in this sub-block).
+  const copilotContext: CopilotContextSummary = useMemo(() => {
+    const lastSelected = deals.find((d) => d.id) ?? null;
+    return {
+      view: undefined,
+      snapshotId: undefined,
+      dealId: lastSelected?.id ?? undefined,
+      oneLine: lastSelected?.id
+        ? `Deal ${lastSelected.id} · ${lastSelected.productType ?? '—'}`
+        : undefined,
+    };
+  }, [deals]);
 
   // Build command items
   const items = useMemo<CommandItem[]>(() => {
@@ -156,6 +177,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
     if (isOpen) {
       setQuery('');
       setSelectedIndex(0);
+      setMode('navigate');
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [isOpen]);
@@ -203,23 +225,67 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-[540px] overflow-hidden rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[0_25px_80px_rgba(0,0,0,0.6)] animate-in fade-in zoom-in-95 duration-150"
       >
-        {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-[var(--nfq-border-ghost)] px-4 py-3">
-          <Search size={16} className="shrink-0 text-[var(--nfq-text-muted)]" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Search views, deals, actions..."
-            className="flex-1 bg-transparent text-sm text-[var(--nfq-text-primary)] outline-none placeholder:text-[var(--nfq-text-faint)]"
-          />
-          <kbd className="hidden rounded border border-[var(--nfq-border-ghost)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--nfq-text-muted)] sm:inline-block">
-            ESC
-          </kbd>
+        {/* Tab bar — Navigate vs Ask (Ola 7 Bloque C.3) */}
+        <div className="flex items-center gap-1 border-b border-[var(--nfq-border-ghost)] px-2 py-2" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'navigate'}
+            data-testid="palette-tab-navigate"
+            onClick={() => setMode('navigate')}
+            className={`flex items-center gap-1.5 rounded px-3 py-1 text-[11px] font-medium transition-colors ${
+              mode === 'navigate'
+                ? 'bg-[var(--nfq-bg-elevated)] text-[var(--nfq-text-primary)]'
+                : 'text-[var(--nfq-text-muted)] hover:text-[var(--nfq-text-secondary)]'
+            }`}
+          >
+            <Compass size={12} /> Navigate
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === 'ask'}
+            data-testid="palette-tab-ask"
+            onClick={() => setMode('ask')}
+            className={`flex items-center gap-1.5 rounded px-3 py-1 text-[11px] font-medium transition-colors ${
+              mode === 'ask'
+                ? 'bg-[var(--nfq-bg-elevated)] text-cyan-300'
+                : 'text-[var(--nfq-text-muted)] hover:text-[var(--nfq-text-secondary)]'
+            }`}
+          >
+            <MessageSquare size={12} /> Ask
+          </button>
         </div>
 
-        {/* Results */}
+        {/* Search input — only in Navigate mode */}
+        {mode === 'navigate' && (
+          <div className="flex items-center gap-3 border-b border-[var(--nfq-border-ghost)] px-4 py-3">
+            <Search size={16} className="shrink-0 text-[var(--nfq-text-muted)]" />
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Search views, deals, actions..."
+              className="flex-1 bg-transparent text-sm text-[var(--nfq-text-primary)] outline-none placeholder:text-[var(--nfq-text-faint)]"
+            />
+            <kbd className="hidden rounded border border-[var(--nfq-border-ghost)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--nfq-text-muted)] sm:inline-block">
+              ESC
+            </kbd>
+          </div>
+        )}
+
+        {/* Ask panel (Ola 7 Bloque C.3) */}
+        {mode === 'ask' && (
+          <CopilotAskPanel
+            context={copilotContext}
+            language={language === 'es' ? 'es' : 'en'}
+            onClose={onClose}
+          />
+        )}
+
+        {/* Results — Navigate mode only */}
+        {mode === 'navigate' && (
         <div ref={listRef} className="max-h-[360px] overflow-y-auto py-2">
           {filtered.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-[var(--nfq-text-muted)]">
@@ -267,6 +333,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
             ))
           )}
         </div>
+        )}
 
         {/* Footer hints */}
         <div className="flex items-center gap-4 border-t border-[var(--nfq-border-ghost)] px-4 py-2 text-[10px] text-[var(--nfq-text-faint)]">

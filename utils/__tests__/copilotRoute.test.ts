@@ -29,25 +29,37 @@ function buildApp(geminiCaller: GeminiCaller, tenancy = { entityId: 'E1', userEm
 
 async function postJson(app: express.Express, body: Record<string, unknown>) {
   // Minimal in-process invocation via supertest-style use of node's http
+  type FakeReq = {
+    method: 'POST';
+    url: string;
+    body: Record<string, unknown>;
+    headers: Record<string, string>;
+  };
+  type FakeRes = {
+    status: (n: number) => FakeRes;
+    json: (o: unknown) => FakeRes;
+    setHeader?: () => void;
+    end?: () => void;
+    statusCode: number;
+  };
   return await new Promise<{ status: number; body: unknown }>((resolve) => {
-    const req = {
+    const req: FakeReq = {
       method: 'POST',
       url: '/api/copilot/ask',
       body,
       headers: { 'content-type': 'application/json' },
     };
-    // Use express directly via supertest substitute — manual invocation
-    const handler = app as unknown as (req: typeof req, res: { status: (n: number) => unknown; json: (o: unknown) => unknown; setHeader?: () => void; end?: () => void; statusCode?: number }) => void;
+    const handler = app as unknown as (req: FakeReq, res: FakeRes) => void;
     let statusCode = 200;
     let payload: unknown = null;
-    const res = {
+    const res: FakeRes = {
       status: (n: number) => { statusCode = n; return res; },
       json: (o: unknown) => { payload = o; resolve({ status: statusCode, body: payload }); return res; },
       setHeader: () => undefined,
       end: () => resolve({ status: statusCode, body: payload }),
       statusCode: 200,
     };
-    handler(req as unknown as Parameters<typeof handler>[0], res);
+    handler(req, res);
   });
 }
 
