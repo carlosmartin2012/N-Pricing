@@ -22,6 +22,7 @@ import { useOfflineStatus } from './hooks/useOfflineStatus';
 import { useOfflineSync } from './hooks/useOfflineSync';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePresenceAwareness } from './hooks/usePresenceAwareness';
+import { PresenceValueProvider } from './contexts/PresenceContext';
 
 const PricingWorkspace = React.lazy(() => import('./components/Pricing/PricingWorkspace'));
 const PricingLayoutShell = React.lazy(() => import('./components/Pricing/PricingLayoutShell'));
@@ -136,7 +137,7 @@ const AppContent: React.FC = () => {
 
   const { loadUserEntities, activeEntity } = useEntity();
 
-  const { onlineUsers } = usePresenceAwareness({
+  const presence = usePresenceAwareness({
     userId: currentUser?.id ?? '',
     name: currentUser?.name ?? '',
     email: currentUser?.email ?? '',
@@ -146,6 +147,19 @@ const AppContent: React.FC = () => {
     entityId: activeEntity?.id,
     enabled: isAuthenticated,
   });
+  const { onlineUsers } = presence;
+  // Memoised value the descendants read via usePresence(). Built from
+  // the same hook instance App already runs, so we don't open a second
+  // Supabase Realtime channel for soft-locks (Ola 7 Bloque B.1).
+  const presenceValue = useMemo(
+    () => ({
+      onlineUsers: presence.onlineUsers,
+      getUsersOnView: presence.getUsersOnView,
+      getUsersOnDeal: presence.getUsersOnDeal,
+      selfUserId: currentUser?.id ?? '',
+    }),
+    [presence.onlineUsers, presence.getUsersOnView, presence.getUsersOnDeal, currentUser?.id],
+  );
 
   useEffect(() => {
     if (currentUser?.email) {
@@ -191,6 +205,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
+    <PresenceValueProvider value={presenceValue}>
     <div className="nfq-shell flex h-screen overflow-hidden font-sans text-[color:var(--nfq-text-primary)] transition-colors duration-300">
       <SkipNav />
       <Sidebar
@@ -418,6 +433,7 @@ const AppContent: React.FC = () => {
         </Suspense>
       </div>
     </div>
+    </PresenceValueProvider>
   );
 };
 
