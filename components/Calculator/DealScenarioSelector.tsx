@@ -4,6 +4,7 @@ import type { ClientEntity, Transaction } from '../../types';
 import { Badge, InputGroup, SelectInput } from '../ui/LayoutComponents';
 import type { Language } from '../../translations';
 import { getTranslations } from '../../translations';
+import DealLockBadge from '../Deals/DealLockBadge';
 
 interface Props {
   values: Transaction;
@@ -55,6 +56,11 @@ export const DealScenarioSelector: React.FC<Props> = ({
           <span className="text-xs text-[color:var(--nfq-text-muted)]">
             {selectedClient?.type || values.clientType}
           </span>
+          {/* Soft-lock indicator (Ola 7 Bloque B.3): only visible when
+              another user is currently on the same deal — otherwise
+              renders null, so the metadata row stays clean for the
+              normal solo-edit flow. */}
+          <DealLockBadge dealId={values.id} variant="chip" />
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="default">{values.productType || t.noProduct}</Badge>
