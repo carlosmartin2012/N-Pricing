@@ -34,7 +34,10 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
   useEffect(() => {
     if (!focusEventId) return;
     const el = document.getElementById(`tl-${focusEventId}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // jsdom does not implement scrollIntoView; guard so tests stay safe.
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, [focusEventId, timeline?.events.length]);
 
   const visibleEvents = useMemo(() => {

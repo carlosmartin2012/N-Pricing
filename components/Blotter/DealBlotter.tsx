@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import * as auditApi from '../../api/audit';
 import * as configApi from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
@@ -131,6 +132,12 @@ const DealBlotter: React.FC = () => {
     setOutcomeDealId(deal.id);
     setIsOutcomeOpen(true);
   }, []);
+
+  const navigate = useNavigate();
+  const handleOpenTimeline = useCallback((deal: Transaction) => {
+    if (!deal.id) return;
+    navigate(`/deals/${encodeURIComponent(deal.id)}/timeline`);
+  }, [navigate]);
 
   const handleSaveOutcome = useCallback(
     async (patch: Partial<Transaction>) => {
@@ -318,6 +325,7 @@ const DealBlotter: React.FC = () => {
           onEditDeal={handleEdit}
           onDeleteDeal={handleDelete}
           onCaptureOutcome={handleCaptureOutcome}
+          onOpenTimeline={handleOpenTimeline}
           formatCurrency={formatDealCurrency}
           selectedDealIds={selectedDealIds}
           onSelectionChange={setSelectedDealIds}

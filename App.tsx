@@ -56,6 +56,7 @@ const ModelInventoryView = React.lazy(() => import('./components/Governance/Mode
 const DossiersView = React.lazy(() => import('./components/Governance/DossiersView'));
 const SnapshotReplayView = React.lazy(() => import('./components/Governance/SnapshotReplayView'));
 const StressPricingView = React.lazy(() => import('./components/StressPricing/StressPricingView'));
+const DealTimelineRoute = React.lazy(() => import('./components/Deals/DealTimelineRoute'));
 // CommandPalette is only rendered on demand (⌘K). Lazy-loading it pulls
 // ~12 KB of source + lucide-react icon barrel out of the initial `index`
 // chunk — cheap win toward the 520 KB budget. The button that opens it
@@ -344,6 +345,10 @@ const AppContent: React.FC = () => {
                       <Route path="/dossiers"      element={<DossiersView />} />
                       <Route path="/snapshots"     element={<SnapshotReplayView />} />
                       <Route path="/stress-pricing" element={<StressPricingView />} />
+                      {/* Deal timeline (Ola 7 Bloque A.6) — dynamic route, no
+                          sidebar entry. Reachable from blotter actions and
+                          deep-links in /escalations + /dossiers banners. */}
+                      <Route path="/deals/:id/timeline" element={<DealTimelineRoute />} />
                     </Route>
 
                     <Route path="/" element={<Navigate to="/pricing" replace />} />
