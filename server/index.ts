@@ -24,6 +24,7 @@ import meteringRouter from './routes/metering';
 import campaignsRouter from './routes/campaigns';
 import targetGridRouter from './routes/targetGrid';
 import marketBenchmarksRouter from './routes/marketBenchmarks';
+import copilotRouter from './routes/copilot';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -150,6 +151,10 @@ app.use('/api/target-grid', ...entityScoped, targetGridRouter);
 // Market benchmarks are cross-tenant reference data (BBG/BdE/EBA surveys).
 // Read is open to any authenticated user; write is admin-gated inside the router.
 app.use('/api/market-benchmarks', authMiddleware, marketBenchmarksRouter);
+// Copilot Cmd+K (Ola 7 Bloque C). Tenancy-scoped — questions about a
+// deal must run in the tenant that owns that deal so PII redaction
+// + RLS-derived snapshot resolution stay aligned.
+app.use('/api/copilot', ...entityScoped, copilotRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);
