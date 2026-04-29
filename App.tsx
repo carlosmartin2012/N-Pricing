@@ -14,6 +14,7 @@ import { PricingStateProvider } from './contexts/PricingStateContext';
 import { useAuth } from './contexts/AuthContext';
 import { useWalkthrough } from './contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from './constants/walkthroughTours';
+import { tourIdForRole } from './utils/roleOnboarding';
 import { useData } from './contexts/DataContext';
 import { useUI } from './contexts/UIContext';
 import { useSupabaseSync } from './hooks/useSupabaseSync';
@@ -109,16 +110,26 @@ const AppContent: React.FC = () => {
   const walkthrough = useWalkthrough();
   const handleUniversalImport = useUniversalImport();
 
-  // Auto-start the business-flow tour on the very first authenticated render
-  // for users who have never completed (nor explicitly skipped) it. Storage is
-  // persisted by WalkthroughContext, so subsequent logins do not re-trigger.
+  // Auto-start the most-relevant onboarding tour on the very first
+  // authenticated render. Role-specific tours (Ola 7 Bloque E) take
+  // precedence over the generic business-flow tour, so a Trader sees
+  // a Trader tour, a Risk Officer sees a Risk Officer tour, etc.
+  // Storage (WalkthroughContext.hasCompletedTour) keeps this idempotent
+  // across logins.
   useEffect(() => {
     if (!isAuthenticated) return;
     if (walkthrough.isActive) return;
-    if (walkthrough.hasCompletedTour(FIRST_LOGIN_TOUR_ID)) return;
-    const timer = setTimeout(() => walkthrough.startTour(FIRST_LOGIN_TOUR_ID), 600);
+    const roleTourId = tourIdForRole(currentUser?.role);
+    const candidate =
+      roleTourId && !walkthrough.hasCompletedTour(roleTourId)
+        ? roleTourId
+        : !walkthrough.hasCompletedTour(FIRST_LOGIN_TOUR_ID)
+          ? FIRST_LOGIN_TOUR_ID
+          : null;
+    if (!candidate) return;
+    const timer = setTimeout(() => walkthrough.startTour(candidate), 600);
     return () => clearTimeout(timer);
-  }, [isAuthenticated, walkthrough]);
+  }, [isAuthenticated, walkthrough, currentUser?.role]);
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
