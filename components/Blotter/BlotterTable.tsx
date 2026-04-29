@@ -1,5 +1,5 @@
 import React, { useRef, useMemo } from 'react';
-import { AlertTriangle, BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, RotateCcw, Send, Target, Trash2, XCircle } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, History, RotateCcw, Send, Target, Trash2, XCircle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '../ui/LayoutComponents';
 import {
@@ -27,6 +27,9 @@ interface Props {
   onEditDeal: (deal: Transaction) => void;
   onDeleteDeal: (deal: Transaction) => void;
   onCaptureOutcome?: (deal: Transaction) => void;
+  /** Optional handler to open the unified Deal Timeline (Ola 7 Bloque A).
+   *  When omitted, the Timeline icon is hidden in the row actions. */
+  onOpenTimeline?: (deal: Transaction) => void;
   formatCurrency: (value: number, currency: string) => string;
   selectedDealIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
@@ -104,12 +107,13 @@ const DealRow: React.FC<{
   onEditDeal: (deal: Transaction) => void;
   onDeleteDeal: (deal: Transaction) => void;
   onCaptureOutcome?: (deal: Transaction) => void;
+  onOpenTimeline?: (deal: Transaction) => void;
   formatCurrency: (value: number, currency: string) => string;
   style?: React.CSSProperties;
   isSelected?: boolean;
   onToggleSelect?: () => void;
   variance?: DealVariance;
-}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, onCaptureOutcome, formatCurrency, style, isSelected, onToggleSelect, variance }) => {
+}> = ({ deal, userRole, modelNames, onWorkflowAction, onOpenDossier, onCloneDeal, onEditDeal, onDeleteDeal, onCaptureOutcome, onOpenTimeline, formatCurrency, style, isSelected, onToggleSelect, variance }) => {
   const availableActions = getAvailableActions(deal.status || 'Draft', userRole);
   const canEdit = canEditDeal(deal, userRole);
   const canClone = canCreateOrCloneDeals(userRole);
@@ -208,6 +212,16 @@ const DealRow: React.FC<{
           >
             <FileSearch size={14} aria-hidden="true" />
           </button>
+          {onOpenTimeline && (
+            <button
+              onClick={() => onOpenTimeline(deal)}
+              className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[var(--nfq-accent)]"
+              title="View deal timeline"
+              aria-label={`View timeline for deal ${deal.id}`}
+            >
+              <History size={14} aria-hidden="true" />
+            </button>
+          )}
           <button
             onClick={() => onCloneDeal(deal)}
             className={`p-1 transition-colors ${canClone ? 'text-[color:var(--nfq-text-muted)] hover:text-[var(--nfq-warning)]' : 'cursor-not-allowed text-[color:var(--nfq-text-faint)]'}`}
@@ -312,6 +326,7 @@ const BlotterTable: React.FC<Props> = ({
   onEditDeal,
   onDeleteDeal,
   onCaptureOutcome,
+  onOpenTimeline,
   formatCurrency,
   selectedDealIds = new Set(),
   onSelectionChange,
@@ -374,6 +389,7 @@ const BlotterTable: React.FC<Props> = ({
     onEditDeal,
     onDeleteDeal,
     onCaptureOutcome,
+    onOpenTimeline,
     formatCurrency,
   };
 
