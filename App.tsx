@@ -24,6 +24,8 @@ import { useOfflineSync } from './hooks/useOfflineSync';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { usePresenceAwareness } from './hooks/usePresenceAwareness';
 import { PresenceValueProvider } from './contexts/PresenceContext';
+import { useLiveCursors } from './hooks/useLiveCursors';
+import LiveCursorOverlay from './components/ui/LiveCursorOverlay';
 
 const PricingWorkspace = React.lazy(() => import('./components/Pricing/PricingWorkspace'));
 const PricingLayoutShell = React.lazy(() => import('./components/Pricing/PricingLayoutShell'));
@@ -172,6 +174,19 @@ const AppContent: React.FC = () => {
     [presence.onlineUsers, presence.getUsersOnView, presence.getUsersOnDeal, currentUser?.id],
   );
 
+  // Live cursors (Ola 7 Bloque B.4c). Default ON, can be killed via
+  // VITE_LIVE_CURSORS_KILL=true (global) or — once tenant flags ship —
+  // disabled per tenant. Fails closed if presence is off (no userId)
+  // or if Supabase is not configured (transport returns null).
+  const liveCursorsKilled =
+    String(import.meta.env?.VITE_LIVE_CURSORS_KILL ?? '').toLowerCase() === 'true';
+  const liveCursors = useLiveCursors({
+    enabled: isAuthenticated && !liveCursorsKilled && Boolean(currentUser?.id),
+    userId: currentUser?.id ?? '',
+    name: currentUser?.name ?? null,
+    viewport: ui.currentView,
+  });
+
   useEffect(() => {
     if (currentUser?.email) {
       void loadUserEntities(currentUser.email);
@@ -217,6 +232,7 @@ const AppContent: React.FC = () => {
 
   return (
     <PresenceValueProvider value={presenceValue}>
+    <LiveCursorOverlay cursors={liveCursors.cursors} />
     <div className="nfq-shell flex h-screen overflow-hidden font-sans text-[color:var(--nfq-text-primary)] transition-colors duration-300">
       <SkipNav />
       <Sidebar
