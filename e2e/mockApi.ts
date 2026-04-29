@@ -507,6 +507,67 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       await route.fulfill(json(rows));
       return;
     }
+    if (/^\/deals\/[^/]+\/timeline$/.test(path) && method === 'GET') {
+      const dealId = decodeURIComponent(path.split('/')[2] ?? '');
+      const dealRow = state.deals.find((d) => d.id === dealId);
+      if (!dealRow) {
+        await route.fulfill(json({ code: 'not_found', message: 'Deal not found' }, 404));
+        return;
+      }
+      const repricedAt = dealRow.created_at ?? '2026-04-01T08:00:00Z';
+      // Synthetic 3-event timeline: created + 1 reprice + 1 escalation. Enough
+      // to exercise filters + replay deep-link without needing real
+      // pricing_snapshots / approval_escalations test fixtures.
+      await route.fulfill(
+        json({
+          dealId,
+          entityId: String(dealRow.entity_id ?? DEFAULT_ENTITY_ID),
+          currentStatus: dealRow.status ?? 'Pending',
+          events: [
+            {
+              id: `snapshot:${dealId}-S0`,
+              dealId,
+              occurredAt: repricedAt,
+              kind: 'deal_created',
+              actor: { email: 'demo@n-pricing.test', name: null, role: null },
+              snapshotId: `${dealId}-S0`,
+              payload: {
+                kind: 'deal_repriced',
+                ftpPct: 3.20, finalClientRatePct: 4.55, rarocPct: 14.10,
+                engineVersion: 'e2e-fixture',
+              },
+            },
+            {
+              id: `snapshot:${dealId}-S1`,
+              dealId,
+              occurredAt: '2026-04-02T10:00:00Z',
+              kind: 'deal_repriced',
+              actor: { email: 'alice@n-pricing.test', name: null, role: null },
+              snapshotId: `${dealId}-S1`,
+              payload: {
+                kind: 'deal_repriced',
+                ftpPct: 3.45, finalClientRatePct: 4.70, rarocPct: 13.20,
+                engineVersion: 'e2e-fixture',
+              },
+            },
+            {
+              id: `escalation:${dealId}-E1:opened`,
+              dealId,
+              occurredAt: '2026-04-02T11:00:00Z',
+              kind: 'escalation_opened',
+              actor: { email: null, name: null, role: null },
+              payload: { kind: 'escalation_opened', level: 'L1', dueAt: '2026-04-04T12:00:00Z' },
+            },
+          ],
+          decisionLineage: [
+            { stage: 'created', actor: null, at: repricedAt },
+            { stage: 'L1',      actor: null, at: '2026-04-02T11:00:00Z' },
+          ],
+          counts: { repricings: 1, escalations: 1, dossiers: 0 },
+        }),
+      );
+      return;
+    }
     if (/^\/deals\/[^/]+\/lock-update$/.test(path) && method === 'PATCH') {
       const dealId = path.split('/')[2] ?? '';
       const payload = (body as { deal?: Partial<MockDealRow> }).deal ?? {};

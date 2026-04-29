@@ -16,6 +16,7 @@ import type {
 } from '../../types/governance';
 import { createLogger } from '../../utils/logger';
 import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
+import TimelineDeprecationBanner from '../Deals/TimelineDeprecationBanner';
 
 const log = createLogger('DossiersView');
 
@@ -257,6 +258,8 @@ const DossiersView: React.FC = () => {
           </button>
         </div>
       </header>
+
+      <TimelineDeprecationBanner surface="dossiers" />
 
       {error && !isTourActive && (
         <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
