@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { ArrowUp, BookOpen, Info, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowUp, BookOpen, Info, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { useCopilotAsk } from '../../hooks/queries/useCopilotAsk';
-import type { CopilotContextSummary } from '../../types/copilot';
+import type { CopilotContextSummary, CopilotSuggestedAction } from '../../types/copilot';
 
 /**
  * CopilotAskPanel — Ola 7 Bloque C.3.
@@ -36,6 +37,7 @@ const COPY = {
     citations: 'Sources',
     redactedNote: 'Client name and id were redacted before sending to the model.',
     close: 'Close',
+    suggestedActions: 'Suggested next steps',
   },
   es: {
     placeholder: 'Pregunta lo que quieras sobre este pricing…',
@@ -49,6 +51,7 @@ const COPY = {
     citations: 'Fuentes',
     redactedNote: 'Nombre y id de cliente redactados antes de enviar al modelo.',
     close: 'Cerrar',
+    suggestedActions: 'Próximos pasos sugeridos',
   },
 } as const;
 
@@ -62,7 +65,24 @@ function classifyError(err: unknown): 'rate_limit' | 'service_unavailable' | 'ge
 const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose }) => {
   const [question, setQuestion] = useState('');
   const ask = useCopilotAsk();
+  const navigate = useNavigate();
   const t = COPY[language];
+
+  const handleApplyAction = useCallback(
+    (action: CopilotSuggestedAction) => {
+      const path = typeof action.payload?.path === 'string' ? action.payload.path : null;
+      if (action.kind === 'NAVIGATE' || action.kind === 'OPEN_DOSSIER') {
+        if (path) {
+          navigate(path);
+          onClose();
+        }
+      }
+      // PREFILL_CALCULATOR / EXPLAIN_MORE not yet implemented — left
+      // as no-op so future kinds can be added without touching the
+      // suggestActions catalog.
+    },
+    [navigate, onClose],
+  );
 
   const handleSubmit = useCallback(() => {
     const trimmed = question.trim();
@@ -154,6 +174,29 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose }) => {
                     className="rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 font-mono text-[10px] text-cyan-200"
                   >
                     {c.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {ask.data.suggestedActions.length > 0 && (
+            <div className="mt-3 border-t border-cyan-500/10 pt-2" data-testid="copilot-suggested-actions">
+              <div className="nfq-label flex items-center gap-1 text-[10px] text-cyan-300">
+                <ArrowRight size={10} />
+                {t.suggestedActions}
+              </div>
+              <ul className="mt-1.5 flex flex-col gap-1">
+                {ask.data.suggestedActions.map((action) => (
+                  <li key={action.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyAction(action)}
+                      data-testid={`copilot-action-${action.id}`}
+                      className="flex w-full items-center justify-between gap-2 rounded border border-slate-700/60 bg-slate-800/40 px-2 py-1.5 text-left text-[11px] text-slate-200 transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
+                    >
+                      <span>{action.label}</span>
+                      <ArrowRight size={11} className="shrink-0" />
+                    </button>
                   </li>
                 ))}
               </ul>
