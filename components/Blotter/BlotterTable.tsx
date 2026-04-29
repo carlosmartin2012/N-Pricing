@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import { AlertTriangle, BookOpen, CheckCircle2, Clock, Copy, Edit, FileSearch, FileText, History, RotateCcw, Send, Target, Trash2, XCircle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Badge } from '../ui/LayoutComponents';
+import DealLockBadge from '../Deals/DealLockBadge';
 import {
   canCreateOrCloneDeals,
   canDeleteDeal,
@@ -136,7 +137,10 @@ const DealRow: React.FC<{
         </td>
       )}
       <td className="whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2">
-        <div className="font-mono text-xs font-bold text-[var(--nfq-accent)] [font-variant-numeric:tabular-nums]">{deal.id}</div>
+        <div className="flex items-center font-mono text-xs font-bold text-[var(--nfq-accent)] [font-variant-numeric:tabular-nums]">
+          {deal.id}
+          <DealLockBadge dealId={deal.id} />
+        </div>
         <div className="font-mono text-[9px] text-[color:var(--nfq-text-muted)] [font-variant-numeric:tabular-nums]">{deal.startDate}</div>
       </td>
       <td className="whitespace-nowrap border-b border-[color:var(--nfq-border-ghost)] px-4 py-2">
