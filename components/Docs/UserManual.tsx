@@ -31,6 +31,8 @@ import {
 import { translations, getTranslations } from '../../translations';
 import { useUI } from '../../contexts/UIContext';
 import { useWalkthrough } from '../../contexts/WalkthroughContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { tourIdForRole } from '../../utils/roleOnboarding';
 import { getUserManualContent } from '../../utils/userManualContent';
 
 /*
@@ -102,6 +104,8 @@ const UserManual: React.FC = () => {
   const { language } = useUI();
   const t = getTranslations(language) || translations['en'];
   const { startTour } = useWalkthrough();
+  const { currentUser } = useAuth();
+  const roleTourId = tourIdForRole(currentUser?.role);
   const isES = language === 'es';
 
   const L = (en: string, es: string) => (isES ? es : en);
@@ -196,6 +200,29 @@ const UserManual: React.FC = () => {
                   </p>
                 </div>
               </button>
+              {roleTourId && roleTourId !== 'business-flow-tour' && (
+                <button
+                  onClick={() => startTour(roleTourId)}
+                  data-testid="replay-role-tour"
+                  className="mt-2 flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-left transition-colors hover:bg-cyan-500/10"
+                >
+                  <Compass size={20} className="shrink-0 text-cyan-300" />
+                  <div>
+                    <span className="text-sm font-semibold text-slate-200">
+                      {L(
+                        `Replay your ${currentUser?.role ?? ''} onboarding`,
+                        `Repetir el onboarding de ${currentUser?.role ?? ''}`,
+                      )}
+                    </span>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {L(
+                        'Role-specific tour — same one you saw on first login.',
+                        'Tour específico por rol — el mismo que viste en el primer login.',
+                      )}
+                    </p>
+                  </div>
+                </button>
+              )}
             </section>
 
             {/* What's new */}
