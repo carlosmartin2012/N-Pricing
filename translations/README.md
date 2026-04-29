@@ -1,8 +1,39 @@
 # Translations — namespaced structure
 
-> Estado: **scaffolding** (2026-04-21). El monolito `translations.ts` (~80 KB,
-> 1450 LOC) sigue siendo la fuente viva. Este directorio es el destino de la
-> migración incremental.
+> Estado: **scaffolding + async loaders** (2026-04-29 / Ola 7 Bloque D
+> foundations). El monolito `translations.ts` (~80 KB, 1450 LOC) sigue
+> siendo la fuente viva para la mayoría de consumers. Este directorio
+> es el destino de la migración incremental.
+
+## API
+
+Hay dos formas de consumir packs:
+
+1. **Sync (bundle inicial)**
+
+   ```ts
+   import { sharedTranslations } from './translations/index';
+   const t = sharedTranslations('es');
+   t.sharedSave; // → 'Guardar'
+   ```
+
+   Importa todos los packs en el bundle inicial. Útil para componentes
+   siempre montados (header, sidebar, login).
+
+2. **Async / code-split** *(añadido 2026-04-29)*
+
+   ```ts
+   import { loadNamespaceTranslations } from './translations/lazy';
+   const t = await loadNamespaceTranslations('shared', 'es');
+   t.sharedSave; // → 'Guardar'
+   ```
+
+   Vite emite un chunk separado por `(namespace, lang)`. Solo el
+   locale activo lo descarga el browser. Recomendado para vistas
+   lazy-loaded (Storybook, Admin, Governance).
+
+   Cache in-memory: una segunda llamada con el mismo `(ns, lang)`
+   devuelve la misma referencia sin re-importar.
 
 ## Motivación
 
