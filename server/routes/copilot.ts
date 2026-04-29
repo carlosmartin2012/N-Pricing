@@ -3,6 +3,7 @@ import { queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { buildCopilotPrompt, scrubClientPii, type PricingSnapshotForPrompt } from '../../utils/copilot/promptBuilder';
 import { extractValidatedCitations } from '../../utils/copilot/citationValidator';
+import { suggestCopilotActions } from '../../utils/copilot/suggestActions';
 import type {
   CopilotAskRequest,
   CopilotAskResponse,
@@ -171,7 +172,7 @@ export function createCopilotRouter(geminiCaller?: GeminiCaller): Router {
       const response: CopilotAskResponse = {
         answer,
         citations,
-        suggestedActions: [], // Populated in C.4
+        suggestedActions: suggestCopilotActions({ snapshot, question }),
         traceId: `copilot:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`,
         redactedPii,
       };

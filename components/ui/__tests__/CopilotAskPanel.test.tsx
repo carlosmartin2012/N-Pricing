@@ -2,6 +2,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { CopilotAskResponse } from '../../../types/copilot';
 
@@ -15,7 +16,28 @@ import CopilotAskPanel from '../CopilotAskPanel';
 function wrap() {
   const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={['/']}>{children}</MemoryRouter>
+    </QueryClientProvider>
+  );
+  return { qc, Wrapper };
+}
+
+function wrapWithProbe() {
+  const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  const Probe: React.FC = () => {
+    const loc = useLocation();
+    return <span data-testid="probe-pathname">{loc.pathname}</span>;
+  };
+  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<>{children}</>} />
+          <Route path="*" element={<Probe />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
   return { qc, Wrapper };
 }
@@ -139,5 +161,47 @@ describe('CopilotAskPanel', () => {
     fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
 
     await waitFor(() => expect(apiMock.askCopilot).toHaveBeenCalled());
+  });
+
+  it('renders suggested actions and navigates + closes when clicked', async () => {
+    apiMock.askCopilot.mockResolvedValue({
+      ...goodResponse,
+      suggestedActions: [
+        { id: 'open-timeline', kind: 'NAVIGATE', label: 'View deal timeline', payload: { path: '/deals/D-1/timeline' } },
+        { id: 'open-raroc',    kind: 'NAVIGATE', label: 'Open RAROC Terminal', payload: { path: '/raroc' } },
+      ],
+    });
+    const onClose = vi.fn();
+    const { Wrapper } = wrapWithProbe();
+
+    render(
+      <CopilotAskPanel context={{ dealId: 'D-1' }} language="en" onClose={onClose} />,
+      { wrapper: Wrapper },
+    );
+
+    fireEvent.change(screen.getByLabelText('Copilot question'), { target: { value: 'why?' } });
+    fireEvent.click(screen.getByTestId('copilot-submit'));
+
+    await waitFor(() => screen.getByTestId('copilot-suggested-actions'));
+    expect(screen.getByText('View deal timeline')).toBeInTheDocument();
+    expect(screen.getByText('Open RAROC Terminal')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('copilot-action-open-timeline'));
+
+    // After click: navigate fired (probe shows new path) + onClose called.
+    await waitFor(() =>
+      expect(screen.getByTestId('probe-pathname').textContent).toBe('/deals/D-1/timeline'),
+    );
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render suggested-actions block when the response has none', async () => {
+    apiMock.askCopilot.mockResolvedValue({ ...goodResponse, suggestedActions: [] });
+    const { Wrapper } = wrap();
+    render(<CopilotAskPanel context={{}} language="en" onClose={vi.fn()} />, { wrapper: Wrapper });
+    fireEvent.change(screen.getByLabelText('Copilot question'), { target: { value: 'hi there' } });
+    fireEvent.click(screen.getByTestId('copilot-submit'));
+    await waitFor(() => screen.getByTestId('copilot-answer'));
+    expect(screen.queryByTestId('copilot-suggested-actions')).toBeNull();
   });
 });
