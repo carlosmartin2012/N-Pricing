@@ -478,7 +478,7 @@ Rules & Config, Behavioural Models, AI Assistant.
 | `SEED_DEMO_ON_BOOT` | unset | `true` dispara `scripts/seed-demo-dataset.ts` tras `runMigrations()` (idempotente). Usado en Replit |
 | `TENANCY_ENFORCE` | `off` | `on` activa `tenancyMiddleware` global |
 | `TENANCY_STRICT` | `off` | `on` hace que `get_current_entity_id()` lance error |
-| `PRICING_ALLOW_MOCKS` | unset (false) | `true` permite fallbacks a mock data |
+| `PRICING_ALLOW_MOCKS` | unset (false) | `true` permite fallbacks a mock data. Gobierna 2 rutas: (a) Edge Function de pricing (rechaza con 400 si falta config y flag=false); (b) `server/integrations/bootstrap.ts` (Ola 10.3) — si `NODE_ENV=production` y `ADAPTER_<KIND>=<real>` pero faltan credenciales, el boot **lanza** salvo que esta flag sea `true`. Runbook: `docs/runbooks/mock-fallback.md` |
 | `ENGINE_VERSION` | `dev-local` | Git sha grabado en pricing_snapshots |
 | `ALERT_EVAL_INTERVAL_MS` | unset (off) | ≥1000 activa el alert worker |
 | `ESCALATION_SWEEP_INTERVAL_MS` | unset (off) | ≥1000 activa el escalation sweeper |
