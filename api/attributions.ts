@@ -168,3 +168,32 @@ export async function getReportingSummary(windowDays = 90): Promise<AttributionR
   const qs = new URLSearchParams({ window_days: String(windowDays) });
   return apiGet<AttributionReportingSummary>(`/attributions/reporting/summary?${qs.toString()}`);
 }
+
+// ---------------------------------------------------------------------------
+// Threshold recalibrations (Ola 10 Bloque B)
+// ---------------------------------------------------------------------------
+
+import type { ThresholdRecalibration } from '../types/attributions';
+
+export interface RecalibrationListResponse {
+  items: ThresholdRecalibration[];
+}
+
+export async function listRecalibrations(status?: ThresholdRecalibration['status']): Promise<RecalibrationListResponse> {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+  return apiGet<RecalibrationListResponse>(`/attributions/recalibrations${qs}`);
+}
+
+export async function approveRecalibration(id: string, reason?: string): Promise<ThresholdRecalibration> {
+  return apiPost<ThresholdRecalibration>(
+    `/attributions/recalibrations/${encodeURIComponent(id)}/approve`,
+    { reason: reason ?? null },
+  );
+}
+
+export async function rejectRecalibration(id: string, reason?: string): Promise<ThresholdRecalibration> {
+  return apiPost<ThresholdRecalibration>(
+    `/attributions/recalibrations/${encodeURIComponent(id)}/reject`,
+    { reason: reason ?? null },
+  );
+}

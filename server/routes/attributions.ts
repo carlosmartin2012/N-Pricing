@@ -659,6 +659,120 @@ router.get('/decisions', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Threshold recalibrations (Ola 10 Bloque B)
+// ---------------------------------------------------------------------------
+
+interface RecalibrationRow {
+  id:                          string;
+  entity_id:                   string;
+  threshold_id:                string;
+  proposed_deviation_bps_max:  string | number | null;
+  proposed_raroc_pp_min:       string | number | null;
+  proposed_volume_eur_max:     string | number | null;
+  rationale:                   Record<string, unknown> | null;
+  status:                      'pending' | 'approved' | 'rejected' | 'superseded';
+  proposed_at:                 string | Date;
+  decided_at:                  string | Date | null;
+  decided_by_user:             string | null;
+  reason:                      string | null;
+}
+
+function mapRecalibration(row: RecalibrationRow) {
+  return {
+    id:                       row.id,
+    entityId:                 row.entity_id,
+    thresholdId:              row.threshold_id,
+    proposedDeviationBpsMax:  num(row.proposed_deviation_bps_max),
+    proposedRarocPpMin:       num(row.proposed_raroc_pp_min),
+    proposedVolumeEurMax:     num(row.proposed_volume_eur_max),
+    rationale:                (row.rationale ?? {}) as Record<string, unknown>,
+    status:                   row.status,
+    proposedAt:               toIsoString(row.proposed_at),
+    decidedAt:                row.decided_at === null ? null : toIsoString(row.decided_at),
+    decidedByUser:            row.decided_by_user,
+    reason:                   row.reason,
+  };
+}
+
+router.get('/recalibrations', async (req, res) => {
+  try {
+    const tenancy = requireTenancy(req, res);
+    if (!tenancy) return;
+    const status = typeof req.query.status === 'string' ? req.query.status : null;
+    const validStatus = ['pending','approved','rejected','superseded'] as const;
+    const wheres: string[] = ['entity_id = $1'];
+    const params: unknown[] = [tenancy.entityId];
+    let idx = 2;
+    if (status && (validStatus as readonly string[]).includes(status)) {
+      wheres.push(`status = $${idx++}`);
+      params.push(status);
+    }
+    const rows = await query<RecalibrationRow>(
+      `SELECT * FROM attribution_threshold_recalibrations
+       WHERE ${wheres.join(' AND ')}
+       ORDER BY proposed_at DESC
+       LIMIT 200`,
+      params,
+    );
+    res.json({ items: rows.map(mapRecalibration) });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/recalibrations/:id/approve', async (req, res) => {
+  try {
+    const tenancy = requireTenancy(req, res);
+    if (!tenancy) return;
+    if (!requireRole(tenancy.role, ['Admin', 'Risk_Manager'])) {
+      res.status(403).json({ code: 'forbidden', message: 'Admin or Risk_Manager required' });
+      return;
+    }
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason : null;
+    const row = await queryOne<RecalibrationRow>(
+      `UPDATE attribution_threshold_recalibrations
+       SET status = 'approved', decided_at = NOW(), decided_by_user = $1, reason = $2
+       WHERE id = $3 AND entity_id = $4 AND status = 'pending'
+       RETURNING *`,
+      [tenancy.userEmail, reason, req.params.id, tenancy.entityId],
+    );
+    if (!row) {
+      res.status(404).json({ code: 'not_found', message: 'Pending recalibration not found' });
+      return;
+    }
+    res.json(mapRecalibration(row));
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+router.post('/recalibrations/:id/reject', async (req, res) => {
+  try {
+    const tenancy = requireTenancy(req, res);
+    if (!tenancy) return;
+    if (!requireRole(tenancy.role, ['Admin', 'Risk_Manager'])) {
+      res.status(403).json({ code: 'forbidden', message: 'Admin or Risk_Manager required' });
+      return;
+    }
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason : null;
+    const row = await queryOne<RecalibrationRow>(
+      `UPDATE attribution_threshold_recalibrations
+       SET status = 'rejected', decided_at = NOW(), decided_by_user = $1, reason = $2
+       WHERE id = $3 AND entity_id = $4 AND status = 'pending'
+       RETURNING *`,
+      [tenancy.userEmail, reason, req.params.id, tenancy.entityId],
+    );
+    if (!row) {
+      res.status(404).json({ code: 'not_found', message: 'Pending recalibration not found' });
+      return;
+    }
+    res.json(mapRecalibration(row));
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // GET /reporting/summary — agregados para dashboards (Ola 8 Bloque C)
 // ---------------------------------------------------------------------------
 

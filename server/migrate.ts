@@ -761,6 +761,39 @@ CREATE INDEX IF NOT EXISTS idx_attribution_decisions_entity_decided
   ON attribution_decisions (entity_id, decided_at DESC);
 
 -- -----------------------------------------------------------------------
+-- Ola 10 Bloque B — Attribution threshold recalibrations.
+--   RLS estricto + trigger validation viven en
+--   supabase/migrations/20260630000001_attribution_threshold_recalibrations.sql.
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS attribution_threshold_recalibrations (
+  id                          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id                   UUID         NOT NULL,
+  threshold_id                UUID         NOT NULL REFERENCES attribution_thresholds(id),
+  proposed_deviation_bps_max  NUMERIC(10,4),
+  proposed_raroc_pp_min       NUMERIC(10,4),
+  proposed_volume_eur_max     NUMERIC(20,2),
+  rationale                   JSONB        NOT NULL DEFAULT '{}'::jsonb,
+  status                      TEXT         NOT NULL DEFAULT 'pending'
+                               CHECK (status IN ('pending','approved','rejected','superseded')),
+  proposed_at                 TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  decided_at                  TIMESTAMPTZ,
+  decided_by_user             TEXT,
+  reason                      TEXT,
+  CHECK (
+    proposed_deviation_bps_max IS NOT NULL
+    OR proposed_raroc_pp_min    IS NOT NULL
+    OR proposed_volume_eur_max  IS NOT NULL
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_attr_recal_entity_status
+  ON attribution_threshold_recalibrations (entity_id, status, proposed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_attr_recal_threshold
+  ON attribution_threshold_recalibrations (threshold_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_attr_recal_pending
+  ON attribution_threshold_recalibrations (threshold_id)
+  WHERE status = 'pending';
+
+-- -----------------------------------------------------------------------
 -- Pricing snapshots: immutable engine input/output records
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pricing_snapshots (

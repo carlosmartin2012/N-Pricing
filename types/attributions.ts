@@ -229,3 +229,50 @@ export interface AttributionMatrix {
   /** Snapshot del momento de carga; útil para caché de cliente. */
   loadedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Threshold recalibrations (Ola 10 Bloque B)
+// ---------------------------------------------------------------------------
+
+export type ThresholdRecalibrationStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'superseded';
+
+/**
+ * Razones cuantitativas que el recalibrator usa para justificar un
+ * ajuste. Todas opcionales — un proposal puede emitirse con sólo
+ * `meanDriftBps` y `windowDays` si los demás no aplican.
+ */
+export interface ThresholdRecalibrationRationale {
+  windowDays: number;
+  decisionsCount: number;
+  meanDeviationBps: number;
+  pctAtLimit: number;
+  /** % de decisiones de este threshold que terminaron en escalated.
+   *  Alto → threshold demasiado estricto. */
+  escalationRate: number;
+  driftSeverity: 'ok' | 'warning' | 'breached';
+  notes?: string;
+}
+
+/**
+ * Propuesta de ajuste a un threshold existente. Sólo los campos
+ * `proposed*` que difieren del threshold actual viajan; los `null`
+ * indican "sin cambio en este criterio".
+ */
+export interface ThresholdRecalibration {
+  id: string;
+  entityId: string;
+  thresholdId: string;
+  proposedDeviationBpsMax: number | null;
+  proposedRarocPpMin: number | null;
+  proposedVolumeEurMax: number | null;
+  rationale: ThresholdRecalibrationRationale;
+  status: ThresholdRecalibrationStatus;
+  proposedAt: string;
+  decidedAt: string | null;
+  decidedByUser: string | null;
+  reason: string | null;
+}

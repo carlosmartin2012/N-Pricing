@@ -72,12 +72,14 @@ export type {
 } from './types/phase0';
 export { PRICING_SLOS } from './types/phase0';
 
-// Ola 8 — Atribuciones jerárquicas (Bloque A)
+// Ola 8 — Atribuciones jerárquicas (Bloque A) + Ola 10 (recalibrations)
 export type {
   AttributionLevel, AttributionScope, AttributionThreshold,
   AttributionDecisionStatus, AttributionRoutingMetadata, AttributionDecision,
   RoutingReason, AttributionQuote, RoutingResult,
   SimulationInput, SimulationResult, AttributionMatrix,
+  ThresholdRecalibrationStatus, ThresholdRecalibrationRationale,
+  ThresholdRecalibration,
 } from './types/attributions';
 
 export type MethodologyType = 'MatchedMaturity' | 'MovingAverage' | 'RateCard' | 'ZeroDiscount';

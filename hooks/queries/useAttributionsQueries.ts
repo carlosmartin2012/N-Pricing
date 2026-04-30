@@ -119,3 +119,40 @@ export function useAttributionReportingQuery(windowDays = 90) {
     staleTime: 60 * 1000,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Threshold recalibrations (Ola 10 Bloque B)
+// ---------------------------------------------------------------------------
+
+import type { ThresholdRecalibration } from '../../types/attributions';
+
+export function useRecalibrationsQuery(status?: ThresholdRecalibration['status']) {
+  return useQuery({
+    queryKey: ['attributions', 'recalibrations', status ?? 'all'] as const,
+    queryFn:  () => attributionsApi.listRecalibrations(status),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useApproveRecalibrationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+      attributionsApi.approveRecalibration(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attributions', 'recalibrations'] });
+      qc.invalidateQueries({ queryKey: queryKeys.attributions.matrix });
+    },
+  });
+}
+
+export function useRejectRecalibrationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+      attributionsApi.rejectRecalibration(id, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attributions', 'recalibrations'] });
+    },
+  });
+}

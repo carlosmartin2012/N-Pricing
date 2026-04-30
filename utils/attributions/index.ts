@@ -59,3 +59,10 @@ export {
   type AttributionsAiContextInput,
   type AttributionsSuggestedAction,
 } from './aiContext';
+
+export {
+  proposeThresholdAdjustments,
+  type RecalibratorOptions,
+  type ProposeInput,
+  type ProposedRecalibration,
+} from './driftRecalibrator';

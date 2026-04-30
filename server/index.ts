@@ -38,6 +38,7 @@ import { startAlertEvaluator } from './workers/alertEvaluator';
 import { startEscalationSweeper } from './workers/escalationSweeper';
 import { startLtvSnapshotWorker } from './workers/ltvSnapshotWorker';
 import { startAttributionDriftDetector } from './workers/attributionDriftDetector';
+import { startThresholdRecalibrator } from './workers/attributionThresholdRecalibrator';
 import { startCrmEventSync } from './workers/crmEventSync';
 import { bootstrapAdapters } from './integrations/bootstrap';
 import { pool } from './db';
@@ -284,6 +285,11 @@ async function main() {
     // Detecta patrones sistemáticos de aprobación al límite por figura
     // comercial. Logs estructurados consumidos por el alert evaluator.
     startAttributionDriftDetector();
+    // Attribution threshold recalibrator (Ola 10 Bloque B) — opt-in via
+    // ATTRIBUTION_RECALIBRATION_INTERVAL_MS. Propone ajustes a thresholds
+    // basado en histórico de decisiones; persiste como pending para
+    // governance flow Admin/Risk_Manager review.
+    startThresholdRecalibrator();
   } catch (err) {
     console.error('[server] Failed to start:', err);
     process.exit(1);
