@@ -66,6 +66,45 @@ describe('budgetReconciler · reconcileBudgetVsRealized', () => {
     expect(items[0].diffVolumePct).toBe(0.2);
   });
 
+  // Anti-regresión Ola 10.5 fix #14 — realizedRateBps=null no debe colapsar
+  // a "tasa 0%" generando under_budget_rate masivo.
+  it('realizedRateBps=null preserva null en diffRateBps (no colapsa a 0)', () => {
+    const items = reconcileBudgetVsRealized(
+      [assumption({})],
+      [realized({ realizedRateBps: null, realizedVolumeEur: 1_000_000 })],
+    );
+    expect(items).toHaveLength(1);
+    expect(items[0].realizedRateBps).toBeNull();
+    expect(items[0].diffRateBps).toBeNull();
+    // Sin diffRateBps, el classifier NO debe reportar under_budget_rate.
+    // Como volume está dentro de tolerancia, el resultado correcto es on_track
+    // (el row está presente en realized aunque no tenga tasa numérica).
+    expect(items[0].status).toBe('on_track');
+  });
+
+  // Anti-regresión Ola 10.5 fix #13 — periodos mixtos lanzan en lugar de
+  // cruzarse silenciosamente.
+  it('lanza mixed_periods si assumptions y realized son de meses distintos', () => {
+    expect(() =>
+      reconcileBudgetVsRealized(
+        [assumption({ period: '2026-04' })],
+        [realized({ period: '2026-05' })],
+      ),
+    ).toThrow(/mixed_periods/);
+  });
+
+  it('lanza mixed_periods si dentro de assumptions hay 2 periodos', () => {
+    expect(() =>
+      reconcileBudgetVsRealized(
+        [
+          assumption({ period: '2026-04', segment: 'A' }),
+          assumption({ period: '2026-05', segment: 'B' }),
+        ],
+        [],
+      ),
+    ).toThrow(/mixed_periods/);
+  });
+
   it('budget_only cuando hay assumption pero no realized', () => {
     const items = reconcileBudgetVsRealized([assumption({})], []);
     expect(items[0].status).toBe('budget_only');

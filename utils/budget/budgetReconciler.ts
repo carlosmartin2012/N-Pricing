@@ -22,7 +22,12 @@ export interface RealizedAggregate {
   segment: string;
   productType: string;
   currency: string;
-  realizedRateBps: number;       // weighted-average por volumen
+  /** Weighted-average por volumen. `null` = no había deals con
+   *  `amount > 0` en esta key (segment×productType×currency) durante el
+   *  período — distinto a "deals con tasa 0%". Mapearlo a 0 confunde al
+   *  classifier que reportaría `under_budget_rate` enorme cuando el
+   *  estado real es `budget_only`. */
+  realizedRateBps: number | null;
   realizedVolumeEur: number;
   realizedRarocPp: number | null;
   dealCount: number;
@@ -79,6 +84,13 @@ function key(s: { segment: string; productType: string; currency: string }): str
 /**
  * Reconciliación budget vs realizado. Idempotente — mismos inputs
  * producen el mismo array (mismo orden incluido).
+ *
+ * **Contrato de período:** todos los items de `assumptions` y
+ * `realized` deben pertenecer al mismo período. Si se mezclan (p.ej.
+ * assumptions de abril + realized de mayo) la función lanza con
+ * `mixed_periods`. Sin este guard, la key `segment|productType|currency`
+ * cruzaba budget de un mes contra realized de otro y producía variances
+ * basura.
  */
 export function reconcileBudgetVsRealized(
   assumptions: BudgetAssumption[],
@@ -89,6 +101,21 @@ export function reconcileBudgetVsRealized(
   const volumeTol = options.volumeTolerancePct ?? DEFAULT_VOLUME_TOLERANCE;
 
   const period = assumptions[0]?.period ?? realized[0]?.period ?? 'unknown';
+
+  if (period !== 'unknown') {
+    const mixed =
+      assumptions.some((a) => a.period !== period) ||
+      realized.some((r) => r.period !== period);
+    if (mixed) {
+      const periods = new Set<string>();
+      for (const a of assumptions) periods.add(a.period);
+      for (const r of realized) periods.add(r.period);
+      throw new Error(
+        `reconcileBudgetVsRealized: mixed_periods detected (${[...periods].sort().join(', ')}). ` +
+        `All assumptions and realized rows must share the same period.`,
+      );
+    }
+  }
   const budgetByKey   = new Map(assumptions.map((a) => [key(a), a]));
   const realizedByKey = new Map(realized.map((r) => [key(r), r]));
 

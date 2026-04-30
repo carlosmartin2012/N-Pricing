@@ -106,7 +106,19 @@ function mapDecision(row: DecisionRow): AttributionDecision {
 }
 
 export interface RecalibrationSweepReport {
+  /**
+   * Entities procesadas con éxito (sin error en la pasada).
+   * NO incluye las que aparecen en `entitiesFailed` — esa diferencia
+   * es la señal regulatoria: una entity con DB lock en el sweep
+   * trimestral debe verse, no desaparecer.
+   */
   entitiesScanned: number;
+  /**
+   * Entities donde el sweep falló (lock, timeout, threshold migration
+   * pendiente, etc.). Si crece, alertar — un threshold sin recalibrar
+   * 2 trimestres consecutivos es regulatoriamente sospechoso.
+   */
+  entitiesFailed: string[];
   proposalsEmitted: number;
   proposalsByEntity: Record<string, number>;
   errors: string[];
@@ -123,6 +135,7 @@ export async function runRecalibrationSweep(
   const windowDays = options.windowDays ?? 180;
   const report: RecalibrationSweepReport = {
     entitiesScanned: 0,
+    entitiesFailed: [],
     proposalsEmitted: 0,
     proposalsByEntity: {},
     errors: [],
@@ -148,11 +161,13 @@ export async function runRecalibrationSweep(
           [entityId],
         ),
         query<DecisionRow>(
+          // Coherente con `/reporting/summary` (Ola 10.5 fix #15):
+          // `make_interval(days => $2::integer)` sin string concat.
           `SELECT * FROM attribution_decisions
            WHERE entity_id = $1
              AND decided_by_level_id IS NOT NULL
-             AND decided_at >= NOW() - ($2 || ' days')::interval`,
-          [entityId, String(windowDays)],
+             AND decided_at >= NOW() - make_interval(days => $2::integer)`,
+          [entityId, windowDays],
         ),
       ]);
 
@@ -172,6 +187,12 @@ export async function runRecalibrationSweep(
       }
       report.entitiesScanned += 1;
     } catch (err) {
+      // entitiesFailed permite distinguir "sweep limpio sin propuestas"
+      // (entitiesScanned=N, entitiesFailed=[]) de "sweep parcial con N
+      // entidades silenciosamente fuera del cycle". Sin esto, una entity
+      // con DB lock perpetuo desaparecía del recalibration cycle por
+      // trimestres sin alerta.
+      report.entitiesFailed.push(entityId);
       report.errors.push(`entity ${entityId}: ${(err as Error).message}`);
     }
   }

@@ -122,11 +122,24 @@ describe('budget router · /comparison', () => {
     });
   });
 
-  it('period inválido (no YYYY-MM) cae al periodo actual', async () => {
+  // Anti-regresión Ola 10.5 fix #19 — period inválido NO debe colapsar
+  // a "este mes" silenciosamente; trazabilidad del replay regulatorio
+  // se rompía cuando un dashboard pedía '2024-13' y veía datos de hoy.
+  it('period inválido (no YYYY-MM) → 400 invalid_period_format', async () => {
+    adapterRegistry.register(new InMemoryBudgetSource());
+    await withApp({ entityId: ENTITY }, async (url) => {
+      const r = await http(url, 'GET', '/api/budget/comparison?period=invalid');
+      expect(r.status).toBe(400);
+      const body = r.body as { code: string };
+      expect(body.code).toBe('invalid_period_format');
+    });
+  });
+
+  it('period ausente → defaultea al mes actual', async () => {
     adapterRegistry.register(new InMemoryBudgetSource());
     dbMock.query.mockResolvedValueOnce([]);
     await withApp({ entityId: ENTITY }, async (url) => {
-      const r = await http(url, 'GET', '/api/budget/comparison?period=invalid');
+      const r = await http(url, 'GET', '/api/budget/comparison');
       expect(r.status).toBe(200);
       const body = r.body as { period: string };
       expect(body.period).toMatch(/^\d{4}-\d{2}$/);

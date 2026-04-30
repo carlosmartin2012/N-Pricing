@@ -68,9 +68,22 @@ router.get('/comparison', async (req, res) => {
       return;
     }
 
-    const period = typeof req.query.period === 'string' && PERIOD_RE.test(req.query.period)
-      ? req.query.period
-      : new Date().toISOString().slice(0, 7);
+    // Igual política que /admission, /coreBanking: ausente → mes actual,
+    // presente + inválido → 400. Sin esto, `period=2024-13` colapsaba
+    // a "este mes" y el dashboard mostraba datos del mes equivocado
+    // sin alerta — trazabilidad rota.
+    let period: string;
+    if (req.query.period === undefined) {
+      period = new Date().toISOString().slice(0, 7);
+    } else if (typeof req.query.period === 'string' && PERIOD_RE.test(req.query.period)) {
+      period = req.query.period;
+    } else {
+      res.status(400).json({
+        code: 'invalid_period_format',
+        message: 'period must be YYYY-MM',
+      });
+      return;
+    }
 
     const rateTolerance = (() => {
       const raw = parseFloat(String(req.query.rate_tolerance_bps ?? '5'));
@@ -118,8 +131,15 @@ router.get('/comparison', async (req, res) => {
       segment:           r.segment,
       productType:       r.product_type,
       currency:          r.currency,
-      realizedRateBps:   r.realized_rate_bps   === null ? 0 : Number(r.realized_rate_bps),
-      realizedVolumeEur: r.realized_volume_eur === null ? 0 : Number(r.realized_volume_eur),
+      // realized_rate_bps NULL ⇒ no había deals con amount>0 en esa
+      // key (la query usa CASE … ELSE NULL). Mapearlo a 0 colapsaba
+      // "sin datos" a "tasa 0%" — el reconciler luego reportaba
+      // `under_budget_rate` masivo cuando el estado real es `budget_only`.
+      realizedRateBps:   r.realized_rate_bps   === null ? null : Number(r.realized_rate_bps),
+      // Volume=0 vs volume=NULL: si SUM(COALESCE(...)) devuelve null es
+      // porque no hay rows en el GROUP BY (caso imposible aquí porque
+      // el GROUP BY ya generó la fila). 0 es semánticamente correcto.
+      realizedVolumeEur: r.realized_volume_eur === null ? 0    : Number(r.realized_volume_eur),
       realizedRarocPp:   r.realized_raroc_pp   === null ? null : Number(r.realized_raroc_pp),
       dealCount:         Number(r.deal_count),
     }));

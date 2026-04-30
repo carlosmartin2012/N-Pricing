@@ -244,22 +244,22 @@ router.post('/push/test', async (req, res) => {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
 
+    // Check VAPID ANTES del round-trip a Postgres. Sin VAPID el
+    // resultado es 503 sin importar cuántas subscriptions tenga el
+    // user — no tiene sentido pegarse a la DB para descubrirlo.
+    if (!isWebPushConfigured()) {
+      res.status(503).json({
+        code: 'no_vapid_config',
+        message: 'VAPID keys missing. Set VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY env vars (and VAPID_SUBJECT).',
+      });
+      return;
+    }
+
     const rows = await query<SubscriptionForSend>(
       `SELECT id, endpoint, keys_p256dh, keys_auth FROM push_subscriptions
        WHERE entity_id = $1 AND user_email = $2`,
       [tenancy.entityId, tenancy.userEmail],
     );
-
-    // Sin VAPID configurado, devolvemos 503 explícito para que el caller
-    // muestre el error ops claro (no fail loud, no false positive).
-    if (!isWebPushConfigured()) {
-      res.status(503).json({
-        code: 'no_vapid_config',
-        message: 'VAPID keys missing. Set VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY env vars (and VAPID_SUBJECT).',
-        subscriptionCount: rows.length,
-      });
-      return;
-    }
 
     const payload: PushPayload = {
       title: 'N-Pricing — push test',
@@ -280,20 +280,33 @@ router.post('/push/test', async (req, res) => {
       payload,
     );
 
-    // Purga subscripciones stale (410/404) — el navegador ya las invalidó.
+    // Purga subscripciones stale (410/404) en try/catch propio — los
+    // push YA se enviaron antes de este DELETE. Si la purga falla, NO
+    // queremos que el handler devuelva 500: el cliente lo interpretaría
+    // como "los push fallaron" y reintentaría → push duplicados al usuario.
+    // Mejor degradar reportando staleEndpointsPurged=0 + log interno.
+    let staleEndpointsPurged = 0;
     if (report.staleEndpoints.length > 0) {
-      await query(
-        `DELETE FROM push_subscriptions
-         WHERE entity_id = $1 AND user_email = $2 AND endpoint = ANY($3::text[])`,
-        [tenancy.entityId, tenancy.userEmail, report.staleEndpoints],
-      );
+      try {
+        await query(
+          `DELETE FROM push_subscriptions
+           WHERE entity_id = $1 AND user_email = $2 AND endpoint = ANY($3::text[])`,
+          [tenancy.entityId, tenancy.userEmail, report.staleEndpoints],
+        );
+        staleEndpointsPurged = report.staleEndpoints.length;
+      } catch (purgeErr) {
+        console.error(
+          '[notifications/push/test] stale purge failed (push DID send)',
+          purgeErr,
+        );
+      }
     }
 
     res.json({
-      delivered:         report.delivered,
-      total:             report.total,
-      staleEndpointsPurged: report.staleEndpoints.length,
-      failures:          report.failures,
+      delivered:            report.delivered,
+      total:                report.total,
+      staleEndpointsPurged,
+      failures:             report.failures,
     });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });

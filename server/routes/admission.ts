@@ -149,9 +149,23 @@ router.get('/reconciliation', async (req, res) => {
       res.status(501).json({ code: 'not_implemented', message: 'Adapter does not support reconciliation pull' });
       return;
     }
-    const asOfDate = typeof req.query.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.as_of)
-      ? req.query.as_of
-      : new Date().toISOString().slice(0, 10);
+    // Si el cliente pasa as_of, debe ser YYYY-MM-DD válido. La versión
+    // previa caía a `today` silenciosamente cuando `as_of` venía
+    // malformado (p.ej. `2024-13-45`) → trazabilidad rota en replays
+    // regulatorios. Comportamiento ahora: ausente → today (default
+    // útil), presente + inválido → 400 explícito.
+    let asOfDate: string;
+    if (req.query.as_of === undefined) {
+      asOfDate = new Date().toISOString().slice(0, 10);
+    } else if (typeof req.query.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.as_of)) {
+      asOfDate = req.query.as_of;
+    } else {
+      res.status(400).json({
+        code: 'invalid_as_of_format',
+        message: 'as_of must be a YYYY-MM-DD date',
+      });
+      return;
+    }
 
     const result = await adapter.pullReconciliation(asOfDate);
     if (!result.ok) {
