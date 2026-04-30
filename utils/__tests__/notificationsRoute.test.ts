@@ -142,17 +142,39 @@ describe('notifications router · GET /push/subscriptions', () => {
 });
 
 describe('notifications router · POST /push/test', () => {
-  it('sin VAPID configurado → 503 no_vapid_config', async () => {
+  it('sin VAPID configurado → 503 no_vapid_config sin tocar la DB', async () => {
     delete process.env.VAPID_PUBLIC_KEY;
     delete process.env.VAPID_PRIVATE_KEY;
-    dbMock.query.mockResolvedValueOnce([{ id: 'sub-1' }, { id: 'sub-2' }]);
     await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
       const r = await http(url, 'POST', '/api/notifications/push/test', { message: 'hello' });
       expect(r.status).toBe(503);
-      const body = r.body as { code: string; subscriptionCount: number };
+      const body = r.body as { code: string };
       expect(body.code).toBe('no_vapid_config');
-      expect(body.subscriptionCount).toBe(2);
     });
+    // Anti-regresión Ola 10.5 fix #16: el check VAPID debe ir ANTES del query
+    // a push_subscriptions; si no, cada hit sin config hace round-trip
+    // innecesario a Postgres.
+    expect(dbMock.query).not.toHaveBeenCalled();
+  });
+
+  it('Anti-regresión fix #11: con VAPID configurado y 0 subs, devuelve 200 (no 500 por purge)', async () => {
+    process.env.VAPID_PUBLIC_KEY = 'BFakePub';
+    process.env.VAPID_PRIVATE_KEY = 'fake-priv';
+    try {
+      dbMock.query.mockResolvedValueOnce([]); // SELECT sin subscriptions
+      await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
+        const r = await http(url, 'POST', '/api/notifications/push/test', { message: 'x' });
+        expect(r.status).toBe(200);
+        const body = r.body as { delivered: number; total: number; staleEndpointsPurged: number };
+        expect(body.delivered).toBe(0);
+        expect(body.staleEndpointsPurged).toBe(0);
+      });
+    } finally {
+      // Limpieza explícita — sin esto, los siguientes tests del archivo
+      // (GET /push/vapid-public-key sin VAPID) heredan estas env vars.
+      delete process.env.VAPID_PUBLIC_KEY;
+      delete process.env.VAPID_PRIVATE_KEY;
+    }
   });
 });
 
