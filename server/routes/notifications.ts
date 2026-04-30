@@ -25,6 +25,40 @@ import {
 
 const router = Router();
 
+// Hosts conocidos de Web Push providers. Cualquier endpoint registrado en
+// `push_subscriptions` se pasa luego a `webpush.sendNotification(...)`,
+// que hace HTTP POST sin restricción de IP/dominio. Sin esta allowlist,
+// un usuario autenticado puede registrar `http://localhost:6379` (Redis),
+// `http://169.254.169.254/...` (cloud metadata) o un host interno y
+// provocar SSRF cuando el dispatcher dispare.
+//
+// Mantener sincronizado con los Web Push providers reales: FCM
+// (Chrome / Edge / Brave / Opera), Mozilla Push (Firefox), Apple
+// WebPush (Safari). Si Microsoft WNS o un provider corporativo entra
+// en escena, añadir el dominio aquí.
+const ALLOWED_PUSH_HOSTS = [
+  'fcm.googleapis.com',
+  'updates.push.services.mozilla.com',
+  'web.push.apple.com',
+  'api.push.apple.com',
+];
+
+function isAllowedPushEndpoint(endpoint: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    return false;
+  }
+  // HTTPS only — la spec de Web Push lo exige y `http://` abriría
+  // puertas a servicios internos plaintext (Redis, memcached).
+  if (parsed.protocol !== 'https:') return false;
+  const host = parsed.hostname.toLowerCase();
+  return ALLOWED_PUSH_HOSTS.some(
+    (allowed) => host === allowed || host.endsWith('.' + allowed),
+  );
+}
+
 interface SubscriptionRow {
   id:            string;
   entity_id:     string;
@@ -90,6 +124,17 @@ router.post('/push/subscribe', async (req, res) => {
       res.status(400).json({
         code: 'validation_error',
         message: 'endpoint, keysP256dh and keysAuth are required',
+      });
+      return;
+    }
+    if (!isAllowedPushEndpoint(endpoint)) {
+      // SSRF guard: rechazar endpoints fuera de la allowlist FCM/Mozilla/Apple.
+      // El dispatcher hace HTTP POST contra esta URL — sin guard, un
+      // atacante podría registrar `http://localhost:6379` o cloud
+      // metadata endpoints y provocar SSRF authenticated.
+      res.status(400).json({
+        code: 'invalid_endpoint',
+        message: 'endpoint must be an https:// URL on a known Web Push provider (FCM, Mozilla, Apple)',
       });
       return;
     }
