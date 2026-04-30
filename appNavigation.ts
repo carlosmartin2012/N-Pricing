@@ -124,8 +124,9 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
  *                      Blotter + Accounting)
  *   3. MARKET DATA   → inputs feeding the motor (Yield Curves, Behavioural
  *                      Models, Methodology)
- *   4. INSIGHTS      → pure outputs (Analytics, Discipline)
- *   5. GOVERNANCE    → control + audit + reproducibility
+ *   4. INSIGHTS      → pure outputs (Analytics, Discipline, Attribution
+ *                      Reporting)
+ *   5. GOVERNANCE    → control + audit + reproducibility (operativo diario)
  *   + ASSISTANT      → standalone AI entry
  *
  * Rationale: Phase 6 introduced CLV + 360º temporal → the product story
@@ -136,6 +137,18 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
  * Granular Pricing entries (Calculator / RAROC / Stress / What-If) match
  * the `<PricingLayoutShell>` nested routes introduced in Phase 6.1 — each
  * workspace is a top-level route, so sidebar-level entries are coherent.
+ *
+ * Density pass (Ola 10.7, 2026-04-30): Governance bajó de 8 → 5 entradas:
+ *   - ESCALATIONS demoted to AUX — flujo edge case (escalation atascada
+ *     genera alerta), no requiere bandeja diaria
+ *   - ATTRIBUTION_MATRIX demoted to AUX — es config de organigrama (se
+ *     edita cuando cambia la estructura, no a diario)
+ *   - ATTRIBUTION_REPORTING moved to Insights — semánticamente es
+ *     analytics/output, no governance operativo
+ * Sidebar visible passes from 28 → 26 entries without breaking E2E that
+ * depend on AUDIT_LOG / HEALTH still being in bottom nav. Reducción mayor
+ * (a < 20) requiere refactor UI: collapsed Pricing tabs, Approvals Hub,
+ * Reconciliation Hub — diferido a Ola futura post pilot feedback.
  */
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   return [
@@ -170,20 +183,21 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'METHODOLOGY', label: 'Methodology',       icon: GitBranch,  section: 'Market Data', path: '/methodology' },
 
     // ─────────────── INSIGHTS ───────────────
-    // Outputs only: portfolio analytics + pricing discipline variance.
-    // Discipline used to live in AUX — it's analytics, belongs here.
-    { id: 'REPORTING',  label: 'Analytics',          icon: BarChart4, section: 'Insights', path: '/analytics' },
-    { id: 'DISCIPLINE', label: 'Pricing Discipline', icon: Sparkles,  section: 'Insights', path: '/discipline' },
+    // Outputs only: portfolio analytics + pricing discipline variance +
+    // attribution reporting (Ola 10.7 — moved here from Governance because
+    // it's pure analytics output, not control operativo).
+    { id: 'REPORTING',             label: 'Analytics',             icon: BarChart4, section: 'Insights', path: '/analytics' },
+    { id: 'DISCIPLINE',            label: 'Pricing Discipline',    icon: Sparkles,  section: 'Insights', path: '/discipline' },
+    { id: 'ATTRIBUTION_REPORTING', label: 'Attribution reporting', icon: BarChart4, section: 'Insights', path: '/attributions/reporting' },
 
     // ─────────────── GOVERNANCE ───────────────
-    { id: 'MODEL_INVENTORY',     label: 'Model Inventory',     icon: BookOpenCheck, section: 'Governance', path: '/models' },
-    { id: 'DOSSIERS',            label: 'Dossiers',            icon: FileSignature, section: 'Governance', path: '/dossiers' },
-    { id: 'ESCALATIONS',         label: 'Escalations',         icon: ShieldAlert,   section: 'Governance', path: '/escalations' },
-    { id: 'APPROVALS',             label: 'Approvals',           icon: ShieldCheck, section: 'Governance', path: '/approvals' },
-    { id: 'ATTRIBUTION_MATRIX',    label: 'Attribution matrix',  icon: Plug,        section: 'Governance', path: '/attributions/matrix' },
-    { id: 'ATTRIBUTION_REPORTING', label: 'Attribution reporting', icon: BarChart4, section: 'Governance', path: '/attributions/reporting' },
-    { id: 'BUDGET_RECONCILIATION', label: 'Budget reconciliation', icon: Scale,     section: 'Governance', path: '/budget/reconciliation' },
-    { id: 'RECONCILIATION',      label: 'FTP Reconciliation',  icon: Scale,         section: 'Governance', path: '/reconciliation' },
+    // Operativo diario de control. ESCALATIONS y ATTRIBUTION_MATRIX viven
+    // en AUX (⌘K) post Ola 10.7 — son edge case / config infrecuente.
+    { id: 'MODEL_INVENTORY',       label: 'Model Inventory',       icon: BookOpenCheck, section: 'Governance', path: '/models' },
+    { id: 'DOSSIERS',              label: 'Dossiers',              icon: FileSignature, section: 'Governance', path: '/dossiers' },
+    { id: 'APPROVALS',             label: 'Approvals',             icon: ShieldCheck,   section: 'Governance', path: '/approvals' },
+    { id: 'BUDGET_RECONCILIATION', label: 'Budget reconciliation', icon: Scale,         section: 'Governance', path: '/budget/reconciliation' },
+    { id: 'RECONCILIATION',        label: 'FTP Reconciliation',    icon: Scale,         section: 'Governance', path: '/reconciliation' },
 
     // ─────────────── ASSISTANT ───────────────
     { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Assistant', path: '/ai' },
@@ -217,8 +231,11 @@ export interface AuxDestination {
 }
 
 export const AUX_DESTINATIONS: AuxDestination[] = [
-  { id: 'ACCOUNTING',    label: 'Accounting Ledger', sublabel: 'FTP journal + BU vs Treasury T-accounts (legacy)',    icon: LayoutDashboard, path: '/accounting', section: 'Pricing' },
-  { id: 'GOV_SNAPSHOTS', label: 'Snapshot Replay',   sublabel: 'Replay grabaciones del motor',                        icon: History,         path: '/snapshots',  section: 'Governance' },
-  { id: 'GOV_SLO',       label: 'SLO Dashboard',     sublabel: 'p50/p95/p99 del motor',                               icon: HeartPulse,      path: '/slo',        section: 'Governance' },
-  { id: 'GOV_ADAPTERS',  label: 'Adapter Health',    sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO', icon: Plug,            path: '/adapters',   section: 'Governance' },
+  { id: 'ACCOUNTING',          label: 'Accounting Ledger',   sublabel: 'FTP journal + BU vs Treasury T-accounts (legacy)',     icon: LayoutDashboard, path: '/accounting',           section: 'Pricing' },
+  { id: 'GOV_SNAPSHOTS',       label: 'Snapshot Replay',     sublabel: 'Replay grabaciones del motor',                         icon: History,         path: '/snapshots',            section: 'Governance' },
+  { id: 'GOV_SLO',             label: 'SLO Dashboard',       sublabel: 'p50/p95/p99 del motor',                                icon: HeartPulse,      path: '/slo',                  section: 'Governance' },
+  { id: 'GOV_ADAPTERS',        label: 'Adapter Health',      sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO',  icon: Plug,            path: '/adapters',             section: 'Governance' },
+  // Ola 10.7 \u2014 demoted from main sidebar to keep Governance \u2264 5 entries.
+  { id: 'ESCALATIONS',         label: 'Escalations',         sublabel: 'Approval flows que han escalado por timeout',          icon: ShieldAlert,     path: '/escalations',          section: 'Governance' },
+  { id: 'ATTRIBUTION_MATRIX',  label: 'Attribution matrix',  sublabel: 'Configuraci\u00f3n de niveles \u00b7 thresholds por scope', icon: Plug,            path: '/attributions/matrix',  section: 'Governance' },
 ];
