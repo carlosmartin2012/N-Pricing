@@ -170,7 +170,7 @@ ALTER TABLE clients ADD COLUMN IF NOT EXISTS entity_id UUID;
 CREATE TABLE IF NOT EXISTS client_positions (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id       UUID        NOT NULL,
-  client_id       TEXT        NOT NULL,
+  client_id       TEXT        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   product_id      TEXT,
   product_type    TEXT        NOT NULL,
   category        TEXT,
@@ -189,7 +189,7 @@ CREATE INDEX IF NOT EXISTS idx_client_positions_entity_client ON client_position
 CREATE TABLE IF NOT EXISTS client_metrics_snapshots (
   id                      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id               UUID        NOT NULL,
-  client_id               TEXT        NOT NULL,
+  client_id               TEXT        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   period                  TEXT        NOT NULL,
   computed_at             TIMESTAMPTZ DEFAULT NOW(),
   nim_bps                 NUMERIC(10,4),
@@ -209,7 +209,7 @@ CREATE INDEX IF NOT EXISTS idx_client_metrics_entity_client ON client_metrics_sn
 CREATE TABLE IF NOT EXISTS client_events (
   id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id   UUID        NOT NULL,
-  client_id   TEXT        NOT NULL,
+  client_id   TEXT        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   event_type  TEXT        NOT NULL,
   event_ts    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   source      TEXT,
@@ -223,7 +223,7 @@ CREATE INDEX IF NOT EXISTS idx_client_events_entity_client ON client_events (ent
 CREATE TABLE IF NOT EXISTS client_ltv_snapshots (
   id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id            UUID        NOT NULL,
-  client_id            TEXT        NOT NULL,
+  client_id            TEXT        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   as_of_date           DATE        NOT NULL,
   computed_at          TIMESTAMPTZ DEFAULT NOW(),
   horizon_years        NUMERIC(6,2),
@@ -247,7 +247,7 @@ CREATE INDEX IF NOT EXISTS idx_client_ltv_entity_client ON client_ltv_snapshots 
 CREATE TABLE IF NOT EXISTS client_nba_recommendations (
   id                       UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_id                UUID        NOT NULL,
-  client_id                TEXT        NOT NULL,
+  client_id                TEXT        NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   recommended_product      TEXT        NOT NULL,
   recommended_rate_bps     NUMERIC(10,4),
   recommended_volume_eur   NUMERIC(20,4),
