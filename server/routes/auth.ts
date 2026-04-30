@@ -82,13 +82,28 @@ router.get('/me', async (req, res) => {
     res.status(401).json({ error: 'unauthenticated' });
     return;
   }
-  const memberships = await query<{ entity_id: string; role: string; is_primary_entity: boolean }>(
-    `SELECT entity_id, role, is_primary_entity
-     FROM entity_users
-     WHERE user_id = $1
-     ORDER BY is_primary_entity DESC`,
-    [req.user.email],
-  ).catch(() => []);
+  // Antes: `.catch(() => [])` colapsaba errores DB a memberships=[]. La
+  // UI lo interpretaba como "usuario sin acceso a ningún tenant" cuando
+  // realmente la DB estaba caída o RLS bloqueando — indistinguible de
+  // un usuario nuevo legítimo. Ahora un fallo de query → 503 explícito
+  // para que el cliente reintente / muestre error de infraestructura.
+  let memberships: Array<{ entity_id: string; role: string; is_primary_entity: boolean }>;
+  try {
+    memberships = await query<{ entity_id: string; role: string; is_primary_entity: boolean }>(
+      `SELECT entity_id, role, is_primary_entity
+       FROM entity_users
+       WHERE user_id = $1
+       ORDER BY is_primary_entity DESC`,
+      [req.user.email],
+    );
+  } catch (err) {
+    console.error('[auth/me] memberships query failed', err);
+    res.status(503).json({
+      code: 'memberships_lookup_failed',
+      message: 'Could not load tenant memberships. Try again.',
+    });
+    return;
+  }
   res.json({
     email: req.user.email,
     name: req.user.name,

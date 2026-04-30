@@ -42,6 +42,51 @@ export function extractValidatedCitations(text: string): CopilotCitation[] {
 }
 
 /**
+ * Output extendido: separa citations validadas de las "candidato
+ * inventado" (texto que parecía citation pero no matchea ninguna pattern
+ * canónica). Uso recomendado en el handler `/api/copilot/ask` para
+ * surface al usuario un banner "El modelo citó N referencias no
+ * verificadas" — el riesgo regulatorio de mostrar respuestas con
+ * citations inventadas (Anejo XII §4.2, EBA GL 2025/99) sin alerta es
+ * que un Risk Manager confía en la respuesta sin saber que el modelo
+ * inventó sus fuentes.
+ *
+ * Heurística de "candidatos": busca patrones genéricos que parecen
+ * referencias regulatorias (palabra reservada + número/articulo) y las
+ * resta de las validadas. Falsos positivos son aceptables (mejor
+ * advertir de más que de menos).
+ */
+const CANDIDATE_REGEX = /\b(?:EBA(?:\s+GL)?|CRR\d?|Anejo\s+\w+|SR\s+\d+-\d+|IFRS\s+\d+|BCBS|MaRisk|Basel|CRD\s*\d+)\b[^.,;:\n]*?(?:\d+(?:[./]\d+)*[a-z]?(?:\(\d+\))?(?:\s*§\s*[A-Za-z0-9.]+)?)?/gi;
+
+export interface CitationsExtractionResult {
+  validated: CopilotCitation[];
+  /** Texto que parecía citation pero no matchea pattern canónica. */
+  unverifiedCandidates: string[];
+}
+
+export function extractCitationsWithVerification(text: string): CitationsExtractionResult {
+  if (!text) return { validated: [], unverifiedCandidates: [] };
+  const validated = extractValidatedCitations(text);
+  const validatedLabels = new Set(validated.map((c) => c.label));
+  const allCandidates = new Set<string>();
+  for (const match of text.matchAll(CANDIDATE_REGEX)) {
+    const candidate = normalizeLabel(match[0]);
+    if (candidate.length < 5) continue; // descarta ruido tipo "EBA"
+    allCandidates.add(candidate);
+  }
+  const unverifiedCandidates: string[] = [];
+  for (const candidate of allCandidates) {
+    // Es validado si matchea anchored alguna pattern, o es subcadena
+    // de una etiqueta validada (e.g. "EBA GL 2018/02 §3.4" engloba
+    // "EBA GL 2018/02").
+    const isValidated = validatedLabels.has(candidate)
+      || Array.from(validatedLabels).some((label) => label.includes(candidate) || candidate.includes(label));
+    if (!isValidated) unverifiedCandidates.push(candidate);
+  }
+  return { validated, unverifiedCandidates };
+}
+
+/**
  * Validates a list of pre-extracted candidates (e.g. when Gemini
  * returns citations as a structured array). Each candidate must match
  * one of the patterns to be kept.
