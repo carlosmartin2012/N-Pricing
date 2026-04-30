@@ -42,20 +42,27 @@ router.get('/paginated', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { user_email, user_name, action, module, description, details, timestamp } = req.body;
+    const { user_name, action, module, description, details, timestamp } = req.body;
     const scope = tenancyScope(req);
-    // In strict mode the entity_id comes from the authenticated tenancy
-    // context — never from the client body. In legacy mode we fall back to
-    // the table default (Default Entity) by passing NULL so existing callers
-    // keep working without sending an entity_id.
+    // user_email se toma del tenancy verificado (JWT), nunca del body.
+    // Aceptarlo del body permitía a un cliente autenticado insertar
+    // entradas de audit suplantando a otro usuario. El audit trail es
+    // regulatoriamente vinculante (SR 11-7) — la integridad del actor
+    // no es negociable.
+    const verifiedUserEmail = req.tenancy?.userEmail
+      ?? (req.user as { email?: string } | null)?.email
+      ?? 'system';
+    // user_name puede venir del body porque es display-only, no security-relevant.
+    const user_name_safe = typeof req.body?.user_name === 'string' ? req.body.user_name : null;
+    void user_name; // eslint
     await execute(
       `INSERT INTO audit_log
          (timestamp, user_email, user_name, action, module, description, details, entity_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8::uuid, '00000000-0000-0000-0000-000000000010'::uuid))`,
       [
         timestamp || new Date().toISOString(),
-        user_email,
-        user_name,
+        verifiedUserEmail,
+        user_name_safe,
         action,
         module,
         description,
