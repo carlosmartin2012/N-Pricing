@@ -105,6 +105,19 @@ describe('escalationPushDispatcher · happy path', () => {
     expect(callArgs[1]).toContain('SME-1234');
     expect(callArgs[1]).toContain('Office Madrid');
     expect(callArgs[1]).toContain('-7.2');
+
+    // Anti-regresión (Ola 10.2 fix #5 — cross-tenant): el users lookup
+    // (segunda query) debe ir scope-ado por entity_id vía entity_users.
+    // La versión bug usaba `SELECT email FROM users WHERE role = $1` sin
+    // entity_id, leakeando candidatos cross-tenant.
+    const usersSql = dbMock.query.mock.calls[1][0] as string;
+    expect(usersSql).toMatch(/FROM entity_users/i);
+    expect(usersSql).toMatch(/eu\.entity_id\s*=\s*\$1/);
+    expect(usersSql).toMatch(/eu\.role\s*=\s*\$2/);
+    // Y los params deben incluir entity_id como primer arg
+    const usersParams = dbMock.query.mock.calls[1][1] as unknown[];
+    expect(usersParams[0]).toBe(ENTITY);
+    expect(usersParams[1]).toBe('BranchManager');
   });
 
   it('purga endpoints stale 410 + cuenta delivered correctamente', async () => {

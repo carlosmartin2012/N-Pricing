@@ -53,7 +53,6 @@ export interface DispatchReport {
 }
 
 const LEVEL_ROLE_TABLE = `attribution_levels`;
-const USERS_TABLE = `users`;
 
 /**
  * Disparo idempotente. Si VAPID no está configurado o no hay usuarios
@@ -92,9 +91,18 @@ export async function dispatchEscalationPush(input: DispatchInput): Promise<Disp
 
   let userRows: UserForPushRow[];
   try {
+    // El rol AUTORITATIVO por tenant es `entity_users.role`, no `users.role`.
+    // La tabla `users` es global y un mismo usuario puede tener distintos
+    // roles en bancos distintos. Filtrar solo por `users.role` rompía el
+    // contrato de tenancy: un email candidato podía pertenecer a otro
+    // banco aunque la query siguiente sí scope-ara las suscripciones.
     userRows = await query<UserForPushRow>(
-      `SELECT DISTINCT email FROM ${USERS_TABLE} WHERE role = $1`,
-      [level.rbac_role],
+      `SELECT DISTINCT u.email
+         FROM entity_users eu
+         JOIN users u ON u.id = eu.user_id
+        WHERE eu.entity_id = $1
+          AND eu.role      = $2`,
+      [input.entityId, level.rbac_role],
     );
   } catch (err) {
     report.errors.push(`users lookup: ${(err as Error).message}`);
