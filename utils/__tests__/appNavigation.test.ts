@@ -139,12 +139,75 @@ describe('appNavigation routing helpers', () => {
     });
   });
 
+  // -----------------------------------------------------------------
+  // Ola 10.7 — Sidebar density pass (28 → 26 entries).
+  // -----------------------------------------------------------------
+  describe('Ola 10.7 density pass', () => {
+    const t = translations.en;
+    const items = buildMainNavItems(t);
+
+    it('demotes ESCALATIONS from sidebar to AUX (edge case, no daily inbox)', () => {
+      expect(items.find((i) => i.id === 'ESCALATIONS')).toBeUndefined();
+    });
+
+    it('demotes ATTRIBUTION_MATRIX from sidebar to AUX (config, not daily)', () => {
+      expect(items.find((i) => i.id === 'ATTRIBUTION_MATRIX')).toBeUndefined();
+    });
+
+    it('moves ATTRIBUTION_REPORTING from Governance to Insights (analytics output)', () => {
+      const reporting = items.find((i) => i.id === 'ATTRIBUTION_REPORTING');
+      expect(reporting?.section).toBe('Insights');
+      expect(reporting?.path).toBe('/attributions/reporting');
+    });
+
+    it('Governance section keeps 5 entries (down from 8 pre-density)', () => {
+      const governance = items.filter((i) => i.section === 'Governance');
+      expect(governance).toHaveLength(5);
+      expect(governance.map((i) => i.id).sort()).toEqual([
+        'APPROVALS',
+        'BUDGET_RECONCILIATION',
+        'DOSSIERS',
+        'MODEL_INVENTORY',
+        'RECONCILIATION',
+      ]);
+    });
+
+    it('Insights section grows to 3 entries (+ATTRIBUTION_REPORTING)', () => {
+      const insights = items.filter((i) => i.section === 'Insights');
+      expect(insights.map((i) => i.id).sort()).toEqual([
+        'ATTRIBUTION_REPORTING',
+        'DISCIPLINE',
+        'REPORTING',
+      ]);
+    });
+
+    it('main sidebar holds at most 22 entries (was 24 pre-density)', () => {
+      // Density floor — alerta si alguien añade entries sin pasar por
+      // density review. Subir este número exige justificación en code review.
+      // Reducción mayor (a < 18) requiere refactor UI: collapsed Pricing
+      // tabs, Approvals Hub, Reconciliation Hub.
+      expect(items.length).toBeLessThanOrEqual(22);
+    });
+  });
+
   describe('AUX_DESTINATIONS', () => {
     it('includes ACCOUNTING after its demotion from main sidebar', async () => {
       const { AUX_DESTINATIONS } = await import('../../appNavigation');
       const accounting = AUX_DESTINATIONS.find((d) => d.id === 'ACCOUNTING');
       expect(accounting).toBeDefined();
       expect(accounting?.path).toBe('/accounting');
+    });
+
+    it('includes ESCALATIONS + ATTRIBUTION_MATRIX after Ola 10.7 demotion', async () => {
+      const { AUX_DESTINATIONS } = await import('../../appNavigation');
+      const escalations = AUX_DESTINATIONS.find((d) => d.id === 'ESCALATIONS');
+      const matrix = AUX_DESTINATIONS.find((d) => d.id === 'ATTRIBUTION_MATRIX');
+      expect(escalations?.path).toBe('/escalations');
+      expect(matrix?.path).toBe('/attributions/matrix');
+      // Crítico: la URL sigue funcionando aunque el item esté en AUX.
+      // pathToView debe seguir resolviendo /escalations y /attributions/matrix.
+      expect(pathToView('/escalations')).toBe('ESCALATIONS');
+      expect(pathToView('/attributions/matrix')).toBe('ATTRIBUTION_MATRIX');
     });
   });
 
