@@ -79,6 +79,17 @@ Capas de evolución posteriores al cierre del roadmap por Phases. Cada Ola es un
 | [`runbooks/feature-flag-kill-switch.md`](runbooks/feature-flag-kill-switch.md) | Activar kill switch por tenant |
 | [`runbooks/backtest-drift.md`](runbooks/backtest-drift.md) | Drift > threshold en backtest |
 
+## 💼 Commercial / Sales
+
+Documentación orientada al equipo comercial NFQ y al comprador en el banco.
+**No** es documentación técnica del producto — esa vive en
+[`architecture.md`](architecture.md) y siblings.
+
+| Documento | Propósito | Audiencia |
+|---|---|---|
+| [`commercial/README.md`](commercial/README.md) | Entry point del directorio comercial + workflow de validación con prospects | Sales NFQ |
+| [`commercial/modules.md`](commercial/modules.md) | Catálogo de módulos comerciales (Core + 4 módulos opcionales) con buyer persona, workshop, KPIs y pricing tiers | Sales NFQ + comprador del banco |
+
 ---
 
 ## ⚠️ Deprecated / historical (no leer como "live")
