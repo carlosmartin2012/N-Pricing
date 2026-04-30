@@ -48,8 +48,31 @@ export class GoogleSsoProvider implements SsoProvider {
         audience: this.config.clientId,
       });
       const payload = ticket.getPayload();
-      if (!payload?.email || !payload.sub) return null;
-      if (this.allowedHd && payload.hd !== this.allowedHd) return null;
+      if (!payload?.email || !payload.sub) {
+        console.warn('[sso/google] verify rejected: payload missing email or sub');
+        return null;
+      }
+      // Reject email_verified=false. Google emite tokens con
+      // email_verified=false en cuentas Workspace mal configuradas. Usar
+      // un email no verificado para autenticar permite ataques de
+      // suplantación si el dominio fue alguna vez secundario de otro tenant.
+      if (payload.email_verified === false) {
+        console.warn('[sso/google] verify rejected: email_verified=false', {
+          email: payload.email,
+        });
+        return null;
+      }
+      if (this.allowedHd && payload.hd !== this.allowedHd) {
+        // Distinguible en logs: domain mismatch es un evento de seguridad
+        // (intento de auth desde dominio no autorizado), no un fallo de
+        // configuración del usuario.
+        console.warn('[sso/google] verify rejected: hd mismatch', {
+          expected: this.allowedHd,
+          got: payload.hd,
+          email: payload.email,
+        });
+        return null;
+      }
 
       // Google ID tokens don't carry group claims in their default profile —
       // groups for role derivation must come from a separate Workspace
@@ -65,7 +88,20 @@ export class GoogleSsoProvider implements SsoProvider {
         tenantHint: payload.hd,
         groups,
       };
-    } catch {
+    } catch (err) {
+      // Distinguir tipos de fallo en log: token expirado (esperado) vs
+      // audience mismatch (alarma) vs JWKS unreachable (network) vs
+      // malformed token (posible ataque). Antes era un `catch {}` mudo
+      // que escondía intentos de auth con audience equivocada.
+      const message = err instanceof Error ? err.message : String(err);
+      // Categorización heurística por mensaje de google-auth-library.
+      const reason = /audience/i.test(message)         ? 'audience_mismatch'
+                   : /expired|exp/i.test(message)      ? 'token_expired'
+                   : /signature|verify/i.test(message) ? 'signature_invalid'
+                   : /malformed|jwt|format/i.test(message) ? 'token_malformed'
+                   : /network|jwks|fetch/i.test(message) ? 'jwks_unreachable'
+                   : 'unknown';
+      console.warn('[sso/google] verify failed', { reason, message });
       return null;
     }
   }
