@@ -89,6 +89,51 @@ describe('notifications router · POST /push/subscribe', () => {
     });
   });
 
+  // -------------------------------------------------------------------
+  // SSRF guard (Ola 10.2 fix #8) — endpoint allowlist
+  // -------------------------------------------------------------------
+  describe('endpoint allowlist (SSRF guard)', () => {
+    const validBody = (endpoint: string) => ({
+      endpoint,
+      keysP256dh: 'p256dh',
+      keysAuth:   'auth',
+    });
+
+    it.each([
+      ['localhost Redis',     'http://localhost:6379'],
+      ['internal IP',          'http://10.0.0.1/admin'],
+      ['cloud metadata',       'http://169.254.169.254/computeMetadata/v1/'],
+      ['http (plaintext)',     'http://fcm.googleapis.com/fcm/send/abc'],
+      ['arbitrary host',       'https://attacker.example.com/path'],
+      ['allowlist substring',  'https://fcm.googleapis.com.attacker.com/path'],
+      ['malformed URL',        'not-a-url'],
+      ['empty after trim',     '   '],
+    ])('rechaza endpoint %s con 400 invalid_endpoint', async (_label, badEndpoint) => {
+      await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
+        const r = await http(url, 'POST', '/api/notifications/push/subscribe', validBody(badEndpoint));
+        expect(r.status).toBe(400);
+        const body = r.body as { code: string };
+        // Empty/missing endpoint → validation_error; resto → invalid_endpoint
+        expect(['invalid_endpoint', 'validation_error']).toContain(body.code);
+      });
+      // Crítico: nunca tocar la DB con endpoint inválido
+      expect(dbMock.queryOne).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['FCM canonical', 'https://fcm.googleapis.com/fcm/send/abc'],
+      ['FCM subdomain', 'https://android.fcm.googleapis.com/fcm/send/abc'],
+      ['Mozilla',       'https://updates.push.services.mozilla.com/wpush/v2/abc'],
+      ['Apple web',     'https://web.push.apple.com/QABCDEF'],
+    ])('acepta endpoint %s', async (_label, goodEndpoint) => {
+      dbMock.queryOne.mockResolvedValueOnce({ ...subRow, endpoint: goodEndpoint });
+      await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
+        const r = await http(url, 'POST', '/api/notifications/push/subscribe', validBody(goodEndpoint));
+        expect(r.status).toBe(201);
+      });
+    });
+  });
+
   it('happy path → 201 con shape mapeada a camelCase', async () => {
     dbMock.queryOne.mockResolvedValueOnce(subRow);
     await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {

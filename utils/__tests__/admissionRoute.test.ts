@@ -12,6 +12,7 @@ import type { AdmissionContext, AdmissionReconciliationItem } from '../../integr
 interface SyntheticTenancy {
   entityId: string;
   userEmail?: string | null;
+  role?: string | null;
 }
 
 async function withApp<T>(
@@ -94,7 +95,7 @@ describe('admission router · tenancy + adapter resolution', () => {
   });
 
   it('POST /push sin adapter registrado → 503 no_adapter', async () => {
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r = await http(url, 'POST', '/api/admission/push', PUSH_BODY);
       expect(r.status).toBe(503);
       expect((r.body as { code: string }).code).toBe('no_adapter');
@@ -116,7 +117,7 @@ describe('admission router · tenancy + adapter resolution', () => {
 describe('admission router · POST /push', () => {
   it('body inválido → 400 validation_error', async () => {
     adapterRegistry.register(new InMemoryAdmission());
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r = await http(url, 'POST', '/api/admission/push', { foo: 'bar' });
       expect(r.status).toBe(400);
     });
@@ -125,7 +126,7 @@ describe('admission router · POST /push', () => {
   it('push exitoso → 202 accepted con externalId', async () => {
     const adapter = new InMemoryAdmission();
     adapterRegistry.register(adapter);
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r = await http(url, 'POST', '/api/admission/push', PUSH_BODY);
       expect(r.status).toBe(202);
       const body = r.body as { accepted: boolean; externalId: string };
@@ -138,12 +139,39 @@ describe('admission router · POST /push', () => {
   it('push duplicado (mismo dealId+hash) usa el mismo externalId', async () => {
     const adapter = new InMemoryAdmission();
     adapterRegistry.register(adapter);
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r1 = await http(url, 'POST', '/api/admission/push', PUSH_BODY);
       const r2 = await http(url, 'POST', '/api/admission/push', PUSH_BODY);
       expect((r1.body as { externalId: string }).externalId).toBe(
         (r2.body as { externalId: string }).externalId,
       );
+    });
+  });
+
+  // -------------------------------------------------------------------
+  // Role guard (Ola 10.2 fix #10) — anti privilege escalation
+  // -------------------------------------------------------------------
+  it.each([
+    ['Sales',      'Sales'],
+    ['Commercial', 'Commercial'],
+    ['Read_Only',  'Read_Only'],
+  ])('rol %s no autorizado → 403 forbidden', async (_label, role) => {
+    const adapter = new InMemoryAdmission();
+    adapterRegistry.register(adapter);
+    await withApp({ entityId: ENTITY, role }, async (url) => {
+      const r = await http(url, 'POST', '/api/admission/push', PUSH_BODY);
+      expect(r.status).toBe(403);
+      expect((r.body as { code: string }).code).toBe('forbidden');
+    });
+    // Crítico: nunca tocar el adapter externo (sistema admisión real) con rol no autorizado
+    expect(adapter.decisionsPushed()).toHaveLength(0);
+  });
+
+  it('sin rol en tenancy → 403', async () => {
+    adapterRegistry.register(new InMemoryAdmission());
+    await withApp({ entityId: ENTITY }, async (url) => {
+      const r = await http(url, 'POST', '/api/admission/push', PUSH_BODY);
+      expect(r.status).toBe(403);
     });
   });
 });
