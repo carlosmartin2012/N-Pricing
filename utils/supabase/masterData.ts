@@ -8,7 +8,13 @@ export const masterDataService = {
     try {
       const rows = await apiGet<Record<string, unknown>[]>('/config/clients');
       return rows.map(mapClientFromDB);
-    } catch { return []; }
+    } catch (err) {
+      // Antes: `catch { return []; }` colapsaba errores DB/API a array
+      // vacío. Cliente Tier-1 veía grids vacíos en config y asumía
+      // "no hay datos" cuando realmente la API rebotó 500.
+      log.error('Error fetching clients', { error: String(err) });
+      return [];
+    }
   },
 
   async saveClient(client: ClientEntity) {
@@ -31,7 +37,10 @@ export const masterDataService = {
     try {
       const rows = await apiGet<Record<string, unknown>[]>('/config/business-units');
       return rows.map(mapBUFromDB);
-    } catch { return []; }
+    } catch (err) {
+      log.error('Error fetching business units', { error: String(err) });
+      return [];
+    }
   },
 
   async saveBusinessUnit(unit: BusinessUnit) {
@@ -54,7 +63,10 @@ export const masterDataService = {
     try {
       const rows = await apiGet<Record<string, unknown>[]>('/config/products');
       return rows.map(mapProductFromDB);
-    } catch { return []; }
+    } catch (err) {
+      log.error('Error fetching products', { error: String(err) });
+      return [];
+    }
   },
 
   async saveProduct(product: ProductDefinition) {
@@ -76,7 +88,10 @@ export const masterDataService = {
   async fetchUsers(): Promise<UserProfile[]> {
     try {
       return await apiGet<UserProfile[]>('/config/users');
-    } catch { return []; }
+    } catch (err) {
+      log.error('Error fetching users', { error: String(err) });
+      return [];
+    }
   },
 
   async upsertUser(user: UserProfile) {
