@@ -684,6 +684,83 @@ CREATE TABLE IF NOT EXISTS approval_escalation_configs (
 );
 
 -- -----------------------------------------------------------------------
+-- Ola 8 — Atribuciones jerárquicas (delegated authority)
+--   Versión completa con RLS estricto + trigger de validación de hash
+--   chain vive en supabase/migrations/20260620000001_attributions.sql.
+--   Aquí se inline-ean las tablas y los índices para que dev/Replit
+--   arranquen sin la secuencia completa de migrations Supabase.
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS attribution_levels (
+  id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id    UUID         NOT NULL,
+  name         TEXT         NOT NULL,
+  parent_id    UUID         REFERENCES attribution_levels(id),
+  level_order  INT          NOT NULL CHECK (level_order >= 1),
+  rbac_role    TEXT         NOT NULL,
+  metadata     JSONB        NOT NULL DEFAULT '{}'::jsonb,
+  active       BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE (entity_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_attribution_levels_entity
+  ON attribution_levels (entity_id) WHERE active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_attribution_levels_parent
+  ON attribution_levels (parent_id) WHERE active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_attribution_levels_order
+  ON attribution_levels (entity_id, level_order) WHERE active = TRUE;
+
+CREATE TABLE IF NOT EXISTS attribution_thresholds (
+  id                  UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id           UUID         NOT NULL,
+  level_id            UUID         NOT NULL REFERENCES attribution_levels(id),
+  scope               JSONB        NOT NULL,
+  deviation_bps_max   NUMERIC(10,4),
+  raroc_pp_min        NUMERIC(10,4),
+  volume_eur_max      NUMERIC(20,2),
+  active_from         DATE         NOT NULL DEFAULT CURRENT_DATE,
+  active_to           DATE,
+  is_active           BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  CHECK (
+    deviation_bps_max IS NOT NULL
+    OR raroc_pp_min    IS NOT NULL
+    OR volume_eur_max  IS NOT NULL
+  ),
+  CHECK (active_to IS NULL OR active_to >= active_from)
+);
+CREATE INDEX IF NOT EXISTS idx_attribution_thresholds_level
+  ON attribution_thresholds (level_id) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_attribution_thresholds_entity
+  ON attribution_thresholds (entity_id) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_attribution_thresholds_scope
+  ON attribution_thresholds USING GIN (scope) WHERE is_active = TRUE;
+
+CREATE TABLE IF NOT EXISTS attribution_decisions (
+  id                       UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id                UUID        NOT NULL,
+  deal_id                  TEXT        NOT NULL,
+  required_level_id        UUID        NOT NULL REFERENCES attribution_levels(id),
+  decided_by_level_id      UUID        REFERENCES attribution_levels(id),
+  decided_by_user          TEXT,
+  decision                 TEXT        NOT NULL
+                            CHECK (decision IN ('approved','rejected','escalated','expired','reverted')),
+  reason                   TEXT,
+  pricing_snapshot_hash    TEXT        NOT NULL,
+  routing_metadata         JSONB       NOT NULL DEFAULT '{}'::jsonb,
+  decided_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_attribution_decisions_deal
+  ON attribution_decisions (deal_id);
+CREATE INDEX IF NOT EXISTS idx_attribution_decisions_user
+  ON attribution_decisions (decided_by_user);
+CREATE INDEX IF NOT EXISTS idx_attribution_decisions_snapshot
+  ON attribution_decisions (pricing_snapshot_hash);
+CREATE INDEX IF NOT EXISTS idx_attribution_decisions_entity_decided
+  ON attribution_decisions (entity_id, decided_at DESC);
+
+-- -----------------------------------------------------------------------
 -- Pricing snapshots: immutable engine input/output records
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pricing_snapshots (

@@ -72,6 +72,14 @@ export type {
 } from './types/phase0';
 export { PRICING_SLOS } from './types/phase0';
 
+// Ola 8 — Atribuciones jerárquicas (Bloque A)
+export type {
+  AttributionLevel, AttributionScope, AttributionThreshold,
+  AttributionDecisionStatus, AttributionRoutingMetadata, AttributionDecision,
+  RoutingReason, AttributionQuote, RoutingResult,
+  SimulationInput, SimulationResult, AttributionMatrix,
+} from './types/attributions';
+
 export type MethodologyType = 'MatchedMaturity' | 'MovingAverage' | 'RateCard' | 'ZeroDiscount';
 
 export interface ClientEntity {
