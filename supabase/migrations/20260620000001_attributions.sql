@@ -205,11 +205,17 @@ COMMENT ON TABLE attribution_decisions IS
 CREATE OR REPLACE FUNCTION validate_attribution_decision_hash()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- pricing_snapshots stores the engine output SHA-256 as `output_hash`
+  -- (see migration 20260602000004_pricing_snapshots.sql columns
+  -- input_hash / output_hash). Earlier revisions of this trigger
+  -- referenced a non-existent column `hash` — every INSERT to
+  -- attribution_decisions would have raised
+  -- `column "hash" does not exist`, breaking the entire append flow.
   IF NOT EXISTS (
     SELECT 1
     FROM pricing_snapshots
-    WHERE hash      = NEW.pricing_snapshot_hash
-      AND entity_id = NEW.entity_id
+    WHERE output_hash = NEW.pricing_snapshot_hash
+      AND entity_id   = NEW.entity_id
   ) THEN
     RAISE EXCEPTION
       'attribution_decision rejects unknown pricing_snapshot_hash % for entity %',

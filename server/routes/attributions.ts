@@ -19,7 +19,7 @@
  */
 
 import { Router } from 'express';
-import { query, queryOne } from '../db';
+import { query, queryOne, withTransaction } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { routeApproval } from '../../utils/attributions/attributionRouter';
 import { simulate } from '../../utils/attributions/attributionSimulator';
@@ -755,18 +755,88 @@ router.post('/recalibrations/:id/approve', async (req, res) => {
       return;
     }
     const reason = typeof req.body?.reason === 'string' ? req.body.reason : null;
-    const row = await queryOne<RecalibrationRow>(
-      `UPDATE attribution_threshold_recalibrations
-       SET status = 'approved', decided_at = NOW(), decided_by_user = $1, reason = $2
-       WHERE id = $3 AND entity_id = $4 AND status = 'pending'
-       RETURNING *`,
-      [tenancy.userEmail, reason, req.params.id, tenancy.entityId],
-    );
-    if (!row) {
-      res.status(404).json({ code: 'not_found', message: 'Pending recalibration not found' });
-      return;
+
+    // El governance flow exige 3 pasos atómicos (ver header de la migration
+    // 20260630000001_attribution_threshold_recalibrations.sql):
+    //   1. Insertar threshold nuevo con los `proposed_*` (mismo level_id, scope, isActive=true)
+    //   2. Soft-delete del threshold viejo (is_active=false; preserva FK histórico)
+    //   3. Marcar la propuesta como approved + decided_*
+    // Sin la transacción, una aprobación que crashee entre 1 y 2 deja dos
+    // thresholds activos para el mismo level/scope; sin paso 1+2, el motor
+    // sigue usando el threshold viejo aunque el operador "haya aprobado".
+    try {
+      const result = await withTransaction(async (tx) => {
+        const proposal = await tx.queryOne<RecalibrationRow & {
+          scope: Record<string, unknown> | null;
+          level_id: string;
+          active_from: string | Date;
+          active_to:   string | Date | null;
+        }>(
+          `SELECT r.*, t.level_id, t.scope, t.active_from, t.active_to
+             FROM attribution_threshold_recalibrations r
+             JOIN attribution_thresholds t ON t.id = r.threshold_id
+            WHERE r.id = $1 AND r.entity_id = $2 AND r.status = 'pending'
+              AND t.entity_id = $2
+            FOR UPDATE OF r`,
+          [req.params.id, tenancy.entityId],
+        );
+        if (!proposal) return null;
+
+        // Paso 1 — insertar threshold nuevo con los proposed_* y mismo
+        // level_id/scope/active_from. active_to queda NULL (vigente).
+        await tx.execute(
+          `INSERT INTO attribution_thresholds
+             (entity_id, level_id, scope,
+              deviation_bps_max, raroc_pp_min, volume_eur_max,
+              active_from, active_to, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE, NULL, TRUE)`,
+          [
+            tenancy.entityId,
+            proposal.level_id,
+            JSON.stringify(proposal.scope ?? {}),
+            proposal.proposed_deviation_bps_max,
+            proposal.proposed_raroc_pp_min,
+            proposal.proposed_volume_eur_max,
+          ],
+        );
+
+        // Paso 2 — desactivar threshold viejo (soft-delete preserva FK
+        // histórico desde attribution_decisions).
+        await tx.execute(
+          `UPDATE attribution_thresholds
+              SET is_active = FALSE, active_to = CURRENT_DATE, updated_at = NOW()
+            WHERE id = $1 AND entity_id = $2`,
+          [proposal.threshold_id, tenancy.entityId],
+        );
+
+        // Paso 3 — marcar la propuesta como approved.
+        const updated = await tx.queryOne<RecalibrationRow>(
+          `UPDATE attribution_threshold_recalibrations
+              SET status = 'approved', decided_at = NOW(),
+                  decided_by_user = $1, reason = $2
+            WHERE id = $3 AND entity_id = $4
+            RETURNING *`,
+          [tenancy.userEmail, reason, req.params.id, tenancy.entityId],
+        );
+        return updated;
+      });
+
+      if (!result) {
+        res.status(404).json({ code: 'not_found', message: 'Pending recalibration not found' });
+        return;
+      }
+      res.json(mapRecalibration(result));
+    } catch (innerErr) {
+      // El trigger `validate_attr_recal_threshold_entity` rechaza cross-tenant
+      // o threshold_id desconocido. Mapeamos a 422 para que el cliente
+      // distinga validación de error infra.
+      const msg = innerErr instanceof Error ? innerErr.message : String(innerErr);
+      if (/cross-tenant recalibration|unknown threshold_id/i.test(msg)) {
+        res.status(422).json({ code: 'invalid_threshold', message: msg });
+        return;
+      }
+      throw innerErr;
     }
-    res.json(mapRecalibration(row));
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
