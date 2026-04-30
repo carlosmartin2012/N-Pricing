@@ -486,6 +486,13 @@ Rules & Config, Behavioural Models, AI Assistant.
 | `CRM_SYNC_INTERVAL_MS` | unset (off) | ≥1000 activa el pull CRM → client_events |
 | `ADAPTER_CRM` | `in-memory` | `salesforce` usa el stub real (Phase 4) |
 | `ADAPTER_MARKET_DATA` | `in-memory` | `bloomberg` usa el stub real (Phase 4) |
+| `ADAPTER_ADMISSION` | `in-memory` | `puzzle` usa stub PUZZLE-BM (Ola 9 Bloque A). Requiere `PUZZLE_BASE_URL/CLIENT_ID/CLIENT_SECRET` |
+| `ADAPTER_CORE_BANKING` | `in-memory` | `bm-host` usa stub HOST mainframe SFTP (Ola 9 Bloque B). Requiere `BM_HOST_SFTP_HOST/USER/PRIVATE_KEY_PEM` + `BM_HOST_DROP_DIRECTORY` |
+| `ADAPTER_BUDGET` | `in-memory` | `alquid` usa stub ALQUID (Ola 9 Bloque C). Requiere `ALQUID_BASE_URL/CLIENT_ID/CLIENT_SECRET` |
+| `ATTRIBUTION_DRIFT_INTERVAL_MS` | unset (off) | ≥1000 activa el drift detector worker (Ola 8 Bloque C) |
+| `ATTRIBUTION_RECALIBRATION_INTERVAL_MS` | unset (off) | ≥1000 activa el threshold recalibrator worker (Ola 10 Bloque B) |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | unset | Web Push real sender (Ola 10 Bloque C). Sin esto los endpoints `/notifications/push/*` devuelven 503 `no_vapid_config`. Generar con `node -e "console.log(require('web-push').generateVAPIDKeys())"` |
+| `VAPID_SUBJECT` | `mailto:ops@n-pricing.local` | Exigido por la spec Web Push. Debe ser `mailto:` o URL `https://` |
 | `DOSSIER_SIGNING_SECRET` | dev fallback | Required en producción |
 | `VITE_PRICING_APPLY_CURVE_SHIFT` | unset (false) | `true` → motor honra `ShockScenario.curveShiftBps` per-tenor (Ola 6 B.4). Off = legacy uniform `interestRate` shift. El chip del header de `/stress-pricing` lo surfacea |
 | `INTEGRATION_DATABASE_URL` | unset | Activa tests de integración (opt-in) |
@@ -516,6 +523,35 @@ Rules & Config, Behavioural Models, AI Assistant.
   para multi-tenant — siempre añadir test antes de modificar.
 - `supabase/functions/pricing/index.ts`: el snapshot write y la tenancy
   validation son obligatorios; nunca eliminar sin reemplazo.
+- `utils/attributions/attributionRouter.ts` + `attributionSimulator.ts`
+  (Ola 8): el simulator cliente-side y el server router consumen el mismo
+  motor puro. Cualquier divergencia rompe la paridad UX↔server. Test fuzz
+  de paridad antes de tocar.
+- `attribution_decisions` (Ola 8): append-only por RLS. Para anular se
+  inserta una row nueva con `decision='reverted'`, NUNCA UPDATE/DELETE.
+  Trigger `validate_attribution_decision_hash` rechaza inserts con
+  `pricing_snapshot_hash` inexistente.
+- `web-push` library (Ola 10 Bloque C): si VAPID keys no están
+  configuradas, los workers hacen `skipped='no_vapid'` sin lanzar.
+  Endpoints devuelven 503 explícito. **Failing closed, no fail loud**.
+
+## Cobertura Banca March (Olas 8 + 9 + 10)
+
+Roadmap completo merged en `main` (12 commits, ~13.5k LOC, 1794 tests):
+
+- **Ola 8 — Atribuciones jerárquicas** · schema + tipos + módulos puros +
+  server router + UI (Approval Cockpit + Simulator + Matrix Editor) +
+  reporting + drift detector + i18n + e2e Playwright + storybook.
+- **Ola 9 — Integración Banca March** · PUZZLE adapter (admisión) + HOST
+  mainframe (file-drop SFTP + reconciliation) + ALQUID wrapper
+  (BudgetReconciliationView). 3 stubs in-memory para demo + 3 reales
+  pendientes de credenciales BM (workshop S10 IT BM).
+- **Ola 10 — Hardening + AI** · AI grounding (copilot Cmd+K entiende la
+  matriz + drift signals), drift recalibrator automático (governance
+  flow Admin/Risk_Manager), mobile-first cockpit, Web Push real con
+  VAPID + escalation push dispatcher.
+
+Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
 
 ## Pitfalls comunes
 
@@ -599,6 +635,8 @@ Rules & Config, Behavioural Models, AI Assistant.
 | `docs/roadmap-execution-summary.md` | Estado fase por fase |
 | `docs/integral-review-2026-04-18.md` | Hallazgos + 3 olas de evolución |
 | `docs/ola-6-tenancy-strict-stress-pricing.md` | **Ola 6 completa** · estado A/B/C con PR refs |
+| `docs/ola-7-collaborative-ux.md` | Ola 7 plan · UX colaborativa (cursors, copilot, i18n) |
+| `docs/ola-8-atribuciones-banca-march.md` | **Olas 8/9/10 completas** · cobertura Banca March (atribuciones jerárquicas, integraciones PUZZLE/HOST/ALQUID, AI insights, mobile cockpit) |
 | `docs/phase-0-design.md` + `phase-0-technical-specs.md` + `phase-0-rollout.md` | Tenancy/snapshots/SLO completo |
 | `docs/integration-tests.md` | Cómo correr los tests integración opt-in |
 | `docs/runbooks/` | 13 plantillas operativas para on-call |

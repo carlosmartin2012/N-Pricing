@@ -1,7 +1,8 @@
 # N-Pricing — Architecture overview
 
 > Lectura recomendada como primer documento técnico tras el README.
-> Última actualización: 2026-04-23 — Ola 6 completa (A + B + C merged).
+> Última actualización: 2026-04-30 — Olas 8/9/10 completas (cobertura
+> Banca March end-to-end). Ver sección "Cobertura Banca March" al final.
 >
 > **Cambios clave desde el último refresh (2026-04-15)**:
 > - +17 vistas (Stress Pricing view añadida en Ola 6 B.5).
@@ -532,8 +533,73 @@ Idempotente. Se puede correr 10 veces sin daño. Logs incluyen el
 
 ---
 
+## Cobertura Banca March (Olas 8 + 9 + 10)
+
+Capa funcional añadida sobre el Phase roadmap original para cubrir el
+email de Esteve Morey (Banca March, Nov 2022) + PDFs Visión NFQ F&R
+(Dic 2022) y Enfoque Pricing alternativo (Oct 2023). Todo merged en
+`main` con 1794 tests verdes y deck comercial entregable.
+
+### Atribuciones jerárquicas (Ola 8)
+
+Modelo formal de **delegated authority by hierarchy** que coexiste con
+el `delegationTier` plano de FTPResult (5 tiers fijos).
+
+**Schema (3 tablas + RLS append-only)**:
+- `attribution_levels` — árbol N-ario por entity (Oficina → Zona →
+  Territorial → Comité). Soft-delete vía `active=false`.
+- `attribution_thresholds` — umbrales por (nivel × scope jsonb)
+  con `deviation_bps_max`, `raroc_pp_min`, `volume_eur_max`. GIN index
+  sobre scope para matching flexible.
+- `attribution_decisions` — append-only por RLS. Hash chain a
+  `pricing_snapshots` validado por trigger en INSERT. Para anular
+  insertar `decision='reverted'`, NUNCA UPDATE/DELETE.
+
+**Servicios puros** (`utils/attributions/`): attributionRouter,
+attributionSimulator (paridad cliente↔server garantizada), thresholdMatcher,
+chainBuilder, attributionReporter (Bloque C), aiContext (Ola 10 A),
+driftRecalibrator (Ola 10 B).
+
+**UI** (`components/Attributions/`): ApprovalCockpit (desktop + mobile
+cards Ola 10 C), AttributionSimulator (embebible en Calculator),
+AttributionMatrixView, AttributionReportingView (4 tabs Volume / Drift /
+Funnel / Time-to-decision).
+
+**Workers opt-in**:
+- `attributionDriftDetector` — `ATTRIBUTION_DRIFT_INTERVAL_MS`.
+- `attributionThresholdRecalibrator` —
+  `ATTRIBUTION_RECALIBRATION_INTERVAL_MS`.
+
+**SLIs nuevos**: `attribution_route_latency_ms`,
+`attribution_decision_time_ms`, `attribution_drift_signals_total`.
+
+### Integraciones Banca March (Ola 9)
+
+Tres nuevas adapter families siguiendo el mismo patrón Result + stub +
+in-memory que Salesforce/Bloomberg:
+
+- **PUZZLE (`AdmissionAdapter`)** — push/pull de decisiones hacia
+  admisión de riesgos. Idempotente por (dealId, pricingSnapshotHash).
+- **HOST mainframe (`CoreBankingAdapter.pullBookedRows`)** — file-drop
+  SFTP nightly + reconciliation matcher.
+- **ALQUID (`BudgetSourceAdapter`)** — read-only sobre módulo
+  presupuestario NFQ. Línea clara: ALQUID = budget,
+  N-Pricing = pricing operativo.
+
+### AI grounding + Web Push (Ola 10)
+
+- Copilot Cmd+K entiende la matriz: `buildAttributionsContextBlock`
+  + `suggestAttributionsActions` con deep-links.
+- Web Push real con VAPID: `webPushSender` + `escalationPushDispatcher`.
+  Cuando una decision cae como `escalated`, push a usuarios con el
+  `rbac_role` del nivel. Failing closed si VAPID no configurado
+  (`skipped='no_vapid'`).
+
+---
+
 ## Referencias rápidas
 
+- **Plan Olas 8/9/10 — Banca March**: [`docs/ola-8-atribuciones-banca-march.md`](./ola-8-atribuciones-banca-march.md)
 - **Integral review 2026-04-18** (hallazgos verificados + propuesta Olas 6-8): [`docs/integral-review-2026-04-18.md`](./integral-review-2026-04-18.md)
 - Roadmap fase a fase: [`docs/roadmap-execution-summary.md`](./roadmap-execution-summary.md)
 - Diseño Phase 0 detallado: [`docs/phase-0-design.md`](./phase-0-design.md)

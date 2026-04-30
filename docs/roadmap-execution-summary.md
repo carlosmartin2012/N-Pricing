@@ -349,3 +349,89 @@ Bloqueados por input externo:
 - Implementación real `SalesforceCrmAdapter` / `BloombergMarketDataAdapter`
   (esperando credenciales del banco ancla).
 - Backtesting con datos históricos reales (esperando dataset del banco).
+
+---
+
+## Olas 8 + 9 + 10 — Cobertura Banca March (2026-04-30)
+
+Plan completo: [`docs/ola-8-atribuciones-banca-march.md`](./ola-8-atribuciones-banca-march.md).
+
+### Resumen ejecutivo
+
+12 commits encadenados sobre `main`, ~13.5k LOC, **1794 tests verdes**,
+deck comercial entregable. La propuesta de 190 k€ del PDF Octubre 2023
+de NFQ a Banca March queda materializada en código, con fallbacks
+in-memory que permiten demostrar el flujo a Esteve Morey sin esperar
+al workshop con IT BM.
+
+### Ola 8 — Atribuciones jerárquicas y Approval Cockpit
+
+| Bloque | Commit | Foco |
+|---|---|---|
+| Plan | `d0b7aed` | Doc maestro + README |
+| A.1-A.5 | `029e213` | Schema + tipos + módulos puros + 50 tests |
+| A.6-A.8 | `9aadc21` | Server router + cliente API + hooks + 22 tests |
+| B | `22a7a3c` | UI: Approval Cockpit + Simulator + Matrix Editor + 13 tests |
+| BM e2e | `752d4f8` | Embed Calculator + Storybook + Playwright |
+| C | `625fb4f` | Reporting + drift detector + runbook + 21 tests |
+
+Schema (3 tablas append-only): `attribution_levels`,
+`attribution_thresholds`, `attribution_decisions` con hash chain
+trigger validation a `pricing_snapshots`. UI 3 vistas + simulator
+embebido en Calculator. Worker drift detector opt-in
+(`ATTRIBUTION_DRIFT_INTERVAL_MS`).
+
+### Ola 9 — Integración Banca March
+
+| Bloque | Commit | Foco |
+|---|---|---|
+| A | `9b6e1f1` | PUZZLE adapter (admission) + 24 tests |
+| B | `a334db2` | HOST mainframe + reconciliation matcher + 21 tests |
+| C | `90633d1` | ALQUID wrapper + BudgetReconciliationView + 24 tests |
+
+3 nuevas adapter families: `AdmissionAdapter`,
+`CoreBankingAdapter.pullBookedRows`, `BudgetSourceAdapter`. Cada uno
+con stub real (PUZZLE/HOST/ALQUID) + InMemory + bootstrap env vars.
+Server endpoints `/api/admission/*`, `/api/core-banking/reconciliation`,
+`/api/budget/comparison`. Línea clara: ALQUID = budget,
+N-Pricing = pricing operativo. Wrapper read-only.
+
+### Ola 10 — AI Insights + Drift Recalibrator + Mobile + Web Push
+
+| Bloque | Commit | Foco |
+|---|---|---|
+| A | `5f68648` | AI grounding sobre atribuciones + 18 tests |
+| B | `9502228` | Drift threshold recalibrator + 23 tests |
+| C | `d3a40dc` | Mobile cockpit + Web Push primitives + 19 tests |
+| Web Push real | `1af66af` | web-push lib + VAPID + escalation push dispatcher + 17 tests |
+
+Copilot Cmd+K entiende la matriz (`buildAttributionsContextBlock`).
+Recalibrator opt-in vía env propone ajustes a thresholds (Admin/
+Risk_Manager aprueba). Mobile-first cards en cockpit. Web Push real
+con VAPID + dispatcher que dispara notif al approver cuando una
+decision queda escalated.
+
+### Estado de los follow-ups del plan
+
+- ✅ **Web Push real** (commit `1af66af`) — antes era stub. Cierra
+  el follow-up #1 documentado en el plan.
+- ⏳ **Adapters reales PUZZLE/HOST/ALQUID** — stubs listos, esperando
+  workshop con IT BM para cerrar contratos HTTP/SFTP.
+- ✅ **Documentación final** — CLAUDE.md, architecture.md, README,
+  roadmap-execution-summary actualizados (este commit).
+
+### Demo deck comercial
+
+`~/Developer/Cowork/decks/n-pricing-banca-march-demo.html` (1280 LOC,
+single-file). 18 slides estructurados:
+
+- Cover + punto de partida (PDF Oct 2023)
+- 12 pasos de demo paso a paso (Calculator → AttributionSimulator →
+  Cockpit desktop + mobile → Matrix Editor → Reporting → Recalibrator
+  → Budget → PUZZLE/HOST → AI Copilot)
+- Cobertura de los 16 puntos del email Esteve Morey
+- Reasignación económica 190 k€
+- Próximos pasos (workshop, kickoff)
+
+Estilo NFQ: dark-first, Inter + JetBrains Mono, accent
+amber→coral→violet.

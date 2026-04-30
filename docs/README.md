@@ -61,7 +61,9 @@ Capas de evolución posteriores al cierre del roadmap por Phases. Cada Ola es un
 |---|---|---|---|
 | 6 — Tenancy strict + Stress Pricing | ✅ MERGED en `main` (2026-04-23) | [`ola-6-tenancy-strict-stress-pricing.md`](ola-6-tenancy-strict-stress-pricing.md) | A: tenancy hardening · B: stress pricing 6 EBA presets · C: pricing snapshots hash chain |
 | 7 — UX colaborativa y copiloto contextual | 📋 PLAN (2026-04-28) | [`ola-7-collaborative-ux.md`](ola-7-collaborative-ux.md) | A: deal timeline · B: live presence · C: Cmd+K copilot · D: i18n namespaces · E: onboarding por rol |
-| 8 — Atribuciones jerárquicas + Approval Cockpit (cobertura Banca March) | 📋 PLAN (2026-04-30) | [`ola-8-atribuciones-banca-march.md`](ola-8-atribuciones-banca-march.md) | A: modelo dominio atribuciones · B: Approval Cockpit + Simulator · C: reporting de atribuciones. Apéndice con outline Olas 9 (integración BM) y 10 (AI + drift) |
+| 8 — Atribuciones jerárquicas + Approval Cockpit (cobertura Banca March) | ✅ MERGED en `main` (2026-04-30) | [`ola-8-atribuciones-banca-march.md`](ola-8-atribuciones-banca-march.md) | A: modelo dominio atribuciones · B: Approval Cockpit + Simulator · C: reporting de atribuciones. Apéndice con outline Olas 9 (integración BM) y 10 (AI + drift) |
+| 9 — Integración Banca March (PUZZLE + HOST + ALQUID) | ✅ MERGED en `main` (2026-04-30) | (incluida en `ola-8-atribuciones-banca-march.md` Apéndice B) | A: PUZZLE admission adapter · B: HOST mainframe SFTP file-drop + reconciliation matcher · C: ALQUID wrapper + BudgetReconciliationView |
+| 10 — AI grounding + drift recalibrator + mobile + Web Push | ✅ MERGED en `main` (2026-04-30) | (incluida en `ola-8-atribuciones-banca-march.md` Apéndice B) | A: copilot entiende atribuciones · B: drift recalibrator con governance · C: mobile cockpit + web-push real con VAPID |
 
 ## 🔴 Operational runbooks
 
