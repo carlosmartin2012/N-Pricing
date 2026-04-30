@@ -53,6 +53,16 @@ Cada Phase (0-6) tiene hasta 3 documentos: `-design.md` (concepción), `-technic
 | [`security-baseline-2026-04.md`](security-baseline-2026-04.md) | Baseline actual. Auditar trimestralmente. | 2026-04 |
 | [`rls-audit-2026-04.md`](rls-audit-2026-04.md) | Auditoría RLS (26 migraciones). | 2026-04 |
 
+## 🔵 Olas (post-Phase 6)
+
+Capas de evolución posteriores al cierre del roadmap por Phases. Cada Ola es un PR-set mergeable agrupado por bloques A/B/C. El doc se mantiene vivo durante el plan; al cierre del rollout se migra a `📸 HISTÓRICO`.
+
+| Ola | Estado | Doc | Foco |
+|---|---|---|---|
+| 6 — Tenancy strict + Stress Pricing | ✅ MERGED en `main` (2026-04-23) | [`ola-6-tenancy-strict-stress-pricing.md`](ola-6-tenancy-strict-stress-pricing.md) | A: tenancy hardening · B: stress pricing 6 EBA presets · C: pricing snapshots hash chain |
+| 7 — UX colaborativa y copiloto contextual | 📋 PLAN (2026-04-28) | [`ola-7-collaborative-ux.md`](ola-7-collaborative-ux.md) | A: deal timeline · B: live presence · C: Cmd+K copilot · D: i18n namespaces · E: onboarding por rol |
+| 8 — Atribuciones jerárquicas + Approval Cockpit (cobertura Banca March) | 📋 PLAN (2026-04-30) | [`ola-8-atribuciones-banca-march.md`](ola-8-atribuciones-banca-march.md) | A: modelo dominio atribuciones · B: Approval Cockpit + Simulator · C: reporting de atribuciones. Apéndice con outline Olas 9 (integración BM) y 10 (AI + drift) |
+
 ## 🔴 Operational runbooks
 
 | Runbook | Trigger |
@@ -79,7 +89,6 @@ regulatorio pero **no** son fuente viva:
 | [`integral-review-2026-04-18.md`](integral-review-2026-04-18.md) | 📸 HISTÓRICO 2026-04-18 | `architecture.md` + `roadmap-execution-summary.md` |
 | [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 📸 HISTÓRICO pre-roadmap | este índice + `roadmap-execution-summary.md` |
 | [`roadmap-execution-summary.md`](roadmap-execution-summary.md) | ✅ live (snapshot por Phase) | — |
-| [`ola-6-tenancy-strict-stress-pricing.md`](ola-6-tenancy-strict-stress-pricing.md) | 📸 HISTÓRICO Ola 6 design | `phase-0-rollout.md` |
 | [`supabase-setup.md`](supabase-setup.md) | ✅ live (dev setup) | — |
 
 ---
