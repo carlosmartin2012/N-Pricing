@@ -824,6 +824,365 @@ paths:
                   assumptions:
                     type: object
 
+# -----------------------------------------------------------------------------
+# Attributions (Ola 8) — hierarchical delegated-authority matrix
+# -----------------------------------------------------------------------------
+# Entity-scoped via x-entity-id. attribution_decisions is append-only
+# (no UPDATE/DELETE policy); to revert a decision insert a new row with
+# decision='reverted'. Hash chain to pricing_snapshots is enforced by
+# DB trigger validate_attribution_decision_hash().
+paths:
+  /attributions/matrix:
+    get:
+      summary: Get the attribution matrix (levels + active thresholds)
+      tags: [attributions]
+      responses:
+        '200':
+          description: AttributionMatrix snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttributionMatrix' }
+
+  /attributions/levels:
+    post:
+      summary: Create a new attribution level (Admin/Risk_Manager)
+      tags: [attributions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, levelOrder, rbacRole]
+              properties:
+                name:        { type: string }
+                parentId:    { type: string, nullable: true }
+                levelOrder:  { type: integer, minimum: 1 }
+                rbacRole:    { type: string }
+                metadata:    { type: object }
+      responses:
+        '201': { description: Created }
+        '403': { description: Admin or Risk_Manager required }
+
+  /attributions/levels/{id}:
+    patch:
+      summary: Update level (incl. soft-delete via active=false)
+      tags: [attributions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Updated }
+        '404': { description: Not found }
+
+  /attributions/thresholds:
+    post:
+      summary: Create a threshold for a level (Admin/Risk_Manager)
+      tags: [attributions]
+      responses:
+        '201': { description: Created }
+
+  /attributions/thresholds/{id}:
+    patch:
+      summary: Update / soft-deactivate a threshold
+      tags: [attributions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Updated }
+
+  /attributions/route:
+    post:
+      summary: Stateless routing — quote → required level + chain
+      tags: [attributions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quote]
+              properties:
+                quote: { $ref: '#/components/schemas/AttributionQuote' }
+      responses:
+        '200':
+          description: RoutingResult
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoutingResult' }
+        '409': { description: Matrix empty — no levels configured }
+
+  /attributions/simulate:
+    post:
+      summary: Apply adjustments + re-route + diff
+      tags: [attributions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quote]
+              properties:
+                quote: { $ref: '#/components/schemas/AttributionQuote' }
+                proposedAdjustments:
+                  type: object
+                  properties:
+                    deviationBpsDelta: { type: number }
+                    rarocPpOverride:   { type: number }
+                    tenorMonthsDelta:  { type: number }
+                    crossSellEur:      { type: number }
+      responses:
+        '200': { description: SimulationResult }
+
+  /attributions/decisions/{dealId}:
+    post:
+      summary: Append-only — record an attribution decision
+      tags: [attributions]
+      parameters:
+        - name: dealId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requiredLevelId, decision, pricingSnapshotHash]
+              properties:
+                requiredLevelId:     { type: string, format: uuid }
+                decidedByLevelId:    { type: string, format: uuid, nullable: true }
+                decision:            { type: string, enum: [approved, rejected, escalated, expired, reverted] }
+                reason:              { type: string, nullable: true }
+                pricingSnapshotHash: { type: string }
+                routingMetadata:     { type: object }
+      responses:
+        '201': { description: Decision recorded; if escalated, fires push notif fire-and-forget }
+        '422': { description: pricingSnapshotHash unknown for this entity }
+
+  /attributions/decisions:
+    get:
+      summary: List decisions (for reporting)
+      tags: [attributions]
+      parameters:
+        - { name: deal_id, in: query, schema: { type: string } }
+        - { name: level_id, in: query, schema: { type: string } }
+        - { name: user, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 100, maximum: 500 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        '200': { description: Paginated list }
+
+  /attributions/reporting/summary:
+    get:
+      summary: Aggregated summary for dashboards (Ola 8 Bloque C)
+      tags: [attributions]
+      parameters:
+        - { name: window_days, in: query, schema: { type: integer, default: 90, minimum: 1, maximum: 365 } }
+      responses:
+        '200':
+          description: AttributionReportingSummary (byLevel, byUser, funnel, drift, timeToDecision)
+
+  /attributions/recalibrations:
+    get:
+      summary: List threshold recalibration proposals (Ola 10 Bloque B)
+      tags: [attributions]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, approved, rejected, superseded] } }
+      responses:
+        '200': { description: Paginated list }
+
+  /attributions/recalibrations/{id}/approve:
+    post:
+      summary: Approve a pending recalibration (Admin/Risk_Manager)
+      tags: [attributions]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Approved }
+        '404': { description: Not found or not pending }
+
+  /attributions/recalibrations/{id}/reject:
+    post:
+      summary: Reject a pending recalibration (Admin/Risk_Manager)
+      tags: [attributions]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Rejected }
+
+# -----------------------------------------------------------------------------
+# Admission integration (Ola 9 Bloque A) — PUZZLE for Banca March
+# -----------------------------------------------------------------------------
+  /admission/health:
+    get:
+      summary: Admission adapter status
+      tags: [admission]
+      responses:
+        '200': { description: kind + name + AdapterHealth }
+        '503': { description: No admission adapter registered }
+
+  /admission/push:
+    post:
+      summary: Push pricing decision to admission system (idempotent)
+      tags: [admission]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dealId, pricingSnapshotHash, decision, decidedAt, finalClientRateBps, rarocPp]
+              properties:
+                dealId:                 { type: string }
+                pricingSnapshotHash:    { type: string }
+                decision:               { type: string, enum: [approved, rejected, escalated] }
+                decidedByUser:          { type: string, nullable: true }
+                decidedAt:              { type: string, format: date-time }
+                finalClientRateBps:     { type: number }
+                rarocPp:                { type: number }
+                attributionLevelId:     { type: string, nullable: true }
+                routingMetadata:        { type: object }
+      responses:
+        '202': { description: Accepted; idempotent by (dealId, pricingSnapshotHash) }
+        '502': { description: Adapter error (unreachable / auth / etc) }
+
+  /admission/context/{dealId}:
+    get:
+      summary: Fetch admission context (rating, exposure, collateral)
+      tags: [admission]
+      parameters:
+        - { name: dealId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: AdmissionContext }
+        '404': { description: Deal not registered in admission system }
+
+  /admission/reconciliation:
+    get:
+      summary: Pull batch reconciliation items
+      tags: [admission]
+      parameters:
+        - { name: as_of, in: query, schema: { type: string, format: date } }
+      responses:
+        '200': { description: items + summary (matched / mismatchRate / mismatchMissing / unknown) }
+
+# -----------------------------------------------------------------------------
+# Core Banking — HOST mainframe reconciliation (Ola 9 Bloque B)
+# -----------------------------------------------------------------------------
+  /core-banking/health:
+    get:
+      summary: Core banking adapter status
+      tags: [coreBanking]
+      responses:
+        '200': { description: kind + name + AdapterHealth }
+
+  /core-banking/reconciliation:
+    get:
+      summary: Cross booked rows (HOST file-drop) vs pricing_snapshots
+      tags: [coreBanking]
+      parameters:
+        - { name: as_of, in: query, schema: { type: string, format: date } }
+        - { name: tolerance_bps, in: query, schema: { type: number, default: 0.5 } }
+      responses:
+        '200': { description: outcomes + summary (matched / mismatchRate / mismatchMissing / unknownInPricing) }
+        '501': { description: Adapter does not support reconciliation pull }
+
+# -----------------------------------------------------------------------------
+# Budget — ALQUID wrapper read-only (Ola 9 Bloque C)
+# -----------------------------------------------------------------------------
+  /budget/health:
+    get:
+      summary: Budget source adapter status
+      tags: [budget]
+      responses:
+        '200': { description: kind + name + AdapterHealth }
+
+  /budget/comparison:
+    get:
+      summary: Compare ALQUID assumptions vs realized pricing
+      tags: [budget]
+      parameters:
+        - { name: period, in: query, required: true, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+        - { name: rate_tolerance_bps, in: query, schema: { type: number, default: 5 } }
+        - { name: volume_tolerance_pct, in: query, schema: { type: number, default: 0.10 } }
+      responses:
+        '200': { description: items + summary by (segment × productType × currency) }
+
+# -----------------------------------------------------------------------------
+# Web Push notifications (Ola 10 Bloque C)
+# -----------------------------------------------------------------------------
+  /notifications/push/vapid-public-key:
+    get:
+      summary: Return VAPID public key for pushManager.subscribe
+      tags: [notifications]
+      responses:
+        '200': { description: publicKey + configured:true }
+        '503': { description: VAPID not configured on this deployment }
+
+  /notifications/push/subscribe:
+    post:
+      summary: Register a Web Push subscription (UPSERT by entity+user+endpoint)
+      tags: [notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint, keysP256dh, keysAuth]
+              properties:
+                endpoint:    { type: string }
+                keysP256dh:  { type: string }
+                keysAuth:    { type: string }
+                userAgent:   { type: string, nullable: true }
+      responses:
+        '201': { description: Created or updated }
+
+  /notifications/push/unsubscribe:
+    post:
+      summary: Remove a Web Push subscription by endpoint
+      tags: [notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint]
+              properties:
+                endpoint: { type: string }
+      responses:
+        '200': { description: ok }
+
+  /notifications/push/subscriptions:
+    get:
+      summary: List user's own push subscriptions
+      tags: [notifications]
+      responses:
+        '200': { description: items[] }
+
+  /notifications/push/test:
+    post:
+      summary: Send a test push to all of the user's registered devices
+      tags: [notifications]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+      responses:
+        '200': { description: delivered + total + staleEndpointsPurged + failures }
+        '503': { description: VAPID not configured }
+
 components:
   schemas:
     ClientEvent:
@@ -890,3 +1249,107 @@ components:
         generatedAt:           { type: string, format: date-time }
         consumedAt:            { type: string, nullable: true, format: date-time }
         consumedBy:            { type: string, nullable: true }
+
+    # ------------------------------------------------------------------
+    # Attribution-related schemas (Ola 8/9/10)
+    # ------------------------------------------------------------------
+    AttributionScope:
+      type: object
+      additionalProperties: true
+      properties:
+        product:        { type: array, items: { type: string } }
+        segment:        { type: array, items: { type: string } }
+        currency:       { type: array, items: { type: string } }
+        tenorMaxMonths: { type: integer }
+
+    AttributionQuote:
+      type: object
+      required: [finalClientRateBps, standardRateBps, hardFloorRateBps, rarocPp, volumeEur, scope]
+      properties:
+        finalClientRateBps: { type: number, description: in basis points }
+        standardRateBps:    { type: number }
+        hardFloorRateBps:   { type: number }
+        rarocPp:            { type: number, description: percentage points }
+        volumeEur:          { type: number }
+        scope:              { $ref: '#/components/schemas/AttributionScope' }
+
+    AttributionLevel:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        entityId:    { type: string, format: uuid }
+        name:        { type: string }
+        parentId:    { type: string, format: uuid, nullable: true }
+        levelOrder:  { type: integer }
+        rbacRole:    { type: string }
+        metadata:    { type: object }
+        active:      { type: boolean }
+
+    AttributionMatrix:
+      type: object
+      properties:
+        entityId:   { type: string, format: uuid }
+        levels:
+          type: array
+          items: { $ref: '#/components/schemas/AttributionLevel' }
+        thresholds: { type: array, items: { type: object } }
+        loadedAt:   { type: string, format: date-time }
+
+    RoutingResult:
+      type: object
+      properties:
+        requiredLevel:  { $ref: '#/components/schemas/AttributionLevel' }
+        approvalChain:
+          type: array
+          items: { $ref: '#/components/schemas/AttributionLevel' }
+        reason:
+          type: string
+          enum: [within_threshold, deviation_exceeded, raroc_below_min, volume_exceeded, no_applicable_threshold, below_hard_floor]
+        belowHardFloor: { type: boolean }
+        metadata:
+          type: object
+          properties:
+            deviationBps: { type: number }
+            rarocPp:      { type: number }
+            volumeEur:    { type: number }
+            scope:        { $ref: '#/components/schemas/AttributionScope' }
+
+    AdmissionContext:
+      type: object
+      properties:
+        dealId:               { type: string }
+        clientId:             { type: string }
+        internalRating:       { type: string, enum: [AAA, AA, A, BBB, BB, B, CCC, CC, C, D, NR] }
+        pdAnnual:             { type: number, nullable: true }
+        lgd:                  { type: number, nullable: true }
+        exposureEur:          { type: number }
+        exposureAtDefaultEur: { type: number, nullable: true }
+        collateral:
+          type: array
+          items:
+            type: object
+            properties:
+              type:         { type: string }
+              valueEur:     { type: number }
+              ltv:          { type: number, nullable: true }
+              jurisdiction: { type: string }
+        decision:    { type: string, enum: [approved, rejected, pending, unknown] }
+        decidedAt:   { type: string, format: date-time, nullable: true }
+        notes:       { type: string, nullable: true }
+
+    BudgetVarianceItem:
+      type: object
+      properties:
+        period:               { type: string }
+        segment:              { type: string }
+        productType:          { type: string }
+        currency:             { type: string }
+        budgetedRateBps:      { type: number, nullable: true }
+        realizedRateBps:      { type: number, nullable: true }
+        diffRateBps:          { type: number, nullable: true }
+        budgetedVolumeEur:    { type: number, nullable: true }
+        realizedVolumeEur:    { type: number, nullable: true }
+        diffVolumePct:        { type: number, nullable: true }
+        status:
+          type: string
+          enum: [on_track, over_budget_rate, under_budget_rate, over_budget_volume, under_budget_volume, budget_only, realized_only]

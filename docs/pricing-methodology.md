@@ -363,3 +363,69 @@ Pillar1Adj = CapitalCharge - ISF_CapitalCharge
 - Deal marcado como `isfEligible = true`
 
 **Referencia**: Marcos Rodriguez — impacto de overlays en rating / modelos IRB (fisico, transicion, ambiental) + medidas Pillar I ESG (ej. ISF en Project Finance).
+
+---
+
+## 20. Routing de aprobación (Ola 8 — atribuciones jerárquicas)
+
+Una vez calculado el `finalClientRate` con los 19 componentes anteriores,
+el motor de pricing emite un snapshot inmutable y delega la **decisión
+de aprobación** al sub-sistema de atribuciones. El routing es una capa
+ortogonal al cálculo: no afecta al precio, sólo decide quién tiene
+autoridad para aprobarlo.
+
+### Flujo
+
+1. **Quote**: el motor produce `FTPResult` con `finalClientRate`,
+   `targetPrice` (estándar comercial), `floorPrice` (mínimo regulatorio
+   = capital + LCR + NSFR + opex) y `raroc`.
+2. **Adapter `quoteFromFtpResult`** (`utils/attributions/`): convierte
+   el `FTPResult` a `AttributionQuote` con tasas en bps y RAROC en pp,
+   más el scope del deal (product × segment × currency × tenor).
+3. **`routeApproval(quote, matrix)`** decide:
+   - Si `finalClientRate < floorPrice` → `belowHardFloor = true` y se
+     escala al comité con flag UX para deshabilitar aprobación.
+   - Filtra thresholds aplicables al scope + vigentes.
+   - Recorre niveles ascendente por `levelOrder` (Oficina → Zona → ...).
+     El primero que tiene un threshold que acepta (deviation, RAROC,
+     volumen) es el `requiredLevel`.
+   - Si ninguno acepta, devuelve el comité con razón diagnóstica
+     (`deviation_exceeded` / `raroc_below_min` / `volume_exceeded`).
+
+### Persistencia
+
+Cada decisión queda en `attribution_decisions` (append-only por RLS)
+con hash chain a `pricing_snapshots`. Para anular se inserta una row
+nueva con `decision='reverted'`, NUNCA UPDATE/DELETE. El trigger
+`validate_attribution_decision_hash()` rechaza inserts con hash
+inexistente.
+
+### Drift detection y recalibration
+
+- **Drift detector** (`server/workers/attributionDriftDetector.ts`,
+  opt-in `ATTRIBUTION_DRIFT_INTERVAL_MS`) detecta usuarios con
+  patrón sistemático de aprobación al límite (>30% decisiones cerca
+  del threshold + drift medio > 5 bps). Emite señales warning /
+  breached.
+- **Threshold recalibrator** (`server/workers/attributionThreshold
+  Recalibrator.ts`, opt-in `ATTRIBUTION_RECALIBRATION_INTERVAL_MS`)
+  propone ajustes RELAX (drift alto) o TIGHTEN (cero drift) a los
+  thresholds. Las propuestas son `pending` hasta que Admin/Risk_Manager
+  las aprueba — el sistema **nunca** muta thresholds automáticamente.
+
+### Coexistencia con `delegationTier` legacy
+
+El campo `delegationTier` en `FTPResult` (5 tiers fijos
+`AUTO/MANAGER_L1/MANAGER_L2/RISK_COMMITTEE/EXECUTIVE_COMMITTEE`) se
+mantiene como fast-path para tenants simples. El nuevo modelo N-ario
+flexible (Oficina × Zona × Territorial × Comité con scope JSONB) es
+la evolución para bancos con organigrama complejo (Banca March, BBVA).
+
+### Referencias
+
+- Plan Ola 8: `docs/ola-8-atribuciones-banca-march.md`
+- Schema: `supabase/migrations/20260620000001_attributions.sql`
+- Módulos puros: `utils/attributions/`
+- API: `docs/api-spec.yaml#/paths/~1attributions~1*`
+- Runbooks: `docs/runbooks/attribution-drift-systematic.md`,
+  `docs/runbooks/attribution-matrix-rollback.md`

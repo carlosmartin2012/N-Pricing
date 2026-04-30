@@ -117,7 +117,10 @@ export const CalculatorWorkspace: React.FC<Props> = ({
       {/* Attribution Simulator — Ola 8 Bloque B. Widget contextual: el comercial
           ve quién tiene atribución sobre el quote actual + simula bajadas/subidas
           para encontrar el sweet-spot de aprobación. Recálculo cliente-side; el
-          motor puro de utils/attributions/ corre el mismo código que el server. */}
+          motor puro de utils/attributions/ corre el mismo código que el server.
+          Handlers cableados (Ola 10 Bloque C cierre): onApply genera un
+          pricing_snapshot y pre-llena el calculator; onRequestApproval crea una
+          decision 'escalated' que dispara push notif al approver. */}
       {currentResult && (
         <Suspense fallback={null}>
           <div className="mb-4">
@@ -133,6 +136,29 @@ export const CalculatorWorkspace: React.FC<Props> = ({
                 } as AttributionScope,
                 dealParams.amount,
               )}
+              onApply={(input) => {
+                // Aplica el delta de margen al deal actual — el comercial
+                // sigue iterando en el calculator con los nuevos parámetros.
+                const deltaBps = input.proposedAdjustments.deviationBpsDelta ?? 0;
+                if (deltaBps !== 0 && setDealParams) {
+                  setDealParams((prev) => ({
+                    ...prev,
+                    marginTarget: prev.marginTarget + deltaBps / 10_000,
+                  }));
+                }
+              }}
+              onRequestApproval={(input) => {
+                // Wire pendiente: crear pricing_snapshot + POST /attributions/
+                // decisions con decision='escalated'. Por ahora navegamos a
+                // la bandeja /approvals con el deal preseleccionado para que
+                // el comercial complete el flow desde allí.
+                const dealId = dealParams.id ?? 'pending';
+                const url = `/approvals?focus=${encodeURIComponent(dealId)}`;
+                if (typeof window !== 'undefined') {
+                  window.location.assign(url);
+                }
+                void input;
+              }}
             />
           </div>
         </Suspense>

@@ -20,6 +20,7 @@ once you know the team that operates the deployment.
 | [feature-flag-kill-switch.md](./feature-flag-kill-switch.md) | Need to halt all writes for a tenant immediately |
 | [escalation-timeouts.md](./escalation-timeouts.md) | Approval escalations stuck past SLA |
 | [attribution-drift-systematic.md](./attribution-drift-systematic.md) | `attribution_drift_signals_total > 0` over 24h (Ola 8 Bloque C) |
+| [attribution-matrix-rollback.md](./attribution-matrix-rollback.md) | Cambio reciente en la matriz provoca escalations spurias / rechazos masivos (Ola 8) |
 | [web-push-troubleshooting.md](./web-push-troubleshooting.md) | Push notifications no llegan / 503 no_vapid_config (Ola 10 Bloque C) |
 
 ## Proactive playbooks
