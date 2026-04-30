@@ -1,4 +1,5 @@
 import { pool, queryOne, execute } from '../db';
+import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
 import {
   buildClientRelationship,
   mapClientPositionRow,
@@ -178,8 +179,9 @@ export function startLtvSnapshotWorker(): void {
       if (report.computed > 0 || report.errors.length > 0) {
         console.info('[ltv-snapshot]', report);
       }
+      recordWorkerTickSuccess('ltv-snapshot');
     } catch (err) {
-      console.error('[ltv-snapshot] tick failed', err);
+      recordWorkerTickFailure('ltv-snapshot', err);
     }
   }, ms);
 }

@@ -1,5 +1,6 @@
 import { pool } from '../db';
 import { dispatchAlert, type DeliveryResult } from '../integrations/alertChannels';
+import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
 import type {
   AlertChannelConfig,
   AlertChannelType,
@@ -167,8 +168,9 @@ export function startAlertEvaluator(): void {
       if (report.triggered > 0 || report.errors.length > 0) {
         console.info('[alert-eval]', report);
       }
+      recordWorkerTickSuccess('alert-eval');
     } catch (err) {
-      console.error('[alert-eval] tick failed', err);
+      recordWorkerTickFailure('alert-eval', err);
     }
   }, ms);
 }
