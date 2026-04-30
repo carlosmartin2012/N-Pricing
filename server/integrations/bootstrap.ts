@@ -81,11 +81,28 @@ export function bootstrapAdapters(): void {
     if (appName) {
       const tickersRaw = process.env.BLOOMBERG_CURVE_TICKERS;
       let curveTickers: Record<string, string[]> = {};
-      if (tickersRaw) {
+      if (tickersRaw && tickersRaw.trim().length > 0) {
+        // Distinguir "string vacío/whitespace" (intencional, mapa vacío)
+        // de "JSON corrupto" (operator error, debe alertar). En la
+        // versión previa el catch silenciaba ambos casos y el motor
+        // arrancaba con curveTickers={} sin pista del problema.
         try {
-          curveTickers = JSON.parse(tickersRaw) as Record<string, string[]>;
-        } catch {
-          console.warn('[adapters] BLOOMBERG_CURVE_TICKERS is not valid JSON — using empty map');
+          const parsed = JSON.parse(tickersRaw);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            curveTickers = parsed as Record<string, string[]>;
+          } else {
+            const reason = `BLOOMBERG_CURVE_TICKERS must be a JSON object {currency: [tickers]}, got ${Array.isArray(parsed) ? 'array' : typeof parsed}`;
+            if (process.env.NODE_ENV === 'production' && process.env.PRICING_ALLOW_MOCKS !== 'true') {
+              throw new Error(`[adapters] ${reason}`);
+            }
+            console.error(`[adapters] ${reason} — using empty curve tickers map`);
+          }
+        } catch (parseErr) {
+          const reason = `BLOOMBERG_CURVE_TICKERS is not valid JSON: ${(parseErr as Error).message}`;
+          if (process.env.NODE_ENV === 'production' && process.env.PRICING_ALLOW_MOCKS !== 'true') {
+            throw new Error(`[adapters] ${reason}`, { cause: parseErr });
+          }
+          console.error(`[adapters] ${reason} — using empty curve tickers map`);
         }
       }
       adapterRegistry.register(new BloombergMarketDataAdapter({

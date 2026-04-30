@@ -47,9 +47,20 @@ router.get('/reconciliation', async (req, res) => {
       return;
     }
 
-    const asOfDate = typeof req.query.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.as_of)
-      ? req.query.as_of
-      : new Date().toISOString().slice(0, 10);
+    // Idéntica política a admission /reconciliation: ausente → today,
+    // presente + inválido → 400 (no fallback silencioso).
+    let asOfDate: string;
+    if (req.query.as_of === undefined) {
+      asOfDate = new Date().toISOString().slice(0, 10);
+    } else if (typeof req.query.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.as_of)) {
+      asOfDate = req.query.as_of;
+    } else {
+      res.status(400).json({
+        code: 'invalid_as_of_format',
+        message: 'as_of must be a YYYY-MM-DD date',
+      });
+      return;
+    }
 
     const toleranceBps = (() => {
       const raw = parseFloat(String(req.query.tolerance_bps ?? '0.5'));
