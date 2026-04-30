@@ -157,6 +157,48 @@ describe('driftRecalibrator · proposeThresholdAdjustments', () => {
     expect(proposals).toEqual([]);
   });
 
+  // -------------------------------------------------------------------
+  // Anti-regresión Ola 10.4 fix #9 — drift simétrico
+  // -------------------------------------------------------------------
+  it('detecta drift simétrico (+10/-10 bps) — antes colapsaba a meanDev=0 y NO disparaba relax', () => {
+    // 20 decisiones a +10 bps + 20 decisiones a -10 bps. Threshold
+    // holgado (deviationBpsMax=30 → limit=24) para que el `pctAtLimit`
+    // sea bajo (la mayoría está dentro del limit) y el TEST aísle el
+    // efecto de meanAbsDeviationBps. Con la versión bug el sumDev
+    // colapsaba a 0 y `Math.abs(mean)=0 < meanDriftRelaxBps=8` →
+    // shouldRelax era false y la cartera dispersa NUNCA generaba
+    // propuesta de recalibración.
+    const proposals = proposeThresholdAdjustments({
+      entityId:    ENTITY,
+      thresholds:  [threshold({ deviationBpsMax: 30 })],
+      decisions:   [
+        ...lots(20, +10, 'approved'),
+        ...lots(20, -10, 'approved'),
+      ],
+    });
+    expect(proposals).toHaveLength(1);
+    const p = proposals[0];
+    // El campo legacy `meanDeviationBps` (signed bias) sí colapsa a ~0:
+    // bias direccional cero porque +10 y -10 se cancelan exactamente.
+    expect(p.rationale.meanDeviationBps).toBeCloseTo(0, 4);
+    // Pero `meanAbsDeviationBps` captura la dispersión real → 10 bps.
+    expect(p.rationale.meanAbsDeviationBps).toBeCloseTo(10, 4);
+    // Y la propuesta SÍ se emitió como relax → severity warning (10 ≥ 8 < 16).
+    expect(p.rationale.driftSeverity).toBe('warning');
+  });
+
+  it('rationale persiste meanDeviationBps signed cuando hay bias direccional', () => {
+    // Drift unilateral (-10 bps puro). El bias signed debe ser ≈ -10
+    // (descuento sistemático al cliente — info útil para auditoría).
+    const proposals = proposeThresholdAdjustments({
+      entityId:    ENTITY,
+      thresholds:  [threshold({ deviationBpsMax: 30 })],
+      decisions:   lots(40, -10),
+    });
+    expect(proposals[0].rationale.meanDeviationBps).toBeCloseTo(-10, 4);
+    expect(proposals[0].rationale.meanAbsDeviationBps).toBeCloseTo(10, 4);
+  });
+
   it('múltiples thresholds del mismo nivel: se asigna decisión al más estricto', () => {
     const ts = [
       threshold({ id: 'tight', deviationBpsMax: 5,  levelId: 'lvl-1' }),
@@ -179,7 +221,7 @@ describe('driftRecalibrator · proposeThresholdAdjustments', () => {
 // ---------------------------------------------------------------------------
 
 describe('driftRecalibrator · statsByThreshold (internal)', () => {
-  it('calcula meanDeviationBps + pctAtLimit + escalationRate', () => {
+  it('calcula meanAbsDeviationBps + signedBiasBps + pctAtLimit + escalationRate', () => {
     const t = threshold({ deviationBpsMax: 10 });
     const ds = [
       ...lots(20, -2,  'approved'),     // 20 within
@@ -191,5 +233,20 @@ describe('driftRecalibrator · statsByThreshold (internal)', () => {
     expect(s.count).toBe(40);
     expect(s.escalationRate).toBeCloseTo(0.25, 4);
     expect(s.pctAtLimit).toBeCloseTo(0.25, 4);  // 10/40 con limit=8 (0.8*10)
+    // Drift unilateral (todo negativo): mean abs == |signed bias|
+    expect(s.meanAbsDeviationBps).toBeCloseTo(4, 4);   // (20·2 + 10·10 + 10·2) / 40 = 4
+    expect(s.signedBiasBps).toBeCloseTo(-4, 4);
+  });
+
+  it('drift simétrico: signedBias ≈ 0 pero meanAbs captura la dispersión', () => {
+    const t = threshold({ deviationBpsMax: 30 });
+    const ds = [
+      ...lots(20, +10, 'approved'),
+      ...lots(20, -10, 'approved'),
+    ];
+    const stats = __recalibratorInternals.statsByThreshold(ds, [t]);
+    const s = stats.get('thr-1')!;
+    expect(s.signedBiasBps).toBeCloseTo(0, 4);
+    expect(s.meanAbsDeviationBps).toBeCloseTo(10, 4);
   });
 });

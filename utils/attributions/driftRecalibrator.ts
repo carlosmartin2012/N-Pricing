@@ -59,7 +59,21 @@ const DEFAULTS: Required<Omit<RecalibratorOptions, 'now'>> = {
 
 interface ThresholdDecisionStats {
   count: number;
-  meanDeviationBps: number;
+  /**
+   * Media de `|deviationBps|` — magnitud de dispersión, NO bias direccional.
+   * Esta es la señal correcta para "¿el threshold está demasiado tight?".
+   * Una cartera con drift simétrico (+10/-10) tiene `meanAbsDeviationBps`
+   * alto aunque `signedBiasBps` colapse a 0.
+   */
+  meanAbsDeviationBps: number;
+  /**
+   * Media de `deviationBps` con signo — bias direccional. Un valor
+   * negativo indica que sistemáticamente el banco está dando descuentos
+   * (drift hacia el cliente); positivo indica primas. NO se usa para
+   * gating de relax/tighten — sólo se reporta en rationale para que el
+   * Risk_Manager vea si la cartera tiene sesgo además de dispersión.
+   */
+  signedBiasBps: number;
   pctAtLimit: number;
   escalationRate: number;
 }
@@ -105,22 +119,31 @@ function statsByThreshold(
     const threshold = thresholds.find((t) => t.id === thrId);
     if (!threshold) continue;
     const max = threshold.deviationBpsMax;
-    let sumDev = 0;
+    // Sumamos los DOS agregados:
+    //   - sumAbsDev: magnitud de dispersión (para gating shouldRelax/Tighten)
+    //   - sumSignedDev: bias direccional (para auditoría/rationale)
+    // La versión previa sólo agregaba signed → cartera con drift simétrico
+    // (+10/-10) colapsaba a meanDev=0 y `Math.abs(0)` no disparaba relax,
+    // dependiendo únicamente de pctAtLimit como red de seguridad.
+    let sumAbsDev = 0;
+    let sumSignedDev = 0;
     let atLimit = 0;
     let escalated = 0;
     for (const d of items) {
       const dev = d.routingMetadata.deviationBps ?? 0;
-      sumDev += dev;
+      sumAbsDev    += Math.abs(dev);
+      sumSignedDev += dev;
       const absDev = Math.abs(dev);
       const limit = max !== null ? max * 0.8 : 8;
       if (absDev >= limit) atLimit += 1;
       if (d.decision === 'escalated') escalated += 1;
     }
     out.set(thrId, {
-      count:            items.length,
-      meanDeviationBps: items.length > 0 ? sumDev / items.length : 0,
-      pctAtLimit:       items.length > 0 ? atLimit / items.length : 0,
-      escalationRate:   items.length > 0 ? escalated / items.length : 0,
+      count:               items.length,
+      meanAbsDeviationBps: items.length > 0 ? sumAbsDev    / items.length : 0,
+      signedBiasBps:       items.length > 0 ? sumSignedDev / items.length : 0,
+      pctAtLimit:          items.length > 0 ? atLimit      / items.length : 0,
+      escalationRate:      items.length > 0 ? escalated    / items.length : 0,
     });
   }
   return out;
@@ -138,7 +161,11 @@ function decideAdjustment(
   shouldEmit: boolean;
   notes?: string;
 } {
-  const meanAbs = Math.abs(stats.meanDeviationBps);
+  // `meanAbsDeviationBps` es la señal correcta para el gating: refleja
+  // dispersión real, no se cancela con drift simétrico. La versión
+  // previa hacía `Math.abs(stats.meanDeviationBps)` (abs DESPUÉS de la
+  // media signed), que colapsa a 0 con cartera +10/-10 bps.
+  const meanAbs = stats.meanAbsDeviationBps;
 
   const shouldRelax =
     meanAbs >= opts.meanDriftRelaxBps ||
@@ -248,13 +275,20 @@ export function proposeThresholdAdjustments(input: ProposeInput): ProposedRecali
     if (!decision.shouldEmit) continue;
 
     const rationale: ThresholdRecalibrationRationale = {
-      windowDays:        opts.windowDays,
-      decisionsCount:    s.count,
-      meanDeviationBps:  +s.meanDeviationBps.toFixed(2),
-      pctAtLimit:        +s.pctAtLimit.toFixed(4),
-      escalationRate:    +s.escalationRate.toFixed(4),
-      driftSeverity:     decision.driftSeverity,
-      notes:             decision.notes,
+      windowDays:           opts.windowDays,
+      decisionsCount:       s.count,
+      // `meanDeviationBps` (legacy field) preserva el bias direccional
+      // signed para que un Risk_Manager pueda ver si la cartera tiene
+      // sesgo además de dispersión. Útil para reporting, no para gating.
+      meanDeviationBps:     +s.signedBiasBps.toFixed(2),
+      // `meanAbsDeviationBps` es la métrica que disparó el gating —
+      // explicable a auditoría sin ambigüedad ("la dispersión media fue
+      // X bps, superó el threshold Y bps").
+      meanAbsDeviationBps:  +s.meanAbsDeviationBps.toFixed(2),
+      pctAtLimit:           +s.pctAtLimit.toFixed(4),
+      escalationRate:       +s.escalationRate.toFixed(4),
+      driftSeverity:        decision.driftSeverity,
+      notes:                decision.notes,
     };
 
     out.push({
