@@ -848,6 +848,69 @@ CREATE UNIQUE INDEX IF NOT EXISTS uniq_pricing_snapshots_prev_hash
   WHERE prev_output_hash IS NOT NULL;
 
 -- -----------------------------------------------------------------------
+-- Ola 8 / Ola 10 B — Attribution data-integrity triggers.
+--
+-- Replicados desde supabase/migrations/{20260620000001_attributions,
+-- 20260630000001_attribution_threshold_recalibrations}.sql para que el
+-- arranque Node-only (dev / Replit) tenga los mismos guardrails que el
+-- entorno Supabase. RLS sigue viviendo solo en las migrations Supabase
+-- (no hay multi-tenant real en Replit), pero la validación de integridad
+-- aplica a todas las DBs.
+-- -----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION validate_attribution_decision_hash()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pricing_snapshots
+    WHERE output_hash = NEW.pricing_snapshot_hash
+      AND entity_id   = NEW.entity_id
+  ) THEN
+    RAISE EXCEPTION
+      'attribution_decision rejects unknown pricing_snapshot_hash % for entity %',
+      NEW.pricing_snapshot_hash, NEW.entity_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validate_attribution_decision ON attribution_decisions;
+CREATE TRIGGER trg_validate_attribution_decision
+  BEFORE INSERT ON attribution_decisions
+  FOR EACH ROW
+  EXECUTE FUNCTION validate_attribution_decision_hash();
+
+CREATE OR REPLACE FUNCTION validate_attr_recal_threshold_entity()
+RETURNS TRIGGER AS $$
+DECLARE
+  threshold_entity UUID;
+BEGIN
+  SELECT entity_id INTO threshold_entity
+  FROM attribution_thresholds
+  WHERE id = NEW.threshold_id;
+
+  IF threshold_entity IS NULL THEN
+    RAISE EXCEPTION
+      'attribution_threshold_recalibration rejects unknown threshold_id %',
+      NEW.threshold_id;
+  END IF;
+  IF threshold_entity <> NEW.entity_id THEN
+    RAISE EXCEPTION
+      'cross-tenant recalibration rejected: threshold % belongs to entity %, recalibration claims %',
+      NEW.threshold_id, threshold_entity, NEW.entity_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_validate_attr_recal_entity ON attribution_threshold_recalibrations;
+CREATE TRIGGER trg_validate_attr_recal_entity
+  BEFORE INSERT OR UPDATE OF threshold_id, entity_id
+  ON attribution_threshold_recalibrations
+  FOR EACH ROW
+  EXECUTE FUNCTION validate_attr_recal_threshold_entity();
+
+-- -----------------------------------------------------------------------
 -- Metering: daily usage aggregates and feature flags
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS usage_aggregates_daily (
