@@ -52,3 +52,10 @@ export {
   type AttributionReportingSummary,
   type BuildSummaryInput,
 } from './attributionReporter';
+
+export {
+  buildAttributionsContextBlock,
+  suggestAttributionsActions,
+  type AttributionsAiContextInput,
+  type AttributionsSuggestedAction,
+} from './aiContext';

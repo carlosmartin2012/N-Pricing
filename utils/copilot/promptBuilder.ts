@@ -33,6 +33,12 @@ export interface BuildPromptOptions {
   snapshot?: PricingSnapshotForPrompt;
   /** Redaction policy — default true. */
   redactPii?: boolean;
+  /** Bloque markdown de contexto de atribuciones (Ola 10 Bloque A).
+   *  Construido típicamente con `buildAttributionsContextBlock` del
+   *  módulo `utils/attributions/aiContext`. Se inserta como sección
+   *  `## Attributions context` cuando es no vacío; ausente si no aplica.
+   *  Failing closed con el copilot stock cuando se omite. */
+  attributionsContext?: string;
 }
 
 export interface BuildPromptResult {
@@ -108,19 +114,23 @@ export function buildCopilotPrompt(options: BuildPromptOptions): BuildPromptResu
     snapshot && (snapshot.clientId || snapshot.clientName),
   );
 
-  const prompt = [
+  const sections: string[] = [
     system,
     '',
     `# Context (${contextLine})`,
     '',
     '## Active snapshot',
     snapshotBlock(snapshot, shouldRedact),
-    '',
-    '## User question',
-    request.question.trim(),
-  ].join('\n');
+  ];
 
-  return { prompt, redactedPii: willRedact };
+  const attributionsContext = options.attributionsContext?.trim();
+  if (attributionsContext) {
+    sections.push('', '## Attributions context', attributionsContext);
+  }
+
+  sections.push('', '## User question', request.question.trim());
+
+  return { prompt: sections.join('\n'), redactedPii: willRedact };
 }
 
 /**
