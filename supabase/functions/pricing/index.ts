@@ -517,7 +517,15 @@ serve(async (req: Request) => {
         endpoint: `POST ${url.pathname}`,
         claimed_entity: entityId,
         error_code: 'tenancy_denied',
-      }).catch(() => { /* best effort */ });
+      }).catch((err: unknown) => {
+        // Best-effort but visible: si esto falla por RLS rota o tabla
+        // bloqueada, el SLO p95 quedaba subestimado en silencio.
+        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
+        // log permite que ops detecte caída de la observabilidad.
+        console.warn('[pricing/metrics] insert failed', {
+          err: err instanceof Error ? err.message : String(err),
+        });
+      });
       return jsonResponse(
         { code: 'tenancy_denied', message: 'User does not have access to this entity', requestId },
         { status: 403 },
@@ -636,7 +644,15 @@ serve(async (req: Request) => {
             metric_name: 'snapshot_write_failures_total',
             metric_value: 1,
             dimensions: { request_id: requestId, endpoint: '/pricing/batch', error: snapErr.message, attempts: String(snapAttempts) },
-          }).catch(() => { /* best effort */ });
+          }).catch((err: unknown) => {
+        // Best-effort but visible: si esto falla por RLS rota o tabla
+        // bloqueada, el SLO p95 quedaba subestimado en silencio.
+        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
+        // log permite que ops detecte caída de la observabilidad.
+        console.warn('[pricing/metrics] insert failed', {
+          err: err instanceof Error ? err.message : String(err),
+        });
+      });
         }
         snapshotIds.push(snapshotId);
       }
@@ -646,7 +662,15 @@ serve(async (req: Request) => {
         metric_name: 'pricing_batch_latency_ms_per_deal',
         metric_value: deals.length > 0 ? durationMs / deals.length : durationMs,
         dimensions: { request_id: requestId, endpoint: '/pricing/batch', status_code: '200', count: String(deals.length) },
-      }).catch(() => { /* best effort */ });
+      }).catch((err: unknown) => {
+        // Best-effort but visible: si esto falla por RLS rota o tabla
+        // bloqueada, el SLO p95 quedaba subestimado en silencio.
+        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
+        // log permite que ops detecte caída de la observabilidad.
+        console.warn('[pricing/metrics] insert failed', {
+          err: err instanceof Error ? err.message : String(err),
+        });
+      });
 
       // Log batch pricing to audit
       await supabase.from('audit_log').insert({
@@ -713,7 +737,15 @@ serve(async (req: Request) => {
           metric_name: 'snapshot_write_failures_total',
           metric_value: 1,
           dimensions: { request_id: requestId, endpoint: '/pricing', error: snapErr.message, attempts: String(snapAttempts) },
-        }).catch(() => { /* best effort */ });
+        }).catch((err: unknown) => {
+        // Best-effort but visible: si esto falla por RLS rota o tabla
+        // bloqueada, el SLO p95 quedaba subestimado en silencio.
+        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
+        // log permite que ops detecte caída de la observabilidad.
+        console.warn('[pricing/metrics] insert failed', {
+          err: err instanceof Error ? err.message : String(err),
+        });
+      });
       }
 
       await supabase.from('metrics').insert({
@@ -721,7 +753,15 @@ serve(async (req: Request) => {
         metric_name: 'pricing_single_latency_ms',
         metric_value: durationMs,
         dimensions: { request_id: requestId, endpoint: '/pricing', status_code: '200' },
-      }).catch(() => { /* best effort */ });
+      }).catch((err: unknown) => {
+        // Best-effort but visible: si esto falla por RLS rota o tabla
+        // bloqueada, el SLO p95 quedaba subestimado en silencio.
+        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
+        // log permite que ops detecte caída de la observabilidad.
+        console.warn('[pricing/metrics] insert failed', {
+          err: err instanceof Error ? err.message : String(err),
+        });
+      });
 
       return jsonResponse(
         { ...result, snapshotId, requestId },
