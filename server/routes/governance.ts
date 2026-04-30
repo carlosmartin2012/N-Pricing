@@ -426,6 +426,14 @@ router.post('/escalations/sweep', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
+    // Sweep ejecuta transiciones notify/escalate/expire. Sin guard
+    // cualquier rol del tenant podía forzar que todas las escalations
+    // pending expiren — privilege escalation operativa.
+    const role = req.tenancy.role ?? null;
+    if (role !== 'Admin' && role !== 'Risk_Manager') {
+      res.status(403).json({ code: 'forbidden', message: 'Admin or Risk_Manager required' });
+      return;
+    }
     const rows = await query<EscalationRow>(
       "SELECT * FROM approval_escalations WHERE entity_id = $1 AND status = 'open' LIMIT 1000",
       [req.tenancy.entityId],
@@ -504,6 +512,14 @@ router.put('/escalation-configs/:level', async (req, res) => {
   try {
     if (!req.tenancy) {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    // Cambiar timeouts de escalación es decision de governance.
+    // Un Trader podría poner timeout_hours=0 para que ninguna
+    // escalation alcance el Comité — compliance broken.
+    const role = req.tenancy.role ?? null;
+    if (role !== 'Admin') {
+      res.status(403).json({ code: 'forbidden', message: 'Admin role required' });
       return;
     }
     const level = req.params.level as EscalationLevel;

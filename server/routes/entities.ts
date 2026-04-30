@@ -5,8 +5,29 @@ import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
 
+// Guard auth + role en mutations. Sin esto, cualquiera con acceso al
+// servidor podía leer el catálogo de entidades/grupos/usuarios o
+// escribir entity_users con role='Admin' (privilege escalation total).
+function requireAuth(req: { tenancy?: { entityId: string; role?: string | null }; user?: { email?: string } | null }, res: { status: (n: number) => { json: (b: unknown) => void } }): boolean {
+  if (!req.tenancy && !req.user) {
+    res.status(401).json({ code: 'unauthenticated' });
+    return false;
+  }
+  return true;
+}
+
+function requireAdmin(req: { tenancy?: { role?: string | null } }, res: { status: (n: number) => { json: (b: unknown) => void } }): boolean {
+  const role = req.tenancy?.role ?? null;
+  if (role !== 'Admin') {
+    res.status(403).json({ code: 'forbidden', message: 'Admin role required' });
+    return false;
+  }
+  return true;
+}
+
 // --- Groups ---
-router.get('/groups', async (_req, res) => {
+router.get('/groups', async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     res.json(await query('SELECT * FROM groups ORDER BY name LIMIT 1000'));
   } catch (err) {
@@ -15,6 +36,7 @@ router.get('/groups', async (_req, res) => {
 });
 
 router.get('/groups/:id', async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     const row = await queryOne('SELECT * FROM groups WHERE id=$1', [req.params.id]);
     if (!row) return res.status(404).json({ error: 'Not found' });
@@ -25,6 +47,7 @@ router.get('/groups/:id', async (req, res) => {
 });
 
 router.post('/groups', async (req, res) => {
+  if (!requireAuth(req, res) || !requireAdmin(req, res)) return;
   try {
     const g = req.body;
     const id = g.id || randomUUID();
@@ -39,7 +62,8 @@ router.post('/groups', async (req, res) => {
 });
 
 // --- Entities ---
-router.get('/entities', async (_req, res) => {
+router.get('/entities', async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     res.json(await query('SELECT * FROM entities ORDER BY name LIMIT 1000'));
   } catch (err) {
@@ -48,6 +72,7 @@ router.get('/entities', async (_req, res) => {
 });
 
 router.get('/entities/:id', async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     const row = await queryOne('SELECT * FROM entities WHERE id=$1', [req.params.id]);
     if (!row) return res.status(404).json({ error: 'Not found' });
@@ -58,6 +83,7 @@ router.get('/entities/:id', async (req, res) => {
 });
 
 router.post('/entities', async (req, res) => {
+  if (!requireAuth(req, res) || !requireAdmin(req, res)) return;
   try {
     const e = req.body;
     const id = e.id || randomUUID();
@@ -76,6 +102,7 @@ router.post('/entities', async (req, res) => {
 
 // --- Entity Users ---
 router.get('/entity-users', async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     const { entity_id, user_id, email } = req.query;
     if (email) {
@@ -97,6 +124,9 @@ router.get('/entity-users', async (req, res) => {
 });
 
 router.post('/entity-users', async (req, res) => {
+  // Admin only — manipular entity_users es privilege escalation directo
+  // (cualquiera podía asignarse role='Admin' en cualquier entity).
+  if (!requireAuth(req, res) || !requireAdmin(req, res)) return;
   try {
     const { entity_id, user_id, role, is_primary_entity } = req.body;
     await execute(

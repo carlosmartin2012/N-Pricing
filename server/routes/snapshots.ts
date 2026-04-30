@@ -204,11 +204,15 @@ router.post('/:id/replay', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
+    // Defense-in-depth: aunque withTenancyTransaction setea
+    // `app.current_entity_id` y RLS filtra, añadimos `AND entity_id = $2`
+    // explícito por si la sesión variable falla o el RLS está desactivado
+    // en el deploy. Belt + suspenders en queries del replay regulatorio.
     const row = await withTenancyTransaction(
       { entityId: req.tenancy.entityId, userEmail: req.tenancy.userEmail, role: req.tenancy.role },
       (tx) => tx.queryOne<SnapshotRow>(
-        `SELECT * FROM pricing_snapshots WHERE id = $1 LIMIT 1`,
-        [req.params.id],
+        `SELECT * FROM pricing_snapshots WHERE id = $1 AND entity_id = $2 LIMIT 1`,
+        [req.params.id, req.tenancy!.entityId],
       ),
     );
 
