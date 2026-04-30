@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express from 'express';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -142,15 +142,42 @@ describe('notifications router · GET /push/subscriptions', () => {
 });
 
 describe('notifications router · POST /push/test', () => {
-  it('STUB: devuelve delivered=0 y stub=true', async () => {
+  it('sin VAPID configurado → 503 no_vapid_config', async () => {
+    delete process.env.VAPID_PUBLIC_KEY;
+    delete process.env.VAPID_PRIVATE_KEY;
     dbMock.query.mockResolvedValueOnce([{ id: 'sub-1' }, { id: 'sub-2' }]);
     await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
       const r = await http(url, 'POST', '/api/notifications/push/test', { message: 'hello' });
-      expect(r.status).toBe(200);
-      const body = r.body as { delivered: number; stub: boolean; subscriptionCount: number };
-      expect(body.delivered).toBe(0);
-      expect(body.stub).toBe(true);
+      expect(r.status).toBe(503);
+      const body = r.body as { code: string; subscriptionCount: number };
+      expect(body.code).toBe('no_vapid_config');
       expect(body.subscriptionCount).toBe(2);
+    });
+  });
+});
+
+describe('notifications router · GET /push/vapid-public-key', () => {
+  afterEach(() => {
+    delete process.env.VAPID_PUBLIC_KEY;
+    delete process.env.VAPID_PRIVATE_KEY;
+  });
+
+  it('sin VAPID configurado → 503', async () => {
+    await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
+      const r = await http(url, 'GET', '/api/notifications/push/vapid-public-key');
+      expect(r.status).toBe(503);
+    });
+  });
+
+  it('con VAPID configurado → devuelve la public key', async () => {
+    process.env.VAPID_PUBLIC_KEY = 'BFakePub';
+    process.env.VAPID_PRIVATE_KEY = 'fake-priv';
+    await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
+      const r = await http(url, 'GET', '/api/notifications/push/vapid-public-key');
+      expect(r.status).toBe(200);
+      const body = r.body as { publicKey: string; configured: boolean };
+      expect(body.publicKey).toBe('BFakePub');
+      expect(body.configured).toBe(true);
     });
   });
 });

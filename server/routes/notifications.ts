@@ -16,6 +16,12 @@
 import { Router } from 'express';
 import { query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
+import {
+  sendPushToMany,
+  getVapidPublicKey,
+  isWebPushConfigured,
+  type PushPayload,
+} from '../integrations/webPushSender';
 
 const router = Router();
 
@@ -156,31 +162,93 @@ router.get('/push/subscriptions', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// POST /push/test — STUB hasta que se cablee web-push + VAPID
+// GET /push/vapid-public-key — el cliente la usa para pushManager.subscribe
 // ---------------------------------------------------------------------------
+
+router.get('/push/vapid-public-key', async (req, res) => {
+  try {
+    const tenancy = requireTenancy(req, res);
+    if (!tenancy) return;
+    const publicKey = getVapidPublicKey();
+    if (!publicKey) {
+      res.status(503).json({
+        code: 'no_vapid_config',
+        message: 'Web Push not configured on this deployment (set VAPID_PUBLIC_KEY/PRIVATE_KEY env vars).',
+      });
+      return;
+    }
+    res.json({ publicKey, configured: true });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /push/test — Envío real con web-push (Ola 10 Bloque C, post-stub)
+// ---------------------------------------------------------------------------
+
+interface SubscriptionForSend {
+  id:           string;
+  endpoint:     string;
+  keys_p256dh:  string;
+  keys_auth:    string;
+}
 
 router.post('/push/test', async (req, res) => {
   try {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
-    const rows = await query<{ id: string }>(
-      `SELECT id FROM push_subscriptions
+
+    const rows = await query<SubscriptionForSend>(
+      `SELECT id, endpoint, keys_p256dh, keys_auth FROM push_subscriptions
        WHERE entity_id = $1 AND user_email = $2`,
       [tenancy.entityId, tenancy.userEmail],
     );
-    // STUB: el sender real (web-push library) entregará la notif.
-    // Aquí sólo logueamos para que el cliente pueda debugger el flow.
-    console.info('[push-test]', {
-      entityId:           tenancy.entityId,
-      userEmail:          tenancy.userEmail,
-      subscriptionCount:  rows.length,
-      message:            req.body?.message ?? '(default)',
-    });
+
+    // Sin VAPID configurado, devolvemos 503 explícito para que el caller
+    // muestre el error ops claro (no fail loud, no false positive).
+    if (!isWebPushConfigured()) {
+      res.status(503).json({
+        code: 'no_vapid_config',
+        message: 'VAPID keys missing. Set VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY env vars (and VAPID_SUBJECT).',
+        subscriptionCount: rows.length,
+      });
+      return;
+    }
+
+    const payload: PushPayload = {
+      title: 'N-Pricing — push test',
+      body:  typeof req.body?.message === 'string'
+        ? req.body.message
+        : 'Test notification from N-Pricing.',
+      url:   '/approvals',
+      tag:   `push-test-${Date.now()}`,
+      data:  { kind: 'push-test' },
+    };
+
+    const report = await sendPushToMany(
+      rows.map((row) => ({
+        endpoint:    row.endpoint,
+        keysP256dh:  row.keys_p256dh,
+        keysAuth:    row.keys_auth,
+      })),
+      payload,
+    );
+
+    // Purga subscripciones stale (410/404) — el navegador ya las invalidó.
+    if (report.staleEndpoints.length > 0) {
+      await query(
+        `DELETE FROM push_subscriptions
+         WHERE entity_id = $1 AND user_email = $2 AND endpoint = ANY($3::text[])`,
+        [tenancy.entityId, tenancy.userEmail, report.staleEndpoints],
+      );
+    }
+
     res.json({
-      delivered: 0,
-      stub: true,
-      subscriptionCount: rows.length,
-      message: 'Push sender not yet wired. Install web-push lib + set VAPID_PRIVATE_KEY/PUBLIC_KEY env vars.',
+      delivered:         report.delivered,
+      total:             report.total,
+      staleEndpointsPurged: report.staleEndpoints.length,
+      failures:          report.failures,
     });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });

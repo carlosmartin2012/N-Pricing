@@ -27,6 +27,7 @@ import {
   buildAttributionSummary,
   type AttributionReportingSummary,
 } from '../../utils/attributions/attributionReporter';
+import { dispatchEscalationPush } from '../integrations/escalationPushDispatcher';
 import type {
   AttributionLevel,
   AttributionMatrix,
@@ -599,6 +600,31 @@ router.post('/decisions/:dealId', async (req, res) => {
         res.status(500).json({ code: 'insert_failed', message: 'Could not record decision' });
         return;
       }
+
+      // Ola 10 Bloque C — fire-and-forget push notif si la decisión escala.
+      // El error aquí NO debe abortar la decisión (ya commit-eada en DB).
+      if (row.decision === 'escalated') {
+        dispatchEscalationPush({
+          entityId:        tenancy.entityId,
+          dealId:          row.deal_id,
+          decisionId:      row.id,
+          requiredLevelId: row.required_level_id,
+          routingMetadata: row.routing_metadata ?? routingMetadata,
+        })
+          .then((report) => {
+            if (report.notified > 0 || report.errors.length > 0 || report.skipped) {
+              console.info('[escalation-push]', {
+                dealId: row.deal_id,
+                decisionId: row.id,
+                ...report,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error('[escalation-push] dispatch failed', err);
+          });
+      }
+
       res.status(201).json(mapDecision(row));
     } catch (innerErr) {
       // El trigger validate_attribution_decision_hash() lanza si el hash no
