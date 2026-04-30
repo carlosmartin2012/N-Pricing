@@ -4,6 +4,7 @@ import type {
   CrmAdapter,
   MarketDataAdapter,
   AdmissionAdapter,
+  BudgetSourceAdapter,
   AdapterKind,
   AdapterHealth,
 } from './types';
@@ -48,6 +49,10 @@ class AdapterRegistry {
   admission(): AdmissionAdapter | null {
     const a = this.adapters.get('admission');
     return a?.kind === 'admission' ? a : null;
+  }
+  budget(): BudgetSourceAdapter | null {
+    const a = this.adapters.get('budget');
+    return a?.kind === 'budget' ? a : null;
   }
 
   async healthAll(): Promise<Array<{ kind: AdapterKind; name: string; health: AdapterHealth }>> {

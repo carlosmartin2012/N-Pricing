@@ -28,6 +28,7 @@ import copilotRouter from './routes/copilot';
 import attributionsRouter from './routes/attributions';
 import admissionRouter from './routes/admission';
 import coreBankingRouter from './routes/coreBanking';
+import budgetRouter from './routes/budget';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -175,6 +176,11 @@ app.use('/api/admission', ...entityScoped, admissionRouter);
 // mainframe vs pricing_snapshots. Adapter registrado en bootstrap (in-memory
 // por defecto, 'bm-host' opt-in via ADAPTER_CORE_BANKING).
 app.use('/api/core-banking', ...entityScoped, coreBankingRouter);
+
+// Budget reconciliation (Ola 9 Bloque C) — wrapper read-only sobre ALQUID.
+// Compara supuestos del budget con precios realizados N-Pricing por
+// (segment × productType × currency) en el periodo. Sin escritura a ALQUID.
+app.use('/api/budget', ...entityScoped, budgetRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

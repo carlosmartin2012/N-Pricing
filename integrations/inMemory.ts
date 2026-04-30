@@ -4,6 +4,7 @@ import {
   type CrmAdapter, type CrmCustomer, type CrmPulledEvent,
   type MarketDataAdapter, type MarketYieldCurveSnapshot, type ShockedCurveScenarioId,
   type AdmissionAdapter, type AdmissionContext, type AdmissionDecisionPush, type AdmissionReconciliationItem,
+  type BudgetSourceAdapter, type BudgetAssumption,
   type AdapterHealth, type AdapterResult,
 } from './types';
 import { computeEbaCurveShift } from '../utils/pricing/shockPresets';
@@ -215,5 +216,28 @@ export class InMemoryAdmission implements AdmissionAdapter {
     _asOfDate: string,
   ): Promise<AdapterResult<AdmissionReconciliationItem[]>> {
     return ok(this.reconciliation);
+  }
+}
+
+/**
+ * In-memory budget source (Ola 9 Bloque C). Tests + dev seedan
+ * supuestos por periodo via `seedAssumptions`.
+ */
+export class InMemoryBudgetSource implements BudgetSourceAdapter {
+  readonly kind = 'budget' as const;
+  readonly name = 'in-memory-budget';
+
+  private byPeriod = new Map<string, BudgetAssumption[]>();
+
+  async health(): Promise<AdapterHealth> {
+    return { ok: true, latencyMs: 0, checkedAt: nowIso() };
+  }
+
+  seedAssumptions(period: string, assumptions: BudgetAssumption[]): void {
+    this.byPeriod.set(period, assumptions);
+  }
+
+  async fetchAssumptions(period: string): Promise<AdapterResult<BudgetAssumption[]>> {
+    return ok(this.byPeriod.get(period) ?? []);
   }
 }

@@ -1,11 +1,12 @@
 import { adapterRegistry } from '../../integrations/registry';
 import {
-  InMemoryCoreBanking, InMemoryCrm, InMemoryMarketData, InMemoryAdmission,
+  InMemoryCoreBanking, InMemoryCrm, InMemoryMarketData, InMemoryAdmission, InMemoryBudgetSource,
 } from '../../integrations/inMemory';
 import { SalesforceCrmAdapter } from '../../integrations/crm/salesforce';
 import { BloombergMarketDataAdapter } from '../../integrations/marketData/bloomberg';
 import { PuzzleAdmissionAdapter } from '../../integrations/admission/puzzle';
 import { BmHostCoreBanking } from '../../integrations/coreBanking/bmHost';
+import { AlquidBudgetSourceAdapter } from '../../integrations/budget/alquid';
 
 /**
  * Wires the adapter registry at server boot. Lives in the server layer
@@ -123,5 +124,27 @@ export function bootstrapAdapters(): void {
     }
   } else {
     adapterRegistry.register(new InMemoryAdmission());
+  }
+
+  // Budget source (Ola 9 Bloque C) — ALQUID for Banca March, in-memory dev.
+  const budgetKind = (process.env.ADAPTER_BUDGET ?? 'in-memory').toLowerCase();
+  if (budgetKind === 'alquid') {
+    const baseUrl = process.env.ALQUID_BASE_URL;
+    const clientId = process.env.ALQUID_CLIENT_ID;
+    const clientSecret = process.env.ALQUID_CLIENT_SECRET;
+    if (baseUrl && clientId && clientSecret) {
+      adapterRegistry.register(new AlquidBudgetSourceAdapter({
+        baseUrl,
+        clientId,
+        clientSecret,
+        tokenUrl:         process.env.ALQUID_TOKEN_URL,
+        assumptionsPath:  process.env.ALQUID_ASSUMPTIONS_PATH,
+      }));
+    } else {
+      console.warn('[adapters] ADAPTER_BUDGET=alquid but ALQUID_BASE_URL/CLIENT_ID/CLIENT_SECRET missing — falling back to in-memory');
+      adapterRegistry.register(new InMemoryBudgetSource());
+    }
+  } else {
+    adapterRegistry.register(new InMemoryBudgetSource());
   }
 }

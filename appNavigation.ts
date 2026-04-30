@@ -69,6 +69,7 @@ const VIEW_PATHS: Record<ViewState, string> = {
   APPROVALS: '/approvals',
   ATTRIBUTION_MATRIX: '/attributions/matrix',
   ATTRIBUTION_REPORTING: '/attributions/reporting',
+  BUDGET_RECONCILIATION: '/budget/reconciliation',
   AUDIT_LOG: '/audit',
   // Assistant
   AI_LAB: '/ai',
@@ -181,6 +182,7 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'APPROVALS',             label: 'Approvals',           icon: ShieldCheck, section: 'Governance', path: '/approvals' },
     { id: 'ATTRIBUTION_MATRIX',    label: 'Attribution matrix',  icon: Plug,        section: 'Governance', path: '/attributions/matrix' },
     { id: 'ATTRIBUTION_REPORTING', label: 'Attribution reporting', icon: BarChart4, section: 'Governance', path: '/attributions/reporting' },
+    { id: 'BUDGET_RECONCILIATION', label: 'Budget reconciliation', icon: Scale,     section: 'Governance', path: '/budget/reconciliation' },
     { id: 'RECONCILIATION',      label: 'FTP Reconciliation',  icon: Scale,         section: 'Governance', path: '/reconciliation' },
 
     // ─────────────── ASSISTANT ───────────────

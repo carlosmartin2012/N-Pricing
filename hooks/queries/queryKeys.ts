@@ -131,4 +131,16 @@ export const queryKeys = {
     reportingSummary: (windowDays: number) =>
       ['attributions', 'reporting', 'summary', windowDays] as const,
   },
+
+  // --- Budget reconciliation (Ola 9 Bloque C) ---
+  budget: {
+    comparison: (period: string) => ['budget', 'comparison', period] as const,
+    health: ['budget', 'health'] as const,
+  },
+
+  // --- Core banking reconciliation (Ola 9 Bloque B) ---
+  coreBanking: {
+    reconciliation: (asOfDate: string, toleranceBps: number) =>
+      ['coreBanking', 'reconciliation', asOfDate, toleranceBps] as const,
+  },
 } as const;

@@ -17,7 +17,7 @@
  *   - never throws on transport failure — returns a Result<T, AdapterError>
  */
 
-export type AdapterKind = 'core_banking' | 'crm' | 'market_data' | 'admission';
+export type AdapterKind = 'core_banking' | 'crm' | 'market_data' | 'admission' | 'budget';
 
 export interface AdapterHealth {
   ok: boolean;
@@ -292,8 +292,56 @@ export interface AdmissionAdapter {
   ): Promise<AdapterResult<AdmissionReconciliationItem[]>>;
 }
 
+// ---------- Budget source (Ola 9 Bloque C) ----------
+//
+// Conecta N-Pricing con la herramienta de presupuestación del banco
+// (ALQUID en Banca March). Línea clara de demarcación:
+//
+//   ALQUID:    proceso anual top-down/bottom-up + cierre de supuestos
+//              + fijación de objetivos por banca/territorio/oficina.
+//              Owner del *budget* (precios estándar mensuales esperados).
+//   N-Pricing: pricing de operaciones individuales en el día a día.
+//              Owner de los *precios reales* (snapshot inmutable por
+//              deal). Calcula la realidad mensual agregando snapshots.
+//
+// El wrapper sólo lee — nunca escribe a ALQUID. La comparativa se
+// dibuja en N-Pricing como insight para el comité de presupuesto.
+
+export interface BudgetAssumption {
+  /** Periodo presupuestario al que aplica el supuesto. Formato YYYY-MM
+   *  (mensual), 'YYYY-Qn' (trimestral) o 'YYYY' (anual). */
+  period: string;
+  segment: string;
+  productType: string;
+  currency: string;
+  /** Tasa esperada (en bps) que el banco asume al construir el budget. */
+  budgetedRateBps: number;
+  /** Volumen esperado (€) en el periodo. */
+  budgetedVolumeEur: number;
+  /** RAROC esperado (puntos porcentuales). */
+  budgetedRarocPp: number | null;
+  /** Source identifier en ALQUID (para trazabilidad). */
+  externalAssumptionId: string | null;
+  /** Cuándo se fijó el supuesto. ISO. */
+  fixedAt: string;
+  notes: string | null;
+}
+
+export interface BudgetSourceAdapter {
+  kind: 'budget';
+  name: string;
+  health(): Promise<AdapterHealth>;
+  /**
+   * Devuelve los supuestos vigentes para el periodo. La granularidad
+   * (mensual / trimestral) la define el adapter remoto. Si el periodo
+   * no existe, devuelve `ok([])` (no es error).
+   */
+  fetchAssumptions(period: string): Promise<AdapterResult<BudgetAssumption[]>>;
+}
+
 export type AnyAdapter =
   | CoreBankingAdapter
   | CrmAdapter
   | MarketDataAdapter
-  | AdmissionAdapter;
+  | AdmissionAdapter
+  | BudgetSourceAdapter;
