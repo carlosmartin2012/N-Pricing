@@ -243,12 +243,26 @@ export type ThresholdRecalibrationStatus =
 /**
  * Razones cuantitativas que el recalibrator usa para justificar un
  * ajuste. Todas opcionales — un proposal puede emitirse con sólo
- * `meanDriftBps` y `windowDays` si los demás no aplican.
+ * `meanAbsDeviationBps` y `windowDays` si los demás no aplican.
  */
 export interface ThresholdRecalibrationRationale {
   windowDays: number;
   decisionsCount: number;
+  /**
+   * Media de `deviationBps` con SIGNO. Refleja bias direccional de la
+   * cartera (negativo = descuento sistemático al cliente, positivo =
+   * primas). NO se usa para gating — sólo para reporting auditable.
+   * Una cartera con drift simétrico puede tener `meanDeviationBps ≈ 0`
+   * y aun así disparar relax via `meanAbsDeviationBps` o `pctAtLimit`.
+   */
   meanDeviationBps: number;
+  /**
+   * Media de `|deviationBps|` — magnitud de dispersión. ESTA es la
+   * señal que dispara `shouldRelax` cuando supera `meanDriftRelaxBps`.
+   * Opcional sólo por retrocompatibilidad con propuestas pre-Ola 10.4
+   * (que sólo persistían `meanDeviationBps`).
+   */
+  meanAbsDeviationBps?: number;
   pctAtLimit: number;
   /** % de decisiones de este threshold que terminaron en escalated.
    *  Alto → threshold demasiado estricto. */
