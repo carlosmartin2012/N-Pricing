@@ -9,6 +9,43 @@ import { BmHostCoreBanking } from '../../integrations/coreBanking/bmHost';
 import { AlquidBudgetSourceAdapter } from '../../integrations/budget/alquid';
 
 /**
+ * Guard "fail loud" cuando un operador pidió un adapter real
+ * (`ADAPTER_<KIND>=salesforce|bloomberg|bm-host|puzzle|alquid`) pero
+ * faltan credenciales. Sin este guard, el código caía a in-memory con
+ * sólo un `console.warn` — un deploy a producción con un secret rotado
+ * (o un typo en el nombre de la env var de credenciales) servía datos
+ * sintéticos como si fueran reales (regresión regulatoria SR 11-7).
+ *
+ * Política consistente con el resto del repo (ver `phase-0-rollout.md`
+ * y runbook `mock-fallback.md`):
+ *
+ *   - `NODE_ENV === 'production'` + sin `PRICING_ALLOW_MOCKS=true`
+ *       → THROW al boot (fail closed). Mejor un crash visible en deploy
+ *         que un servicio degradado en silencio.
+ *   - Cualquier otro entorno (dev, staging, preview, test, o prod con
+ *     el flag activado intencionalmente):
+ *       → `console.warn` + fallback a in-memory (preserva la ergonomía
+ *         de `npm run dev` sin secrets reales y los staging deploys que
+ *         aceptan mocks).
+ */
+function assertMockFallbackAllowed(adapterKind: string, requestedImpl: string, reason: string): void {
+  const isProd = process.env.NODE_ENV === 'production';
+  const mocksAllowed = process.env.PRICING_ALLOW_MOCKS === 'true';
+  const message = `[adapters] ADAPTER_${adapterKind}=${requestedImpl} but ${reason}`;
+  if (isProd && !mocksAllowed) {
+    // Failing closed: deploy operator pidió un adapter real, no nos
+    // inventemos uno sintético. Crash al boot da una señal clara
+    // (vs. servir mocks por un trimestre sin que nadie lo note).
+    throw new Error(
+      `${message} — refusing to fall back to in-memory in production. ` +
+      `Either provide the missing credentials or set PRICING_ALLOW_MOCKS=true ` +
+      `to acknowledge the mock fallback explicitly.`,
+    );
+  }
+  console.warn(`${message} — falling back to in-memory`);
+}
+
+/**
  * Wires the adapter registry at server boot. Lives in the server layer
  * (not in `integrations/`) because it decides *which* concrete adapter
  * goes live for each kind — that's deployment configuration, not a
@@ -18,9 +55,13 @@ import { AlquidBudgetSourceAdapter } from '../../integrations/budget/alquid';
  * adapter (currently 'in-memory' | 'salesforce' | 'bloomberg'). Falls back
  * to the reference in-memory adapter so a fresh `npm run dev` or a fresh
  * container exposes useful data out of the box without any external
- * credentials. Production deploys that forget to set these vars get the
- * in-memory impl — harmless but visibly not the real thing from the
- * integrations dashboard.
+ * credentials.
+ *
+ * **Producción + PRICING_ALLOW_MOCKS=false** (el default operativo):
+ * si `ADAPTER_<KIND>` está set explícitamente a un real (salesforce /
+ * bloomberg / bm-host / puzzle / alquid) y faltan credenciales, el boot
+ * lanza en lugar de silenciosamente fallback a mocks. Ver
+ * `assertMockFallbackAllowed` arriba.
  */
 export function bootstrapAdapters(): void {
   // Core banking: in-memory ref por defecto. Ola 9 Bloque B añade el
@@ -44,7 +85,7 @@ export function bootstrapAdapters(): void {
         encoding:         process.env.BM_HOST_ENCODING === 'ebcdic' ? 'ebcdic' : 'utf-8',
       }));
     } else {
-      console.warn('[adapters] ADAPTER_CORE_BANKING=bm-host but BM_HOST_SFTP_HOST/USER/PRIVATE_KEY missing — falling back to in-memory');
+      assertMockFallbackAllowed('CORE_BANKING', 'bm-host', 'BM_HOST_SFTP_HOST/USER/PRIVATE_KEY missing');
       adapterRegistry.register(new InMemoryCoreBanking());
     }
   } else {
@@ -67,7 +108,7 @@ export function bootstrapAdapters(): void {
         privateKeyPem: process.env.SALESFORCE_PRIVATE_KEY_PEM,
       }));
     } else {
-      console.warn('[adapters] ADAPTER_CRM=salesforce but SALESFORCE_INSTANCE_URL/CLIENT_ID/CLIENT_SECRET missing — falling back to in-memory');
+      assertMockFallbackAllowed('CRM', 'salesforce', 'SALESFORCE_INSTANCE_URL/CLIENT_ID/CLIENT_SECRET missing');
       adapterRegistry.register(new InMemoryCrm());
     }
   } else {
@@ -95,7 +136,7 @@ export function bootstrapAdapters(): void {
         curveTickers,
       }));
     } else {
-      console.warn('[adapters] ADAPTER_MARKET_DATA=bloomberg but BLOOMBERG_APP_NAME missing — falling back to in-memory');
+      assertMockFallbackAllowed('MARKET_DATA', 'bloomberg', 'BLOOMBERG_APP_NAME missing');
       adapterRegistry.register(new InMemoryMarketData());
     }
   } else {
@@ -119,7 +160,7 @@ export function bootstrapAdapters(): void {
         contextsPath:    process.env.PUZZLE_CONTEXTS_PATH,
       }));
     } else {
-      console.warn('[adapters] ADAPTER_ADMISSION=puzzle but PUZZLE_BASE_URL/CLIENT_ID/CLIENT_SECRET missing — falling back to in-memory');
+      assertMockFallbackAllowed('ADMISSION', 'puzzle', 'PUZZLE_BASE_URL/CLIENT_ID/CLIENT_SECRET missing');
       adapterRegistry.register(new InMemoryAdmission());
     }
   } else {
@@ -141,7 +182,7 @@ export function bootstrapAdapters(): void {
         assumptionsPath:  process.env.ALQUID_ASSUMPTIONS_PATH,
       }));
     } else {
-      console.warn('[adapters] ADAPTER_BUDGET=alquid but ALQUID_BASE_URL/CLIENT_ID/CLIENT_SECRET missing — falling back to in-memory');
+      assertMockFallbackAllowed('BUDGET', 'alquid', 'ALQUID_BASE_URL/CLIENT_ID/CLIENT_SECRET missing');
       adapterRegistry.register(new InMemoryBudgetSource());
     }
   } else {
