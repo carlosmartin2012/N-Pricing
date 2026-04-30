@@ -25,6 +25,7 @@ import campaignsRouter from './routes/campaigns';
 import targetGridRouter from './routes/targetGrid';
 import marketBenchmarksRouter from './routes/marketBenchmarks';
 import copilotRouter from './routes/copilot';
+import attributionsRouter from './routes/attributions';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -155,6 +156,11 @@ app.use('/api/market-benchmarks', authMiddleware, marketBenchmarksRouter);
 // deal must run in the tenant that owns that deal so PII redaction
 // + RLS-derived snapshot resolution stay aligned.
 app.use('/api/copilot', ...entityScoped, copilotRouter);
+
+// Atribuciones jerárquicas (Ola 8 Bloque A). Tenancy-scoped — la matriz
+// es per-tenant y las decisiones son append-only con hash chain a
+// pricing_snapshots (validado por trigger DB).
+app.use('/api/attributions', ...entityScoped, attributionsRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

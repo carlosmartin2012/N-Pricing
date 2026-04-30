@@ -31,5 +31,8 @@ export * as pricingDiscipline from './pricingDiscipline';
 // Ola 3 — What-If
 export * as whatIf from './whatIf';
 
+// Ola 8 — Atribuciones jerárquicas
+export * as attributions from './attributions';
+
 // Re-export mappers for consumers that need direct access
 export * as mappers from './mappers';
