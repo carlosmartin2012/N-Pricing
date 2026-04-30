@@ -20,8 +20,11 @@ const CalculatorRecommendationPanel = React.lazy(() => import('./CalculatorRecom
 const PricingInsightsWidget = React.lazy(() => import('./PricingInsightsWidget'));
 const CustomerRelationshipPanel = React.lazy(() => import('../Customer360/CustomerRelationshipPanel'));
 const LtvImpactPanel = React.lazy(() => import('../Customer360/LtvImpactPanel'));
+const AttributionSimulator = React.lazy(() => import('../Attributions/AttributionSimulator'));
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
+import { quoteFromFtpResult } from '../../utils/attributions';
+import type { AttributionScope } from '../../types/attributions';
 
 interface Props {
   /** Optional — if omitted, reads from PricingStateContext. Required for
@@ -106,6 +109,30 @@ export const CalculatorWorkspace: React.FC<Props> = ({
               raroc={currentResult.raroc ?? 0}
               hurdleRate={dealParams.targetROE}
               proposedRate={currentResult.finalClientRate ?? (currentResult.baseRate + dealParams.marginTarget)}
+            />
+          </div>
+        </Suspense>
+      )}
+
+      {/* Attribution Simulator — Ola 8 Bloque B. Widget contextual: el comercial
+          ve quién tiene atribución sobre el quote actual + simula bajadas/subidas
+          para encontrar el sweet-spot de aprobación. Recálculo cliente-side; el
+          motor puro de utils/attributions/ corre el mismo código que el server. */}
+      {currentResult && (
+        <Suspense fallback={null}>
+          <div className="mb-4">
+            <AttributionSimulator
+              compact
+              quote={quoteFromFtpResult(
+                currentResult,
+                {
+                  product:        [dealParams.productType],
+                  segment:        [dealParams.clientType],
+                  currency:       [dealParams.currency],
+                  tenorMaxMonths: dealParams.durationMonths,
+                } as AttributionScope,
+                dealParams.amount,
+              )}
             />
           </div>
         </Suspense>

@@ -1138,6 +1138,58 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       await route.fulfill(json({ asOfPeriod: new Date().toISOString().slice(0, 7), pairs: [] }));
       return;
     }
+    // ----------------------------------------------------------------
+    // Attributions (Ola 8) — matrix + decisions + route + simulate
+    // ----------------------------------------------------------------
+    if (path === '/attributions/matrix' && method === 'GET') {
+      await route.fulfill(json({
+        entityId: 'demo-entity',
+        levels: [
+          { id: 'office',    entityId: 'demo-entity', name: 'Director Oficina', parentId: null,     levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() },
+          { id: 'zone',      entityId: 'demo-entity', name: 'Zona',             parentId: 'office', levelOrder: 2, rbacRole: 'ZoneManager',   metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() },
+          { id: 'committee', entityId: 'demo-entity', name: 'Comité',           parentId: 'zone',   levelOrder: 3, rbacRole: 'Committee',     metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() },
+        ],
+        thresholds: [
+          { id: 't1', entityId: 'demo-entity', levelId: 'office',    scope: {}, deviationBpsMax: 5,  rarocPpMin: 14, volumeEurMax: 100_000,    activeFrom: '2026-01-01', activeTo: null, isActive: true, createdAt: nowIso(), updatedAt: nowIso() },
+          { id: 't2', entityId: 'demo-entity', levelId: 'zone',      scope: {}, deviationBpsMax: 15, rarocPpMin: 12, volumeEurMax: 500_000,    activeFrom: '2026-01-01', activeTo: null, isActive: true, createdAt: nowIso(), updatedAt: nowIso() },
+          { id: 't3', entityId: 'demo-entity', levelId: 'committee', scope: {}, deviationBpsMax: 50, rarocPpMin: 8,  volumeEurMax: 10_000_000, activeFrom: '2026-01-01', activeTo: null, isActive: true, createdAt: nowIso(), updatedAt: nowIso() },
+        ],
+        loadedAt: nowIso(),
+      }));
+      return;
+    }
+    if (path === '/attributions/decisions' && method === 'GET') {
+      await route.fulfill(json({
+        items: [
+          { id: 'd1', entityId: 'demo-entity', dealId: 'ABC-1234', requiredLevelId: 'office',    decidedByLevelId: null, decidedByUser: null, decision: 'escalated', reason: null, pricingSnapshotHash: 'h-1', routingMetadata: { deviationBps: -7.2, rarocPp: 13.8, volumeEur: 80_000,  scope: {} }, decidedAt: nowIso() },
+          { id: 'd2', entityId: 'demo-entity', dealId: 'ABC-1240', requiredLevelId: 'zone',      decidedByLevelId: null, decidedByUser: null, decision: 'escalated', reason: null, pricingSnapshotHash: 'h-2', routingMetadata: { deviationBps: -12,  rarocPp: 11.5, volumeEur: 320_000, scope: {} }, decidedAt: nowIso() },
+        ],
+        pagination: { limit: 200, offset: 0, returned: 2 },
+      }));
+      return;
+    }
+    if (path === '/attributions/route' && method === 'POST') {
+      await route.fulfill(json({
+        requiredLevel: { id: 'office', entityId: 'demo-entity', name: 'Director Oficina', parentId: null, levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() },
+        approvalChain: [{ id: 'office', entityId: 'demo-entity', name: 'Director Oficina', parentId: null, levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() }],
+        reason: 'within_threshold',
+        metadata: { deviationBps: -2, rarocPp: 14.5, volumeEur: 80_000, scope: {} },
+        belowHardFloor: false,
+      }));
+      return;
+    }
+    if (/^\/attributions\/decisions\/[^/]+$/.test(path) && method === 'POST') {
+      const dealId = path.split('/').pop() ?? 'unknown';
+      await route.fulfill(json({
+        id: `dec-${dealId}-${Date.now()}`,
+        entityId: 'demo-entity',
+        dealId,
+        ...(body as Record<string, unknown>),
+        decidedAt: nowIso(),
+      }));
+      return;
+    }
+
     if (path === '/clv/preview-ltv-impact' && method === 'POST') {
       await route.fulfill(json({
         before: { clvPointEur: 1_250_000, clvP5Eur: 980_000, clvP95Eur: 1_520_000 },

@@ -92,6 +92,12 @@ vi.mock('../../Customer360/LtvImpactPanel', () => ({
   default: () => <div data-testid="ltv-impact-panel" />,
 }));
 
+// AttributionSimulator (Ola 8 Bloque B) idem — useAttributionMatrixQuery
+// requiere QueryClientProvider que este test no monta.
+vi.mock('../../Attributions/AttributionSimulator', () => ({
+  default: () => <div data-testid="attribution-simulator" />,
+}));
+
 describe('CalculatorWorkspace', () => {
   const setDealParams = vi.fn();
 
