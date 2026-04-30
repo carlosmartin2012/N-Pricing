@@ -18,6 +18,7 @@
  */
 
 import { query, queryOne } from '../db';
+import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
 import {
   proposeThresholdAdjustments,
   type ProposedRecalibration,
@@ -251,8 +252,9 @@ export function startThresholdRecalibrator(): void {
       if (report.proposalsEmitted > 0 || report.errors.length > 0) {
         console.info('[attribution-recalibrator]', report);
       }
+      recordWorkerTickSuccess('attribution-recalibrator');
     } catch (err) {
-      console.error('[attribution-recalibrator] tick failed', err);
+      recordWorkerTickFailure('attribution-recalibrator', err);
     }
   }, ms);
 }

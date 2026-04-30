@@ -18,6 +18,7 @@
  */
 
 import { query } from '../db';
+import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
 import {
   aggregateByUser,
   detectSystematicDrift,
@@ -185,8 +186,9 @@ export function startAttributionDriftDetector(): void {
           errors:          report.errors.length,
         });
       }
+      recordWorkerTickSuccess('attribution-drift');
     } catch (err) {
-      console.error('[attribution-drift] tick failed', err);
+      recordWorkerTickFailure('attribution-drift', err);
     }
   }, ms);
 }

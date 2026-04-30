@@ -1,5 +1,6 @@
 import { pool } from '../db';
 import { sweepEscalations } from '../../utils/governance/escalationEvaluator';
+import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
 import type {
   ApprovalEscalation,
   ApprovalEscalationConfig,
@@ -169,8 +170,9 @@ export function startEscalationSweeper(): void {
       if (report.escalated + report.notified + report.expired > 0 || report.errors.length > 0) {
         console.info('[escalation-sweep]', report);
       }
+      recordWorkerTickSuccess('escalation-sweep');
     } catch (err) {
-      console.error('[escalation-sweep] tick failed', err);
+      recordWorkerTickFailure('escalation-sweep', err);
     }
   }, ms);
 }

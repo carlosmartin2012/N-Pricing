@@ -1,5 +1,6 @@
 import { pool, execute } from '../db';
 import { adapterRegistry } from '../../integrations/registry';
+import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
 import type { CrmPulledEvent, CrmEventKind } from '../../integrations/types';
 import type { ClientEventType } from '../../types/clv';
 
@@ -124,8 +125,9 @@ export function startCrmEventSync(): void {
       if (report.inserted > 0 || report.errors.length > 0) {
         console.info('[crm-sync]', report);
       }
+      recordWorkerTickSuccess('crm-sync');
     } catch (err) {
-      console.error('[crm-sync] tick failed', err);
+      recordWorkerTickFailure('crm-sync', err);
     }
   }, ms);
 }
