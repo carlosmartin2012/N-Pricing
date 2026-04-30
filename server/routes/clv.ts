@@ -352,14 +352,23 @@ router.post('/clients/:clientId/ltv/recompute', async (req, res) => {
       ],
     );
 
-    // Timeline event — best-effort, never blocks.
+    // Timeline event — best-effort: el insert no debe abortar la
+    // respuesta del recompute si falla. Pero antes era silencio total
+    // — un audit trail (regulatorio) que perdía rows sin alerta.
+    // Ahora log explícito para que ops detecte caída del audit log.
     await execute(
       `INSERT INTO client_events (entity_id, client_id, event_type, source, payload, created_by)
        VALUES ($1, $2, 'price_review', 'ops', $3::jsonb, $4)`,
       [req.tenancy.entityId, req.params.clientId,
        JSON.stringify({ kind: 'ltv_recompute', clvPointEur: computed.clvPointEur, asOfDate }),
        req.tenancy.userEmail],
-    ).catch(() => undefined);
+    ).catch((err) => {
+      console.error('[clv/recompute] client_events insert failed (audit trail incomplete)', {
+        entityId: req.tenancy?.entityId,
+        clientId: req.params.clientId,
+        err: err instanceof Error ? err.message : String(err),
+      });
+    });
 
     res.status(201).json(row ? mapSnapshot(row) : null);
   } catch (err) {
