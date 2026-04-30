@@ -299,19 +299,45 @@ router.post('/pricing-targets', async (req, res) => {
 // Accepts text/csv body or { csv: '<text>' } JSON body. Streams INSERTs in
 // chunks of 200 within a single transaction so partial failures roll back.
 
+// Límite de tamaño del CSV: 10 MB. Antes acumulaba todo el body sin
+// límite — un atacante autenticado podía enviar un CSV de cientos de
+// MB que agotara la RAM del proceso (DoS).
+const MAX_CSV_BYTES = 10 * 1024 * 1024;
+
+class CsvTooLargeError extends Error {
+  constructor() { super('CSV body exceeds 10 MB limit'); }
+}
+
 async function consumeCsv(req: import('express').Request): Promise<string> {
   const ct = (req.headers['content-type'] ?? '').toString().toLowerCase();
   if (ct.startsWith('text/csv') || ct.startsWith('text/plain')) {
     return await new Promise<string>((resolve, reject) => {
       let buf = '';
-      req.on('data', (c) => { buf += c.toString('utf8'); });
+      let bytes = 0;
+      req.on('data', (c: Buffer) => {
+        bytes += c.length;
+        if (bytes > MAX_CSV_BYTES) {
+          req.destroy();
+          reject(new CsvTooLargeError());
+          return;
+        }
+        buf += c.toString('utf8');
+      });
       req.on('end', () => resolve(buf));
       req.on('error', reject);
     });
   }
   const body = req.body as Record<string, unknown> | undefined;
-  return typeof body?.csv === 'string' ? body.csv : '';
+  const csvBody = typeof body?.csv === 'string' ? body.csv : '';
+  // El body parser de express ya tiene límite (50kb default), pero si
+  // el CSV viene en JSON puede ser grande también. Verifico aquí.
+  if (Buffer.byteLength(csvBody, 'utf8') > MAX_CSV_BYTES) {
+    throw new CsvTooLargeError();
+  }
+  return csvBody;
 }
+
+export { CsvTooLargeError };
 
 router.post('/import/positions', async (req, res) => {
   try {
@@ -359,6 +385,10 @@ router.post('/import/positions', async (req, res) => {
       errors: parsed.errors,
     });
   } catch (err) {
+    if (err instanceof CsvTooLargeError) {
+      res.status(413).json({ code: 'csv_too_large', message: err.message });
+      return;
+    }
     res.status(500).json({ error: safeError(err) });
   }
 });
@@ -414,6 +444,10 @@ router.post('/import/metrics', async (req, res) => {
       errors: parsed.errors,
     });
   } catch (err) {
+    if (err instanceof CsvTooLargeError) {
+      res.status(413).json({ code: 'csv_too_large', message: err.message });
+      return;
+    }
     res.status(500).json({ error: safeError(err) });
   }
 });
