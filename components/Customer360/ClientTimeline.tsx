@@ -82,7 +82,7 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <span className="font-mono text-slate-200">{meta.label}</span>
-                        <span className="font-mono text-[10px] text-slate-500">{e.eventTs.slice(0, 10)}</span>
+                        <span className="font-mono text-[10px] text-slate-500">{(e.eventTs ?? '').slice(0, 10)}</span>
                       </div>
                       {e.amountEur !== null && (
                         <div className="font-mono text-[11px] text-slate-400">{fmtEur(e.amountEur)}</div>

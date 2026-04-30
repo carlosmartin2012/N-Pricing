@@ -25,29 +25,31 @@ test.beforeEach(async ({ page }) => {
   // Wait for the default Calculator view to load
   await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
 
-  // Ensure the sidebar is expanded so nav items are clickable
+  // Ensure the sidebar is expanded so nav items are clickable.
+  // Post-Option B (2026-04) el label es "Calculator" — antes "Pricing Engine".
   const sidebarHasLabels = await page
     .getByTestId('sidebar')
-    .getByText('Pricing Engine')
+    .getByText('Calculator')
     .isVisible()
     .catch(() => false);
 
   if (!sidebarHasLabels) {
     await page.getByTestId('menu-toggle').click();
-    await expect(page.getByTestId('sidebar').getByText('Pricing Engine')).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId('sidebar').getByText('Calculator')).toBeVisible({ timeout: 3_000 });
   }
 });
 
 test.describe('Main Navigation Items', () => {
+  // Labels actualizados a Option B (2026-04) + density pass (Ola 10.7).
+  // ACCOUNTING demoted a AUX (⌘K only) en 2026-04-22 — fuera del sidebar.
   const mainNavItems = [
-    { testId: 'nav-CALCULATOR', label: 'Pricing Engine' },
-    { testId: 'nav-RAROC', label: 'RAROC Terminal' },
-    { testId: 'nav-SHOCKS', label: 'Stress Testing' },
+    { testId: 'nav-CALCULATOR', label: 'Calculator' },
+    { testId: 'nav-RAROC', label: 'RAROC' },
+    { testId: 'nav-SHOCKS', label: 'Stress Test' },
     { testId: 'nav-BLOTTER', label: 'Deal Blotter' },
-    { testId: 'nav-ACCOUNTING', label: 'Accounting Ledger' },
-    { testId: 'nav-REPORTING', label: 'FTP Analytics' },
+    { testId: 'nav-REPORTING', label: 'Analytics' },
     { testId: 'nav-MARKET_DATA', label: 'Yield Curves' },
-    { testId: 'nav-METHODOLOGY', label: 'Rules & Config' },
+    { testId: 'nav-METHODOLOGY', label: 'Methodology' },
     { testId: 'nav-BEHAVIOURAL', label: 'Behavioural Models' },
     { testId: 'nav-AI_LAB', label: 'AI Assistant' },
   ];
