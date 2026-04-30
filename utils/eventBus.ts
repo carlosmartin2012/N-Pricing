@@ -60,11 +60,21 @@ class EventBusImpl {
       correlationId: `evt-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
     };
 
-    // Notify in-app handlers
+    // Notify in-app handlers. Sin log + counter, errores en handlers
+    // críticos (audit listener, webhook trigger, etc.) eran invisibles —
+    // el sistema seguía como si todo estuviera bien.
     const handlers = this.handlers.get(event);
     if (handlers) {
       for (const handler of handlers) {
-        try { await handler(payload); } catch { /* swallow handler errors */ }
+        try {
+          await handler(payload);
+        } catch (err) {
+          console.error('[eventBus] handler failed', {
+            event,
+            correlationId: payload.correlationId,
+            err,
+          });
+        }
       }
     }
 
@@ -77,6 +87,8 @@ class EventBusImpl {
 
   private async deliverWebhook(webhook: WebhookConfig, payload: EventPayload): Promise<void> {
     const { maxAttempts, backoffMs } = webhook.retryPolicy;
+    let lastError: unknown = null;
+    let lastStatus: number | null = null;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -99,15 +111,37 @@ class EventBusImpl {
         });
 
         if (response.ok) return;
-        if (response.status >= 400 && response.status < 500) return; // don't retry client errors
-      } catch {
-        // Network error — retry
+        lastStatus = response.status;
+        if (response.status >= 400 && response.status < 500) {
+          // Client error — no retry, but log final.
+          console.warn('[eventBus] webhook delivery rejected (4xx)', {
+            url: webhook.url,
+            event: payload.event,
+            correlationId: payload.correlationId,
+            status: response.status,
+          });
+          return;
+        }
+      } catch (err) {
+        lastError = err;
       }
 
       if (attempt < maxAttempts - 1) {
         await new Promise((resolve) => setTimeout(resolve, backoffMs * (attempt + 1)));
       }
     }
+
+    // Retries exhausted: log final con detalle. Antes esto era silencio
+    // total — un banco que registraba un webhook nunca se enteraba de que
+    // sus eventos no llegaban tras 3 intentos fallidos.
+    console.error('[eventBus] webhook delivery exhausted', {
+      url: webhook.url,
+      event: payload.event,
+      correlationId: payload.correlationId,
+      attempts: maxAttempts,
+      lastStatus,
+      lastError: lastError instanceof Error ? lastError.message : String(lastError ?? 'unknown'),
+    });
   }
 }
 
