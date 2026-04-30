@@ -33,6 +33,25 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
     return { p5, p95, span: Math.max(1, p95 - p5) };
   }, [latest]);
 
+  // Loading state — primer render mientras la query corre. Antes el
+  // componente devolvía null implícito (loading=true && latest=null no
+  // entraba en ninguna rama), provocando flash vacío que el usuario
+  // interpretaba como "sin datos" en vez de "cargando".
+  if (loading && !latest) {
+    return (
+      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-emerald-400" />
+            <span className="nfq-label text-[10px] text-slate-300">{t.clvProjectionTitle}</span>
+          </div>
+          <RefreshCw className="h-3 w-3 animate-spin text-slate-400" />
+        </div>
+        <p className="mt-4 text-center text-xs text-slate-500">Loading projection…</p>
+      </div>
+    );
+  }
+
   if (!latest && !loading) {
     return (
       <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">

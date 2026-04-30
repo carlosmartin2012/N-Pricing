@@ -151,6 +151,12 @@ export function useConsumeNbaPipeline() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['clv', 'pipeline', 'nba'] });
       void qc.invalidateQueries({ queryKey: ['clv', 'nba'] });
+      // Antes faltaba: el server escribe un evento `nba_consumed` en
+      // `client_events`. Si el usuario abre la ficha del cliente
+      // afectado tras consumir desde Pipeline, la timeline mostraba
+      // datos stale durante 30s. Invalida prefijo `['clv', 'timeline']`
+      // para refrescar todos los timelines (no sabemos qué clientId).
+      void qc.invalidateQueries({ queryKey: ['clv', 'timeline'] });
     },
   });
 }
