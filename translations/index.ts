@@ -28,6 +28,8 @@ import { systemEn } from './system.en';
 import { systemEs } from './system.es';
 import { sharedEn } from './shared.en';
 import { sharedEs } from './shared.es';
+import { attributionsEn } from './attributions.en';
+import { attributionsEs } from './attributions.es';
 import type { Language } from '../translations';
 
 function byLang<T>(en: T, es: T): Record<Language, T> {
@@ -41,6 +43,7 @@ const GOVERNANCE_BY_LANG = byLang(governanceEn, governanceEs);
 const INSIGHTS_BY_LANG   = byLang(insightsEn, insightsEs);
 const SYSTEM_BY_LANG     = byLang(systemEn, systemEs);
 const SHARED_BY_LANG     = byLang(sharedEn, sharedEs);
+const ATTRIBUTIONS_BY_LANG = byLang(attributionsEn, attributionsEs);
 
 export function clvTranslations(lang: Language): typeof clvEn {
   return CLV_BY_LANG[lang] ?? clvEn;
@@ -70,6 +73,10 @@ export function sharedTranslations(lang: Language): typeof sharedEn {
   return SHARED_BY_LANG[lang] ?? sharedEn;
 }
 
+export function attributionsTranslations(lang: Language): typeof attributionsEn {
+  return ATTRIBUTIONS_BY_LANG[lang] ?? attributionsEn;
+}
+
 export {
   clvEn, clvEs,
   commercialEn, commercialEs,
@@ -78,6 +85,7 @@ export {
   insightsEn, insightsEs,
   systemEn, systemEs,
   sharedEn, sharedEs,
+  attributionsEn, attributionsEs,
 };
 export type { ClvTranslationKeys } from './clv.en';
 export type { CommercialTranslationKeys } from './commercial.en';
@@ -86,3 +94,4 @@ export type { GovernanceTranslationKeys } from './governance.en';
 export type { InsightsTranslationKeys } from './insights.en';
 export type { SystemTranslationKeys } from './system.en';
 export type { SharedTranslationKeys } from './shared.en';
+export type { AttributionsTranslationKeys } from './attributions.en';
