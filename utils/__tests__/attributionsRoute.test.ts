@@ -5,15 +5,36 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import type { AddressInfo } from 'node:net';
 
 // Mock pg.Pool / query / queryOne para no tocar DB real.
-const dbMock = vi.hoisted(() => ({
-  pool:                   { query: vi.fn(), connect: vi.fn() },
-  query:                  vi.fn(),
-  queryOne:               vi.fn(),
-  execute:                vi.fn(),
-  withTransaction:        vi.fn(),
-  withTenancyTransaction: vi.fn(),
-}));
+const dbMock = vi.hoisted(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const obj: any = {
+    pool:     { query: vi.fn(), connect: vi.fn() },
+    query:    vi.fn(),
+    queryOne: vi.fn(),
+    execute:  vi.fn(),
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  obj.withTransaction        = vi.fn(async (fn: (tx: any) => unknown) => fn(obj));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  obj.withTenancyTransaction = vi.fn(async (_t: unknown, fn: (tx: any) => unknown) => fn(obj));
+  return obj;
+});
 vi.mock('../../server/db', () => dbMock);
+
+// Mock dispatcher de push para evitar que `attributions.ts` arrastre
+// `web-push` (top-level side-effects) por la cadena de imports. Sin este
+// mock, otros archivos de test que importan el mismo grafo pueden hidratar
+// el módulo antes de que vi.mock('server/db') se aplique → flake
+// no-determinístico que devuelve 501 en /route y /recalibrations/:id/reject
+// cuando vitest pone los archivos en cierto orden.
+vi.mock('../../server/integrations/escalationPushDispatcher', () => ({
+  dispatchEscalationPush: vi.fn().mockResolvedValue({
+    notified: 0,
+    staleEndpointsPurged: 0,
+    skipped: 'no_vapid' as const,
+    errors: [],
+  }),
+}));
 
 import attributionsRouter from '../../server/routes/attributions';
 
@@ -127,6 +148,8 @@ const baseQuote = {
 beforeEach(() => {
   dbMock.query.mockReset();
   dbMock.queryOne.mockReset();
+  dbMock.execute.mockReset();
+  dbMock.withTransaction.mockClear();
 });
 
 // ---------------------------------------------------------------------------

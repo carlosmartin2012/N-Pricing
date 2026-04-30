@@ -4,15 +4,36 @@ import express from 'express';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-const dbMock = vi.hoisted(() => ({
-  pool:                   { query: vi.fn(), connect: vi.fn() },
-  query:                  vi.fn(),
-  queryOne:               vi.fn(),
-  execute:                vi.fn(),
-  withTransaction:        vi.fn(),
-  withTenancyTransaction: vi.fn(),
-}));
+const dbMock = vi.hoisted(() => {
+  // El hoisted block necesita auto-referencia para que `withTransaction(fn)`
+  // pueda inyectar el mismo objeto como `tx`, manteniendo compatibilidad con
+  // tests que pre-configuran `dbMock.queryOne.mockResolvedValueOnce(...)`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const obj: any = {
+    pool:     { query: vi.fn(), connect: vi.fn() },
+    query:    vi.fn(),
+    queryOne: vi.fn(),
+    execute:  vi.fn(),
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  obj.withTransaction        = vi.fn(async (fn: (tx: any) => unknown) => fn(obj));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  obj.withTenancyTransaction = vi.fn(async (_t: unknown, fn: (tx: any) => unknown) => fn(obj));
+  return obj;
+});
 vi.mock('../../server/db', () => dbMock);
+
+// Mock dispatcher de push (mismo motivo que en attributionsRoute.test.ts):
+// evita arrastrar `web-push` por imports transitivos y elimina la flake
+// 501 no-determinística en suite completa.
+vi.mock('../../server/integrations/escalationPushDispatcher', () => ({
+  dispatchEscalationPush: vi.fn().mockResolvedValue({
+    notified: 0,
+    staleEndpointsPurged: 0,
+    skipped: 'no_vapid' as const,
+    errors: [],
+  }),
+}));
 
 import attributionsRouter from '../../server/routes/attributions';
 
@@ -65,6 +86,8 @@ const recalRow = (over: Record<string, unknown> = {}) => ({
 beforeEach(() => {
   dbMock.query.mockReset();
   dbMock.queryOne.mockReset();
+  dbMock.execute.mockReset();
+  dbMock.withTransaction.mockClear();
 });
 
 describe('attributions router · GET /recalibrations', () => {
@@ -117,13 +140,28 @@ describe('attributions router · POST /recalibrations/:id/approve', () => {
     });
   });
 
-  it('happy path: marca approved y devuelve la row', async () => {
+  it('happy path: aplica los 3 pasos (insert nuevo / desactivar viejo / marcar approved)', async () => {
+    // El handler ejecuta dentro de withTransaction:
+    //   1. SELECT JOIN  → proposal+threshold (devuelve proposal con level_id, scope, ...)
+    //   2. INSERT new threshold (execute, sin return)
+    //   3. UPDATE old threshold is_active=false (execute)
+    //   4. UPDATE recalibration → status=approved, RETURNING *
+    dbMock.queryOne.mockResolvedValueOnce({
+      ...recalRow(),
+      level_id:    'lvl-zone',
+      scope:       {},
+      active_from: '2026-01-01',
+      active_to:   null,
+    });
+    dbMock.execute.mockResolvedValueOnce(undefined); // INSERT new threshold
+    dbMock.execute.mockResolvedValueOnce(undefined); // UPDATE old threshold
     dbMock.queryOne.mockResolvedValueOnce(recalRow({
-      status: 'approved',
-      decided_at: '2026-05-01T08:00:00Z',
-      decided_by_user: 'admin@bank.es',
-      reason: 'looks reasonable',
+      status:           'approved',
+      decided_at:       '2026-05-01T08:00:00Z',
+      decided_by_user:  'admin@bank.es',
+      reason:           'looks reasonable',
     }));
+
     await withApp(
       { entityId: ENTITY, role: 'Admin', userEmail: 'admin@bank.es' },
       async (url) => {
@@ -135,13 +173,48 @@ describe('attributions router · POST /recalibrations/:id/approve', () => {
         expect(body.reason).toBe('looks reasonable');
       },
     );
+
+    // Verifica que los 3 pasos del governance flow se ejecutaron
+    expect(dbMock.withTransaction).toHaveBeenCalledTimes(1);
+    expect(dbMock.queryOne).toHaveBeenCalledTimes(2);
+    expect(dbMock.execute).toHaveBeenCalledTimes(2);
+    // Step 1: el SELECT debe usar JOIN attribution_thresholds
+    const firstSelectSql = dbMock.queryOne.mock.calls[0][0] as string;
+    expect(firstSelectSql).toMatch(/SELECT[\s\S]*JOIN attribution_thresholds/i);
+    // Step 2: INSERT into attribution_thresholds
+    const insertSql = dbMock.execute.mock.calls[0][0] as string;
+    expect(insertSql).toMatch(/INSERT INTO attribution_thresholds/i);
+    // Step 3: UPDATE attribution_thresholds … is_active = FALSE
+    const deactivateSql = dbMock.execute.mock.calls[1][0] as string;
+    expect(deactivateSql).toMatch(/UPDATE attribution_thresholds[\s\S]*is_active\s*=\s*FALSE/i);
   });
 
-  it('si la propuesta no existe / ya decidida → 404', async () => {
-    dbMock.queryOne.mockResolvedValueOnce(null);
+  it('si la propuesta no existe / ya decidida → 404 (sin tocar thresholds)', async () => {
+    dbMock.queryOne.mockResolvedValueOnce(null); // SELECT inicial vacío
     await withApp({ entityId: ENTITY, role: 'Admin' }, async (url) => {
       const r = await http(url, 'POST', '/api/attributions/recalibrations/missing/approve', {});
       expect(r.status).toBe(404);
+    });
+    // Crítico: si la propuesta no existe NO debe tocar los thresholds
+    expect(dbMock.execute).not.toHaveBeenCalled();
+  });
+
+  it('trigger cross-tenant rechaza → 422 invalid_threshold', async () => {
+    dbMock.queryOne.mockResolvedValueOnce({
+      ...recalRow(),
+      level_id:    'lvl-zone',
+      scope:       {},
+      active_from: '2026-01-01',
+      active_to:   null,
+    });
+    dbMock.execute.mockRejectedValueOnce(
+      new Error('cross-tenant recalibration rejected: threshold X belongs to entity Y, recalibration claims Z'),
+    );
+
+    await withApp({ entityId: ENTITY, role: 'Admin', userEmail: 'admin@bank.es' }, async (url) => {
+      const r = await http(url, 'POST', '/api/attributions/recalibrations/recal-1/approve', {});
+      expect(r.status).toBe(422);
+      expect((r.body as { code: string }).code).toBe('invalid_threshold');
     });
   });
 });
