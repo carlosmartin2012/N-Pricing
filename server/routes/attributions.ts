@@ -724,6 +724,14 @@ router.get('/recalibrations', async (req, res) => {
   try {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
+    if (!requireRole(tenancy.role, ['Admin', 'Risk_Manager'])) {
+      // Las propuestas de recalibración exponen detalles internos del
+      // motor de pricing (`proposed_*`, `rationale.driftSeverity`,
+      // `meanAbsDeviationBps`). En contexto SR 11-7 / EBA esto es
+      // sensible — coherente con los guards de approve/reject de abajo.
+      res.status(403).json({ code: 'forbidden', message: 'Admin or Risk_Manager required' });
+      return;
+    }
     const status = typeof req.query.status === 'string' ? req.query.status : null;
     const validStatus = ['pending','approved','rejected','superseded'] as const;
     const wheres: string[] = ['entity_id = $1'];
@@ -814,11 +822,18 @@ router.get('/reporting/summary', async (req, res) => {
 
     const [decisionRows, levelRows, thresholdRows] = await Promise.all([
       query<DecisionRow>(
+        // `make_interval(days => $2::integer)` evita la concatenación
+        // string `($2 || ' days')::interval`. `windowDays` viene de
+        // `parseInt + Math.min/max(1..365)` así que ya es entero seguro,
+        // pero la versión previa abría la puerta a inyección si la
+        // sanitización se rompiera en una refactorización futura. El
+        // cast explícito a integer también evita tipos sorpresa cuando
+        // pg vuelva a interpretar el binding.
         `SELECT * FROM attribution_decisions
          WHERE entity_id = $1
-           AND decided_at >= NOW() - ($2 || ' days')::interval
+           AND decided_at >= NOW() - make_interval(days => $2::integer)
          ORDER BY decided_at DESC`,
-        [tenancy.entityId, String(windowDays)],
+        [tenancy.entityId, windowDays],
       ),
       query<LevelRow>(
         `SELECT * FROM attribution_levels

@@ -75,9 +75,23 @@ describe('attributions router · GET /recalibrations', () => {
     });
   });
 
+  // Anti-regresión Ola 10.5 fix #12 — endpoint expone propuestas
+  // sensibles del motor (governance SR 11-7).
+  it.each([
+    ['Sales',      'Sales'],
+    ['Commercial', 'Commercial'],
+    ['Auditor',    'Auditor'],
+  ])('rol %s no autorizado → 403 forbidden sin tocar la DB', async (_label, role) => {
+    await withApp({ entityId: ENTITY, role }, async (url) => {
+      const r = await http(url, 'GET', '/api/attributions/recalibrations');
+      expect(r.status).toBe(403);
+    });
+    expect(dbMock.query).not.toHaveBeenCalled();
+  });
+
   it('lista propuestas y mapea a camelCase', async () => {
     dbMock.query.mockResolvedValueOnce([recalRow()]);
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'Risk_Manager' }, async (url) => {
       const r = await http(url, 'GET', '/api/attributions/recalibrations?status=pending');
       expect(r.status).toBe(200);
       const body = r.body as { items: Array<{ id: string; thresholdId: string; status: string; proposedDeviationBpsMax: number }> };
@@ -90,7 +104,7 @@ describe('attributions router · GET /recalibrations', () => {
 
   it('filtra por status válido', async () => {
     dbMock.query.mockResolvedValueOnce([]);
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'Admin' }, async (url) => {
       const r = await http(url, 'GET', '/api/attributions/recalibrations?status=approved');
       expect(r.status).toBe(200);
       const sql = dbMock.query.mock.calls[0][0] as string;
@@ -100,7 +114,7 @@ describe('attributions router · GET /recalibrations', () => {
 
   it('ignora status inválido', async () => {
     dbMock.query.mockResolvedValueOnce([]);
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'Admin' }, async (url) => {
       const r = await http(url, 'GET', '/api/attributions/recalibrations?status=hacked');
       expect(r.status).toBe(200);
       const params = dbMock.query.mock.calls[0][1] as unknown[];
