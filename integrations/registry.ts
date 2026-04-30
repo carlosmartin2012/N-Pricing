@@ -3,6 +3,7 @@ import type {
   CoreBankingAdapter,
   CrmAdapter,
   MarketDataAdapter,
+  AdmissionAdapter,
   AdapterKind,
   AdapterHealth,
 } from './types';
@@ -43,6 +44,10 @@ class AdapterRegistry {
   marketData(): MarketDataAdapter | null {
     const a = this.adapters.get('market_data');
     return a?.kind === 'market_data' ? a : null;
+  }
+  admission(): AdmissionAdapter | null {
+    const a = this.adapters.get('admission');
+    return a?.kind === 'admission' ? a : null;
   }
 
   async healthAll(): Promise<Array<{ kind: AdapterKind; name: string; health: AdapterHealth }>> {

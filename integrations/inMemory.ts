@@ -3,6 +3,7 @@ import {
   type CoreBankingAdapter, type CoreBankingDeal,
   type CrmAdapter, type CrmCustomer, type CrmPulledEvent,
   type MarketDataAdapter, type MarketYieldCurveSnapshot, type ShockedCurveScenarioId,
+  type AdmissionAdapter, type AdmissionContext, type AdmissionDecisionPush, type AdmissionReconciliationItem,
   type AdapterHealth, type AdapterResult,
 } from './types';
 import { computeEbaCurveShift } from '../utils/pricing/shockPresets';
@@ -143,5 +144,66 @@ export class InMemoryMarketData implements MarketDataAdapter {
       source: `${base.source} +eba:${scenarioId}`,
       points: shiftedPoints,
     });
+  }
+}
+
+/**
+ * In-memory Admission adapter (Ola 9). Idempotente por (dealId,
+ * pricingSnapshotHash) — un push duplicado devuelve el mismo externalId.
+ * Tests pueden seedar contextos via `seedContext` y leer las decisiones
+ * pushed via `decisionsPushed` (snapshot inmutable).
+ */
+export class InMemoryAdmission implements AdmissionAdapter {
+  readonly kind = 'admission' as const;
+  readonly name = 'in-memory-admission';
+
+  private contexts = new Map<string, AdmissionContext>();
+  /** dedupKey → { decision, externalId } — preserva el externalId asignado
+   *  en el primer push para garantizar idempotencia. */
+  private pushed = new Map<string, { decision: AdmissionDecisionPush; externalId: string }>();
+  private reconciliation: AdmissionReconciliationItem[] = [];
+  private nextExternalSeq = 1;
+
+  async health(): Promise<AdapterHealth> {
+    return { ok: true, latencyMs: 0, checkedAt: nowIso() };
+  }
+
+  seedContext(ctx: AdmissionContext): void {
+    this.contexts.set(ctx.dealId, ctx);
+  }
+
+  seedReconciliation(items: AdmissionReconciliationItem[]): void {
+    this.reconciliation = [...items];
+  }
+
+  /** Snapshot inmutable de las decisiones empujadas. Útil en tests. */
+  decisionsPushed(): AdmissionDecisionPush[] {
+    return Array.from(this.pushed.values()).map((entry) => entry.decision);
+  }
+
+  async pushPricingDecision(
+    decision: AdmissionDecisionPush,
+  ): Promise<AdapterResult<{ externalId: string | null }>> {
+    const dedupKey = `${decision.dealId}:${decision.pricingSnapshotHash}`;
+    const existing = this.pushed.get(dedupKey);
+    if (existing) {
+      // Idempotencia: devuelve el externalId asignado en el primer push.
+      return ok({ externalId: existing.externalId });
+    }
+    const externalId = `puzzle-mem-${this.nextExternalSeq++}`;
+    this.pushed.set(dedupKey, { decision, externalId });
+    return ok({ externalId });
+  }
+
+  async fetchAdmissionContext(
+    dealId: string,
+  ): Promise<AdapterResult<AdmissionContext | null>> {
+    return ok(this.contexts.get(dealId) ?? null);
+  }
+
+  async pullReconciliation(
+    _asOfDate: string,
+  ): Promise<AdapterResult<AdmissionReconciliationItem[]>> {
+    return ok(this.reconciliation);
   }
 }

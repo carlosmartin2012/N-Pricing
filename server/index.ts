@@ -26,6 +26,7 @@ import targetGridRouter from './routes/targetGrid';
 import marketBenchmarksRouter from './routes/marketBenchmarks';
 import copilotRouter from './routes/copilot';
 import attributionsRouter from './routes/attributions';
+import admissionRouter from './routes/admission';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -162,6 +163,12 @@ app.use('/api/copilot', ...entityScoped, copilotRouter);
 // es per-tenant y las decisiones son append-only con hash chain a
 // pricing_snapshots (validado por trigger DB).
 app.use('/api/attributions', ...entityScoped, attributionsRouter);
+
+// Admission integration (Ola 9 Bloque A) — push de decisiones de pricing
+// hacia el sistema de admisión del banco (PUZZLE en BM, in-memory en dev).
+// El adapter concreto se registra en bootstrapAdapters() vía
+// ADAPTER_ADMISSION env var. Tenancy-scoped por defense-in-depth.
+app.use('/api/admission', ...entityScoped, admissionRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

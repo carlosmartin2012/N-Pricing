@@ -17,7 +17,7 @@
  *   - never throws on transport failure — returns a Result<T, AdapterError>
  */
 
-export type AdapterKind = 'core_banking' | 'crm' | 'market_data';
+export type AdapterKind = 'core_banking' | 'crm' | 'market_data' | 'admission';
 
 export interface AdapterHealth {
   ok: boolean;
@@ -169,4 +169,106 @@ export interface MarketDataAdapter {
   ): Promise<AdapterResult<MarketYieldCurveSnapshot>>;
 }
 
-export type AnyAdapter = CoreBankingAdapter | CrmAdapter | MarketDataAdapter;
+// ---------- Admission (Ola 9) ----------
+//
+// Conecta el motor de pricing/atribuciones con el sistema de admisión de
+// riesgos del banco (PUZZLE en Banca March, similares en otros tenants).
+// El adapter cubre dos sentidos:
+//
+//   PUSH:  N-Pricing → Admission. Emite decisiones de pricing/atribución
+//          (snapshot hash incluido) para que el flujo de admisión las
+//          incorpore a su circuito. Idempotente — el remoto deduplica
+//          por dealId + snapshotHash.
+//   PULL:  Admission → N-Pricing. Lee el contexto de admisión de un
+//          deal (rating interno, exposure agregada cliente, garantías,
+//          decisión final del comité de admisión) para alimentar el
+//          motor cuando se reprice.
+//
+// File-drop overnight + reconciliación batch quedan modelados como un
+// método separado `pullReconciliation(asOfDate)` para que el worker que
+// los procesa no necesite saber el transporte (SFTP / S3 / API).
+
+/** Rating interno simplificado (S&P-style). El dominio puede mapearlo a
+ *  su propio scoring si difiere. */
+export type AdmissionRating =
+  | 'AAA' | 'AA' | 'A' | 'BBB' | 'BB' | 'B' | 'CCC' | 'CC' | 'C' | 'D'
+  | 'NR';   // Not rated
+
+export interface AdmissionCollateral {
+  type: string;             // 'mortgage', 'pledge', 'guarantee', 'standby_lc', etc.
+  valueEur: number;
+  ltv?: number | null;       // 0..1
+  jurisdiction?: string;
+}
+
+export interface AdmissionContext {
+  dealId: string;
+  clientId: string;
+  internalRating: AdmissionRating;
+  pdAnnual: number | null;        // 0..1
+  lgd: number | null;              // 0..1
+  exposureEur: number;             // exposición agregada cliente
+  exposureAtDefaultEur: number | null;
+  collateral: AdmissionCollateral[];
+  decision: 'approved' | 'rejected' | 'pending' | 'unknown';
+  decidedAt: string | null;        // ISO
+  notes: string | null;
+}
+
+export interface AdmissionDecisionPush {
+  dealId: string;
+  pricingSnapshotHash: string;     // hash chain N-Pricing
+  decision: 'approved' | 'rejected' | 'escalated';
+  decidedByUser: string | null;
+  decidedAt: string;               // ISO
+  finalClientRateBps: number;
+  rarocPp: number;
+  attributionLevelId: string | null;
+  routingMetadata: Record<string, unknown>;
+}
+
+export interface AdmissionReconciliationItem {
+  dealId: string;
+  pricingSnapshotHash: string;
+  ourFinalRateBps: number;
+  bookedRateBps: number;
+  diffBps: number;                 // bookedRate - ourFinalRate
+  bookedAt: string | null;
+  status: 'matched' | 'mismatch_rate' | 'mismatch_missing' | 'unknown_in_admission';
+}
+
+export interface AdmissionAdapter {
+  kind: 'admission';
+  name: string;
+  health(): Promise<AdapterHealth>;
+  /**
+   * Idempotent push de la decisión hacia el sistema de admisión. La
+   * implementación remota debe deduplicar por (dealId, pricingSnapshotHash).
+   * Devuelve `externalId` cuando el remoto crea un registro propio.
+   */
+  pushPricingDecision(
+    decision: AdmissionDecisionPush,
+  ): Promise<AdapterResult<{ externalId: string | null }>>;
+  /**
+   * Lee el contexto de admisión actual del deal. Devuelve `null` cuando
+   * el remoto no tiene registro del dealId (mismatch_missing en
+   * reconciliation).
+   */
+  fetchAdmissionContext(
+    dealId: string,
+  ): Promise<AdapterResult<AdmissionContext | null>>;
+  /**
+   * Reconciliación batch — pares (dealId, ourSnapshotHash) que el caller
+   * necesita confirmar contra el book oficial. Modela el flujo overnight
+   * file-drop + el real-time API sin acoplar el caller al transporte.
+   */
+  pullReconciliation?(
+    asOfDate: string,
+  ): Promise<AdapterResult<AdmissionReconciliationItem[]>>;
+}
+
+export type AnyAdapter =
+  | CoreBankingAdapter
+  | CrmAdapter
+  | MarketDataAdapter
+  | AdmissionAdapter;

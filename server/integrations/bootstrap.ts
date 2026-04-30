@@ -1,7 +1,10 @@
 import { adapterRegistry } from '../../integrations/registry';
-import { InMemoryCoreBanking, InMemoryCrm, InMemoryMarketData } from '../../integrations/inMemory';
+import {
+  InMemoryCoreBanking, InMemoryCrm, InMemoryMarketData, InMemoryAdmission,
+} from '../../integrations/inMemory';
 import { SalesforceCrmAdapter } from '../../integrations/crm/salesforce';
 import { BloombergMarketDataAdapter } from '../../integrations/marketData/bloomberg';
+import { PuzzleAdmissionAdapter } from '../../integrations/admission/puzzle';
 
 /**
  * Wires the adapter registry at server boot. Lives in the server layer
@@ -72,5 +75,29 @@ export function bootstrapAdapters(): void {
     }
   } else {
     adapterRegistry.register(new InMemoryMarketData());
+  }
+
+  // Admission (Ola 9 Bloque A) — PUZZLE for Banca March, in-memory for dev.
+  // Falls back to in-memory when ADAPTER_ADMISSION is unset or 'in-memory'.
+  const admissionKind = (process.env.ADAPTER_ADMISSION ?? 'in-memory').toLowerCase();
+  if (admissionKind === 'puzzle') {
+    const baseUrl = process.env.PUZZLE_BASE_URL;
+    const clientId = process.env.PUZZLE_CLIENT_ID;
+    const clientSecret = process.env.PUZZLE_CLIENT_SECRET;
+    if (baseUrl && clientId && clientSecret) {
+      adapterRegistry.register(new PuzzleAdmissionAdapter({
+        baseUrl,
+        clientId,
+        clientSecret,
+        tokenUrl:        process.env.PUZZLE_TOKEN_URL,
+        decisionsPath:   process.env.PUZZLE_DECISIONS_PATH,
+        contextsPath:    process.env.PUZZLE_CONTEXTS_PATH,
+      }));
+    } else {
+      console.warn('[adapters] ADAPTER_ADMISSION=puzzle but PUZZLE_BASE_URL/CLIENT_ID/CLIENT_SECRET missing — falling back to in-memory');
+      adapterRegistry.register(new InMemoryAdmission());
+    }
+  } else {
+    adapterRegistry.register(new InMemoryAdmission());
   }
 }
