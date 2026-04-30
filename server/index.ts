@@ -27,6 +27,7 @@ import marketBenchmarksRouter from './routes/marketBenchmarks';
 import copilotRouter from './routes/copilot';
 import attributionsRouter from './routes/attributions';
 import admissionRouter from './routes/admission';
+import coreBankingRouter from './routes/coreBanking';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -169,6 +170,11 @@ app.use('/api/attributions', ...entityScoped, attributionsRouter);
 // El adapter concreto se registra en bootstrapAdapters() vía
 // ADAPTER_ADMISSION env var. Tenancy-scoped por defense-in-depth.
 app.use('/api/admission', ...entityScoped, admissionRouter);
+
+// Core Banking integration (Ola 9 Bloque B) — reconciliación batch HOST
+// mainframe vs pricing_snapshots. Adapter registrado en bootstrap (in-memory
+// por defecto, 'bm-host' opt-in via ADAPTER_CORE_BANKING).
+app.use('/api/core-banking', ...entityScoped, coreBankingRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

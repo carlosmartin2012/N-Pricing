@@ -1,6 +1,6 @@
 import {
   ok, fail,
-  type CoreBankingAdapter, type CoreBankingDeal,
+  type CoreBankingAdapter, type CoreBankingDeal, type CoreBankingBookedRow,
   type CrmAdapter, type CrmCustomer, type CrmPulledEvent,
   type MarketDataAdapter, type MarketYieldCurveSnapshot, type ShockedCurveScenarioId,
   type AdmissionAdapter, type AdmissionContext, type AdmissionDecisionPush, type AdmissionReconciliationItem,
@@ -22,6 +22,7 @@ export class InMemoryCoreBanking implements CoreBankingAdapter {
   readonly name = 'in-memory';
   private deals = new Map<string, CoreBankingDeal[]>();   // by clientId
   private booked = new Map<string, CoreBankingDeal>();
+  private bookedRows: CoreBankingBookedRow[] = [];
 
   async health(): Promise<AdapterHealth> {
     return { ok: true, latencyMs: 0, checkedAt: nowIso() };
@@ -29,6 +30,11 @@ export class InMemoryCoreBanking implements CoreBankingAdapter {
 
   seed(clientId: string, deals: CoreBankingDeal[]): void {
     this.deals.set(clientId, deals);
+  }
+
+  /** Seed para reconciliación batch (Ola 9 Bloque B). */
+  seedBookedRows(rows: CoreBankingBookedRow[]): void {
+    this.bookedRows = [...rows];
   }
 
   async fetchActiveDeals(clientId: string): Promise<AdapterResult<CoreBankingDeal[]>> {
@@ -46,6 +52,10 @@ export class InMemoryCoreBanking implements CoreBankingAdapter {
     if (idx >= 0) list[idx] = deal; else list.push(deal);
     this.deals.set(deal.clientId, list);
     return ok({ externalId: deal.id });
+  }
+
+  async pullBookedRows(_asOfDate: string): Promise<AdapterResult<CoreBankingBookedRow[]>> {
+    return ok(this.bookedRows);
   }
 }
 

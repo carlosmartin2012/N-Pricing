@@ -5,6 +5,7 @@ import {
 import { SalesforceCrmAdapter } from '../../integrations/crm/salesforce';
 import { BloombergMarketDataAdapter } from '../../integrations/marketData/bloomberg';
 import { PuzzleAdmissionAdapter } from '../../integrations/admission/puzzle';
+import { BmHostCoreBanking } from '../../integrations/coreBanking/bmHost';
 
 /**
  * Wires the adapter registry at server boot. Lives in the server layer
@@ -21,10 +22,33 @@ import { PuzzleAdmissionAdapter } from '../../integrations/admission/puzzle';
  * integrations dashboard.
  */
 export function bootstrapAdapters(): void {
-  // Core banking: only in-memory ships as a reference. T24 / FIS / FlexCube
-  // adapters are pending bank-specific credentials and will register here
-  // once implemented.
-  adapterRegistry.register(new InMemoryCoreBanking());
+  // Core banking: in-memory ref por defecto. Ola 9 Bloque B añade el
+  // adapter BM HOST mainframe (file-drop SFTP) — opt-in via
+  // ADAPTER_CORE_BANKING=bm-host + BM_HOST_SFTP_HOST/USER/PRIVATE_KEY.
+  const cbKind = (process.env.ADAPTER_CORE_BANKING ?? 'in-memory').toLowerCase();
+  if (cbKind === 'bm-host') {
+    const sftpHost = process.env.BM_HOST_SFTP_HOST;
+    const sftpUser = process.env.BM_HOST_SFTP_USER;
+    const sftpPrivateKeyPem = process.env.BM_HOST_SFTP_PRIVATE_KEY_PEM;
+    const dropDirectory = process.env.BM_HOST_DROP_DIRECTORY ?? '/incoming/pricing-recon';
+    if (sftpHost && sftpUser && sftpPrivateKeyPem) {
+      adapterRegistry.register(new BmHostCoreBanking({
+        sftpHost,
+        sftpUser,
+        sftpPrivateKeyPem,
+        dropDirectory,
+        sftpPort:         process.env.BM_HOST_SFTP_PORT ? Number(process.env.BM_HOST_SFTP_PORT) : undefined,
+        sftpPassphrase:   process.env.BM_HOST_SFTP_PASSPHRASE,
+        filenameTemplate: process.env.BM_HOST_FILENAME_TEMPLATE,
+        encoding:         process.env.BM_HOST_ENCODING === 'ebcdic' ? 'ebcdic' : 'utf-8',
+      }));
+    } else {
+      console.warn('[adapters] ADAPTER_CORE_BANKING=bm-host but BM_HOST_SFTP_HOST/USER/PRIVATE_KEY missing — falling back to in-memory');
+      adapterRegistry.register(new InMemoryCoreBanking());
+    }
+  } else {
+    adapterRegistry.register(new InMemoryCoreBanking());
+  }
 
   // CRM
   const crmKind = (process.env.ADAPTER_CRM ?? 'in-memory').toLowerCase();

@@ -57,12 +57,37 @@ export interface CoreBankingDeal {
   status: 'Active' | 'Matured' | 'Cancelled';
 }
 
+/**
+ * Booked deal vs lo que N-Pricing precia. La filosofía de la
+ * reconciliación es comparar `bookedRateBps` (lo que el HOST mainframe
+ * realmente grabó) con el `finalClientRateBps` del último snapshot de
+ * pricing emitido para ese deal. Mismatch → alerta operativa.
+ */
+export interface CoreBankingBookedRow {
+  dealId: string;
+  externalDealId: string | null;
+  clientId: string;
+  productType: string;
+  bookedRateBps: number;
+  amountEur: number;
+  currency: string;
+  bookedAt: string;          // ISO
+  status: 'booked' | 'pending' | 'cancelled';
+}
+
 export interface CoreBankingAdapter {
   kind: 'core_banking';
   name: string;
   health(): Promise<AdapterHealth>;
   fetchActiveDeals(clientId: string): Promise<AdapterResult<CoreBankingDeal[]>>;
   upsertBookedDeal(deal: CoreBankingDeal): Promise<AdapterResult<{ externalId: string }>>;
+  /**
+   * Reconciliación batch (Ola 9 Bloque B). Devuelve las filas
+   * registradas en el core para una fecha as-of. El caller cruza con
+   * `pricing_snapshots` para detectar mismatches. Opcional para
+   * adapters in-memory simples.
+   */
+  pullBookedRows?(asOfDate: string): Promise<AdapterResult<CoreBankingBookedRow[]>>;
 }
 
 // ---------- CRM ----------
