@@ -126,20 +126,48 @@ const ApprovalCockpit: React.FC = () => {
           </div>
         )}
         {!isLoading && !error && pending.length > 0 && (
-          <table className="w-full text-left text-sm" role="table">
-            <thead className="border-b border-white/5 text-[10px] uppercase tracking-wide text-slate-400">
-              <tr>
-                <th className="px-4 py-2">{t.cockpitDeal}</th>
-                <th className="px-4 py-2 text-right">{t.cockpitDeviation}</th>
-                <th className="px-4 py-2 text-right">{t.cockpitRaroc}</th>
-                <th className="px-4 py-2 text-right">{t.cockpitVolume}</th>
-                <th className="px-4 py-2">{t.simulatorRequiredLevel}</th>
-                <th className="px-4 py-2 text-right">{t.cockpitAction}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Desktop: tabla. Mobile: oculta — cards debajo. */}
+            <table className="hidden w-full text-left text-sm md:table" role="table">
+              <thead className="border-b border-white/5 text-[10px] uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-4 py-2">{t.cockpitDeal}</th>
+                  <th className="px-4 py-2 text-right">{t.cockpitDeviation}</th>
+                  <th className="px-4 py-2 text-right">{t.cockpitRaroc}</th>
+                  <th className="px-4 py-2 text-right">{t.cockpitVolume}</th>
+                  <th className="px-4 py-2">{t.simulatorRequiredLevel}</th>
+                  <th className="px-4 py-2 text-right">{t.cockpitAction}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pending.map((p) => (
+                  <PendingRow
+                    key={p.decision.id}
+                    item={p}
+                    onDecide={(decision, reason) =>
+                      recordDecision.mutate({
+                        dealId: p.decision.dealId,
+                        input: {
+                          requiredLevelId:     p.decision.requiredLevelId,
+                          decidedByLevelId:    p.decision.requiredLevelId,
+                          decision,
+                          reason,
+                          pricingSnapshotHash: p.decision.pricingSnapshotHash,
+                          routingMetadata:     p.decision.routingMetadata,
+                        },
+                      })
+                    }
+                    pending={recordDecision.isPending}
+                    t={t}
+                  />
+                ))}
+              </tbody>
+            </table>
+
+            {/* Mobile cards (Ola 10 Bloque C): apilados, sin scroll horizontal. */}
+            <div className="space-y-2 p-2 md:hidden" data-testid="approval-cockpit-mobile-cards">
               {pending.map((p) => (
-                <PendingRow
+                <PendingCard
                   key={p.decision.id}
                   item={p}
                   onDecide={(decision, reason) =>
@@ -159,8 +187,8 @@ const ApprovalCockpit: React.FC = () => {
                   t={t}
                 />
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </section>
     </div>
@@ -284,6 +312,134 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, t, onDecide }) =
         </tr>
       )}
     </>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// PendingCard (Ola 10 Bloque C — mobile-first)
+// ---------------------------------------------------------------------------
+
+interface PendingCardProps {
+  item: PendingItem;
+  pending: boolean;
+  t: ReturnType<typeof attributionsTranslations>;
+  onDecide: (decision: AttributionDecisionStatus, reason: string) => void;
+}
+
+const PendingCard: React.FC<PendingCardProps> = ({ item, pending, t, onDecide }) => {
+  const [confirming, setConfirming] = useState<AttributionDecisionStatus | null>(null);
+  const [reason, setReason] = useState('');
+  const meta = item.decision.routingMetadata;
+  const belowFloor = (meta.deviationBps ?? 0) <= -100;
+
+  const submit = (decision: AttributionDecisionStatus) => {
+    onDecide(decision, reason);
+    setConfirming(null);
+    setReason('');
+  };
+
+  return (
+    <article
+      data-testid="approval-cockpit-card"
+      className="rounded-xl border border-white/5 bg-slate-900/40 p-3 text-sm"
+    >
+      <header className="flex items-center justify-between">
+        <span className="font-mono text-xs text-slate-200">{item.decision.dealId}</span>
+        {item.requiredLevel && (
+          <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+            {item.requiredLevel.name}
+          </span>
+        )}
+      </header>
+
+      <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+        <div>
+          <dt className="font-mono text-[9px] uppercase tracking-wide text-slate-400">{t.cockpitDeviation}</dt>
+          <dd className={`font-mono ${meta.deviationBps < 0 ? 'text-amber-300' : 'text-slate-200'}`}>
+            {fmtBps(meta.deviationBps)}
+          </dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[9px] uppercase tracking-wide text-slate-400">{t.cockpitRaroc}</dt>
+          <dd className="font-mono text-slate-200">{fmtPp(meta.rarocPp)}</dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[9px] uppercase tracking-wide text-slate-400">{t.cockpitVolume}</dt>
+          <dd className="font-mono text-slate-200">{fmtEur(meta.volumeEur)}</dd>
+        </div>
+      </dl>
+
+      {/* Botones grandes touch-friendly */}
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          disabled={pending || belowFloor}
+          onClick={() => setConfirming('approved')}
+          className="flex items-center justify-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-2 text-xs text-emerald-300 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+          aria-label={t.cockpitApprove}
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          {t.cockpitApprove}
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => setConfirming('rejected')}
+          className="flex items-center justify-center gap-1 rounded border border-rose-500/30 bg-rose-500/10 px-2 py-2 text-xs text-rose-300 hover:bg-rose-500/20 disabled:opacity-40"
+          aria-label={t.cockpitReject}
+        >
+          <XCircle className="h-4 w-4" />
+          {t.cockpitReject}
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => setConfirming('escalated')}
+          className="flex items-center justify-center gap-1 rounded border border-white/10 bg-white/5 px-2 py-2 text-xs text-slate-200 hover:bg-white/10 disabled:opacity-40"
+          aria-label={t.cockpitEscalate}
+        >
+          <ArrowUpRight className="h-4 w-4" />
+          {t.cockpitEscalate}
+        </button>
+      </div>
+
+      {confirming && (
+        <div className="mt-3 space-y-2 rounded-md border border-white/10 bg-slate-950/40 p-3">
+          {belowFloor && confirming === 'approved' && (
+            <span className="flex items-center gap-1 text-xs text-rose-300">
+              <AlertTriangle className="h-3 w-3" />
+              {t.cockpitBelowFloorBlocked}
+            </span>
+          )}
+          <input
+            type="text"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder={t.cockpitDecisionReason}
+            className="w-full rounded border border-white/10 bg-slate-900/60 px-2 py-2 text-xs text-slate-100 placeholder:text-slate-500"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => submit(confirming)}
+              disabled={pending || (belowFloor && confirming === 'approved')}
+              className="flex-1 rounded bg-emerald-500/80 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-600"
+            >
+              {confirming === 'approved' && t.cockpitConfirmApprove}
+              {confirming === 'rejected' && t.cockpitConfirmReject}
+              {confirming === 'escalated' && t.cockpitConfirmEscalate}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setConfirming(null); setReason(''); }}
+              className="flex-1 rounded border border-white/10 px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
+            >
+              {t.matrixCancel}
+            </button>
+          </div>
+        </div>
+      )}
+    </article>
   );
 };
 

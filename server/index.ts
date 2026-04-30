@@ -29,6 +29,7 @@ import attributionsRouter from './routes/attributions';
 import admissionRouter from './routes/admission';
 import coreBankingRouter from './routes/coreBanking';
 import budgetRouter from './routes/budget';
+import notificationsRouter from './routes/notifications';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -182,6 +183,11 @@ app.use('/api/core-banking', ...entityScoped, coreBankingRouter);
 // Compara supuestos del budget con precios realizados N-Pricing por
 // (segment × productType × currency) en el periodo. Sin escritura a ALQUID.
 app.use('/api/budget', ...entityScoped, budgetRouter);
+
+// Push notifications (Ola 10 Bloque C) — registro de suscripciones Web
+// Push para mobile-first cockpit. El sender real con web-push + VAPID
+// queda como follow-up.
+app.use('/api/notifications', ...entityScoped, notificationsRouter);
 
 // Channel pricing — its own auth (API key) and rate limit. No JWT.
 app.use('/api/channel', channelPricingRouter);

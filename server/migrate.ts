@@ -794,6 +794,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS uniq_attr_recal_pending
   WHERE status = 'pending';
 
 -- -----------------------------------------------------------------------
+-- Ola 10 Bloque C — push_subscriptions for mobile-first cockpit.
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+  entity_id    UUID         NOT NULL,
+  user_email   TEXT         NOT NULL,
+  endpoint     TEXT         NOT NULL,
+  keys_p256dh  TEXT         NOT NULL,
+  keys_auth    TEXT         NOT NULL,
+  user_agent   TEXT,
+  created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  last_seen_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE (entity_id, user_email, endpoint)
+);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_entity_user
+  ON push_subscriptions (entity_id, user_email);
+
+-- -----------------------------------------------------------------------
 -- Pricing snapshots: immutable engine input/output records
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pricing_snapshots (
