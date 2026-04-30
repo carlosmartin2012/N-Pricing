@@ -188,6 +188,21 @@ const ALLOWED_DECISIONS: AttributionDecisionStatus[] = [
   'approved', 'rejected', 'escalated', 'expired', 'reverted',
 ];
 
+// Roles autorizados para registrar AttributionDecision. La matriz
+// configurable de `attribution_levels.rbac_role` declara *qué* role aplica
+// a cada nivel; este whitelist actúa como guard de "rol con autoridad
+// para tomar decisiones" (anti privilege escalation). Roles puramente
+// comerciales (Sales / Commercial) no deben poder registrar decisiones
+// firmadas con su email — aunque sean tenants legítimos.
+//
+// Mantener sincronizado con los rbac_role que aparecen en attribution_levels
+// de los deploys reales. Si una entity introduce un nuevo rbac_role que
+// puede decidir, añádelo aquí o el endpoint devolverá 403.
+const DECISION_ALLOWED_ROLES = [
+  'Admin', 'Risk_Manager', 'Director', 'Trader',
+  'BranchManager', 'Compliance_Officer',
+];
+
 // ---------------------------------------------------------------------------
 // GET /matrix
 // ---------------------------------------------------------------------------
@@ -555,6 +570,17 @@ router.post('/decisions/:dealId', async (req, res) => {
   try {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
+    if (!requireRole(tenancy.role, DECISION_ALLOWED_ROLES)) {
+      // Privilege-escalation guard: sin este check, un rol Sales o
+      // Commercial puede registrar decision='approved' firmando con su
+      // email. La trigger DB solo valida el hash del snapshot, no la
+      // autoridad del usuario.
+      res.status(403).json({
+        code: 'forbidden',
+        message: `Role '${tenancy.role ?? 'unknown'}' is not authorised to record attribution decisions`,
+      });
+      return;
+    }
 
     const dealId = req.params.dealId;
     const body = req.body ?? {};

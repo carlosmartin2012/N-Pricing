@@ -22,7 +22,7 @@ const router = Router();
 function requireTenancy(
   req: Parameters<Parameters<typeof router.get>[1]>[0],
   res: Parameters<Parameters<typeof router.get>[1]>[1],
-): { entityId: string; userEmail: string | null } | null {
+): { entityId: string; userEmail: string | null; role: string | null } | null {
   if (!req.tenancy) {
     res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
     return null;
@@ -30,8 +30,23 @@ function requireTenancy(
   return {
     entityId:  req.tenancy.entityId,
     userEmail: req.tenancy.userEmail ?? null,
+    role:      req.tenancy.role ?? null,
   };
 }
+
+function requireRole(role: string | null, allowed: string[]): boolean {
+  if (!role) return false;
+  return allowed.includes(role);
+}
+
+// Roles autorizados para empujar decisiones al sistema de admisión
+// (PUZZLE en el deploy de Banca March). Una operación pushed materialia
+// como decisión real en el sistema externo de riesgos del banco — no
+// debe permitirse a roles meramente comerciales.
+const PUSH_ALLOWED_ROLES = [
+  'Admin', 'Risk_Manager', 'Director', 'Trader',
+  'BranchManager', 'Compliance_Officer',
+];
 
 function isValidPushBody(body: unknown): body is AdmissionDecisionPush {
   if (!body || typeof body !== 'object') return false;
@@ -66,6 +81,13 @@ router.post('/push', async (req, res) => {
   try {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
+    if (!requireRole(tenancy.role, PUSH_ALLOWED_ROLES)) {
+      res.status(403).json({
+        code: 'forbidden',
+        message: `Role '${tenancy.role ?? 'unknown'}' is not authorised to push admission decisions`,
+      });
+      return;
+    }
     const adapter = adapterRegistry.admission();
     if (!adapter) {
       res.status(503).json({ code: 'no_adapter', message: 'No admission adapter registered' });

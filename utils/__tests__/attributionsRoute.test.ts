@@ -197,7 +197,7 @@ describe('attributions router · validation', () => {
   });
 
   it('POST /decisions/:dealId con decision inválida → 400', async () => {
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r = await http(url, 'POST', '/api/attributions/decisions/deal-1', {
         requiredLevelId:    'lvl-office',
         decision:           'frobnicate',
@@ -208,13 +208,49 @@ describe('attributions router · validation', () => {
   });
 
   it('POST /decisions/:dealId sin pricingSnapshotHash → 400', async () => {
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r = await http(url, 'POST', '/api/attributions/decisions/deal-1', {
         requiredLevelId: 'lvl-office',
         decision:        'approved',
       });
       expect(r.status).toBe(400);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// POST /decisions/:dealId — role guard (Ola 10.2 fix #7)
+// ---------------------------------------------------------------------------
+
+describe('attributions router · POST /decisions/:dealId · role guard', () => {
+  it.each([
+    ['Sales',      'Sales'],
+    ['Commercial', 'Commercial'],
+    ['Read_Only',  'Read_Only'],
+  ])('rol %s no autorizado → 403 forbidden (anti privilege escalation)', async (_label, role) => {
+    await withApp({ entityId: ENTITY, role, userEmail: 'sales@bank.es' }, async (url) => {
+      const r = await http(url, 'POST', '/api/attributions/decisions/deal-1', {
+        requiredLevelId:     'lvl-office',
+        decision:            'approved',
+        pricingSnapshotHash: 'h-abc',
+      });
+      expect(r.status).toBe(403);
+      expect((r.body as { code: string }).code).toBe('forbidden');
+    });
+    // Crítico: el INSERT NUNCA debe ejecutarse para roles no autorizados
+    expect(dbMock.queryOne).not.toHaveBeenCalled();
+  });
+
+  it('sin rol en tenancy → 403', async () => {
+    await withApp({ entityId: ENTITY, userEmail: 'x@bank.es' }, async (url) => {
+      const r = await http(url, 'POST', '/api/attributions/decisions/deal-1', {
+        requiredLevelId:     'lvl-office',
+        decision:            'approved',
+        pricingSnapshotHash: 'h-abc',
+      });
+      expect(r.status).toBe(403);
+    });
+    expect(dbMock.queryOne).not.toHaveBeenCalled();
   });
 });
 
@@ -337,7 +373,7 @@ describe('attributions router · POST /decisions/:dealId', () => {
     };
     dbMock.queryOne.mockResolvedValueOnce(insertedRow);
 
-    await withApp({ entityId: ENTITY, userEmail: 'demo@bank.es' }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager', userEmail: 'demo@bank.es' }, async (url) => {
       const r = await http(url, 'POST', '/api/attributions/decisions/deal-1', {
         requiredLevelId:     'lvl-office',
         decidedByLevelId:    'lvl-office',
@@ -358,7 +394,7 @@ describe('attributions router · POST /decisions/:dealId', () => {
       new Error('attribution_decision rejects unknown pricing_snapshot_hash h-bad for entity ' + ENTITY),
     );
 
-    await withApp({ entityId: ENTITY }, async (url) => {
+    await withApp({ entityId: ENTITY, role: 'BranchManager' }, async (url) => {
       const r = await http(url, 'POST', '/api/attributions/decisions/deal-1', {
         requiredLevelId:     'lvl-office',
         decision:            'approved',
