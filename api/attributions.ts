@@ -16,6 +16,9 @@ import type {
   SimulationInput,
   SimulationResult,
 } from '../types/attributions';
+import type { AttributionReportingSummary } from '../utils/attributions/attributionReporter';
+
+export type { AttributionReportingSummary } from '../utils/attributions/attributionReporter';
 
 // ---------------------------------------------------------------------------
 // Matrix (read)
@@ -155,4 +158,13 @@ export async function listDecisions(params: ListDecisionsParams = {}): Promise<D
   if (typeof params.offset === 'number') qs.set('offset', String(params.offset));
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
   return apiGet<DecisionsListResponse>(`/attributions/decisions${suffix}`);
+}
+
+// ---------------------------------------------------------------------------
+// Reporting (Ola 8 Bloque C)
+// ---------------------------------------------------------------------------
+
+export async function getReportingSummary(windowDays = 90): Promise<AttributionReportingSummary> {
+  const qs = new URLSearchParams({ window_days: String(windowDays) });
+  return apiGet<AttributionReportingSummary>(`/attributions/reporting/summary?${qs.toString()}`);
 }

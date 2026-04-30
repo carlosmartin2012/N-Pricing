@@ -101,8 +101,21 @@ export function useRecordDecisionMutation() {
       qc.invalidateQueries({
         queryKey: queryKeys.attributions.decisionsForDeal(vars.dealId),
       });
-      // Invalida cualquier listado abierto.
+      // Invalida cualquier listado abierto + summary del reporting.
       qc.invalidateQueries({ queryKey: ['attributions', 'decisions'] });
+      qc.invalidateQueries({ queryKey: ['attributions', 'reporting'] });
     },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Reporting (Bloque C)
+// ---------------------------------------------------------------------------
+
+export function useAttributionReportingQuery(windowDays = 90) {
+  return useQuery({
+    queryKey: queryKeys.attributions.reportingSummary(windowDays),
+    queryFn:  () => attributionsApi.getReportingSummary(windowDays),
+    staleTime: 60 * 1000,
   });
 }

@@ -33,3 +33,22 @@ export {
   applyAdjustments,
   simulate,
 } from './attributionSimulator';
+
+export {
+  aggregateByLevel,
+  aggregateByUser,
+  decisionFunnel,
+  timeToDecisionStats,
+  detectSystematicDrift,
+  buildAttributionSummary,
+  DEFAULT_ATTRIBUTION_DRIFT_THRESHOLDS,
+  type VolumeStats,
+  type ByLevelEntry,
+  type ByUserEntry,
+  type DecisionFunnel,
+  type TimeToDecisionStats,
+  type DriftSignal,
+  type DriftThresholds,
+  type AttributionReportingSummary,
+  type BuildSummaryInput,
+} from './attributionReporter';

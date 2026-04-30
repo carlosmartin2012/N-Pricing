@@ -34,6 +34,7 @@ import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
 import { startEscalationSweeper } from './workers/escalationSweeper';
 import { startLtvSnapshotWorker } from './workers/ltvSnapshotWorker';
+import { startAttributionDriftDetector } from './workers/attributionDriftDetector';
 import { startCrmEventSync } from './workers/crmEventSync';
 import { bootstrapAdapters } from './integrations/bootstrap';
 import { pool } from './db';
@@ -260,6 +261,10 @@ async function main() {
     // CRM event sync — opt-in via CRM_SYNC_INTERVAL_MS. Pulls events from
     // the registered CRM adapter into client_events for every active client.
     startCrmEventSync();
+    // Attribution drift detector — opt-in via ATTRIBUTION_DRIFT_INTERVAL_MS.
+    // Detecta patrones sistemáticos de aprobación al límite por figura
+    // comercial. Logs estructurados consumidos por el alert evaluator.
+    startAttributionDriftDetector();
   } catch (err) {
     console.error('[server] Failed to start:', err);
     process.exit(1);

@@ -521,7 +521,8 @@ export type ViewState =
   | 'DOSSIERS'
   | 'STRESS_PRICING'
   | 'APPROVALS'
-  | 'ATTRIBUTION_MATRIX';
+  | 'ATTRIBUTION_MATRIX'
+  | 'ATTRIBUTION_REPORTING';
 export type AuditModule = ViewState | 'AUTH' | 'MASTER_DATA' | 'SYS_CONFIG' | 'SYSTEM' | (string & {});
 
 export interface YieldCurvePoint {

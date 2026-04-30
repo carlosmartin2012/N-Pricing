@@ -140,7 +140,10 @@ export type SLIName =
   | 'mock_fallback_rate'
   | 'snapshot_write_failures_total'
   | 'auth_failures_total'
-  | 'cold_start_duration_ms';
+  | 'cold_start_duration_ms'
+  | 'attribution_route_latency_ms'
+  | 'attribution_decision_time_ms'
+  | 'attribution_drift_signals_total';
 
 export type AlertSeverity = 'info' | 'warning' | 'page' | 'critical';
 
@@ -295,5 +298,30 @@ export const PRICING_SLOS: readonly SLODefinition[] = [
     windowSeconds: 300,
     severity: 'page',
     description: 'Snapshot write must never fail',
+  },
+  // ── Ola 8 Bloque C — Atribuciones jerárquicas
+  {
+    name: 'attribution_route_latency_ms',
+    target: 50,
+    comparator: 'lt',
+    windowSeconds: 3600,
+    severity: 'warning',
+    description: 'POST /api/attributions/route p95 under 50 ms',
+  },
+  {
+    name: 'attribution_decision_time_ms',
+    target: 4 * 3600 * 1000,
+    comparator: 'lt',
+    windowSeconds: 24 * 3600,
+    severity: 'warning',
+    description: 'p95 time-to-decision (open → resolved) under 4h',
+  },
+  {
+    name: 'attribution_drift_signals_total',
+    target: 0,
+    comparator: 'eq',
+    windowSeconds: 24 * 3600,
+    severity: 'warning',
+    description: 'Any breached drift signal in 24h needs investigation',
   },
 ] as const;

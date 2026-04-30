@@ -23,6 +23,10 @@ import { query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { routeApproval } from '../../utils/attributions/attributionRouter';
 import { simulate } from '../../utils/attributions/attributionSimulator';
+import {
+  buildAttributionSummary,
+  type AttributionReportingSummary,
+} from '../../utils/attributions/attributionReporter';
 import type {
   AttributionLevel,
   AttributionMatrix,
@@ -30,6 +34,7 @@ import type {
   AttributionRoutingMetadata,
   AttributionThreshold,
   AttributionDecisionStatus,
+  AttributionDecision,
   AttributionScope,
   SimulationInput,
 } from '../../types/attributions';
@@ -648,6 +653,70 @@ router.get('/decisions', async (req, res) => {
       items: rows.map(mapDecision),
       pagination: { limit, offset, returned: rows.length },
     });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /reporting/summary — agregados para dashboards (Ola 8 Bloque C)
+// ---------------------------------------------------------------------------
+
+router.get('/reporting/summary', async (req, res) => {
+  try {
+    const tenancy = requireTenancy(req, res);
+    if (!tenancy) return;
+
+    const windowDays = Math.min(
+      Math.max(parseInt(String(req.query.window_days ?? '90'), 10) || 90, 1),
+      365,
+    );
+
+    const [decisionRows, levelRows, thresholdRows] = await Promise.all([
+      query<DecisionRow>(
+        `SELECT * FROM attribution_decisions
+         WHERE entity_id = $1
+           AND decided_at >= NOW() - ($2 || ' days')::interval
+         ORDER BY decided_at DESC`,
+        [tenancy.entityId, String(windowDays)],
+      ),
+      query<LevelRow>(
+        `SELECT * FROM attribution_levels
+         WHERE entity_id = $1 AND active = TRUE`,
+        [tenancy.entityId],
+      ),
+      query<ThresholdRow>(
+        `SELECT * FROM attribution_thresholds
+         WHERE entity_id = $1 AND is_active = TRUE`,
+        [tenancy.entityId],
+      ),
+    ]);
+
+    const decisions: AttributionDecision[] = decisionRows.map(mapDecision);
+    const levels = levelRows.map(mapLevel);
+    const thresholdsByLevel = new Map<string, number | null>();
+    for (const row of thresholdRows) {
+      const max = row.deviation_bps_max === null
+        ? null
+        : Number(row.deviation_bps_max);
+      // Si un nivel tiene varios thresholds, conserva el más estricto.
+      const existing = thresholdsByLevel.get(row.level_id);
+      if (existing === undefined || (max !== null && (existing === null || max < existing))) {
+        thresholdsByLevel.set(row.level_id, max);
+      }
+    }
+
+    const summary: AttributionReportingSummary = buildAttributionSummary({
+      decisions,
+      levels,
+      windowDays,
+      thresholdLookup: (levelId) => {
+        const max = thresholdsByLevel.get(levelId);
+        return max === undefined ? null : { deviationBpsMax: max };
+      },
+    });
+
+    res.json(summary);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }

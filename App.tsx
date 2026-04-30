@@ -63,6 +63,7 @@ const StressPricingView = React.lazy(() => import('./components/StressPricing/St
 const DealTimelineRoute = React.lazy(() => import('./components/Deals/DealTimelineRoute'));
 const ApprovalCockpit = React.lazy(() => import('./components/Attributions/ApprovalCockpit'));
 const AttributionMatrixView = React.lazy(() => import('./components/Attributions/AttributionMatrixView'));
+const AttributionReportingView = React.lazy(() => import('./components/Attributions/AttributionReportingView'));
 // CommandPalette is only rendered on demand (⌘K). Lazy-loading it pulls
 // ~12 KB of source + lucide-react icon barrel out of the initial `index`
 // chunk — cheap win toward the 520 KB budget. The button that opens it
@@ -386,6 +387,7 @@ const AppContent: React.FC = () => {
                       <Route path="/escalations"   element={<EscalationsView />} />
                       <Route path="/approvals"     element={<ApprovalCockpit />} />
                       <Route path="/attributions/matrix" element={<AttributionMatrixView />} />
+                      <Route path="/attributions/reporting" element={<AttributionReportingView />} />
                       <Route path="/reconciliation" element={<ReconciliationView />} />
                       <Route path="/models"        element={<ModelInventoryView />} />
                       <Route path="/dossiers"      element={<DossiersView />} />

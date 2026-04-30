@@ -19,6 +19,7 @@ once you know the team that operates the deployment.
 | [clv-ops.md](./clv-ops.md) | LTV worker stalled · stale snapshots · NBA bias · preview-ltv-impact latency |
 | [feature-flag-kill-switch.md](./feature-flag-kill-switch.md) | Need to halt all writes for a tenant immediately |
 | [escalation-timeouts.md](./escalation-timeouts.md) | Approval escalations stuck past SLA |
+| [attribution-drift-systematic.md](./attribution-drift-systematic.md) | `attribution_drift_signals_total > 0` over 24h (Ola 8 Bloque C) |
 
 ## Proactive playbooks
 

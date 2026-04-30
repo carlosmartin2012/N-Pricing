@@ -121,12 +121,14 @@ export const queryKeys = {
       ['whatIf', 'budget', 'consistency', snapshotId] as const,
   },
 
-  // --- Attributions (Ola 8 Bloque A) ---
+  // --- Attributions (Ola 8 Bloque A + C) ---
   attributions: {
     matrix: ['attributions', 'matrix'] as const,
     decisions: (filters: { dealId?: string; levelId?: string; user?: string }) =>
       ['attributions', 'decisions', filters] as const,
     decisionsForDeal: (dealId: string) =>
       ['attributions', 'decisions', 'deal', dealId] as const,
+    reportingSummary: (windowDays: number) =>
+      ['attributions', 'reporting', 'summary', windowDays] as const,
   },
 } as const;
