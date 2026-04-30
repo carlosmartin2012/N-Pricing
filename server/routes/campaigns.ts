@@ -82,6 +82,19 @@ router.patch('/:id/status', async (req, res) => {
       res.status(400).json({ code: 'invalid_status', message: `status must be one of ${VALID_STATUSES.join(', ')}` });
       return;
     }
+    // Las transiciones a 'approved' / 'active' requieren rol con
+    // autoridad. Sin guard, un Trader podía auto-aprobarse su propia
+    // campaña (campaigns active aplican delta a quotes de canal).
+    if (status === 'approved' || status === 'active') {
+      const role = req.tenancy.role ?? null;
+      if (role !== 'Admin' && role !== 'Risk_Manager') {
+        res.status(403).json({
+          code: 'forbidden',
+          message: 'Admin or Risk_Manager required to approve/activate campaigns',
+        });
+        return;
+      }
+    }
     const setApproved = status === 'approved';
     const row = await queryOne(
       `UPDATE pricing_campaigns
