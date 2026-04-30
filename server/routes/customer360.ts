@@ -42,9 +42,12 @@ router.get('/clients/:clientId', async (req, res) => {
       ? req.query.as_of
       : new Date().toISOString().slice(0, 10);
 
+    // Tenancy scope obligatorio: la tabla `clients` es multi-tenant.
+    // Sin `AND entity_id = $2`, un usuario del tenant A que conozca el
+    // UUID de un cliente del tenant B leería su nombre/segmento/rating.
     const client = await queryOne<ClientRow>(
-      'SELECT id, name, type, segment, rating FROM clients WHERE id = $1 LIMIT 1',
-      [clientId],
+      'SELECT id, name, type, segment, rating FROM clients WHERE id = $1 AND entity_id = $2 LIMIT 1',
+      [clientId, entityId],
     );
     if (!client) {
       res.status(404).json({ code: 'not_found', message: 'Client not found' });

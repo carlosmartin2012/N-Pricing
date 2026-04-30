@@ -174,9 +174,13 @@ function mapNba(row: NbaRow): NbaRecommendation {
 }
 
 async function loadRelationship(entityId: string, clientId: string, asOfDate: string) {
+  // Tenancy scope obligatorio (idéntico al fix de customer360.ts).
+  // La tabla `clients` es multi-tenant; sin `AND entity_id = $2` un
+  // usuario del tenant A que conozca el UUID de un cliente del tenant B
+  // leería su nombre/segmento/rating cross-tenant.
   const client = await queryOne<ClientRow>(
-    'SELECT id, name, type, segment, rating FROM clients WHERE id = $1 LIMIT 1',
-    [clientId],
+    'SELECT id, name, type, segment, rating FROM clients WHERE id = $1 AND entity_id = $2 LIMIT 1',
+    [clientId, entityId],
   );
   if (!client) return null;
   const [positions, metrics, targets] = await Promise.all([
