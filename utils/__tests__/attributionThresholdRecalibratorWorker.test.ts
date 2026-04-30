@@ -63,7 +63,10 @@ describe('attributionThresholdRecalibrator · runRecalibrationSweep', () => {
     expect(dbMock.queryOne).toHaveBeenCalledTimes(1);
     const upsertSql = dbMock.queryOne.mock.calls[0][0] as string;
     expect(upsertSql).toContain('INSERT INTO attribution_threshold_recalibrations');
-    expect(upsertSql).toContain('ON CONFLICT ON CONSTRAINT uniq_attr_recal_pending');
+    // Partial unique index `uniq_attr_recal_pending` (status='pending') es
+    // referenciable solo con `ON CONFLICT (col) WHERE ...`; usar
+    // `ON CONFLICT ON CONSTRAINT <name>` rompe en runtime con `42P10`.
+    expect(upsertSql).toContain("ON CONFLICT (threshold_id) WHERE status = 'pending'");
   });
 
   it('si no hay thresholds activos no llama queryOne', async () => {

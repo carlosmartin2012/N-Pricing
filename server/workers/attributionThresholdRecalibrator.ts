@@ -182,6 +182,12 @@ export async function runRecalibrationSweep(
  * UPSERT por threshold_id sobre el unique partial index
  * `uniq_attr_recal_pending`. Si ya hay una pending, se actualiza con
  * los nuevos valores propuestos + nueva rationale + nuevo proposed_at.
+ *
+ * Nota: la cláusula es `ON CONFLICT (col) WHERE ...` — el index `uniq_attr_recal_pending`
+ * es un partial unique index, no una constraint nombrada, por lo que
+ * `ON CONFLICT ON CONSTRAINT uniq_attr_recal_pending` no es válido en PG
+ * (lanza `42P10: there is no unique or exclusion constraint matching the
+ * ON CONFLICT specification`).
  */
 async function persistProposal(p: ProposedRecalibration): Promise<void> {
   await queryOne(
@@ -189,7 +195,7 @@ async function persistProposal(p: ProposedRecalibration): Promise<void> {
        (entity_id, threshold_id, proposed_deviation_bps_max,
         proposed_raroc_pp_min, proposed_volume_eur_max, rationale, status, proposed_at)
      VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW())
-     ON CONFLICT ON CONSTRAINT uniq_attr_recal_pending
+     ON CONFLICT (threshold_id) WHERE status = 'pending'
        DO UPDATE SET
          proposed_deviation_bps_max = EXCLUDED.proposed_deviation_bps_max,
          proposed_raroc_pp_min      = EXCLUDED.proposed_raroc_pp_min,
