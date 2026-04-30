@@ -79,15 +79,21 @@ export default defineConfig(() => {
                   cacheableResponse: { statuses: [0, 200] },
                 },
               },
+              // Antes: NetworkFirst con `maxAgeSeconds: 86400` cacheaba
+              // respuestas autenticadas de Supabase REST en el SW. En
+              // dispositivos compartidos (sucursal, kiosko) el siguiente
+              // usuario podía leer datos del anterior offline sin
+              // autenticarse — el caché no estaba keyed por usuario ni
+              // por sesión.
+              //
+              // Ahora: NetworkOnly (sin storage). Las respuestas de la
+              // API REST autenticada NO se cachean. Si la app pierde
+              // conectividad, el cliente decide qué mostrar (estado
+              // local, mensajes "offline"). Mejor un error explícito
+              // que un dato del usuario equivocado.
               {
                 urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
-                handler: 'NetworkFirst',
-                options: {
-                  cacheName: 'supabase-api-cache',
-                  expiration: { maxEntries: 50, maxAgeSeconds: 24 * 60 * 60 },
-                  networkTimeoutSeconds: 10,
-                  cacheableResponse: { statuses: [0, 200] },
-                },
+                handler: 'NetworkOnly',
               },
             ],
           },
