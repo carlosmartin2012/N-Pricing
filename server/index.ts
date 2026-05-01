@@ -34,6 +34,7 @@ import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
 import { requireTenancy } from './middleware/requireTenancy';
+import { authRateLimit } from './middleware/authRateLimit';
 import { safeError } from './middleware/errorHandler';
 import { startAlertEvaluator } from './workers/alertEvaluator';
 import { startEscalationSweeper } from './workers/escalationSweeper';
@@ -41,6 +42,7 @@ import { startLtvSnapshotWorker } from './workers/ltvSnapshotWorker';
 import { startAttributionDriftDetector } from './workers/attributionDriftDetector';
 import { startThresholdRecalibrator } from './workers/attributionThresholdRecalibrator';
 import { startCrmEventSync } from './workers/crmEventSync';
+import { getWorkerHealth } from './workers/workerHealth';
 import { bootstrapAdapters } from './integrations/bootstrap';
 import { pool } from './db';
 import { seedDemoDataset } from '../scripts/seed-demo-dataset';
@@ -53,6 +55,13 @@ const IS_PROD = !!process.env.PORT && fs.existsSync(path.join(distDir, 'index.ht
 const PORT = parseInt(process.env.PORT ?? '3001', 10);
 
 const app = express();
+// Strip the default `X-Powered-By: Express` banner so we don't volunteer the
+// server stack to scanners. Cheap defence-in-depth.
+app.disable('x-powered-by');
+// Trust X-Forwarded-* when behind a reverse proxy / Vercel so req.ip,
+// rate limiting, and HTTPS detection see the real client. Behind a single
+// proxy hop this is the safe value; tune if more hops are involved.
+app.set('trust proxy', 1);
 
 // 3000 is the Vite dev port (see vite.config.ts — 5000 is reserved by macOS
 // AirPlay). 5173 kept for ad-hoc `vite --port 5173` runs; 3001 is the
@@ -63,7 +72,10 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
   'http://localhost:3001',
 ];
 app.use(cors({
-  origin: IS_PROD ? false : ALLOWED_ORIGINS,
+  // In production the SPA is served from the same origin as the API
+  // (express.static below), so `origin: false` keeps cross-origin requests
+  // out. If a separate origin needs API access, set ALLOWED_ORIGINS in env.
+  origin: IS_PROD ? (process.env.ALLOWED_ORIGINS ? ALLOWED_ORIGINS : false) : ALLOWED_ORIGINS,
   credentials: true,
 }));
 
@@ -73,6 +85,11 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // HSTS in prod only — sending it during local HTTP would refuse future
+  // localhost http:// loads in the same browser profile.
+  if (IS_PROD) {
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+  }
   if (req.path.startsWith('/api/')) {
     // API responses: block embedding and disable caching.
     res.setHeader('X-Frame-Options', 'DENY');
@@ -83,12 +100,22 @@ app.use((req, res, next) => {
 
 // Public routes (no auth required)
 // /api/auth/google is public (sign-in); /api/auth/me requires JWT.
+// Per-IP rate limiter on the unauthenticated branches so credential stuffing
+// against /demo and replay against /google can't run unbounded. /me sits
+// behind authMiddleware and doesn't need throttling beyond JWT verification.
+const authLimiter = authRateLimit({ scope: 'login', capacity: 10, rpm: 10 });
 app.use('/api/auth', (req, res, next) => {
   if (req.path === '/me') return authMiddleware(req, res, next);
-  next();
+  return authLimiter(req, res, next);
 }, authRouter);
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
+});
+// Worker-tick heartbeat snapshot. Documented in
+// server/workers/workerHealth.ts but never exposed before; ops needs this
+// to detect a silently dead worker (last_success_at far in the past).
+app.get('/api/health/workers', (_req, res) => {
+  res.json({ ts: new Date().toISOString(), workers: getWorkerHealth() });
 });
 
 // API documentation — serve OpenAPI spec + Swagger UI
