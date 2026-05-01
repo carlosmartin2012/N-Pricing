@@ -7,7 +7,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Panel, Badge, Button, TextInput, InputGroup, SelectInput } from '../ui/LayoutComponents';
-import { useUI } from '../../contexts/UIContext';
 import { useEntity } from '../../contexts/EntityContext';
 import {
   useElasticityModelsQuery,
@@ -95,7 +94,6 @@ function formFromModel(model: ElasticityModel): ModelFormState {
 // ---------------------------------------------------------------------------
 
 const ElasticityCalibration: React.FC = () => {
-  const { t } = useUI();
   const { activeEntity } = useEntity();
   const entityId = activeEntity?.id;
 

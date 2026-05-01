@@ -1,12 +1,5 @@
 import React from 'react';
 
-interface TooltipEntry {
-  name: string;
-  value: number | string;
-  color: string;
-  unit?: string;
-}
-
 interface Props {
   active?: boolean;
   payload?: Array<{ name: string; value: number; color: string; unit?: string }>;

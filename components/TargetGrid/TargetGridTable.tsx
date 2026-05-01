@@ -2,7 +2,6 @@ import React, { useRef, useMemo, useState, useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowUpDown, Search } from 'lucide-react';
 import type { TargetGridCell } from '../../types';
-import { useUI } from '../../contexts/UIContext';
 
 type SortKey = 'product' | 'segment' | 'tenorBucket' | 'currency' | 'ftp' | 'targetMargin' | 'targetClientRate' | 'targetRaroc';
 type SortDir = 'asc' | 'desc';
@@ -55,7 +54,6 @@ const COLUMNS: { key: SortKey; label: string; align?: string }[] = [
 ];
 
 const TargetGridTable: React.FC<Props> = ({ cells, onCellSelect, isLoading }) => {
-  const { t } = useUI();
   const parentRef = useRef<HTMLDivElement>(null);
   const [sortKey, setSortKey] = useState<SortKey>('product');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
