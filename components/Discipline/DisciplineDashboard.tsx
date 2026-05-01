@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Calendar, Filter, BarChart3, AlertTriangle, User, Shield, FileWarning } from 'lucide-react';
-import { useUI } from '../../contexts/UIContext';
+import { Filter, BarChart3, AlertTriangle, User, Shield, FileWarning } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
 import {
   useDisciplineKpisQuery,
@@ -81,7 +80,6 @@ const TABS: { value: Tab; label: string; icon: React.FC<{ size?: number; classNa
 // ---------------------------------------------------------------------------
 
 const DisciplineDashboard: React.FC = () => {
-  const { t } = useUI();
   const { activeEntity } = useEntity();
 
   // Filters

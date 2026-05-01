@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 import type { MethodologySnapshot } from '../../types';
-import { useUI } from '../../contexts/UIContext';
 
 interface Props {
   snapshots: MethodologySnapshot[];
@@ -122,8 +121,6 @@ const SnapshotSelector: React.FC<Props> = ({
   compareId,
   onCompareSelect,
 }) => {
-  const { t } = useUI();
-
   return (
     <div className="flex flex-wrap items-center gap-3">
       <SnapshotDropdown

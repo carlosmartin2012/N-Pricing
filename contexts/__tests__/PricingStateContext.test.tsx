@@ -10,13 +10,6 @@ import {
 import { INITIAL_DEAL } from '../../utils/seedData';
 import type { Transaction } from '../../types';
 
-function wrap(children: React.ReactNode): React.FC<{ children: React.ReactNode }> {
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children: inner }) => (
-    <PricingStateProvider>{children ?? inner}</PricingStateProvider>
-  );
-  return Wrapper;
-}
-
 describe('PricingStateContext', () => {
   it('usePricingState throws outside provider', () => {
     const { result } = renderHook(() => {

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowUpDown, TrendingUp, Users } from 'lucide-react';
+import { ArrowUpDown, Users } from 'lucide-react';
 import type { Transaction, ClientEntity } from '../../types';
 import { calculatePricing } from '../../utils/pricingEngine';
 import { useCoreData, useMarketData } from '../../contexts/DataContext';

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import type { BacktestRun, BacktestResult, BacktestStatus } from '../../types';
+import type { BacktestResult, BacktestStatus } from '../../types';
 import {
   Play,
   FlaskConical,
@@ -16,7 +16,6 @@ import {
   ResponsiveContainer,
 } from '../ui/charts/lazyRecharts';
 import { Panel, Badge, Button, TextInput, InputGroup } from '../ui/LayoutComponents';
-import { useUI } from '../../contexts/UIContext';
 import { useEntity } from '../../contexts/EntityContext';
 import {
   useBacktestRunsQuery,
@@ -84,7 +83,6 @@ const tooltipStyle: React.CSSProperties = {
 // ---------------------------------------------------------------------------
 
 const BacktestingConsole: React.FC = () => {
-  const { t } = useUI();
   const { activeEntity } = useEntity();
   const entityId = activeEntity?.id;
 

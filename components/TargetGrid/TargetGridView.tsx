@@ -16,7 +16,7 @@ import SnapshotDiffView from './SnapshotDiffView';
 type ViewMode = 'table' | 'heatmap' | 'diff';
 
 const TargetGridView: React.FC = () => {
-  const { t, language } = useUI();
+  const { language } = useUI();
   const tc = commercialTranslations(language);
   const { activeEntity } = useEntity();
   const entityId = activeEntity?.id;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertTriangle, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { CheckCircle, AlertTriangle, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import type { DisciplineKpis } from '../../types';
 
 interface Props {

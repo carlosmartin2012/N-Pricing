@@ -15,7 +15,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from '../ui/charts/lazyRecharts';
-import { Panel, Badge } from '../ui/LayoutComponents';
+import { Panel } from '../ui/LayoutComponents';
 
 // ---------------------------------------------------------------------------
 // Props

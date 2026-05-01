@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { TargetGridCell, TenorBucket } from '../../types';
 import { TENOR_BUCKETS } from '../../types';
-import { useUI } from '../../contexts/UIContext';
 
 interface Props {
   cells: TargetGridCell[];
@@ -31,8 +30,6 @@ function rarocTextColor(value: number): string {
 }
 
 const TargetGridHeatmap: React.FC<Props> = ({ cells, onCellSelect }) => {
-  const { t } = useUI();
-
   // Derive unique products and currencies from cells
   const products = useMemo(() => [...new Set(cells.map((c) => c.product))].sort(), [cells]);
   const currencies = useMemo(() => [...new Set(cells.map((c) => c.currency))].sort(), [cells]);

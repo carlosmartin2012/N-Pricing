@@ -10,7 +10,6 @@ import {
   GitBranch,
 } from 'lucide-react';
 import { Panel, Badge, Button, TextInput } from '../ui/LayoutComponents';
-import { useUI } from '../../contexts/UIContext';
 import { useEntity } from '../../contexts/EntityContext';
 import {
   useSandboxesQuery,
@@ -218,7 +217,6 @@ const DiffCard: React.FC<{
 // ---------------------------------------------------------------------------
 
 const WhatIfWorkspace: React.FC = () => {
-  const { t } = useUI();
   const { activeEntity } = useEntity();
   const entityId = activeEntity?.id;
 

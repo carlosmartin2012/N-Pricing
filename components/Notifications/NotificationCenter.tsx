@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Bell, Check, CheckCheck, Filter, Inbox } from 'lucide-react';
+import { Check, CheckCheck, Filter, Inbox } from 'lucide-react';
 import { Panel } from '../ui/LayoutComponents';
 import { useNotifications } from '../../hooks/useNotifications';
 import type { Notification } from '../../types';

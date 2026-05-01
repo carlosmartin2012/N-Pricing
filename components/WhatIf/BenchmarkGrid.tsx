@@ -6,7 +6,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Panel, Badge } from '../ui/LayoutComponents';
-import { useUI } from '../../contexts/UIContext';
 import { useEntity } from '../../contexts/EntityContext';
 import {
   useBenchmarkComparisonQuery,
@@ -65,12 +64,6 @@ function deltaBg(bps: number): string {
   if (bps <= -5) return 'bg-emerald-500/10';
   if (bps <= 5) return 'bg-amber-500/10';
   return 'bg-rose-500/10';
-}
-
-function deltaBadge(bps: number): 'success' | 'warning' | 'danger' {
-  if (bps <= -5) return 'success';
-  if (bps <= 5) return 'warning';
-  return 'danger';
 }
 
 function gapTone(value: number): string {
@@ -197,7 +190,6 @@ const BudgetConsistencyTable: React.FC<{ rows: BudgetConsistency[] }> = ({ rows 
 // ---------------------------------------------------------------------------
 
 const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
-  const { t } = useUI();
   const { activeEntity } = useEntity();
   const entityId = activeEntity?.id;
 

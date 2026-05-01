@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { AlertTriangle, BarChart4, Shield } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { AlertTriangle, Shield } from 'lucide-react';
 import type { Transaction } from '../../types';
 import { analyzePortfolioConcentration, classifyHHI, type ConcentrationMetrics } from '../../utils/concentrationAnalytics';
 

@@ -33,7 +33,6 @@ import type {
 // EBA Table 1 (EUR, 2018) — magnitudes in bps.
 const PARALLEL_MAGNITUDE_BPS = 200;
 const SHORT_SHOCK_MAGNITUDE_BPS = 250;
-const LONG_SHOCK_MAGNITUDE_BPS = Math.round(0.6 * PARALLEL_MAGNITUDE_BPS); // 120
 
 // EBA §115 weightings for the slope scenarios.
 const STEEPENER_SHORT_WEIGHT = -0.65;

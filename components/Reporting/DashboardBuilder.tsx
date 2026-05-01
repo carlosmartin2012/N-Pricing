@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 import ReactGridLayout from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 
@@ -8,11 +8,11 @@ import 'react-grid-layout/css/styles.css';
 const GridLayout = ReactGridLayout as unknown as React.FC<Record<string, unknown>>;
 type LayoutItem = { i: string; x: number; y: number; w: number; h: number; minW?: number; minH?: number };
 import {
-  BarChart4, FileText, GripVertical, Lock, Percent, Plus, RotateCcw,
+  BarChart4, FileText, GripVertical, Lock, RotateCcw,
   ShieldCheck, TrendingUp, Unlock, Wallet,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useCoreData, useMarketData } from '../../contexts/DataContext';
+import { useCoreData } from '../../contexts/DataContext';
 
 // Width measured from parent container
 
