@@ -129,7 +129,7 @@ export function useBlotterWorkflowActions({
         description: `Cloned deal ${deal.id} → ${clonedDeal.id}`,
       });
     },
-    [setDeals, user, userRole]
+    [canWriteRemotely, setDeals, user, userRole]
   );
 
   const handleWorkflowAction = useCallback(
@@ -229,7 +229,7 @@ export function useBlotterWorkflowActions({
         },
       });
     },
-    [data, pricingContext, setDeals, user, userRole]
+    [canWriteRemotely, data, pricingContext, setDeals, user, userRole]
   );
 
   const handleBatchReprice = useCallback(async () => {
