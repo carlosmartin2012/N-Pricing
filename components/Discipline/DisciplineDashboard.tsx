@@ -111,7 +111,14 @@ const DisciplineDashboard: React.FC = () => {
   );
   const { data: bands = [] } = useToleranceBandsQuery(activeEntity?.id);
 
-  const variances: DealVariance[] = variancesPage?.data ?? [];
+  // useMemo es necesario porque variancesPage?.data ?? [] crea un nuevo
+  // array vacío en cada render cuando variancesPage es undefined,
+  // invalidando la identidad de variances y disparando recomputos en
+  // cascada en originatorIds y handleDealClick.
+  const variances: DealVariance[] = useMemo(
+    () => variancesPage?.data ?? [],
+    [variancesPage?.data],
+  );
 
   // Average tolerance for distribution chart
   const avgToleranceBps = useMemo(() => {
