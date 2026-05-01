@@ -56,7 +56,7 @@ router.get('/snapshots', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const entityId = typeof req.query.entity_id === 'string' ? req.query.entity_id : req.tenancy.entityId;
+    const entityId = req.tenancy.entityId;
     const rows = await query<Record<string, unknown>>(
       `SELECT * FROM methodology_snapshots
        WHERE entity_id = $1
@@ -287,7 +287,7 @@ router.get('/templates', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const entityId = typeof req.query.entity_id === 'string' ? req.query.entity_id : req.tenancy.entityId;
+    const entityId = req.tenancy.entityId;
     const rows = await query<Record<string, unknown>>(
       `SELECT * FROM canonical_deal_templates WHERE (entity_id IS NULL OR entity_id = $1) ORDER BY product, segment`,
       [entityId],
@@ -305,6 +305,18 @@ router.post('/templates', async (req, res) => {
       return;
     }
     const body = (req.body ?? {}) as Record<string, unknown>;
+    const tenantEntityId = req.tenancy.entityId;
+    if (
+      typeof body.entity_id === 'string' &&
+      body.entity_id.length > 0 &&
+      body.entity_id !== tenantEntityId
+    ) {
+      res.status(403).json({
+        code: 'tenancy_forbidden_write',
+        message: 'body.entity_id does not match the authenticated tenancy',
+      });
+      return;
+    }
     const id = String(body.id ?? randomUUID());
     const row = await queryOne<Record<string, unknown>>(
       `INSERT INTO canonical_deal_templates
@@ -318,10 +330,12 @@ router.post('/templates', async (req, res) => {
          template = EXCLUDED.template,
          editable_by_role = EXCLUDED.editable_by_role,
          updated_at = NOW()
+       WHERE canonical_deal_templates.entity_id IS NULL
+          OR canonical_deal_templates.entity_id = $2
        RETURNING *`,
       [
         id,
-        body.entity_id ?? req.tenancy.entityId,
+        tenantEntityId,
         body.product,
         body.segment,
         body.tenor_bucket,
@@ -330,6 +344,13 @@ router.post('/templates', async (req, res) => {
         JSON.stringify(body.editable_by_role ?? ['methodologist', 'admin']),
       ],
     );
+    if (!row) {
+      res.status(409).json({
+        code: 'entity_mismatch',
+        message: 'Template id exists in another entity',
+      });
+      return;
+    }
     res.status(201).json(row);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
