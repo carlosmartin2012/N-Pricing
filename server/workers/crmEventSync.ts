@@ -1,6 +1,6 @@
 import { pool, execute } from '../db';
 import { adapterRegistry } from '../../integrations/registry';
-import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
+import { runWorkerTick } from './workerHealth';
 import type { CrmPulledEvent, CrmEventKind } from '../../integrations/types';
 import type { ClientEventType } from '../../types/clv';
 
@@ -119,16 +119,13 @@ export function startCrmEventSync(): void {
   const ms = Number(process.env.CRM_SYNC_INTERVAL_MS ?? '0');
   if (!Number.isFinite(ms) || ms < 60_000) return;
   if (interval) return;
-  interval = setInterval(async () => {
-    try {
+  interval = setInterval(() => {
+    void runWorkerTick('crm-sync', async () => {
       const report = await runCrmSyncTick();
       if (report.inserted > 0 || report.errors.length > 0) {
         console.info('[crm-sync]', report);
       }
-      recordWorkerTickSuccess('crm-sync');
-    } catch (err) {
-      recordWorkerTickFailure('crm-sync', err);
-    }
+    });
   }, ms);
 }
 

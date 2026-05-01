@@ -1,6 +1,6 @@
-import { pool } from '../db';
+import { pool, withTransaction } from '../db';
 import { sweepEscalations } from '../../utils/governance/escalationEvaluator';
-import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
+import { runWorkerTick } from './workerHealth';
 import type {
   ApprovalEscalation,
   ApprovalEscalationConfig,
@@ -116,25 +116,32 @@ export async function runSweep(now: Date = new Date()): Promise<SweepReport> {
         );
         report.notified += 1;
       } else if (action.kind === 'escalate') {
-        await pool.query(
-          "UPDATE approval_escalations SET status = 'escalated', resolved_at = $2 WHERE id = $1",
-          [escalation.id, now.toISOString()],
-        );
-        await pool.query(
-          `INSERT INTO approval_escalations
-             (entity_id, deal_id, exception_id, level, due_at, status, opened_by, current_notes, escalated_from_id)
-           VALUES ($1, $2, $3, $4, $5, 'open', $6, $7, $8)`,
-          [
-            escalation.entityId,
-            escalation.dealId,
-            escalation.exceptionId,
-            action.toLevel,
-            action.newDueAt,
-            escalation.openedBy,
-            escalation.currentNotes,
-            escalation.id,
-          ],
-        );
+        // Wrap UPDATE + INSERT in a single transaction so a failure between
+        // them cannot leave the original escalation marked `escalated` while
+        // no fresh `open` row is created at the next level — that state was
+        // unrecoverable without manual intervention because nothing in the
+        // sweep would re-open the escalation.
+        await withTransaction(async (tx) => {
+          await tx.execute(
+            "UPDATE approval_escalations SET status = 'escalated', resolved_at = $2 WHERE id = $1",
+            [escalation.id, now.toISOString()],
+          );
+          await tx.execute(
+            `INSERT INTO approval_escalations
+               (entity_id, deal_id, exception_id, level, due_at, status, opened_by, current_notes, escalated_from_id)
+             VALUES ($1, $2, $3, $4, $5, 'open', $6, $7, $8)`,
+            [
+              escalation.entityId,
+              escalation.dealId,
+              escalation.exceptionId,
+              action.toLevel,
+              action.newDueAt,
+              escalation.openedBy,
+              escalation.currentNotes,
+              escalation.id,
+            ],
+          );
+        });
         report.escalated += 1;
       } else if (action.kind === 'expire') {
         await pool.query(
@@ -164,16 +171,13 @@ export function startEscalationSweeper(): void {
   if (!Number.isFinite(ms) || ms < 1_000) return;
   if (interval) return;
 
-  interval = setInterval(async () => {
-    try {
+  interval = setInterval(() => {
+    void runWorkerTick('escalation-sweep', async () => {
       const report = await runSweep();
       if (report.escalated + report.notified + report.expired > 0 || report.errors.length > 0) {
         console.info('[escalation-sweep]', report);
       }
-      recordWorkerTickSuccess('escalation-sweep');
-    } catch (err) {
-      recordWorkerTickFailure('escalation-sweep', err);
-    }
+    });
   }, ms);
 }
 

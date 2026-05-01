@@ -42,7 +42,7 @@ import { startLtvSnapshotWorker } from './workers/ltvSnapshotWorker';
 import { startAttributionDriftDetector } from './workers/attributionDriftDetector';
 import { startThresholdRecalibrator } from './workers/attributionThresholdRecalibrator';
 import { startCrmEventSync } from './workers/crmEventSync';
-import { getWorkerHealth } from './workers/workerHealth';
+import { getWorkerHealth, getWorkerSkipCounts } from './workers/workerHealth';
 import { bootstrapAdapters } from './integrations/bootstrap';
 import { pool } from './db';
 import { seedDemoDataset } from '../scripts/seed-demo-dataset';
@@ -113,9 +113,14 @@ app.get('/api/health', (_req, res) => {
 });
 // Worker-tick heartbeat snapshot. Documented in
 // server/workers/workerHealth.ts but never exposed before; ops needs this
-// to detect a silently dead worker (last_success_at far in the past).
+// to detect a silently dead worker (last_success_at far in the past) or
+// a worker whose ticks are slower than its interval (skipped > 0).
 app.get('/api/health/workers', (_req, res) => {
-  res.json({ ts: new Date().toISOString(), workers: getWorkerHealth() });
+  res.json({
+    ts: new Date().toISOString(),
+    workers: getWorkerHealth(),
+    skips: getWorkerSkipCounts(),
+  });
 });
 
 // API documentation — serve OpenAPI spec + Swagger UI
@@ -240,28 +245,32 @@ if (IS_PROD) {
 //      locally. Express 5 forwards async rejections here automatically.
 // Without this middleware, a crash in one handler produced an unhelpful
 // default 500 with no logging, making prod incidents invisible.
-const errorHandler: ErrorRequestHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+const errorHandler: ErrorRequestHandler = (err: unknown, req: Request, res: Response, _next: NextFunction) => {
   if (res.headersSent) {
     return;
   }
+  // Echo the request-id in 5xx bodies so a user reporting "I got a 500"
+  // can be matched to the server log line. The header is always set by
+  // requestIdMiddleware but clients rarely surface response headers.
+  const requestId = req.requestId;
   if (err && typeof err === 'object') {
     const e = err as { type?: string; status?: number; statusCode?: number };
     if (e.type === 'entity.parse.failed') {
-      res.status(400).json({ error: 'Malformed JSON body' });
+      res.status(400).json({ error: 'Malformed JSON body', requestId });
       return;
     }
     if (e.type === 'entity.too.large') {
-      res.status(413).json({ error: 'Request body too large' });
+      res.status(413).json({ error: 'Request body too large', requestId });
       return;
     }
     const status = e.status ?? e.statusCode;
     if (status && status >= 400 && status < 500) {
-      res.status(status).json({ error: safeError(err) });
+      res.status(status).json({ error: safeError(err), requestId });
       return;
     }
   }
-  console.error('[server] Unhandled route error', err);
-  res.status(500).json({ error: safeError(err) });
+  console.error('[server] Unhandled route error', { requestId, err });
+  res.status(500).json({ error: safeError(err), requestId });
 };
 app.use(errorHandler);
 

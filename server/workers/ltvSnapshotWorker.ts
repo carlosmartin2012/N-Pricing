@@ -1,5 +1,5 @@
 import { pool, queryOne, execute } from '../db';
-import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
+import { runWorkerTick } from './workerHealth';
 import {
   buildClientRelationship,
   mapClientPositionRow,
@@ -173,16 +173,13 @@ export function startLtvSnapshotWorker(): void {
   if (!Number.isFinite(ms) || ms < 60_000) return;      // minimum 1 min
   if (interval) return;
 
-  interval = setInterval(async () => {
-    try {
+  interval = setInterval(() => {
+    void runWorkerTick('ltv-snapshot', async () => {
       const report = await runLtvSnapshotTick();
       if (report.computed > 0 || report.errors.length > 0) {
         console.info('[ltv-snapshot]', report);
       }
-      recordWorkerTickSuccess('ltv-snapshot');
-    } catch (err) {
-      recordWorkerTickFailure('ltv-snapshot', err);
-    }
+    });
   }, ms);
 }
 

@@ -1,6 +1,6 @@
 import { pool } from '../db';
 import { dispatchAlert, type DeliveryResult } from '../integrations/alertChannels';
-import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
+import { runWorkerTick } from './workerHealth';
 import type {
   AlertChannelConfig,
   AlertChannelType,
@@ -162,16 +162,13 @@ export function startAlertEvaluator(): void {
   if (interval) return;
 
   const deps = buildProductionDeps();
-  interval = setInterval(async () => {
-    try {
+  interval = setInterval(() => {
+    void runWorkerTick('alert-eval', async () => {
       const report = await evaluateAlerts(deps);
       if (report.triggered > 0 || report.errors.length > 0) {
         console.info('[alert-eval]', report);
       }
-      recordWorkerTickSuccess('alert-eval');
-    } catch (err) {
-      recordWorkerTickFailure('alert-eval', err);
-    }
+    });
   }, ms);
 }
 
