@@ -13,6 +13,7 @@ import { DataProvider } from './contexts/DataContext';
 import { UIProvider } from './contexts/UIContext';
 import { WalkthroughProvider } from './contexts/WalkthroughContext';
 import { ToastProvider } from './components/ui/Toast';
+import { ProviderErrorBoundary } from './components/ProviderErrorBoundary';
 import { errorTracker } from './utils/errorTracking';
 
 // ---------------------------------------------------------------------------
@@ -95,6 +96,12 @@ if (!googleClientId) {
   console.warn('VITE_GOOGLE_CLIENT_ID not set. Google OAuth will not work.');
 }
 
+// Granular error boundaries por provider — un fallo en (p.ej.) MarketData
+// ya no presenta el crash genérico de root: la UI dice "Market Data
+// subsystem failed", reporta a errorTracker con módulo específico, y
+// permite retry sin recarga. Orden de anidado preservado: cada capa
+// depende de la anterior (Auth → Entity → MarketData → Governance →
+// Data → UI → Walkthrough).
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
@@ -102,21 +109,35 @@ root.render(
       <HashRouter>
         <QueryClientProvider client={queryClient}>
           <ToastProvider>
+            <ProviderErrorBoundary name="Auth">
               <AuthProvider>
-                <EntityProvider>
-                <MarketDataProvider>
-                  <GovernanceProvider>
-                    <DataProvider>
-                      <UIProvider>
-                        <WalkthroughProvider>
-                          <App />
-                        </WalkthroughProvider>
-                      </UIProvider>
-                    </DataProvider>
-                  </GovernanceProvider>
-                </MarketDataProvider>
-                </EntityProvider>
+                <ProviderErrorBoundary name="Entity">
+                  <EntityProvider>
+                    <ProviderErrorBoundary name="Market Data">
+                      <MarketDataProvider>
+                        <ProviderErrorBoundary name="Governance">
+                          <GovernanceProvider>
+                            <ProviderErrorBoundary name="Data">
+                              <DataProvider>
+                                <ProviderErrorBoundary name="UI">
+                                  <UIProvider>
+                                    <ProviderErrorBoundary name="Walkthrough">
+                                      <WalkthroughProvider>
+                                        <App />
+                                      </WalkthroughProvider>
+                                    </ProviderErrorBoundary>
+                                  </UIProvider>
+                                </ProviderErrorBoundary>
+                              </DataProvider>
+                            </ProviderErrorBoundary>
+                          </GovernanceProvider>
+                        </ProviderErrorBoundary>
+                      </MarketDataProvider>
+                    </ProviderErrorBoundary>
+                  </EntityProvider>
+                </ProviderErrorBoundary>
               </AuthProvider>
+            </ProviderErrorBoundary>
           </ToastProvider>
         </QueryClientProvider>
       </HashRouter>
