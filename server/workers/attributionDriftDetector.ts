@@ -18,7 +18,7 @@
  */
 
 import { query } from '../db';
-import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
+import { runWorkerTick } from './workerHealth';
 import {
   aggregateByUser,
   detectSystematicDrift,
@@ -176,8 +176,8 @@ export function startAttributionDriftDetector(): void {
   if (!Number.isFinite(ms) || ms < 1_000) return;
   if (interval) return;
 
-  interval = setInterval(async () => {
-    try {
+  interval = setInterval(() => {
+    void runWorkerTick('attribution-drift', async () => {
       const report = await runAttributionDriftSweep();
       if (report.signalsTotal > 0 || report.errors.length > 0) {
         console.info('[attribution-drift] sweep', {
@@ -186,10 +186,7 @@ export function startAttributionDriftDetector(): void {
           errors:          report.errors.length,
         });
       }
-      recordWorkerTickSuccess('attribution-drift');
-    } catch (err) {
-      recordWorkerTickFailure('attribution-drift', err);
-    }
+    });
   }, ms);
 }
 

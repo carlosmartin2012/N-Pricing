@@ -99,4 +99,67 @@ export function getWorkerHealth(): WorkerHealthSnapshot[] {
 /** Test helper — limpia state in-memory. */
 export function __resetWorkerHealth(): void {
   STATE.clear();
+  RUNNING.clear();
+}
+
+// ---------------------------------------------------------------------------
+// Tick lock — defence against overlapping ticks
+// ---------------------------------------------------------------------------
+// setInterval(asyncFn, ms) does NOT wait for the previous tick to finish. If
+// a tick takes longer than the interval (a slow query, a CRM stub timing
+// out), Node fires the next tick while the first is still running. Two
+// concurrent ticks of the same worker means: doubled DB pool usage, races
+// on append-only inserts, duplicate alert dispatch.
+//
+// `runWorkerTick` wraps the async body in:
+//   1. A `running` flag — second tick exits immediately, increments a
+//      `skippedCount` so ops can spot a worker that's chronically slower
+//      than its interval.
+//   2. The success/failure heartbeat call — same as recordWorkerTickSuccess
+//      / recordWorkerTickFailure, so the wrapper is the single source of
+//      truth and individual workers can't forget either branch.
+
+const RUNNING = new Set<string>();
+
+export interface WorkerSkipSnapshot {
+  worker: string;
+  skippedCount: number;
+}
+
+const SKIPPED = new Map<string, number>();
+
+/**
+ * Run an async tick body with the overlap guard + heartbeat. If a previous
+ * tick is still in flight for the same worker name, this call is a no-op
+ * and the skipped counter is incremented.
+ *
+ * Note: `runWorkerTick` does NOT throw — errors are recorded via
+ * `recordWorkerTickFailure` so the calling setInterval loop never sees a
+ * rejection.
+ */
+export async function runWorkerTick(
+  worker: string,
+  body: () => Promise<void>,
+): Promise<void> {
+  if (RUNNING.has(worker)) {
+    SKIPPED.set(worker, (SKIPPED.get(worker) ?? 0) + 1);
+    return;
+  }
+  RUNNING.add(worker);
+  try {
+    await body();
+    recordWorkerTickSuccess(worker);
+  } catch (err) {
+    recordWorkerTickFailure(worker, err);
+  } finally {
+    RUNNING.delete(worker);
+  }
+}
+
+/** Snapshot of overlap-skip counters for the /health/workers endpoint. */
+export function getWorkerSkipCounts(): WorkerSkipSnapshot[] {
+  return Array.from(SKIPPED.entries()).map(([worker, skippedCount]) => ({
+    worker,
+    skippedCount,
+  }));
 }

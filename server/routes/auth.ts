@@ -1,7 +1,20 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { signToken } from '../middleware/auth';
 import { query, queryOne } from '../db';
 import { GoogleSsoProvider } from '../../integrations/sso/google';
+
+/**
+ * Constant-time string equality to avoid leaking the demo credential length
+ * or prefix via response timing. The values are env-provided so the cost is
+ * trivial; defence-in-depth on top of the rate limiter.
+ */
+function safeEqual(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) return false;
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 const router = Router();
 
@@ -129,7 +142,16 @@ router.post('/demo', (req, res) => {
   }
 
   const { username, password } = req.body as { username?: string; password?: string };
-  if (username !== DEMO_USER || password !== DEMO_PASS) {
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    res.status(401).json({ error: 'Invalid credentials' });
+    return;
+  }
+  // Always run BOTH comparisons so total work is independent of whether the
+  // username happens to match. timingSafeEqual itself is constant-time but
+  // short-circuit `||` would still leak via overall response time.
+  const userOk = safeEqual(username, DEMO_USER);
+  const passOk = safeEqual(password, DEMO_PASS);
+  if (!userOk || !passOk) {
     res.status(401).json({ error: 'Invalid credentials' });
     return;
   }

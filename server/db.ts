@@ -4,15 +4,29 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required');
 }
 
+// Tunable via env for prod sizing. Default 10 mirrors the historical setting;
+// raise DB_POOL_SIZE (typical prod: 20–40) when concurrent users grow.
+const POOL_MAX = Math.max(1, parseInt(process.env.DB_POOL_SIZE ?? '10', 10) || 10);
+// Hard cap on a single statement so a runaway query (cartesian join, missing
+// index) cannot starve the pool for the rest of the process. 30 s is generous
+// for batch repricing; tune via env if specific routes need longer.
+const STATEMENT_TIMEOUT_MS = Math.max(
+  1000,
+  parseInt(process.env.DB_STATEMENT_TIMEOUT_MS ?? '30000', 10) || 30000,
+);
+
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL.includes('localhost') ? false : {
     rejectUnauthorized: process.env.DB_REJECT_UNAUTHORIZED !== 'false',
     ca: process.env.DATABASE_CA_CERT || undefined,
   },
-  max: 10,
+  max: POOL_MAX,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
+  // Applied to every fresh connection. Because pg.Pool reuses connections,
+  // setting it once on `connect` is the right hook (vs. SET LOCAL per query).
+  statement_timeout: STATEMENT_TIMEOUT_MS,
 });
 
 pool.on('error', (err) => {

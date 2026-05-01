@@ -18,7 +18,7 @@
  */
 
 import { query, queryOne } from '../db';
-import { recordWorkerTickFailure, recordWorkerTickSuccess } from './workerHealth';
+import { runWorkerTick } from './workerHealth';
 import {
   proposeThresholdAdjustments,
   type ProposedRecalibration,
@@ -246,16 +246,13 @@ export function startThresholdRecalibrator(): void {
   const ms = Number(process.env.ATTRIBUTION_RECALIBRATION_INTERVAL_MS ?? '0');
   if (!Number.isFinite(ms) || ms < 1_000) return;
   if (interval) return;
-  interval = setInterval(async () => {
-    try {
+  interval = setInterval(() => {
+    void runWorkerTick('attribution-recalibrator', async () => {
       const report = await runRecalibrationSweep();
       if (report.proposalsEmitted > 0 || report.errors.length > 0) {
         console.info('[attribution-recalibrator]', report);
       }
-      recordWorkerTickSuccess('attribution-recalibrator');
-    } catch (err) {
-      recordWorkerTickFailure('attribution-recalibrator', err);
-    }
+    });
   }, ms);
 }
 

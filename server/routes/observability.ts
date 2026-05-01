@@ -8,9 +8,9 @@ const router = Router();
 
 router.get('/summary', async (req, res) => {
   try {
-    const entityId = String(req.query.entity_id ?? '').trim();
+    const entityId = String(req.tenancy?.entityId ?? req.query.entity_id ?? '').trim();
     if (!entityId) {
-      return res.status(400).json({ error: 'entity_id required' });
+      return res.status(400).json({ code: 'tenancy_missing_header', error: 'entity_id required' });
     }
 
     const [latencyRow, errorRow, dealRow, alertRow] = await Promise.all([
@@ -65,7 +65,7 @@ router.get('/summary', async (req, res) => {
 
 router.get('/metrics/recent', async (req, res) => {
   try {
-    const entityId = String(req.query.entity_id ?? '').trim();
+    const entityId = String(req.tenancy?.entityId ?? req.query.entity_id ?? '').trim();
     const metricName = String(req.query.metric_name ?? '').trim();
     const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '50'), 10) || 50, 1), 200);
 
@@ -89,13 +89,14 @@ router.get('/metrics/recent', async (req, res) => {
 
 router.get('/alert-rules', async (req, res) => {
   try {
-    const entityId = String(req.query.entity_id ?? '').trim();
-    const rows = entityId
-      ? await query(
-          'SELECT * FROM alert_rules WHERE entity_id = $1 ORDER BY is_active DESC, created_at DESC LIMIT 500',
-          [entityId],
-        )
-      : await query('SELECT * FROM alert_rules ORDER BY is_active DESC, created_at DESC LIMIT 500');
+    const entityId = String(req.tenancy?.entityId ?? req.query.entity_id ?? '').trim();
+    if (!entityId) {
+      return res.status(400).json({ code: 'tenancy_missing_header', error: 'entity_id required' });
+    }
+    const rows = await query(
+      'SELECT * FROM alert_rules WHERE entity_id = $1 ORDER BY is_active DESC, created_at DESC LIMIT 500',
+      [entityId],
+    );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
@@ -105,13 +106,22 @@ router.get('/alert-rules', async (req, res) => {
 router.post('/alert-rules', async (req, res) => {
   try {
     const rule = req.body ?? {};
+    const tenantEntityId = req.tenancy?.entityId ?? null;
+    if (!tenantEntityId) {
+      return res.status(400).json({ code: 'tenancy_missing_header', error: 'x-entity-id required' });
+    }
+    if (rule.entity_id && rule.entity_id !== tenantEntityId) {
+      return res.status(403).json({
+        code: 'tenancy_forbidden_write',
+        message: 'body.entity_id does not match the authenticated tenancy',
+      });
+    }
     const id = String(rule.id ?? randomUUID());
     const row = await queryOne(
       `INSERT INTO alert_rules (
          id, entity_id, name, metric_name, operator, threshold, recipients, is_active
        ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
        ON CONFLICT (id) DO UPDATE SET
-         entity_id = EXCLUDED.entity_id,
          name = EXCLUDED.name,
          metric_name = EXCLUDED.metric_name,
          operator = EXCLUDED.operator,
@@ -119,10 +129,11 @@ router.post('/alert-rules', async (req, res) => {
          recipients = EXCLUDED.recipients,
          is_active = EXCLUDED.is_active,
          updated_at = NOW()
+       WHERE alert_rules.entity_id = $2
        RETURNING *`,
       [
         id,
-        rule.entity_id,
+        tenantEntityId,
         rule.name,
         rule.metric_name,
         rule.operator,
@@ -131,6 +142,12 @@ router.post('/alert-rules', async (req, res) => {
         rule.is_active ?? true,
       ],
     );
+    if (!row) {
+      return res.status(409).json({
+        code: 'entity_mismatch',
+        message: 'Alert rule id exists in another entity',
+      });
+    }
     res.json(row);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
@@ -143,10 +160,14 @@ router.patch('/alert-rules/:id/toggle', async (req, res) => {
     if (typeof isActive !== 'boolean') {
       return res.status(400).json({ error: 'is_active boolean required' });
     }
+    const tenantEntityId = req.tenancy?.entityId ?? null;
+    if (!tenantEntityId) {
+      return res.status(400).json({ code: 'tenancy_missing_header', error: 'x-entity-id required' });
+    }
 
     const row = await queryOne(
-      'UPDATE alert_rules SET is_active = $2, updated_at = NOW() WHERE id = $1 RETURNING *',
-      [req.params.id, isActive],
+      'UPDATE alert_rules SET is_active = $3, updated_at = NOW() WHERE id = $1 AND entity_id = $2 RETURNING *',
+      [req.params.id, tenantEntityId, isActive],
     );
     if (!row) {
       return res.status(404).json({ error: 'Not found' });
@@ -159,7 +180,14 @@ router.patch('/alert-rules/:id/toggle', async (req, res) => {
 
 router.delete('/alert-rules/:id', async (req, res) => {
   try {
-    await execute('DELETE FROM alert_rules WHERE id = $1', [req.params.id]);
+    const tenantEntityId = req.tenancy?.entityId ?? null;
+    if (!tenantEntityId) {
+      return res.status(400).json({ code: 'tenancy_missing_header', error: 'x-entity-id required' });
+    }
+    await execute('DELETE FROM alert_rules WHERE id = $1 AND entity_id = $2', [
+      req.params.id,
+      tenantEntityId,
+    ]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
@@ -173,7 +201,7 @@ router.delete('/alert-rules/:id', async (req, res) => {
 // directly to keep the endpoint working even if pg_cron isn't set up yet.
 router.get('/slo-summary', async (req, res) => {
   try {
-    const entityId = String(req.query.entity_id ?? req.tenancy?.entityId ?? '').trim();
+    const entityId = String(req.tenancy?.entityId ?? req.query.entity_id ?? '').trim();
     if (!entityId) {
       return res.status(400).json({ code: 'tenancy_missing_header', message: 'entity_id required' });
     }
@@ -333,7 +361,7 @@ router.get('/slo-summary', async (req, res) => {
 // per-endpoint rollup needed to pinpoint which code paths are leaking.
 router.get('/tenancy-violations', async (req, res) => {
   try {
-    const entityId = String(req.query.entity_id ?? req.tenancy?.entityId ?? '').trim();
+    const entityId = String(req.tenancy?.entityId ?? req.query.entity_id ?? '').trim();
     if (!entityId) {
       return res.status(400).json({ code: 'tenancy_missing_header', message: 'entity_id required' });
     }

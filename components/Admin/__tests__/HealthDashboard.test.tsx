@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   listAlertRules: vi.fn(),
   getSLOSummary: vi.fn(),
   getAdapterHealth: vi.fn(),
+  getTenancyViolations: vi.fn(),
 }));
 
 vi.mock('../../../api/observability', () => ({
@@ -17,6 +18,7 @@ vi.mock('../../../api/observability', () => ({
   listAlertRules: mocks.listAlertRules,
   getSLOSummary: mocks.getSLOSummary,
   getAdapterHealth: mocks.getAdapterHealth,
+  getTenancyViolations: mocks.getTenancyViolations,
 }));
 
 vi.mock('../../../contexts/EntityContext', () => ({
@@ -34,6 +36,7 @@ describe('HealthDashboard', () => {
       generatedAt: new Date().toISOString(),
       adapters: [],
     });
+    mocks.getTenancyViolations.mockReset().mockResolvedValue(null);
   });
 
   it('renders live summary metrics and alert rules from the observability API', async () => {

@@ -34,6 +34,14 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
     const text = await res.text().catch(() => '');
     throw new Error(`API ${options?.method ?? 'GET'} ${path} failed (${res.status}): ${text}`);
   }
+  // 204 No Content (and other empty 2xx) carry no body — calling res.json()
+  // would throw "Unexpected end of JSON input". The previous behaviour broke
+  // every DELETE that returned 204 (e.g. /target-grid/templates/:id,
+  // /market-benchmarks/:id) — the row was removed server-side but the caller
+  // saw a thrown error and surfaced "delete failed" to the user.
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return undefined as T;
+  }
   return res.json() as Promise<T>;
 }
 
