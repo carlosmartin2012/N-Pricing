@@ -258,7 +258,7 @@ export function useBlotterActions({
     setDeals((previous) => previous.map((deal) => (deal.id === updated.id ? savedDeal || updated : deal)));
     if (updated.id) void pricingDiscipline.recomputeVariance(updated.id);
     setIsEditOpen(false);
-  }, [products, selectedDeal, setDeals, userRole]);
+  }, [canWriteRemotely, products, selectedDeal, setDeals, userRole]);
 
   const handleNewDeal = useCallback(() => {
     if (!canCreateOrCloneDeals(userRole)) return;
@@ -297,7 +297,7 @@ export function useBlotterActions({
     setDeals((previous) => [savedDeal || newDeal, ...previous]);
     if (newDeal.id) void pricingDiscipline.recomputeVariance(newDeal.id);
     setIsNewOpen(false);
-  }, [products, selectedDeal, setDeals, userRole]);
+  }, [canWriteRemotely, products, selectedDeal, setDeals, userRole]);
 
   const handleDelete = useCallback((deal: Transaction) => {
     if (!canDeleteDeal(userRole)) return;
@@ -350,7 +350,7 @@ export function useBlotterActions({
     });
     setIsDeleteOpen(false);
     setSelectedDeal(null);
-  }, [data, selectedDeal, setDeals, user, userRole]);
+  }, [canWriteRemotely, data, selectedDeal, setDeals, user, userRole]);
 
   return {
     behaviouralModels,

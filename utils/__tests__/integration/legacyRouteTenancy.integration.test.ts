@@ -6,9 +6,10 @@ import { Pool } from 'pg';
 
 /**
  * Integration tests for the legacy routes migrated to the tenancy pattern
- * (deals, audit, config). They verify that when tenancy middleware populated
- * req.tenancy, queries never return or mutate rows belonging to another
- * entity — the core regression this hardening was meant to close.
+ * (deals, audit, config, report-schedules). They verify that when tenancy
+ * middleware populated req.tenancy, queries never return or mutate rows
+ * belonging to another entity — the core regression this hardening was
+ * meant to close.
  *
  * OPT-IN: only runs with INTEGRATION_DATABASE_URL set. CI can wire it up
  * with a Postgres service container + migrations applied beforehand.
@@ -58,6 +59,7 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
     const { default: dealsRouter } = await import('../../../server/routes/deals');
     const { default: auditRouter } = await import('../../../server/routes/audit');
     const { default: configRouter } = await import('../../../server/routes/config');
+    const { default: reportSchedulesRouter } = await import('../../../server/routes/reportSchedules');
 
     const app = express();
     app.use(express.json());
@@ -76,6 +78,7 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
     app.use('/api/deals', dealsRouter);
     app.use('/api/audit', auditRouter);
     app.use('/api/config', configRouter);
+    app.use('/api/report-schedules', reportSchedulesRouter);
 
     await new Promise<void>((resolve) => {
       server = http.createServer(app).listen(0, () => resolve());
@@ -96,6 +99,8 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
     // test DB is short-lived in CI.
     await pool.query('DELETE FROM deals WHERE id LIKE $1', ['itest-%']);
     await pool.query('DELETE FROM rules WHERE product = $1', ['ITEST']);
+    await pool.query('DELETE FROM report_runs WHERE schedule_id IN (SELECT id FROM report_schedules WHERE name LIKE $1)', ['itest-%']);
+    await pool.query('DELETE FROM report_schedules WHERE name LIKE $1', ['itest-%']);
     await pool.query('DELETE FROM entity_users WHERE user_id IN ($1, $2)', ['user-a@test', 'user-b@test']);
     await pool.end();
   });
@@ -119,6 +124,17 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
          VALUES ('BU', 'ITEST', 'SEG', '1Y', $1)
          ON CONFLICT DO NOTHING`,
         [entity],
+      );
+      // Schedule IDs distintos a las entity IDs para no colisionar.
+      const schedId = suffix === 'a'
+        ? '00000000-0000-0000-0000-0000000005ca'
+        : '00000000-0000-0000-0000-0000000005cb';
+      await pool.query(
+        `INSERT INTO report_schedules
+           (id, entity_id, name, report_type, frequency, format, recipients, config, is_active, created_by)
+         VALUES ($1, $2, $3, 'portfolio_summary', 'weekly', 'pdf', '[]'::jsonb, '{}'::jsonb, true, 'itest')
+         ON CONFLICT (id) DO UPDATE SET entity_id = EXCLUDED.entity_id, name = EXCLUDED.name`,
+        [schedId, entity, `itest-sched-${suffix}`],
       );
     }
   });
@@ -149,6 +165,20 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
     const r = await fetch(`${baseUrl}${path}`, {
       method: 'DELETE',
       headers: { 'x-entity-id': entity, 'x-user-email': email },
+    });
+    const respBody = await r.json().catch(() => null);
+    return { status: r.status, body: respBody };
+  }
+
+  async function apiPatch(path: string, entity: string, body: unknown, email = 'test@test') {
+    const r = await fetch(`${baseUrl}${path}`, {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        'x-entity-id': entity,
+        'x-user-email': email,
+      },
+      body: JSON.stringify(body),
     });
     const respBody = await r.json().catch(() => null);
     return { status: r.status, body: respBody };
@@ -210,6 +240,62 @@ describe.skipIf(!SUITE_ENABLED)('integration: legacy route tenancy', () => {
     expect(entA).not.toContain(ENTITY_B);
     expect(entB).toContain(ENTITY_B);
     expect(entB).not.toContain(ENTITY_A);
+  });
+
+  it('GET /api/report-schedules only returns schedules for the caller entity', async () => {
+    const a = await apiGet('/api/report-schedules', ENTITY_A);
+    const b = await apiGet('/api/report-schedules', ENTITY_B);
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+    const namesA = (a.body as Array<{ name: string }>).map((r) => r.name);
+    const namesB = (b.body as Array<{ name: string }>).map((r) => r.name);
+    expect(namesA).toContain('itest-sched-a');
+    expect(namesA).not.toContain('itest-sched-b');
+    expect(namesB).toContain('itest-sched-b');
+    expect(namesB).not.toContain('itest-sched-a');
+  });
+
+  it('POST /api/report-schedules ignores body.entity_id and binds to caller', async () => {
+    // Cliente del tenant A intenta crear un schedule para el tenant B
+    // poniendo entity_id en el body. El handler debe ignorar el body
+    // y forzar el entity del JWT — el row resultante pertenece a A.
+    const r = await apiPost('/api/report-schedules', ENTITY_A, {
+      name: 'itest-sched-forge',
+      entity_id: ENTITY_B,
+      report_type: 'portfolio_summary',
+      frequency: 'daily',
+      format: 'pdf',
+      recipients: [],
+      config: {},
+      is_active: true,
+      created_by: 'attacker',
+    });
+    expect(r.status).toBe(200);
+    const created = r.body as { id: string; entity_id: string };
+    expect(created.entity_id).toBe(ENTITY_A);
+    // Limpieza para que el test sea idempotente (no acumular rows iter→iter)
+    await pool.query('DELETE FROM report_schedules WHERE id = $1', [created.id]);
+  });
+
+  it('DELETE /api/report-schedules/:id from wrong entity is silent no-op', async () => {
+    const SCHED_B_ID = '00000000-0000-0000-0000-0000000005cb';
+    const r = await apiDelete(`/api/report-schedules/${SCHED_B_ID}`, ENTITY_A);
+    expect(r.status).toBe(200);
+    // Verificar que el row sigue ahí (DELETE cross-tenant fue no-op)
+    const { rows } = await pool.query('SELECT id FROM report_schedules WHERE id = $1', [SCHED_B_ID]);
+    expect(rows.length).toBe(1);
+  });
+
+  it('PATCH /api/report-schedules/:id/toggle from wrong entity is silent no-op', async () => {
+    const SCHED_B_ID = '00000000-0000-0000-0000-0000000005cb';
+    // Estado inicial: is_active=true (del seed)
+    const r = await apiPatch(`/api/report-schedules/${SCHED_B_ID}/toggle`, ENTITY_A, { is_active: false });
+    expect(r.status).toBe(200);
+    const { rows } = await pool.query<{ is_active: boolean }>(
+      'SELECT is_active FROM report_schedules WHERE id = $1',
+      [SCHED_B_ID],
+    );
+    expect(rows[0]?.is_active).toBe(true); // No cambió porque es de otro tenant
   });
 
   it('fuzz: 30 alternating-entity reads do not cross-tenant', async () => {
