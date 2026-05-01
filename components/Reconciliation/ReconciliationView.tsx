@@ -79,7 +79,10 @@ const ReconciliationView: React.FC = () => {
   const { data, isLoading } = useReconciliationSummaryQuery(period);
 
   const summary = data?.summary;
-  const allPairs = data?.pairs ?? [];
+  // useMemo evita crear un nuevo [] cada render cuando data es undefined,
+  // que invalidaría la identidad de allPairs y dispararía el filtered
+  // useMemo aunque ningún input lógico haya cambiado.
+  const allPairs = useMemo(() => data?.pairs ?? [], [data?.pairs]);
 
   const filtered = useMemo(() => {
     if (statusFilter === 'all') return allPairs;
