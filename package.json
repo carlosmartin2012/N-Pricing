@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit",
     "build:edge": "node supabase/functions/pricing/build.mjs",
     "typecheck:edge": "npm run build:edge && deno check supabase/functions/pricing/index.ts",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
     "verify": "npm run lint && npm run typecheck && npm run typecheck:edge && npm run check:sync && npm run check:data-quality && npm run check:security && npm run test && npm run build && npm run check:bundle",
     "verify:full": "npm run verify && npm run test:e2e",
     "check:sync": "npx tsx scripts/check-seed-schema-sync.ts",

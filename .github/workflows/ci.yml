@@ -22,6 +22,12 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Lint (zero warnings)
+        # `npm run lint` ahora usa --max-warnings=0 (package.json), así
+        # que cualquier warning nuevo (unused import, exhaustive-deps,
+        # etc.) bloquea el merge. Baseline cerrado en PR #108.
+        run: npm run lint
+
       - name: TypeScript check
         run: npx tsc --noEmit
 
