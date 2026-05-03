@@ -69,19 +69,23 @@ export const Header: React.FC<HeaderProps> = ({
   const currentItem =
     mainNavItems.find((item) => item.id === currentView) ||
     bottomNavItems.find((item) => item.id === currentView);
-  const currentLabel = currentItem?.label ?? 'Workspace';
+  const currentLabel = currentItem?.label ?? t.headerWorkspace;
   const currentSection = currentItem?.section;
   const sectionAccent: Record<string, string> = {
+    Relationships: 'text-[color:var(--nfq-success)]',
     Commercial: 'text-[color:var(--nfq-success)]',
     Pricing:    'text-[color:var(--nfq-accent)]',
+    'Market Data': 'text-sky-300',
     Insights:   'text-[color:var(--nfq-warning)]',
     Governance: 'text-violet-300',
     Assistant:  'text-fuchsia-300',
     System:     'text-slate-400',
   };
   const sectionDot: Record<string, string> = {
+    Relationships: 'bg-[var(--nfq-success)]',
     Commercial: 'bg-[var(--nfq-success)]',
     Pricing:    'bg-[var(--nfq-accent)]',
+    'Market Data': 'bg-sky-400',
     Insights:   'bg-[var(--nfq-warning)]',
     Governance: 'bg-violet-400',
     Assistant:  'bg-fuchsia-400',
@@ -93,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
     if (themeMode === 'light') return 'system';
     return 'dark';
   };
-  const themeLabel = themeMode === 'system' ? 'System' : themeMode === 'dark' ? 'Dark' : 'Light';
+  const themeLabel = themeMode === 'system' ? t.system : themeMode === 'dark' ? t.dark : t.light;
   const dataModeState = describeDataModeState({ dataMode, syncStatus });
   const dataModeBadgeClass =
     dataModeState.accent === 'emerald'
@@ -117,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
       className="nfq-topbar sticky top-0 z-20 flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] px-4 md:px-5 xl:px-6"
       style={{ height: 'var(--nfq-topbar-height)', background: 'var(--nfq-bg-surface)' }}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 shrink-0 items-center gap-3">
         <button
           data-testid="menu-toggle"
           onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -129,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="hidden h-8 w-px bg-[color:var(--nfq-border-ghost)] md:block" />
 
-        <div className="min-w-0">
+        <div className="min-w-[140px] max-w-[280px] shrink min-[1440px]:max-w-[360px]">
           <div className="flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.2em]">
             {currentSection ? (
               <>
@@ -141,10 +145,10 @@ export const Header: React.FC<HeaderProps> = ({
                   {currentSection}
                 </span>
                 <span className="text-[color:var(--nfq-text-faint)]">{'\u203a'}</span>
-                <span className="text-[color:var(--nfq-text-tertiary)]">Workspace</span>
+                <span className="text-[color:var(--nfq-text-tertiary)]">{t.headerWorkspace}</span>
               </>
             ) : (
-              <span className="text-[color:var(--nfq-text-tertiary)]">Workspace</span>
+              <span className="text-[color:var(--nfq-text-tertiary)]">{t.headerWorkspace}</span>
             )}
           </div>
           <div className="truncate text-sm font-medium text-[color:var(--nfq-text-primary)] md:text-base">
@@ -153,8 +157,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3">
-        <div className="hidden items-center gap-3 rounded-full bg-[var(--nfq-bg-elevated)] px-4 py-2 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] xl:flex">
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-2 overflow-hidden md:gap-3">
+        <div className="hidden items-center gap-3 rounded-full bg-[var(--nfq-bg-elevated)] px-4 py-2 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] 2xl:flex">
           <div className="flex items-center gap-2">
             <span className={`h-2 w-2 rounded-full shadow-[0_0_0_6px_rgba(16,185,129,0.08)] ${
               dataModeState.accent === 'emerald'
@@ -170,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-xs text-[color:var(--nfq-text-secondary)]">{dataModeState.detail}</span>
         </div>
 
-        <div className="hidden items-center gap-1 rounded-full bg-[var(--nfq-bg-elevated)] p-1 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] lg:flex">
+        <div className="hidden items-center gap-1 rounded-full bg-[var(--nfq-bg-elevated)] p-1 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] 2xl:flex">
           <span className="px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--nfq-text-muted)]">{t.dataMode}</span>
           <button
             type="button"
@@ -199,12 +203,12 @@ export const Header: React.FC<HeaderProps> = ({
         {onOpenCommandPalette && (
           <button
             onClick={onOpenCommandPalette}
-            aria-label="Open command palette"
-            className="hidden items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] md:flex"
-            title="Search views, clients, deals, snapshots (\u2318K)"
+            aria-label={t.headerSearchTitle}
+            className="hidden items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] min-[1440px]:flex"
+            title={t.headerSearchTitle}
           >
             <Search size={14} />
-            <span>Search{'\u2026'}</span>
+            <span>{t.headerSearch}</span>
             <kbd className="ml-1 rounded border border-[var(--nfq-border-ghost)] px-1.5 py-0.5 font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
               {'\u2318'}K
             </kbd>
@@ -213,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-          className="hidden h-10 items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] md:inline-flex"
+          className="hidden h-10 items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] min-[1440px]:inline-flex"
           title={t.language}
         >
           <Languages size={14} />
@@ -251,7 +255,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsNotificationOpen((prev) => !prev)}
-            aria-label="Notifications"
+            aria-label={t.headerNotifications}
             aria-expanded={isNotificationOpen}
             className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
           >
@@ -266,11 +270,11 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onOpenImport}
           className="nfq-button nfq-button-primary px-4 text-[11px] uppercase tracking-[0.14em]"
-          title="Universal Data Import"
-          aria-label="Universal Data Import"
+          title={t.headerImportData}
+          aria-label={t.headerImportData}
         >
           <Upload size={14} />
-          <span className="hidden lg:inline">Import Data</span>
+          <span className="hidden min-[1440px]:inline">{t.headerImportData}</span>
         </button>
 
         <div className="ml-1 flex items-center gap-3 rounded-full bg-[var(--nfq-bg-elevated)] px-2 py-1.5 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)]">

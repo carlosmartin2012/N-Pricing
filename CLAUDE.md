@@ -94,7 +94,7 @@ el usuario abra la UI. Ver [`docs/runbooks/replit-demo.md`](docs/runbooks/replit
 
 ```text
 App.tsx                    # Shell principal, lazy loading, routing
-appNavigation.ts           # Navegación (17 vistas — +Stress Pricing en Ola 6 B.5)
+appNavigation.ts           # Navegación (31 ViewState; 22 sidebar + AUX)
 types.ts                   # Tipos de dominio + re-exports de types/*
 translations.ts            # i18n (en/es)
 
@@ -211,7 +211,7 @@ utils/
 
 supabase/
   schema.sql (LEGACY — DO NOT EXECUTE) schema_v2.sql fix_rls_realtime.sql
-  migrations/                       # 40 migraciones secuenciales (cronológicas)
+  migrations/                       # 43 migraciones SQL secuenciales (cronológicas)
   functions/
     pricing/                        # +tenancy + snapshot write + scoping (Phase 0)
     realize-raroc/                  # +entity_id query param (Phase 0)
@@ -426,13 +426,16 @@ Plus, post-roadmap:
 - Campaign delta aplicado a `finalClientRate` en channel quotes.
 - Snapshot inmutable de cada ejecución para reproducibilidad regulatoria.
 
-## Vistas y navegación (17 vistas)
+## Vistas y navegación (31 ViewState)
 
-**Principales (13):** Pricing Engine, RAROC Terminal, Stress Testing,
-**Stress Pricing** (`/stress-pricing` — 6 presets EBA × deal, Ola 6 B.5),
-**Customer Pricing**, **Campaigns**, Deal Blotter, Accounting Ledger,
-ALM Reporting, Yield Curves, Target Grid, Pricing Discipline, What-If,
-Rules & Config, Behavioural Models, AI Assistant.
+**Sidebar principal (22):** Clients, Pipeline, Campaigns, Targets,
+Calculator, RAROC, Stress Test, Stress Pricing, What-If, Deal Blotter,
+Yield Curves, Behavioural Models, Methodology, Analytics, Pricing Discipline,
+Attribution reporting, Model Inventory, Dossiers, Approvals,
+Budget reconciliation, FTP Reconciliation, AI Assistant.
+
+**AUX via Command Palette:** Accounting Ledger, Snapshot Replay, SLO Dashboard,
+Adapter Health, Escalations, Attribution matrix.
 
 **Bottom nav:** User Configuration, User Management, System Audit
 (con SLO Panel embebido), User Manual.
@@ -450,9 +453,9 @@ Rules & Config, Behavioural Models, AI Assistant.
 
 ## Base de datos y Supabase
 
-- 40 migrations secuenciales en `supabase/migrations/` (última:
-  `20260619000004_tenancy_alerts_seed.sql`; la anterior es
-  `20260619000003_pricing_snapshots_hash_chain.sql`).
+- 43 migrations SQL secuenciales en `supabase/migrations/` (última:
+  `20260630000002_push_subscriptions.sql`; la anterior es
+  `20260630000001_attribution_threshold_recalibrations.sql`).
 - Schema principal: `supabase/schema_v2.sql` (referencia legacy),
   migrations es la verdad operativa.
 - `supabase/schema.sql` está marcado **LEGACY — DO NOT EXECUTE** y ningún

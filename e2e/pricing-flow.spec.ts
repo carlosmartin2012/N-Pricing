@@ -37,9 +37,9 @@ test.describe('Calculator Workspace Layout', () => {
     await expect(page.getByTestId('pricing-receipt')).toBeVisible();
   });
 
-  test('shows the workspace title "Pricing Engine"', async ({ page }) => {
+  test('shows the workspace title "Calculator"', async ({ page }) => {
     // The main heading in the hero section reflects the active view
-    await expect(page.getByRole('heading', { name: 'Pricing Engine' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Calculator' })).toBeVisible();
   });
 
   test('shows portfolio KPI cards (Deals, Pending, Snapshots, AI traces)', async ({ page }) => {
@@ -134,7 +134,7 @@ test.describe('Deal Input — Lever Controls', () => {
   });
 
   test('shows the tenor lever', async ({ page }) => {
-    await expect(page.getByText('Tenor', { exact: false })).toBeVisible();
+    await expect(page.getByTestId('deal-input-panel').getByText('Tenor', { exact: true })).toBeVisible();
   });
 
   test('amount input accepts numeric values', async ({ page }) => {
@@ -266,7 +266,7 @@ test.describe('Cross-View Data Persistence', () => {
     // Ensure sidebar is expanded
     const sidebarHasLabels = await page
       .getByTestId('sidebar')
-      .getByText('Pricing Engine')
+      .getByTestId('nav-CALCULATOR')
       .isVisible()
       .catch(() => false);
 
@@ -276,7 +276,7 @@ test.describe('Cross-View Data Persistence', () => {
 
     // Navigate to the blotter
     await page.getByTestId('nav-BLOTTER').click();
-    await expect(page.getByTestId('header').getByText('Deal Blotter')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('heading', { name: 'Deal Blotter', level: 1 })).toBeVisible({ timeout: 5_000 });
 
     // The blotter should contain visible rows once the saved deal has been
     // persisted into the mocked API state and the view rehydrates.

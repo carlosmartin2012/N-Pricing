@@ -56,22 +56,15 @@ const DealUpsertSchema = object({
   liquidity_spread: optional(number({ min: -100, max: 100 })),
   liquidity_premium_details: optional(any()),
   clc_charge_details: optional(any()),
+  _liquidity_premium_details: optional(any()),
+  _clc_charge_details: optional(any()),
   entity_id: optional(string({ maxLength: 128 })),
   version: optional(number({ min: 0, max: 1_000_000, integer: true })),
 });
 
-// Batch upsert uses a slimmer payload — enforce the shape and a hard cap of
-// 1000 deals per request to prevent memory/DB exhaustion.
-const BatchDealSchema = object({
-  id: optional(string({ maxLength: 128 })),
-  status: string({ maxLength: 64 }),
-  client_id: optional(string({ maxLength: 128 })),
-  product_type: optional(string({ maxLength: 64 })),
-  currency: optional(string({ minLength: 3, maxLength: 3 })),
-  amount: number({ min: 0, max: 1e15 }),
-  entity_id: optional(string({ maxLength: 128 })),
-});
-const BatchDealArraySchema = array(BatchDealSchema, { maxLength: 1000 });
+// Batch upsert accepts the same deal shape as single upsert, with a hard cap
+// of 1000 deals per request to prevent memory/DB exhaustion.
+const BatchDealArraySchema = array(DealUpsertSchema, { maxLength: 1000 });
 
 // Transition payload: the server derives the rest from `newStatus`.
 const ALLOWED_STATUSES = [
@@ -89,6 +82,79 @@ const TransitionSchema = object({
 });
 
 const nowIso = () => new Date().toISOString();
+
+type DealPayload = Record<string, unknown>;
+
+const DEAL_UPSERT_SQL = `INSERT INTO deals (
+  id, status, client_id, client_type, business_unit, funding_business_unit,
+  business_line, product_type, currency, amount, start_date, duration_months,
+  amortization, repricing_freq, margin_target, behavioural_model_id, risk_weight,
+  capital_ratio, target_roe, operational_cost_bps, lcr_outflow_pct, category,
+  drawn_amount, undrawn_amount, is_committed, lcr_classification, deposit_type,
+  behavioral_maturity_override, transition_risk, physical_risk, liquidity_spread,
+  _liquidity_premium_details, _clc_charge_details, entity_id, version, updated_at
+) VALUES (
+  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+  $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36
+)
+ON CONFLICT (id) DO UPDATE SET
+  status = EXCLUDED.status,
+  client_id = EXCLUDED.client_id,
+  client_type = EXCLUDED.client_type,
+  business_unit = EXCLUDED.business_unit,
+  funding_business_unit = EXCLUDED.funding_business_unit,
+  business_line = EXCLUDED.business_line,
+  product_type = EXCLUDED.product_type,
+  currency = EXCLUDED.currency,
+  amount = EXCLUDED.amount,
+  start_date = EXCLUDED.start_date,
+  duration_months = EXCLUDED.duration_months,
+  amortization = EXCLUDED.amortization,
+  repricing_freq = EXCLUDED.repricing_freq,
+  margin_target = EXCLUDED.margin_target,
+  behavioural_model_id = EXCLUDED.behavioural_model_id,
+  risk_weight = EXCLUDED.risk_weight,
+  capital_ratio = EXCLUDED.capital_ratio,
+  target_roe = EXCLUDED.target_roe,
+  operational_cost_bps = EXCLUDED.operational_cost_bps,
+  lcr_outflow_pct = EXCLUDED.lcr_outflow_pct,
+  category = EXCLUDED.category,
+  drawn_amount = EXCLUDED.drawn_amount,
+  undrawn_amount = EXCLUDED.undrawn_amount,
+  is_committed = EXCLUDED.is_committed,
+  lcr_classification = EXCLUDED.lcr_classification,
+  deposit_type = EXCLUDED.deposit_type,
+  behavioral_maturity_override = EXCLUDED.behavioral_maturity_override,
+  transition_risk = EXCLUDED.transition_risk,
+  physical_risk = EXCLUDED.physical_risk,
+  liquidity_spread = EXCLUDED.liquidity_spread,
+  _liquidity_premium_details = EXCLUDED._liquidity_premium_details,
+  _clc_charge_details = EXCLUDED._clc_charge_details,
+  entity_id = EXCLUDED.entity_id,
+  version = EXCLUDED.version,
+  updated_at = EXCLUDED.updated_at
+RETURNING *`;
+
+function asJsonText(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
+
+function dealUpsertParams(d: DealPayload, id: string, effectiveEntityId: string | null): unknown[] {
+  return [
+    id, d.status, d.client_id, d.client_type, d.business_unit, d.funding_business_unit,
+    d.business_line, d.product_type, d.currency, d.amount, d.start_date, d.duration_months,
+    d.amortization, d.repricing_freq, d.margin_target, d.behavioural_model_id, d.risk_weight,
+    d.capital_ratio, d.target_roe, d.operational_cost_bps, d.lcr_outflow_pct ?? 0,
+    d.category ?? 'Asset', d.drawn_amount ?? 0, d.undrawn_amount ?? 0,
+    d.is_committed ?? false, d.lcr_classification, d.deposit_type,
+    d.behavioral_maturity_override, d.transition_risk, d.physical_risk,
+    d.liquidity_spread,
+    asJsonText(d._liquidity_premium_details ?? d.liquidity_premium_details),
+    asJsonText(d._clc_charge_details ?? d.clc_charge_details),
+    effectiveEntityId, d.version ?? 1, nowIso(),
+  ];
+}
 
 // Bound pagination inputs to protect the DB from NaN / unbounded scans.
 // A missing or malformed query param falls back to `fallback`; anything above
@@ -235,69 +301,7 @@ router.post('/upsert', validateBody(DealUpsertSchema), async (req, res) => {
         return;
       }
     }
-    const row = await queryOne(
-      `INSERT INTO deals (
-        id, status, client_id, client_type, business_unit, funding_business_unit,
-        business_line, product_type, currency, amount, start_date, duration_months,
-        amortization, repricing_freq, margin_target, behavioural_model_id, risk_weight,
-        capital_ratio, target_roe, operational_cost_bps, lcr_outflow_pct, category,
-        drawn_amount, undrawn_amount, is_committed, lcr_classification, deposit_type,
-        behavioral_maturity_override, transition_risk, physical_risk, liquidity_spread,
-        _liquidity_premium_details, _clc_charge_details, entity_id, version, updated_at
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-        $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36
-      )
-      ON CONFLICT (id) DO UPDATE SET
-        status = EXCLUDED.status,
-        client_id = EXCLUDED.client_id,
-        client_type = EXCLUDED.client_type,
-        business_unit = EXCLUDED.business_unit,
-        funding_business_unit = EXCLUDED.funding_business_unit,
-        business_line = EXCLUDED.business_line,
-        product_type = EXCLUDED.product_type,
-        currency = EXCLUDED.currency,
-        amount = EXCLUDED.amount,
-        start_date = EXCLUDED.start_date,
-        duration_months = EXCLUDED.duration_months,
-        amortization = EXCLUDED.amortization,
-        repricing_freq = EXCLUDED.repricing_freq,
-        margin_target = EXCLUDED.margin_target,
-        behavioural_model_id = EXCLUDED.behavioural_model_id,
-        risk_weight = EXCLUDED.risk_weight,
-        capital_ratio = EXCLUDED.capital_ratio,
-        target_roe = EXCLUDED.target_roe,
-        operational_cost_bps = EXCLUDED.operational_cost_bps,
-        lcr_outflow_pct = EXCLUDED.lcr_outflow_pct,
-        category = EXCLUDED.category,
-        drawn_amount = EXCLUDED.drawn_amount,
-        undrawn_amount = EXCLUDED.undrawn_amount,
-        is_committed = EXCLUDED.is_committed,
-        lcr_classification = EXCLUDED.lcr_classification,
-        deposit_type = EXCLUDED.deposit_type,
-        behavioral_maturity_override = EXCLUDED.behavioral_maturity_override,
-        transition_risk = EXCLUDED.transition_risk,
-        physical_risk = EXCLUDED.physical_risk,
-        liquidity_spread = EXCLUDED.liquidity_spread,
-        _liquidity_premium_details = EXCLUDED._liquidity_premium_details,
-        _clc_charge_details = EXCLUDED._clc_charge_details,
-        entity_id = EXCLUDED.entity_id,
-        version = EXCLUDED.version,
-        updated_at = EXCLUDED.updated_at
-      RETURNING *`,
-      [
-        id, d.status, d.client_id, d.client_type, d.business_unit, d.funding_business_unit,
-        d.business_line, d.product_type, d.currency, d.amount, d.start_date, d.duration_months,
-        d.amortization, d.repricing_freq, d.margin_target, d.behavioural_model_id, d.risk_weight,
-        d.capital_ratio, d.target_roe, d.operational_cost_bps, d.lcr_outflow_pct ?? 0,
-        d.category ?? 'Asset', d.drawn_amount ?? 0, d.undrawn_amount ?? 0,
-        d.is_committed ?? false, d.lcr_classification, d.deposit_type,
-        d.behavioral_maturity_override, d.transition_risk, d.physical_risk,
-        d.liquidity_spread, d.liquidity_premium_details ? JSON.stringify(d.liquidity_premium_details) : null,
-        d.clc_charge_details ? JSON.stringify(d.clc_charge_details) : null,
-        effectiveEntityId, d.version ?? 1, nowIso(),
-      ],
-    );
+    const row = await queryOne(DEAL_UPSERT_SQL, dealUpsertParams(d, id, effectiveEntityId));
     res.json(row);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
@@ -306,7 +310,7 @@ router.post('/upsert', validateBody(DealUpsertSchema), async (req, res) => {
 
 router.post('/batch-upsert', validateBody(BatchDealArraySchema), async (req, res) => {
   try {
-    const deals = req.body as Record<string, unknown>[];
+    const deals = req.body as DealPayload[];
     const scope = tenancyScope(req);
     // Batch writes are all-or-nothing for tenancy: if any item tries to
     // write to a different entity than the caller, the whole batch is
@@ -322,16 +326,34 @@ router.post('/batch-upsert', validateBody(BatchDealArraySchema), async (req, res
         return;
       }
     }
-    const results = await Promise.all(
-      deals.map(async (d) => {
-        const id = (d.id as string) || randomUUID();
+    const results = await withTransaction(async (tx) => {
+      const rows: unknown[] = [];
+      for (const d of deals) {
+        const id = (d.id as string | undefined) || randomUUID();
         const effectiveEntityId = scope.entityId ?? (d.entity_id as string | undefined) ?? null;
-        return queryOne('INSERT INTO deals (id, status, client_id, product_type, currency, amount, entity_id, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status, updated_at=EXCLUDED.updated_at RETURNING *',
-          [id, d.status, d.client_id, d.product_type, d.currency, d.amount, effectiveEntityId, nowIso()]);
-      })
-    );
+        if (scope.entityId && d.id) {
+          const existing = await tx.queryOne<{ entity_id: string }>(
+            'SELECT entity_id FROM deals WHERE id = $1',
+            [d.id],
+          );
+          if (existing && existing.entity_id !== scope.entityId) {
+            throw new Error(`Deal id ${String(d.id)} exists in another entity`);
+          }
+        }
+        const row = await tx.queryOne(DEAL_UPSERT_SQL, dealUpsertParams(d, id, effectiveEntityId));
+        if (row) rows.push(row);
+      }
+      return rows;
+    });
     res.json(results.filter(Boolean));
   } catch (err) {
+    if (err instanceof Error && /exists in another entity/i.test(err.message)) {
+      res.status(409).json({
+        code: 'entity_mismatch',
+        message: 'One or more deal ids exist in another entity',
+      });
+      return;
+    }
     res.status(500).json({ error: safeError(err) });
   }
 });

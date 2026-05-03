@@ -10,17 +10,18 @@ import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
-import { viewToPath, AUX_DESTINATIONS } from '../../appNavigation';
+import { viewToPath, buildAuxDestinations } from '../../appNavigation';
 import type { ViewState } from '../../types';
 import type { CopilotContextSummary } from '../../types/copilot';
 import CopilotAskPanel from './CopilotAskPanel';
+import type { translations } from '../../translations';
 
 interface CommandItem {
   id: string;
   label: string;
   sublabel?: string;
   icon: LucideIcon;
-  category: 'Navigation' | 'Deal' | 'Client' | 'Action';
+  category: 'navigation' | 'deal' | 'client' | 'action';
   action: () => void;
 }
 
@@ -29,27 +30,30 @@ interface Props {
   onClose: () => void;
 }
 
-// Main sidebar destinations (11) — aligned with buildMainNavItems
-const VIEW_ITEMS: { id: ViewState; label: string; icon: LucideIcon }[] = [
-  { id: 'CUSTOMER_360',    label: 'Customers',          icon: Users },
-  { id: 'CAMPAIGNS',       label: 'Campaigns',          icon: Target },
-  { id: 'TARGET_GRID',     label: 'Target Grid',        icon: Grid3X3 },
-  { id: 'CALCULATOR',      label: 'Pricing Engine',     icon: Calculator },
-  { id: 'BLOTTER',         label: 'Deal Blotter',       icon: FileText },
-  { id: 'ACCOUNTING',      label: 'Accounting Ledger',  icon: LayoutDashboard },
-  { id: 'REPORTING',       label: 'Analytics',          icon: BarChart4 },
-  { id: 'MARKET_DATA',     label: 'Yield Curves',       icon: TrendingUp },
-  { id: 'BEHAVIOURAL',     label: 'Behavioural Models', icon: Activity },
-  { id: 'METHODOLOGY',     label: 'Methodology',        icon: GitBranch },
-  { id: 'MODEL_INVENTORY', label: 'Model Inventory',    icon: BookOpenCheck },
-  { id: 'DOSSIERS',        label: 'Signed Dossiers',    icon: FileSignature },
-  { id: 'ESCALATIONS',     label: 'Escalations',        icon: ShieldAlert },
-  { id: 'AI_LAB',          label: 'AI Assistant',       icon: BrainCircuit },
-  { id: 'USER_MGMT',       label: 'User Management',    icon: Users },
-  { id: 'AUDIT_LOG',       label: 'System Audit',       icon: ShieldCheck },
-  { id: 'HEALTH',          label: 'System Health',      icon: HeartPulse },
-  { id: 'MANUAL',          label: 'User Manual',        icon: BookOpen },
-];
+type TranslationLabels = typeof translations.en;
+
+function buildViewItems(t: TranslationLabels): { id: ViewState; label: string; icon: LucideIcon }[] {
+  return [
+    { id: 'CUSTOMER_360',    label: t.navClients,          icon: Users },
+    { id: 'CAMPAIGNS',       label: t.navCampaigns,        icon: Target },
+    { id: 'TARGET_GRID',     label: t.targetGrid,          icon: Grid3X3 },
+    { id: 'CALCULATOR',      label: t.pricingEngine,       icon: Calculator },
+    { id: 'BLOTTER',         label: t.dealBlotter,         icon: FileText },
+    { id: 'ACCOUNTING',      label: t.auxAccountingLedger, icon: LayoutDashboard },
+    { id: 'REPORTING',       label: t.navAnalytics,        icon: BarChart4 },
+    { id: 'MARKET_DATA',     label: t.yieldCurves,         icon: TrendingUp },
+    { id: 'BEHAVIOURAL',     label: t.behaviouralModels,   icon: Activity },
+    { id: 'METHODOLOGY',     label: t.navMethodology,      icon: GitBranch },
+    { id: 'MODEL_INVENTORY', label: t.navModelInventory,   icon: BookOpenCheck },
+    { id: 'DOSSIERS',        label: t.navDossiers,         icon: FileSignature },
+    { id: 'ESCALATIONS',     label: t.auxEscalations,      icon: ShieldAlert },
+    { id: 'AI_LAB',          label: t.navAiAssistant,      icon: BrainCircuit },
+    { id: 'USER_MGMT',       label: t.userMgmt,            icon: Users },
+    { id: 'AUDIT_LOG',       label: t.auditLog,            icon: ShieldCheck },
+    { id: 'HEALTH',          label: t.systemHealth,        icon: HeartPulse },
+    { id: 'MANUAL',          label: t.manual,              icon: BookOpen },
+  ];
+}
 
 function fuzzyMatch(text: string, query: string): boolean {
   const lower = text.toLowerCase();
@@ -71,7 +75,18 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { deals, clients } = useData();
-  const { theme, setTheme, setIsImportModalOpen, openCustomerDrawer, language } = useUI();
+  const { theme, setTheme, setIsImportModalOpen, openCustomerDrawer, language, t } = useUI();
+  const viewItems = useMemo(() => buildViewItems(t), [t]);
+  const auxDestinations = useMemo(() => buildAuxDestinations(t), [t]);
+  const categoryLabels = useMemo(
+    () => ({
+      navigation: t.commandCategoryNavigation,
+      deal: t.commandCategoryDeal,
+      client: t.commandCategoryClient,
+      action: t.commandCategoryAction,
+    }),
+    [t],
+  );
 
   // Compose the copilot context from the user's surroundings. dealId
   // comes from the Calculator selection (last deal in `deals` array
@@ -92,22 +107,22 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
 
   // Build command items
   const items = useMemo<CommandItem[]>(() => {
-    const navItems: CommandItem[] = VIEW_ITEMS.map((v) => ({
+    const navItems: CommandItem[] = viewItems.map((v) => ({
       id: `nav-${v.id}`,
       label: v.label,
-      sublabel: 'Navigate',
+      sublabel: t.commandNavigateSublabel,
       icon: v.icon,
-      category: 'Navigation' as const,
+      category: 'navigation' as const,
       action: () => { navigate(viewToPath(v.id)); onClose(); },
     }));
 
     // Auxiliary destinations — not in sidebar but reachable via palette
-    const auxItems: CommandItem[] = AUX_DESTINATIONS.map((d) => ({
+    const auxItems: CommandItem[] = auxDestinations.map((d) => ({
       id: `aux-${d.id}`,
       label: d.label,
       sublabel: d.sublabel,
       icon: d.icon,
-      category: 'Navigation' as const,
+      category: 'navigation' as const,
       action: () => { navigate(d.path); onClose(); },
     }));
 
@@ -115,56 +130,56 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
     const clientItems: CommandItem[] = clients.slice(0, 50).map((c) => ({
       id: `client-${c.id}`,
       label: c.name,
-      sublabel: `${c.segment ?? 'Client'} \u00b7 ${c.rating ?? '—'} \u00b7 Open 360 drawer`,
+      sublabel: `${c.segment ?? t.commandClientFallback} \u00b7 ${c.rating ?? '—'} \u00b7 ${t.commandOpen360Drawer}`,
       icon: User2,
-      category: 'Client' as const,
+      category: 'client' as const,
       action: () => { openCustomerDrawer(c.id); onClose(); },
     }));
 
     const dealItems: CommandItem[] = deals.slice(0, 20).map((d) => ({
       id: `deal-${d.id}`,
-      label: `${d.id || 'Draft'} — ${d.clientId}`,
+      label: `${d.id || t.commandDraftDeal} — ${d.clientId}`,
       sublabel: `${d.productType} \u00b7 ${d.currency} ${((d.amount || 0) / 1e6).toFixed(1)}M`,
       icon: FileText,
-      category: 'Deal' as const,
+      category: 'deal' as const,
       action: () => { navigate(viewToPath('BLOTTER')); onClose(); },
     }));
 
     const actionItems: CommandItem[] = [
       {
         id: 'action-new-deal',
-        label: 'New Deal',
-        sublabel: 'Create a new pricing deal',
+        label: t.commandNewDeal,
+        sublabel: t.commandNewDealDesc,
         icon: Plus,
-        category: 'Action' as const,
+        category: 'action' as const,
         action: () => { navigate(viewToPath('BLOTTER')); onClose(); },
       },
       {
         id: 'action-import',
-        label: 'Import Data',
-        sublabel: 'Universal data import',
+        label: t.headerImportData,
+        sublabel: t.commandImportDataDesc,
         icon: Upload,
-        category: 'Action' as const,
+        category: 'action' as const,
         action: () => { setIsImportModalOpen(true); onClose(); },
       },
       {
         id: 'action-theme',
-        label: theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-        sublabel: 'Toggle color theme',
+        label: theme === 'dark' ? t.commandSwitchToLightMode : t.commandSwitchToDarkMode,
+        sublabel: t.commandToggleTheme,
         icon: theme === 'dark' ? Sun : Moon,
-        category: 'Action' as const,
+        category: 'action' as const,
         action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); onClose(); },
       },
     ];
 
     return [...navItems, ...auxItems, ...actionItems, ...clientItems, ...dealItems];
-  }, [deals, clients, navigate, onClose, theme, setTheme, setIsImportModalOpen, openCustomerDrawer]);
+  }, [auxDestinations, deals, clients, navigate, onClose, theme, setTheme, setIsImportModalOpen, openCustomerDrawer, t, viewItems]);
 
   // Filter by query
   const filtered = useMemo(() => {
     if (!query.trim()) {
       // Empty query: show top navs + actions only (skip long client/deal lists)
-      return items.filter((i) => i.category === 'Navigation' || i.category === 'Action').slice(0, 20);
+      return items.filter((i) => i.category === 'navigation' || i.category === 'action').slice(0, 20);
     }
     return items.filter((i) => fuzzyMatch(i.label, query) || (i.sublabel && fuzzyMatch(i.sublabel, query))).slice(0, 25);
   }, [items, query]);
@@ -239,7 +254,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
                 : 'text-[var(--nfq-text-muted)] hover:text-[var(--nfq-text-secondary)]'
             }`}
           >
-            <Compass size={12} /> Navigate
+            <Compass size={12} /> {t.commandNavigateTab}
           </button>
           <button
             type="button"
@@ -253,7 +268,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
                 : 'text-[var(--nfq-text-muted)] hover:text-[var(--nfq-text-secondary)]'
             }`}
           >
-            <MessageSquare size={12} /> Ask
+            <MessageSquare size={12} /> {t.commandAskTab}
           </button>
         </div>
 
@@ -266,7 +281,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Search views, deals, actions..."
+              placeholder={t.commandSearchPlaceholder}
               className="flex-1 bg-transparent text-sm text-[var(--nfq-text-primary)] outline-none placeholder:text-[var(--nfq-text-faint)]"
             />
             <kbd className="hidden rounded border border-[var(--nfq-border-ghost)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--nfq-text-muted)] sm:inline-block">
@@ -289,13 +304,13 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
         <div ref={listRef} className="max-h-[360px] overflow-y-auto py-2">
           {filtered.length === 0 ? (
             <div className="px-4 py-8 text-center text-sm text-[var(--nfq-text-muted)]">
-              No results for &ldquo;{query}&rdquo;
+              {t.commandNoResults} &ldquo;{query}&rdquo;
             </div>
           ) : (
             Array.from(grouped.entries()).map(([category, categoryItems]) => (
               <div key={category}>
                 <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--nfq-text-faint)]">
-                  {category}
+                  {categoryLabels[category as keyof typeof categoryLabels]}
                 </div>
                 {categoryItems.map((item) => {
                   const idx = itemIndex++;
@@ -339,15 +354,15 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
         <div className="flex items-center gap-4 border-t border-[var(--nfq-border-ghost)] px-4 py-2 text-[10px] text-[var(--nfq-text-faint)]">
           <span className="flex items-center gap-1">
             <kbd className="rounded border border-[var(--nfq-border-ghost)] px-1 py-0.5 font-mono">↑↓</kbd>
-            navigate
+            {t.commandFooterNavigate}
           </span>
           <span className="flex items-center gap-1">
             <kbd className="rounded border border-[var(--nfq-border-ghost)] px-1 py-0.5 font-mono">↵</kbd>
-            select
+            {t.commandFooterSelect}
           </span>
           <span className="flex items-center gap-1">
             <kbd className="rounded border border-[var(--nfq-border-ghost)] px-1 py-0.5 font-mono">esc</kbd>
-            close
+            {t.commandFooterClose}
           </span>
         </div>
       </div>

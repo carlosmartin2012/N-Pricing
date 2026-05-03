@@ -4,11 +4,11 @@ import { useToast } from '../components/ui/Toast';
 import { useEntity } from '../contexts/EntityContext';
 import { useConfigPersistence } from './supabaseSync/useConfigPersistence';
 import { useInitialHydration } from './supabaseSync/useInitialHydration';
-// Realtime and presence disabled — Supabase Realtime WebSocket reconnection loop
-// blocks the main thread when DB tables are empty or RLS blocks anonymous access.
-// Re-enable when Supabase has seeded data and proper auth flow.
-// import { usePresenceAndSessionAudit } from './supabaseSync/usePresenceAndSessionAudit';
-// import { useRealtimeSync } from './supabaseSync/useRealtimeSync';
+import { usePresenceAndSessionAudit } from './supabaseSync/usePresenceAndSessionAudit';
+import { useRealtimeSync } from './supabaseSync/useRealtimeSync';
+
+const realtimeEnabled =
+  String(import.meta.env?.VITE_REALTIME_SYNC_ENABLED ?? '').toLowerCase() === 'true';
 
 /**
  * Orchestrates Supabase lifecycle concerns through focused hooks:
@@ -16,7 +16,7 @@ import { useInitialHydration } from './supabaseSync/useInitialHydration';
  */
 export const useSupabaseSync = () => {
   const data = useData();
-  const { currentUser } = useAuth();
+  const { currentUser, isAuthenticated } = useAuth();
   const { addToast } = useToast();
   const { activeEntity, isGroupScope, isLoading: isEntityLoading } = useEntity();
 
@@ -28,7 +28,13 @@ export const useSupabaseSync = () => {
     isEntityLoading,
     addToast,
   });
-  // useRealtimeSync(data);  // Disabled: WebSocket reconnection loop blocks UI
-  // usePresenceAndSessionAudit({ currentUser, isAuthenticated });  // Disabled: depends on Realtime
+  // Realtime/presence caused a WebSocket reconnection loop in empty/RLS-blocked
+  // tenants. Keep it wired but opt-in until the tenant has seeded data and a
+  // monitored rollout window.
+  useRealtimeSync(data, { enabled: realtimeEnabled });
+  usePresenceAndSessionAudit({
+    currentUser,
+    isAuthenticated: isAuthenticated && realtimeEnabled,
+  });
   useConfigPersistence(data);
 };

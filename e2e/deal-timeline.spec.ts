@@ -47,7 +47,7 @@ test.describe('Deal Timeline', () => {
     // KPI tiles
     await expect(page.getByText('Repricings')).toBeVisible();
     await expect(page.getByText('Escalations')).toBeVisible();
-    await expect(page.getByText('Dossiers')).toBeVisible();
+    await expect(page.locator('#main-content').getByText('Dossiers')).toBeVisible();
     // 3 event cards rendered
     await expect(page.locator('article[data-event-kind]')).toHaveCount(3);
   });

@@ -1,12 +1,12 @@
 # N-Pricing — Architecture overview
 
 > Lectura recomendada como primer documento técnico tras el README.
-> Última actualización: 2026-04-30 — Olas 8/9/10 completas (cobertura
+> Última actualización: 2026-05-03 — Olas 8/9/10 completas (cobertura
 > Banca March end-to-end). Ver sección "Cobertura Banca March" al final.
 >
 > **Cambios clave desde el último refresh (2026-04-15)**:
-> - +17 vistas (Stress Pricing view añadida en Ola 6 B.5).
-> - 40 migrations (+3 vs previo: scenario cols, hash chain, tenancy alerts seed).
+> - 31 `ViewState` registrados; sidebar principal compactado a 22 entradas + destinos AUX vía Command Palette.
+> - 43 migrations SQL; última `20260630000002_push_subscriptions.sql`.
 > - Hash chain tamper-evidence activo: `prev_output_hash` + partial UNIQUE + verifier puro + endpoint admin + Edge writer con retry.
 > - Stress Pricing: 6 escenarios EBA GL 2018/02 cableados al motor (feature flag `VITE_PRICING_APPLY_CURVE_SHIFT`), con vista `/stress-pricing` y CSV export.
 > - SLOPanel: widget `Tenancy violations · last 60m` para el flip canary.
@@ -44,7 +44,7 @@ está modelada como SLOs con 5 canales de alertas.
 │  │              Walkthrough                                          │
 │  ├─ React Query (cache + invalidación)                              │
 │  ├─ api/* (cliente tipado + mappers)                                │
-│  └─ 17 vistas, code-split con React.lazy (CommandPalette lazy)      │
+│  └─ 31 ViewState, code-split con React.lazy (CommandPalette lazy)   │
 └────────────────────┬────────────────────────────────────────────────┘
                      │ HTTPS · JWT bearer · x-entity-id · x-request-id
                      ▼
@@ -68,7 +68,7 @@ está modelada como SLOs con 5 canales de alertas.
          ▼                                                     ▼
 ┌────────────────────────────┐         ┌───────────────────────────────┐
 │  PostgreSQL (Supabase)     │         │  Channel API (server/routes/  │
-│  ├─ 40 migraciones         │◀───────▶│   channelPricing.ts)          │
+│  ├─ 43 migraciones SQL     │◀───────▶│   channelPricing.ts)          │
 │  ├─ RLS estricto           │         │  · x-channel-key auth         │
 │  ├─ Helpers tenancy:       │         │  · token bucket per key       │
 │  │    get_current_entity_id│         │  · campaign delta apply       │

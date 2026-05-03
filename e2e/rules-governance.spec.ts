@@ -40,7 +40,7 @@ async function loginToDemoWorkspace(page: Page, mockOptions?: Parameters<typeof 
 
 async function openRulesAndConfig(page: Page) {
   await page.getByTestId('nav-METHODOLOGY').click();
-  await expect(page.getByTestId('header').getByText('Rules & Config')).toBeVisible({ timeout: 5_000 });
+  await expect(page.getByTestId('header').getByText('Methodology')).toBeVisible({ timeout: 5_000 });
   await expect(page.getByRole('heading', { name: /System Configuration & Master Data/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Governance/i })).toBeVisible();
 }

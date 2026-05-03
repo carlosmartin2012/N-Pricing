@@ -29,22 +29,14 @@ test.beforeEach(async ({ page }) => {
   await page.getByTestId('demo-login-btn').click();
   await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
 
-  const sidebarHasLabels = await page
-    .getByTestId('sidebar')
-    .getByText('Pricing Engine')
-    .isVisible()
-    .catch(() => false);
-  if (!sidebarHasLabels) {
-    await page.getByTestId('menu-toggle').click();
-    await expect(page.getByTestId('sidebar').getByText('Pricing Engine')).toBeVisible({ timeout: 3_000 });
-  }
+  await expect(page.getByTestId('nav-RECONCILIATION')).toBeVisible();
 });
 
 test.describe('Reconciliation — navigation + KPIs', () => {
   test('opens /reconciliation from the sidebar Governance bucket', async ({ page }) => {
     await page.getByTestId('nav-RECONCILIATION').click();
     await expect(page).toHaveURL(/\/reconciliation/);
-    await expect(page.getByRole('heading', { name: /FTP Reconciliation/i })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('heading', { name: /FTP Reconciliation/i, level: 1 })).toBeVisible({ timeout: 5_000 });
   });
 
   test('renders the 4 KPI tiles populated from the mock', async ({ page }) => {

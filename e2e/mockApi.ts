@@ -257,6 +257,80 @@ function withDealDefaults(payload: Partial<MockDealRow>, fallbackId: string): Mo
   } as MockDealRow;
 }
 
+function buildCustomerRelationship(clientId: string) {
+  const client = MOCK_CLIENTS.find((item) => item.id === clientId) ?? MOCK_CLIENTS[0];
+  const positions = [
+    {
+      id: `${clientId}-pos-1`,
+      entityId: DEFAULT_ENTITY_ID,
+      clientId,
+      productId: 'loan',
+      productType: 'Loan',
+      category: 'Asset',
+      dealId: statefulDealId(clientId),
+      amount: 4_200_000,
+      currency: 'EUR',
+      marginBps: 185,
+      startDate: '2025-01-01',
+      maturityDate: '2029-01-01',
+      status: 'Active',
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    },
+    {
+      id: `${clientId}-pos-2`,
+      entityId: DEFAULT_ENTITY_ID,
+      clientId,
+      productId: 'deposit',
+      productType: 'Deposit',
+      category: 'Liability',
+      dealId: null,
+      amount: 1_800_000,
+      currency: 'EUR',
+      marginBps: 35,
+      startDate: '2025-06-01',
+      maturityDate: null,
+      status: 'Active',
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    },
+  ];
+  const latest = {
+    id: `${clientId}-metrics-latest`,
+    entityId: DEFAULT_ENTITY_ID,
+    clientId,
+    period: '2026-Q2',
+    computedAt: nowIso(),
+    nimBps: 190,
+    feesEur: 53_000,
+    evaEur: 150_000,
+    shareOfWalletPct: 0.45,
+    relationshipAgeYears: 4.75,
+    npsScore: 52,
+    activePositionCount: positions.length,
+    totalExposureEur: positions.reduce((sum, position) => sum + position.amount, 0),
+    source: 'computed',
+    detail: {},
+  };
+  return {
+    client,
+    positions,
+    metrics: { latest, history: [latest] },
+    applicableTargets: [],
+    derived: {
+      activePositionCount: positions.length,
+      totalExposureEur: latest.totalExposureEur,
+      productTypesHeld: Array.from(new Set(positions.map((position) => position.productType))),
+      relationshipAgeYears: latest.relationshipAgeYears,
+      isMultiProduct: true,
+    },
+  };
+}
+
+function statefulDealId(clientId: string): string {
+  return `DL-${clientId}-REL`;
+}
+
 async function fulfillDeals(route: Route, url: URL, state: MockState) {
   const entityId = url.searchParams.get('entity_id');
   const rows = entityId
@@ -317,6 +391,20 @@ async function fulfillConfig(
 
 export async function registerApiMocks(page: Page, options?: MockApiOptions): Promise<void> {
   const state = createState(options);
+  const generatedNbaClients = new Set<string>();
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      'nfq-tours-completed',
+      JSON.stringify([
+        'main-tour',
+        'trader-tour',
+        'risk-manager-tour',
+        'auditor-tour',
+        'business-flow-tour',
+      ]),
+    );
+  });
 
   await page.route('**/api/**', async (route) => {
     const request = route.request();
@@ -331,6 +419,20 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
 
     if (path === '/health') {
       await route.fulfill(json({ ok: true, ts: nowIso() }));
+      return;
+    }
+
+    if (path === '/auth/demo' && method === 'POST') {
+      const { username, password } = body as { username?: string; password?: string };
+      if (username === 'demo' && password === 'demo') {
+        await route.fulfill(json({
+          token: 'e2e-demo-token',
+          email: 'demo@nfq.es',
+          name: 'Demo User',
+        }));
+        return;
+      }
+      await route.fulfill(json({ error: 'Invalid credentials.' }, 401));
       return;
     }
 
@@ -383,6 +485,49 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
     if (path === '/observability/summary' && method === 'GET') {
       const entityId = url.searchParams.get('entity_id') ?? DEFAULT_ENTITY_ID;
       await route.fulfill(json(buildObservabilitySummary(entityId, state)));
+      return;
+    }
+    if (path === '/observability/slo-summary' && method === 'GET') {
+      const entityId = url.searchParams.get('entity_id') ?? DEFAULT_ENTITY_ID;
+      await route.fulfill(json({
+        entityId,
+        generatedAt: nowIso(),
+        window: '24h',
+        slos: [
+          {
+            name: 'pricing_single_latency_ms',
+            target: 250,
+            current: 192,
+            status: 'ok',
+            window: '24h',
+            percentiles: { p50: 58, p95: 192, p99: 240 },
+            sampleCount: 4,
+          },
+        ],
+        activeAlerts: [],
+      }));
+      return;
+    }
+    if (path === '/observability/tenancy-violations' && method === 'GET') {
+      const entityId = url.searchParams.get('entity_id') ?? DEFAULT_ENTITY_ID;
+      await route.fulfill(json({
+        entityId,
+        windowMinutes: Number(url.searchParams.get('window_minutes') ?? '60'),
+        since: nowIso(),
+        total: 0,
+        topEndpoints: [],
+      }));
+      return;
+    }
+    if (path === '/observability/integrations/health' && method === 'GET') {
+      await route.fulfill(json({
+        generatedAt: nowIso(),
+        adapters: [
+          { kind: 'core_banking', name: 'Mock Core Banking', ok: true, latencyMs: 14, message: null, checkedAt: nowIso() },
+          { kind: 'crm', name: 'Mock CRM', ok: true, latencyMs: 22, message: null, checkedAt: nowIso() },
+          { kind: 'market_data', name: 'Mock Market Data', ok: true, latencyMs: 18, message: null, checkedAt: nowIso() },
+        ],
+      }));
       return;
     }
     if (path === '/observability/metrics/recent' && method === 'GET') {
@@ -638,6 +783,26 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
 
     if (path.startsWith('/config/')) {
       if (await fulfillConfig(route, path, method, body, state)) return;
+    }
+
+    if (/^\/customer360\/clients\/[^/]+$/.test(path) && method === 'GET') {
+      const clientId = decodeURIComponent(path.split('/')[3] ?? '');
+      await route.fulfill(json(buildCustomerRelationship(clientId)));
+      return;
+    }
+    if (/^\/customer360\/clients\/[^/]+\/positions$/.test(path) && method === 'GET') {
+      const clientId = decodeURIComponent(path.split('/')[3] ?? '');
+      await route.fulfill(json(buildCustomerRelationship(clientId).positions));
+      return;
+    }
+    if (/^\/customer360\/clients\/[^/]+\/metrics$/.test(path) && method === 'GET') {
+      const clientId = decodeURIComponent(path.split('/')[3] ?? '');
+      await route.fulfill(json(buildCustomerRelationship(clientId).metrics.history));
+      return;
+    }
+    if (path === '/customer360/pricing-targets' && method === 'GET') {
+      await route.fulfill(json([]));
+      return;
     }
 
     if (path === '/config/notifications' && method === 'GET') {
@@ -1019,7 +1184,7 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
         return;
       }
       if (kind === 'nba' && method === 'GET') {
-        await route.fulfill(json([
+        const recommendations = [
           {
             id: 'nba-1', entityId: DEFAULT_ENTITY_ID, clientId,
             recommendedProduct: 'FX_Hedging', recommendedRateBps: 40, recommendedVolumeEur: 1_500_000, recommendedCurrency: 'EUR',
@@ -1027,10 +1192,21 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
             reasonCodes: ['product_gap_core', 'renewal_window_open'], rationale: 'FX_Hedging ticket €1.5M → ΔCLV 2.1% · renewal window open · core product gap',
             source: 'engine', generatedAt: nowIso(), consumedAt: null, consumedBy: null,
           },
-        ]));
+        ];
+        if (generatedNbaClients.has(clientId)) {
+          recommendations.unshift({
+            id: 'nba-new', entityId: DEFAULT_ENTITY_ID, clientId,
+            recommendedProduct: 'Corporate_Loan', recommendedRateBps: 420, recommendedVolumeEur: 2_000_000, recommendedCurrency: 'EUR',
+            expectedClvDeltaEur: 410_000, confidence: 0.82,
+            reasonCodes: ['share_of_wallet_low', 'nim_below_target'], rationale: 'Corporate_Loan ticket €2M → ΔCLV 2.7% · lifts NIM toward target · share-of-wallet expansion',
+            source: 'engine', generatedAt: nowIso(), consumedAt: null, consumedBy: null,
+          });
+        }
+        await route.fulfill(json(recommendations));
         return;
       }
       if (kind === 'nba' && method === 'POST') {
+        generatedNbaClients.add(clientId);
         await route.fulfill(json([{
           id: 'nba-new', entityId: DEFAULT_ENTITY_ID, clientId,
           recommendedProduct: 'Corporate_Loan', recommendedRateBps: 420, recommendedVolumeEur: 2_000_000, recommendedCurrency: 'EUR',

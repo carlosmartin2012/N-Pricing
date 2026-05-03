@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { viewToPath, pathToView, getAllRoutePaths, buildMainNavItems, buildBottomNavItems } from '../../appNavigation';
+import { viewToPath, pathToView, getAllRoutePaths, buildMainNavItems, buildBottomNavItems, buildAuxDestinations } from '../../appNavigation';
 import { translations } from '../../translations';
 import type { ViewState } from '../../types';
 
@@ -137,6 +137,17 @@ describe('appNavigation routing helpers', () => {
       expect(recon?.path).toBe('/reconciliation');
       expect(recon?.label).toBe('FTP Reconciliation');
     });
+
+    it('keeps stable section keys while rendering localized section labels', () => {
+      const spanishItems = buildMainNavItems(translations.es);
+      const clients = spanishItems.find((i) => i.id === 'CUSTOMER_360');
+      const market = spanishItems.find((i) => i.id === 'MARKET_DATA');
+      expect(clients?.section).toBe('Relationships');
+      expect(clients?.sectionLabel).toBe('Relaciones');
+      expect(clients?.label).toBe('Clientes');
+      expect(market?.section).toBe('Market Data');
+      expect(market?.sectionLabel).toBe('Datos de mercado');
+    });
   });
 
   // -----------------------------------------------------------------
@@ -208,6 +219,13 @@ describe('appNavigation routing helpers', () => {
       // pathToView debe seguir resolviendo /escalations y /attributions/matrix.
       expect(pathToView('/escalations')).toBe('ESCALATIONS');
       expect(pathToView('/attributions/matrix')).toBe('ATTRIBUTION_MATRIX');
+    });
+
+    it('builds auxiliary labels from the active language', () => {
+      const aux = buildAuxDestinations(translations.es);
+      const accounting = aux.find((d) => d.id === 'ACCOUNTING');
+      expect(accounting?.label).toBe('Libro contable');
+      expect(accounting?.sublabel).toContain('Tesorería');
     });
   });
 

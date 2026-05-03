@@ -4,11 +4,26 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 // activeEntity reads localStorage; jsdom env is enough.
 import apiFetch, { apiDelete, apiGet } from '../apiFetch';
 
+function installLocalStorageShim(): void {
+  const store = new Map<string, string>();
+  vi.stubGlobal('localStorage', {
+    getItem: (key: string) => (store.has(key) ? store.get(key)! : null),
+    setItem: (key: string, value: string) => { store.set(key, value); },
+    removeItem: (key: string) => { store.delete(key); },
+    clear: () => { store.clear(); },
+    key: (i: number) => Array.from(store.keys())[i] ?? null,
+    get length() { return store.size; },
+  });
+}
+
 describe('apiFetch', () => {
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
     originalFetch = globalThis.fetch;
+    if (typeof localStorage.clear !== 'function') {
+      installLocalStorageShim();
+    }
     localStorage.clear();
   });
 

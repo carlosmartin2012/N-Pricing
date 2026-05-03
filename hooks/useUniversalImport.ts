@@ -235,13 +235,19 @@ export const useUniversalImport = () => {
               | 'Green',
             physicalRisk: readString(pick(r, 'PhysicalRisk', 'physicalRisk'), 'Low') as 'High' | 'Medium' | 'Low',
           }));
-          for (let i = 0; i < dealsToSave.length; i++) {
-            try {
-              await dealsApi.upsertDeal(dealsToSave[i]);
-              summary.imported += 1;
-            } catch (err) {
-              recordFailure(i, err);
+          try {
+            const saved = await dealsApi.batchUpsertDeals(dealsToSave);
+            summary.imported = saved.length;
+            summary.skipped = Math.max(0, dealsToSave.length - saved.length);
+            if (saved.length !== dealsToSave.length) {
+              summary.failures.push({
+                row: -1,
+                error: `Batch import persisted ${saved.length}/${dealsToSave.length} deals.`,
+              });
             }
+          } catch (err) {
+            summary.skipped = dealsToSave.length;
+            recordFailure(-1, err);
           }
           break;
         }

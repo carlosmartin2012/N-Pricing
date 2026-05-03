@@ -37,8 +37,11 @@
         "npm:@types/node@^22.14.0",
         "npm:@types/pg@^8.20.0",
         "npm:@types/react-dom@^19.2.3",
+        "npm:@types/react-grid-layout@^1.3.6",
         "npm:@types/react@^19.2.14",
+        "npm:@types/web-push@^3.6.4",
         "npm:@vitejs/plugin-react@5",
+        "npm:@vitest/coverage-v8@^4.0.18",
         "npm:autoprefixer@^10.4.20",
         "npm:concurrently@^9.2.1",
         "npm:cors@^2.8.6",
@@ -55,8 +58,11 @@
         "npm:postcss@^8.4.47",
         "npm:prettier@^3.8.1",
         "npm:react-dom@^19.2.4",
+        "npm:react-grid-layout@^2.2.3",
         "npm:react-hook-form@^7.72.0",
         "npm:react-is@^19.2.4",
+        "npm:react-router-dom@^7.14.0",
+        "npm:react-router@^7.14.0",
         "npm:react@^19.2.4",
         "npm:recharts@^3.7.0",
         "npm:storybook@^8.6.18",
@@ -67,6 +73,7 @@
         "npm:vite-plugin-pwa@^1.2.0",
         "npm:vite@^6.2.0",
         "npm:vitest@^4.0.18",
+        "npm:web-push@^3.6.7",
         "npm:xlsx@~0.18.5"
       ]
     }

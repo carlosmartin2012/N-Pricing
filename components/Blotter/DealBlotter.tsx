@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import * as auditApi from '../../api/audit';
 import * as configApi from '../../api/config';
@@ -43,6 +43,12 @@ const DealBlotter: React.FC = () => {
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isOutcomeOpen, setIsOutcomeOpen] = useState(false);
   const [outcomeDealId, setOutcomeDealId] = useState<string | null>(null);
+
+  useEffect(() => {
+    void import('./DealBlotterDrawers').then(() => {
+      (window as Window & { __dealBlotterDrawersPreloaded?: boolean }).__dealBlotterDrawersPreloaded = true;
+    });
+  }, []);
 
   const userRole = (user?.role || 'Trader') as UserRole;
   const {

@@ -39,8 +39,12 @@ function updateCollectionState<T extends { id?: string | number }>(
   });
 }
 
-export function useRealtimeSync(data: DataContextType) {
+export function useRealtimeSync(
+  data: DataContextType,
+  options: { enabled?: boolean } = {},
+) {
   const { addToast } = useToast();
+  const { enabled = true } = options;
   const {
     setDeals,
     setBehaviouralModels,
@@ -60,6 +64,7 @@ export function useRealtimeSync(data: DataContextType) {
   } = data;
 
   useEffect(() => {
+    if (!enabled) return;
     if (!isSupabaseConfigured) return;
 
     let channel: ReturnType<typeof monitoringService.subscribeToAll> | null = null;
@@ -126,5 +131,6 @@ export function useRealtimeSync(data: DataContextType) {
     setRules,
     setShocks,
     setUsers,
+    enabled,
   ]);
 }

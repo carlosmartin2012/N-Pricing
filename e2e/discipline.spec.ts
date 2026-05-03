@@ -26,17 +26,7 @@ test.beforeEach(async ({ page }) => {
   // Wait for the default Calculator view to load
   await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
 
-  // Ensure the sidebar is expanded so nav items are clickable
-  const sidebarHasLabels = await page
-    .getByTestId('sidebar')
-    .getByText('Pricing Engine')
-    .isVisible()
-    .catch(() => false);
-
-  if (!sidebarHasLabels) {
-    await page.getByTestId('menu-toggle').click();
-    await expect(page.getByTestId('sidebar').getByText('Pricing Engine')).toBeVisible({ timeout: 3_000 });
-  }
+  await expect(page.getByTestId('nav-DISCIPLINE')).toBeVisible();
 });
 
 test.describe('Discipline Navigation', () => {

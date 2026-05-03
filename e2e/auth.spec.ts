@@ -125,7 +125,7 @@ test.describe('Post-Login User Identity', () => {
   test('main navigation items are visible in the sidebar', async ({ page }) => {
     // Open sidebar if collapsed on smaller viewports
     const sidebar = page.getByTestId('sidebar');
-    if (!(await sidebar.getByText('Pricing Engine').isVisible().catch(() => false))) {
+    if (!(await sidebar.getByTestId('nav-CALCULATOR').isVisible().catch(() => false))) {
       await page.getByTestId('menu-toggle').click();
     }
 

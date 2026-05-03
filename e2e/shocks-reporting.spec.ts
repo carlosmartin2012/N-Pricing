@@ -15,14 +15,14 @@ async function loginToDemoWorkspace(page: Page) {
 
 async function openStressTesting(page: Page) {
   await page.getByTestId('nav-SHOCKS').click();
-  await expect(page.getByTestId('header').getByText('Stress Testing')).toBeVisible({ timeout: 5_000 });
+  await expect(page.getByTestId('header').getByText('Stress Test')).toBeVisible({ timeout: 5_000 });
   await expect(page.getByText('Escenarios de stress EBA')).toBeVisible();
   await expect(page.getByText('Impact Analysis')).toBeVisible();
 }
 
 async function openReporting(page: Page) {
   await page.getByTestId('nav-REPORTING').click();
-  await expect(page.getByTestId('header').getByText('FTP Analytics')).toBeVisible({ timeout: 5_000 });
+  await expect(page.getByTestId('header').getByText('Analytics')).toBeVisible({ timeout: 5_000 });
   await expect(page.getByRole('heading', { name: 'FTP Analytics' })).toBeVisible();
 }
 

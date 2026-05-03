@@ -110,7 +110,7 @@ Supabase Edge Functions (Deno)
 └── elasticity-recalibrate — cron nocturno, ?entity_id scoping
 
 PostgreSQL (Supabase)
-├── 40 migraciones secuenciales
+├── 43 migraciones SQL secuenciales
 ├── RLS estricto por entity_id
 ├── Helpers: get_current_entity_id, get_accessible_entity_ids
 ├── Hash chain en pricing_snapshots (prev_output_hash + partial UNIQUE)
@@ -258,7 +258,7 @@ types/                  # Tipos por dominio (re-exportados desde types.ts)
 utils/                  # Pricing engine + helpers
   pricing/ customer360/ channels/ governance/ metering/ backtesting/ clv/
 supabase/
-  migrations/           # 40 migraciones secuenciales
+  migrations/           # 43 migraciones SQL secuenciales
   functions/            # 3 Edge Functions Deno
 e2e/                    # 20 specs Playwright
 docs/                   # Doc operativa + runbooks
@@ -325,7 +325,7 @@ Detalle de integration tests en [docs/integration-tests.md](./docs/integration-t
 El producto está diseñado para SaaS-first con flexibilidad on-premise.
 Para despliegue interno del banco:
 
-1. `Postgres` propio + aplicar las 40 migrations.
+1. `Postgres` propio + aplicar las 43 migrations SQL.
 2. `node server/index.js` (build TS) tras `npm run build:server`.
 3. Edge Functions opcionales (deploy independiente vía Supabase CLI).
 4. Adapter layer: registrar implementaciones reales en `server/index.ts`

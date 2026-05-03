@@ -22,16 +22,7 @@ test.beforeEach(async ({ page }) => {
   await page.getByTestId('demo-login-btn').click();
   await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
 
-  // Ensure sidebar labels are visible (expand if collapsed)
-  const sidebarHasLabels = await page
-    .getByTestId('sidebar')
-    .getByText('Pricing Engine')
-    .isVisible()
-    .catch(() => false);
-  if (!sidebarHasLabels) {
-    await page.getByTestId('menu-toggle').click();
-    await expect(page.getByTestId('sidebar').getByText('Pricing Engine')).toBeVisible({ timeout: 3_000 });
-  }
+  await expect(page.getByTestId('nav-CUSTOMER_360')).toBeVisible();
 });
 
 test.describe('Customer 360 — CLV tabs', () => {

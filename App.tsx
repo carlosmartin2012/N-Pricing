@@ -289,49 +289,48 @@ const AppContent: React.FC = () => {
             <section className="rounded-[28px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)] md:px-7 md:py-6">
               <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                 <div className="max-w-3xl">
-                  <div className="nfq-eyebrow">Meridian Obsidian Workspace</div>
+                  <div className="nfq-eyebrow">{ui.t.workspaceEyebrow}</div>
                   <h1 className="mt-4 text-[clamp(2rem,3.5vw,56px)] font-semibold tracking-[var(--nfq-tracking-tight)] leading-[1.1] text-[color:var(--nfq-text-primary)]">
                     {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
                       bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
-                      'Pricing workspace'}
+                      ui.t.workspaceFallback}
                   </h1>
                   <p className="mt-3 max-w-2xl text-[14px] leading-6 text-[color:var(--nfq-text-secondary)]">
-                    Governed pricing, methodology control, portfolio reporting and committee evidence in one aligned NFQ
-                    operating shell.
+                    {ui.t.workspaceDescription}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                    <div className="nfq-label">Deals</div>
+                    <div className="nfq-label">{ui.t.workspaceDeals}</div>
                     <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
                       {data.deals.length}
                     </div>
-                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{data.dataMode === 'demo' ? 'Demo book' : 'Live book'}</div>
+                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{data.dataMode === 'demo' ? ui.t.workspaceDemoBook : ui.t.workspaceLiveBook}</div>
                   </div>
                   <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                    <div className="nfq-label">Pending</div>
+                    <div className="nfq-label">{ui.t.workspacePending}</div>
                     <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">
                       {data.deals.filter((deal) => deal.status === 'Pending_Approval').length}
                     </div>
-                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">Approval queue</div>
+                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{ui.t.workspaceApprovalQueue}</div>
                   </div>
                   <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                    <div className="nfq-label">Snapshots</div>
+                    <div className="nfq-label">{ui.t.workspaceSnapshots}</div>
                     <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">
                       {data.portfolioSnapshots.length}
                     </div>
-                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">Portfolio frames</div>
+                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{ui.t.workspacePortfolioFrames}</div>
                   </div>
                   <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                    <div className="nfq-label">AI traces</div>
+                    <div className="nfq-label">{ui.t.workspaceAiTraces}</div>
                     <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">
                       {data.pricingDossiers.reduce(
                         (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
                         0
                       )}
                     </div>
-                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">Grounded evidence</div>
+                    <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{ui.t.workspaceGroundedEvidence}</div>
                   </div>
                 </div>
               </div>

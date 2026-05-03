@@ -67,7 +67,7 @@
 **Scope**: `supabase/`, `api/`, `utils/supabase/`, `server/db.ts`, `server/migrate.ts`, `hooks/supabaseSync/`
 
 **Reglas**:
-- **Fuente de verdad Supabase**: `supabase/migrations/*.sql` (40 migrations en orden cronológico). Última: `20260619000004_tenancy_alerts_seed.sql`; la anterior es `20260619000003_pricing_snapshots_hash_chain.sql`.
+- **Fuente de verdad Supabase**: `supabase/migrations/*.sql` (43 migrations SQL en orden cronológico). Última: `20260630000002_push_subscriptions.sql`; la anterior es `20260630000001_attribution_threshold_recalibrations.sql`.
 - **Server inline schema**: `server/migrate.ts` es un subconjunto para el arranque Node-only (dev + Replit). Si tocas una tabla que el server necesita al boot, actualiza ambos.
 - **Migrations históricas vs inline schema** (diagnosticado en Ola 6, PRs #55/#56/#57/#60): `server/migrate.ts` es la verdad operativa en producción. Las migrations bajo `supabase/migrations/` son canónicas para entornos que las corren en secuencia (hoy sólo CI). Si añades una columna o cambias un tipo, verificar en ambos sitios más `utils/seedData.ts`. Ejemplos de drift detectado y corregido: `clients.id`, `deals.id`, `deals.client_id` eran UUID en migration pero TEXT en inline schema y en código de app.
 - **CI integration-tests sobre `postgres:16` raw** necesita un bootstrap Supabase-compat antes del migration loop: crea `supabase_realtime` publication, los 3 roles (`anon`/`authenticated`/`service_role`) y el schema `auth` con stubs `jwt()`/`uid()`/`users`. Si añades una migration que asume otro objeto hosted (storage schema, extensión, etc.), extiende el bootstrap step en `.github/workflows/ci.yml`, no la migration.

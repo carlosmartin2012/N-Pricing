@@ -103,7 +103,7 @@ test.describe('View Switching', () => {
     await page.getByTestId('nav-REPORTING').click();
 
     const header = page.getByTestId('header');
-    await expect(header.getByText('FTP Analytics')).toBeVisible({ timeout: 5_000 });
+    await expect(header.getByText('Analytics')).toBeVisible({ timeout: 5_000 });
   });
 
   test('navigating to Yield Curves loads the market data view', async ({ page }) => {
@@ -117,14 +117,14 @@ test.describe('View Switching', () => {
     await page.getByTestId('nav-METHODOLOGY').click();
 
     const header = page.getByTestId('header');
-    await expect(header.getByText('Rules & Config')).toBeVisible({ timeout: 5_000 });
+    await expect(header.getByText('Methodology')).toBeVisible({ timeout: 5_000 });
   });
 
   test('navigating to RAROC Terminal loads the RAROC calculator', async ({ page }) => {
     await page.getByTestId('nav-RAROC').click();
 
     const header = page.getByTestId('header');
-    await expect(header.getByText('RAROC Terminal')).toBeVisible({ timeout: 5_000 });
+    await expect(header.getByText('RAROC')).toBeVisible({ timeout: 5_000 });
   });
 
   test('navigating to User Management loads admin view', async ({ page }) => {
@@ -180,7 +180,7 @@ test.describe('Header Controls', () => {
   });
 
   test('import data button is present', async ({ page }) => {
-    const importButton = page.getByRole('button', { name: /Universal Data Import/i });
+    const importButton = page.getByRole('button', { name: /Import Data/i });
     await expect(importButton).toBeVisible();
   });
 });

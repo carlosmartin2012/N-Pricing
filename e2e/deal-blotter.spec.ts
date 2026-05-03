@@ -41,7 +41,8 @@ test.describe('Deal Blotter', () => {
     await expect(table.getByText('TRD-HYPER-001')).toBeVisible();
     await expect(table.getByText('TRD-HYPER-005')).not.toBeVisible();
 
-    await searchInput.clear();
+    await searchInput.fill('');
+    await expect(searchInput).toHaveValue('');
     await page.locator('select').filter({ has: page.locator('option[value="Review"]') }).selectOption('Review');
     await expect(table.getByText('TRD-HYPER-005')).toBeVisible();
     await expect(table.getByText('TRD-HYPER-001')).not.toBeVisible();

@@ -151,23 +151,32 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
  * Reconciliation Hub — diferido a Ola futura post pilot feedback.
  */
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
+  const sectionLabels = {
+    relationships: t.navSectionRelationships,
+    pricing: t.navSectionPricing,
+    marketData: t.navSectionMarketData,
+    insights: t.navSectionInsights,
+    governance: t.navSectionGovernance,
+    assistant: t.navSectionAssistant,
+  };
+
   return [
     // ─────────────── RELATIONSHIPS ───────────────
-    { id: 'CUSTOMER_360', label: 'Clients',     icon: Users,                 section: 'Relationships', path: '/customers' },
-    { id: 'PIPELINE',     label: 'Pipeline',    icon: GitPullRequestArrow,   section: 'Relationships', path: '/pipeline' },
-    { id: 'CAMPAIGNS',    label: 'Campaigns',   icon: Target,                section: 'Relationships', path: '/campaigns' },
-    { id: 'TARGET_GRID',  label: 'Targets',     icon: Grid3X3,               section: 'Relationships', path: '/target-grid' },
+    { id: 'CUSTOMER_360', label: t.navClients,   icon: Users,               section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/customers' },
+    { id: 'PIPELINE',     label: t.navPipeline,  icon: GitPullRequestArrow, section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/pipeline' },
+    { id: 'CAMPAIGNS',    label: t.navCampaigns, icon: Target,              section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/campaigns' },
+    { id: 'TARGET_GRID',  label: t.navTargets,   icon: Grid3X3,             section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/target-grid' },
 
     // ─────────────── PRICING ───────────────
     // The 4 workspaces are now first-class entries (nested routes under
     // <PricingLayoutShell>). Post-trade stays in this bucket because its
     // gravity is pricing-adjacent, not an insight or governance artefact.
-    { id: 'CALCULATOR',  label: 'Calculator',        icon: Calculator,    section: 'Pricing', path: '/pricing' },
-    { id: 'RAROC',       label: 'RAROC',             icon: Percent,       section: 'Pricing', path: '/raroc' },
-    { id: 'SHOCKS',         label: 'Stress Test',       icon: Zap,           section: 'Pricing', path: '/stress-testing' },
-    { id: 'STRESS_PRICING', label: 'Stress Pricing',    icon: LineChart,     section: 'Pricing', path: '/stress-pricing' },
-    { id: 'WHAT_IF',        label: 'What-If',           icon: FlaskConical,  section: 'Pricing', path: '/what-if' },
-    { id: 'BLOTTER',     label: t.dealBlotter,       icon: FileText,      section: 'Pricing', path: '/blotter' },
+    { id: 'CALCULATOR',     label: t.navCalculator,    icon: Calculator,   section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/pricing' },
+    { id: 'RAROC',          label: t.navRaroc,         icon: Percent,      section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/raroc' },
+    { id: 'SHOCKS',         label: t.navStressTest,    icon: Zap,          section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/stress-testing' },
+    { id: 'STRESS_PRICING', label: t.navStressPricing, icon: LineChart,    section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/stress-pricing' },
+    { id: 'WHAT_IF',        label: t.navWhatIf,        icon: FlaskConical, section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/what-if' },
+    { id: 'BLOTTER',     label: t.dealBlotter,       icon: FileText,      section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/blotter' },
     // Accounting Ledger demoted to AUX (reachable via ⌘K) on 2026-04-22.
     // Reason: today the view mixes a FTP-summary + T-accounts + journal
     // ledger for no specific daily user. The valuable use case —
@@ -178,29 +187,29 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     // Inputs to the motor. Methodology belongs here because it is engine
     // *configuration*, not a control artefact — and it sits upstream of
     // every pricing call.
-    { id: 'MARKET_DATA', label: t.yieldCurves,       icon: TrendingUp, section: 'Market Data', path: '/market-data' },
-    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity,   section: 'Market Data', path: '/behavioural' },
-    { id: 'METHODOLOGY', label: 'Methodology',       icon: GitBranch,  section: 'Market Data', path: '/methodology' },
+    { id: 'MARKET_DATA', label: t.yieldCurves,       icon: TrendingUp, section: 'Market Data', sectionLabel: sectionLabels.marketData, path: '/market-data' },
+    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity,   section: 'Market Data', sectionLabel: sectionLabels.marketData, path: '/behavioural' },
+    { id: 'METHODOLOGY', label: t.navMethodology,    icon: GitBranch,  section: 'Market Data', sectionLabel: sectionLabels.marketData, path: '/methodology' },
 
     // ─────────────── INSIGHTS ───────────────
     // Outputs only: portfolio analytics + pricing discipline variance +
     // attribution reporting (Ola 10.7 — moved here from Governance because
     // it's pure analytics output, not control operativo).
-    { id: 'REPORTING',             label: 'Analytics',             icon: BarChart4, section: 'Insights', path: '/analytics' },
-    { id: 'DISCIPLINE',            label: 'Pricing Discipline',    icon: Sparkles,  section: 'Insights', path: '/discipline' },
-    { id: 'ATTRIBUTION_REPORTING', label: 'Attribution reporting', icon: BarChart4, section: 'Insights', path: '/attributions/reporting' },
+    { id: 'REPORTING',             label: t.navAnalytics,             icon: BarChart4, section: 'Insights', sectionLabel: sectionLabels.insights, path: '/analytics' },
+    { id: 'DISCIPLINE',            label: t.pricingDiscipline,        icon: Sparkles,  section: 'Insights', sectionLabel: sectionLabels.insights, path: '/discipline' },
+    { id: 'ATTRIBUTION_REPORTING', label: t.navAttributionReporting,  icon: BarChart4, section: 'Insights', sectionLabel: sectionLabels.insights, path: '/attributions/reporting' },
 
     // ─────────────── GOVERNANCE ───────────────
     // Operativo diario de control. ESCALATIONS y ATTRIBUTION_MATRIX viven
     // en AUX (⌘K) post Ola 10.7 — son edge case / config infrecuente.
-    { id: 'MODEL_INVENTORY',       label: 'Model Inventory',       icon: BookOpenCheck, section: 'Governance', path: '/models' },
-    { id: 'DOSSIERS',              label: 'Dossiers',              icon: FileSignature, section: 'Governance', path: '/dossiers' },
-    { id: 'APPROVALS',             label: 'Approvals',             icon: ShieldCheck,   section: 'Governance', path: '/approvals' },
-    { id: 'BUDGET_RECONCILIATION', label: 'Budget reconciliation', icon: Scale,         section: 'Governance', path: '/budget/reconciliation' },
-    { id: 'RECONCILIATION',        label: 'FTP Reconciliation',    icon: Scale,         section: 'Governance', path: '/reconciliation' },
+    { id: 'MODEL_INVENTORY',       label: t.navModelInventory,       icon: BookOpenCheck, section: 'Governance', sectionLabel: sectionLabels.governance, path: '/models' },
+    { id: 'DOSSIERS',              label: t.navDossiers,             icon: FileSignature, section: 'Governance', sectionLabel: sectionLabels.governance, path: '/dossiers' },
+    { id: 'APPROVALS',             label: t.navApprovals,            icon: ShieldCheck,   section: 'Governance', sectionLabel: sectionLabels.governance, path: '/approvals' },
+    { id: 'BUDGET_RECONCILIATION', label: t.navBudgetReconciliation, icon: Scale,         section: 'Governance', sectionLabel: sectionLabels.governance, path: '/budget/reconciliation' },
+    { id: 'RECONCILIATION',        label: t.navFtpReconciliation,    icon: Scale,         section: 'Governance', sectionLabel: sectionLabels.governance, path: '/reconciliation' },
 
     // ─────────────── ASSISTANT ───────────────
-    { id: 'AI_LAB', label: 'AI Assistant', icon: BrainCircuit, section: 'Assistant', path: '/ai' },
+    { id: 'AI_LAB', label: t.navAiAssistant, icon: BrainCircuit, section: 'Assistant', sectionLabel: sectionLabels.assistant, path: '/ai' },
   ];
 }
 
@@ -209,7 +218,7 @@ export function buildBottomNavItems(t: NavigationLabels): NavItem[] {
     { id: 'USER_CONFIG', label: t.userConfig, icon: Settings },
     { id: 'USER_MGMT',   label: t.userMgmt,   icon: Users,       path: '/users' },
     { id: 'AUDIT_LOG',   label: t.auditLog,   icon: ShieldCheck, path: '/audit' },
-    { id: 'HEALTH',      label: t.systemHealth, icon: HeartPulse, section: 'System', path: '/health' },
+    { id: 'HEALTH',      label: t.systemHealth, icon: HeartPulse, section: 'System', sectionLabel: t.navSectionSystem, path: '/health' },
     { id: 'MANUAL',      label: t.manual,     icon: BookOpen,    path: '/manual' },
   ];
 }
@@ -230,12 +239,16 @@ export interface AuxDestination {
   section: 'Pricing' | 'Governance' | 'Insights';
 }
 
-export const AUX_DESTINATIONS: AuxDestination[] = [
-  { id: 'ACCOUNTING',          label: 'Accounting Ledger',   sublabel: 'FTP journal + BU vs Treasury T-accounts (legacy)',     icon: LayoutDashboard, path: '/accounting',           section: 'Pricing' },
-  { id: 'GOV_SNAPSHOTS',       label: 'Snapshot Replay',     sublabel: 'Replay grabaciones del motor',                         icon: History,         path: '/snapshots',            section: 'Governance' },
-  { id: 'GOV_SLO',             label: 'SLO Dashboard',       sublabel: 'p50/p95/p99 del motor',                                icon: HeartPulse,      path: '/slo',                  section: 'Governance' },
-  { id: 'GOV_ADAPTERS',        label: 'Adapter Health',      sublabel: 'CoreBanking \u00b7 CRM \u00b7 MarketData \u00b7 SSO',  icon: Plug,            path: '/adapters',             section: 'Governance' },
-  // Ola 10.7 \u2014 demoted from main sidebar to keep Governance \u2264 5 entries.
-  { id: 'ESCALATIONS',         label: 'Escalations',         sublabel: 'Approval flows que han escalado por timeout',          icon: ShieldAlert,     path: '/escalations',          section: 'Governance' },
-  { id: 'ATTRIBUTION_MATRIX',  label: 'Attribution matrix',  sublabel: 'Configuraci\u00f3n de niveles \u00b7 thresholds por scope', icon: Plug,            path: '/attributions/matrix',  section: 'Governance' },
-];
+export function buildAuxDestinations(t: NavigationLabels): AuxDestination[] {
+  return [
+    { id: 'ACCOUNTING',         label: t.auxAccountingLedger,    sublabel: t.auxAccountingLedgerDesc,    icon: LayoutDashboard, path: '/accounting',          section: 'Pricing' },
+    { id: 'GOV_SNAPSHOTS',      label: t.auxSnapshotReplay,      sublabel: t.auxSnapshotReplayDesc,      icon: History,         path: '/snapshots',           section: 'Governance' },
+    { id: 'GOV_SLO',            label: t.auxSloDashboard,        sublabel: t.auxSloDashboardDesc,        icon: HeartPulse,      path: '/slo',                 section: 'Governance' },
+    { id: 'GOV_ADAPTERS',       label: t.auxAdapterHealth,       sublabel: t.auxAdapterHealthDesc,       icon: Plug,            path: '/adapters',            section: 'Governance' },
+    // Ola 10.7 \u2014 demoted from main sidebar to keep Governance \u2264 5 entries.
+    { id: 'ESCALATIONS',        label: t.auxEscalations,         sublabel: t.auxEscalationsDesc,         icon: ShieldAlert,     path: '/escalations',         section: 'Governance' },
+    { id: 'ATTRIBUTION_MATRIX', label: t.auxAttributionMatrix,   sublabel: t.auxAttributionMatrixDesc,   icon: Plug,            path: '/attributions/matrix', section: 'Governance' },
+  ];
+}
+
+export const AUX_DESTINATIONS: AuxDestination[] = buildAuxDestinations(translations.en);

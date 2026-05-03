@@ -331,6 +331,29 @@ async function insertSnapshotWithChain(
   };
 }
 
+async function bestEffortInsert(
+  // Supabase Edge types expose insert builders as thenables without `.catch()`;
+  // awaiting the builder keeps this compatible with Deno check and lets us
+  // surface observability write failures instead of silently swallowing them.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  table: string,
+  row: Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { error } = await supabase.from(table).insert(row);
+    if (error) {
+      console.warn(`[pricing/${table}] insert failed`, {
+        err: error instanceof Error ? error.message : String(error.message ?? error),
+      });
+    }
+  } catch (err) {
+    console.warn(`[pricing/${table}] insert failed`, {
+      err: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
 function todayUtc(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -511,20 +534,12 @@ serve(async (req: Request) => {
       .eq('entity_id', entityId)
       .maybeSingle();
     if (entityUserErr || !entityUserRow) {
-      await supabase.from('tenancy_violations').insert({
+      await bestEffortInsert(supabase, 'tenancy_violations', {
         request_id: requestId,
         user_email: user.email,
         endpoint: `POST ${url.pathname}`,
         claimed_entity: entityId,
         error_code: 'tenancy_denied',
-      }).catch((err: unknown) => {
-        // Best-effort but visible: si esto falla por RLS rota o tabla
-        // bloqueada, el SLO p95 quedaba subestimado en silencio.
-        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
-        // log permite que ops detecte caída de la observabilidad.
-        console.warn('[pricing/metrics] insert failed', {
-          err: err instanceof Error ? err.message : String(err),
-        });
       });
       return jsonResponse(
         { code: 'tenancy_denied', message: 'User does not have access to this entity', requestId },
@@ -639,37 +654,21 @@ serve(async (req: Request) => {
           scenario_source: scenarioSource,
         }, entityId);
         if (snapErr) {
-          await supabase.from('metrics').insert({
+          await bestEffortInsert(supabase, 'metrics', {
             entity_id: entityId,
             metric_name: 'snapshot_write_failures_total',
             metric_value: 1,
             dimensions: { request_id: requestId, endpoint: '/pricing/batch', error: snapErr.message, attempts: String(snapAttempts) },
-          }).catch((err: unknown) => {
-        // Best-effort but visible: si esto falla por RLS rota o tabla
-        // bloqueada, el SLO p95 quedaba subestimado en silencio.
-        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
-        // log permite que ops detecte caída de la observabilidad.
-        console.warn('[pricing/metrics] insert failed', {
-          err: err instanceof Error ? err.message : String(err),
-        });
-      });
+          });
         }
         snapshotIds.push(snapshotId);
       }
 
-      await supabase.from('metrics').insert({
+      await bestEffortInsert(supabase, 'metrics', {
         entity_id: entityId,
         metric_name: 'pricing_batch_latency_ms_per_deal',
         metric_value: deals.length > 0 ? durationMs / deals.length : durationMs,
         dimensions: { request_id: requestId, endpoint: '/pricing/batch', status_code: '200', count: String(deals.length) },
-      }).catch((err: unknown) => {
-        // Best-effort but visible: si esto falla por RLS rota o tabla
-        // bloqueada, el SLO p95 quedaba subestimado en silencio.
-        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
-        // log permite que ops detecte caída de la observabilidad.
-        console.warn('[pricing/metrics] insert failed', {
-          err: err instanceof Error ? err.message : String(err),
-        });
       });
 
       // Log batch pricing to audit
@@ -732,35 +731,19 @@ serve(async (req: Request) => {
         scenario_source: scenarioSource,
       }, entityId);
       if (snapErr) {
-        await supabase.from('metrics').insert({
+        await bestEffortInsert(supabase, 'metrics', {
           entity_id: entityId,
           metric_name: 'snapshot_write_failures_total',
           metric_value: 1,
           dimensions: { request_id: requestId, endpoint: '/pricing', error: snapErr.message, attempts: String(snapAttempts) },
-        }).catch((err: unknown) => {
-        // Best-effort but visible: si esto falla por RLS rota o tabla
-        // bloqueada, el SLO p95 quedaba subestimado en silencio.
-        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
-        // log permite que ops detecte caída de la observabilidad.
-        console.warn('[pricing/metrics] insert failed', {
-          err: err instanceof Error ? err.message : String(err),
         });
-      });
       }
 
-      await supabase.from('metrics').insert({
+      await bestEffortInsert(supabase, 'metrics', {
         entity_id: entityId,
         metric_name: 'pricing_single_latency_ms',
         metric_value: durationMs,
         dimensions: { request_id: requestId, endpoint: '/pricing', status_code: '200' },
-      }).catch((err: unknown) => {
-        // Best-effort but visible: si esto falla por RLS rota o tabla
-        // bloqueada, el SLO p95 quedaba subestimado en silencio.
-        // Antes: `.catch(() => { /* best effort */ })`. Ahora un
-        // log permite que ops detecte caída de la observabilidad.
-        console.warn('[pricing/metrics] insert failed', {
-          err: err instanceof Error ? err.message : String(err),
-        });
       });
 
       return jsonResponse(

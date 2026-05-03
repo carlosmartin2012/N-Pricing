@@ -8,7 +8,12 @@ export interface NavItem {
   id: string;
   label: string;
   icon: LucideIcon;
+  /**
+   * Stable taxonomy key used for grouping, accents, and tests. Keep this
+   * language-neutral; render `sectionLabel` when available.
+   */
   section?: string;
+  sectionLabel?: string;
   path?: string;
 }
 
@@ -217,6 +222,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               if (item.section) lastSection = item.section;
 
               const accent = item.section ? SECTION_ACCENTS[item.section] : undefined;
+              const sectionLabel = item.sectionLabel ?? item.section;
               return (
                 <div key={item.id}>
                   {showSection && isSidebarOpen && (
@@ -226,7 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         aria-hidden="true"
                       />
                       <span className={`nfq-section-label ${accent?.label ?? ''}`}>
-                        {item.section}
+                        {sectionLabel}
                       </span>
                       <div className="h-px flex-1 bg-[color:var(--nfq-border-ghost)]" />
                     </div>
@@ -236,7 +242,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span
                         className={`h-1 w-1 rounded-full opacity-80 ${accent?.dot ?? 'bg-slate-500'}`}
                         aria-hidden="true"
-                        title={item.section}
+                        title={sectionLabel}
                       />
                     </div>
                   )}

@@ -26,17 +26,7 @@ test.beforeEach(async ({ page }) => {
   // Wait for the default Calculator view to load
   await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
 
-  // Ensure the sidebar is expanded so nav items are clickable
-  const sidebarHasLabels = await page
-    .getByTestId('sidebar')
-    .getByText('Pricing Engine')
-    .isVisible()
-    .catch(() => false);
-
-  if (!sidebarHasLabels) {
-    await page.getByTestId('menu-toggle').click();
-    await expect(page.getByTestId('sidebar').getByText('Pricing Engine')).toBeVisible({ timeout: 3_000 });
-  }
+  await expect(page.getByTestId('nav-TARGET_GRID')).toBeVisible();
 });
 
 test.describe('Target Grid Navigation', () => {
@@ -45,7 +35,7 @@ test.describe('Target Grid Navigation', () => {
 
     // Header should reflect the active view
     const header = page.getByTestId('header');
-    await expect(header.getByText('Target Grid')).toBeVisible({ timeout: 5_000 });
+    await expect(header.getByText('Targets')).toBeVisible({ timeout: 5_000 });
 
     // URL should match the expected route
     await expect(page).toHaveURL(/\/target-grid/);
@@ -55,7 +45,7 @@ test.describe('Target Grid Navigation', () => {
 test.describe('Target Grid View Structure', () => {
   test.beforeEach(async ({ page }) => {
     await page.getByTestId('nav-TARGET_GRID').click();
-    await expect(page.getByTestId('header').getByText('Target Grid')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('header').getByText('Targets')).toBeVisible({ timeout: 5_000 });
   });
 
   test('renders the view mode toggle buttons (Table and Heatmap)', async ({ page }) => {
@@ -100,7 +90,7 @@ test.describe('Target Grid View Structure', () => {
 test.describe('Target Grid Export Modal', () => {
   test.beforeEach(async ({ page }) => {
     await page.getByTestId('nav-TARGET_GRID').click();
-    await expect(page.getByTestId('header').getByText('Target Grid')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('header').getByText('Targets')).toBeVisible({ timeout: 5_000 });
   });
 
   test('export button is present and disabled when there are no cells', async ({ page }) => {
@@ -115,7 +105,7 @@ test.describe('Target Grid Export Modal', () => {
 test.describe('Target Grid Snapshot Selector', () => {
   test.beforeEach(async ({ page }) => {
     await page.getByTestId('nav-TARGET_GRID').click();
-    await expect(page.getByTestId('header').getByText('Target Grid')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('header').getByText('Targets')).toBeVisible({ timeout: 5_000 });
   });
 
   test('filter area is rendered', async ({ page }) => {
