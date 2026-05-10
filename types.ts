@@ -621,6 +621,7 @@ export type MethodologyChangeTarget =
   | 'PHYSICAL_GRID'
   | 'GREENIUM_GRID'
   | 'APPROVAL_MATRIX'
+  | 'SANDBOX'
   | 'CAPITAL';
 
 export type MethodologyChangeAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'IMPORT' | 'ROLLBACK';

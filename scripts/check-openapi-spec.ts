@@ -63,6 +63,7 @@ const requiredPaths = [
   '/target-grid/snapshots/{snapshotId}/export/pdf',
   '/what-if/sandboxes',
   '/what-if/sandboxes/{sandboxId}/impact',
+  '/what-if/sandboxes/{sandboxId}/publish',
   '/what-if/backtests',
   '/what-if/backtests/{runId}/result',
   '/what-if/benchmarks/compare',

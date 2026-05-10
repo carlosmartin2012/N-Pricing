@@ -308,6 +308,8 @@ export function useGovernanceActions({
         await configApi.saveApprovalMatrix(proposedApprovalMatrix);
         nextApprovalMatrix = proposedApprovalMatrix;
         appliedRequest = { ...request, status: 'Applied', appliedByEmail: user.email, appliedByName: user.name, appliedAt: new Date().toISOString() };
+      } else if (request.target === 'SANDBOX') {
+        appliedRequest = { ...request, status: 'Applied', appliedByEmail: user.email, appliedByName: user.name, appliedAt: new Date().toISOString() };
       } else {
         return;
       }
@@ -365,6 +367,8 @@ export function useGovernanceActions({
         setApprovalMatrixDraft(currentApprovalMatrix);
         await configApi.saveApprovalMatrix(currentApprovalMatrix);
         nextApprovalMatrix = currentApprovalMatrix;
+        rolledBackRequest = { ...request, status: 'Rolled_Back', rolledBackByEmail: user.email, rolledBackByName: user.name, rolledBackAt: new Date().toISOString() };
+      } else if (request.target === 'SANDBOX') {
         rolledBackRequest = { ...request, status: 'Rolled_Back', rolledBackByEmail: user.email, rolledBackByName: user.name, rolledBackAt: new Date().toISOString() };
       } else {
         return;

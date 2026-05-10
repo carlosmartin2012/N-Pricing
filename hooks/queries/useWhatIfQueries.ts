@@ -87,9 +87,11 @@ export function usePublishSandbox() {
       if (dataMode !== 'live') throw new Error('What-If mutations are disabled in demo mode');
       return whatIfApi.publishSandbox(id);
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.whatIf.sandbox(id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.whatIf.sandboxes });
       void queryClient.invalidateQueries({ queryKey: queryKeys.governance.methodologyChangeRequests });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.governance.approvalTasks });
     },
   });
 }

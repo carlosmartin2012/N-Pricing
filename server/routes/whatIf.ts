@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import { randomUUID } from 'crypto';
-import { execute, query, queryOne, withTransaction } from '../db';
+import { execute, query, queryOne, withTransaction, type Tx } from '../db';
 import { safeError } from '../middleware/errorHandler';
 
 const router = Router();
@@ -699,6 +699,123 @@ function emptyBacktestResult(runId: string) {
   };
 }
 
+function governanceIdSuffix(id: string): string {
+  const clean = id.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  return (clean || 'SANDBOX').slice(0, 12);
+}
+
+function upsertById<T extends Record<string, unknown>>(items: unknown[], item: T): unknown[] {
+  const id = String(item.id ?? '');
+  let replaced = false;
+  const next = items.map((existing) => {
+    if (!existing || typeof existing !== 'object' || Array.isArray(existing)) return existing;
+    if (String((existing as Record<string, unknown>).id ?? '') !== id) return existing;
+    replaced = true;
+    return item;
+  });
+  return replaced ? next : [item, ...next];
+}
+
+function findById(items: unknown[], id: string): Record<string, unknown> | null {
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+    const record = item as Record<string, unknown>;
+    if (String(record.id ?? '') === id) return record;
+  }
+  return null;
+}
+
+function buildSandboxGovernanceArtifacts(
+  req: Request,
+  sandbox: Record<string, unknown>,
+  publishedSandbox: Record<string, unknown>,
+) {
+  const sandboxId = String(sandbox.id);
+  const suffix = governanceIdSuffix(sandboxId);
+  const requestId = `MCR-WHATIF-${suffix}`;
+  const approvalTaskId = `ATK-WHATIF-${suffix}`;
+  const name = asString(sandbox.name, sandboxId);
+  const submittedAt = new Date().toISOString();
+  const correlation = {
+    correlationId: `${requestId}:publish`,
+    changeRequestId: requestId,
+    approvalTaskId,
+  };
+  const currentSnapshot = sandboxToDto(sandbox) as unknown as Record<string, unknown>;
+  const proposedSnapshot = sandboxToDto(publishedSandbox) as unknown as Record<string, unknown>;
+  const diffCount = asJsonArray(sandbox.diffs).length;
+  const reason = `Review What-If sandbox ${name} before applying the methodology decision.`;
+  const request = {
+    id: requestId,
+    title: `Publish sandbox: ${name}`,
+    reason,
+    target: 'SANDBOX',
+    action: 'IMPORT',
+    status: 'Pending_Review',
+    submittedByEmail: userEmail(req),
+    submittedByName: userName(req),
+    submittedAt,
+    correlation,
+    operations: [
+      {
+        entityType: 'SANDBOX',
+        entityId: sandboxId,
+        action: 'IMPORT',
+        summary: `Publish What-If sandbox ${name}`,
+        currentValue: {
+          status: String(sandbox.status ?? 'ready'),
+          baseSnapshotId: String(sandbox.base_snapshot_id ?? ''),
+          diffCount,
+        },
+        proposedValue: {
+          status: 'published',
+          baseSnapshotId: String(publishedSandbox.base_snapshot_id ?? ''),
+          diffCount,
+          diffs: asJsonArray(publishedSandbox.diffs),
+        },
+        currentSnapshot,
+        proposedSnapshot,
+      },
+    ],
+  };
+  const task = {
+    id: approvalTaskId,
+    scope: 'METHODOLOGY_CHANGE',
+    status: 'Pending',
+    title: `Review sandbox: ${name}`,
+    description: reason,
+    requiredRole: 'Risk_Manager',
+    submittedByEmail: userEmail(req),
+    submittedByName: userName(req),
+    submittedAt,
+    subject: {
+      type: 'METHOD_CHANGE',
+      id: requestId,
+      label: `Publish sandbox: ${name}`,
+    },
+    correlation,
+  };
+  return { request, task };
+}
+
+async function readConfigArray(tx: Tx, key: string): Promise<unknown[]> {
+  const row = await tx.queryOne<{ value: unknown }>(
+    'SELECT value FROM system_config WHERE key = $1 FOR UPDATE',
+    [key],
+  );
+  return asJsonArray(row?.value);
+}
+
+async function saveConfigArray(tx: Tx, key: string, value: unknown[]): Promise<void> {
+  await tx.execute(
+    `INSERT INTO system_config (key, value, updated_at)
+     VALUES ($1, $2::jsonb, now())
+     ON CONFLICT (key) DO UPDATE
+     SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at`,
+    [key, JSON.stringify(value)],
+  );
+}
+
 function benchmarkToDto(row: Record<string, unknown>) {
   return {
     id: String(row.id),
@@ -937,18 +1054,70 @@ router.post('/sandboxes/:id/publish', async (req, res) => {
     const tenancy = tenant(req, res);
     if (!tenancy) return;
     if (!requireMethodologyAuthor(req, res)) return;
-    const row = await queryOne<{ id: string }>(
-      `UPDATE sandbox_methodologies
-       SET status = 'published', updated_at = now()
-       WHERE id = $1 AND entity_id = $2
-       RETURNING id`,
-      [req.params.id, tenancy.entityId],
-    );
-    if (!row) {
+
+    const result = await withTransaction(async (tx) => {
+      const sandbox = await tx.queryOne<Record<string, unknown>>(
+        `SELECT * FROM sandbox_methodologies
+         WHERE id = $1 AND entity_id = $2
+         LIMIT 1
+         FOR UPDATE`,
+        [req.params.id, tenancy.entityId],
+      );
+      if (!sandbox) return null;
+
+      const status = String(sandbox.status ?? 'draft');
+      if (!['ready', 'published'].includes(status)) {
+        return { blocked: true, status };
+      }
+
+      const publishedSandbox = await tx.queryOne<Record<string, unknown>>(
+        `UPDATE sandbox_methodologies
+         SET status = 'published', updated_at = now()
+         WHERE id = $1 AND entity_id = $2
+         RETURNING *`,
+        [req.params.id, tenancy.entityId],
+      );
+      if (!publishedSandbox) return null;
+
+      const { request, task } = buildSandboxGovernanceArtifacts(req, sandbox, publishedSandbox);
+      const currentRequests = await readConfigArray(tx, 'methodology_change_requests');
+      const currentTasks = await readConfigArray(tx, 'approval_tasks');
+      const requestToPersist = status === 'published'
+        ? findById(currentRequests, String(request.id)) ?? request
+        : request;
+      const taskToPersist = status === 'published'
+        ? findById(currentTasks, String(task.id)) ?? task
+        : task;
+      const requests = upsertById(currentRequests, requestToPersist);
+      const tasks = upsertById(currentTasks, taskToPersist);
+
+      await saveConfigArray(tx, 'methodology_change_requests', requests);
+      await saveConfigArray(tx, 'approval_tasks', tasks);
+
+      return { request: requestToPersist, task: taskToPersist, sandbox: sandboxToDto(publishedSandbox) };
+    });
+
+    if (!result) {
       res.status(404).json({ code: 'not_found' });
       return;
     }
-    res.json({ governance_request_id: `GOV-${req.params.id.slice(0, 8).toUpperCase()}` });
+    if ('blocked' in result) {
+      res.status(409).json({
+        code: 'impact_not_ready',
+        message: 'Compute impact before publishing a sandbox to Governance',
+        status: result.status,
+      });
+      return;
+    }
+    res.json({
+      governance_request_id: result.request.id,
+      governanceRequestId: result.request.id,
+      approval_task_id: result.task.id,
+      approvalTaskId: result.task.id,
+      request: result.request,
+      approvalTask: result.task,
+      sandbox: result.sandbox,
+    });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }

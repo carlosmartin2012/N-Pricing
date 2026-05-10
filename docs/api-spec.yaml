@@ -549,6 +549,17 @@ paths:
       responses:
         '200': { description: ImpactReport }
 
+  /what-if/sandboxes/{sandboxId}/publish:
+    post:
+      tags: [what-if]
+      summary: Publish a ready what-if sandbox into methodology governance
+      operationId: publishWhatIfSandbox
+      parameters:
+        - { in: path, name: sandboxId, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Governance request and approval task identifiers }
+        '409': { description: Impact report must be ready before publishing }
+
   /what-if/backtests:
     get:
       tags: [what-if]

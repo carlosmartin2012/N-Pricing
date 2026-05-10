@@ -34,6 +34,7 @@ export function applyLabelForTarget(target: MethodologyChangeRequest['target']) 
   if (target === 'RATE_CARD') return 'Apply to Rate Cards';
   if (target === 'TRANSITION_GRID') return 'Apply to Transition Grid';
   if (target === 'PHYSICAL_GRID') return 'Apply to Physical Grid';
+  if (target === 'SANDBOX') return 'Apply Sandbox Decision';
   return 'Apply Change';
 }
 

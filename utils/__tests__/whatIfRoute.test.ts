@@ -139,6 +139,96 @@ describe('what-if router', () => {
     }, 'Trader');
   });
 
+  it('publishes a ready sandbox into governance requests and approval tasks', async () => {
+    const sandboxId = '11111111-1111-1111-1111-111111111111';
+    const readySandbox = {
+      id: sandboxId,
+      name: 'Corporate margin uplift',
+      description: 'Scenario',
+      base_snapshot_id: 'snap-1',
+      status: 'ready',
+      diffs: [{ parameterPath: 'rules.margin', currentValue: 0, proposedValue: 20 }],
+      created_at: '2026-05-01T00:00:00Z',
+      created_by_email: 'methodologist@nfq.es',
+      created_by_name: 'Methodologist',
+      updated_at: '2026-05-02T00:00:00Z',
+      entity_id: ENTITY,
+    };
+    dbMock.withTransaction.mockImplementation(async (fn: (tx: typeof dbMock) => Promise<unknown>) =>
+      fn({ query: dbMock.query, queryOne: dbMock.queryOne, execute: dbMock.execute } as unknown as typeof dbMock),
+    );
+    dbMock.queryOne
+      .mockResolvedValueOnce(readySandbox)
+      .mockResolvedValueOnce({ ...readySandbox, status: 'published', updated_at: '2026-05-03T00:00:00Z' })
+      .mockResolvedValueOnce({ value: [] })
+      .mockResolvedValueOnce({ value: [] });
+    dbMock.execute.mockResolvedValue(undefined);
+
+    await withApp(async (url) => {
+      const r = await http<{
+        governance_request_id: string;
+        approval_task_id: string;
+        request: { target: string; operations: Array<{ entityType: string; entityId: string }> };
+      }>(
+        url,
+        'POST',
+        `/api/what-if/sandboxes/${sandboxId}/publish`,
+      );
+      expect(r.status).toBe(200);
+      expect(r.body.governance_request_id).toBe('MCR-WHATIF-111111111111');
+      expect(r.body.approval_task_id).toBe('ATK-WHATIF-111111111111');
+      expect(r.body.request).toMatchObject({
+        target: 'SANDBOX',
+        operations: [{ entityType: 'SANDBOX', entityId: sandboxId }],
+      });
+
+      const requestWrite = dbMock.execute.mock.calls.find(([, params]) =>
+        Array.isArray(params) && params[0] === 'methodology_change_requests',
+      );
+      const taskWrite = dbMock.execute.mock.calls.find(([, params]) =>
+        Array.isArray(params) && params[0] === 'approval_tasks',
+      );
+      expect(requestWrite).toBeTruthy();
+      expect(taskWrite).toBeTruthy();
+      const persistedRequests = JSON.parse(String(requestWrite?.[1]?.[1])) as Array<{ id: string; target: string }>;
+      const persistedTasks = JSON.parse(String(taskWrite?.[1]?.[1])) as Array<{ id: string; subject: { id: string } }>;
+      expect(persistedRequests[0]).toMatchObject({ id: 'MCR-WHATIF-111111111111', target: 'SANDBOX' });
+      expect(persistedTasks[0]).toMatchObject({
+        id: 'ATK-WHATIF-111111111111',
+        subject: { id: 'MCR-WHATIF-111111111111' },
+      });
+    });
+  });
+
+  it('rejects sandbox publish before impact is ready', async () => {
+    dbMock.withTransaction.mockImplementation(async (fn: (tx: typeof dbMock) => Promise<unknown>) =>
+      fn({ query: dbMock.query, queryOne: dbMock.queryOne, execute: dbMock.execute } as unknown as typeof dbMock),
+    );
+    dbMock.queryOne.mockResolvedValueOnce({
+      id: 'sb-draft',
+      name: 'Draft',
+      base_snapshot_id: 'snap-1',
+      status: 'draft',
+      diffs: [],
+      created_at: '2026-05-01T00:00:00Z',
+      created_by_email: 'methodologist@nfq.es',
+      created_by_name: 'Methodologist',
+      updated_at: '2026-05-01T00:00:00Z',
+      entity_id: ENTITY,
+    });
+
+    await withApp(async (url) => {
+      const r = await http<{ code: string; status: string }>(
+        url,
+        'POST',
+        '/api/what-if/sandboxes/sb-draft/publish',
+      );
+      expect(r.status).toBe(409);
+      expect(r.body).toMatchObject({ code: 'impact_not_ready', status: 'draft' });
+      expect(dbMock.execute).not.toHaveBeenCalled();
+    });
+  });
+
   it('computes cohort-scoped impact with elasticity and booked deal portfolio', async () => {
     dbMock.queryOne.mockResolvedValueOnce({
       id: 'sb-1',
