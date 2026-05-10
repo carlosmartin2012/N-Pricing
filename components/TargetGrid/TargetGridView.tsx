@@ -279,6 +279,7 @@ const TargetGridView: React.FC = () => {
         onClose={() => setExportOpen(false)}
         snapshotId={effectiveSnapshotId}
         filters={filters}
+        cells={cells}
         cellCount={cells.length}
       />
     </div>

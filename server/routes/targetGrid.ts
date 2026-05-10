@@ -46,6 +46,110 @@ function cellToDto(row: Record<string, unknown>) {
   };
 }
 
+function listParam(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((v) => listParam(v));
+  }
+  if (typeof value !== 'string') return [];
+  return value.split(',').map((v) => v.trim()).filter(Boolean);
+}
+
+function addListFilter(
+  filters: string[],
+  params: unknown[],
+  column: string,
+  values: string[],
+): void {
+  if (values.length === 0) return;
+  params.push(values);
+  filters.push(`${column} = ANY($${params.length}::text[])`);
+}
+
+function buildCellQuery(
+  snapshotId: string,
+  entityId: string,
+  queryParams: Record<string, unknown>,
+): { filters: string[]; params: unknown[] } {
+  const params: unknown[] = [snapshotId, entityId];
+  const filters: string[] = ['snapshot_id = $1', 'entity_id = $2'];
+
+  addListFilter(filters, params, 'product', listParam(queryParams.products ?? queryParams.product));
+  addListFilter(filters, params, 'segment', listParam(queryParams.segments ?? queryParams.segment));
+  addListFilter(filters, params, 'tenor_bucket', listParam(queryParams.tenor_buckets ?? queryParams.tenorBucket));
+  addListFilter(filters, params, 'currency', listParam(queryParams.currencies ?? queryParams.currency));
+
+  return { filters, params };
+}
+
+async function loadCellsForSnapshot(
+  snapshotId: string,
+  entityId: string,
+  queryParams: Record<string, unknown> = {},
+) {
+  const { filters, params } = buildCellQuery(snapshotId, entityId, queryParams);
+  return query<Record<string, unknown>>(
+    `SELECT * FROM target_grid_cells WHERE ${filters.join(' AND ')} ORDER BY product, segment, tenor_bucket, currency`,
+    params,
+  );
+}
+
+function exportRows(rows: Record<string, unknown>[]) {
+  return rows.map((row) => ({
+    Product: row.product,
+    Segment: row.segment,
+    Tenor: row.tenor_bucket,
+    Currency: row.currency,
+    'FTP (%)': Number(row.ftp ?? 0),
+    'Liquidity Premium (%)': row.liquidity_premium == null ? null : Number(row.liquidity_premium),
+    'Capital Charge (%)': row.capital_charge == null ? null : Number(row.capital_charge),
+    'ESG Adjustment (%)': row.esg_adjustment == null ? null : Number(row.esg_adjustment),
+    'Target Margin (%)': Number(row.target_margin ?? 0),
+    'Target Client Rate (%)': Number(row.target_client_rate ?? 0),
+    'Target RAROC (%)': Number(row.target_raroc ?? 0),
+    'Computed At': row.computed_at ?? row.created_at ?? '',
+  }));
+}
+
+function pdfEscape(value: unknown): string {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function buildSimplePdf(lines: string[]): Buffer {
+  const content = [
+    'BT /F1 16 Tf 48 792 Td (N-Pricing Target Grid Export) Tj ET',
+    ...lines.slice(0, 48).map((line, index) => {
+      const size = index === 0 ? 10 : 8;
+      return `BT /F1 ${size} Tf 48 ${764 - index * 14} Td (${pdfEscape(line).slice(0, 118)}) Tj ET`;
+    }),
+  ].join('\n');
+
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    `<< /Length ${Buffer.byteLength(content, 'utf8')} >>\nstream\n${content}\nendstream`,
+  ];
+
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  objects.forEach((obj, index) => {
+    offsets.push(Buffer.byteLength(pdf, 'utf8'));
+    pdf += `${index + 1} 0 obj\n${obj}\nendobj\n`;
+  });
+  const xrefOffset = Buffer.byteLength(pdf, 'utf8');
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += '0000000000 65535 f \n';
+  for (let i = 1; i < offsets.length; i += 1) {
+    pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  return Buffer.from(pdf, 'utf8');
+}
+
 // ---------------------------------------------------------------------------
 // Snapshots
 // ---------------------------------------------------------------------------
@@ -159,23 +263,10 @@ router.get('/snapshots/:snapshotId/cells', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const params: unknown[] = [req.params.snapshotId, req.tenancy.entityId];
-    const filters: string[] = ['snapshot_id = $1', 'entity_id = $2'];
-    if (typeof req.query.product === 'string') {
-      params.push(req.query.product);
-      filters.push(`product = $${params.length}`);
-    }
-    if (typeof req.query.segment === 'string') {
-      params.push(req.query.segment);
-      filters.push(`segment = $${params.length}`);
-    }
-    if (typeof req.query.currency === 'string') {
-      params.push(req.query.currency);
-      filters.push(`currency = $${params.length}`);
-    }
-    const rows = await query<Record<string, unknown>>(
-      `SELECT * FROM target_grid_cells WHERE ${filters.join(' AND ')} ORDER BY product, segment, tenor_bucket`,
-      params,
+    const rows = await loadCellsForSnapshot(
+      req.params.snapshotId,
+      req.tenancy.entityId,
+      req.query as Record<string, unknown>,
     );
     res.json(rows.map(cellToDto));
   } catch (err) {
@@ -374,15 +465,58 @@ router.delete('/templates/:id', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Export stubs (xlsx/pdf require additional libraries — return JSON for now)
+// Exports
 // ---------------------------------------------------------------------------
 
 router.get('/snapshots/:snapshotId/export/xlsx', async (req, res) => {
-  res.status(501).json({ code: 'not_implemented', message: 'XLSX export requires server-side package' });
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const rows = await loadCellsForSnapshot(
+      req.params.snapshotId,
+      req.tenancy.entityId,
+      req.query as Record<string, unknown>,
+    );
+    const XLSX = await import('xlsx');
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportRows(rows));
+    XLSX.utils.book_append_sheet(wb, ws, 'Target Grid');
+    const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' }) as Buffer;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="target-grid-${req.params.snapshotId.slice(0, 8)}.xlsx"`);
+    res.send(buffer);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
 });
 
 router.get('/snapshots/:snapshotId/export/pdf', async (req, res) => {
-  res.status(501).json({ code: 'not_implemented', message: 'PDF export requires server-side package' });
+  try {
+    if (!req.tenancy) {
+      res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
+      return;
+    }
+    const rows = await loadCellsForSnapshot(
+      req.params.snapshotId,
+      req.tenancy.entityId,
+      req.query as Record<string, unknown>,
+    );
+    const lines = [
+      `Snapshot: ${req.params.snapshotId}`,
+      `Cells: ${rows.length}`,
+      ...exportRows(rows).map((row) => (
+        `${row.Product} | ${row.Segment} | ${row.Tenor} | ${row.Currency} | FTP ${row['FTP (%)']} | Client ${row['Target Client Rate (%)']} | RAROC ${row['Target RAROC (%)']}`
+      )),
+    ];
+    const pdf = buildSimplePdf(lines);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="target-grid-${req.params.snapshotId.slice(0, 8)}.pdf"`);
+    res.send(pdf);
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
 });
 
 export default router;

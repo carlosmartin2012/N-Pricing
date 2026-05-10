@@ -23,6 +23,7 @@ import governanceRouter from './routes/governance';
 import meteringRouter from './routes/metering';
 import campaignsRouter from './routes/campaigns';
 import targetGridRouter from './routes/targetGrid';
+import whatIfRouter from './routes/whatIf';
 import marketBenchmarksRouter from './routes/marketBenchmarks';
 import copilotRouter from './routes/copilot';
 import attributionsRouter from './routes/attributions';
@@ -187,6 +188,7 @@ app.use('/api/governance', ...entityScoped, governanceRouter);
 app.use('/api/metering', ...entityScoped, meteringRouter);
 app.use('/api/campaigns', ...entityScoped, campaignsRouter);
 app.use('/api/target-grid', ...entityScoped, targetGridRouter);
+app.use('/api/what-if', ...entityScoped, whatIfRouter);
 // Market benchmarks are cross-tenant reference data (BBG/BdE/EBA surveys).
 // Read is open to any authenticated user; write is admin-gated inside the router.
 app.use('/api/market-benchmarks', authMiddleware, marketBenchmarksRouter);

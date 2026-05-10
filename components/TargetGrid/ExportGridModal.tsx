@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Download, FileSpreadsheet, FileText } from 'lucide-react';
-import type { GridFilters } from '../../types';
+import type { GridFilters, TargetGridCell } from '../../types';
 import { useUI } from '../../contexts/UIContext';
 
 interface Props {
@@ -8,12 +8,13 @@ interface Props {
   onClose: () => void;
   snapshotId: string;
   filters?: GridFilters;
+  cells: TargetGridCell[];
   cellCount: number;
 }
 
 type ExportFormat = 'pdf' | 'xlsx';
 
-const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters, cellCount }) => {
+const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters, cells, cellCount }) => {
   const { t } = useUI();
   const [format, setFormat] = useState<ExportFormat>('xlsx');
   const [includeBreakdown, setIncludeBreakdown] = useState(true);
@@ -29,24 +30,29 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
       // Dynamic import for export utilities
       if (format === 'xlsx') {
         const { utils, writeFile } = await import('xlsx');
-        // Build a placeholder workbook — the actual data assembly would use the API
-        const ws = utils.aoa_to_sheet([
-          ['Target Grid Export'],
-          ['Snapshot ID', snapshotId],
-          ['Cells', cellCount],
-          ['Filters', JSON.stringify(filters ?? {})],
-          [],
-          ['Product', 'Segment', 'Tenor', 'Currency', 'FTP (bps)', 'Margin (%)', 'Client Rate (%)', 'RAROC (%)'],
-        ]);
+        const rows = cells.map((cell) => ({
+          Product: cell.product,
+          Segment: cell.segment,
+          Tenor: cell.tenorBucket,
+          Currency: cell.currency,
+          'FTP (%)': cell.ftp,
+          'Liquidity Premium (%)': cell.liquidityPremium,
+          'Capital Charge (%)': cell.capitalCharge,
+          'ESG Adjustment (%)': cell.esgAdjustment,
+          'Target Margin (%)': cell.targetMargin,
+          'Target Client Rate (%)': cell.targetClientRate,
+          'Target RAROC (%)': cell.targetRaroc,
+          'Computed At': cell.computedAt,
+        }));
+        const ws = utils.json_to_sheet(rows);
         const wb = utils.book_new();
         utils.book_append_sheet(wb, ws, 'Target Grid');
         writeFile(wb, `target-grid-${snapshotId.slice(0, 8)}.xlsx`);
       } else {
-        // PDF export — dynamically import; the helper may not yet exist
         const pdfModule = await import('../../utils/pdfExport');
         const exportFn = (pdfModule as Record<string, unknown>)['exportTargetGridPdf'];
         if (typeof exportFn === 'function') {
-          await (exportFn as (id: string, f?: GridFilters) => Promise<void>)(snapshotId, filters);
+          (exportFn as (id: string, f: GridFilters | undefined, c: TargetGridCell[]) => void)(snapshotId, filters, cells);
         }
       }
     } catch (err) {

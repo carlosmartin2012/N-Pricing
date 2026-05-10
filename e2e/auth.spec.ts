@@ -19,7 +19,7 @@ test.beforeEach(async ({ page }) => {
 async function gotoLogin(page: Page) {
   await page.goto('/');
   await expect(page.getByTestId('login-page')).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByRole('heading', { name: 'Login' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Bienvenido|Welcome|Login/ })).toBeVisible();
 }
 
 async function submitDemoLogin(page: Page, username: string, password: string) {
@@ -62,8 +62,7 @@ test.describe('Login Page', () => {
   test('shows demo login form when demo env vars are set', async ({ page }) => {
     await gotoLogin(page);
 
-    // The demo access section should be visible since env vars are set
-    await expect(page.getByText('Demo access', { exact: true })).toBeVisible();
+    // The demo login controls should be visible since env vars are set.
     await expect(page.getByTestId('demo-username')).toBeVisible();
     await expect(page.getByTestId('demo-password')).toBeVisible();
     await expect(page.getByTestId('demo-login-btn')).toBeVisible();

@@ -981,6 +981,114 @@ CREATE TABLE IF NOT EXISTS canonical_deal_templates (
 CREATE INDEX IF NOT EXISTS idx_canonical_templates_entity ON canonical_deal_templates (entity_id, product, segment);
 
 -- -----------------------------------------------------------------------
+-- Methodology What-If: sandboxes, backtests and budget targets
+-- -----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS sandbox_methodologies (
+  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name             TEXT        NOT NULL,
+  description      TEXT,
+  base_snapshot_id UUID        NOT NULL REFERENCES methodology_snapshots(id),
+  status           TEXT        NOT NULL DEFAULT 'draft',
+  diffs            JSONB       NOT NULL DEFAULT '[]',
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  created_by_email TEXT        NOT NULL,
+  created_by_name  TEXT        NOT NULL,
+  updated_at       TIMESTAMPTZ DEFAULT NOW(),
+  entity_id        UUID
+);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'sandbox_methodologies' AND constraint_name = 'sandbox_status_check') THEN
+    ALTER TABLE sandbox_methodologies ADD CONSTRAINT sandbox_status_check
+      CHECK (status IN ('draft', 'computing', 'ready', 'published', 'archived'));
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_sandbox_entity ON sandbox_methodologies (entity_id);
+CREATE INDEX IF NOT EXISTS idx_sandbox_status ON sandbox_methodologies (status);
+
+CREATE TABLE IF NOT EXISTS backtesting_runs (
+  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name             TEXT        NOT NULL,
+  description      TEXT,
+  sandbox_id       UUID        REFERENCES sandbox_methodologies(id),
+  snapshot_id      UUID        NOT NULL REFERENCES methodology_snapshots(id),
+  date_from        DATE        NOT NULL,
+  date_to          DATE        NOT NULL,
+  status           TEXT        NOT NULL DEFAULT 'pending',
+  deal_count       INT         DEFAULT 0,
+  filters          JSONB,
+  started_at       TIMESTAMPTZ DEFAULT NOW(),
+  completed_at     TIMESTAMPTZ,
+  duration_ms      INT,
+  entity_id        UUID,
+  created_by_email TEXT        NOT NULL,
+  result           JSONB
+);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'backtesting_runs' AND constraint_name = 'backtest_status_check') THEN
+    ALTER TABLE backtesting_runs ADD CONSTRAINT backtest_status_check
+      CHECK (status IN ('pending', 'running', 'completed', 'failed'));
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_backtesting_entity ON backtesting_runs (entity_id);
+
+CREATE TABLE IF NOT EXISTS budget_targets (
+  id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  product        TEXT        NOT NULL,
+  segment        TEXT        NOT NULL,
+  currency       TEXT        NOT NULL,
+  entity_id      UUID,
+  period         TEXT        NOT NULL,
+  target_nii     NUMERIC(18,2) NOT NULL,
+  target_volume  NUMERIC(18,2) NOT NULL,
+  target_raroc   NUMERIC(10,6) NOT NULL,
+  created_at     TIMESTAMPTZ DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_budget_targets_cohort_period
+  ON budget_targets (product, segment, currency, COALESCE(entity_id, '00000000-0000-0000-0000-000000000000'::uuid), period);
+CREATE INDEX IF NOT EXISTS idx_budget_targets_lookup ON budget_targets (product, segment, currency, period);
+
+CREATE TABLE IF NOT EXISTS elasticity_models (
+  id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  segment_key         TEXT        NOT NULL,
+  elasticity          NUMERIC     NOT NULL,
+  baseline_conversion NUMERIC     NOT NULL,
+  anchor_rate         NUMERIC     NOT NULL,
+  sample_size         INTEGER     NOT NULL,
+  confidence          TEXT        NOT NULL,
+  method              TEXT        NOT NULL,
+  calibrated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  is_active           BOOLEAN     NOT NULL DEFAULT TRUE,
+  entity_id           TEXT
+);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'elasticity_models' AND constraint_name = 'elasticity_models_confidence_check') THEN
+    ALTER TABLE elasticity_models ADD CONSTRAINT elasticity_models_confidence_check
+      CHECK (confidence IN ('LOW', 'MEDIUM', 'HIGH'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'elasticity_models' AND constraint_name = 'elasticity_models_method_check') THEN
+    ALTER TABLE elasticity_models ADD CONSTRAINT elasticity_models_method_check
+      CHECK (method IN ('FREQUENTIST', 'BAYESIAN'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+    WHERE table_name = 'elasticity_models' AND constraint_name = 'elasticity_models_sample_size_check') THEN
+    ALTER TABLE elasticity_models ADD CONSTRAINT elasticity_models_sample_size_check
+      CHECK (sample_size >= 0);
+  END IF;
+END $$;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_elasticity_active_unique
+  ON elasticity_models (segment_key, COALESCE(entity_id, ''))
+  WHERE is_active;
+CREATE INDEX IF NOT EXISTS idx_elasticity_calibrated_at ON elasticity_models (calibrated_at DESC);
+
+-- -----------------------------------------------------------------------
 -- Observability: alert rules
 -- -----------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS alert_rules (

@@ -30,6 +30,7 @@ security:
 
 tags:
   - name: pricing
+  - name: deals
   - name: snapshots
   - name: customer360
   - name: campaigns
@@ -37,6 +38,10 @@ tags:
   - name: governance
   - name: observability
   - name: metering
+  - name: target-grid
+  - name: what-if
+  - name: market-benchmarks
+  - name: copilot
   - name: auth
 
 paths:
@@ -431,6 +436,122 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScenarioResponse'
+
+  /deals/{dealId}/timeline:
+    get:
+      tags: [deals]
+      summary: Deal timeline aggregator
+      description: Returns deal lifecycle, audit, snapshot and governance events for one entity-scoped deal.
+      operationId: getDealTimeline
+      parameters:
+        - { in: path, name: dealId, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Timeline events and KPI summary }
+        '404': { description: Deal not found in caller entity }
+
+  /copilot/ask:
+    post:
+      tags: [copilot]
+      summary: Ask the contextual pricing copilot
+      operationId: askCopilot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question:   { type: string }
+                snapshotId: { type: string, nullable: true }
+                dealId:     { type: string, nullable: true }
+      responses:
+        '200': { description: Grounded answer with redacted context and citations }
+
+  /market-benchmarks:
+    get:
+      tags: [market-benchmarks]
+      summary: List market reference benchmarks
+      operationId: listMarketBenchmarks
+      parameters:
+        - { in: query, name: products, required: false, schema: { type: string } }
+        - { in: query, name: currencies, required: false, schema: { type: string } }
+        - { in: query, name: clients, required: false, schema: { type: string } }
+      responses:
+        '200': { description: Shared benchmark rows }
+    post:
+      tags: [market-benchmarks]
+      summary: Upsert a market reference benchmark
+      operationId: upsertMarketBenchmark
+      responses:
+        '201': { description: Created or updated benchmark }
+        '403': { description: Admin role required }
+
+  /target-grid/snapshots/{snapshotId}/export/xlsx:
+    get:
+      tags: [target-grid]
+      summary: Export target-grid cells as XLSX
+      operationId: exportTargetGridXlsx
+      parameters:
+        - { in: path, name: snapshotId, required: true, schema: { type: string, format: uuid } }
+        - { in: query, name: products, required: false, schema: { type: string } }
+        - { in: query, name: segments, required: false, schema: { type: string } }
+        - { in: query, name: tenor_buckets, required: false, schema: { type: string } }
+        - { in: query, name: currencies, required: false, schema: { type: string } }
+      responses:
+        '200': { description: XLSX binary export }
+
+  /target-grid/snapshots/{snapshotId}/export/pdf:
+    get:
+      tags: [target-grid]
+      summary: Export target-grid cells as PDF
+      operationId: exportTargetGridPdf
+      parameters:
+        - { in: path, name: snapshotId, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: PDF binary export }
+
+  /what-if/sandboxes:
+    get:
+      tags: [what-if]
+      summary: List methodology what-if sandboxes
+      operationId: listWhatIfSandboxes
+      responses:
+        '200': { description: SandboxMethodology[] }
+    post:
+      tags: [what-if]
+      summary: Create a methodology what-if sandbox
+      operationId: createWhatIfSandbox
+      responses:
+        '201': { description: Created sandbox }
+
+  /what-if/sandboxes/{sandboxId}/impact:
+    get:
+      tags: [what-if]
+      summary: Read a sandbox impact report
+      operationId: getWhatIfImpact
+      parameters:
+        - { in: path, name: sandboxId, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: ImpactReport }
+    post:
+      tags: [what-if]
+      summary: Compute and mark ready a sandbox impact report
+      operationId: computeWhatIfImpact
+      parameters:
+        - { in: path, name: sandboxId, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: ImpactReport }
+
+  /what-if/benchmarks/compare:
+    get:
+      tags: [what-if]
+      summary: Compare target-grid cells against latest matching benchmarks
+      operationId: compareWhatIfBenchmarks
+      parameters:
+        - { in: query, name: snapshot_id, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: BenchmarkComparison[] }
 
 components:
   securitySchemes:

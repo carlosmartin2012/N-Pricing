@@ -1,4 +1,4 @@
-import type { Transaction, FTPResult } from '../types';
+import type { Transaction, FTPResult, GridFilters, TargetGridCell } from '../types';
 
 /** Safe toFixed that handles NaN/undefined by returning '0.0000'. */
 function safeFixed(v: number | undefined | null, digits = 4): string {
@@ -186,5 +186,81 @@ export function exportPricingPDF(
   const html = buildPricingReceiptHTML(deal, result, clientName);
   printWindow.document.open();
   printWindow.document.write(html);
+  printWindow.document.close();
+}
+
+function fmtPct(value: number | null | undefined): string {
+  return Number.isFinite(value) ? `${(value as number).toFixed(4)}%` : '-';
+}
+
+function buildTargetGridHTML(
+  snapshotId: string,
+  filters: GridFilters | undefined,
+  cells: TargetGridCell[],
+): string {
+  const timestamp = new Date().toISOString();
+  const rows = cells.map((cell) => `
+      <tr>
+        <td>${esc(cell.product)}</td>
+        <td>${esc(cell.segment)}</td>
+        <td>${esc(cell.tenorBucket)}</td>
+        <td>${esc(cell.currency)}</td>
+        <td>${fmtPct(cell.ftp)}</td>
+        <td>${fmtPct(cell.targetMargin)}</td>
+        <td>${fmtPct(cell.targetClientRate)}</td>
+        <td>${fmtPct(cell.targetRaroc)}</td>
+      </tr>`).join('');
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <title>Target Grid Export - ${esc(snapshotId)}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Inter, Arial, sans-serif; color: #0f172a; padding: 32px; }
+    .meta { color: #64748b; font-size: 11px; line-height: 1.6; margin-bottom: 20px; }
+    h1 { color: #0891b2; font-size: 24px; margin-bottom: 8px; }
+    table { border-collapse: collapse; width: 100%; font-size: 11px; }
+    th, td { border-bottom: 1px solid #e2e8f0; padding: 7px 8px; text-align: right; }
+    th { color: #475569; font-weight: 700; background: #f8fafc; }
+    th:first-child, td:first-child,
+    th:nth-child(2), td:nth-child(2),
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(4), td:nth-child(4) { text-align: left; }
+    @media print { body { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <h1>N-Pricing Target Grid</h1>
+  <div class="meta">
+    Snapshot: ${esc(snapshotId)}<br/>
+    Cells: ${cells.length}<br/>
+    Filters: ${esc(JSON.stringify(filters ?? {}))}<br/>
+    Generated: ${esc(timestamp)}
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th><th>Segment</th><th>Tenor</th><th>Currency</th>
+        <th>FTP</th><th>Margin</th><th>Client Rate</th><th>RAROC</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <script>window.onload = () => { window.print(); }</script>
+</body>
+</html>`;
+}
+
+export function exportTargetGridPdf(
+  snapshotId: string,
+  filters: GridFilters | undefined,
+  cells: TargetGridCell[],
+): void {
+  const printWindow = window.open('', '_blank', 'width=1100,height=900');
+  if (!printWindow) return;
+
+  printWindow.document.open();
+  printWindow.document.write(buildTargetGridHTML(snapshotId, filters, cells));
   printWindow.document.close();
 }
