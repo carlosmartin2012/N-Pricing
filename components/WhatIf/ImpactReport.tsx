@@ -329,6 +329,8 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                     <th className="px-3 py-2 text-right font-semibold text-[color:var(--nfq-text-secondary)]">FTP \u0394</th>
                     <th className="px-3 py-2 text-right font-semibold text-[color:var(--nfq-text-secondary)]">RAROC \u0394</th>
                     <th className="px-3 py-2 text-right font-semibold text-[color:var(--nfq-text-secondary)]">Rate \u0394</th>
+                    <th className="px-3 py-2 text-right font-semibold text-[color:var(--nfq-text-secondary)]">Volume \u0394</th>
+                    <th className="px-3 py-2 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Elasticity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -351,6 +353,19 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                       </td>
                       <td className={`px-3 py-2 text-right font-mono ${deltaColor(cell.clientRateDeltaBps)}`}>
                         {fmtBps(cell.clientRateDeltaBps)}
+                      </td>
+                      <td className={`px-3 py-2 text-right font-mono ${deltaColor(cell.estimatedVolumeDelta ?? 0)}`}>
+                        <span>{fmtCurrency(cell.estimatedVolumeDelta ?? 0)}</span>
+                        <span className="ml-1 text-[color:var(--nfq-text-secondary)]">
+                          ({fmtPct(cell.estimatedVolumeDeltaPct ?? 0)})
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-[color:var(--nfq-text-secondary)]">
+                        {cell.elasticityModelId ? (
+                          <span className="font-mono text-[10px] text-cyan-300">{cell.elasticityModelId}</span>
+                        ) : (
+                          <span>No model</span>
+                        )}
                       </td>
                     </tr>
                   ))}

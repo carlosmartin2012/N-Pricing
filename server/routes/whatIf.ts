@@ -50,6 +50,24 @@ interface DealImpactRow {
   amount?: unknown;
   duration_months?: unknown;
   pricing_snapshot?: unknown;
+  approved_at?: unknown;
+  created_at?: unknown;
+  updated_at?: unknown;
+}
+
+interface BacktestCohortTotals {
+  product: string;
+  segment: string;
+  simulatedRateAmount: number;
+  actualRateAmount: number;
+  volume: number;
+  dealCount: number;
+}
+
+interface BacktestPeriodTotals {
+  simulatedPnl: number;
+  actualPnl: number;
+  dealCount: number;
 }
 
 function tenant(req: Request, res: Response) {
@@ -318,6 +336,139 @@ function findDealCell(
   const currency = String(deal.currency ?? 'EUR');
   const tenorBucket = tenorBucketFromMonths(asNumber(deal.duration_months, 12));
   return cellsByKey.get(`${product}|${segment}|${tenorBucket}|${currency}`) ?? null;
+}
+
+function dateKey(value: unknown): string {
+  const raw = isoDate(value);
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return new Date().toISOString().slice(0, 10);
+  return date.toISOString().slice(0, 10);
+}
+
+function periodKey(value: unknown): string {
+  return dateKey(value).slice(0, 7);
+}
+
+function pricingRate(output: Record<string, unknown>, fallback: number): number {
+  return asNumber(
+    output.finalClientRate ??
+      output.final_client_rate ??
+      output.clientRate ??
+      output.client_rate ??
+      output.allInRate ??
+      output.all_in_rate,
+    fallback,
+  );
+}
+
+function pricingRaroc(output: Record<string, unknown>, fallback: number): number {
+  return asNumber(output.raroc ?? output.RAROC ?? output.rarocPct ?? output.raroc_pct, fallback);
+}
+
+function buildBacktestResult(
+  runId: string,
+  cells: Record<string, unknown>[],
+  dealRows: DealImpactRow[],
+  diffs: unknown[],
+) {
+  const cellsByKey = new Map(
+    cells.map((row) => {
+      const cell = gridCellToDto(row);
+      return [cellKeyFromDto(cell), cell] as const;
+    }),
+  );
+
+  const periodTotals = new Map<string, BacktestPeriodTotals>();
+  const cohortTotals = new Map<string, BacktestCohortTotals>();
+  let simulatedPnl = 0;
+  let actualPnl = 0;
+  let simulatedRaroc = 0;
+  let actualRaroc = 0;
+  let dealCount = 0;
+
+  for (const deal of dealRows) {
+    const cell = findDealCell(deal, cellsByKey);
+    if (!cell) continue;
+
+    const output = extractPricingOutput(deal.pricing_snapshot);
+    const effect = effectForCell(diffs, cell);
+    const amount = asNumber(deal.amount);
+    const durationYears = Math.max(asNumber(deal.duration_months, 12), 1) / 12;
+    const actualRate = pricingRate(output, cell.targetClientRate);
+    const simulatedRate = cell.targetClientRate + (effect.clientRateDeltaBps / 100);
+    const actualDealRaroc = pricingRaroc(output, cell.targetRaroc);
+    const simulatedDealRaroc = cell.targetRaroc + effect.rarocDeltaPp;
+    const actualDealPnl = amount * (actualRate / 100) * durationYears;
+    const simulatedDealPnl = amount * (simulatedRate / 100) * durationYears;
+    const date = deal.approved_at ?? deal.updated_at ?? deal.created_at;
+    const period = periodKey(date);
+    const cohortKey = `${cell.product}|${cell.segment}`;
+
+    simulatedPnl += simulatedDealPnl;
+    actualPnl += actualDealPnl;
+    simulatedRaroc += simulatedDealRaroc;
+    actualRaroc += actualDealRaroc;
+    dealCount += 1;
+
+    const periodEntry = periodTotals.get(period) ?? { simulatedPnl: 0, actualPnl: 0, dealCount: 0 };
+    periodEntry.simulatedPnl += simulatedDealPnl;
+    periodEntry.actualPnl += actualDealPnl;
+    periodEntry.dealCount += 1;
+    periodTotals.set(period, periodEntry);
+
+    const cohortEntry = cohortTotals.get(cohortKey) ?? {
+      product: cell.product,
+      segment: cell.segment,
+      simulatedRateAmount: 0,
+      actualRateAmount: 0,
+      volume: 0,
+      dealCount: 0,
+    };
+    cohortEntry.simulatedRateAmount += simulatedRate * amount;
+    cohortEntry.actualRateAmount += actualRate * amount;
+    cohortEntry.volume += amount;
+    cohortEntry.dealCount += 1;
+    cohortTotals.set(cohortKey, cohortEntry);
+  }
+
+  const pnlDelta = simulatedPnl - actualPnl;
+  const simulatedAvgRarocPct = dealCount === 0 ? 0 : simulatedRaroc / dealCount;
+  const actualAvgRarocPct = dealCount === 0 ? 0 : actualRaroc / dealCount;
+
+  return {
+    runId,
+    simulatedPnl,
+    actualPnl,
+    pnlDelta,
+    pnlDeltaPct: actualPnl === 0 ? 0 : (pnlDelta / actualPnl) * 100,
+    simulatedAvgRaroc: simulatedAvgRarocPct / 100,
+    actualAvgRaroc: actualAvgRarocPct / 100,
+    rarocDeltaPp: simulatedAvgRarocPct - actualAvgRarocPct,
+    periodBreakdown: Array.from(periodTotals.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([period, totals]) => ({
+        period,
+        simulatedPnl: totals.simulatedPnl,
+        actualPnl: totals.actualPnl,
+        delta: totals.simulatedPnl - totals.actualPnl,
+        dealCount: totals.dealCount,
+      })),
+    cohortBreakdown: Array.from(cohortTotals.values())
+      .sort((a, b) => b.volume - a.volume)
+      .map((cohort) => {
+        const simulatedAvgRatePct = cohort.volume === 0 ? 0 : cohort.simulatedRateAmount / cohort.volume;
+        const actualAvgRatePct = cohort.volume === 0 ? 0 : cohort.actualRateAmount / cohort.volume;
+        return {
+          product: cohort.product,
+          segment: cohort.segment,
+          simulatedAvgRate: simulatedAvgRatePct / 100,
+          actualAvgRate: actualAvgRatePct / 100,
+          rateDeltaBps: (simulatedAvgRatePct - actualAvgRatePct) * 100,
+          dealCount: cohort.dealCount,
+          volumeEur: cohort.volume,
+        };
+      }),
+  };
 }
 
 async function computeImpactReport(sandboxId: string, entityId: string, markReady: boolean) {
@@ -953,6 +1104,7 @@ router.get('/backtests', async (req, res) => {
 
 router.post('/backtests', async (req, res) => {
   try {
+    const startedAt = Date.now();
     const tenancy = tenant(req, res);
     if (!tenancy) return;
     if (!requireMethodologyAuthor(req, res)) return;
@@ -968,25 +1120,60 @@ router.post('/backtests', async (req, res) => {
       return;
     }
     const id = asString(body.id, randomUUID());
-    const result = emptyBacktestResult(id);
+    const sandboxId = asString(body.sandboxId);
+    const sandbox = sandboxId
+      ? await queryOne<Record<string, unknown>>(
+        `SELECT * FROM sandbox_methodologies
+         WHERE id = $1 AND entity_id = $2
+         LIMIT 1`,
+        [sandboxId, tenancy.entityId],
+      )
+      : null;
+    if (sandboxId && !sandbox) {
+      res.status(404).json({ code: 'sandbox_not_found' });
+      return;
+    }
+    const cells = await query<Record<string, unknown>>(
+      `SELECT * FROM target_grid_cells
+       WHERE snapshot_id = $1 AND entity_id = $2
+       ORDER BY product, segment, tenor_bucket, currency`,
+      [snapshotId, tenancy.entityId],
+    );
+    const dateFrom = asString(body.dateFrom, new Date().toISOString().slice(0, 10));
+    const dateTo = asString(body.dateTo, new Date().toISOString().slice(0, 10));
+    const dealRows = await query<DealImpactRow>(
+      `SELECT id, product_type, client_type, currency, amount, duration_months,
+              pricing_snapshot, approved_at, created_at, updated_at
+       FROM deals
+       WHERE entity_id = $1
+         AND COALESCE(approved_at::date, created_at::date) BETWEEN $2::date AND $3::date
+         AND status IN ('Booked', 'Approved', 'Pending_Approval', 'Pending', 'Draft')
+       ORDER BY COALESCE(approved_at, created_at) ASC
+       LIMIT 10000`,
+      [tenancy.entityId, dateFrom, dateTo],
+    );
+    const result = buildBacktestResult(id, cells, dealRows, asJsonArray(sandbox?.diffs));
+    const durationMs = Date.now() - startedAt;
     const status = BACKTEST_STATUSES.has(String(body.status)) ? String(body.status) : 'completed';
     const row = await queryOne<Record<string, unknown>>(
       `INSERT INTO backtesting_runs
          (id, name, description, sandbox_id, snapshot_id, date_from, date_to,
           status, deal_count, filters, completed_at, duration_ms, entity_id,
           created_by_email, result)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0, $9::jsonb, now(), 0, $10, $11, $12::jsonb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, now(), $11, $12, $13, $14::jsonb)
        RETURNING *`,
       [
         id,
         name,
         body.description ?? null,
-        body.sandboxId ?? null,
+        sandboxId || null,
         snapshotId,
-        asString(body.dateFrom, new Date().toISOString().slice(0, 10)),
-        asString(body.dateTo, new Date().toISOString().slice(0, 10)),
+        dateFrom,
+        dateTo,
         status,
+        result.periodBreakdown.reduce((sum, period) => sum + period.dealCount, 0),
         JSON.stringify(body.filters ?? {}),
+        durationMs,
         tenancy.entityId,
         asString(body.createdByEmail, userEmail(req)),
         JSON.stringify(result),

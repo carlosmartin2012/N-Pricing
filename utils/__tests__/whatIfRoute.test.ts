@@ -226,6 +226,119 @@ describe('what-if router', () => {
     });
   });
 
+  it('creates a computed backtest result from historical deals and sandbox diffs', async () => {
+    const sandbox = {
+      id: 'sb-1',
+      base_snapshot_id: 'snap-1',
+      diffs: [{
+        parameterPath: 'rules.margin',
+        parameterLabel: 'Margin',
+        changeType: 'spread',
+        currentValue: 0,
+        proposedValue: 20,
+        scope: { products: ['LOAN_COMM'], segments: ['Corporate'] },
+      }],
+    };
+    const insertedResults: Array<Record<string, unknown>> = [];
+    dbMock.queryOne
+      .mockResolvedValueOnce(sandbox)
+      .mockImplementationOnce(async (_sql: string, params: unknown[]) => {
+        const result = JSON.parse(String(params[13])) as Record<string, unknown>;
+        insertedResults.push(result);
+        return {
+          id: params[0],
+          name: params[1],
+          description: null,
+          sandbox_id: params[3],
+          snapshot_id: params[4],
+          date_from: params[5],
+          date_to: params[6],
+          status: params[7],
+          deal_count: params[8],
+          filters: {},
+          started_at: '2026-05-01T00:00:00Z',
+          completed_at: '2026-05-01T00:00:01Z',
+          duration_ms: params[10],
+          entity_id: ENTITY,
+          created_by_email: params[12],
+          result,
+        };
+      });
+    dbMock.query
+      .mockResolvedValueOnce([
+        {
+          id: 'cell-1',
+          snapshot_id: 'snap-1',
+          entity_id: ENTITY,
+          product: 'LOAN_COMM',
+          segment: 'Corporate',
+          tenor_bucket: '0-1Y',
+          currency: 'EUR',
+          canonical_deal_input: { amount: 1_000_000 },
+          ftp: 2.1,
+          target_margin: 2,
+          target_client_rate: 4.1,
+          target_raroc: 12,
+          components: {},
+          computed_at: '2026-05-01T00:00:00Z',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'deal-1',
+          product_type: 'LOAN_COMM',
+          client_type: 'Corporate',
+          currency: 'EUR',
+          amount: 1_000_000,
+          duration_months: 12,
+          approved_at: '2026-02-15T00:00:00Z',
+          created_at: '2026-02-01T00:00:00Z',
+          updated_at: '2026-02-16T00:00:00Z',
+          pricing_snapshot: { output: { finalClientRate: 4, raroc: 10 } },
+        },
+      ]);
+
+    await withApp(async (url) => {
+      const r = await http<{ id: string; dealCount: number; status: string }>(
+        url,
+        'POST',
+        '/api/what-if/backtests',
+        {
+          id: 'bt-1',
+          name: 'Q1 replay',
+          snapshotId: 'snap-1',
+          sandboxId: 'sb-1',
+          dateFrom: '2026-01-01',
+          dateTo: '2026-03-31',
+        },
+      );
+      expect(r.status).toBe(201);
+      expect(r.body).toMatchObject({ id: 'bt-1', dealCount: 1, status: 'completed' });
+      const result = insertedResults[0] as {
+        simulatedPnl: number;
+        actualPnl: number;
+        pnlDelta: number;
+        simulatedAvgRaroc: number;
+        actualAvgRaroc: number;
+        rarocDeltaPp: number;
+        periodBreakdown: Array<{ period: string; dealCount: number; delta: number }>;
+        cohortBreakdown: Array<{ product: string; segment: string; rateDeltaBps: number; dealCount: number }>;
+      };
+      expect(result).toMatchObject({
+        runId: 'bt-1',
+        periodBreakdown: [{ period: '2026-02', dealCount: 1, delta: 3_000 }],
+        cohortBreakdown: [{ product: 'LOAN_COMM', segment: 'Corporate', dealCount: 1 }],
+      });
+      expect(result.simulatedPnl).toBeCloseTo(43_000, 6);
+      expect(result.actualPnl).toBeCloseTo(40_000, 6);
+      expect(result.pnlDelta).toBeCloseTo(3_000, 6);
+      expect(result.simulatedAvgRaroc).toBeCloseTo(0.118, 6);
+      expect(result.actualAvgRaroc).toBeCloseTo(0.1, 6);
+      expect(result.rarocDeltaPp).toBeCloseTo(1.8, 6);
+      expect(result.cohortBreakdown[0].rateDeltaBps).toBeCloseTo(30, 6);
+    });
+  });
+
   it('compares target-grid cells against latest matching market benchmarks', async () => {
     dbMock.query
       .mockResolvedValueOnce([

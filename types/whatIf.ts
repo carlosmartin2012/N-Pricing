@@ -71,6 +71,8 @@ export interface CellImpact {
   rarocDeltaPp: number;
   clientRateDeltaBps: number;
   estimatedVolumeDelta?: number;
+  estimatedVolumeDeltaPct?: number;
+  elasticityModelId?: string | null;
 }
 
 export interface PortfolioImpact {

@@ -1,15 +1,18 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import type { SandboxMethodology, SandboxDiff, SandboxStatus } from '../../types';
 import {
+  BarChart3,
   FlaskConical,
+  History,
   Plus,
   Send,
   Trash2,
   Edit,
   Play,
   GitBranch,
+  TrendingUp,
 } from 'lucide-react';
-import { Panel, Badge, Button, TextInput } from '../ui/LayoutComponents';
+import { Panel, Badge, Button, TextInput, InputGroup } from '../ui/LayoutComponents';
 import { useEntity } from '../../contexts/EntityContext';
 import {
   useSandboxesQuery,
@@ -22,6 +25,9 @@ import {
   useComputeImpactReport,
 } from '../../hooks/queries/useWhatIfQueries';
 import ImpactReportPanel from './ImpactReport';
+import ElasticityCalibration from './ElasticityCalibration';
+import BacktestingConsole from './BacktestingConsole';
+import BenchmarkGrid from './BenchmarkGrid';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -43,6 +49,20 @@ const CHANGE_TYPE_LABELS: Record<SandboxDiff['changeType'], string> = {
   esg: 'ESG',
   capital: 'Capital',
 };
+
+type WorkspaceTab = 'sandboxes' | 'elasticity' | 'backtesting' | 'benchmarks';
+
+const WORKSPACE_TABS: Array<{
+  id: WorkspaceTab;
+  label: string;
+  sublabel: string;
+  icon: typeof FlaskConical;
+}> = [
+  { id: 'sandboxes', label: 'Sandbox Lab', sublabel: 'Policy diffs + impact', icon: FlaskConical },
+  { id: 'elasticity', label: 'Elasticity', sublabel: 'Models + calibration', icon: TrendingUp },
+  { id: 'backtesting', label: 'Backtesting', sublabel: 'Historical P&L replay', icon: History },
+  { id: 'benchmarks', label: 'Benchmarks', sublabel: 'Market + budget checks', icon: BarChart3 },
+];
 
 function formatChangeValue(value: unknown): string {
   if (value === null || value === undefined) return '\u2014';
@@ -226,6 +246,8 @@ const WhatIfWorkspace: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [editingName, setEditingName] = useState(false);
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('sandboxes');
+  const [benchmarkSnapshotId, setBenchmarkSnapshotId] = useState('');
 
   // --- Queries ---
   const { data: sandboxes = [], isLoading: loadingSandboxes } = useSandboxesQuery(entityId);
@@ -244,6 +266,7 @@ const WhatIfWorkspace: React.FC = () => {
   const isComputing = sandbox?.status === 'computing' || computeImpactMutation.isPending;
   const canCompute = sandbox?.status === 'draft' && (sandbox.diffs.length ?? 0) > 0;
   const canPublish = sandbox?.status === 'ready';
+  const effectiveBenchmarkSnapshotId = benchmarkSnapshotId.trim() || sandbox?.baseSnapshotId || '';
 
   // --- Handlers ---
   const handleCreate = useCallback(() => {
@@ -340,7 +363,39 @@ const WhatIfWorkspace: React.FC = () => {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="flex h-full min-h-0 gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="shrink-0 rounded-[18px] border border-white/5 bg-[var(--nfq-bg-surface)] p-1">
+        <div className="grid gap-1 md:grid-cols-4">
+          {WORKSPACE_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const selected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                aria-pressed={selected}
+                className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-left transition-colors ${
+                  selected
+                    ? 'bg-cyan-500/10 text-[color:var(--nfq-text-primary)] ring-1 ring-cyan-500/30'
+                    : 'text-[color:var(--nfq-text-secondary)] hover:bg-white/[0.03] hover:text-[color:var(--nfq-text-primary)]'
+                }`}
+              >
+                <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-cyan-300' : ''}`} />
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold">{tab.label}</span>
+                  <span className="block truncate text-[10px] uppercase tracking-[0.12em] text-[color:var(--nfq-text-secondary)]">
+                    {tab.sublabel}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {activeTab === 'sandboxes' && (
+        <div className="flex min-h-0 flex-1 gap-4">
       {/* --- Left sidebar: sandbox list --- */}
       <aside className="flex w-72 shrink-0 flex-col rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5 overflow-hidden">
         <div className="flex items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
@@ -532,6 +587,57 @@ const WhatIfWorkspace: React.FC = () => {
         <aside className="w-[420px] shrink-0 overflow-y-auto">
           <ImpactReportPanel report={impactReport ?? null} isLoading={loadingReport || isComputing} />
         </aside>
+      )}
+        </div>
+      )}
+
+      {activeTab === 'elasticity' && (
+        <div className="min-h-0 flex-1">
+          <ElasticityCalibration />
+        </div>
+      )}
+
+      {activeTab === 'backtesting' && (
+        <div className="min-h-0 flex-1">
+          <BacktestingConsole />
+        </div>
+      )}
+
+      {activeTab === 'benchmarks' && (
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <Panel
+            title="Snapshot Comparison"
+            icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+            className="h-auto shrink-0"
+            actions={
+              sandbox?.baseSnapshotId ? (
+                <Badge variant="info">Selected sandbox base: {sandbox.baseSnapshotId}</Badge>
+              ) : null
+            }
+          >
+            <div className="p-4">
+              <InputGroup
+                label="Snapshot ID"
+                hint="Falls back to the selected sandbox base snapshot"
+              >
+                <TextInput
+                  value={benchmarkSnapshotId}
+                  onChange={(e) => setBenchmarkSnapshotId(e.target.value)}
+                  placeholder={sandbox?.baseSnapshotId || 'Paste methodology snapshot ID'}
+                />
+              </InputGroup>
+            </div>
+          </Panel>
+          {effectiveBenchmarkSnapshotId ? (
+            <BenchmarkGrid snapshotId={effectiveBenchmarkSnapshotId} />
+          ) : (
+            <div className="flex flex-1 items-center justify-center rounded-[22px] border border-white/5 bg-[var(--nfq-bg-surface)]">
+              <span className="text-xs text-[color:var(--nfq-text-secondary)]">
+                Select a sandbox or enter a snapshot ID to compare against market and budget targets.
+              </span>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

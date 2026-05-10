@@ -549,6 +549,30 @@ paths:
       responses:
         '200': { description: ImpactReport }
 
+  /what-if/backtests:
+    get:
+      tags: [what-if]
+      summary: List methodology backtest runs
+      operationId: listWhatIfBacktests
+      responses:
+        '200': { description: "BacktestRun[]" }
+    post:
+      tags: [what-if]
+      summary: Run a methodology snapshot or sandbox against historical deals
+      operationId: createWhatIfBacktest
+      responses:
+        '201': { description: BacktestRun }
+
+  /what-if/backtests/{runId}/result:
+    get:
+      tags: [what-if]
+      summary: Read a completed methodology backtest result
+      operationId: getWhatIfBacktestResult
+      parameters:
+        - { in: path, name: runId, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: BacktestResult }
+
   /what-if/benchmarks/compare:
     get:
       tags: [what-if]
