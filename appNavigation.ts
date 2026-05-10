@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import type { NavItem } from './components/ui/Sidebar';
 import type { ViewState } from './types';
-import { translations } from './translations';
+import type { translations } from './translations';
 
 type NavigationLabels = typeof translations.en;
 
@@ -113,100 +113,52 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
 // ---------------------------------------------------------------------------
 
 /**
- * Main sidebar navigation — customer-centric taxonomy (Option B, 2026-04).
+ * Main sidebar navigation — cockpit taxonomy (2026-05).
  *
- * Five buckets aligned with the *relationship* lifecycle rather than the
- * per-deal lifecycle that governed the previous 4-bucket layout:
+ * The product outgrew the old 22-entry sidebar. The visible rail now exposes
+ * the daily operating hubs, while specialist destinations stay addressable via
+ * deep links and Command Palette/AUX:
  *
- *   1. RELATIONSHIPS → who the bank prices to (Clients, Campaigns, Targets)
- *   2. PRICING       → deal execution surface (Calculator + RAROC + Stress
- *                      + What-If as first-class entries, plus post-trade
- *                      Blotter + Accounting)
- *   3. MARKET DATA   → inputs feeding the motor (Yield Curves, Behavioural
- *                      Models, Methodology)
- *   4. INSIGHTS      → pure outputs (Analytics, Discipline, Attribution
- *                      Reporting)
- *   5. GOVERNANCE    → control + audit + reproducibility (operativo diario)
- *   + ASSISTANT      → standalone AI entry
+ *   1. RELATIONSHIP COCKPIT → clients, pipeline and target-grid steering.
+ *   2. PRICING COCKPIT      → quote, execute and stress pricing.
+ *   3. DATA & OPS HUB       → inputs, methodology and FTP reconciliation.
+ *   4. GOVERNANCE HUB       → analytics, discipline and approvals.
+ *   + ASSISTANT             → standalone AI entry.
  *
- * Rationale: Phase 6 introduced CLV + 360º temporal → the product story
- * moved from "price every deal well" to "price every relationship well".
- * The sidebar has to reflect that model; calling it COMMERCIAL + burying
- * the 4 pricing tabs inside one entry made the model invisible.
- *
- * Granular Pricing entries (Calculator / RAROC / Stress / What-If) match
- * the `<PricingLayoutShell>` nested routes introduced in Phase 6.1 — each
- * workspace is a top-level route, so sidebar-level entries are coherent.
- *
- * Density pass (Ola 10.7, 2026-04-30): Governance bajó de 8 → 5 entradas:
- *   - ESCALATIONS demoted to AUX — flujo edge case (escalation atascada
- *     genera alerta), no requiere bandeja diaria
- *   - ATTRIBUTION_MATRIX demoted to AUX — es config de organigrama (se
- *     edita cuando cambia la estructura, no a diario)
- *   - ATTRIBUTION_REPORTING moved to Insights — semánticamente es
- *     analytics/output, no governance operativo
- * Sidebar visible passes from 28 → 26 entries without breaking E2E that
- * depend on AUDIT_LOG / HEALTH still being in bottom nav. Reducción mayor
- * (a < 20) requiere refactor UI: collapsed Pricing tabs, Approvals Hub,
- * Reconciliation Hub — diferido a Ola futura post pilot feedback.
+ * This keeps the critical demo/pilot flows one click away and moves
+ * lower-frequency work (RAROC detail, What-If lab, model inventory, dossiers,
+ * attribution reports, campaigns, behavioural models) to searchable AUX.
  */
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   const sectionLabels = {
     relationships: t.navSectionRelationships,
     pricing: t.navSectionPricing,
-    marketData: t.navSectionMarketData,
-    insights: t.navSectionInsights,
+    dataOps: t.navSectionMarketData,
     governance: t.navSectionGovernance,
     assistant: t.navSectionAssistant,
   };
 
   return [
-    // ─────────────── RELATIONSHIPS ───────────────
-    { id: 'CUSTOMER_360', label: t.navClients,   icon: Users,               section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/customers' },
-    { id: 'PIPELINE',     label: t.navPipeline,  icon: GitPullRequestArrow, section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/pipeline' },
-    { id: 'CAMPAIGNS',    label: t.navCampaigns, icon: Target,              section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/campaigns' },
-    { id: 'TARGET_GRID',  label: t.navTargets,   icon: Grid3X3,             section: 'Relationships', sectionLabel: sectionLabels.relationships, path: '/target-grid' },
+    // ─────────────── RELATIONSHIP COCKPIT ───────────────
+    { id: 'CUSTOMER_360', label: t.navClients,  icon: Users,               section: 'Relationship Cockpit', sectionLabel: sectionLabels.relationships, path: '/customers' },
+    { id: 'PIPELINE',     label: t.navPipeline, icon: GitPullRequestArrow, section: 'Relationship Cockpit', sectionLabel: sectionLabels.relationships, path: '/pipeline' },
+    { id: 'TARGET_GRID',  label: t.navTargets,  icon: Grid3X3,             section: 'Relationship Cockpit', sectionLabel: sectionLabels.relationships, path: '/target-grid' },
 
-    // ─────────────── PRICING ───────────────
-    // The 4 workspaces are now first-class entries (nested routes under
-    // <PricingLayoutShell>). Post-trade stays in this bucket because its
-    // gravity is pricing-adjacent, not an insight or governance artefact.
-    { id: 'CALCULATOR',     label: t.navCalculator,    icon: Calculator,   section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/pricing' },
-    { id: 'RAROC',          label: t.navRaroc,         icon: Percent,      section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/raroc' },
-    { id: 'SHOCKS',         label: t.navStressTest,    icon: Zap,          section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/stress-testing' },
-    { id: 'STRESS_PRICING', label: t.navStressPricing, icon: LineChart,    section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/stress-pricing' },
-    { id: 'WHAT_IF',        label: t.navWhatIf,        icon: FlaskConical, section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/what-if' },
-    { id: 'BLOTTER',     label: t.dealBlotter,       icon: FileText,      section: 'Pricing', sectionLabel: sectionLabels.pricing, path: '/blotter' },
-    // Accounting Ledger demoted to AUX (reachable via ⌘K) on 2026-04-22.
-    // Reason: today the view mixes a FTP-summary + T-accounts + journal
-    // ledger for no specific daily user. The valuable use case —
-    // reconciliation of BU vs Treasury entries — is a follow-up rewrite.
-    // Keep the route alive so deep links + E2E still work.
+    // ─────────────── PRICING COCKPIT ───────────────
+    { id: 'CALCULATOR',     label: t.navCalculator,    icon: Calculator, section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/pricing' },
+    { id: 'BLOTTER',        label: t.dealBlotter,      icon: FileText,   section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/blotter' },
+    { id: 'SHOCKS',         label: t.navStressTest,    icon: Zap,        section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/stress-testing' },
+    { id: 'STRESS_PRICING', label: t.navStressPricing, icon: LineChart,  section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/stress-pricing' },
 
-    // ─────────────── MARKET DATA ───────────────
-    // Inputs to the motor. Methodology belongs here because it is engine
-    // *configuration*, not a control artefact — and it sits upstream of
-    // every pricing call.
-    { id: 'MARKET_DATA', label: t.yieldCurves,       icon: TrendingUp, section: 'Market Data', sectionLabel: sectionLabels.marketData, path: '/market-data' },
-    { id: 'BEHAVIOURAL', label: t.behaviouralModels, icon: Activity,   section: 'Market Data', sectionLabel: sectionLabels.marketData, path: '/behavioural' },
-    { id: 'METHODOLOGY', label: t.navMethodology,    icon: GitBranch,  section: 'Market Data', sectionLabel: sectionLabels.marketData, path: '/methodology' },
+    // ─────────────── DATA & OPS HUB ───────────────
+    { id: 'MARKET_DATA',    label: t.yieldCurves,          icon: TrendingUp, section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/market-data' },
+    { id: 'METHODOLOGY',    label: t.navMethodology,       icon: GitBranch,  section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/methodology' },
+    { id: 'RECONCILIATION', label: t.navFtpReconciliation, icon: Scale,      section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/reconciliation' },
 
-    // ─────────────── INSIGHTS ───────────────
-    // Outputs only: portfolio analytics + pricing discipline variance +
-    // attribution reporting (Ola 10.7 — moved here from Governance because
-    // it's pure analytics output, not control operativo).
-    { id: 'REPORTING',             label: t.navAnalytics,             icon: BarChart4, section: 'Insights', sectionLabel: sectionLabels.insights, path: '/analytics' },
-    { id: 'DISCIPLINE',            label: t.pricingDiscipline,        icon: Sparkles,  section: 'Insights', sectionLabel: sectionLabels.insights, path: '/discipline' },
-    { id: 'ATTRIBUTION_REPORTING', label: t.navAttributionReporting,  icon: BarChart4, section: 'Insights', sectionLabel: sectionLabels.insights, path: '/attributions/reporting' },
-
-    // ─────────────── GOVERNANCE ───────────────
-    // Operativo diario de control. ESCALATIONS y ATTRIBUTION_MATRIX viven
-    // en AUX (⌘K) post Ola 10.7 — son edge case / config infrecuente.
-    { id: 'MODEL_INVENTORY',       label: t.navModelInventory,       icon: BookOpenCheck, section: 'Governance', sectionLabel: sectionLabels.governance, path: '/models' },
-    { id: 'DOSSIERS',              label: t.navDossiers,             icon: FileSignature, section: 'Governance', sectionLabel: sectionLabels.governance, path: '/dossiers' },
-    { id: 'APPROVALS',             label: t.navApprovals,            icon: ShieldCheck,   section: 'Governance', sectionLabel: sectionLabels.governance, path: '/approvals' },
-    { id: 'BUDGET_RECONCILIATION', label: t.navBudgetReconciliation, icon: Scale,         section: 'Governance', sectionLabel: sectionLabels.governance, path: '/budget/reconciliation' },
-    { id: 'RECONCILIATION',        label: t.navFtpReconciliation,    icon: Scale,         section: 'Governance', sectionLabel: sectionLabels.governance, path: '/reconciliation' },
+    // ─────────────── GOVERNANCE HUB ───────────────
+    { id: 'REPORTING',  label: t.navAnalytics,      icon: BarChart4,   section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/analytics' },
+    { id: 'DISCIPLINE', label: t.pricingDiscipline, icon: Sparkles,    section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/discipline' },
+    { id: 'APPROVALS',  label: t.navApprovals,      icon: ShieldCheck, section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/approvals' },
 
     // ─────────────── ASSISTANT ───────────────
     { id: 'AI_LAB', label: t.navAiAssistant, icon: BrainCircuit, section: 'Assistant', sectionLabel: sectionLabels.assistant, path: '/ai' },
@@ -223,6 +175,26 @@ export function buildBottomNavItems(t: NavigationLabels): NavItem[] {
   ];
 }
 
+export function getViewNavigationMeta(
+  t: NavigationLabels,
+  view: ViewState,
+): { label: string; section?: string } | undefined {
+  const auxMeta: Partial<Record<ViewState, { label: string; section?: string }>> = {
+    RAROC: { label: t.navRaroc, section: 'Pricing Cockpit' },
+    WHAT_IF: { label: t.navWhatIf, section: 'Pricing Cockpit' },
+    ACCOUNTING: { label: t.auxAccountingLedger, section: 'Pricing Cockpit' },
+    BEHAVIOURAL: { label: t.behaviouralModels, section: 'Data & Ops Hub' },
+    CAMPAIGNS: { label: t.navCampaigns, section: 'Relationship Cockpit' },
+    MODEL_INVENTORY: { label: t.navModelInventory, section: 'Governance Hub' },
+    DOSSIERS: { label: t.navDossiers, section: 'Governance Hub' },
+    BUDGET_RECONCILIATION: { label: t.navBudgetReconciliation, section: 'Governance Hub' },
+    ATTRIBUTION_REPORTING: { label: t.navAttributionReporting, section: 'Governance Hub' },
+    ESCALATIONS: { label: t.auxEscalations, section: 'Governance Hub' },
+    ATTRIBUTION_MATRIX: { label: t.auxAttributionMatrix, section: 'Governance Hub' },
+  };
+  return auxMeta[view];
+}
+
 /**
  * Additional destinations reachable via Command Palette (⌘K) only.
  *
@@ -236,19 +208,24 @@ export interface AuxDestination {
   sublabel: string;
   icon: typeof Calculator;
   path: string;
-  section: 'Pricing' | 'Governance' | 'Insights';
+  section: 'Relationship Cockpit' | 'Pricing Cockpit' | 'Data & Ops Hub' | 'Governance Hub';
 }
 
 export function buildAuxDestinations(t: NavigationLabels): AuxDestination[] {
   return [
-    { id: 'ACCOUNTING',         label: t.auxAccountingLedger,    sublabel: t.auxAccountingLedgerDesc,    icon: LayoutDashboard, path: '/accounting',          section: 'Pricing' },
-    { id: 'GOV_SNAPSHOTS',      label: t.auxSnapshotReplay,      sublabel: t.auxSnapshotReplayDesc,      icon: History,         path: '/snapshots',           section: 'Governance' },
-    { id: 'GOV_SLO',            label: t.auxSloDashboard,        sublabel: t.auxSloDashboardDesc,        icon: HeartPulse,      path: '/slo',                 section: 'Governance' },
-    { id: 'GOV_ADAPTERS',       label: t.auxAdapterHealth,       sublabel: t.auxAdapterHealthDesc,       icon: Plug,            path: '/adapters',            section: 'Governance' },
-    // Ola 10.7 \u2014 demoted from main sidebar to keep Governance \u2264 5 entries.
-    { id: 'ESCALATIONS',        label: t.auxEscalations,         sublabel: t.auxEscalationsDesc,         icon: ShieldAlert,     path: '/escalations',         section: 'Governance' },
-    { id: 'ATTRIBUTION_MATRIX', label: t.auxAttributionMatrix,   sublabel: t.auxAttributionMatrixDesc,   icon: Plug,            path: '/attributions/matrix', section: 'Governance' },
+    { id: 'CAMPAIGNS',             label: t.navCampaigns,              sublabel: t.commandNavigateSublabel,        icon: Target,          path: '/campaigns',              section: 'Relationship Cockpit' },
+    { id: 'RAROC',                 label: t.navRaroc,                  sublabel: t.commandNavigateSublabel,        icon: Percent,         path: '/raroc',                  section: 'Pricing Cockpit' },
+    { id: 'WHAT_IF',               label: t.navWhatIf,                 sublabel: t.commandNavigateSublabel,        icon: FlaskConical,    path: '/what-if',                section: 'Pricing Cockpit' },
+    { id: 'ACCOUNTING',            label: t.auxAccountingLedger,        sublabel: t.auxAccountingLedgerDesc,        icon: LayoutDashboard, path: '/accounting',             section: 'Pricing Cockpit' },
+    { id: 'BEHAVIOURAL',           label: t.behaviouralModels,          sublabel: t.commandNavigateSublabel,        icon: Activity,        path: '/behavioural',            section: 'Data & Ops Hub' },
+    { id: 'GOV_ADAPTERS',          label: t.auxAdapterHealth,           sublabel: t.auxAdapterHealthDesc,           icon: Plug,            path: '/adapters',               section: 'Data & Ops Hub' },
+    { id: 'GOV_SLO',               label: t.auxSloDashboard,            sublabel: t.auxSloDashboardDesc,            icon: HeartPulse,      path: '/slo',                    section: 'Data & Ops Hub' },
+    { id: 'GOV_SNAPSHOTS',         label: t.auxSnapshotReplay,          sublabel: t.auxSnapshotReplayDesc,          icon: History,         path: '/snapshots',              section: 'Governance Hub' },
+    { id: 'MODEL_INVENTORY',       label: t.navModelInventory,          sublabel: t.commandNavigateSublabel,        icon: BookOpenCheck,   path: '/models',                 section: 'Governance Hub' },
+    { id: 'DOSSIERS',              label: t.navDossiers,                sublabel: t.commandNavigateSublabel,        icon: FileSignature,   path: '/dossiers',               section: 'Governance Hub' },
+    { id: 'BUDGET_RECONCILIATION', label: t.navBudgetReconciliation,    sublabel: t.commandNavigateSublabel,        icon: Scale,           path: '/budget/reconciliation',  section: 'Governance Hub' },
+    { id: 'ATTRIBUTION_REPORTING', label: t.navAttributionReporting,    sublabel: t.commandNavigateSublabel,        icon: BarChart4,       path: '/attributions/reporting', section: 'Governance Hub' },
+    { id: 'ESCALATIONS',           label: t.auxEscalations,             sublabel: t.auxEscalationsDesc,             icon: ShieldAlert,     path: '/escalations',            section: 'Governance Hub' },
+    { id: 'ATTRIBUTION_MATRIX',    label: t.auxAttributionMatrix,       sublabel: t.auxAttributionMatrixDesc,       icon: Plug,            path: '/attributions/matrix',    section: 'Governance Hub' },
   ];
 }
-
-export const AUX_DESTINATIONS: AuxDestination[] = buildAuxDestinations(translations.en);

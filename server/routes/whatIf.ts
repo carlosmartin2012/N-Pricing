@@ -28,6 +28,30 @@ interface ImpactTotals {
   volumeAtRisk: number;
 }
 
+interface CellEffect {
+  ftpDeltaBps: number;
+  clientRateDeltaBps: number;
+  rarocDeltaPp: number;
+}
+
+interface ElasticityRow {
+  id?: string;
+  segment_key?: string;
+  elasticity?: unknown;
+  baseline_conversion?: unknown;
+  sample_size?: unknown;
+}
+
+interface DealImpactRow {
+  id?: string;
+  product_type?: string;
+  client_type?: string;
+  currency?: string;
+  amount?: unknown;
+  duration_months?: unknown;
+  pricing_snapshot?: unknown;
+}
+
 function tenant(req: Request, res: Response) {
   if (!req.tenancy) {
     res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
@@ -176,6 +200,126 @@ function diffDeltaBps(diff: unknown): number {
   return proposed - current;
 }
 
+function includesScopeValue(scope: unknown, keys: string[], value: string): boolean {
+  if (!scope || typeof scope !== 'object') return true;
+  const record = scope as Record<string, unknown>;
+  for (const key of keys) {
+    const raw = record[key];
+    const values = Array.isArray(raw) ? raw : raw == null ? [] : [raw];
+    if (values.length === 0) continue;
+    return values.map(String).includes(value);
+  }
+  return true;
+}
+
+function diffMatchesCell(diff: unknown, cell: ReturnType<typeof gridCellToDto>): boolean {
+  if (!diff || typeof diff !== 'object') return false;
+  const record = diff as Record<string, unknown>;
+  const scope = record.scope ?? record.cohort ?? record.filters;
+  return (
+    includesScopeValue(scope, ['product', 'products', 'productType', 'productTypes'], cell.product) &&
+    includesScopeValue(scope, ['segment', 'segments', 'clientType', 'clientTypes'], cell.segment) &&
+    includesScopeValue(scope, ['tenorBucket', 'tenorBuckets', 'tenor_bucket', 'tenor_buckets'], cell.tenorBucket) &&
+    includesScopeValue(scope, ['currency', 'currencies'], cell.currency)
+  );
+}
+
+function effectFromDiff(diff: unknown, cell: ReturnType<typeof gridCellToDto>): CellEffect {
+  if (!diffMatchesCell(diff, cell)) {
+    return { ftpDeltaBps: 0, clientRateDeltaBps: 0, rarocDeltaPp: 0 };
+  }
+  const record = diff as Record<string, unknown>;
+  const deltaBps = diffDeltaBps(diff);
+  const changeType = String(record.changeType ?? '');
+  if (changeType === 'capital') {
+    return { ftpDeltaBps: 0, clientRateDeltaBps: deltaBps, rarocDeltaPp: -(deltaBps / 100) };
+  }
+  if (changeType === 'threshold') {
+    return { ftpDeltaBps: 0, clientRateDeltaBps: 0, rarocDeltaPp: deltaBps / 100 };
+  }
+  return {
+    ftpDeltaBps: deltaBps,
+    clientRateDeltaBps: deltaBps,
+    rarocDeltaPp: -(deltaBps / 100),
+  };
+}
+
+function effectForCell(diffs: unknown[], cell: ReturnType<typeof gridCellToDto>): CellEffect {
+  return diffs.reduce<CellEffect>((acc, diff) => {
+    const effect = effectFromDiff(diff, cell);
+    acc.ftpDeltaBps += effect.ftpDeltaBps;
+    acc.clientRateDeltaBps += effect.clientRateDeltaBps;
+    acc.rarocDeltaPp += effect.rarocDeltaPp;
+    return acc;
+  }, { ftpDeltaBps: 0, clientRateDeltaBps: 0, rarocDeltaPp: 0 });
+}
+
+function tenorBucketFromMonths(months: number): string {
+  if (months <= 12) return '0-1Y';
+  if (months <= 36) return '1-3Y';
+  if (months <= 60) return '3-5Y';
+  if (months <= 120) return '5-10Y';
+  return '10Y+';
+}
+
+function parseSegmentKey(row: ElasticityRow) {
+  const [product = 'ALL', segment = 'ALL', currency = 'ALL', tenor = 'ALL'] = String(row.segment_key ?? '').split('|');
+  return { product, segment, currency, tenor };
+}
+
+function tokenMatches(token: string, value: string): boolean {
+  return !token || token === 'ALL' || token === value;
+}
+
+function pickElasticityModel(
+  models: ElasticityRow[],
+  cell: { product: string; segment: string; currency: string; tenorBucket: string },
+): ElasticityRow | null {
+  let best: { row: ElasticityRow; score: number } | null = null;
+  for (const row of models) {
+    const key = parseSegmentKey(row);
+    if (!tokenMatches(key.product, cell.product)) continue;
+    if (!tokenMatches(key.segment, cell.segment)) continue;
+    if (!tokenMatches(key.currency, cell.currency)) continue;
+    if (!tokenMatches(key.tenor, cell.tenorBucket)) continue;
+    const score = [key.product, key.segment, key.currency, key.tenor].filter((v) => v !== 'ALL').length;
+    if (!best || score > best.score) best = { row, score };
+  }
+  return best?.row ?? null;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function estimateVolumeDeltaPct(model: ElasticityRow | null, clientRateDeltaBps: number): number {
+  if (!model) return 0;
+  const slope = -Math.abs(asNumber(model.elasticity));
+  const intercept = asNumber(model.baseline_conversion);
+  return clamp(slope * clientRateDeltaBps + intercept, -80, 200);
+}
+
+function extractPricingOutput(value: unknown): Record<string, unknown> {
+  const snapshot = asJsonObject(value);
+  const output = snapshot.output ?? snapshot.result ?? snapshot.pricingResult ?? snapshot;
+  return asJsonObject(output);
+}
+
+function cellKeyFromDto(cell: { product: string; segment: string; tenorBucket: string; currency: string }): string {
+  return `${cell.product}|${cell.segment}|${cell.tenorBucket}|${cell.currency}`;
+}
+
+function findDealCell(
+  deal: DealImpactRow,
+  cellsByKey: Map<string, ReturnType<typeof gridCellToDto>>,
+): ReturnType<typeof gridCellToDto> | null {
+  const product = String(deal.product_type ?? '');
+  const segment = String(deal.client_type ?? '');
+  const currency = String(deal.currency ?? 'EUR');
+  const tenorBucket = tenorBucketFromMonths(asNumber(deal.duration_months, 12));
+  return cellsByKey.get(`${product}|${segment}|${tenorBucket}|${currency}`) ?? null;
+}
+
 async function computeImpactReport(sandboxId: string, entityId: string, markReady: boolean) {
   const sandbox = await queryOne<Record<string, unknown>>(
     `SELECT * FROM sandbox_methodologies
@@ -186,23 +330,43 @@ async function computeImpactReport(sandboxId: string, entityId: string, markRead
   if (!sandbox) return null;
 
   const diffs = asJsonArray(sandbox.diffs);
-  const deltaBps = diffs.reduce<number>((sum, diff) => sum + diffDeltaBps(diff), 0);
   const baseSnapshotId = String(sandbox.base_snapshot_id ?? '');
-  const rows = await query<Record<string, unknown>>(
-    `SELECT * FROM target_grid_cells
-     WHERE snapshot_id = $1 AND entity_id = $2
-     ORDER BY product, segment, tenor_bucket, currency`,
-    [baseSnapshotId, entityId],
-  );
+  const [rows, elasticityRows, dealRows] = await Promise.all([
+    query<Record<string, unknown>>(
+      `SELECT * FROM target_grid_cells
+       WHERE snapshot_id = $1 AND entity_id = $2
+       ORDER BY product, segment, tenor_bucket, currency`,
+      [baseSnapshotId, entityId],
+    ),
+    query<ElasticityRow>(
+      `SELECT * FROM elasticity_models
+       WHERE is_active = true AND (entity_id IS NULL OR entity_id = $1)
+       ORDER BY calibrated_at DESC`,
+      [entityId],
+    ),
+    query<DealImpactRow>(
+      `SELECT id, product_type, client_type, currency, amount, duration_months, pricing_snapshot
+       FROM deals
+       WHERE entity_id = $1 AND status IN ('Booked', 'Approved', 'Pending_Approval')
+       ORDER BY updated_at DESC NULLS LAST, created_at DESC
+       LIMIT 1000`,
+      [entityId],
+    ),
+  ]);
 
-  const deltaPct = deltaBps / 100;
   const cellImpacts = rows.map((row) => {
     const currentCell = gridCellToDto(row);
+    const effect = effectForCell(diffs, currentCell);
+    const rateDeltaPct = effect.clientRateDeltaBps / 100;
+    const ftpDeltaPct = effect.ftpDeltaBps / 100;
+    const model = pickElasticityModel(elasticityRows, currentCell);
+    const estimatedVolumeDeltaPct = estimateVolumeDeltaPct(model, effect.clientRateDeltaBps);
+    const amount = amountFromCell(row);
     const proposedCell = {
       ...currentCell,
-      ftp: currentCell.ftp + deltaPct,
-      targetClientRate: currentCell.targetClientRate + deltaPct,
-      targetRaroc: currentCell.targetRaroc - deltaPct,
+      ftp: currentCell.ftp + ftpDeltaPct,
+      targetClientRate: currentCell.targetClientRate + rateDeltaPct,
+      targetRaroc: currentCell.targetRaroc + effect.rarocDeltaPp,
     };
     return {
       product: currentCell.product,
@@ -211,24 +375,30 @@ async function computeImpactReport(sandboxId: string, entityId: string, markRead
       currency: currentCell.currency,
       currentCell,
       proposedCell,
-      ftpDeltaBps: deltaBps,
-      rarocDeltaPp: -deltaPct,
-      clientRateDeltaBps: deltaBps,
-      estimatedVolumeDelta: Math.abs(deltaBps) > 25 ? -Math.abs(deltaBps) / 100 : 0,
+      ftpDeltaBps: effect.ftpDeltaBps,
+      rarocDeltaPp: effect.rarocDeltaPp,
+      clientRateDeltaBps: effect.clientRateDeltaBps,
+      estimatedVolumeDelta: amount * (estimatedVolumeDeltaPct / 100),
+      estimatedVolumeDeltaPct,
+      elasticityModelId: model?.id ?? null,
     };
   });
 
-  const totals = rows.reduce<ImpactTotals>((acc, row) => {
+  const totals = rows.reduce<ImpactTotals>((acc, row, index) => {
     const amount = amountFromCell(row);
+    const impact = cellImpacts[index];
+    const projectedAmount = amount + asNumber(impact.estimatedVolumeDelta);
     const currentRate = asNumber(row.target_client_rate);
-    const projectedRate = currentRate + deltaPct;
+    const projectedRate = currentRate + (impact.clientRateDeltaBps / 100);
     const currentRaroc = asNumber(row.target_raroc);
     acc.currentNii += amount * (currentRate / 100);
-    acc.projectedNii += amount * (projectedRate / 100);
+    acc.projectedNii += projectedAmount * (projectedRate / 100);
     acc.currentRaroc += currentRaroc;
-    acc.projectedRaroc += currentRaroc - deltaPct;
+    acc.projectedRaroc += currentRaroc + impact.rarocDeltaPp;
     acc.volume += amount;
-    if (Math.abs(deltaBps) > 25) acc.volumeAtRisk += amount;
+    if (Math.abs(impact.clientRateDeltaBps) > 25 || Math.abs(asNumber(impact.estimatedVolumeDeltaPct)) >= 2) {
+      acc.volumeAtRisk += amount;
+    }
     return acc;
   }, {
     currentNii: 0,
@@ -239,16 +409,80 @@ async function computeImpactReport(sandboxId: string, entityId: string, markRead
     volumeAtRisk: 0,
   });
 
-  const count = Math.max(rows.length, 1);
+  const cellsByKey = new Map(
+    cellImpacts.map((impact) => [cellKeyFromDto(impact.currentCell), impact.currentCell]),
+  );
+  const effectsByKey = new Map(
+    cellImpacts.map((impact) => [cellKeyFromDto(impact.currentCell), impact]),
+  );
+  const dealPortfolio = dealRows.reduce<ImpactTotals & { dealCount: number; affectedDealCount: number }>((acc, deal) => {
+    const matchedCell = findDealCell(deal, cellsByKey);
+    if (!matchedCell) return acc;
+    const effect = effectsByKey.get(cellKeyFromDto(matchedCell));
+    if (!effect) return acc;
+    const output = extractPricingOutput(deal.pricing_snapshot);
+    const amount = asNumber(deal.amount);
+    const durationYears = Math.max(asNumber(deal.duration_months, 12), 1) / 12;
+    const currentRate = asNumber(
+      output.finalClientRate ?? output.final_client_rate ?? output.clientRate ?? output.client_rate,
+      matchedCell.targetClientRate,
+    );
+    const currentRaroc = asNumber(output.raroc ?? output.RAROC, matchedCell.targetRaroc);
+    const projectedRate = currentRate + (effect.clientRateDeltaBps / 100);
+    const projectedAmount = amount + amount * (asNumber(effect.estimatedVolumeDeltaPct) / 100);
+    acc.currentNii += amount * (currentRate / 100) * durationYears;
+    acc.projectedNii += projectedAmount * (projectedRate / 100) * durationYears;
+    acc.currentRaroc += currentRaroc;
+    acc.projectedRaroc += currentRaroc + effect.rarocDeltaPp;
+    acc.volume += amount;
+    acc.dealCount += 1;
+    if (Math.abs(effect.clientRateDeltaBps) > 0.0001 || Math.abs(effect.rarocDeltaPp) > 0.0001) {
+      acc.affectedDealCount += 1;
+    }
+    if (Math.abs(effect.clientRateDeltaBps) > 25 || Math.abs(asNumber(effect.estimatedVolumeDeltaPct)) >= 2) {
+      acc.volumeAtRisk += amount;
+    }
+    return acc;
+  }, {
+    currentNii: 0,
+    projectedNii: 0,
+    currentRaroc: 0,
+    projectedRaroc: 0,
+    volume: 0,
+    volumeAtRisk: 0,
+    dealCount: 0,
+    affectedDealCount: 0,
+  });
+
   const niiDelta = totals.projectedNii - totals.currentNii;
+  const avgFtpChangeBps = cellImpacts.length === 0
+    ? 0
+    : cellImpacts.reduce((sum, impact) => sum + impact.ftpDeltaBps, 0) / cellImpacts.length;
+  const avgRarocChangePp = cellImpacts.length === 0
+    ? 0
+    : cellImpacts.reduce((sum, impact) => sum + impact.rarocDeltaPp, 0) / cellImpacts.length;
+  const dealNiiDelta = dealPortfolio.projectedNii - dealPortfolio.currentNii;
+  const portfolioSource = dealPortfolio.dealCount > 0 ? dealPortfolio : {
+    ...totals,
+    dealCount: rows.length,
+    affectedDealCount: cellImpacts.filter((impact) => (
+      Math.abs(impact.clientRateDeltaBps) > 0.0001 || Math.abs(impact.rarocDeltaPp) > 0.0001
+    )).length,
+  };
+  const portfolioNiiDelta = dealPortfolio.dealCount > 0 ? dealNiiDelta : niiDelta;
+  const portfolioCount = Math.max(portfolioSource.dealCount, 1);
   const report = {
     sandboxId,
     baseSnapshotId,
     computedAt: new Date().toISOString(),
     summary: {
-      totalCellsAffected: Math.abs(deltaBps) > 0 ? rows.length : 0,
-      avgFtpChangeBps: deltaBps,
-      avgRarocChangePp: -deltaPct,
+      totalCellsAffected: cellImpacts.filter((impact) => (
+        Math.abs(impact.ftpDeltaBps) > 0.0001 ||
+        Math.abs(impact.clientRateDeltaBps) > 0.0001 ||
+        Math.abs(impact.rarocDeltaPp) > 0.0001
+      )).length,
+      avgFtpChangeBps,
+      avgRarocChangePp,
       estimatedNiiDelta: niiDelta,
       estimatedNiiDeltaPct: totals.currentNii === 0 ? 0 : (niiDelta / totals.currentNii) * 100,
       volumeAtRisk: totals.volumeAtRisk,
@@ -256,14 +490,14 @@ async function computeImpactReport(sandboxId: string, entityId: string, markRead
     },
     cellImpacts,
     portfolioImpact: {
-      currentNii: totals.currentNii,
-      projectedNii: totals.projectedNii,
-      niiDelta,
-      currentAvgRaroc: totals.currentRaroc / count,
-      projectedAvgRaroc: totals.projectedRaroc / count,
-      rarocDelta: -deltaPct,
-      dealCount: rows.length,
-      affectedDealCount: Math.abs(deltaBps) > 0 ? rows.length : 0,
+      currentNii: portfolioSource.currentNii,
+      projectedNii: portfolioSource.projectedNii,
+      niiDelta: portfolioNiiDelta,
+      currentAvgRaroc: portfolioSource.currentRaroc / portfolioCount,
+      projectedAvgRaroc: portfolioSource.projectedRaroc / portfolioCount,
+      rarocDelta: (portfolioSource.projectedRaroc - portfolioSource.currentRaroc) / portfolioCount,
+      dealCount: portfolioSource.dealCount,
+      affectedDealCount: portfolioSource.affectedDealCount,
     },
   };
 

@@ -97,9 +97,11 @@ describe('useLiveCursors', () => {
 
     // 5 mousemoves in quick succession — leading edge fires once,
     // remaining are coalesced into a trailing call.
-    for (let i = 0; i < 5; i += 1) {
-      window.dispatchEvent(new MouseEvent('mousemove', { clientX: i, clientY: i }));
-    }
+    act(() => {
+      for (let i = 0; i < 5; i += 1) {
+        window.dispatchEvent(new MouseEvent('mousemove', { clientX: i, clientY: i }));
+      }
+    });
     // Leading call has fired; trailing not yet (timer pending).
     expect(sendSpy).toHaveBeenCalledTimes(1);
 
@@ -152,12 +154,16 @@ describe('useLiveCursors', () => {
       }),
     );
 
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 10 }));
+    act(() => {
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 10 }));
+    });
     expect(sendSpy).toHaveBeenCalledTimes(1);
 
     unmount();
     sendSpy.mockClear();
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 20, clientY: 20 }));
+    act(() => {
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 20, clientY: 20 }));
+    });
     expect(sendSpy).not.toHaveBeenCalled();
   });
 });

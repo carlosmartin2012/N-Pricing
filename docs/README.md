@@ -26,7 +26,7 @@ canónica**: usa esto para saber dónde está cada cosa, no `git log`.
 |---|---|---|
 | [`architecture.md`](architecture.md) | **Overview maestro post-roadmap.** Lectura obligatoria para onboarding. | Core team |
 | [`pricing-methodology.md`](pricing-methodology.md) | Metodología FTP completa (19 componentes). | Risk / ALM |
-| [`api-spec.yaml`](api-spec.yaml) | OpenAPI v2. Refresh automático por CI tras cada PR. | Core team |
+| [`api-spec.yaml`](api-spec.yaml) | OpenAPI v2. Fuente única validada por `npm run check:api-spec`. | Core team |
 | [`integration-tests.md`](integration-tests.md) | Cómo correr los tests de integración opt-in. | Core team |
 | [`pricing-calculation-observability.md`](pricing-calculation-observability.md) | SLO + snapshots. | SRE |
 | [`pricing-plugin-architecture.md`](pricing-plugin-architecture.md) | Cómo extender el motor sin tocar core. | Core team |

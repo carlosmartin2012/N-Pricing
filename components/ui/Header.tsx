@@ -7,6 +7,7 @@ import type { ThemeMode } from '../../contexts/UIContext';
 import { getTranslations, Language } from '../../translations';
 import type { DataMode } from '../../utils/dataModeUtils';
 import { describeDataModeState } from '../../utils/dataModeUtils';
+import { getViewNavigationMeta } from '../../appNavigation';
 import { EntitySwitcher } from './EntitySwitcher';
 import { NotificationPanel } from './NotificationPanel';
 import { OfflineBadge } from './OfflineBadge';
@@ -68,26 +69,23 @@ export const Header: React.FC<HeaderProps> = ({
   const walkthrough = useWalkthroughOptional();
   const currentItem =
     mainNavItems.find((item) => item.id === currentView) ||
-    bottomNavItems.find((item) => item.id === currentView);
+    bottomNavItems.find((item) => item.id === currentView) ||
+    getViewNavigationMeta(t, currentView);
   const currentLabel = currentItem?.label ?? t.headerWorkspace;
   const currentSection = currentItem?.section;
   const sectionAccent: Record<string, string> = {
-    Relationships: 'text-[color:var(--nfq-success)]',
-    Commercial: 'text-[color:var(--nfq-success)]',
-    Pricing:    'text-[color:var(--nfq-accent)]',
-    'Market Data': 'text-sky-300',
-    Insights:   'text-[color:var(--nfq-warning)]',
-    Governance: 'text-violet-300',
+    'Relationship Cockpit': 'text-[color:var(--nfq-success)]',
+    'Pricing Cockpit': 'text-[color:var(--nfq-accent)]',
+    'Data & Ops Hub': 'text-sky-300',
+    'Governance Hub': 'text-violet-300',
     Assistant:  'text-fuchsia-300',
     System:     'text-slate-400',
   };
   const sectionDot: Record<string, string> = {
-    Relationships: 'bg-[var(--nfq-success)]',
-    Commercial: 'bg-[var(--nfq-success)]',
-    Pricing:    'bg-[var(--nfq-accent)]',
-    'Market Data': 'bg-sky-400',
-    Insights:   'bg-[var(--nfq-warning)]',
-    Governance: 'bg-violet-400',
+    'Relationship Cockpit': 'bg-[var(--nfq-success)]',
+    'Pricing Cockpit': 'bg-[var(--nfq-accent)]',
+    'Data & Ops Hub': 'bg-sky-400',
+    'Governance Hub': 'bg-violet-400',
     Assistant:  'bg-fuchsia-400',
     System:     'bg-slate-400',
   };

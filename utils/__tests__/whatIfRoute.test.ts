@@ -139,6 +139,93 @@ describe('what-if router', () => {
     }, 'Trader');
   });
 
+  it('computes cohort-scoped impact with elasticity and booked deal portfolio', async () => {
+    dbMock.queryOne.mockResolvedValueOnce({
+      id: 'sb-1',
+      name: 'NII uplift',
+      base_snapshot_id: 'snap-1',
+      status: 'draft',
+      diffs: [{
+        parameterPath: 'rules.margin',
+        parameterLabel: 'Margin',
+        changeType: 'spread',
+        currentValue: 0,
+        proposedValue: 20,
+        scope: { products: ['LOAN_COMM'], segments: ['Corporate'] },
+      }],
+      created_at: '2026-05-01T00:00:00Z',
+      created_by_email: 'methodologist@nfq.es',
+      created_by_name: 'Methodologist',
+      updated_at: '2026-05-01T00:00:00Z',
+      entity_id: ENTITY,
+    });
+    dbMock.query
+      .mockResolvedValueOnce([
+        {
+          id: 'cell-1',
+          snapshot_id: 'snap-1',
+          entity_id: ENTITY,
+          product: 'LOAN_COMM',
+          segment: 'Corporate',
+          tenor_bucket: '1-3Y',
+          currency: 'EUR',
+          canonical_deal_input: { amount: 1_000_000 },
+          ftp: 2.1,
+          target_margin: 1.9,
+          target_client_rate: 4,
+          target_raroc: 12,
+          components: {},
+          computed_at: '2026-05-01T00:00:00Z',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'ela-1',
+          segment_key: 'LOAN_COMM|Corporate|EUR|ALL',
+          elasticity: 0.1,
+          baseline_conversion: 0,
+          sample_size: 120,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'deal-1',
+          product_type: 'LOAN_COMM',
+          client_type: 'Corporate',
+          currency: 'EUR',
+          amount: 2_000_000,
+          duration_months: 24,
+          pricing_snapshot: { output: { finalClientRate: 4, raroc: 11 } },
+        },
+      ]);
+
+    await withApp(async (url) => {
+      const r = await http<{
+        summary: { totalCellsAffected: number; avgFtpChangeBps: number; avgRarocChangePp: number };
+        cellImpacts: Array<{ clientRateDeltaBps: number; estimatedVolumeDelta: number; elasticityModelId: string }>;
+        portfolioImpact: { dealCount: number; affectedDealCount: number; niiDelta: number };
+      }>(
+        url,
+        'GET',
+        '/api/what-if/sandboxes/sb-1/impact',
+      );
+      expect(r.status).toBe(200);
+      expect(r.body.summary).toMatchObject({
+        totalCellsAffected: 1,
+        avgFtpChangeBps: 20,
+        avgRarocChangePp: -0.2,
+      });
+      expect(r.body.cellImpacts[0]).toMatchObject({
+        clientRateDeltaBps: 20,
+        estimatedVolumeDelta: -20_000,
+        elasticityModelId: 'ela-1',
+      });
+      expect(r.body.portfolioImpact.dealCount).toBe(1);
+      expect(r.body.portfolioImpact.affectedDealCount).toBe(1);
+      expect(r.body.portfolioImpact.niiDelta).toBeCloseTo(4_640, 6);
+    });
+  });
+
   it('compares target-grid cells against latest matching market benchmarks', async () => {
     dbMock.query
       .mockResolvedValueOnce([

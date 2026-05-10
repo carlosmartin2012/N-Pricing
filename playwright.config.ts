@@ -1,5 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const e2ePort = Number(process.env.E2E_PORT ?? 3000);
+if (!Number.isInteger(e2ePort) || e2ePort < 1 || e2ePort > 65535) {
+  throw new Error(`Invalid E2E_PORT value: ${process.env.E2E_PORT}`);
+}
+
+const e2eBaseUrl = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${e2ePort}`;
+const reuseExistingServer = process.env.E2E_REUSE_EXISTING_SERVER === '1';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -8,7 +16,7 @@ export default defineConfig({
   workers: 1,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: e2eBaseUrl,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -26,9 +34,9 @@ export default defineConfig({
     // vite in isolation and let the app fall back to its offline/mock
     // data path.
     command:
-      'VITE_DEMO_USER=demo VITE_DEMO_PASS=demo VITE_DEMO_EMAIL=demo@nfq.es npm run dev:vite -- --host 127.0.0.1 --port 3000',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+      `VITE_DEMO_USER=demo VITE_DEMO_PASS=demo VITE_DEMO_EMAIL=demo@nfq.es npm run dev:vite -- --host 127.0.0.1 --port ${e2ePort}`,
+    url: e2eBaseUrl,
+    reuseExistingServer,
     timeout: 60_000,
   },
 });

@@ -43,6 +43,8 @@ function emit(entry: LogEntry) {
   logBuffer.push(entry);
   if (logBuffer.length > LOG_BUFFER_SIZE) logBuffer.shift();
 
+  if (import.meta.env.MODE === 'test') return;
+
   // Console output
   const prefix = `[${entry.module}]`;
   switch (entry.level) {

@@ -4,7 +4,7 @@ import { useEntity } from './contexts/EntityContext';
 import { Sparkles } from 'lucide-react';
 import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
-import { buildBottomNavItems, buildMainNavItems } from './appNavigation';
+import { buildBottomNavItems, buildMainNavItems, getViewNavigationMeta } from './appNavigation';
 import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
@@ -218,6 +218,10 @@ const AppContent: React.FC = () => {
 
   const mainNavItems = useMemo(() => buildMainNavItems(ui.t), [ui.t]);
   const bottomNavItems = useMemo(() => buildBottomNavItems(ui.t), [ui.t]);
+  const currentViewMeta = useMemo(
+    () => getViewNavigationMeta(ui.t, ui.currentView),
+    [ui.currentView, ui.t],
+  );
 
   if (!isAuthenticated) {
     return (
@@ -293,6 +297,7 @@ const AppContent: React.FC = () => {
                   <h1 className="mt-4 text-[clamp(2rem,3.5vw,56px)] font-semibold tracking-[var(--nfq-tracking-tight)] leading-[1.1] text-[color:var(--nfq-text-primary)]">
                     {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
                       bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
+                      currentViewMeta?.label ||
                       ui.t.workspaceFallback}
                   </h1>
                   <p className="mt-3 max-w-2xl text-[14px] leading-6 text-[color:var(--nfq-text-secondary)]">

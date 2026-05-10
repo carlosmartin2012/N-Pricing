@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Calculator, FileText, BarChart4, TrendingUp, GitBranch, Activity,
-  LayoutDashboard, BrainCircuit, Users, ShieldCheck, BookOpen,
-  HeartPulse, Plus, Upload, Moon, Sun, Search, ArrowRight, Target,
-  Grid3X3, BookOpenCheck, FileSignature, ShieldAlert, User2,
-  MessageSquare, Compass,
+  Calculator, FileText, BarChart4, TrendingUp, GitBranch,
+  BrainCircuit, Users, ShieldCheck, BookOpen,
+  HeartPulse, Plus, Upload, Moon, Sun, Search, ArrowRight,
+  Grid3X3, User2,
+  MessageSquare, Compass, GitPullRequestArrow, LineChart, Scale, Sparkles,
+  Zap,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
@@ -35,18 +36,18 @@ type TranslationLabels = typeof translations.en;
 function buildViewItems(t: TranslationLabels): { id: ViewState; label: string; icon: LucideIcon }[] {
   return [
     { id: 'CUSTOMER_360',    label: t.navClients,          icon: Users },
-    { id: 'CAMPAIGNS',       label: t.navCampaigns,        icon: Target },
+    { id: 'PIPELINE',        label: t.navPipeline,         icon: GitPullRequestArrow },
     { id: 'TARGET_GRID',     label: t.targetGrid,          icon: Grid3X3 },
     { id: 'CALCULATOR',      label: t.pricingEngine,       icon: Calculator },
     { id: 'BLOTTER',         label: t.dealBlotter,         icon: FileText },
-    { id: 'ACCOUNTING',      label: t.auxAccountingLedger, icon: LayoutDashboard },
+    { id: 'SHOCKS',          label: t.navStressTest,       icon: Zap },
+    { id: 'STRESS_PRICING',  label: t.navStressPricing,    icon: LineChart },
     { id: 'REPORTING',       label: t.navAnalytics,        icon: BarChart4 },
+    { id: 'DISCIPLINE',      label: t.pricingDiscipline,   icon: Sparkles },
     { id: 'MARKET_DATA',     label: t.yieldCurves,         icon: TrendingUp },
-    { id: 'BEHAVIOURAL',     label: t.behaviouralModels,   icon: Activity },
     { id: 'METHODOLOGY',     label: t.navMethodology,      icon: GitBranch },
-    { id: 'MODEL_INVENTORY', label: t.navModelInventory,   icon: BookOpenCheck },
-    { id: 'DOSSIERS',        label: t.navDossiers,         icon: FileSignature },
-    { id: 'ESCALATIONS',     label: t.auxEscalations,      icon: ShieldAlert },
+    { id: 'RECONCILIATION',  label: t.navFtpReconciliation, icon: Scale },
+    { id: 'APPROVALS',       label: t.navApprovals,        icon: ShieldCheck },
     { id: 'AI_LAB',          label: t.navAiAssistant,      icon: BrainCircuit },
     { id: 'USER_MGMT',       label: t.userMgmt,            icon: Users },
     { id: 'AUDIT_LOG',       label: t.auditLog,            icon: ShieldCheck },

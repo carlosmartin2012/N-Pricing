@@ -33,12 +33,10 @@ export interface NavItem {
  * render un-styled.
  */
 const SECTION_ACCENTS: Record<string, { dot: string; label: string }> = {
-  Relationships: { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]' },
-  Commercial:    { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]' },
-  Pricing:       { dot: 'bg-[var(--nfq-accent)]',   label: 'text-[color:var(--nfq-accent)]'  },
-  'Market Data': { dot: 'bg-sky-400',               label: 'text-sky-300'                     },
-  Insights:      { dot: 'bg-[var(--nfq-warning)]',  label: 'text-[color:var(--nfq-warning)]' },
-  Governance:    { dot: 'bg-violet-400',            label: 'text-violet-300'                  },
+  'Relationship Cockpit': { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]' },
+  'Pricing Cockpit': { dot: 'bg-[var(--nfq-accent)]',   label: 'text-[color:var(--nfq-accent)]'  },
+  'Data & Ops Hub': { dot: 'bg-sky-400',               label: 'text-sky-300'                     },
+  'Governance Hub': { dot: 'bg-violet-400',            label: 'text-violet-300'                  },
   Assistant:     { dot: 'bg-fuchsia-400',           label: 'text-fuchsia-300'                 },
   System:        { dot: 'bg-slate-400',             label: 'text-slate-400'                   },
 };

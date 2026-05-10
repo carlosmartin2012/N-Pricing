@@ -6,6 +6,8 @@
  * - Supports pluggable reporters (Supabase audit log, Sentry, etc.)
  */
 
+import { logAudit } from '../api/audit';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -92,39 +94,34 @@ function createSupabaseReporter(): ErrorReporter {
   return {
     name: 'supabase',
     onException(error: Error, context?: ErrorContext) {
-      // Lazy-import to avoid circular dependencies and keep it optional
-      void import('../api/audit').then(({ logAudit }) => {
-        void logAudit({
-          userEmail: currentUser?.email || 'system',
-          userName: currentUser?.id || 'system',
-          action: 'ERROR_CAPTURED',
-          module: context?.module || 'SYSTEM',
-          description: `[ErrorTracker] ${error.message}`,
-          details: {
-            stack: error.stack,
-            dealId: context?.dealId,
-            ...context?.extra,
-          },
-        });
+      void logAudit({
+        userEmail: currentUser?.email || 'system',
+        userName: currentUser?.id || 'system',
+        action: 'ERROR_CAPTURED',
+        module: context?.module || 'SYSTEM',
+        description: `[ErrorTracker] ${error.message}`,
+        details: {
+          stack: error.stack,
+          dealId: context?.dealId,
+          ...context?.extra,
+        },
       }).catch(() => {
         // Module not available — Supabase not configured
       });
     },
     onMessage(message: string, level: 'info' | 'warning' | 'error', context?: ErrorContext) {
       if (level !== 'error') return; // Only persist errors to audit log
-      void import('../api/audit').then(({ logAudit }) => {
-        void logAudit({
-          userEmail: currentUser?.email || 'system',
-          userName: currentUser?.id || 'system',
-          action: 'ERROR_MESSAGE',
-          module: context?.module || 'SYSTEM',
-          description: `[ErrorTracker] ${message}`,
-          details: {
-            level,
-            dealId: context?.dealId,
-            ...context?.extra,
-          },
-        });
+      void logAudit({
+        userEmail: currentUser?.email || 'system',
+        userName: currentUser?.id || 'system',
+        action: 'ERROR_MESSAGE',
+        module: context?.module || 'SYSTEM',
+        description: `[ErrorTracker] ${message}`,
+        details: {
+          level,
+          dealId: context?.dealId,
+          ...context?.extra,
+        },
       }).catch(() => {
         // Module not available
       });

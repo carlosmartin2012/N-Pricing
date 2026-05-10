@@ -29,9 +29,14 @@ security:
   - bearerAuth: []
 
 tags:
+  - name: admission
+  - name: attributions
+  - name: budget
   - name: pricing
   - name: deals
   - name: snapshots
+  - name: CLV
+  - name: coreBanking
   - name: customer360
   - name: campaigns
   - name: channel
@@ -43,6 +48,7 @@ tags:
   - name: market-benchmarks
   - name: copilot
   - name: auth
+  - name: notifications
 
 paths:
   /pricing:
@@ -517,7 +523,7 @@ paths:
       summary: List methodology what-if sandboxes
       operationId: listWhatIfSandboxes
       responses:
-        '200': { description: SandboxMethodology[] }
+        '200': { description: "SandboxMethodology[]" }
     post:
       tags: [what-if]
       summary: Create a methodology what-if sandbox
@@ -551,182 +557,13 @@ paths:
       parameters:
         - { in: query, name: snapshot_id, required: true, schema: { type: string, format: uuid } }
       responses:
-        '200': { description: BenchmarkComparison[] }
-
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-  schemas:
-    PricingRequest:
-      type: object
-      required: [deal, approvalMatrix]
-      properties:
-        deal:
-          $ref: '#/components/schemas/Transaction'
-        approvalMatrix:
-          $ref: '#/components/schemas/ApprovalMatrix'
-        shocks:
-          $ref: '#/components/schemas/PricingShocks'
-
-    BatchPricingRequest:
-      type: object
-      required: [deals, approvalMatrix]
-      properties:
-        deals:
-          type: array
-          items:
-            $ref: '#/components/schemas/Transaction'
-          maxItems: 10000
-        approvalMatrix:
-          $ref: '#/components/schemas/ApprovalMatrix'
-        shocks:
-          $ref: '#/components/schemas/PricingShocks'
-
-    BatchPricingResponse:
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            type: object
-            properties:
-              dealId:
-                type: string
-              result:
-                $ref: '#/components/schemas/FTPResult'
-        count:
-          type: integer
-
-    ScenarioRequest:
-      type: object
-      required: [deal, approvalMatrix, scenarios]
-      properties:
-        deal:
-          $ref: '#/components/schemas/Transaction'
-        approvalMatrix:
-          $ref: '#/components/schemas/ApprovalMatrix'
-        scenarios:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-              shocks:
-                $ref: '#/components/schemas/PricingShocks'
-              overrides:
-                type: object
-
-    ScenarioResponse:
-      type: object
-      properties:
-        scenarios:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-              result:
-                $ref: '#/components/schemas/FTPResult'
-              deltaVsBase:
-                type: object
-
-    Transaction:
-      type: object
-      required: [clientId, productType, category, currency, amount, durationMonths]
-      properties:
-        id:
-          type: string
-        clientId:
-          type: string
-        clientType:
-          type: string
-          enum: [Corporate, Retail, SME, Institution, Gov]
-        productType:
-          type: string
-        category:
-          type: string
-          enum: [Asset, Liability, Off-Balance]
-        currency:
-          type: string
-        amount:
-          type: number
-          minimum: 0
-        durationMonths:
-          type: integer
-          minimum: 1
-          maximum: 360
-        marginTarget:
-          type: number
-        riskWeight:
-          type: number
-        capitalRatio:
-          type: number
-        targetROE:
-          type: number
-        transitionRisk:
-          type: string
-          enum: [Brown, Amber, Neutral, Green]
-        physicalRisk:
-          type: string
-          enum: [High, Medium, Low]
-
-    ApprovalMatrix:
-      type: object
-      properties:
-        autoApprovalThreshold:
-          type: number
-        l1Threshold:
-          type: number
-        l2Threshold:
-          type: number
-
-    PricingShocks:
-      type: object
-      properties:
-        interestRate:
-          type: number
-          description: Basis points shock to interest rates
-        liquiditySpread:
-          type: number
-          description: Basis points shock to liquidity spreads
-
-    FTPResult:
-      type: object
-      properties:
-        baseRate:
-          type: number
-        liquiditySpread:
-          type: number
-        regulatoryCost:
-          type: number
-        capitalCharge:
-          type: number
-        totalFTP:
-          type: number
-        finalClientRate:
-          type: number
-        raroc:
-          type: number
-        economicProfit:
-          type: number
-        approvalLevel:
-          type: string
-          enum: [Auto, L1_Manager, L2_Committee, Rejected]
-        matchedMethodology:
-          type: string
+        '200': { description: "BenchmarkComparison[]" }
 
 # -----------------------------------------------------------------------------
 # CLV + 360º temporal (Phase 6)
 # -----------------------------------------------------------------------------
 # Every endpoint below is entity-scoped via `x-entity-id` + JWT. Snapshots
 # are immutable (write-only via RLS); NBA rows are append + soft-consume.
-paths:
   /clv/clients/{clientId}/timeline:
     get:
       summary: List timeline events for a client
@@ -952,7 +789,6 @@ paths:
 # (no UPDATE/DELETE policy); to revert a decision insert a new row with
 # decision='reverted'. Hash chain to pricing_snapshots is enforced by
 # DB trigger validate_attribution_decision_hash().
-paths:
   /attributions/matrix:
     get:
       summary: Get the attribution matrix (levels + active thresholds)
@@ -1287,7 +1123,7 @@ paths:
       summary: List user's own push subscriptions
       tags: [notifications]
       responses:
-        '200': { description: items[] }
+        '200': { description: "items[]" }
 
   /notifications/push/test:
     post:
@@ -1305,7 +1141,173 @@ paths:
         '503': { description: VAPID not configured }
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
+    PricingRequest:
+      type: object
+      required: [deal, approvalMatrix]
+      properties:
+        deal:
+          $ref: '#/components/schemas/Transaction'
+        approvalMatrix:
+          $ref: '#/components/schemas/ApprovalMatrix'
+        shocks:
+          $ref: '#/components/schemas/PricingShocks'
+
+    BatchPricingRequest:
+      type: object
+      required: [deals, approvalMatrix]
+      properties:
+        deals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+          maxItems: 10000
+        approvalMatrix:
+          $ref: '#/components/schemas/ApprovalMatrix'
+        shocks:
+          $ref: '#/components/schemas/PricingShocks'
+
+    BatchPricingResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              dealId:
+                type: string
+              result:
+                $ref: '#/components/schemas/FTPResult'
+        count:
+          type: integer
+
+    ScenarioRequest:
+      type: object
+      required: [deal, approvalMatrix, scenarios]
+      properties:
+        deal:
+          $ref: '#/components/schemas/Transaction'
+        approvalMatrix:
+          $ref: '#/components/schemas/ApprovalMatrix'
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              shocks:
+                $ref: '#/components/schemas/PricingShocks'
+              overrides:
+                type: object
+
+    ScenarioResponse:
+      type: object
+      properties:
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              result:
+                $ref: '#/components/schemas/FTPResult'
+              deltaVsBase:
+                type: object
+
+    Transaction:
+      type: object
+      required: [clientId, productType, category, currency, amount, durationMonths]
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        clientType:
+          type: string
+          enum: [Corporate, Retail, SME, Institution, Gov]
+        productType:
+          type: string
+        category:
+          type: string
+          enum: [Asset, Liability, Off-Balance]
+        currency:
+          type: string
+        amount:
+          type: number
+          minimum: 0
+        durationMonths:
+          type: integer
+          minimum: 1
+          maximum: 360
+        marginTarget:
+          type: number
+        riskWeight:
+          type: number
+        capitalRatio:
+          type: number
+        targetROE:
+          type: number
+        transitionRisk:
+          type: string
+          enum: [Brown, Amber, Neutral, Green]
+        physicalRisk:
+          type: string
+          enum: [High, Medium, Low]
+
+    ApprovalMatrix:
+      type: object
+      properties:
+        autoApprovalThreshold:
+          type: number
+        l1Threshold:
+          type: number
+        l2Threshold:
+          type: number
+
+    PricingShocks:
+      type: object
+      properties:
+        interestRate:
+          type: number
+          description: Basis points shock to interest rates
+        liquiditySpread:
+          type: number
+          description: Basis points shock to liquidity spreads
+
+    FTPResult:
+      type: object
+      properties:
+        baseRate:
+          type: number
+        liquiditySpread:
+          type: number
+        regulatoryCost:
+          type: number
+        capitalCharge:
+          type: number
+        totalFTP:
+          type: number
+        finalClientRate:
+          type: number
+        raroc:
+          type: number
+        economicProfit:
+          type: number
+        approvalLevel:
+          type: string
+          enum: [Auto, L1_Manager, L2_Committee, Rejected]
+        matchedMethodology:
+          type: string
+
     ClientEvent:
       type: object
       properties:

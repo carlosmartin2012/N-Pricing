@@ -79,30 +79,32 @@ describe('appNavigation routing helpers', () => {
     });
   });
 
-  describe('Option B taxonomy', () => {
+  describe('cockpit taxonomy', () => {
     const t = translations.en;
     const items = buildMainNavItems(t);
 
-    it('uses the 5-bucket customer-centric taxonomy', () => {
+    it('uses the 4-hub operating taxonomy', () => {
       const sections = Array.from(new Set(items.map((i) => i.section).filter(Boolean)));
-      // Order matters: Relationships → Pricing → Market Data → Insights → Governance → Assistant
+      // Order matters: Relationship Cockpit → Pricing Cockpit → Data & Ops Hub → Governance Hub → Assistant
       expect(sections).toEqual([
-        'Relationships', 'Pricing', 'Market Data', 'Insights', 'Governance', 'Assistant',
+        'Relationship Cockpit', 'Pricing Cockpit', 'Data & Ops Hub', 'Governance Hub', 'Assistant',
       ]);
     });
 
-    it('surfaces the 4 pricing workspaces as first-class entries', () => {
-      const pricingIds = items.filter((i) => i.section === 'Pricing').map((i) => i.id);
+    it('keeps daily pricing surfaces in the sidebar and specialist labs in AUX', () => {
+      const pricingIds = items.filter((i) => i.section === 'Pricing Cockpit').map((i) => i.id);
       expect(pricingIds).toContain('CALCULATOR');
-      expect(pricingIds).toContain('RAROC');
       expect(pricingIds).toContain('SHOCKS');
-      expect(pricingIds).toContain('WHAT_IF');
+      expect(pricingIds).toContain('STRESS_PRICING');
+      expect(pricingIds).toContain('BLOTTER');
+      expect(pricingIds).not.toContain('RAROC');
+      expect(pricingIds).not.toContain('WHAT_IF');
     });
 
     it('renames CUSTOMER_360 label to "Clients"', () => {
       const clients = items.find((i) => i.id === 'CUSTOMER_360');
       expect(clients?.label).toBe('Clients');
-      expect(clients?.section).toBe('Relationships');
+      expect(clients?.section).toBe('Relationship Cockpit');
     });
 
     it('renames TARGET_GRID label to "Targets"', () => {
@@ -110,14 +112,14 @@ describe('appNavigation routing helpers', () => {
       expect(targets?.label).toBe('Targets');
     });
 
-    it('moves METHODOLOGY to Market Data bucket', () => {
+    it('moves METHODOLOGY to Data & Ops Hub', () => {
       const methodology = items.find((i) => i.id === 'METHODOLOGY');
-      expect(methodology?.section).toBe('Market Data');
+      expect(methodology?.section).toBe('Data & Ops Hub');
     });
 
-    it('promotes DISCIPLINE to Insights (no longer aux-only)', () => {
+    it('keeps DISCIPLINE in the Governance Hub', () => {
       const discipline = items.find((i) => i.id === 'DISCIPLINE');
-      expect(discipline?.section).toBe('Insights');
+      expect(discipline?.section).toBe('Governance Hub');
     });
 
     it('demotes ACCOUNTING from sidebar to AUX (reachable via ⌘K only)', () => {
@@ -125,15 +127,15 @@ describe('appNavigation routing helpers', () => {
       expect(main).toBeUndefined();
     });
 
-    it('includes PIPELINE under Relationships (Phase 6.8)', () => {
+    it('includes PIPELINE under Relationship Cockpit (Phase 6.8)', () => {
       const pipeline = items.find((i) => i.id === 'PIPELINE');
-      expect(pipeline?.section).toBe('Relationships');
+      expect(pipeline?.section).toBe('Relationship Cockpit');
       expect(pipeline?.path).toBe('/pipeline');
     });
 
-    it('includes RECONCILIATION under Governance (Phase 6.9)', () => {
+    it('includes RECONCILIATION under Data & Ops Hub (Phase 6.9)', () => {
       const recon = items.find((i) => i.id === 'RECONCILIATION');
-      expect(recon?.section).toBe('Governance');
+      expect(recon?.section).toBe('Data & Ops Hub');
       expect(recon?.path).toBe('/reconciliation');
       expect(recon?.label).toBe('FTP Reconciliation');
     });
@@ -142,10 +144,10 @@ describe('appNavigation routing helpers', () => {
       const spanishItems = buildMainNavItems(translations.es);
       const clients = spanishItems.find((i) => i.id === 'CUSTOMER_360');
       const market = spanishItems.find((i) => i.id === 'MARKET_DATA');
-      expect(clients?.section).toBe('Relationships');
+      expect(clients?.section).toBe('Relationship Cockpit');
       expect(clients?.sectionLabel).toBe('Relaciones');
       expect(clients?.label).toBe('Clientes');
-      expect(market?.section).toBe('Market Data');
+      expect(market?.section).toBe('Data & Ops Hub');
       expect(market?.sectionLabel).toBe('Datos de mercado');
     });
   });
@@ -153,7 +155,7 @@ describe('appNavigation routing helpers', () => {
   // -----------------------------------------------------------------
   // Ola 10.7 — Sidebar density pass (28 → 26 entries).
   // -----------------------------------------------------------------
-  describe('Ola 10.7 density pass', () => {
+  describe('cockpit density pass', () => {
     const t = translations.en;
     const items = buildMainNavItems(t);
 
@@ -165,60 +167,69 @@ describe('appNavigation routing helpers', () => {
       expect(items.find((i) => i.id === 'ATTRIBUTION_MATRIX')).toBeUndefined();
     });
 
-    it('moves ATTRIBUTION_REPORTING from Governance to Insights (analytics output)', () => {
-      const reporting = items.find((i) => i.id === 'ATTRIBUTION_REPORTING');
-      expect(reporting?.section).toBe('Insights');
-      expect(reporting?.path).toBe('/attributions/reporting');
+    it('demotes ATTRIBUTION_REPORTING from sidebar to AUX (specialist analytics output)', () => {
+      expect(items.find((i) => i.id === 'ATTRIBUTION_REPORTING')).toBeUndefined();
     });
 
-    it('Governance section keeps 5 entries (down from 8 pre-density)', () => {
-      const governance = items.filter((i) => i.section === 'Governance');
-      expect(governance).toHaveLength(5);
+    it('Governance Hub keeps 3 daily entries', () => {
+      const governance = items.filter((i) => i.section === 'Governance Hub');
+      expect(governance).toHaveLength(3);
       expect(governance.map((i) => i.id).sort()).toEqual([
         'APPROVALS',
-        'BUDGET_RECONCILIATION',
-        'DOSSIERS',
-        'MODEL_INVENTORY',
-        'RECONCILIATION',
-      ]);
-    });
-
-    it('Insights section grows to 3 entries (+ATTRIBUTION_REPORTING)', () => {
-      const insights = items.filter((i) => i.section === 'Insights');
-      expect(insights.map((i) => i.id).sort()).toEqual([
-        'ATTRIBUTION_REPORTING',
         'DISCIPLINE',
         'REPORTING',
       ]);
     });
 
-    it('main sidebar holds at most 22 entries (was 24 pre-density)', () => {
+    it('Data & Ops Hub keeps 3 operational entries', () => {
+      const dataOps = items.filter((i) => i.section === 'Data & Ops Hub');
+      expect(dataOps.map((i) => i.id).sort()).toEqual([
+        'MARKET_DATA',
+        'METHODOLOGY',
+        'RECONCILIATION',
+      ]);
+    });
+
+    it('main sidebar holds at most 14 daily entries', () => {
       // Density floor — alerta si alguien añade entries sin pasar por
-      // density review. Subir este número exige justificación en code review.
-      // Reducción mayor (a < 18) requiere refactor UI: collapsed Pricing
-      // tabs, Approvals Hub, Reconciliation Hub.
-      expect(items.length).toBeLessThanOrEqual(22);
+      // density review. Specialist destinations belong in AUX.
+      expect(items.length).toBeLessThanOrEqual(14);
     });
   });
 
-  describe('AUX_DESTINATIONS', () => {
-    it('includes ACCOUNTING after its demotion from main sidebar', async () => {
-      const { AUX_DESTINATIONS } = await import('../../appNavigation');
-      const accounting = AUX_DESTINATIONS.find((d) => d.id === 'ACCOUNTING');
+  describe('AUX destinations', () => {
+    it('includes ACCOUNTING after its demotion from main sidebar', () => {
+      const aux = buildAuxDestinations(translations.en);
+      const accounting = aux.find((d) => d.id === 'ACCOUNTING');
       expect(accounting).toBeDefined();
       expect(accounting?.path).toBe('/accounting');
     });
 
-    it('includes ESCALATIONS + ATTRIBUTION_MATRIX after Ola 10.7 demotion', async () => {
-      const { AUX_DESTINATIONS } = await import('../../appNavigation');
-      const escalations = AUX_DESTINATIONS.find((d) => d.id === 'ESCALATIONS');
-      const matrix = AUX_DESTINATIONS.find((d) => d.id === 'ATTRIBUTION_MATRIX');
+    it('includes ESCALATIONS + ATTRIBUTION_MATRIX after Ola 10.7 demotion', () => {
+      const aux = buildAuxDestinations(translations.en);
+      const escalations = aux.find((d) => d.id === 'ESCALATIONS');
+      const matrix = aux.find((d) => d.id === 'ATTRIBUTION_MATRIX');
       expect(escalations?.path).toBe('/escalations');
       expect(matrix?.path).toBe('/attributions/matrix');
       // Crítico: la URL sigue funcionando aunque el item esté en AUX.
       // pathToView debe seguir resolviendo /escalations y /attributions/matrix.
       expect(pathToView('/escalations')).toBe('ESCALATIONS');
       expect(pathToView('/attributions/matrix')).toBe('ATTRIBUTION_MATRIX');
+    });
+
+    it('includes specialist views demoted by the cockpit density pass', () => {
+      const aux = buildAuxDestinations(translations.en);
+      expect(aux.map((d) => d.id).sort()).toEqual(expect.arrayContaining([
+        'ACCOUNTING',
+        'ATTRIBUTION_REPORTING',
+        'BEHAVIOURAL',
+        'BUDGET_RECONCILIATION',
+        'CAMPAIGNS',
+        'DOSSIERS',
+        'MODEL_INVENTORY',
+        'RAROC',
+        'WHAT_IF',
+      ]));
     });
 
     it('builds auxiliary labels from the active language', () => {

@@ -40,17 +40,21 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('Main Navigation Items', () => {
-  // Labels actualizados a Option B (2026-04) + density pass (Ola 10.7).
-  // ACCOUNTING demoted a AUX (⌘K only) en 2026-04-22 — fuera del sidebar.
+  // Cockpit taxonomy (2026-05): daily surfaces stay in the sidebar;
+  // specialist surfaces move to Command Palette/AUX.
   const mainNavItems = [
     { testId: 'nav-CALCULATOR', label: 'Calculator' },
-    { testId: 'nav-RAROC', label: 'RAROC' },
     { testId: 'nav-SHOCKS', label: 'Stress Test' },
+    { testId: 'nav-STRESS_PRICING', label: 'Stress Pricing' },
     { testId: 'nav-BLOTTER', label: 'Deal Blotter' },
+    { testId: 'nav-PIPELINE', label: 'Pipeline' },
+    { testId: 'nav-TARGET_GRID', label: 'Targets' },
     { testId: 'nav-REPORTING', label: 'Analytics' },
+    { testId: 'nav-DISCIPLINE', label: 'Pricing Discipline' },
     { testId: 'nav-MARKET_DATA', label: 'Yield Curves' },
     { testId: 'nav-METHODOLOGY', label: 'Methodology' },
-    { testId: 'nav-BEHAVIOURAL', label: 'Behavioural Models' },
+    { testId: 'nav-RECONCILIATION', label: 'FTP Reconciliation' },
+    { testId: 'nav-APPROVALS', label: 'Approvals' },
     { testId: 'nav-AI_LAB', label: 'AI Assistant' },
   ];
 
@@ -120,11 +124,11 @@ test.describe('View Switching', () => {
     await expect(header.getByText('Methodology')).toBeVisible({ timeout: 5_000 });
   });
 
-  test('navigating to RAROC Terminal loads the RAROC calculator', async ({ page }) => {
-    await page.getByTestId('nav-RAROC').click();
+  test('navigating to Stress Pricing loads the stress pricing workspace', async ({ page }) => {
+    await page.getByTestId('nav-STRESS_PRICING').click();
 
     const header = page.getByTestId('header');
-    await expect(header.getByText('RAROC')).toBeVisible({ timeout: 5_000 });
+    await expect(header.getByText('Stress Pricing')).toBeVisible({ timeout: 5_000 });
   });
 
   test('navigating to User Management loads admin view', async ({ page }) => {
