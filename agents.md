@@ -71,7 +71,7 @@
 - **Server inline schema**: `server/migrate.ts` es un subconjunto para el arranque Node-only (dev + Replit). Si tocas una tabla que el server necesita al boot, actualiza ambos.
 - **Migrations históricas vs inline schema** (diagnosticado en Ola 6, PRs #55/#56/#57/#60): `server/migrate.ts` es la verdad operativa en producción. Las migrations bajo `supabase/migrations/` son canónicas para entornos que las corren en secuencia (hoy sólo CI). Si añades una columna o cambias un tipo, verificar en ambos sitios más `utils/seedData.ts`. Ejemplos de drift detectado y corregido: `clients.id`, `deals.id`, `deals.client_id` eran UUID en migration pero TEXT en inline schema y en código de app.
 - **CI integration-tests sobre `postgres:16` raw** necesita un bootstrap Supabase-compat antes del migration loop: crea `supabase_realtime` publication, los 3 roles (`anon`/`authenticated`/`service_role`) y el schema `auth` con stubs `jwt()`/`uid()`/`users`. Si añades una migration que asume otro objeto hosted (storage schema, extensión, etc.), extiende el bootstrap step en `.github/workflows/ci.yml`, no la migration.
-- `supabase/schema_v2.sql` es snapshot parcial de referencia (leído por `check-seed-schema-sync.ts` como fallback). `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` y ningún tooling lo lee.
+- `supabase/migrations/*.sql` es la única fuente canónica de schema para tooling repo-backed. Los snapshots SQL legacy fueron retirados para evitar drift.
 - Siempre añadir la siguiente migration con prefijo `YYYYMMDDHHMMSS_`
 - Capa API centralizada en `api/` (21 módulos) — usar `api/mappers.ts` para snake_case↔camelCase
 - Servicios especializados en `utils/supabase/`: deals, market, config, audit, approval, masterData, rules, monitoring, etc.
@@ -85,13 +85,13 @@
 - Server routes entity-scoped: usar `entityScopedClause(req, N)` para reads y `tenancyScope(req)` para writes/deletes (ver `server/middleware/requireTenancy.ts`)
 
 ### 4. Agente de Testing
-**Scope**: `utils/__tests__/` (~85 archivos), `components/*/__tests__/`, `e2e/` (20 specs)
+**Scope**: `utils/__tests__/` (~85 archivos), `components/*/__tests__/`, `e2e/`
 
 **Reglas**:
 - **Unit**: Vitest 4 (no Jest) — ~1.37k tests en ~85 archivos
 - **Integration (opt-in)**: `utils/__tests__/integration/` — corre sólo con `INTEGRATION_DATABASE_URL` set. RLS + tenancy + fuzz + market benchmarks. En CI los integration tests se activan en el job `integration-tests` tras el bootstrap Supabase-compat (ver sección "Agente de Base de Datos" arriba)
 - **Audit log es append-only**: las tablas `audit_log`, `pricing_snapshots`, `*_versions`, `signed_committee_dossiers` y otras append-only tienen un trigger que bloquea UPDATE/DELETE (`prevent_audit_modification` en el caso de audit_log). En tests, los `afterAll()` NO deben hacer DELETE sobre ellas — tolerar debris del test es preferible. Ver PR #62 como referencia
-- **E2E**: Playwright 1.59 — 20 specs (auth, pricing-flow, deal-blotter, esg-grid, market-data, multi-entity, navigation, rules-governance, shocks-reporting, ai-assistant, offline-pwa, rbac, reconciliation, pipeline, clv, brochure-screenshots, ...)
+- **E2E**: Playwright 1.59 — specs funcionales (auth, pricing-flow, deal-blotter, esg-grid, market-data, multi-entity, navigation, rules-governance, shocks-reporting, ai-assistant, offline-pwa, rbac, reconciliation, pipeline, clv, ...)
 - **Component**: Storybook 8.6 — stories junto al componente
 - Tests colocados en `__tests__/` junto al módulo
 - Patrón de test existente: describe → it → expect con datos inline
@@ -123,7 +123,7 @@
 4. Añadir entrada de navegación en `appNavigation.ts` (`buildMainNavItems` o `buildBottomNavItems`)
 5. Añadir traducciones en `translations.ts` (en + es, ~534 keys existentes)
 6. Si necesita datos: añadir estado en el Context apropiado (DataContext, GovernanceContext, MarketDataContext)
-7. Si necesita persistencia: crear **nueva migration** en `supabase/migrations/YYYYMMDDHHMMSS_*.sql` (no editar `schema_v2.sql`) + servicio en `utils/supabase/` + operación en `api/`
+7. Si necesita persistencia: crear **nueva migration** en `supabase/migrations/YYYYMMDDHHMMSS_*.sql` (no crear snapshots SQL paralelos) + servicio en `utils/supabase/` + operación en `api/`
 8. Si necesita data fetching: añadir React Query hook en `hooks/queries/`
 
 ### Añadir un nuevo campo a Deal/Transaction
@@ -161,5 +161,5 @@
 - [ ] Tipos: `types.ts` refleja cualquier cambio de schema
 - [ ] Mappers: `api/mappers.ts` actualizado si hay nuevos campos
 - [ ] Traducciones: textos nuevos en ambos idiomas (en/es) en `translations.ts`
-- [ ] Schema: si hay cambios de BD, **nueva migración** en `supabase/migrations/` (no editar `schema_v2.sql`)
+- [ ] Schema: si hay cambios de BD, **nueva migración** en `supabase/migrations/` (sin snapshots SQL paralelos)
 - [ ] Query keys: si hay nuevas queries, registradas en `hooks/queries/queryKeys.ts`

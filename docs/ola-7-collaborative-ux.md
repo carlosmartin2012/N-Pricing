@@ -1,7 +1,7 @@
 # Ola 7 — UX colaborativa y copiloto contextual
 
 > **Estado:** 📋 **Plan** — 2026-04-28 · **Predecesor:** [`ola-6-tenancy-strict-stress-pricing.md`](./ola-6-tenancy-strict-stress-pricing.md) (✅ código en `main`)
-> **Origen:** [`integral-review-2026-04-18.md`](./integral-review-2026-04-18.md) §3 Ola 7 (párrafo de scoping → este plan ejecutable)
+> **Origen:** revisión integral histórica 2026-04-18, consolidada en este plan ejecutable
 > **Esta ola NO es:** un rediseño visual ni un cambio de design system. Reusa NFQ tokens existentes.
 
 ---
@@ -18,7 +18,7 @@
 
 **Conclusión:** Ola 7 es una ola de **extensión**, no de construcción. La mayoría de primitives (Outlet, presence, command palette, walkthrough, AI traces) ya viven en `main`. El trabajo neto son ~9 semanas-persona repartidos en 5 bloques con bajo acoplamiento.
 
-> ⚠️ **Corrección al integral review §3 Ola 7 punto 1:** "Layout persistente con `<Outlet/>`" **ya está hecho** (Ola 6 mergeada incluyó `PricingLayoutShell` + `AppLayout variant="bare|flex-col"` en `App.tsx:306-347`). Eliminado del scope de Ola 7.
+> ⚠️ **Corrección de scope Ola 7 punto 1:** "Layout persistente con `<Outlet/>`" **ya está hecho** (Ola 6 mergeada incluyó `PricingLayoutShell` + `AppLayout variant="bare|flex-col"` en `App.tsx:306-347`). Eliminado del scope de Ola 7.
 
 ---
 
@@ -117,7 +117,7 @@ GET /api/deals/:id/timeline
    - Server: agregación + tenancy guard + ordering (Vitest).
    - UI: render por kind + filtros + link al replay (RTL).
    - E2E: spec `e2e/deal-timeline.spec.ts` (deal con escalation + dossier + repricings).
-7. **Eliminar Escalations/Dossiers del sidebar principal** (siguen accesibles desde Audit). Cumple §3 del integral review: *"Ola 7 debería reducir, no añadir"*.
+7. **Eliminar Escalations/Dossiers del sidebar principal** (siguen accesibles desde Audit). Cumple el principio de scope de Ola 7: reducir navegación, no añadir más entradas.
 
 ### Riesgos Bloque A
 
@@ -171,7 +171,7 @@ Surfacear quién está mirando o editando un deal/calculator en tiempo real. Red
 1. Extensión de `usePresenceAwareness` con cursor coords.
 2. `components/ui/LiveCursorOverlay.tsx`.
 3. `hooks/useDealLock.ts`.
-4. Wiring en `Calculator/PricingWorkspace.tsx` y `Blotter/DealBlotter.tsx`.
+4. Wiring en `Calculator/CalculatorWorkspace.tsx` y `Blotter/DealBlotter.tsx`.
 5. Toggle global en UIContext.
 6. Tests: presence broadcast + render + lock acquisition (Vitest + RTL).
 7. E2E: 2 contextos Playwright simulando 2 usuarios, verificando cursor y lock modal.
@@ -388,7 +388,7 @@ Cada bloque cierra con un PR mergeable a `main`. **A puede empezar antes que ter
 
 ## 7. Decisiones — resueltas 2026-04-28
 
-1. **Eliminación de `EscalationsView` / `DossiersView` del sidebar: sí, con deprecation gradual.** Durante 30 días post-merge cada vista standalone muestra banner "Open in Timeline" enlazando al deal. Después se eliminan del sidebar (rutas mantienen compatibilidad deep-link 90 días más). Reduce de 16 → 14 vistas y respeta el principio §3 del integral review ("Ola 7 reduce, no añade").
+1. **Eliminación de `EscalationsView` / `DossiersView` del sidebar: sí, con deprecation gradual.** Durante 30 días post-merge cada vista standalone muestra banner "Open in Timeline" enlazando al deal. Después se eliminan del sidebar (rutas mantienen compatibilidad deep-link 90 días más). Reduce de 16 → 14 vistas y respeta el principio de Ola 7: reducir navegación, no añadir.
 2. **Cursors: feature flag per-tenant `LIVE_CURSORS_ENABLED` default `true`** + kill switch global `LIVE_CURSORS_KILL=true` (env var) para rollback en <1 min si hay incidente. Default `on` porque el ROI de presence solo se ve con masa crítica de adopción.
 3. **PII en prompts a Gemini: redactar por defecto.** Prompt builder sustituye `clientName` y `clientId` por `<CLIENT_REDACTED>` antes de enviar; el snapshot original queda intacto en DB. Override per-tenant vía `COPILOT_REDACT_CLIENT_PII=false` documentado pero **no recomendado**. Failing closed protege ante un GDPR-incident por una opción de UX.
 4. **Tab Ask vs `/ai`: separar por intención.** Cmd+K Ask = "quick ask con snapshot del momento como contexto"; `/ai` (GenAIChat) = "sesión larga libre". Ambos persisten en `ai_response_traces` con discriminator `kind='copilot'` vs `kind='chat'`.

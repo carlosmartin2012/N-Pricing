@@ -11,7 +11,7 @@ import {
   MOCK_RULES,
   MOCK_TRANSITION_GRID,
   MOCK_YIELD_CURVE,
-} from '../../constants';
+} from '../seedData';
 import type { ApprovalMatrixConfig, FTPResult, GeneralRule, Transaction } from '../../types';
 import { buildPricingContext } from '../pricingContext';
 import {

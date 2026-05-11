@@ -1,4 +1,4 @@
-import { MOCK_YIELD_CURVE } from '../../constants';
+import { MOCK_YIELD_CURVE } from '../../utils/seedData';
 import type { YieldCurvePoint } from '../../types';
 
 interface YieldCurveHistoryPoint {
@@ -32,11 +32,9 @@ export interface CurveDisplayPoint extends YieldCurvePoint {
 
 export const CURVE_PANEL_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY'] as const;
 
-export const getCurveHistoryKey = (currency: string, date: string) =>
-  `${currency}-${date}`;
+export const getCurveHistoryKey = (currency: string, date: string) => `${currency}-${date}`;
 
-export const getCurveDateFromKey = (key: string) =>
-  key.split('-').slice(1).join('-');
+export const getCurveDateFromKey = (key: string) => key.split('-').slice(1).join('-');
 
 export const mapCurveHistoryRecords = (history: YieldCurveHistoryEntry[]) => {
   const historyMap: Record<string, YieldCurvePoint[]> = {};
@@ -82,7 +80,7 @@ export const buildYieldCurveData = ({
     const dateNum = selectedDate.split('-').reduce((sum, part) => sum + Number(part), 0);
     const dateMod = (dateNum % 5) * 0.1;
 
-    basePoints = MOCK_YIELD_CURVE.map(point => ({
+    basePoints = MOCK_YIELD_CURVE.map((point) => ({
       tenor: point.tenor,
       rate: Math.max(0.1, point.rate + modifier + dateMod),
       prev: Math.max(0.1, point.prev + modifier),
@@ -92,7 +90,7 @@ export const buildYieldCurveData = ({
   return basePoints.map((point, index) => {
     const rateValue = Number(point.rate) || 0;
     const prevValue = Number(point.prev) || rateValue;
-    const shockedRate = rateValue + (shockBps / 100);
+    const shockedRate = rateValue + shockBps / 100;
 
     return {
       ...point,
@@ -104,14 +102,12 @@ export const buildYieldCurveData = ({
   });
 };
 
-export const buildCurveTemplateRows = (
-  curvesHistory: Record<string, YieldCurvePoint[]>,
-) => {
+export const buildCurveTemplateRows = (curvesHistory: Record<string, YieldCurvePoint[]>) => {
   const rows: Array<Record<string, string | number | undefined>> = [];
 
   Object.entries(curvesHistory).forEach(([key, points]) => {
     const [currency] = key.split('-');
-    points.forEach(point => {
+    points.forEach((point) => {
       rows.push({
         Currency: currency,
         Tenor: point.tenor,

@@ -20,17 +20,14 @@ idempotentemente. No ejecutar SQL a mano.
 
 **Opción B — aplicar sobre un Supabase remoto:** desde el SQL Editor
 aplicar los ficheros de `supabase/migrations/*.sql` **en orden alfabético**
-(el prefijo `YYYYMMDDHHMMSS_` garantiza la secuencia). Hay ~36 ficheros.
-Si hay problemas de RLS/Realtime en un proyecto pre-existente:
+(el prefijo `YYYYMMDDHHMMSS_` garantiza la secuencia). Si hay problemas de
+RLS/Realtime en un proyecto pre-existente:
 `supabase/fix_rls_realtime.sql`.
 
-> **Archivos de referencia (no ejecutables):**
-> - `supabase/schema.sql` está marcado `LEGACY — DO NOT EXECUTE` en su
->   cabecera; pre-dates tenancy, workflow y todo Phase 0-5. Solo referencia
->   histórica.
-> - `supabase/schema_v2.sql` es un snapshot intermedio. Sigue siendo útil
->   como fallback para onboarding y lo lee `scripts/check-seed-schema-sync.ts`,
->   pero las policies RLS y tablas nuevas viven solo en migrations.
+> Los snapshots SQL legacy fueron retirados para evitar doble fuente de verdad.
+> No crear ni restaurar schemas paralelos: toda evolución entra como migration
+> nueva y, si aplica al arranque Node-only, se refleja también en
+> `server/migrate.ts`.
 
 ## 3. Habilitar Realtime
 
@@ -70,13 +67,11 @@ VITE_DEMO_EMAIL=demo@nfq.es   # Opcional
 
 ## 6. Verificar RLS
 
-Las políticas RLS canónicas viven en `supabase/migrations/` —
+Las políticas RLS canónicas viven en `supabase/migrations/`:
 `20260406000001_multi_entity.sql` aplica las políticas entity-scoped sobre
-las tablas de negocio; migrations posteriores (`20260411000002_rls_hardening.sql`,
+las tablas de negocio y migrations posteriores (`20260411000002_rls_hardening.sql`,
 `20260602000002_rls_delete_policies.sql`, `20260602000007_olas_1_3_rls_hardening.sql`)
-refinan y extienden. `schema_v2.sql` §8 conserva el baseline histórico pero
-**no** es la fuente de verdad actual — ver
-[`docs/rls-audit-2026-04.md`](./rls-audit-2026-04.md).
+refinan y extienden. Ver [`docs/rls-audit-2026-04.md`](./rls-audit-2026-04.md).
 
 Para verificar que funcionan:
 

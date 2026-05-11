@@ -1,13 +1,11 @@
-import { INITIAL_DEAL } from '../../constants';
-import type {
-  ProductDefinition,
-  Transaction,
-} from '../../types';
+import { INITIAL_DEAL } from '../../utils/seedData';
+import type { ProductDefinition, Transaction } from '../../types';
 import { generateId } from '../../utils/generateId';
 
 type ImportRow = Record<string, unknown>;
 
-export const DEAL_BLOTTER_TEMPLATE = "id,clientId,clientType,productType,amount,currency,startDate,durationMonths,marginTarget,riskWeight,capitalRatio,targetROE,operationalCostBps,status\nTRD-90001,CL-1001,Corporate,LOAN_COMM,2500000,USD,2023-10-25,24,2.5,100,11.5,15,45,Pending\nTRD-90002,CL-1002,Corporate,DEP_TERM,500000,EUR,2023-10-25,12,1.2,0,11.5,12,20,Pending";
+export const DEAL_BLOTTER_TEMPLATE =
+  'id,clientId,clientType,productType,amount,currency,startDate,durationMonths,marginTarget,riskWeight,capitalRatio,targetROE,operationalCostBps,status\nTRD-90001,CL-1001,Corporate,LOAN_COMM,2500000,USD,2023-10-25,24,2.5,100,11.5,15,45,Pending\nTRD-90002,CL-1002,Corporate,DEP_TERM,500000,EUR,2023-10-25,12,1.2,0,11.5,12,20,Pending';
 
 const DEFAULT_STATUS: Transaction['status'] = 'Draft';
 
@@ -21,28 +19,24 @@ const readNumber = (value: unknown, fallback: number) => {
 
 const todayIso = () => new Date().toISOString().split('T')[0];
 
-export const generateDealId = () =>
-  `TRD-${Date.now().toString(36).toUpperCase()}`;
+export const generateDealId = () => `TRD-${Date.now().toString(36).toUpperCase()}`;
 
 const resolveProductCategory = (
   productType: string,
   products: ProductDefinition[],
-  fallback: Transaction['category'],
-) => products.find(product => product.id === productType)?.category ?? fallback;
+  fallback: Transaction['category']
+) => products.find((product) => product.id === productType)?.category ?? fallback;
 
 export const normalizeDealDraft = (
   draft: Partial<Transaction>,
   products: ProductDefinition[],
-  overrides: Partial<Transaction> = {},
+  overrides: Partial<Transaction> = {}
 ): Transaction => {
-  const productType = readString(
-    overrides.productType ?? draft.productType,
-    INITIAL_DEAL.productType,
-  );
+  const productType = readString(overrides.productType ?? draft.productType, INITIAL_DEAL.productType);
   const category = resolveProductCategory(
     productType,
     products,
-    (overrides.category ?? draft.category ?? INITIAL_DEAL.category) as Transaction['category'],
+    (overrides.category ?? draft.category ?? INITIAL_DEAL.category) as Transaction['category']
   );
 
   return {
@@ -59,10 +53,7 @@ export const normalizeDealDraft = (
   };
 };
 
-export const createImportedDeal = (
-  row: ImportRow,
-  products: ProductDefinition[],
-): Transaction =>
+export const createImportedDeal = (row: ImportRow, products: ProductDefinition[]): Transaction =>
   normalizeDealDraft(
     {
       id: readString(row.id ?? row.ID, generateId('TRD-IMP')),
@@ -73,8 +64,14 @@ export const createImportedDeal = (
       currency: readString(row.currency ?? row.Currency, INITIAL_DEAL.currency),
       startDate: readString(row.startDate ?? row.StartDate, todayIso()),
       durationMonths: readNumber(row.durationMonths ?? row.DurationMonths, 12),
-      amortization: readString(row.amortization ?? row.Amortization, INITIAL_DEAL.amortization) as Transaction['amortization'],
-      repricingFreq: readString(row.repricingFreq ?? row.RepricingFreq, INITIAL_DEAL.repricingFreq) as Transaction['repricingFreq'],
+      amortization: readString(
+        row.amortization ?? row.Amortization,
+        INITIAL_DEAL.amortization
+      ) as Transaction['amortization'],
+      repricingFreq: readString(
+        row.repricingFreq ?? row.RepricingFreq,
+        INITIAL_DEAL.repricingFreq
+      ) as Transaction['repricingFreq'],
       marginTarget: readNumber(row.marginTarget ?? row.MarginTarget, 0),
       riskWeight: readNumber(row.riskWeight ?? row.RiskWeight, 100),
       capitalRatio: readNumber(row.capitalRatio ?? row.CapitalRatio, 11.5),
@@ -89,12 +86,10 @@ export const createImportedDeal = (
       transitionRisk: 'Neutral',
       physicalRisk: 'Low',
     },
-    products,
+    products
   );
 
-export const createNewDealDraft = (
-  products: ProductDefinition[],
-): Transaction =>
+export const createNewDealDraft = (products: ProductDefinition[]): Transaction =>
   normalizeDealDraft(
     {
       id: generateDealId(),
@@ -103,7 +98,7 @@ export const createNewDealDraft = (
       marginTarget: 2,
       businessLine: 'Corp Fin',
     },
-    products,
+    products
   );
 
 export const formatDealCurrency = (value: number, currency: string) =>
@@ -113,8 +108,7 @@ export const formatDealCurrency = (value: number, currency: string) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-const serializeCsvCell = (value: unknown) =>
-  `"${String(value ?? '').replace(/"/g, '""')}"`;
+const serializeCsvCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
 export const buildDealsCsv = (deals: Transaction[]) => {
   const headers = [
@@ -132,20 +126,24 @@ export const buildDealsCsv = (deals: Transaction[]) => {
     'RiskWeight',
   ];
 
-  const rows = deals.map(deal => ([
-    deal.id,
-    deal.clientId,
-    deal.clientType,
-    deal.productType,
-    deal.amount,
-    deal.currency,
-    `${deal.durationMonths}M`,
-    deal.marginTarget?.toFixed(2),
-    deal.status || DEFAULT_STATUS,
-    deal.businessUnit,
-    deal.startDate,
-    deal.riskWeight,
-  ].map(serializeCsvCell).join(',')));
+  const rows = deals.map((deal) =>
+    [
+      deal.id,
+      deal.clientId,
+      deal.clientType,
+      deal.productType,
+      deal.amount,
+      deal.currency,
+      `${deal.durationMonths}M`,
+      deal.marginTarget?.toFixed(2),
+      deal.status || DEFAULT_STATUS,
+      deal.businessUnit,
+      deal.startDate,
+      deal.riskWeight,
+    ]
+      .map(serializeCsvCell)
+      .join(',')
+  );
 
   return [headers.map(serializeCsvCell).join(','), ...rows].join('\n');
 };

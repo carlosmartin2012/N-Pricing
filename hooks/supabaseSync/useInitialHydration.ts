@@ -28,7 +28,7 @@ import {
   MOCK_CANONICAL_TEMPLATES,
   MOCK_TOLERANCE_BANDS,
   MOCK_ELASTICITY_MODELS,
-} from '../../constants';
+} from '../../utils/seedData';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { createLogger } from '../../utils/logger';
 import { resolveHydrationPlan } from '../../utils/dataModeUtils';
@@ -122,13 +122,12 @@ export function useInitialHydration({
           configApi.fetchMarketDataSources(),
         ]);
 
-        const failedCount = settled.filter(r => r.status === 'rejected').length;
+        const failedCount = settled.filter((r) => r.status === 'rejected').length;
         if (failedCount > 0) {
           log.warn(`${failedCount}/${settled.length} hydration calls failed — using partial data`);
         }
 
-        const v = <T,>(r: PromiseSettledResult<T>): T | null =>
-          r.status === 'fulfilled' ? r.value : null;
+        const v = <T>(r: PromiseSettledResult<T>): T | null => (r.status === 'fulfilled' ? r.value : null);
 
         const dbDeals = v(settled[0]);
         const dbModels = v(settled[1]);
@@ -161,7 +160,10 @@ export function useInitialHydration({
         if (scopedEntityId) {
           queryClient.setQueryData([...queryKeys.deals.all, scopedEntityId], resolvedDeals);
         }
-        queryClient.setQueryData(queryKeys.marketData.behaviouralModels, resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS));
+        queryClient.setQueryData(
+          queryKeys.marketData.behaviouralModels,
+          resolveWithFallback(dbModels, MOCK_BEHAVIOURAL_MODELS)
+        );
         queryClient.setQueryData(queryKeys.config.rules, resolveWithFallback(dbRules, MOCK_RULES));
         queryClient.setQueryData(queryKeys.config.clients, resolveWithFallback(dbClients, MOCK_CLIENTS));
         queryClient.setQueryData(queryKeys.config.businessUnits, resolveWithFallback(dbUnits, MOCK_BUSINESS_UNITS));
@@ -169,13 +171,28 @@ export function useInitialHydration({
         queryClient.setQueryData(queryKeys.config.users, resolveWithFallback(dbUsers, MOCK_USERS));
         queryClient.setQueryData(queryKeys.config.shocks, dbShocks);
         queryClient.setQueryData(queryKeys.config.rateCards, resolveWithFallback(dbRateCards, MOCK_FTP_RATE_CARDS));
-        queryClient.setQueryData(queryKeys.config.esgGrid('transition'), resolveWithFallback(dbTransGrid as unknown[], MOCK_TRANSITION_GRID));
-        queryClient.setQueryData(queryKeys.config.esgGrid('physical'), resolveWithFallback(dbPhysGrid as unknown[], MOCK_PHYSICAL_GRID));
-        queryClient.setQueryData(queryKeys.config.esgGrid('greenium'), resolveWithFallback(dbGreeniumGrid as unknown[], MOCK_GREENIUM_GRID));
-        queryClient.setQueryData(queryKeys.marketData.yieldCurves, dbYieldCurves?.length ? dbYieldCurves : MOCK_YIELD_CURVE);
+        queryClient.setQueryData(
+          queryKeys.config.esgGrid('transition'),
+          resolveWithFallback(dbTransGrid as unknown[], MOCK_TRANSITION_GRID)
+        );
+        queryClient.setQueryData(
+          queryKeys.config.esgGrid('physical'),
+          resolveWithFallback(dbPhysGrid as unknown[], MOCK_PHYSICAL_GRID)
+        );
+        queryClient.setQueryData(
+          queryKeys.config.esgGrid('greenium'),
+          resolveWithFallback(dbGreeniumGrid as unknown[], MOCK_GREENIUM_GRID)
+        );
+        queryClient.setQueryData(
+          queryKeys.marketData.yieldCurves,
+          dbYieldCurves?.length ? dbYieldCurves : MOCK_YIELD_CURVE
+        );
         queryClient.setQueryData(queryKeys.config.rarocInputs, dbRaroc);
         queryClient.setQueryData(queryKeys.config.approvalMatrix, dbApprovalMatrix);
-        queryClient.setQueryData(queryKeys.marketData.liquidityCurves, resolveWithFallback(dbLiqCurves, MOCK_LIQUIDITY_CURVES));
+        queryClient.setQueryData(
+          queryKeys.marketData.liquidityCurves,
+          resolveWithFallback(dbLiqCurves, MOCK_LIQUIDITY_CURVES)
+        );
         queryClient.setQueryData(queryKeys.governance.methodologyChangeRequests, dbMethodologyChangeRequests);
         queryClient.setQueryData(queryKeys.governance.methodologyVersions, dbMethodologyVersions);
         queryClient.setQueryData(queryKeys.governance.approvalTasks, dbApprovalTasks);
@@ -186,7 +203,10 @@ export function useInitialHydration({
         // Seed new views (Target Grid, Discipline, What-If) with mock fallback
         // These views don't have dedicated Supabase endpoints yet, so always use mock data
         queryClient.setQueryData(queryKeys.targetGrid.snapshots, [MOCK_METHODOLOGY_SNAPSHOT]);
-        queryClient.setQueryData(queryKeys.targetGrid.snapshot(MOCK_METHODOLOGY_SNAPSHOT.id), MOCK_METHODOLOGY_SNAPSHOT);
+        queryClient.setQueryData(
+          queryKeys.targetGrid.snapshot(MOCK_METHODOLOGY_SNAPSHOT.id),
+          MOCK_METHODOLOGY_SNAPSHOT
+        );
         queryClient.setQueryData(queryKeys.targetGrid.cells(MOCK_METHODOLOGY_SNAPSHOT.id), MOCK_TARGET_GRID_CELLS);
         queryClient.setQueryData(queryKeys.targetGrid.templates, MOCK_CANONICAL_TEMPLATES);
         queryClient.setQueryData(queryKeys.discipline.bands, MOCK_TOLERANCE_BANDS);

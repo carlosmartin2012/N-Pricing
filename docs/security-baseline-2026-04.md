@@ -21,7 +21,7 @@ Estado repo-backed del slice de seguridad actualmente ejecutable.
   - `GHSA-4r6h-8v6p-xvw6`
   - `GHSA-5pgg-2g8v-p4x9`
 - Estado upstream: sin fix disponible a fecha del corte.
-- Motivo de permanencia: el repo sigue usando import/export Excel en flujos operativos y brochure tooling.
+- Motivo de permanencia: el repo sigue usando import/export Excel en flujos operativos.
 - Mitigaciones aplicadas en este corte:
   - validación de extensión permitida (`.xlsx`, `.xls`, `.csv`)
   - límite de tamaño de importación: `5 MB`

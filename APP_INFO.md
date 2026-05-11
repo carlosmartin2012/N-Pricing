@@ -23,7 +23,7 @@ guarantee reproducibility for regulatory review (SR 11-7 / EBA).
   ISF Pillar I overlay), capital charge, effective tenors (DTM, RM, BM),
   currency basis, SDR modulation, incentivisation.
 - **RAROC Terminal** — standalone calculator with economic profit breakdown.
-- **Stress Testing** — shock control panel (moving toward EBA 6 scenarios, Ola 6).
+- **Stress Testing** — shock control panel with 6 EBA scenarios and per-tenor curve shifts.
 - **Behavioural Models** — NMD (Parametric + Caterpillar) and Prepayment CPR.
 - **Target Grid / Discipline / What-If** — Waves 1–3 (target rates, leakage,
   sandboxes).
@@ -85,7 +85,7 @@ guarantee reproducibility for regulatory review (SR 11-7 / EBA).
 - **Server**: Express 5 + pg.Pool 8 (port :3001).
 - **Backend**: Supabase (PostgreSQL 15+, Realtime, RLS, Edge Functions Deno).
 - **Auth**: JWT HMAC propio + `GoogleSsoProvider` (@react-oauth/google).
-- **Testing**: Vitest 4 (~1.0k tests, 80 archivos) + Playwright 1.59 (20 specs)
+- **Testing**: Vitest 4 (~1.37k tests, ~85 archivos) + Playwright 1.59 (23 specs)
   + Storybook 8.6.
 - **CI/CD**: GitHub Actions + Vercel; Replit-ready (nodejs-18 + postgresql-16).
 
@@ -108,23 +108,23 @@ guarantee reproducibility for regulatory review (SR 11-7 / EBA).
 - `types.ts` + `types/*.ts` — domain types re-exported.
 - `translations.ts` — full i18n (English / Spanish).
 
-## Statistics (2026-04-22)
+## Statistics (2026-05-11)
 | Metric | Count |
 |--------|-------|
-| TypeScript / TSX files | 671 |
-| Component files | 227 |
-| Hook files | 30 |
-| Utility files | 134 |
-| API modules | 21 |
+| TypeScript / TSX files | 836 |
+| Component files | 312 |
+| Hook files | 40 |
+| Utility files | 280 |
+| API modules | 28 |
 | Context providers | 9 |
-| Unit tests (Vitest) | ~1.0k in 80 files |
-| Integration tests (opt-in) | 2 in `utils/__tests__/integration/` |
-| E2E specs (Playwright) | 20 |
-| Supabase migrations | 38 |
-| Server routers | 18 |
-| Workers | 4 opt-in |
+| Unit/component test files (Vitest) | 174 |
+| Integration test files (opt-in) | 4 in `utils/__tests__/integration/` |
+| E2E specs (Playwright) | 23 |
+| Supabase migrations | 43 |
+| Server routers | 28 |
+| Workers | 9 opt-in |
 | Edge Functions (Deno) | 3 |
-| Runbooks | 12 |
+| Runbooks | 16 |
 
 ## Quickstart
 - **Local**: `npm install && npm run dev` + `npm run seed:demo` (requires

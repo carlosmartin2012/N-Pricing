@@ -3,7 +3,7 @@
 > **Status:** Draft v1 · 2026-04-13
 > **Owner:** Gregorio Gonzalo
 > **Scope:** Strategic product pivot from deal-centric pricing review to methodology-first target pricing & pricing discipline analytics.
-> **Companion docs:** [IMPROVEMENT_PLAN.md](./IMPROVEMENT_PLAN.md) (UX/UI roadmap H1–H3), [pricing-methodology.md](./pricing-methodology.md) (19-gap engine spec).
+> **Companion docs:** [roadmap-execution-summary.md](./roadmap-execution-summary.md) (roadmap ejecutado), [pricing-methodology.md](./pricing-methodology.md) (19-gap engine spec).
 
 ---
 
@@ -360,7 +360,7 @@ recomputeAllVariances(snapshotId: string): Promise<JobId>  // batch, returns job
 
 ### 4.7 Alert engine integration
 
-Reaprovechar el alert engine planificado en H2 del roadmap UX (`IMPROVEMENT_PLAN.md`). Definir tipos de alerta nuevos:
+Reaprovechar el alert engine existente y extenderlo con tipos de alerta nuevos:
 - `DisciplineThresholdAlert` — `%_out_of_band_monthly > threshold` para una cohorte.
 - `LeakageAlert` — leakage mensual agregado > threshold absoluto.
 - `OriginatorDriftAlert` — scorecard de un originador degrada > Xpp vs baseline.
@@ -497,16 +497,16 @@ Ola 1 ──► Ola 2 ──► Ola 3
   └── sin dependencias externas bloqueantes
 ```
 
-**Dependencias con roadmap UX existente (`IMPROVEMENT_PLAN.md`):**
+**Dependencias con capacidades existentes y roadmap ejecutado:**
 
 | Este plan requiere | Viene de | Bloqueante |
 |---|---|---|
-| Alert engine | UX H2 — "Alert engine" | Sí para Ola 2 F2.8 (puede hacerse después) |
-| Backtesting engine | UX H2 — "Backtesting engine" | Sí para Ola 3 B3 (misma pieza) |
-| Report scheduling | UX H2 — "Report scheduling" | No (deseable para rate card emails) |
-| Real-time collab | UX H3 | No |
+| Alert engine | Observabilidad y alertas tenancy/pricing | Sí para Ola 2 F2.8 (puede hacerse después) |
+| Backtesting engine | Roadmap metodológico / pricing discipline | Sí para Ola 3 B3 (misma pieza) |
+| Report scheduling | Reporting programado | No (deseable para rate card emails) |
+| Real-time collab | Presencia/locks planificados | No |
 
-**Propuesta de coordinación:** adelantar "Alert engine" y "Backtesting engine" del roadmap UX H2 al periodo de Olas 2–3 de este plan. Fusionar backlogs.
+**Propuesta de coordinación:** fusionar alerting, backtesting y pricing discipline en un único backlog operativo de Olas 2–3.
 
 ---
 

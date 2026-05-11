@@ -220,14 +220,14 @@ npm run dev              # Vite :5000 + Express :3001 (concurrently)
 npm run build            # Build producción (PWA)
 npm run preview          # Preview del build
 npm run test             # Vitest (~1.37k tests, 85 archivos)
-npm run test:e2e         # Playwright (20 specs)
+npm run test:e2e         # Playwright (23 specs)
 npm run typecheck        # tsc --noEmit
 npm run typecheck:edge   # build Edge + deno check
 npm run lint             # ESLint
 npm run format           # Prettier
 npm run verify           # lint+typecheck+edge+sync+data+security+test+build+bundle
 npm run verify:full      # verify + test:e2e
-npm run check:sync       # Validar seed↔schema (migrations + schema_v2 fallback)
+npm run check:sync       # Validar seed↔schema (migrations)
 npm run check:bundle     # Validar tamaños de bundle
 npm run check:data-quality
 npm run check:security   # Scan deps prod con excepciones gobernadas
@@ -260,7 +260,7 @@ utils/                  # Pricing engine + helpers
 supabase/
   migrations/           # 43 migraciones SQL secuenciales
   functions/            # 3 Edge Functions Deno
-e2e/                    # 20 specs Playwright
+e2e/                    # 23 specs Playwright
 docs/                   # Doc operativa + runbooks
   runbooks/             # 13 plantillas operativas (incluye replit-demo.md)
 public/                 # PWA assets
@@ -293,7 +293,7 @@ Ver detalle en [docs/pricing-methodology.md](./docs/pricing-methodology.md).
 |---|---|---|
 | Unit | `npm run test` | ~1.37k tests · 85 archivos |
 | Integration (opt-in) | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration` | RLS + tenancy + fuzz |
-| E2E | `npm run test:e2e` | 20 specs Playwright |
+| E2E | `npm run test:e2e` | 23 specs Playwright |
 | Storybook | `npm run storybook` | Component stories |
 
 Cubre motor FTP completo, RAROC, curvas, rule matching, deal workflow,
@@ -369,7 +369,6 @@ Detalle fase por fase en
 | Demo en Replit (troubleshooting) | [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md) |
 | Estado del roadmap | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md) |
 | Ola 6 — estado por bloque + PR refs | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md) |
-| Integral review 2026-04 | [docs/integral-review-2026-04-18.md](./docs/integral-review-2026-04-18.md) |
 | Operación / on-call | [docs/runbooks/](./docs/runbooks/) (13 plantillas) |
 | Tenancy strict flip playbook | [docs/runbooks/tenancy-strict-flip.md](./docs/runbooks/tenancy-strict-flip.md) |
 | Rollout de tenancy + flags | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md) |
@@ -379,6 +378,8 @@ Detalle fase por fase en
 | Setup Supabase | [docs/supabase-setup.md](./docs/supabase-setup.md) |
 | Tests integración | [docs/integration-tests.md](./docs/integration-tests.md) |
 | Seguridad baseline | [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md) |
+| Nueva plataforma greenfield | [docs/next-gen-application-spec.md](./docs/next-gen-application-spec.md) |
+| Extracción hacia greenfield | [docs/next-gen-extraction-map.md](./docs/next-gen-extraction-map.md) |
 
 ## Licencia
 

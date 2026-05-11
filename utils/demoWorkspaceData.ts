@@ -19,13 +19,9 @@ import {
   MOCK_RULES,
   MOCK_TRANSITION_GRID,
   MOCK_YIELD_CURVE,
-} from '../constants';
+} from './seedData';
 import { createMethodologyVersionSnapshot } from './governance/methodologyRequests';
-import {
-  buildApprovalTaskForPricingDossier,
-  buildPortfolioSnapshot,
-  buildPricingDossier,
-} from './governance/pricing';
+import { buildApprovalTaskForPricingDossier, buildPortfolioSnapshot, buildPricingDossier } from './governance/pricing';
 import { buildPricingContext } from './pricingContext';
 import { calculatePricing } from './pricingEngine';
 
@@ -57,7 +53,7 @@ export function buildDemoWorkspaceData({
       clients: MOCK_CLIENTS,
       products: MOCK_PRODUCT_DEFS,
       businessUnits: MOCK_BUSINESS_UNITS,
-    },
+    }
   );
 
   const actor = {
@@ -101,9 +97,7 @@ export function buildDemoWorkspaceData({
   const dealCandidates = MOCK_DEALS.filter((deal) => Boolean(deal.id) && deal.amount > 0);
   const dealsForSnapshot = dealCandidates.length > 0 ? dealCandidates : MOCK_DEALS.slice(0, 2);
   const featuredDeal =
-    dealCandidates.find((deal) => deal.status === 'Pending_Approval') ??
-    dealCandidates[0] ??
-    MOCK_DEALS[0];
+    dealCandidates.find((deal) => deal.status === 'Pending_Approval') ?? dealCandidates[0] ?? MOCK_DEALS[0];
 
   const portfolioSnapshot = buildPortfolioSnapshot({
     name: 'Demo Portfolio Snapshot',

@@ -2,8 +2,9 @@
 
 > Contexto esencial para agentes IA que trabajan en este repositorio.
 > Última actualización: 2026-04-23 (Ola 6 completa en `main` — A + B + C merged).
-> **Lectura obligatoria antes de tocar código:** [`docs/integral-review-2026-04-18.md`](docs/integral-review-2026-04-18.md)
-> (hallazgos verificados, falsos positivos descartados, propuesta de evolución en 3 olas).
+> **Lectura obligatoria antes de tocar código:** [`docs/architecture.md`](docs/architecture.md)
+> para el estado vivo del producto y [`docs/next-gen-application-spec.md`](docs/next-gen-application-spec.md)
+> para la dirección greenfield.
 > **Ola 6 completa (22 PRs merged, `#42–#63`):** estado por bloque en
 > [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md);
 > resumen ejecutivo y follow-ups en
@@ -38,7 +39,7 @@ PWA con soporte offline. **Multi-tenant** vía RLS Postgres.
 | Backend | Express + pg.Pool sobre Postgres (Supabase para client/Edge) |
 | Edge Functions | Deno (Supabase Edge) — pricing, realize-raroc, elasticity-recalibrate |
 | Auth | JWT propio HMAC + Google SSO real (`GoogleSsoProvider`) |
-| Testing | Vitest 4 (~1.37k tests, ~85 archivos) + Playwright 1.59 (20 specs) |
+| Testing | Vitest 4 (~1.37k tests, ~85 archivos) + Playwright 1.59 (23 specs) |
 | Storybook | Storybook 8.6 (React Vite) |
 | IA | Google Generative AI (@google/genai) |
 | Charts | Recharts 3.7 |
@@ -56,10 +57,10 @@ npm run lint             # ESLint
 npm run typecheck        # tsc --noEmit
 npm run typecheck:edge   # Build + deno check de Edge Functions
 npm run test             # Vitest (~1.37k tests, ~85 archivos)
-npm run test:e2e         # Playwright (20 specs)
+npm run test:e2e         # Playwright (23 specs)
 npm run verify           # lint + typecheck + edge + sync + data + security + test + build + bundle
 npm run verify:full      # verify + test:e2e
-npm run check:sync       # Validar seed↔schema (lee migrations + schema_v2 fallback)
+npm run check:sync       # Validar seed↔schema (lee migrations)
 npm run check:bundle     # Validar tamaños de bundle
 npm run check:data-quality
 npm run check:security   # Audit de deps prod
@@ -126,7 +127,6 @@ scripts/
   check-seed-schema-sync.ts
   check-data-quality.ts
   check-dependency-audit.ts
-  recapture-brochure.mjs       # Regenera screenshots del brochure HTML
 
 server/                    # Express server
   index.ts                 # Bootstrap + runMigrations + seed-on-boot opcional + routers + middlewares
@@ -210,14 +210,14 @@ utils/
   __tests__/                        # ~85 archivos · ~1 373 tests + 17 integration opt-in
 
 supabase/
-  schema.sql (LEGACY — DO NOT EXECUTE) schema_v2.sql fix_rls_realtime.sql
+  fix_rls_realtime.sql
   migrations/                       # 43 migraciones SQL secuenciales (cronológicas)
   functions/
     pricing/                        # +tenancy + snapshot write + scoping (Phase 0)
     realize-raroc/                  # +entity_id query param (Phase 0)
     elasticity-recalibrate/         # +entity_id query param (Phase 0)
 
-e2e/                                # 20 specs Playwright (ai-assistant, auth, pricing-flow,
+e2e/                                # 23 specs Playwright (ai-assistant, auth, pricing-flow,
                                     # deal-blotter, esg-grid, market-data, multi-entity,
                                     # navigation, rules-governance, shocks-reporting,
                                     # reconciliation, pipeline, clv, offline-pwa, rbac, …)
@@ -231,16 +231,16 @@ docs/                               # Doc operativa (ver índice abajo)
   pricing-calculation-observability.md
   pricing-plugin-architecture.md
   methodology-first-evolution-plan.md
-  IMPROVEMENT_PLAN.md
   phase-0-design.md                 # NUEVO — Phase 0 diseño conceptual
   phase-0-technical-specs.md        # NUEVO — SQL + tipos + OpenAPI delta + ejemplos
   phase-0-rollout.md                # NUEVO — env vars + secuencia rollout
   roadmap-execution-summary.md      # Estado por fase tras roadmap
   integration-tests.md              # Cómo correr tests opt-in
   architecture.md                   # Overview maestro post-roadmap
-  integral-review-2026-04-18.md     # Hallazgos + 3 olas de evolución
+  next-gen-application-spec.md      # Especificación greenfield
+  next-gen-extraction-map.md        # Mapa de extracción / descarte
   ola-6-tenancy-strict-stress-pricing.md   # Siguiente ola en marcha
-  pivot/ superpowers/               # Material exploratorio
+  pivot/                            # Material exploratorio vivo
   runbooks/                         # 13 plantillas operativas
     README.md tenancy-violation.md tenancy-strict-flip.md
     pricing-latency.md snapshot-write-failure.md mock-fallback.md
@@ -443,7 +443,7 @@ Adapter Health, Escalations, Attribution matrix.
 ## Testing
 
 - **Unit (Vitest 4):** ~85 archivos, ~1.37k tests + 17 integration opt-in.
-- **E2E (Playwright 1.59):** 20 specs.
+- **E2E (Playwright 1.59):** 23 specs.
 - **Component (Storybook 8.6):** stories en `*.stories.tsx`.
 - **Integration RLS (opt-in):** `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration`.
 - Para cálculos financieros usar `toBeCloseTo`.
@@ -456,10 +456,8 @@ Adapter Health, Escalations, Attribution matrix.
 - 43 migrations SQL secuenciales en `supabase/migrations/` (última:
   `20260630000002_push_subscriptions.sql`; la anterior es
   `20260630000001_attribution_threshold_recalibrations.sql`).
-- Schema principal: `supabase/schema_v2.sql` (referencia legacy),
-  migrations es la verdad operativa.
-- `supabase/schema.sql` está marcado **LEGACY — DO NOT EXECUTE** y ningún
-  tooling lo lee.
+- Schema principal: la secuencia de `supabase/migrations/*.sql`. Los snapshots
+  SQL legacy fueron retirados para evitar drift.
 - `api/` (cliente) usa `api/mappers.ts` para snake_case ↔ camelCase.
 - `utils/supabase/` queda para servicios especializados (approval, audit,
   monitoring, methodology, reporting).
@@ -568,8 +566,7 @@ Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
   `campaigns.ts`, `governance.ts`, `metering.ts`.
 - `seedData.ts` y Supabase pueden divergir si se cambia uno sin revisar el
   otro. Usar `npm run check:sync`. El script lee la **secuencia completa
-  de migrations** + `schema_v2.sql` como fallback; `supabase/schema.sql`
-  está marcado `LEGACY — DO NOT EXECUTE` y el script ya no lo lee.
+  de migrations** como fuente canónica.
 - `server/migrate.ts` (schema inline para dev/Replit) es un **subconjunto**
   de `supabase/migrations/`. Si añades una tabla que el server necesita al
   arrancar (p.ej. `tenancy_violations`, entity_users default seed), tócala
@@ -636,7 +633,8 @@ Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
 | `docs/architecture.md` | **Overview maestro** post-roadmap (lectura recomendada) |
 | `docs/api-spec.yaml` | OpenAPI v2 |
 | `docs/roadmap-execution-summary.md` | Estado fase por fase |
-| `docs/integral-review-2026-04-18.md` | Hallazgos + 3 olas de evolución |
+| `docs/next-gen-application-spec.md` | Especificación greenfield Bank Revenue Intelligence |
+| `docs/next-gen-extraction-map.md` | Qué extraer, reescribir o descartar |
 | `docs/ola-6-tenancy-strict-stress-pricing.md` | **Ola 6 completa** · estado A/B/C con PR refs |
 | `docs/ola-7-collaborative-ux.md` | Ola 7 plan · UX colaborativa (cursors, copilot, i18n) |
 | `docs/ola-8-atribuciones-banca-march.md` | **Olas 8/9/10 completas** · cobertura Banca March (atribuciones jerárquicas, integraciones PUZZLE/HOST/ALQUID, AI insights, mobile cockpit) |

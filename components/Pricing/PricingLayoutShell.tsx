@@ -5,12 +5,11 @@ import { Calculator as CalculatorIcon, Percent, Zap, FlaskConical } from 'lucide
 /**
  * PricingLayoutShell — persistent shell for the 4 pricing workspaces.
  *
- * Replaces the old <PricingWorkspace> wrapper which conditionally rendered
- * one of 4 tabs based on pathname. With nested routing + Outlet:
+ * Pricing tab shell for nested routing + Outlet:
  *   - The tab bar is part of the layout (no re-render on tab switch)
  *   - Each workspace is its own route-level component and reads shared
  *     state via `usePricingState()` from PricingStateContext
- *   - Deep linking + browser back/forward works identically to before
+ *   - Deep linking + browser back/forward use route-level components
  *
  * Route shape:
  *   <Route element={<PricingLayoutShell/>}>
@@ -24,10 +23,10 @@ import { Calculator as CalculatorIcon, Percent, Zap, FlaskConical } from 'lucide
 type TabId = 'deal' | 'raroc' | 'stress' | 'what-if';
 
 const TABS: { id: TabId; path: string; label: string; sublabel: string; icon: typeof CalculatorIcon }[] = [
-  { id: 'deal',    path: '/pricing',        label: 'Deal',    sublabel: 'Motor + recomendación',    icon: CalculatorIcon },
-  { id: 'raroc',   path: '/raroc',          label: 'RAROC',   sublabel: 'Economic profit + hurdle', icon: Percent },
-  { id: 'stress',  path: '/stress-testing', label: 'Stress',  sublabel: 'EBA 6 escenarios',         icon: Zap },
-  { id: 'what-if', path: '/what-if',        label: 'What-If', sublabel: 'Simulación + backtest',    icon: FlaskConical },
+  { id: 'deal', path: '/pricing', label: 'Deal', sublabel: 'Motor + recomendación', icon: CalculatorIcon },
+  { id: 'raroc', path: '/raroc', label: 'RAROC', sublabel: 'Economic profit + hurdle', icon: Percent },
+  { id: 'stress', path: '/stress-testing', label: 'Stress', sublabel: 'EBA 6 escenarios', icon: Zap },
+  { id: 'what-if', path: '/what-if', label: 'What-If', sublabel: 'Simulación + backtest', icon: FlaskConical },
 ];
 
 function pathToTab(pathname: string): TabId {

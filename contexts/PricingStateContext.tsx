@@ -5,16 +5,11 @@ import { INITIAL_DEAL } from '../utils/seedData';
 /**
  * PricingState context — shared state for the Pricing workspace (Phase 6.1).
  *
- * Why this exists: the deal params currently live in App.tsx as useState and
- * are prop-drilled into PricingWorkspace → CalculatorWorkspace. When we
- * split the workspace into separate routes (the 🔴 #2 improvement from the
- * integral review), the 4 views will all need to read/write the same
- * `dealParams` without being nested under a common parent.
+ * Why this exists: pricing routes are split across Calculator, RAROC, Stress
+ * and What-If, but they still share the current deal inputs.
  *
- * This context is a **parallel** API — App.tsx keeps its useState for now,
- * and only new components need to adopt `usePricingState()`. When the split
- * happens, App.tsx will wrap everything with <PricingStateProvider> and
- * delete the prop drilling.
+ * This context can mirror App.tsx state through the controlled provider prop,
+ * which keeps the current route-level workspaces in sync.
  *
  * Do NOT put heavy derived state (e.g. calculatePricing output) in here —
  * derive per-component with useMemo instead. The context holds only the
@@ -45,11 +40,7 @@ interface ProviderProps {
   children: React.ReactNode;
 }
 
-export const PricingStateProvider: React.FC<ProviderProps> = ({
-  initialDeal = INITIAL_DEAL,
-  controlled,
-  children,
-}) => {
+export const PricingStateProvider: React.FC<ProviderProps> = ({ initialDeal = INITIAL_DEAL, controlled, children }) => {
   const [internalDeal, setInternalDeal] = useState<Transaction>(initialDeal);
 
   const dealParams = controlled?.value ?? internalDeal;
@@ -57,13 +48,13 @@ export const PricingStateProvider: React.FC<ProviderProps> = ({
 
   const patchDeal = useCallback(
     (patch: Partial<Transaction>) => setDealParams((prev) => ({ ...prev, ...patch })),
-    [setDealParams],
+    [setDealParams]
   );
   const resetDeal = useCallback(() => setDealParams(initialDeal), [setDealParams, initialDeal]);
 
   const value = useMemo<PricingStateValue>(
     () => ({ dealParams, setDealParams, patchDeal, resetDeal }),
-    [dealParams, setDealParams, patchDeal, resetDeal],
+    [dealParams, setDealParams, patchDeal, resetDeal]
   );
 
   return <PricingStateContext.Provider value={value}>{children}</PricingStateContext.Provider>;

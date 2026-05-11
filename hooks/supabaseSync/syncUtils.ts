@@ -19,7 +19,7 @@ import {
   MOCK_CANONICAL_TEMPLATES,
   MOCK_TOLERANCE_BANDS,
   MOCK_ELASTICITY_MODELS,
-} from '../../constants';
+} from '../../utils/seedData';
 import { buildDemoWorkspaceData } from '../../utils/demoWorkspaceData';
 import { queryKeys } from '../queries/queryKeys';
 
@@ -30,12 +30,11 @@ export function resolveWithFallback<T>(dataset: T[] | null | undefined, fallback
 export function applyMockData(
   data: DataContextType,
   syncStatus: DataContextType['syncStatus'],
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ) {
   const demoWorkspaceData = buildDemoWorkspaceData({
     approvalMatrix: data.approvalMatrix,
   });
-
 
   data.setDeals(MOCK_DEALS);
   data.setClients(MOCK_CLIENTS);

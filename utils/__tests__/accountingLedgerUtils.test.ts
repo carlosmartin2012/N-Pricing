@@ -11,7 +11,7 @@ import {
   MOCK_PRODUCT_DEFS,
   MOCK_TRANSITION_GRID,
   MOCK_YIELD_CURVE,
-} from '../../constants';
+} from '../seedData';
 import {
   buildLedgerEntries,
   summarizeLedgerEntries,
@@ -118,7 +118,7 @@ describe('accountingLedgerUtils', () => {
       approvalMatrix,
       pricingContext,
       MOCK_BUSINESS_UNITS,
-      MOCK_PRODUCT_DEFS,
+      MOCK_PRODUCT_DEFS
     );
 
     expect(entries).toHaveLength(1);

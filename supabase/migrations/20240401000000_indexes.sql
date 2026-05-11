@@ -4,14 +4,14 @@
 -- Depends on: 20240201000000_v2_extensions (for deal_versions, etc.)
 
 -- ============================================================
--- PRICING RESULTS INDEXES (from schema.sql)
+-- PRICING RESULTS INDEXES (from baseline schema)
 -- ============================================================
 
 CREATE INDEX IF NOT EXISTS idx_pricing_results_deal_id ON pricing_results(deal_id);
 CREATE INDEX IF NOT EXISTS idx_pricing_results_calculated_at ON pricing_results(calculated_at DESC);
 
 -- ============================================================
--- DEALS INDEXES (from schema_v2.sql)
+-- DEALS INDEXES (from V2 baseline)
 -- ============================================================
 
 CREATE INDEX IF NOT EXISTS idx_deals_status ON deals(status);

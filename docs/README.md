@@ -3,20 +3,11 @@
 > Source-of-truth consolidado (2026-04-21). Si añades un documento nuevo,
 > registra su ruta y propósito aquí.
 
-## 📚 Estructura canónica
+## 📚 Estructura viva
 
-Tres categorías, sin solapamiento:
-
-```
-docs/
-  reference/   — decisiones arquitectónicas, specs, metodología (evergreen)
-  operations/  — runbooks, rollout, seguridad, auditorías (operativo)
-  history/     — snapshots históricos (integral reviews, roadmaps completados)
-```
-
-La estructura actual mezcla los 3. El plan de consolidación vive más abajo
-(sección *Plan de consolidación*). Entre tanto, esta tabla es **LA fuente
-canónica**: usa esto para saber dónde está cada cosa, no `git log`.
+La tabla de este índice es la fuente canónica de documentación. El árbol ya no
+mantiene snapshots históricos ni planes de consolidación paralelos: si un doc
+queda obsoleto, se retira o se reemplaza por una entrada viva aquí.
 
 ---
 
@@ -46,7 +37,7 @@ Cada Phase (0-6) tiene hasta 3 documentos: `-design.md` (concepción), `-technic
 | 3 — Governance (SR 11-7) | ✅ live | (en architecture.md) |
 | 4 — Integrations adapter layer | ✅ live | (en architecture.md) |
 | 5 — Metering / feature flags | ✅ live | (en architecture.md) |
-| 6 — CLV + 360º temporal | 🆕 **DEV** (2026-04-21) | ver sección abajo |
+| 6 — CLV + 360º temporal | ✅ live | ver sección abajo |
 
 ## 🟠 Security & audits
 
@@ -94,21 +85,7 @@ Documentación orientada al equipo comercial NFQ y al comprador en el banco.
 
 ---
 
-## ⚠️ Deprecated / historical (no leer como "live")
-
-Estos documentos fueron snapshots puntuales. Se mantienen como histórico
-regulatorio pero **no** son fuente viva:
-
-| Documento | Estado | Reemplazado por |
-|---|---|---|
-| [`integral-review-2026-04-18.md`](integral-review-2026-04-18.md) | 📸 HISTÓRICO 2026-04-18 | `architecture.md` + `roadmap-execution-summary.md` |
-| [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 📸 HISTÓRICO pre-roadmap | este índice + `roadmap-execution-summary.md` |
-| [`roadmap-execution-summary.md`](roadmap-execution-summary.md) | ✅ live (snapshot por Phase) | — |
-| [`supabase-setup.md`](supabase-setup.md) | ✅ live (dev setup) | — |
-
----
-
-## 🆕 Phase 6 — CLV + 360º temporal (WIP, 2026-04-21)
+## 🆕 Phase 6 — CLV + 360º temporal
 
 Capa de **Customer Lifetime Value** y **timeline temporal** sobre Customer 360.
 
@@ -118,6 +95,7 @@ Capa de **Customer Lifetime Value** y **timeline temporal** sobre Customer 360.
 - Motor puro: `utils/clv/` — ltvEngine, marginalLtvImpact, nextBestAction.
 - Server: `server/routes/clv.ts` (tenancy-scoped, patrón Phase 1).
 - UI: `components/Customer360/` → LtvProjectionCard, ClientTimeline, NbaRecommendationCard, LtvImpactPanel.
+- Pricing workspace: `components/Calculator/CalculatorWorkspace.tsx` embebe `LtvImpactPanel`.
 - i18n: `translations/clv.{en,es}.ts` (primer namespace migrado fuera del monolito).
 - Tests: 31 tests motor + 10 tests guard tenancy.
 
@@ -131,56 +109,17 @@ Capa de **Customer Lifetime Value** y **timeline temporal** sobre Customer 360.
 - `PATCH /api/clv/nba/:id/consume`
 - `POST /api/clv/preview-ltv-impact` ⭐ **killer demo endpoint**
 
-### Pendiente
-- `LtvImpactPanel` embebido en Pricing Engine (ya existe como componente,
-  falta montar en el workspace — depende de tener `selectedDeal` + `clientId`
-  en el contexto del calculator).
-- Worker nocturno `server/workers/ltvSnapshotWorker.ts` opt-in por
-  `LTV_SNAPSHOT_INTERVAL_MS`.
+### Bloqueos externos
 - Integración Salesforce real vía `integrations/crm/salesforce.ts` para
-  alimentar `client_events` automáticamente.
+  alimentar `client_events` automáticamente. El adapter existe como stub hasta
+  contar con credenciales y contrato SOQL definitivo.
 
 ---
 
-## Plan de consolidación
-
-Migración propuesta (no ejecutada todavía — es mecánico y puede hacerse en
-un PR):
-
-```
-reference/
-  architecture.md                        (renombrar)
-  pricing-methodology.md                 (renombrar)
-  pricing-plugin-architecture.md
-  methodology-first-evolution-plan.md
-  pricing-calculation-observability.md
-
-operations/
-  security-baseline.md                   (quitar fecha del nombre)
-  rls-audit.md                           (idem)
-  integration-tests.md
-  runbooks/...                           (sin cambios)
-
-phase/
-  0/design.md + specs.md + rollout.md
-  6/design.md                            (nuevo — este documento ampliado)
-
-history/
-  integral-review-2026-04-18.md
-  IMPROVEMENT_PLAN.md
-  roadmap-execution-summary.md
-  ola-6-tenancy-strict-stress-pricing.md
-```
-
-Coste estimado: 1 PR mecánico (1-2h). Riesgo: cero (sólo moves + update de
-referencias en CLAUDE.md + README).
-
 ## Reglas para documentación nueva
 
-1. **Un documento vive en `reference/`, `operations/` o `history/`** — no hay
-   una cuarta categoría.
-2. **Si es histórico (snapshot de una fecha), va a `history/`** y se marca
-   `📸 HISTÓRICO {fecha}` en el título.
+1. **Todo documento nuevo debe registrarse en este índice** con propósito y owner.
+2. **No añadir snapshots históricos como fuente viva**; si se necesita conservar
+   historia, enlazar al commit o release externo.
 3. **Runbook obligatorio** para cada alerta nueva que genere paging.
-4. **Update de este índice** en el mismo PR que añade el doc.
-5. No mezclar **decisiones** con **rollout**: dos documentos distintos.
+4. No mezclar **decisiones** con **rollout**: dos documentos distintos.

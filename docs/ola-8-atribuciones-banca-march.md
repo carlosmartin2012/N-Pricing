@@ -396,7 +396,7 @@ components/Attributions/
 1. 4 vistas nuevas (`ApprovalCockpit`, `AttributionSimulator`, `AttributionMatrixView`, `DecisionHistoryDrawer`).
 2. Sub-componentes (`MatrixTreeNode`, `ThresholdEditor`).
 3. Wiring en `App.tsx` (rutas `/approvals`, `/attributions/matrix`) + `appNavigation.ts`.
-4. Embed de `AttributionSimulator` en `Calculator/PricingWorkspace.tsx`.
+4. Embed de `AttributionSimulator` en `Calculator/CalculatorWorkspace.tsx`.
 5. Storybook stories para los 4 componentes principales.
 6. i18n: `translations/attributions.{en,es}.ts` (siguiendo namespaces de Ola 7).
 7. Tests:

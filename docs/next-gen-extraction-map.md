@@ -33,7 +33,7 @@ Una pieza se reescribe si:
 | Extraer casi directo            | pricing kernel, canonical JSON/hash, snapshot verification, dossier signing, adapter result pattern, selected data-quality scripts             |
 | Extraer con envoltorio          | RAROC, liquidity/capital engines, attributions routing, CLV/LTV, elasticity/backtesting, escalation evaluator, alert channels, push dispatcher |
 | Reescribir manteniendo concepto | UI, navigation, contexts, API routes, migrations, AI chat, reports, customer/portfolio views                                                   |
-| Descartar                       | pitch/brochure HTML, screenshots, legacy docs drift, demo-only surfaces, duplicated inline schema, broad sidebar model                         |
+| Descartar                       | material comercial HTML, capturas de demo, legacy docs drift, demo-only surfaces, duplicated inline schema, broad sidebar model                 |
 
 ---
 
@@ -432,11 +432,10 @@ Los mappers existentes sirven como referencia de naming snake/camel.
 
 - `supabase/migrations/*`
 - `server/migrate.ts`
-- `supabase/schema_v2.sql`
 
 **Problema:**
 
-- Hay drift historico entre migrations, inline schema y seeds.
+- Hubo drift historico entre snapshots SQL, migrations, inline schema y seeds.
 - El greenfield no debe tener dos schemas operativos.
 
 **Decision:**
@@ -481,9 +480,9 @@ Reescribir:
 
 | Path / familia                                              | Motivo                                           |
 | ----------------------------------------------------------- | ------------------------------------------------ |
-| `N-Pricing-Pitch-Comercial.html`, `N-Pricing-Brochure.html` | Material comercial, no base producto             |
-| `screenshots/`                                              | Artefactos de demo/documentacion                 |
-| `.claude/`, `.superpowers/`, `Cowork/`                      | Contexto operativo, no producto                  |
+| Material comercial HTML legacy                              | Retirado; no era base producto                   |
+| Capturas de demo/versiones antiguas                         | Retiradas; regenerar bajo demanda desde Playwright |
+| Contexto operativo local o de agentes                       | No es producto ni base greenfield                |
 | `dist/`, `coverage/`, `node_modules/`                       | Build/runtime local                              |
 | Roadmaps antiguos que contradigan codigo                    | Mantener solo como historia, no como fuente viva |
 | Sidebar con 20+ entradas                                    | Antipatron para greenfield                       |

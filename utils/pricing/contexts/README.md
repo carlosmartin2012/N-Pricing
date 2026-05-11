@@ -87,7 +87,7 @@ governance.resolveApprovalLevel(raroc, hurdle, matrix);
 
 ## Preview — governance context
 
-Cuando se ejecute la ola C-1, el layout será:
+El layout actual es:
 
 ```
 contexts/governance/
@@ -96,19 +96,9 @@ contexts/governance/
   governanceMode.ts             # Flag + env reader (VITE_GOVERNANCE_MODE)
   __tests__/
     approvalLevel.test.ts
-    governanceMode.test.ts
 ```
 
-Los consumidores actuales (`import … from 'utils/pricing/governance'`)
-siguen funcionando porque `utils/pricing/governance.ts` se convierte en un
-re-export shim:
-
-```ts
-// utils/pricing/governance.ts  (tras C-1)
-export * from './contexts/governance';
-```
-
-Esto permite:
-- **Cero breaking change** para callers.
-- Deprecar el shim en una ola posterior cuando todos los imports estén
-  actualizados.
+Los consumidores internos importan directamente desde
+`utils/pricing/contexts/governance` o desde el namespace público
+`utils/pricing`. El shim legacy de governance fue retirado cuando ya no
+quedaban imports internos.

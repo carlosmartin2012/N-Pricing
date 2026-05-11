@@ -6,13 +6,13 @@ Se revisaron las migraciones activas de `supabase/migrations/` con foco en tres 
 
 1. Si cada tabla sensible tiene `ENABLE ROW LEVEL SECURITY`.
 2. Si las policies filtran por rol (`get_user_role()` / `users.role`) y, cuando aplica, por `entity_id`.
-3. Si hay tablas nuevas cuya seguridad vive en migraciones posteriores y ya no está reflejada en `supabase/schema_v2.sql`.
+3. Si hay tablas nuevas cuya seguridad vive en migraciones posteriores al baseline inicial.
 
-Resultado: la base está razonablemente protegida, pero el estado real de RLS ya no cabe en `supabase/schema_v2.sql` y había un ajuste de hardening pendiente en `greenium_rate_cards` y en writes entity-scoped recientes. Ese ajuste queda cubierto por `supabase/migrations/20260411000002_rls_hardening.sql`.
+Resultado: la base está razonablemente protegida y el estado real de RLS vive en `supabase/migrations/`. Había un ajuste de hardening pendiente en `greenium_rate_cards` y en writes entity-scoped recientes. Ese ajuste queda cubierto por `supabase/migrations/20260411000002_rls_hardening.sql`.
 
 ## Hallazgos principales
 
-- `supabase/schema_v2.sql` ya no es una referencia completa de RLS. Sirve como baseline histórico, pero tablas y policies posteriores viven solo en migraciones.
+- Los snapshots SQL legacy fueron retirados; el baseline y sus extensiones viven en migraciones ordenadas.
 - La migración `20240301000000_rls_policies.sql` sigue siendo la base del modelo RBAC clásico: lectura amplia para usuarios autenticados y escritura restringida por rol en tablas maestras.
 - La migración `20260406000001_multi_entity.sql` introduce el control de aislamiento más importante del estado actual: `entity_id`, `get_current_entity_id()` y `get_accessible_entity_ids()`.
 - `audit_log` cumple el requisito de ser `INSERT`-only en la capa RLS: hay lectura e inserción, pero no policies de `UPDATE`/`DELETE`, y además el esquema inicial ya incluía inmutabilidad por trigger.
@@ -62,14 +62,14 @@ Resultado: la base está razonablemente protegida, pero el estado real de RLS ya
 
 ## Riesgos y deuda residual
 
-- `schema_v2.sql` y el estado real de migraciones divergen en seguridad. Para onboarding sigue siendo útil, pero no debe considerarse fuente única de verdad.
+- La seguridad depende de ejecutar la secuencia completa de migraciones. Saltarse migrations intermedias puede dejar tablas sin el hardening posterior.
 - Varias tablas históricas previas a multi-entity siguen con lectura amplia para authenticated y dependen de que el aislamiento fuerte llegue por la migración de `entity_id`. Esto es aceptable, pero hace más importante no saltarse `20260406000001_multi_entity.sql`.
 - `yield_curve_history`, `notifications` y algunos históricos no están entity-scoped. Esto puede ser correcto por diseño, pero conviene revisarlo si se profundiza el aislamiento por entidad en reporting y market data.
 - `report_runs` no permite writes desde authenticated. La inferencia es que las ejecuciones las genera backend privilegiado; si en el futuro se exponen writes desde cliente, hará falta policy específica.
 
 ## Recomendaciones
 
-1. Tratar `supabase/migrations/` como fuente de verdad operativa y rebajar el peso de `schema_v2.sql` en documentación futura.
+1. Tratar `supabase/migrations/` como fuente de verdad operativa y evitar snapshots SQL paralelos.
 2. Mantener el patrón append-only en tablas de auditoría, snapshots y versiones; está bien alineado con trazabilidad regulatoria.
 3. Si se añade una nueva tabla de negocio:
    - activar RLS,

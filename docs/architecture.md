@@ -434,7 +434,7 @@ cálculo IRRBB regulatorio (ΔEVE, SOT, ΔNII runoff)".
 |---|---|---|
 | Unit | Vitest 4 (~1.37k tests) | Cada commit |
 | Integration RLS | Vitest + Postgres real | Opt-in, cuando se cambian helpers PG |
-| E2E | Playwright (20 specs) | Pre-PR |
+| E2E | Playwright (23 specs) | Pre-PR |
 | Component | Storybook 8.6 | Diseño visual aislado |
 
 ### Integration tests opt-in
@@ -600,7 +600,7 @@ in-memory que Salesforce/Bloomberg:
 ## Referencias rápidas
 
 - **Plan Olas 8/9/10 — Banca March**: [`docs/ola-8-atribuciones-banca-march.md`](./ola-8-atribuciones-banca-march.md)
-- **Integral review 2026-04-18** (hallazgos verificados + propuesta Olas 6-8): [`docs/integral-review-2026-04-18.md`](./integral-review-2026-04-18.md)
+- Nueva plataforma greenfield: [`docs/next-gen-application-spec.md`](./next-gen-application-spec.md) y [`docs/next-gen-extraction-map.md`](./next-gen-extraction-map.md)
 - Roadmap fase a fase: [`docs/roadmap-execution-summary.md`](./roadmap-execution-summary.md)
 - Diseño Phase 0 detallado: [`docs/phase-0-design.md`](./phase-0-design.md)
 - SQL + tipos + ejemplos Phase 0: [`docs/phase-0-technical-specs.md`](./phase-0-technical-specs.md)

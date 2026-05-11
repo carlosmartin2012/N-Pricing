@@ -1,6 +1,6 @@
 -- N PRICING SYSTEM: INITIAL DATABASE SCHEMA
 -- Migration: 20240101000000_initial_schema
--- Description: Core table creation from the original schema.sql
+-- Description: Core table creation from the original baseline schema
 -- Tables: deals, audit_log, behavioural_models, yield_curves, system_config,
 --         rules, users, pricing_results, clients, products, business_units,
 --         rate_cards, liquidity_curves, esg_transition_grid, esg_physical_grid,

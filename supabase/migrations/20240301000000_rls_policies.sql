@@ -5,7 +5,7 @@
 -- Depends on: 20240201000000_v2_extensions (for get_user_role function)
 
 -- ============================================================
--- DROP LEGACY POLICIES (from schema.sql blanket USING(true))
+-- DROP LEGACY POLICIES (from baseline blanket USING(true))
 -- ============================================================
 
 DROP POLICY IF EXISTS "deals_select_all" ON deals;

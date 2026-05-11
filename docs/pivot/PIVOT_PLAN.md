@@ -5,13 +5,13 @@
 > **Fecha:** 2026-04-13
 > **Estado:** Aprobado, arrancable inmediato
 > **Piloto:** Banco Tier-1 España (all-segment: Corporate + SME + Retail), arranque limpio (sin backfill)
-> **Referencias relacionadas:** [`IMPROVEMENT_PLAN.md`](../IMPROVEMENT_PLAN.md), [`pricing-methodology.md`](../pricing-methodology.md), [`ai-assistant-refocus.md`](./ai-assistant-refocus.md)
+> **Referencias relacionadas:** [`roadmap-execution-summary.md`](../roadmap-execution-summary.md), [`pricing-methodology.md`](../pricing-methodology.md), [`ai-assistant-refocus.md`](./ai-assistant-refocus.md)
 
 ---
 
 ## 0. Cómo usar este documento
 
-Este plan es complementario al `IMPROVEMENT_PLAN.md`: aquél es consolidación/limpieza, éste es **evolución de posicionamiento**. Ejecutar en paralelo por equipos distintos si hay capacidad; sequencial si no.
+Este plan complementa el roadmap ejecutado y la documentación de metodología: el foco aquí es **evolución de posicionamiento**. Ejecutar en paralelo por equipos distintos si hay capacidad; secuencial si no.
 
 - Bloques A/B/C se arrancan **en paralelo** desde día 1.
 - Ruta crítica: A → D → E (outcome capture → elasticity calibration → Calculator bridge).
@@ -140,7 +140,7 @@ Verificado contra código el 2026-04-13. Estado honesto de cada pieza:
 **Objetivo:** reducir surface de N-Pricing a lo que es pricing, delegar ALM a Alquid.
 
 **Entregables:**
-1. Feature flag `VITE_NPRICING_DEPRECATE_ALM` en `.env.example` y `constants.ts`.
+1. Feature flag `VITE_NPRICING_DEPRECATE_ALM` en `.env.example` y `constants/alquidDeepLinks.ts`.
 2. Env var pair: `VITE_ALQUID_BASE_URL` (ej. `https://alquid.nfq.es`).
 3. Mapa deep-link en `constants/alquidDeepLinks.ts`:
    ```ts
@@ -254,7 +254,7 @@ Resumen:
    - **Commercial**: `finalRate` actual (la vista de hoy).
    - Diff visual entre los 3 con bandera si comercial < floor.
 3. EVA-based governance:
-   - Modificar `DEFAULT_APPROVAL_MATRIX` en `constants.ts` de thresholds RAROC absolutos a bandas EVA:
+   - Modificar la matriz de aprobación por defecto en `utils/seedData.governance.ts` de thresholds RAROC absolutos a bandas EVA:
      ```ts
      export const DEFAULT_APPROVAL_MATRIX = {
        autoApprovalEvaBp: 200,   // EVA > +200bp → auto

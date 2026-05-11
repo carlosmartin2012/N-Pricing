@@ -1,6 +1,6 @@
 -- N PRICING SYSTEM: V2 SCHEMA EXTENSIONS
 -- Migration: 20240201000000_v2_extensions
--- Description: Extensions from schema_v2.sql — new tables, altered columns,
+-- Description: V2 extensions — new tables, altered columns,
 --              enhanced constraints, triggers, grants, and seed data.
 -- Depends on: 20240101000000_initial_schema
 
@@ -250,7 +250,7 @@ END $$;
 -- SECTION 9: SEED REFERENCE DATA
 -- ============================================================
 
--- Seed clients (matching MOCK_CLIENTS in constants.ts)
+-- Seed clients (matching MOCK_CLIENTS in utils/seedData.ts)
 -- Using deterministic UUIDs since clients.id is now UUID
 INSERT INTO clients (id, name, type, segment, rating) VALUES
     ('c1001000-0000-4000-a000-000000001001', 'Industrias Omega S.A.', 'Corporate', 'Large Corporate', 'BBB'),
@@ -264,7 +264,7 @@ ON CONFLICT (id) DO UPDATE SET
     segment = EXCLUDED.segment,
     rating = EXCLUDED.rating;
 
--- Seed products (matching MOCK_PRODUCTS in constants.ts)
+-- Seed products (matching MOCK_PRODUCTS in utils/seedData.ts)
 INSERT INTO products (id, name, category, default_amortization) VALUES
     ('LOAN_COMM', 'Commercial Loan', 'Asset', 'Bullet'),
     ('LOAN_MORTG', 'Mortgage Loan', 'Asset', 'French'),
@@ -277,7 +277,7 @@ ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     category = EXCLUDED.category;
 
--- Seed business units (matching MOCK_BUSINESS_UNITS in constants.ts)
+-- Seed business units (matching MOCK_BUSINESS_UNITS in utils/seedData.ts)
 INSERT INTO business_units (id, name, code, is_funding_unit) VALUES
     ('BU-001', 'Corporate Banking', 'CB', false),
     ('BU-002', 'Retail Banking', 'RB', false),

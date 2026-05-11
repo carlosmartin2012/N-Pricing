@@ -1,8 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { calculatePricing, PricingShocks, interpolateYieldCurve, resolveEffectiveTenors, bootstrapZeroRates } from '../pricingEngine';
+import {
+  calculatePricing,
+  PricingShocks,
+  interpolateYieldCurve,
+  resolveEffectiveTenors,
+  bootstrapZeroRates,
+} from '../pricingEngine';
 import { calculateRAROC } from '../rarocEngine';
 import type { Transaction, ApprovalMatrixConfig, BehaviouralModel } from '../../types';
-import { MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS } from '../../constants';
+import { MOCK_YIELD_CURVE, MOCK_BEHAVIOURAL_MODELS } from '../seedData';
 import { LCR_OUTFLOW_TABLE, NSFR_ASF_TABLE, NSFR_RSF_TABLE } from '../../constants/regulations';
 
 // ---------------------------------------------------------------------------
@@ -59,12 +65,12 @@ describe('interpolateYieldCurve', () => {
   it('interpolates between 1Y and 2Y for 18 months', () => {
     const rate = interpolateYieldCurve(MOCK_YIELD_CURVE, 18);
     expect(rate).toBeGreaterThan(4.85);
-    expect(rate).toBeLessThan(5.10);
+    expect(rate).toBeLessThan(5.1);
   });
 
   it('returns 30Y rate for very long tenor', () => {
     const rate = interpolateYieldCurve(MOCK_YIELD_CURVE, 500);
-    expect(rate).toBeCloseTo(4.10, 1);
+    expect(rate).toBeCloseTo(4.1, 1);
   });
 
   it('drops points with unknown tenors instead of collapsing them onto month 0', () => {
@@ -126,8 +132,12 @@ describe('resolveEffectiveTenors', () => {
 
   it('BM from CPR model reduces effective maturity', () => {
     const cprModel: BehaviouralModel = {
-      id: 'test-cpr', name: 'Test CPR', type: 'Prepayment_CPR',
-      description: 'test', cpr: 10, penaltyExempt: 50,
+      id: 'test-cpr',
+      name: 'Test CPR',
+      type: 'Prepayment_CPR',
+      description: 'test',
+      cpr: 10,
+      penaltyExempt: 50,
     };
     const deal = { ...baseDeal, behaviouralModelId: 'test-cpr', durationMonths: 120 };
     const tenors = resolveEffectiveTenors(deal, [cprModel]);
@@ -137,9 +147,14 @@ describe('resolveEffectiveTenors', () => {
 
   it('BM from NMD Parametric model uses core ratio formula', () => {
     const nmdModel: BehaviouralModel = {
-      id: 'test-nmd', name: 'Test NMD', type: 'NMD_Replication',
-      nmdMethod: 'Parametric', description: 'test',
-      coreRatio: 60, betaFactor: 0.3, decayRate: 0.05,
+      id: 'test-nmd',
+      name: 'Test NMD',
+      type: 'NMD_Replication',
+      nmdMethod: 'Parametric',
+      description: 'test',
+      coreRatio: 60,
+      betaFactor: 0.3,
+      decayRate: 0.05,
     };
     const deal = { ...baseDeal, behaviouralModelId: 'test-nmd', durationMonths: 12 };
     const tenors = resolveEffectiveTenors(deal, [nmdModel]);
@@ -295,8 +310,11 @@ describe('calculatePricing', () => {
 
     it('liability gets negative NSFR cost (benefit)', () => {
       const liabDeal: Transaction = {
-        ...baseDeal, category: 'Liability', productType: 'DEP_TERM',
-        depositStability: 'Stable', riskWeight: 0,
+        ...baseDeal,
+        category: 'Liability',
+        productType: 'DEP_TERM',
+        depositStability: 'Stable',
+        riskWeight: 0,
       };
       const result = calculatePricing(liabDeal, defaultApproval, undefined, noShocks);
       expect(result.nsfrCost!).toBeLessThan(0);
@@ -304,12 +322,18 @@ describe('calculatePricing', () => {
 
     it('stable deposit has smaller NSFR charge magnitude than non-stable', () => {
       const stableDeal: Transaction = {
-        ...baseDeal, category: 'Liability', productType: 'DEP_TERM',
-        depositStability: 'Stable', riskWeight: 0,
+        ...baseDeal,
+        category: 'Liability',
+        productType: 'DEP_TERM',
+        depositStability: 'Stable',
+        riskWeight: 0,
       };
       const nonStableDeal: Transaction = {
-        ...baseDeal, category: 'Liability', productType: 'DEP_TERM',
-        depositStability: 'Non_Stable', riskWeight: 0,
+        ...baseDeal,
+        category: 'Liability',
+        productType: 'DEP_TERM',
+        depositStability: 'Non_Stable',
+        riskWeight: 0,
       };
       const stableResult = calculatePricing(stableDeal, defaultApproval, undefined, noShocks);
       const nonStableResult = calculatePricing(nonStableDeal, defaultApproval, undefined, noShocks);
@@ -323,8 +347,11 @@ describe('calculatePricing', () => {
   describe('LCR CLC charge', () => {
     it('liability with outflow gets CLC charge', () => {
       const liabDeal: Transaction = {
-        ...baseDeal, category: 'Liability', productType: 'DEP_CASA',
-        lcrOutflowPct: 20, riskWeight: 0,
+        ...baseDeal,
+        category: 'Liability',
+        productType: 'DEP_CASA',
+        lcrOutflowPct: 20,
+        riskWeight: 0,
       };
       const result = calculatePricing(liabDeal, defaultApproval, undefined, noShocks);
       expect(result._clcChargeDetails).toBeGreaterThan(0);
@@ -332,8 +359,12 @@ describe('calculatePricing', () => {
 
     it('credit line with undrawn amount scales CLC', () => {
       const lineDeal: Transaction = {
-        ...baseDeal, productType: 'CRED_LINE', category: 'Off-Balance',
-        isCommitted: true, lcrOutflowPct: 10, undrawnAmount: 10_000_000,
+        ...baseDeal,
+        productType: 'CRED_LINE',
+        category: 'Off-Balance',
+        isCommitted: true,
+        lcrOutflowPct: 10,
+        undrawnAmount: 10_000_000,
       };
       const result = calculatePricing(lineDeal, defaultApproval, undefined, noShocks);
       expect(result._clcChargeDetails).toBeGreaterThan(0);
@@ -353,7 +384,9 @@ describe('calculatePricing', () => {
   describe('secured LP', () => {
     it('collateralized asset uses secured LP (lower premium)', () => {
       const securedDeal: Transaction = {
-        ...baseDeal, collateralType: 'Sovereign', haircutPct: 5,
+        ...baseDeal,
+        collateralType: 'Sovereign',
+        haircutPct: 5,
       };
       const unsecuredResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
       const securedResult = calculatePricing(securedDeal, defaultApproval, undefined, noShocks);
@@ -404,30 +437,45 @@ describe('calculatePricing', () => {
   describe('shocks', () => {
     it('interest rate shock increases baseRate by exact bps', () => {
       const noShockResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
-      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, { interestRate: 50, liquiditySpread: 0 });
-      expect(shockResult.baseRate - noShockResult.baseRate).toBeCloseTo(0.50, 5);
+      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, {
+        interestRate: 50,
+        liquiditySpread: 0,
+      });
+      expect(shockResult.baseRate - noShockResult.baseRate).toBeCloseTo(0.5, 5);
     });
 
     it('liquidity spread shock increases liquiditySpread', () => {
       const noShockResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
-      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, { interestRate: 0, liquiditySpread: 25 });
+      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, {
+        interestRate: 0,
+        liquiditySpread: 25,
+      });
       expect(shockResult.liquiditySpread - noShockResult.liquiditySpread).toBeCloseTo(0.25, 5);
     });
 
     it('combined shocks increase totalFTP', () => {
       const noShockResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
-      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, { interestRate: 100, liquiditySpread: 50 });
+      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, {
+        interestRate: 100,
+        liquiditySpread: 50,
+      });
       expect(shockResult.totalFTP).toBeGreaterThan(noShockResult.totalFTP);
     });
 
     it('combined shocks also increase finalClientRate when pass-through is enabled', () => {
       const noShockResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
-      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, { interestRate: 100, liquiditySpread: 50 });
+      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, {
+        interestRate: 100,
+        liquiditySpread: 50,
+      });
       expect(shockResult.finalClientRate).toBeGreaterThan(noShockResult.finalClientRate);
     });
 
     it('preserves the margin target above shocked FTP', () => {
-      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, { interestRate: 75, liquiditySpread: 25 });
+      const shockResult = calculatePricing(baseDeal, defaultApproval, undefined, {
+        interestRate: 75,
+        liquiditySpread: 25,
+      });
       expect(shockResult.finalClientRate - shockResult.totalFTP).toBeCloseTo(baseDeal.marginTarget, 5);
     });
   });
@@ -468,7 +516,10 @@ describe('calculatePricing', () => {
   describe('liability pricing', () => {
     it('liability has negative or lower liquidity premium than asset', () => {
       const liabDeal: Transaction = {
-        ...baseDeal, category: 'Liability', productType: 'DEP_TERM', riskWeight: 0,
+        ...baseDeal,
+        category: 'Liability',
+        productType: 'DEP_TERM',
+        riskWeight: 0,
       };
       const assetResult = calculatePricing(baseDeal, defaultApproval, undefined, noShocks);
       const liabResult = calculatePricing(liabDeal, defaultApproval, undefined, noShocks);
@@ -495,11 +546,22 @@ describe('calculatePricing', () => {
 describe('calculateRAROC', () => {
   it('computes positive RAROC for profitable loan', () => {
     const result = calculateRAROC({
-      transactionId: 'test', loanAmt: 1_000_000, osAmt: 1_000_000,
-      ead: 1_000_000, interestRate: 8.0, interestSpread: 4.0,
-      cofRate: 3.5, rwa: 600_000, ecl: 5000, feeIncome: 10000,
-      operatingCostPct: 0.5, riskFreeRate: 2.5, opRiskCapitalCharge: 0.2,
-      minRegCapitalReq: 8, hurdleRate: 12, pillar2CapitalCharge: 1.5,
+      transactionId: 'test',
+      loanAmt: 1_000_000,
+      osAmt: 1_000_000,
+      ead: 1_000_000,
+      interestRate: 8.0,
+      interestSpread: 4.0,
+      cofRate: 3.5,
+      rwa: 600_000,
+      ecl: 5000,
+      feeIncome: 10000,
+      operatingCostPct: 0.5,
+      riskFreeRate: 2.5,
+      opRiskCapitalCharge: 0.2,
+      minRegCapitalReq: 8,
+      hurdleRate: 12,
+      pillar2CapitalCharge: 1.5,
     });
     expect(result.raroc).toBeGreaterThan(0);
     expect(result.totalRegCapital).toBeGreaterThan(0);
@@ -508,29 +570,62 @@ describe('calculateRAROC', () => {
 
   it('EVA is RAROC minus hurdle rate', () => {
     const result = calculateRAROC({
-      transactionId: 'test', loanAmt: 1_000_000, osAmt: 1_000_000,
-      ead: 1_000_000, interestRate: 6.5, interestSpread: 2.5,
-      cofRate: 3.5, rwa: 600_000, ecl: 5000, feeIncome: 10000,
-      operatingCostPct: 0.5, riskFreeRate: 2.5, opRiskCapitalCharge: 0.2,
-      minRegCapitalReq: 8, hurdleRate: 12, pillar2CapitalCharge: 1.5,
+      transactionId: 'test',
+      loanAmt: 1_000_000,
+      osAmt: 1_000_000,
+      ead: 1_000_000,
+      interestRate: 6.5,
+      interestSpread: 2.5,
+      cofRate: 3.5,
+      rwa: 600_000,
+      ecl: 5000,
+      feeIncome: 10000,
+      operatingCostPct: 0.5,
+      riskFreeRate: 2.5,
+      opRiskCapitalCharge: 0.2,
+      minRegCapitalReq: 8,
+      hurdleRate: 12,
+      pillar2CapitalCharge: 1.5,
     });
     expect(result.eva).toBeCloseTo(result.raroc - 12, 2);
   });
 
   it('fee income increases RAROC', () => {
     const noFee = calculateRAROC({
-      transactionId: 'test', loanAmt: 1_000_000, osAmt: 1_000_000,
-      ead: 1_000_000, interestRate: 6.5, interestSpread: 2.5,
-      cofRate: 3.5, rwa: 600_000, ecl: 5000, feeIncome: 0,
-      operatingCostPct: 0.5, riskFreeRate: 2.5, opRiskCapitalCharge: 0.2,
-      minRegCapitalReq: 8, hurdleRate: 12, pillar2CapitalCharge: 1.5,
+      transactionId: 'test',
+      loanAmt: 1_000_000,
+      osAmt: 1_000_000,
+      ead: 1_000_000,
+      interestRate: 6.5,
+      interestSpread: 2.5,
+      cofRate: 3.5,
+      rwa: 600_000,
+      ecl: 5000,
+      feeIncome: 0,
+      operatingCostPct: 0.5,
+      riskFreeRate: 2.5,
+      opRiskCapitalCharge: 0.2,
+      minRegCapitalReq: 8,
+      hurdleRate: 12,
+      pillar2CapitalCharge: 1.5,
     });
     const withFee = calculateRAROC({
-      transactionId: 'test', loanAmt: 1_000_000, osAmt: 1_000_000,
-      ead: 1_000_000, interestRate: 6.5, interestSpread: 2.5,
-      cofRate: 3.5, rwa: 600_000, ecl: 5000, feeIncome: 50000,
-      operatingCostPct: 0.5, riskFreeRate: 2.5, opRiskCapitalCharge: 0.2,
-      minRegCapitalReq: 8, hurdleRate: 12, pillar2CapitalCharge: 1.5,
+      transactionId: 'test',
+      loanAmt: 1_000_000,
+      osAmt: 1_000_000,
+      ead: 1_000_000,
+      interestRate: 6.5,
+      interestSpread: 2.5,
+      cofRate: 3.5,
+      rwa: 600_000,
+      ecl: 5000,
+      feeIncome: 50000,
+      operatingCostPct: 0.5,
+      riskFreeRate: 2.5,
+      opRiskCapitalCharge: 0.2,
+      minRegCapitalReq: 8,
+      hurdleRate: 12,
+      pillar2CapitalCharge: 1.5,
     });
     expect(withFee.raroc).toBeGreaterThan(noFee.raroc);
   });
@@ -546,7 +641,7 @@ describe('regulatory tables', () => {
   });
 
   it('LCR_OUTFLOW_TABLE has financial institution at 100%', () => {
-    expect(LCR_OUTFLOW_TABLE['DEP_TERM_Financial']).toBe(1.00);
+    expect(LCR_OUTFLOW_TABLE['DEP_TERM_Financial']).toBe(1.0);
   });
 
   it('NSFR_ASF_TABLE has stable deposit at 95%', () => {
@@ -565,8 +660,8 @@ describe('regulatory tables', () => {
 describe('bootstrapZeroRates', () => {
   it('short-term zero rates equal par rates', () => {
     const zeros = bootstrapZeroRates(MOCK_YIELD_CURVE);
-    const onPar = MOCK_YIELD_CURVE.find(p => p.tenor === 'ON')!;
-    const onZero = zeros.find(p => p.tenor === 'ON')!;
+    const onPar = MOCK_YIELD_CURVE.find((p) => p.tenor === 'ON')!;
+    const onZero = zeros.find((p) => p.tenor === 'ON')!;
     expect(onZero.rate).toBeCloseTo(onPar.rate, 2);
   });
 
@@ -577,8 +672,8 @@ describe('bootstrapZeroRates', () => {
 
   it('long-term zero rates are slightly higher than par (upward sloping)', () => {
     const zeros = bootstrapZeroRates(MOCK_YIELD_CURVE);
-    const par5Y = MOCK_YIELD_CURVE.find(p => p.tenor === '5Y')!;
-    const zero5Y = zeros.find(p => p.tenor === '5Y')!;
+    const par5Y = MOCK_YIELD_CURVE.find((p) => p.tenor === '5Y')!;
+    const zero5Y = zeros.find((p) => p.tenor === '5Y')!;
     // For downward-sloping curve, zero should be slightly different
     expect(zero5Y.rate).toBeDefined();
     expect(Math.abs(zero5Y.rate - par5Y.rate)).toBeLessThan(1); // reasonable divergence
@@ -599,7 +694,7 @@ describe('Gap 17 — Greenium / Movilización', () => {
     const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
     expect(result.esgGreeniumAdj).toBeDefined();
     expect(result.esgGreeniumAdj!).toBeLessThan(0); // discount = negative
-    expect(result.esgGreeniumAdj!).toBeCloseTo(-0.20, 2); // -20 bps from mock grid
+    expect(result.esgGreeniumAdj!).toBeCloseTo(-0.2, 2); // -20 bps from mock grid
   });
 
   it('applies smaller discount for Sustainability-Linked format', () => {
@@ -608,7 +703,7 @@ describe('Gap 17 — Greenium / Movilización', () => {
       greenFormat: 'Sustainability_Linked',
     };
     const result = calculatePricing(deal, defaultApproval, undefined, noShocks);
-    expect(result.esgGreeniumAdj!).toBeCloseTo(-0.10, 2); // -10 bps
+    expect(result.esgGreeniumAdj!).toBeCloseTo(-0.1, 2); // -10 bps
   });
 
   it('no greenium for None format', () => {

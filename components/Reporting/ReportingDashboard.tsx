@@ -1,9 +1,21 @@
 import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
-import { INITIAL_DEAL } from '../../constants';
+import { INITIAL_DEAL } from '../../utils/seedData';
 import { Badge } from '../ui/LayoutComponents';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { useCoreData, useMarketData } from '../../contexts/DataContext';
-import { BarChart4, RefreshCw, AlertCircle, Info, Calculator, Globe, Lock, Unlock, Layers, Download, ChevronDown } from 'lucide-react';
+import {
+  BarChart4,
+  RefreshCw,
+  AlertCircle,
+  Info,
+  Calculator,
+  Globe,
+  Lock,
+  Unlock,
+  Layers,
+  Download,
+  ChevronDown,
+} from 'lucide-react';
 
 import { useEntity } from '../../contexts/EntityContext';
 import { useUI } from '../../contexts/UIContext';
@@ -196,12 +208,8 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
       {isGroupScope && (
         <div className="flex items-center gap-2 bg-cyan-500/10 border-b border-cyan-500/20 px-4 md:px-6 py-2">
           <Globe className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs font-mono font-medium text-cyan-400">
-            Group Consolidated View
-          </span>
-          <span className="text-xs text-slate-400 ml-2">
-            Aggregated data across all entities
-          </span>
+          <span className="text-xs font-mono font-medium text-cyan-400">Group Consolidated View</span>
+          <span className="text-xs text-slate-400 ml-2">Aggregated data across all entities</span>
         </div>
       )}
       {/* Top Bar */}
@@ -222,11 +230,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                   <button
                     key={tab.key}
                     onClick={() => setActiveSubTab(tab.key)}
-                    className={`nfq-tab ${
-                      activeSubTab === tab.key
-                        ? 'nfq-tab--active'
-                        : ''
-                    }`}
+                    className={`nfq-tab ${activeSubTab === tab.key ? 'nfq-tab--active' : ''}`}
                   >
                     {tab.label}
                   </button>
@@ -251,9 +255,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                 </option>
               ))}
             </select>
-            {isGroupScope && (
-              <span className="nfq-label text-cyan-400 text-[10px]">ALL ENTITIES</span>
-            )}
+            {isGroupScope && <span className="nfq-label text-cyan-400 text-[10px]">ALL ENTITIES</span>}
           </div>
           {/* Regulatory Export dropdown */}
           <div className="relative" ref={exportMenuRef}>
@@ -342,9 +344,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="nfq-label">
-                      Term (Months): {scenarioDeal.durationMonths}
-                    </label>
+                    <label className="nfq-label">Term (Months): {scenarioDeal.durationMonths}</label>
                     <input
                       type="range"
                       min="1"
@@ -485,17 +485,23 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                 fundingCurveData={fundingCurveData}
               />
             ) : activeSubTab === 'MATURITY_LADDER' ? (
-              isAlmDeprecationEnabled()
-                ? <MovedToAlquidPanel feature="MATURITY_LADDER" />
-                : <MaturityLadder deals={deals} />
+              isAlmDeprecationEnabled() ? (
+                <MovedToAlquidPanel feature="MATURITY_LADDER" />
+              ) : (
+                <MaturityLadder deals={deals} />
+              )
             ) : activeSubTab === 'CURRENCY_GAP' ? (
-              isAlmDeprecationEnabled()
-                ? <MovedToAlquidPanel feature="CURRENCY_GAP" />
-                : <CurrencyGap deals={deals} />
+              isAlmDeprecationEnabled() ? (
+                <MovedToAlquidPanel feature="CURRENCY_GAP" />
+              ) : (
+                <CurrencyGap deals={deals} />
+              )
             ) : activeSubTab === 'NII_SENSITIVITY' ? (
-              isAlmDeprecationEnabled()
-                ? <MovedToAlquidPanel feature="NII_SENSITIVITY" />
-                : <NIISensitivity deals={deals} />
+              isAlmDeprecationEnabled() ? (
+                <MovedToAlquidPanel feature="NII_SENSITIVITY" />
+              ) : (
+                <NIISensitivity deals={deals} />
+              )
             ) : activeSubTab === 'PNL_ATTRIBUTION' ? (
               <PnlAttribution
                 deals={deals}
@@ -520,31 +526,17 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                 pricingContext={pricingContext}
               />
             ) : activeSubTab === 'VINTAGE' ? (
-              <VintageAnalysis
-                deals={deals}
-                products={products}
-                businessUnits={businessUnits}
-                clients={clients}
-              />
+              <VintageAnalysis deals={deals} products={products} businessUnits={businessUnits} clients={clients} />
             ) : activeSubTab === 'BACKTEST' ? (
-              <BacktestingDashboard
-                deals={deals}
-                products={products}
-                businessUnits={businessUnits}
-                clients={clients}
-              />
+              <BacktestingDashboard deals={deals} products={products} businessUnits={businessUnits} clients={clients} />
             ) : activeSubTab === 'PORTFOLIO_REVIEW' ? (
-              <PortfolioReviewDashboard
-                deals={deals}
-                results={portfolioResultsMap}
-              />
+              <PortfolioReviewDashboard deals={deals} results={portfolioResultsMap} />
             ) : activeSubTab === 'CUSTOM_DASHBOARD' ? (
               <DashboardBuilder />
             ) : activeSubTab === 'CLIENT_PROFITABILITY' ? (
               <ClientProfitabilityDashboard deals={deals} clients={clients} />
             ) : activeSubTab === 'CONCENTRATION' ? (
               <ConcentrationDashboard deals={deals} />
-            
             ) : activeSubTab === 'PRICE_ELASTICITY' ? (
               <PriceElasticityDashboard deals={deals} />
             ) : activeSubTab === 'EX_POST_RAROC' ? (

@@ -1,6 +1,6 @@
 # Ola 6 — Tenancy strict global + pricing bajo estrés
 
-> **Estado:** ✅ **Completa (código)** — 2026-04-23 · **Creado:** 2026-04-19 · **Predecesor:** [`integral-review-2026-04-18.md`](./integral-review-2026-04-18.md) §3 Ola 6
+> **Estado:** ✅ **Completa (código)** — 2026-04-23 · **Creado:** 2026-04-19 · **Predecesor:** revisión integral histórica retirada del árbol vivo
 > **Dependencias cerradas:** PR [#6](https://github.com/carlosmartin2012/N-Pricing/pull/6) (EntityOnboarding split + `.env.example`) · PR [#7](https://github.com/carlosmartin2012/N-Pricing/pull/7) (guard `requireTenancy()` mode-aware)
 > **Esta ola NO es:** un motor IRRBB regulatorio (ΔEVE, SOT, NII runoff). Ver §"Fuera de scope".
 >
@@ -377,7 +377,7 @@ Cerrar el círculo de "pricing decision support con referencia externa": que un 
 
 ## 8. Referencias
 
-- [`integral-review-2026-04-18.md`](./integral-review-2026-04-18.md) §3 Ola 6 (revisada post-challenge)
+- Revisión integral histórica 2026-04-18, retirada del árbol vivo tras consolidar el roadmap ejecutado
 - [`phase-0-rollout.md`](./phase-0-rollout.md) para rollout de tenancy strict
 - [`phase-0-technical-specs.md`](./phase-0-technical-specs.md) para forma de `pricing_snapshots`
 - EBA GL 2018/02 — Guidelines on the management of interest rate risk arising from non-trading book activities

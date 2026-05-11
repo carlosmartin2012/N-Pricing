@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains Supabase migrations for the N-Pricing FTP engine database. These migrations were converted from the legacy `schema.sql` and `schema_v2.sql` files into a proper sequential migration system.
+This directory contains Supabase migrations for the N-Pricing FTP engine database. These migrations are the canonical schema source; the old monolithic schema snapshots were removed to avoid parallel, drifting definitions.
 
 ## Migration Files
 
@@ -57,7 +57,7 @@ YYYYMMDDHHMMSS_descriptive_name.sql
 
 ## Notes
 
-- **Converted from legacy files:** The original `supabase/schema.sql` and `supabase/schema_v2.sql` are kept for reference but should not be used for schema changes. All future changes go through migrations.
+- **Single source of truth:** All schema changes go through migrations. Do not add monolithic schema snapshots back to the repo.
 - **Idempotent where possible:** Tables use `IF NOT EXISTS`, columns are checked before adding via `information_schema`, and policies are dropped before recreation.
 - **Sequential dependency:** Migrations must be run in timestamp order. Each migration may depend on objects created in earlier migrations.
 - **RLS policies:** The v2 policies use `get_user_role()` which queries the `users` table via `auth.jwt()`. For development/demo without Supabase Auth, you may need to temporarily use the simpler `USING(true)` policies from the initial schema.

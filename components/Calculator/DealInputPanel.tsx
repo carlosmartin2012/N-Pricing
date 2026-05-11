@@ -1,12 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import type {
-  BehaviouralModel,
-  BusinessUnit,
-  ClientEntity,
-  ProductDefinition,
-  Transaction,
-} from '../../types';
-import { EMPTY_DEAL } from '../../constants';
+import type { BehaviouralModel, BusinessUnit, ClientEntity, ProductDefinition, Transaction } from '../../types';
+import { EMPTY_DEAL } from '../../utils/seedData';
 import { Panel } from '../ui/LayoutComponents';
 import { ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import type { Language } from '../../translations';
@@ -49,19 +43,16 @@ const DealInputPanel: React.FC<Props> = ({
   const [showConfig, setShowConfig] = useState(false);
   const t = getTranslations(language);
 
-  const clientDisplayName = useMemo(
-    () => getClientDisplayName(clients, values.clientId),
-    [clients, values.clientId],
-  );
+  const clientDisplayName = useMemo(() => getClientDisplayName(clients, values.clientId), [clients, values.clientId]);
 
   const availableModels = useMemo(
     () => getAvailableBehaviouralModels(values.productType, products, behaviouralModels),
-    [values.productType, products, behaviouralModels],
+    [values.productType, products, behaviouralModels]
   );
 
   const handleFieldInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    field: keyof Transaction,
+    field: keyof Transaction
   ) => {
     onChange(field, parseDealFieldValue(field, event));
   };
@@ -85,14 +76,10 @@ const DealInputPanel: React.FC<Props> = ({
       return;
     }
 
-    const compatibleModels = getAvailableBehaviouralModels(
-      selectedProduct.id,
-      products,
-      behaviouralModels,
-    );
+    const compatibleModels = getAvailableBehaviouralModels(selectedProduct.id, products, behaviouralModels);
 
     const defaultAmortization = DEAL_AMORTIZATION_OPTIONS.includes(
-      selectedProduct.defaultAmortization as Transaction['amortization'],
+      selectedProduct.defaultAmortization as Transaction['amortization']
     )
       ? (selectedProduct.defaultAmortization as Transaction['amortization'])
       : values.amortization;
@@ -119,7 +106,11 @@ const DealInputPanel: React.FC<Props> = ({
 
   return (
     <Panel title={t.pricingSimulationEngine || 'Pricing Simulation Engine'} className="h-full">
-      <div data-testid="deal-input-panel" data-tour="deal-input" className="flex h-full flex-col text-[color:var(--nfq-text-primary)]">
+      <div
+        data-testid="deal-input-panel"
+        data-tour="deal-input"
+        className="flex h-full flex-col text-[color:var(--nfq-text-primary)]"
+      >
         <DealScenarioSelector
           values={values}
           deals={deals}
@@ -144,9 +135,7 @@ const DealInputPanel: React.FC<Props> = ({
           >
             <div className="flex items-center gap-2">
               <Settings size={14} />
-              <span className="font-medium">
-                {t.dealConfigAssumptions}
-              </span>
+              <span className="font-medium">{t.dealConfigAssumptions}</span>
             </div>
             {showConfig ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
