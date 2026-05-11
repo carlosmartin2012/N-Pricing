@@ -31,6 +31,8 @@ canónica**: usa esto para saber dónde está cada cosa, no `git log`.
 | [`pricing-calculation-observability.md`](pricing-calculation-observability.md) | SLO + snapshots. | SRE |
 | [`pricing-plugin-architecture.md`](pricing-plugin-architecture.md) | Cómo extender el motor sin tocar core. | Core team |
 | [`methodology-first-evolution-plan.md`](methodology-first-evolution-plan.md) | Plan vivo de evolución metodológica. | Risk / ALM |
+| [`next-gen-application-spec.md`](next-gen-application-spec.md) | Especificación greenfield de la plataforma Bank Revenue Intelligence. | Core team |
+| [`next-gen-extraction-map.md`](next-gen-extraction-map.md) | Qué extraer, reescribir o descartar de N-Pricing para el greenfield. | Core team |
 
 ## 🟡 Phase design (design + rollout de cada Phase)
 
