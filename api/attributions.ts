@@ -16,6 +16,7 @@ import type {
   SimulationInput,
   SimulationResult,
 } from '../types/attributions';
+import type { ApprovalMatrixConfig, FTPResult, Transaction } from '../types';
 import type { AttributionReportingSummary } from '../utils/attributions/attributionReporter';
 
 export type { AttributionReportingSummary } from '../utils/attributions/attributionReporter';
@@ -111,6 +112,36 @@ export async function routeQuote(quote: AttributionQuote): Promise<RoutingResult
 
 export async function simulateQuote(input: SimulationInput): Promise<SimulationResult> {
   return apiPost<SimulationResult>('/attributions/simulate', input);
+}
+
+// ---------------------------------------------------------------------------
+// Escalations (snapshot + append-only decision)
+// ---------------------------------------------------------------------------
+
+export interface RequestAttributionEscalationInput {
+  quote: AttributionQuote;
+  proposedAdjustments?: SimulationInput['proposedAdjustments'];
+  deal?: Transaction;
+  pricingResult?: FTPResult;
+  approvalMatrix?: ApprovalMatrixConfig;
+  reason?: string | null;
+}
+
+export interface RequestAttributionEscalationResponse {
+  snapshotId: string;
+  pricingSnapshotHash: string;
+  routing: RoutingResult;
+  decision: AttributionDecision;
+}
+
+export async function requestEscalation(
+  dealId: string,
+  input: RequestAttributionEscalationInput,
+): Promise<RequestAttributionEscalationResponse> {
+  return apiPost<RequestAttributionEscalationResponse>(
+    `/attributions/escalations/${encodeURIComponent(dealId)}`,
+    input,
+  );
 }
 
 // ---------------------------------------------------------------------------

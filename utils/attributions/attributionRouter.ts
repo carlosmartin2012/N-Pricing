@@ -58,12 +58,14 @@ export function quoteFromFtpResult(
   scope: AttributionScope,
   volumeEur: number,
 ): AttributionQuote {
-  const standardRateBps = (ftp.targetPrice ?? ftp.floorPrice) * 10000;
+  const rateToBps = (rate: number): number => Math.abs(rate) <= 1 ? rate * 10000 : rate * 100;
+  const rarocToPp = (raroc: number): number => Math.abs(raroc) <= 1 ? raroc * 100 : raroc;
+  const standardRateBps = rateToBps(ftp.targetPrice ?? ftp.floorPrice);
   return {
-    finalClientRateBps: ftp.finalClientRate * 10000,
+    finalClientRateBps: rateToBps(ftp.finalClientRate),
     standardRateBps,
-    hardFloorRateBps: ftp.floorPrice * 10000,
-    rarocPp: ftp.raroc * 100, // raroc viene como ratio (0.124 = 12.4%) → pp
+    hardFloorRateBps: rateToBps(ftp.floorPrice),
+    rarocPp: rarocToPp(ftp.raroc),
     volumeEur,
     scope,
   };

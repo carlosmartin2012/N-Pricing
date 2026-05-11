@@ -1354,6 +1354,41 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       }));
       return;
     }
+    if (/^\/attributions\/escalations\/[^/]+$/.test(path) && method === 'POST') {
+      const dealId = path.split('/').pop() ?? 'unknown';
+      const quote = ((body as Record<string, unknown>)?.quote ?? {}) as Record<string, unknown>;
+      const routing = {
+        requiredLevel: { id: 'office', entityId: 'demo-entity', name: 'Director Oficina', parentId: null, levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() },
+        approvalChain: [{ id: 'office', entityId: 'demo-entity', name: 'Director Oficina', parentId: null, levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() }],
+        reason: 'within_threshold',
+        metadata: {
+          deviationBps: Number(quote.finalClientRateBps ?? 0) - Number(quote.standardRateBps ?? 0),
+          rarocPp: Number(quote.rarocPp ?? 0),
+          volumeEur: Number(quote.volumeEur ?? 0),
+          scope: quote.scope ?? {},
+        },
+        belowHardFloor: false,
+      };
+      await route.fulfill(json({
+        snapshotId: `snap-${dealId}-${Date.now()}`,
+        pricingSnapshotHash: 'a'.repeat(64),
+        routing,
+        decision: {
+          id: `dec-${dealId}-${Date.now()}`,
+          entityId: 'demo-entity',
+          dealId,
+          requiredLevelId: 'office',
+          decidedByLevelId: null,
+          decidedByUser: null,
+          decision: 'escalated',
+          reason: 'Requested from Calculator Attribution Simulator',
+          pricingSnapshotHash: 'a'.repeat(64),
+          routingMetadata: routing.metadata,
+          decidedAt: nowIso(),
+        },
+      }));
+      return;
+    }
     if (/^\/attributions\/decisions\/[^/]+$/.test(path) && method === 'POST') {
       const dealId = path.split('/').pop() ?? 'unknown';
       await route.fulfill(json({

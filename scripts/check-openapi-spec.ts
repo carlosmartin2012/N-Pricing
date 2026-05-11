@@ -69,6 +69,7 @@ const requiredPaths = [
   '/what-if/benchmarks/compare',
   '/clv/clients/{clientId}/timeline',
   '/attributions/matrix',
+  '/attributions/escalations/{dealId}',
   '/admission/health',
   '/core-banking/reconciliation',
   '/budget/comparison',

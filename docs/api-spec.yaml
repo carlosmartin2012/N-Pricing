@@ -932,6 +932,34 @@ paths:
       responses:
         '200': { description: SimulationResult }
 
+  /attributions/escalations/{dealId}:
+    post:
+      summary: Persist a pricing snapshot and create an escalated attribution decision
+      tags: [attributions]
+      parameters:
+        - name: dealId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quote]
+              properties:
+                quote: { $ref: '#/components/schemas/AttributionQuote' }
+                proposedAdjustments: { type: object }
+                deal: { type: object }
+                pricingResult: { type: object }
+                approvalMatrix: { type: object }
+                reason: { type: string, nullable: true }
+      responses:
+        '201': { description: Snapshot + escalated decision created }
+        '404': { description: Deal not found in this entity }
+        '422': { description: Quote below hard floor }
+
   /attributions/decisions/{dealId}:
     post:
       summary: Append-only — record an attribution decision

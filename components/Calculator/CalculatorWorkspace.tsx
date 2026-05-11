@@ -24,7 +24,11 @@ const AttributionSimulator = React.lazy(() => import('../Attributions/Attributio
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
 import { quoteFromFtpResult } from '../../utils/attributions';
-import type { AttributionScope } from '../../types/attributions';
+import * as dealsApi from '../../api/deals';
+import * as attributionsApi from '../../api/attributions';
+import { canPersistRemotely } from '../../utils/dataModeUtils';
+import { isSupabaseConfigured } from '../../utils/supabaseClient';
+import type { AttributionScope, SimulationInput } from '../../types/attributions';
 
 interface Props {
   /** Optional — if omitted, reads from PricingStateContext. Required for
@@ -46,8 +50,13 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   if (!dealParams || !setDealParams) {
     throw new Error('CalculatorWorkspace: no dealParams available (pass as prop or wrap in <PricingStateProvider>)');
   }
-  const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = useData();
-  const { language } = useUI();
+  const data = useData();
+  const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = data;
+  const { language, t } = useUI();
+  const canWriteRemotely = canPersistRemotely({
+    dataMode: data.dataMode,
+    isSupabaseConfigured,
+  });
   const [matchedMethod, setMatchedMethod] = useState('Matched Maturity');
   const handleParamChange = useCallback(
     (key: keyof Transaction, value: Transaction[keyof Transaction] | undefined) => {
@@ -84,6 +93,62 @@ export const CalculatorWorkspace: React.FC<Props> = ({
       setDealParams((prev) => ({ ...prev, ...updates }));
     },
     [setDealParams],
+  );
+
+  const handleRequestAttributionApproval = useCallback(
+    async (input: SimulationInput) => {
+      if (!currentResult) return;
+      try {
+        const dealId = dealParams.id || `DL-${Date.now().toString(36).toUpperCase()}`;
+        const deltaBps = input.proposedAdjustments.deviationBpsDelta ?? 0;
+        const adjustedDeal: Transaction = {
+          ...dealParams,
+          id: dealId,
+          status: 'Pending_Approval',
+          marginTarget: dealParams.marginTarget + deltaBps / 100,
+          liquiditySpread: currentResult.liquiditySpread,
+          _liquidityPremiumDetails: currentResult._liquidityPremiumDetails,
+          _clcChargeDetails: currentResult._clcChargeDetails,
+        };
+        const adjustedResult = {
+          ...currentResult,
+          finalClientRate: input.quote.finalClientRateBps / 100,
+          targetPrice: input.quote.standardRateBps / 100,
+          floorPrice: input.quote.hardFloorRateBps / 100,
+          raroc: input.quote.rarocPp,
+        };
+
+        const persistedDeal = canWriteRemotely ? await dealsApi.upsertDeal(adjustedDeal) : null;
+        const resolvedDeal = persistedDeal || adjustedDeal;
+        data.setDeals((previous) => {
+          const exists = previous.some((item) => item.id === resolvedDeal.id);
+          return exists
+            ? previous.map((item) => (item.id === resolvedDeal.id ? resolvedDeal : item))
+            : [...previous, resolvedDeal];
+        });
+        setDealParams(resolvedDeal);
+
+        if (canWriteRemotely && resolvedDeal.id) {
+          await attributionsApi.requestEscalation(resolvedDeal.id, {
+            quote: input.quote,
+            proposedAdjustments: input.proposedAdjustments,
+            deal: resolvedDeal,
+            pricingResult: adjustedResult,
+            approvalMatrix,
+            reason: 'Requested from Calculator Attribution Simulator',
+          });
+        }
+
+        if (typeof window !== 'undefined' && resolvedDeal.id) {
+          window.location.assign(`/approvals?focus=${encodeURIComponent(resolvedDeal.id)}`);
+        }
+      } catch (err) {
+        if (typeof window !== 'undefined') {
+          window.alert(err instanceof Error ? err.message : t.attributionApprovalRequestFailed);
+        }
+      }
+    },
+    [approvalMatrix, canWriteRemotely, currentResult, data, dealParams, setDealParams, t],
   );
 
   return (
@@ -143,21 +208,12 @@ export const CalculatorWorkspace: React.FC<Props> = ({
                 if (deltaBps !== 0 && setDealParams) {
                   setDealParams((prev) => ({
                     ...prev,
-                    marginTarget: prev.marginTarget + deltaBps / 10_000,
+                    marginTarget: prev.marginTarget + deltaBps / 100,
                   }));
                 }
               }}
               onRequestApproval={(input) => {
-                // Wire pendiente: crear pricing_snapshot + POST /attributions/
-                // decisions con decision='escalated'. Por ahora navegamos a
-                // la bandeja /approvals con el deal preseleccionado para que
-                // el comercial complete el flow desde allí.
-                const dealId = dealParams.id ?? 'pending';
-                const url = `/approvals?focus=${encodeURIComponent(dealId)}`;
-                if (typeof window !== 'undefined') {
-                  window.location.assign(url);
-                }
-                void input;
+                void handleRequestAttributionApproval(input);
               }}
             />
           </div>

@@ -18,11 +18,13 @@
  * de la tenancy (no se confía en el body).
  */
 
+import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
-import { query, queryOne, withTransaction } from '../db';
+import { query, queryOne, withTransaction, type Tx } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { routeApproval } from '../../utils/attributions/attributionRouter';
 import { simulate } from '../../utils/attributions/attributionSimulator';
+import { hashSnapshotInput, hashSnapshotOutput } from '../../utils/snapshotHash';
 import {
   buildAttributionSummary,
   type AttributionReportingSummary,
@@ -39,6 +41,7 @@ import type {
   AttributionScope,
   SimulationInput,
 } from '../../types/attributions';
+import type { ApprovalMatrixConfig, FTPResult, Transaction } from '../../types';
 
 const router = Router();
 
@@ -202,6 +205,91 @@ const DECISION_ALLOWED_ROLES = [
   'Admin', 'Risk_Manager', 'Director', 'Trader',
   'BranchManager', 'Compliance_Officer',
 ];
+
+const ESCALATION_REQUEST_ROLES = [
+  'Admin', 'Risk_Manager', 'Director', 'Trader',
+  'BranchManager', 'Commercial', 'Sales',
+];
+
+const ENGINE_VERSION =
+  process.env.ENGINE_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'node-calculator';
+
+interface EscalationRequestBody {
+  quote?: AttributionQuote;
+  proposedAdjustments?: SimulationInput['proposedAdjustments'];
+  deal?: Transaction;
+  pricingResult?: FTPResult;
+  approvalMatrix?: ApprovalMatrixConfig;
+  reason?: string | null;
+}
+
+function isChainConflict(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const record = err as { code?: string; message?: string };
+  return record.code === '23505' || /uniq_pricing_snapshots_prev_hash/i.test(record.message ?? '');
+}
+
+function todayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function insertDecision(
+  tx: Pick<Tx, 'queryOne'>,
+  tenancy: { entityId: string; userEmail: string | null },
+  {
+    dealId,
+    requiredLevelId,
+    decidedByLevelId,
+    decision,
+    reason,
+    pricingSnapshotHash,
+    routingMetadata,
+  }: {
+    dealId: string;
+    requiredLevelId: string;
+    decidedByLevelId: string | null;
+    decision: AttributionDecisionStatus;
+    reason: string | null;
+    pricingSnapshotHash: string;
+    routingMetadata: AttributionRoutingMetadata;
+  },
+): Promise<DecisionRow | null> {
+  return tx.queryOne<DecisionRow>(
+    `INSERT INTO attribution_decisions
+       (entity_id, deal_id, required_level_id, decided_by_level_id, decided_by_user,
+        decision, reason, pricing_snapshot_hash, routing_metadata)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING *`,
+    [
+      tenancy.entityId, dealId, requiredLevelId, decidedByLevelId,
+      tenancy.userEmail,
+      decision, reason, pricingSnapshotHash, JSON.stringify(routingMetadata),
+    ],
+  );
+}
+
+function dispatchEscalationDecision(row: DecisionRow, routingMetadata: AttributionRoutingMetadata): void {
+  if (row.decision !== 'escalated') return;
+  dispatchEscalationPush({
+    entityId:        row.entity_id,
+    dealId:          row.deal_id,
+    decisionId:      row.id,
+    requiredLevelId: row.required_level_id,
+    routingMetadata: row.routing_metadata ?? routingMetadata,
+  })
+    .then((report) => {
+      if (report.notified > 0 || report.errors.length > 0 || report.skipped) {
+        console.info('[escalation-push]', {
+          dealId: row.deal_id,
+          decisionId: row.id,
+          ...report,
+        });
+      }
+    })
+    .catch((err) => {
+      console.error('[escalation-push] dispatch failed', err);
+    });
+}
 
 // ---------------------------------------------------------------------------
 // GET /matrix
@@ -566,6 +654,165 @@ function mapDecision(row: DecisionRow) {
   };
 }
 
+async function persistEscalationWithSnapshot(
+  tenancy: { entityId: string; userEmail: string | null },
+  dealId: string,
+  body: Required<Pick<EscalationRequestBody, 'quote'>> & EscalationRequestBody,
+  routing: ReturnType<typeof routeApproval>,
+): Promise<{ snapshotId: string; snapshotHash: string; decision: DecisionRow } | 'deal_not_found'> {
+  const requestId = `ATTR-${randomUUID()}`;
+  const snapshotInput = {
+    deal: body.deal ?? { id: dealId },
+    approvalMatrix: body.approvalMatrix ?? null,
+    attribution: {
+      quote: body.quote,
+      proposedAdjustments: body.proposedAdjustments ?? {},
+    },
+  };
+  const snapshotContext = {
+    source: 'calculator-attribution-escalation',
+    routing: {
+      requiredLevelId: routing.requiredLevel.id,
+      requiredLevelName: routing.requiredLevel.name,
+      reason: routing.reason,
+      belowHardFloor: routing.belowHardFloor,
+      approvalChain: routing.approvalChain.map((level) => ({
+        id: level.id,
+        name: level.name,
+        role: level.rbacRole,
+      })),
+    },
+  };
+  const snapshotOutput = body.pricingResult ?? { attributionQuote: body.quote };
+  const inputHash = await hashSnapshotInput(snapshotInput, snapshotContext);
+  const outputHash = await hashSnapshotOutput(snapshotOutput);
+  const reason = typeof body.reason === 'string' && body.reason.trim()
+    ? body.reason.trim()
+    : 'Requested from Calculator Attribution Simulator';
+  const maxAttempts = 4;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const snapshotId = randomUUID();
+    try {
+      const result = await withTransaction(async (tx) => {
+        const deal = await tx.queryOne<{ id: string }>(
+          'SELECT id FROM deals WHERE id = $1 AND entity_id = $2 LIMIT 1',
+          [dealId, tenancy.entityId],
+        );
+        if (!deal) return 'deal_not_found' as const;
+
+        const last = await tx.queryOne<{ output_hash: string }>(
+          `SELECT output_hash FROM pricing_snapshots
+           WHERE entity_id = $1
+           ORDER BY created_at DESC, id DESC
+           LIMIT 1`,
+          [tenancy.entityId],
+        );
+        await tx.execute(
+          `INSERT INTO pricing_snapshots
+             (id, entity_id, deal_id, request_id, engine_version, as_of_date,
+              used_mock_for, input, context, output, input_hash, output_hash,
+              scenario_id, scenario_source, prev_output_hash)
+           VALUES ($1, $2, $3, $4, $5, $6, $7::text[], $8::jsonb, $9::jsonb,
+                   $10::jsonb, $11, $12, $13, $14, $15)`,
+          [
+            snapshotId,
+            tenancy.entityId,
+            dealId,
+            requestId,
+            ENGINE_VERSION,
+            todayIsoDate(),
+            [],
+            JSON.stringify(snapshotInput),
+            JSON.stringify(snapshotContext),
+            JSON.stringify(snapshotOutput),
+            inputHash,
+            outputHash,
+            null,
+            null,
+            last?.output_hash ?? null,
+          ],
+        );
+
+        const row = await insertDecision(tx, tenancy, {
+          dealId,
+          requiredLevelId: routing.requiredLevel.id,
+          decidedByLevelId: null,
+          decision: 'escalated',
+          reason,
+          pricingSnapshotHash: outputHash,
+          routingMetadata: routing.metadata,
+        });
+        if (!row) throw new Error('Could not record attribution escalation');
+        return { snapshotId, snapshotHash: outputHash, decision: row };
+      });
+      return result;
+    } catch (err) {
+      if (attempt < maxAttempts && isChainConflict(err)) {
+        await new Promise((resolve) => setTimeout(resolve, 10 * Math.pow(4, attempt - 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw new Error('snapshot chain write retries exhausted');
+}
+
+router.post('/escalations/:dealId', async (req, res) => {
+  try {
+    const tenancy = requireTenancy(req, res);
+    if (!tenancy) return;
+    if (!requireRole(tenancy.role, ESCALATION_REQUEST_ROLES)) {
+      res.status(403).json({ code: 'forbidden', message: 'Role is not authorised to request attribution escalations' });
+      return;
+    }
+
+    const body = (req.body ?? {}) as EscalationRequestBody;
+    if (!isValidQuoteBody(body.quote)) {
+      res.status(400).json({
+        code: 'validation_error',
+        message: 'quote with finalClientRateBps/standardRateBps/hardFloorRateBps/rarocPp/volumeEur/scope is required',
+      });
+      return;
+    }
+
+    const matrix = await loadMatrix(tenancy.entityId);
+    if (matrix.levels.length === 0) {
+      res.status(409).json({
+        code: 'matrix_empty',
+        message: 'No active attribution levels configured for this tenant',
+      });
+      return;
+    }
+
+    const routing = routeApproval(body.quote, matrix);
+    if (routing.belowHardFloor) {
+      res.status(422).json({
+        code: 'below_hard_floor',
+        message: 'Quotes below hard floor cannot be escalated for approval',
+      });
+      return;
+    }
+
+    const result = await persistEscalationWithSnapshot(tenancy, req.params.dealId, { ...body, quote: body.quote }, routing);
+    if (result === 'deal_not_found') {
+      res.status(404).json({ code: 'deal_not_found', message: 'Deal not found in this entity' });
+      return;
+    }
+
+    dispatchEscalationDecision(result.decision, routing.metadata);
+    res.status(201).json({
+      snapshotId: result.snapshotId,
+      pricingSnapshotHash: result.snapshotHash,
+      routing,
+      decision: mapDecision(result.decision),
+    });
+  } catch (err) {
+    res.status(500).json({ error: safeError(err) });
+  }
+});
+
 router.post('/decisions/:dealId', async (req, res) => {
   try {
     const tenancy = requireTenancy(req, res);
@@ -610,18 +857,15 @@ router.post('/decisions/:dealId', async (req, res) => {
     }
 
     try {
-      const row = await queryOne<DecisionRow>(
-        `INSERT INTO attribution_decisions
-           (entity_id, deal_id, required_level_id, decided_by_level_id, decided_by_user,
-            decision, reason, pricing_snapshot_hash, routing_metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         RETURNING *`,
-        [
-          tenancy.entityId, dealId, requiredLevelId, decidedByLevelId,
-          tenancy.userEmail,
-          decision, reason, pricingSnapshotHash, JSON.stringify(routingMetadata),
-        ],
-      );
+      const row = await insertDecision({ queryOne }, tenancy, {
+        dealId,
+        requiredLevelId,
+        decidedByLevelId,
+        decision: decision as AttributionDecisionStatus,
+        reason,
+        pricingSnapshotHash,
+        routingMetadata: routingMetadata as AttributionRoutingMetadata,
+      });
       if (!row) {
         res.status(500).json({ code: 'insert_failed', message: 'Could not record decision' });
         return;
@@ -629,27 +873,7 @@ router.post('/decisions/:dealId', async (req, res) => {
 
       // Ola 10 Bloque C — fire-and-forget push notif si la decisión escala.
       // El error aquí NO debe abortar la decisión (ya commit-eada en DB).
-      if (row.decision === 'escalated') {
-        dispatchEscalationPush({
-          entityId:        tenancy.entityId,
-          dealId:          row.deal_id,
-          decisionId:      row.id,
-          requiredLevelId: row.required_level_id,
-          routingMetadata: row.routing_metadata ?? routingMetadata,
-        })
-          .then((report) => {
-            if (report.notified > 0 || report.errors.length > 0 || report.skipped) {
-              console.info('[escalation-push]', {
-                dealId: row.deal_id,
-                decisionId: row.id,
-                ...report,
-              });
-            }
-          })
-          .catch((err) => {
-            console.error('[escalation-push] dispatch failed', err);
-          });
-      }
+      dispatchEscalationDecision(row, routingMetadata as AttributionRoutingMetadata);
 
       res.status(201).json(mapDecision(row));
     } catch (innerErr) {

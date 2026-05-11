@@ -320,7 +320,7 @@ describe('chainBuilder · findChildren / findDescendants', () => {
 // ---------------------------------------------------------------------------
 
 describe('attributionRouter · quoteFromFtpResult', () => {
-  it('convierte rates (decimal) a bps multiplicando por 10000', () => {
+  it('convierte rates decimales a bps multiplicando por 10000', () => {
     const ftp = {
       finalClientRate: 0.0485,
       targetPrice:     0.0492,
@@ -333,6 +333,20 @@ describe('attributionRouter · quoteFromFtpResult', () => {
     expect(quote.hardFloorRateBps).toBeCloseTo(400, 4);
     expect(quote.rarocPp).toBeCloseTo(13.8, 4);
     expect(quote.volumeEur).toBe(250_000);
+  });
+
+  it('convierte rates porcentuales del pricing engine a bps multiplicando por 100', () => {
+    const ftp = {
+      finalClientRate: 4.85,
+      targetPrice:     4.92,
+      floorPrice:      4.00,
+      raroc:           13.8,
+    } as Partial<FTPResult> as FTPResult;
+    const quote = quoteFromFtpResult(ftp, { product: ['loan'] }, 250_000);
+    expect(quote.finalClientRateBps).toBeCloseTo(485, 4);
+    expect(quote.standardRateBps).toBeCloseTo(492, 4);
+    expect(quote.hardFloorRateBps).toBeCloseTo(400, 4);
+    expect(quote.rarocPp).toBeCloseTo(13.8, 4);
   });
 
   it('cae a floorPrice cuando targetPrice es undefined', () => {

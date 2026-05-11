@@ -488,6 +488,7 @@ export const translations = {
 
         // ErrorBoundary
         somethingWentWrong: 'Something went wrong',
+        attributionApprovalRequestFailed: 'Could not request approval',
 
         // Optimistic locking / conflict resolution
         conflictDetected: 'Conflict Detected',
@@ -1264,6 +1265,7 @@ export const translations = {
 
         // ErrorBoundary
         somethingWentWrong: 'Algo salió mal',
+        attributionApprovalRequestFailed: 'No se pudo solicitar la aprobación',
 
         // Optimistic locking / conflict resolution
         conflictDetected: 'Conflicto Detectado',

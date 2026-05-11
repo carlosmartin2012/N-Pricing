@@ -108,6 +108,19 @@ export function useRecordDecisionMutation() {
   });
 }
 
+export function useRequestEscalationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ dealId, input }: { dealId: string; input: attributionsApi.RequestAttributionEscalationInput }) =>
+      attributionsApi.requestEscalation(dealId, input),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: queryKeys.attributions.decisionsForDeal(vars.dealId) });
+      qc.invalidateQueries({ queryKey: ['attributions', 'decisions'] });
+      qc.invalidateQueries({ queryKey: ['attributions', 'reporting'] });
+    },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Reporting (Bloque C)
 // ---------------------------------------------------------------------------

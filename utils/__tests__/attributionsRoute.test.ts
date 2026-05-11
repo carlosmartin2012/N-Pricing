@@ -278,6 +278,90 @@ describe('attributions router · POST /decisions/:dealId · role guard', () => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /escalations/:dealId — snapshot + escalated decision
+// ---------------------------------------------------------------------------
+
+describe('attributions router · POST /escalations/:dealId', () => {
+  it('crea snapshot de pricing y decision escalated con routing server-side', async () => {
+    dbMock.query
+      .mockResolvedValueOnce([officeRow, zoneRow, committeeRow])
+      .mockResolvedValueOnce([officeThresholdRow, zoneThresholdRow, committeeThresholdRow]);
+    dbMock.queryOne
+      .mockResolvedValueOnce({ id: 'deal-1' })
+      .mockResolvedValueOnce({ output_hash: 'b'.repeat(64) })
+      .mockImplementationOnce(async (_sql: string, params: unknown[]) => ({
+        id: 'dec-escalated',
+        entity_id: ENTITY,
+        deal_id: params[1],
+        required_level_id: params[2],
+        decided_by_level_id: params[3],
+        decided_by_user: params[4],
+        decision: params[5],
+        reason: params[6],
+        pricing_snapshot_hash: params[7],
+        routing_metadata: JSON.parse(String(params[8])),
+        decided_at: '2026-04-30T10:00:00Z',
+      }));
+
+    await withApp({ entityId: ENTITY, role: 'Trader', userEmail: 'trader@bank.es' }, async (url) => {
+      const r = await http<{
+        snapshotId: string;
+        pricingSnapshotHash: string;
+        decision: { decision: string; requiredLevelId: string; pricingSnapshotHash: string };
+        routing: { requiredLevel: { id: string } };
+      }>(url, 'POST', '/api/attributions/escalations/deal-1', {
+        quote: {
+          ...baseQuote,
+          finalClientRateBps: 480,
+          standardRateBps: 492,
+        },
+        proposedAdjustments: { deviationBpsDelta: -12 },
+        deal: { id: 'deal-1', amount: 80_000 },
+        pricingResult: { finalClientRate: 4.8, raroc: 13.8 },
+        approvalMatrix: { autoApprovalThreshold: 15, l1Threshold: 10, l2Threshold: 5 },
+      });
+
+      expect(r.status).toBe(201);
+      expect(r.body.snapshotId).toMatch(/[0-9a-f-]{36}/);
+      expect(r.body.pricingSnapshotHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(r.body.routing.requiredLevel.id).toBe('lvl-zone');
+      expect(r.body.decision).toMatchObject({
+        decision: 'escalated',
+        requiredLevelId: 'lvl-zone',
+        pricingSnapshotHash: r.body.pricingSnapshotHash,
+      });
+
+      const snapshotInsert = dbMock.execute.mock.calls.find((call: unknown[]) =>
+        String(call[0]).includes('INSERT INTO pricing_snapshots'),
+      );
+      expect(snapshotInsert).toBeTruthy();
+      expect(snapshotInsert?.[1]?.[11]).toBe(r.body.pricingSnapshotHash);
+      expect(snapshotInsert?.[1]?.[14]).toBe('b'.repeat(64));
+    });
+  });
+
+  it('rechaza escalaciones bajo hard floor antes de persistir', async () => {
+    dbMock.query
+      .mockResolvedValueOnce([officeRow, zoneRow, committeeRow])
+      .mockResolvedValueOnce([officeThresholdRow, zoneThresholdRow, committeeThresholdRow]);
+
+    await withApp({ entityId: ENTITY, role: 'Trader', userEmail: 'trader@bank.es' }, async (url) => {
+      const r = await http<{ code: string }>(url, 'POST', '/api/attributions/escalations/deal-1', {
+        quote: {
+          ...baseQuote,
+          finalClientRateBps: 390,
+          hardFloorRateBps: 400,
+        },
+      });
+
+      expect(r.status).toBe(422);
+      expect(r.body.code).toBe('below_hard_floor');
+      expect(dbMock.execute).not.toHaveBeenCalled();
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
 // GET /matrix — happy path
 // ---------------------------------------------------------------------------
 
