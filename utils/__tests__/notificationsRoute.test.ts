@@ -210,8 +210,9 @@ describe('notifications router · POST /push/test', () => {
       await withApp({ entityId: ENTITY, userEmail: USER }, async (url) => {
         const r = await http(url, 'POST', '/api/notifications/push/test', { message: 'x' });
         expect(r.status).toBe(200);
-        const body = r.body as { delivered: number; total: number; staleEndpointsPurged: number };
+        const body = r.body as { delivered: number; total: number; retried: number; staleEndpointsPurged: number };
         expect(body.delivered).toBe(0);
+        expect(body.retried).toBe(0);
         expect(body.staleEndpointsPurged).toBe(0);
       });
     } finally {

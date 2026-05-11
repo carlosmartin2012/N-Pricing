@@ -1200,7 +1200,7 @@ paths:
               properties:
                 message: { type: string }
       responses:
-        '200': { description: delivered + total + staleEndpointsPurged + failures }
+        '200': { description: delivered + total + retried + staleEndpointsPurged + failures }
         '503': { description: VAPID not configured }
 
 components:

@@ -29,6 +29,7 @@ vi.mock('../../server/db', () => dbMock);
 vi.mock('../../server/integrations/escalationPushDispatcher', () => ({
   dispatchEscalationPush: vi.fn().mockResolvedValue({
     notified: 0,
+    retried: 0,
     staleEndpointsPurged: 0,
     skipped: 'no_vapid' as const,
     errors: [],

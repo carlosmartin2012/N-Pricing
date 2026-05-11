@@ -47,12 +47,19 @@ export interface DispatchInput {
 
 export interface DispatchReport {
   notified: number;
+  retried: number;
   staleEndpointsPurged: number;
   skipped: 'no_vapid' | 'no_users' | 'no_subscriptions' | null;
   errors: string[];
 }
 
 const LEVEL_ROLE_TABLE = `attribution_levels`;
+
+function readBoundedIntEnv(name: string, fallback: number, min: number, max: number): number {
+  const parsed = Number(process.env[name]);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
+}
 
 /**
  * Disparo idempotente. Si VAPID no está configurado o no hay usuarios
@@ -62,6 +69,7 @@ const LEVEL_ROLE_TABLE = `attribution_levels`;
 export async function dispatchEscalationPush(input: DispatchInput): Promise<DispatchReport> {
   const report: DispatchReport = {
     notified: 0,
+    retried: 0,
     staleEndpointsPurged: 0,
     skipped: null,
     errors: [],
@@ -151,9 +159,14 @@ export async function dispatchEscalationPush(input: DispatchInput): Promise<Disp
         requiredLevelId: input.requiredLevelId,
       },
     },
+    {
+      maxAttempts: readBoundedIntEnv('PUSH_RETRY_MAX_ATTEMPTS', 3, 1, 5),
+      retryDelayMs: readBoundedIntEnv('PUSH_RETRY_BASE_MS', 250, 0, 5_000),
+    },
   );
 
   report.notified = sendReport.delivered;
+  report.retried = sendReport.retried;
 
   if (sendReport.staleEndpoints.length > 0) {
     try {

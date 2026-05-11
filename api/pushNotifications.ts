@@ -3,7 +3,7 @@
  *
  * Distinto de `api/notifications.ts` (in-app notifications). Este
  * cliente cubre el flujo Web Push: subscribe, unsubscribe, list y
- * test. El sender real con web-push lib + VAPID queda como follow-up.
+ * test. El sender server-side usa web-push + VAPID y reporta retries.
  */
 
 import { apiGet, apiPost } from '../utils/apiFetch';
@@ -35,9 +35,10 @@ export async function listMyPushSubscriptions(): Promise<{ items: PushSubscripti
 
 export interface PushTestResponse {
   delivered: number;
-  stub: boolean;
-  subscriptionCount: number;
-  message: string;
+  total: number;
+  retried: number;
+  staleEndpointsPurged: number;
+  failures: Array<{ endpoint: string; statusCode?: number; reason: string; attempts: number }>;
 }
 
 export async function sendTestPush(message?: string): Promise<PushTestResponse> {

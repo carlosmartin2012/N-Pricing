@@ -39,11 +39,15 @@ beforeEach(() => {
   sendNotificationMock.mockReset();
   delete process.env.VAPID_PUBLIC_KEY;
   delete process.env.VAPID_PRIVATE_KEY;
+  delete process.env.PUSH_RETRY_MAX_ATTEMPTS;
+  delete process.env.PUSH_RETRY_BASE_MS;
 });
 
 afterEach(() => {
   delete process.env.VAPID_PUBLIC_KEY;
   delete process.env.VAPID_PRIVATE_KEY;
+  delete process.env.PUSH_RETRY_MAX_ATTEMPTS;
+  delete process.env.PUSH_RETRY_BASE_MS;
 });
 
 describe('escalationPushDispatcher · skip paths', () => {
@@ -99,6 +103,7 @@ describe('escalationPushDispatcher · happy path', () => {
     sendNotificationMock.mockResolvedValueOnce({ statusCode: 201 });
     const report = await dispatchEscalationPush(baseInput);
     expect(report.notified).toBe(1);
+    expect(report.retried).toBe(0);
     expect(report.skipped).toBeNull();
     // Verificar payload básico
     const callArgs = sendNotificationMock.mock.calls[0];
@@ -140,5 +145,23 @@ describe('escalationPushDispatcher · happy path', () => {
     // verifica que se llamó DELETE con endpoint stale
     const deleteCall = dbMock.query.mock.calls.find((c) => /DELETE FROM push_subscriptions/.test(c[0] as string));
     expect(deleteCall).toBeTruthy();
+  });
+
+  it('reintenta fallos transitorios del provider sin duplicar el reporte de éxito', async () => {
+    process.env.PUSH_RETRY_MAX_ATTEMPTS = '2';
+    process.env.PUSH_RETRY_BASE_MS = '0';
+    dbMock.query
+      .mockResolvedValueOnce([{ rbac_role: 'BranchManager', name: 'Office' }])
+      .mockResolvedValueOnce([{ email: 'dir@bank.es' }])
+      .mockResolvedValueOnce([{ endpoint: 'https://retry', keys_p256dh: 'p', keys_auth: 'a' }]);
+    sendNotificationMock
+      .mockRejectedValueOnce(Object.assign(new Error('provider busy'), { statusCode: 503 }))
+      .mockResolvedValueOnce({ statusCode: 201 });
+
+    const report = await dispatchEscalationPush(baseInput);
+    expect(report.notified).toBe(1);
+    expect(report.retried).toBe(1);
+    expect(report.errors).toHaveLength(0);
+    expect(sendNotificationMock).toHaveBeenCalledTimes(2);
   });
 });

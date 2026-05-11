@@ -5,10 +5,7 @@
  *   POST /push/subscribe    → registra Web Push subscription
  *   POST /push/unsubscribe  → elimina la suscripción (por endpoint)
  *   GET  /push/subscriptions → lista propias del usuario (Admin lista todas)
- *   POST /push/test         → STUB que loga y devuelve `{ delivered: 0 }`.
- *                             La integración real con `web-push` + VAPID
- *                             keys queda como follow-up (instalar la lib +
- *                             `VAPID_PRIVATE_KEY/PUBLIC_KEY` env vars).
+ *   POST /push/test         → envía Web Push real usando `web-push` + VAPID.
  *
  * Tenancy-scoped por defense-in-depth.
  */
@@ -305,6 +302,7 @@ router.post('/push/test', async (req, res) => {
     res.json({
       delivered:            report.delivered,
       total:                report.total,
+      retried:              report.retried,
       staleEndpointsPurged,
       failures:             report.failures,
     });

@@ -54,7 +54,7 @@ curl -s -X POST -H "x-entity-id: $ENTITY" \
      -d '{"message":"runbook test"}' \
      $HOST/api/notifications/push/test
 ```
-Mirar el campo `failures`:
+Mirar los campos `retried` y `failures`:
 
 | `statusCode` | Significado | Acción |
 |---|---|---|
@@ -62,8 +62,13 @@ Mirar el campo `failures`:
 | `404` | Idem 410 | Idem. |
 | `403` | VAPID auth fallida — keys mal configuradas | Verificar que `VAPID_SUBJECT` empieza con `mailto:` o `https://`. Re-generar keys si están corrompidas. |
 | `413` | Payload too large | El payload del cockpit es chico (~200 B), si vemos esto es un bug — abrir issue. |
-| `429` | Rate limit por el provider (FCM/APNS) | Esperar y reintentar. Considerar batching si la entity tiene >1000 suscripciones. |
-| `500-503` | Provider transient error | Reintentar (no auto, manual desde `/push/test` o esperar a la próxima escalation). |
+| `429` | Rate limit por el provider (FCM/APNS) | El dispatcher reintenta automáticamente hasta `PUSH_RETRY_MAX_ATTEMPTS` (default 3). Si persiste, esperar y reintentar. Considerar batching si la entity tiene >1000 suscripciones. |
+| `500-503` | Provider transient error | El dispatcher reintenta automáticamente hasta `PUSH_RETRY_MAX_ATTEMPTS` (default 3). Si `failures[].attempts` llega al máximo, revisar proveedor/VAPID. |
+
+`PUSH_RETRY_BASE_MS` controla la espera base entre intentos (default
+250ms, crecimiento lineal por intento). En el endpoint `/push/test`, un
+`retried > 0` con `delivered > 0` significa que el problema fue transitorio
+y quedó recuperado sin acción manual.
 
 ### 4. ¿Push entregado pero el navegador no muestra notif?
 

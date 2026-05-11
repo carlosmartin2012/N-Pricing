@@ -4,7 +4,7 @@
  * Reemplaza el stub de `POST /api/notifications/push/test` con un
  * sender real basado en la lib `web-push`. La integración con el flujo
  * de decisiones escaladas (push notif al approver cuando una decision
- * cae en su bandeja) vive en `server/workers/pushDispatcher.ts`.
+ * cae en su bandeja) vive en `server/integrations/escalationPushDispatcher.ts`.
  *
  * Configuración:
  *   - VAPID_PUBLIC_KEY  : clave pública (base64 url-safe). El cliente
@@ -45,6 +45,13 @@ export interface PushSubscriptionInput {
   endpoint: string;
   keysP256dh: string;
   keysAuth: string;
+}
+
+export interface PushRetryOptions {
+  /** Total attempts per subscription. 1 means no retry. */
+  maxAttempts?: number;
+  /** Base delay in ms between attempts. Delay grows linearly per attempt. */
+  retryDelayMs?: number;
 }
 
 export type SendPushResult =
@@ -130,32 +137,81 @@ export async function sendPush(
 export interface BulkSendReport {
   total: number;
   delivered: number;
+  retried: number;
   staleEndpoints: string[];      // endpoints a purgar
-  failures: Array<{ endpoint: string; statusCode?: number; reason: string }>;
+  failures: Array<{ endpoint: string; statusCode?: number; reason: string; attempts: number }>;
+}
+
+function normaliseRetryOptions(options?: PushRetryOptions): Required<PushRetryOptions> {
+  const rawAttempts = Number(options?.maxAttempts ?? 1);
+  const rawDelay = Number(options?.retryDelayMs ?? 0);
+  return {
+    maxAttempts: Number.isFinite(rawAttempts) ? Math.max(1, Math.min(5, Math.floor(rawAttempts))) : 1,
+    retryDelayMs: Number.isFinite(rawDelay) ? Math.max(0, Math.floor(rawDelay)) : 0,
+  };
+}
+
+function shouldRetryPush(result: SendPushResult): boolean {
+  if (result.ok || result.reason !== 'send_failed' || result.staleEndpoint) return false;
+  const code = result.statusCode;
+  return code === undefined || code === 408 || code === 429 || code >= 500;
+}
+
+function sleep(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function sendPushWithRetry(
+  subscription: PushSubscriptionInput,
+  payload: PushPayload,
+  options?: PushRetryOptions,
+): Promise<{ result: SendPushResult; attempts: number }> {
+  const retry = normaliseRetryOptions(options);
+  let attempts = 0;
+  let result: SendPushResult = { ok: false, reason: 'send_failed' };
+
+  while (attempts < retry.maxAttempts) {
+    attempts += 1;
+    result = await sendPush(subscription, payload);
+    if (!shouldRetryPush(result) || attempts >= retry.maxAttempts) break;
+    await sleep(retry.retryDelayMs * attempts);
+  }
+
+  return { result, attempts };
 }
 
 export async function sendPushToMany(
   subscriptions: PushSubscriptionInput[],
   payload: PushPayload,
+  options?: PushRetryOptions,
 ): Promise<BulkSendReport> {
   const report: BulkSendReport = {
     total:           subscriptions.length,
     delivered:       0,
+    retried:         0,
     staleEndpoints:  [],
     failures:        [],
   };
   for (const sub of subscriptions) {
-    const result = await sendPush(sub, payload);
+    const { result, attempts } = await sendPushWithRetry(sub, payload, options);
+    report.retried += Math.max(0, attempts - 1);
     if (result.ok) {
       report.delivered += 1;
     } else if (result.staleEndpoint) {
       report.staleEndpoints.push(sub.endpoint);
-      report.failures.push({ endpoint: sub.endpoint, statusCode: result.statusCode, reason: 'stale' });
+      report.failures.push({
+        endpoint: sub.endpoint,
+        statusCode: result.statusCode,
+        reason: 'stale',
+        attempts,
+      });
     } else {
       report.failures.push({
         endpoint: sub.endpoint,
         statusCode: result.statusCode,
         reason: result.reason,
+        attempts,
       });
     }
   }

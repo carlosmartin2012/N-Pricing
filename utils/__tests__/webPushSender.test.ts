@@ -133,16 +133,42 @@ describe('webPushSender · sendPushToMany', () => {
     const report = await sendPushToMany(subs, PAYLOAD);
     expect(report.total).toBe(3);
     expect(report.delivered).toBe(1);
+    expect(report.retried).toBe(0);
     expect(report.staleEndpoints).toEqual(['https://stale']);
     expect(report.failures).toHaveLength(2);
     const stale = report.failures.find((f) => f.reason === 'stale');
     expect(stale?.endpoint).toBe('https://stale');
+    expect(stale?.attempts).toBe(1);
   });
 
   it('lista vacía → todos los counters a 0', async () => {
     const report = await sendPushToMany([], PAYLOAD);
     expect(report.total).toBe(0);
     expect(report.delivered).toBe(0);
+    expect(report.retried).toBe(0);
     expect(sendNotificationMock).not.toHaveBeenCalled();
+  });
+
+  it('reintenta errores transitorios y cuenta retried', async () => {
+    sendNotificationMock
+      .mockRejectedValueOnce(Object.assign(new Error('Rate limited'), { statusCode: 429 }))
+      .mockResolvedValueOnce({ statusCode: 201 });
+
+    const report = await sendPushToMany([SUB], PAYLOAD, { maxAttempts: 3, retryDelayMs: 0 });
+    expect(report.delivered).toBe(1);
+    expect(report.retried).toBe(1);
+    expect(report.failures).toHaveLength(0);
+    expect(sendNotificationMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('no reintenta stale endpoints porque debe purgarlos', async () => {
+    sendNotificationMock.mockRejectedValueOnce(Object.assign(new Error('Gone'), { statusCode: 410 }));
+
+    const report = await sendPushToMany([SUB], PAYLOAD, { maxAttempts: 3, retryDelayMs: 0 });
+    expect(report.delivered).toBe(0);
+    expect(report.retried).toBe(0);
+    expect(report.staleEndpoints).toEqual([SUB.endpoint]);
+    expect(report.failures[0]?.attempts).toBe(1);
+    expect(sendNotificationMock).toHaveBeenCalledTimes(1);
   });
 });
