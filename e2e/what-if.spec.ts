@@ -18,7 +18,7 @@ test('What-If workspace exposes sandbox, elasticity, backtesting, and benchmark 
   await expect(page.getByText('Sandboxes', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: /Elasticity/i }).click();
-  await expect(page.getByText('Elasticity Models')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Elasticity Models' })).toBeVisible();
 
   await page.getByRole('button', { name: /Backtesting/i }).click();
   await expect(page.getByText('New Backtest')).toBeVisible();

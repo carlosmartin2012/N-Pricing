@@ -1,4 +1,5 @@
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import type { Transaction } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
@@ -51,6 +52,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
     throw new Error('CalculatorWorkspace: no dealParams available (pass as prop or wrap in <PricingStateProvider>)');
   }
   const data = useData();
+  const navigate = useNavigate();
   const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = data;
   const { language, t } = useUI();
   const canWriteRemotely = canPersistRemotely({
@@ -139,8 +141,8 @@ export const CalculatorWorkspace: React.FC<Props> = ({
           });
         }
 
-        if (typeof window !== 'undefined' && resolvedDeal.id) {
-          window.location.assign(`/approvals?focus=${encodeURIComponent(resolvedDeal.id)}`);
+        if (resolvedDeal.id) {
+          navigate(`/approvals?focus=${encodeURIComponent(resolvedDeal.id)}`);
         }
       } catch (err) {
         if (typeof window !== 'undefined') {
@@ -148,7 +150,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
         }
       }
     },
-    [approvalMatrix, canWriteRemotely, currentResult, data, dealParams, setDealParams, t],
+    [approvalMatrix, canWriteRemotely, currentResult, data, dealParams, navigate, setDealParams, t],
   );
 
   return (

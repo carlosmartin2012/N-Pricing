@@ -40,6 +40,8 @@ export const attributionsEn: AttributionsPack = {
   cockpitConfirmEscalate:         'Confirm escalation',
   cockpitBelowFloorBlocked:       'Below regulatory floor — cannot approve',
   cockpitErrorLoading:            'Could not load decisions. Retry.',
+  cockpitFocusFound:              'Focused escalation: {deal}',
+  cockpitFocusMissing:            'No pending escalation found for {deal}',
 
   // Simulator
   simulatorTitle:                 'Attribution simulator',

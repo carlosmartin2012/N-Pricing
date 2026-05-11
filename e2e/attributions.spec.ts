@@ -46,6 +46,15 @@ test.describe('Atribuciones — Approval Cockpit', () => {
     await expect(page.getByPlaceholder(/Reason|Motivo/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /Confirm approval|Confirmar aprobación/i })).toBeVisible();
   });
+
+  test('resalta la escalación cuando llega con ?focus=<dealId>', async ({ page }) => {
+    await page.goto('/#/approvals?focus=ABC-1240');
+    await expect(page.getByTestId('approval-focus-status')).toContainText(/ABC-1240/);
+    const focusedRow = page.getByTestId('approval-focused-row');
+    await expect(focusedRow).toBeVisible({ timeout: 5_000 });
+    await expect(focusedRow).toContainText('ABC-1240');
+    await expect(focusedRow).toHaveAttribute('data-focused', 'true');
+  });
 });
 
 test.describe('Atribuciones — Matrix Editor', () => {
@@ -77,5 +86,16 @@ test.describe('Atribuciones — Simulator embebido en Calculator', () => {
     await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
     // Esperamos a que el simulator se hidrate (lazy import + matrix fetch).
     await expect(page.getByTestId('attribution-simulator')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('solicitar aprobación navega a la bandeja con la escalación enfocada', async ({ page }) => {
+    await page.goto('/#/pricing');
+    await expect(page.getByTestId('attribution-simulator')).toBeVisible({ timeout: 10_000 });
+
+    await page.getByRole('button', { name: /Request approval|Solicitar aprobación/i }).click();
+
+    await expect(page).toHaveURL(/#\/approvals\?focus=/, { timeout: 10_000 });
+    await expect(page.getByTestId('approval-focus-status')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('approval-focused-row')).toBeVisible();
   });
 });

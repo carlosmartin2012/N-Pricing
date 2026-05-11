@@ -34,6 +34,8 @@ export const attributionsEs: AttributionsTranslationKeys = {
   cockpitConfirmEscalate:         'Confirmar escalación',
   cockpitBelowFloorBlocked:       'Bajo mínimo regulatorio — no se puede aprobar',
   cockpitErrorLoading:            'No se pudieron cargar las decisiones. Reintenta.',
+  cockpitFocusFound:              'Escalación enfocada: {deal}',
+  cockpitFocusMissing:            'No hay escalación pendiente para {deal}',
 
   simulatorTitle:                 'Simulador de atribución',
   simulatorSubtitle:              'Mueve palancas y ve quién puede aprobar',

@@ -1,5 +1,6 @@
 import type { Page, Route } from '@playwright/test';
 import type { Transaction } from '../types';
+import type { AttributionDecision, AttributionRoutingMetadata } from '../types/attributions';
 import { DEFAULT_ENTITY_ID, MOCK_ENTITIES, MOCK_ENTITY_USERS, MOCK_GROUPS } from '../utils/seedData.entities';
 import {
   INITIAL_DEAL,
@@ -42,6 +43,7 @@ type MockDealRow = ReturnType<typeof mapDealToDB> & {
 interface MockState {
   audit: Array<Record<string, unknown>>;
   alertRules: Array<Record<string, unknown>>;
+  attributionDecisions: AttributionDecision[];
   deals: MockDealRow[];
   recentMetrics: Array<Record<string, unknown>>;
   notifications: Array<Record<string, unknown>>;
@@ -51,6 +53,7 @@ interface MockState {
 interface MockApiOptions {
   audit?: Array<Record<string, unknown>>;
   alertRules?: Array<Record<string, unknown>>;
+  attributionDecisions?: AttributionDecision[];
   deals?: Transaction[];
   recentMetrics?: Array<Record<string, unknown>>;
   notifications?: Array<Record<string, unknown>>;
@@ -208,10 +211,44 @@ function buildObservabilitySummary(entityId: string, state: MockState) {
   };
 }
 
+function defaultAttributionDecisions(): AttributionDecision[] {
+  return [
+    {
+      id: 'd1',
+      entityId: 'demo-entity',
+      dealId: 'ABC-1234',
+      requiredLevelId: 'office',
+      decidedByLevelId: null,
+      decidedByUser: null,
+      decision: 'escalated',
+      reason: null,
+      pricingSnapshotHash: 'h-1',
+      routingMetadata: { deviationBps: -7.2, rarocPp: 13.8, volumeEur: 80_000, scope: {} },
+      decidedAt: nowIso(),
+    },
+    {
+      id: 'd2',
+      entityId: 'demo-entity',
+      dealId: 'ABC-1240',
+      requiredLevelId: 'zone',
+      decidedByLevelId: null,
+      decidedByUser: null,
+      decision: 'escalated',
+      reason: null,
+      pricingSnapshotHash: 'h-2',
+      routingMetadata: { deviationBps: -12, rarocPp: 11.5, volumeEur: 320_000, scope: {} },
+      decidedAt: nowIso(),
+    },
+  ];
+}
+
 function createState(options: MockApiOptions = {}): MockState {
   return {
     audit: options.audit ? [...options.audit] : [],
     alertRules: options.alertRules ? [...options.alertRules] : defaultAlertRules(),
+    attributionDecisions: options.attributionDecisions
+      ? [...options.attributionDecisions]
+      : defaultAttributionDecisions(),
     deals: (options.deals ?? MOCK_DEALS).map((deal) => makeDealRow(deal)),
     recentMetrics: options.recentMetrics ? [...options.recentMetrics] : defaultRecentMetrics(),
     notifications: options.notifications
@@ -1335,12 +1372,22 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
       return;
     }
     if (path === '/attributions/decisions' && method === 'GET') {
+      const dealId = url.searchParams.get('deal_id');
+      const levelId = url.searchParams.get('level_id');
+      const user = url.searchParams.get('user');
+      const rows = state.attributionDecisions.filter((decision) => {
+        if (dealId && decision.dealId !== dealId) return false;
+        if (
+          levelId &&
+          decision.requiredLevelId !== levelId &&
+          decision.decidedByLevelId !== levelId
+        ) return false;
+        if (user && decision.decidedByUser !== user) return false;
+        return true;
+      });
       await route.fulfill(json({
-        items: [
-          { id: 'd1', entityId: 'demo-entity', dealId: 'ABC-1234', requiredLevelId: 'office',    decidedByLevelId: null, decidedByUser: null, decision: 'escalated', reason: null, pricingSnapshotHash: 'h-1', routingMetadata: { deviationBps: -7.2, rarocPp: 13.8, volumeEur: 80_000,  scope: {} }, decidedAt: nowIso() },
-          { id: 'd2', entityId: 'demo-entity', dealId: 'ABC-1240', requiredLevelId: 'zone',      decidedByLevelId: null, decidedByUser: null, decision: 'escalated', reason: null, pricingSnapshotHash: 'h-2', routingMetadata: { deviationBps: -12,  rarocPp: 11.5, volumeEur: 320_000, scope: {} }, decidedAt: nowIso() },
-        ],
-        pagination: { limit: 200, offset: 0, returned: 2 },
+        items: rows,
+        pagination: { limit: 200, offset: 0, returned: rows.length },
       }));
       return;
     }
@@ -1357,47 +1404,58 @@ export async function registerApiMocks(page: Page, options?: MockApiOptions): Pr
     if (/^\/attributions\/escalations\/[^/]+$/.test(path) && method === 'POST') {
       const dealId = path.split('/').pop() ?? 'unknown';
       const quote = ((body as Record<string, unknown>)?.quote ?? {}) as Record<string, unknown>;
+      const routingMetadata: AttributionRoutingMetadata = {
+        deviationBps: Number(quote.finalClientRateBps ?? 0) - Number(quote.standardRateBps ?? 0),
+        rarocPp: Number(quote.rarocPp ?? 0),
+        volumeEur: Number(quote.volumeEur ?? 0),
+        scope: {},
+      };
       const routing = {
         requiredLevel: { id: 'office', entityId: 'demo-entity', name: 'Director Oficina', parentId: null, levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() },
         approvalChain: [{ id: 'office', entityId: 'demo-entity', name: 'Director Oficina', parentId: null, levelOrder: 1, rbacRole: 'BranchManager', metadata: {}, active: true, createdAt: nowIso(), updatedAt: nowIso() }],
         reason: 'within_threshold',
-        metadata: {
-          deviationBps: Number(quote.finalClientRateBps ?? 0) - Number(quote.standardRateBps ?? 0),
-          rarocPp: Number(quote.rarocPp ?? 0),
-          volumeEur: Number(quote.volumeEur ?? 0),
-          scope: quote.scope ?? {},
-        },
+        metadata: routingMetadata,
         belowHardFloor: false,
       };
+      const decision: AttributionDecision = {
+        id: `dec-${dealId}-${Date.now()}`,
+        entityId: 'demo-entity',
+        dealId,
+        requiredLevelId: 'office',
+        decidedByLevelId: null,
+        decidedByUser: null,
+        decision: 'escalated',
+        reason: 'Requested from Calculator Attribution Simulator',
+        pricingSnapshotHash: 'a'.repeat(64),
+        routingMetadata: routing.metadata,
+        decidedAt: nowIso(),
+      };
+      state.attributionDecisions = [
+        decision,
+        ...state.attributionDecisions.filter((item) => item.id !== decision.id),
+      ];
       await route.fulfill(json({
         snapshotId: `snap-${dealId}-${Date.now()}`,
         pricingSnapshotHash: 'a'.repeat(64),
         routing,
-        decision: {
-          id: `dec-${dealId}-${Date.now()}`,
-          entityId: 'demo-entity',
-          dealId,
-          requiredLevelId: 'office',
-          decidedByLevelId: null,
-          decidedByUser: null,
-          decision: 'escalated',
-          reason: 'Requested from Calculator Attribution Simulator',
-          pricingSnapshotHash: 'a'.repeat(64),
-          routingMetadata: routing.metadata,
-          decidedAt: nowIso(),
-        },
+        decision,
       }));
       return;
     }
     if (/^\/attributions\/decisions\/[^/]+$/.test(path) && method === 'POST') {
       const dealId = path.split('/').pop() ?? 'unknown';
-      await route.fulfill(json({
+      const decision = {
         id: `dec-${dealId}-${Date.now()}`,
         entityId: 'demo-entity',
         dealId,
         ...(body as Record<string, unknown>),
         decidedAt: nowIso(),
-      }));
+      } as AttributionDecision;
+      state.attributionDecisions = [
+        decision,
+        ...state.attributionDecisions.filter((item) => item.id !== decision.id),
+      ];
+      await route.fulfill(json(decision));
       return;
     }
 

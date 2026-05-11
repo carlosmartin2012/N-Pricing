@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { CheckCircle2, XCircle, ArrowUpRight, Inbox, ShieldCheck, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useUI } from '../../contexts/UIContext';
 import { attributionsTranslations } from '../../translations/index';
@@ -17,6 +18,7 @@ const fmtBps = (v: number): string => `${v >= 0 ? '+' : ''}${v.toFixed(1)} bps`;
 const fmtPp = (v: number): string => `${v.toFixed(1)} pp`;
 const fmtEur = (v: number): string =>
   new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+const fillDeal = (template: string, dealId: string): string => template.replace('{deal}', dealId);
 
 interface PendingItem {
   decision: AttributionDecision;
@@ -38,6 +40,8 @@ interface PendingItem {
 const ApprovalCockpit: React.FC = () => {
   const { language } = useUI();
   const t = attributionsTranslations(language);
+  const [searchParams] = useSearchParams();
+  const focusParam = searchParams.get('focus')?.trim() || null;
 
   const matrixQuery = useAttributionMatrixQuery();
   const decisionsQuery = useAttributionDecisionsQuery({ limit: 200 });
@@ -81,6 +85,26 @@ const ApprovalCockpit: React.FC = () => {
   const isLoading = decisionsQuery.isLoading || matrixQuery.isLoading;
   const error = decisionsQuery.isError;
 
+  const focusedItem = useMemo(() => {
+    if (!focusParam) return null;
+    return pending.find((p) =>
+      p.decision.dealId === focusParam || p.decision.id === focusParam,
+    ) ?? null;
+  }, [focusParam, pending]);
+  const focusedDecisionId = focusedItem?.decision.id ?? null;
+
+  useEffect(() => {
+    if (!focusedDecisionId) return;
+    const targets = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-approval-focus-target]'),
+    ).filter((el) => el.dataset.approvalFocusTarget === focusedDecisionId);
+    const visibleTarget = targets.find((el) => el.offsetParent !== null || el.getClientRects().length > 0)
+      ?? targets[0];
+    if (visibleTarget && typeof visibleTarget.scrollIntoView === 'function') {
+      visibleTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [focusedDecisionId, pending.length]);
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-center justify-between">
@@ -110,6 +134,23 @@ const ApprovalCockpit: React.FC = () => {
         <Kpi label={t.cockpitMeanRaroc}        value={fmtPp(kpis.meanRaroc)} />
         <Kpi label={t.cockpitMeanDrift}        value={fmtBps(kpis.meanDriftBps)} />
       </section>
+
+      {focusParam && !isLoading && !error && (
+        <div
+          data-testid="approval-focus-status"
+          className={`rounded-md border px-3 py-2 text-xs ${
+            focusedItem
+              ? 'border-cyan-400/30 bg-cyan-500/10 text-cyan-100'
+              : 'border-amber-400/30 bg-amber-500/10 text-amber-100'
+          }`}
+          role="status"
+        >
+          {fillDeal(
+            focusedItem ? t.cockpitFocusFound : t.cockpitFocusMissing,
+            focusParam,
+          )}
+        </div>
+      )}
 
       {/* Bandeja */}
       <section className="rounded-xl border border-white/5 bg-slate-900/40">
@@ -144,6 +185,7 @@ const ApprovalCockpit: React.FC = () => {
                   <PendingRow
                     key={p.decision.id}
                     item={p}
+                    focused={p.decision.id === focusedDecisionId}
                     onDecide={(decision, reason) =>
                       recordDecision.mutate({
                         dealId: p.decision.dealId,
@@ -170,6 +212,7 @@ const ApprovalCockpit: React.FC = () => {
                 <PendingCard
                   key={p.decision.id}
                   item={p}
+                  focused={p.decision.id === focusedDecisionId}
                   onDecide={(decision, reason) =>
                     recordDecision.mutate({
                       dealId: p.decision.dealId,
@@ -210,11 +253,12 @@ const Kpi: React.FC<KpiProps> = ({ label, value }) => (
 interface PendingRowProps {
   item: PendingItem;
   pending: boolean;
+  focused?: boolean;
   t: ReturnType<typeof attributionsTranslations>;
   onDecide: (decision: AttributionDecisionStatus, reason: string) => void;
 }
 
-const PendingRow: React.FC<PendingRowProps> = ({ item, pending, t, onDecide }) => {
+const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false, t, onDecide }) => {
   const [confirming, setConfirming] = useState<AttributionDecisionStatus | null>(null);
   const [reason, setReason] = useState('');
   const meta = item.decision.routingMetadata;
@@ -228,7 +272,15 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, t, onDecide }) =
 
   return (
     <>
-      <tr className="border-b border-white/5 hover:bg-white/[0.02]">
+      <tr
+        data-testid={focused ? 'approval-focused-row' : undefined}
+        data-focused={focused ? 'true' : undefined}
+        data-approval-focus-target={item.decision.id}
+        tabIndex={focused ? -1 : undefined}
+        className={`scroll-mt-24 border-b border-white/5 hover:bg-white/[0.02] ${
+          focused ? 'bg-cyan-500/10 outline outline-1 outline-cyan-400/50' : ''
+        }`}
+      >
         <td className="px-4 py-2 font-mono text-xs text-slate-200">{item.decision.dealId}</td>
         <td className={`px-4 py-2 text-right font-mono text-xs ${meta.deviationBps < 0 ? 'text-amber-300' : 'text-slate-200'}`}>
           {fmtBps(meta.deviationBps)}
@@ -322,11 +374,12 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, t, onDecide }) =
 interface PendingCardProps {
   item: PendingItem;
   pending: boolean;
+  focused?: boolean;
   t: ReturnType<typeof attributionsTranslations>;
   onDecide: (decision: AttributionDecisionStatus, reason: string) => void;
 }
 
-const PendingCard: React.FC<PendingCardProps> = ({ item, pending, t, onDecide }) => {
+const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = false, t, onDecide }) => {
   const [confirming, setConfirming] = useState<AttributionDecisionStatus | null>(null);
   const [reason, setReason] = useState('');
   const meta = item.decision.routingMetadata;
@@ -341,7 +394,12 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, t, onDecide })
   return (
     <article
       data-testid="approval-cockpit-card"
-      className="rounded-xl border border-white/5 bg-slate-900/40 p-3 text-sm"
+      data-focused={focused ? 'true' : undefined}
+      data-approval-focus-target={item.decision.id}
+      tabIndex={focused ? -1 : undefined}
+      className={`scroll-mt-24 rounded-xl border bg-slate-900/40 p-3 text-sm ${
+        focused ? 'border-cyan-400/50 bg-cyan-500/10 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]' : 'border-white/5'
+      }`}
     >
       <header className="flex items-center justify-between">
         <span className="font-mono text-xs text-slate-200">{item.decision.dealId}</span>
