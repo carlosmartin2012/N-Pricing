@@ -159,7 +159,15 @@ CREATE TABLE IF NOT EXISTS attribution_decisions (
   deal_id                  TEXT        NOT NULL REFERENCES deals(id),
   required_level_id        UUID        NOT NULL REFERENCES attribution_levels(id),
   decided_by_level_id      UUID        REFERENCES attribution_levels(id),
-  decided_by_user          TEXT        REFERENCES users(id),
+  -- decided_by_user audita el identificador humano-legible (email/username).
+  -- Originalmente declarado como `TEXT REFERENCES users(id)`, pero `users.id`
+  -- es UUID en 20240101_initial_schema — esa FK es estructuralmente inválida
+  -- en Postgres ("incompatible types: text and uuid") y fallaba al CREATE
+  -- TABLE en cualquier entorno que parseara el SQL estricto. La FK quedó
+  -- silenciosamente rota hasta el roll-up al migration runner (2026-05).
+  -- Dropear la FK preserva la columna como audit trail; la integridad con
+  -- users se valida a nivel app (ya hoy es informacional).
+  decided_by_user          TEXT,
   decision                 TEXT        NOT NULL
                             CHECK (decision IN ('approved','rejected','escalated','expired','reverted')),
   reason                   TEXT,

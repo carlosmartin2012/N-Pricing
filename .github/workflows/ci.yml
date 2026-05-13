@@ -125,63 +125,15 @@ jobs:
           echo "Postgres did not become ready" >&2
           exit 1
 
-      - name: Bootstrap Supabase-specific objects (CI only)
-        # Supabase-hosted Postgres provisions objects our migrations take for
-        # granted — a raw postgres:16 container has none of them. This step
-        # creates a minimal compatible environment so the migration loop runs
-        # end-to-end. All statements are idempotent (IF NOT EXISTS / OR REPLACE).
-        #
-        # Covered:
-        #   - `supabase_realtime` publication          (ALTER PUBLICATION ADD TABLE)
-        #   - `anon` / `authenticated` / `service_role` roles  (GRANT ... TO)
-        #   - `auth` schema + stub `jwt()`/`uid()`/`users` table
-        #       → required for CREATE POLICY to parse schema-qualified calls
-        #         like `auth.jwt()->>'email'`. Policies evaluate expressions
-        #         only at row-access time, but the schema + object names must
-        #         resolve at CREATE. The stubs return empty/null so policies
-        #         never match at runtime; integration tests use pg.Pool with
-        #         the DB owner (bypasses RLS), so no coverage is lost.
-        #
-        # No GitHub event data is used — only the DB URL from env above.
-        run: |
-          psql "$INTEGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          DO $$
-          BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
-              CREATE PUBLICATION supabase_realtime;
-            END IF;
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-              CREATE ROLE anon NOLOGIN NOINHERIT;
-            END IF;
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
-              CREATE ROLE authenticated NOLOGIN NOINHERIT;
-            END IF;
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
-              CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS;
-            END IF;
-          END
-          $$;
-
-          CREATE SCHEMA IF NOT EXISTS auth;
-
-          CREATE OR REPLACE FUNCTION auth.jwt() RETURNS JSONB
-            LANGUAGE sql STABLE AS $$ SELECT '{}'::jsonb $$;
-
-          CREATE OR REPLACE FUNCTION auth.uid() RETURNS UUID
-            LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$;
-
-          CREATE TABLE IF NOT EXISTS auth.users (
-            id    UUID PRIMARY KEY,
-            email TEXT
-          );
-          SQL
-
-      - name: Apply migrations in order
-        run: |
-          for f in $(ls supabase/migrations/*.sql | sort); do
-            echo "→ applying $f"
-            psql "$INTEGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
-          done
+      - name: Apply migrations via runner
+        # Llama al MISMO runner que el server arranca al boot
+        # (`server/migrationRunner.ts`). El bootstrap Supabase-compat
+        # (auth schema, anon/authenticated/service_role, supabase_realtime)
+        # se aplica internamente — ya no se duplica aquí. El runner falla
+        # con exit ≠ 0 en la primera migration que rompa, evitando el
+        # silent-failure histórico del loop bash `for f in ...; psql ...; done`
+        # (el `for` no tenía `set -e`, los errores se imprimían y se ignoraban).
+        run: npx tsx scripts/apply-migrations.ts
 
       - name: Run integration tests
         run: npx vitest run utils/__tests__/integration
