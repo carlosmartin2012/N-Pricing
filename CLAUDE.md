@@ -131,7 +131,11 @@ scripts/
 server/                    # Express server
   index.ts                 # Bootstrap + runMigrations + seed-on-boot opcional + routers + middlewares
   db.ts                    # pg.Pool + withTransaction + withTenancyTransaction
-  migrate.ts               # Schema inline + seed Default Entity + demo user/entity_user
+  migrate.ts               # Thin wrapper sobre migrationRunner (ex schema inline 1140L)
+  migrationRunner.ts       # NUEVO — aplica supabase/migrations/*.sql en orden con
+                           # bootstrap Supabase-compat (auth schema, anon/authenticated/
+                           # service_role, supabase_realtime) + tracking en
+                           # _n_pricing_migrations + content-hash tamper guard
   middleware/
     auth.ts                # JWT HMAC propio
     requestId.ts           # Phase 0, x-request-id correlación
@@ -463,9 +467,15 @@ Adapter Health, Escalations, Attribution matrix.
   monitoring, methodology, reporting).
 - Edge Function de pricing valida tenancy explícitamente antes de tocar
   service role; ver `supabase/functions/pricing/index.ts`.
-- `server/migrate.ts` incluye el schema inline para el arranque Node-only
-  (dev + Replit). Es un subconjunto de las migrations Supabase; cualquier
-  tabla nueva que el server necesite al boot debe añadirse a los dos sitios.
+- `server/migrate.ts` es ahora un **thin wrapper** sobre `server/migrationRunner.ts`
+  (ex 1154L de schema inline → 37L). Boot de Node-only / Replit / CI aplica
+  la secuencia completa de `supabase/migrations/*.sql` en orden, con bootstrap
+  Supabase-compat (auth schema + roles + publication) automático para envs
+  no-Supabase. Tracking en `_n_pricing_migrations` (con content hash) evita
+  re-aplicar y detecta tampering. **Cualquier tabla nueva = nueva migration,
+  ya NO se toca el server**. Fin del bug-magnet histórico (PRs #55/#56/#57).
+  Variable `N_PRICING_MIGRATIONS_DIR` permite override del path si el deploy
+  separa server compilado de los SQL.
 
 ## Variables de entorno clave
 
@@ -567,20 +577,20 @@ Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
 - `seedData.ts` y Supabase pueden divergir si se cambia uno sin revisar el
   otro. Usar `npm run check:sync`. El script lee la **secuencia completa
   de migrations** como fuente canónica.
-- `server/migrate.ts` (schema inline para dev/Replit) es un **subconjunto**
-  de `supabase/migrations/`. Si añades una tabla que el server necesita al
-  arrancar (p.ej. `tenancy_violations`, entity_users default seed), tócala
-  en los dos sitios o Replit arrancará con una DB rota.
-- **Migrations históricas vs inline schema** (diagnosticado durante Ola 6,
-  PRs #55/#56/#57): `server/migrate.ts` es la **verdad operativa** en
-  producción. Las migrations en `supabase/migrations/` son la verdad
-  *canónica* para envs que corren la secuencia completa (sólo CI lo
-  hace hoy). Divergencias entre ambas eran bugs silentes hasta que
-  `integration-tests` los destapó. Ejemplos detectados y corregidos:
-  `clients.id` (UUID en migration, TEXT en inline), `deals.client_id`
-  (idem), FK UUID→BIGSERIAL en `pricing_snapshots`, variable `strict` como
-  identifier (reserved en PG 16). **Al añadir columnas con FK o tipos
-  concretos, verificar en ambos sitios y en `utils/seedData.ts`.**
+- **Migrations consolidadas (RESUELTO 2026-05-13):** el schema inline de
+  `server/migrate.ts` (1140L) ha sido retirado. El boot ejecuta el mismo
+  runner (`server/migrationRunner.ts`) que CI: bootstrap Supabase-compat
+  + iteración de `supabase/migrations/*.sql` en orden + tracking con content
+  hash. **Una sola fuente de verdad.** Fin de la clase de bug Ola 6 (PRs
+  #55/#56/#57): cualquier divergencia ahora es imposible — solo hay
+  migrations. Si una migration nueva necesita seed runtime (p.ej. demo
+  user), va en `scripts/seed-demo-dataset.ts` o en una migration de seed
+  explícita (patrón `*_seed.sql`), no en el server.
+  > Bug pre-existente descubierto durante la consolidación y arreglado en
+  > la misma migration: `attribution_decisions.decided_by_user` declaraba
+  > `TEXT REFERENCES users(id)` siendo `users.id` UUID — FK estructuralmente
+  > inválida que silenciosamente no se aplicaba en clean DBs. Hoy es solo
+  > `TEXT` con validación a nivel app.
 - **Integration-tests en CI** necesita `postgres:16` con un bootstrap
   Supabase-compat (`.github/workflows/ci.yml` lo hace explícito): la
   publication `supabase_realtime`, los roles `anon`/`authenticated`/
