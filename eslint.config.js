@@ -40,6 +40,48 @@ export default [
       'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
     },
   },
+  // Package boundary enforce — código fuera de packages/* y fuera de los
+  // archivos owner originales debe consumir las facades `@npricing/*`, no
+  // los implementation paths. Complementa el test custom de
+  // utils/__tests__/packageBoundaryImports.test.ts; el test es la verdad
+  // canónica (cubre más rutas y permite excepciones explícitas), esta regla
+  // se queda como guardia rápida y feedback en IDE para los offenders más
+  // comunes (pricingEngine, canonicalJson, snapshotHash).
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    ignores: [
+      'packages/**',
+      'utils/pricingEngine.ts',
+      'utils/canonicalJson.ts',
+      'utils/snapshotHash.ts',
+      'utils/governance/dossierSigning.ts',
+      'utils/pricing/**',
+      '**/__tests__/**',
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.stories.tsx',
+      'utils/channels/**',
+      'utils/clv/**',
+      'utils/customer360/**',
+      'utils/targetGrid/**',
+      'utils/governance/**',
+      'utils/backtesting/**',
+    ],
+    rules: {
+      'no-restricted-imports': ['warn', {
+        patterns: [
+          {
+            group: ['**/pricingEngine', '**/utils/pricingEngine'],
+            message: 'Importa desde @npricing/pricing-core en vez de utils/pricingEngine directamente.',
+          },
+          {
+            group: ['**/canonicalJson', '**/snapshotHash'],
+            message: 'Importa desde @npricing/evidence en vez de utils/canonicalJson o utils/snapshotHash.',
+          },
+        ],
+      }],
+    },
+  },
   // Node-only scripts (Playwright callbacks execute in browser context, so we
   // also expose browser globals — ESLint cannot statically distinguish between
   // the script scope and `page.evaluate(() => {...})` callbacks).

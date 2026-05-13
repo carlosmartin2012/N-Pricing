@@ -29,7 +29,7 @@
 import { Pool } from 'pg';
 import { computeLtv, defaultAssumptions } from '../utils/clv/ltvEngine';
 import { buildClientRelationship } from '../utils/customer360/relationshipAggregator';
-import { sha256CanonicalJson } from '../utils/snapshotHash';
+import { sha256CanonicalJson } from '@npricing/evidence';
 import type { ClientPosition, ClientMetricsSnapshot } from '../types/customer360';
 
 const DEFAULT_ENTITY = '00000000-0000-0000-0000-000000000010';
