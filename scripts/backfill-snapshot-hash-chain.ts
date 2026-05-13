@@ -41,7 +41,7 @@ import { Pool } from 'pg';
 import {
   verifySnapshotChain,
   type SnapshotChainLink,
-} from '../utils/snapshotHash';
+} from '@npricing/evidence';
 
 interface Args {
   entityId?: string;

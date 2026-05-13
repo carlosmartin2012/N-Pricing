@@ -47,7 +47,7 @@ import {
 import { DEFAULT_ENTITY_ID } from '../utils/seedData.entities';
 import { computeLtv, defaultAssumptions } from '../utils/clv/ltvEngine';
 import { buildClientRelationship } from '../utils/customer360/relationshipAggregator';
-import { sha256CanonicalJson } from '../utils/snapshotHash';
+import { sha256CanonicalJson } from '@npricing/evidence';
 import type { ClientPosition, ClientMetricsSnapshot } from '../types/customer360';
 
 interface Args {

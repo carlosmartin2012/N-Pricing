@@ -1,9 +1,17 @@
 /**
- * Supabase client stub — all data access goes through the Express API (utils/apiFetch.ts).
- * This stub exists to satisfy legacy imports that reference `supabase` without making
- * real network calls. Any code path reaching this stub is a no-op by design.
+ * Supabase client compat shim — all real data access goes through the Express
+ * API (`utils/apiFetch.ts`). This stub keeps Supabase-shaped code paths
+ * (`supabase.from('x').select()`, `supabase.channel('y').on(...)`) functional
+ * as silent no-ops so that hooks like `useLiveCursors`, `useMFA`, presence,
+ * realtime sync, etc. can be feature-flagged on/off without dynamic imports.
  *
- * @deprecated Remove this file once all legacy Supabase imports are migrated.
+ * Active consumers (~14 modules): MFA hooks, live cursors, presence
+ * awareness, optimistic deal updates, supabaseSync/* hooks, Admin UI.
+ *
+ * **Do NOT delete** until those consumers either (a) migrate fully to the
+ * Express API and remove their Supabase imports, or (b) get rewired through
+ * an explicit feature-flag layer. Deleting prematurely breaks the offline /
+ * realtime fallback contract documented in `useSupabaseSync`.
  */
 export const isSupabaseConfigured = true;
 

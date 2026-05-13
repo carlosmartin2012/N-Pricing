@@ -31,6 +31,7 @@ import admissionRouter from './routes/admission';
 import coreBankingRouter from './routes/coreBanking';
 import budgetRouter from './routes/budget';
 import notificationsRouter from './routes/notifications';
+import cspReportRouter from './routes/cspReport';
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -112,6 +113,12 @@ app.use('/api/auth', (req, res, next) => {
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
 });
+// CSP violation reports — public POST endpoint declared by `Content-Security-Policy:
+// report-uri /api/csp-report` and `Reporting-Endpoints` header in vercel.json.
+// No auth: browsers send these without our JWT. On Vercel-only deploys (SPA
+// static hosting) this path 404s unless a Vercel rewrite or serverless
+// function proxies it to the Express server; see CLAUDE.md Pitfalls.
+app.use('/api/csp-report', cspReportRouter);
 // Worker-tick heartbeat snapshot. Documented in
 // server/workers/workerHealth.ts but never exposed before; ops needs this
 // to detect a silently dead worker (last_success_at far in the past) or
