@@ -1,19 +1,9 @@
 import React from 'react';
-import type {
-  CreditRiskResult,
-  FTPResult,
-  Transaction,
-} from '../../types';
-import type { PricingShocks } from '../../utils/pricingEngine';
+import type { CreditRiskResult, FTPResult, Transaction } from '../../types';
+import type { PricingShocks } from '@npricing/pricing-core';
 import type { ValidationError } from '../../utils/validation';
 import { TooltipTrigger } from '../ui/Tooltip';
-import {
-  ChevronDown,
-  ChevronUp,
-  Droplets,
-  XCircle,
-  Zap,
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, Droplets, XCircle, Zap } from 'lucide-react';
 import { PricingReceiptCreditDetail } from './PricingReceiptCreditDetail';
 
 interface PricingReceiptWaterfallProps {
@@ -55,9 +45,7 @@ export function PricingReceiptWaterfall({
             <Zap size={16} className={applyShocks ? 'text-amber-500' : 'text-slate-400'} />
             <div className="text-xs">
               <span
-                className={`block font-bold ${
-                  applyShocks ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500'
-                }`}
+                className={`block font-bold ${applyShocks ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500'}`}
               >
                 {t.shockedScenario || 'Shocked Scenario'}
               </span>
@@ -71,9 +59,7 @@ export function PricingReceiptWaterfall({
           <button
             onClick={onToggleShocks}
             className={`rounded-full px-3 py-1 text-[10px] font-bold transition-colors ${
-              applyShocks
-                ? 'bg-amber-500 text-white shadow-md'
-                : 'bg-slate-200 text-slate-500 dark:bg-slate-700'
+              applyShocks ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-200 text-slate-500 dark:bg-slate-700'
             }`}
           >
             {applyShocks ? 'ON' : 'OFF'}
@@ -85,9 +71,7 @@ export function PricingReceiptWaterfall({
         <div className="mx-4 mt-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
           <div className="mb-1 flex items-center gap-2">
             <XCircle size={14} className="shrink-0 text-red-400" />
-            <span className="text-xs font-medium text-red-400">
-              Validation Errors
-            </span>
+            <span className="text-xs font-medium text-red-400">Validation Errors</span>
           </div>
           <ul className="space-y-0.5 pl-6">
             {validationErrors.map((error) => (
@@ -102,9 +86,7 @@ export function PricingReceiptWaterfall({
       <div className="flex-1 space-y-1 overflow-auto bg-[var(--nfq-bg-surface)] p-4">
         {result.formulaUsed && (
           <div className="mb-3 rounded-lg border border-indigo-800/50 bg-indigo-950/30 p-2">
-            <div className="mb-1 text-[11px] font-medium text-indigo-400">
-              Applied Formula
-            </div>
+            <div className="mb-1 text-[11px] font-medium text-indigo-400">Applied Formula</div>
             <div className="font-mono text-xs text-indigo-300">{result.formulaUsed}</div>
             {result.behavioralMaturityUsed != null &&
               deal.durationMonths != null &&
@@ -116,9 +98,7 @@ export function PricingReceiptWaterfall({
           </div>
         )}
 
-        <div className="mb-2 text-[11px] font-medium text-slate-500">
-          Pricing Construction Flow
-        </div>
+        <div className="mb-2 text-[11px] font-medium text-slate-500">Pricing Construction Flow</div>
 
         <div data-testid="receipt-base-rate">
           <WaterfallItem
@@ -145,9 +125,7 @@ export function PricingReceiptWaterfall({
               {result._liquidityPremiumDetails >= 0 ? '+' : ''}
               {result._liquidityPremiumDetails.toFixed(3)}%
             </MiniMetric>
-            <MiniMetric label="LCR Buffer Cost (CLC)">
-              +{result._clcChargeDetails.toFixed(3)}%
-            </MiniMetric>
+            <MiniMetric label="LCR Buffer Cost (CLC)">+{result._clcChargeDetails.toFixed(3)}%</MiniMetric>
             {result.nsfrCost != null && result.nsfrCost !== 0 && (
               <MiniMetric label={`NSFR ${result.nsfrCost < 0 ? 'Benefit' : 'Charge'}`}>
                 {result.nsfrCost >= 0 ? '+' : ''}
@@ -217,12 +195,7 @@ export function PricingReceiptWaterfall({
             </div>
           )}
 
-          <WaterfallItem
-            label="Operational Cost"
-            value={result.operationalCost}
-            isAdd
-            color="text-rose-400"
-          />
+          <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-rose-400" />
           <WaterfallItem
             label="ESG Transition"
             value={result.esgTransitionCharge}
@@ -256,9 +229,7 @@ export function PricingReceiptWaterfall({
             color="text-slate-300"
             formula={t.tooltip_formula_floorPrice}
           />
-          <BottomMetric label="+ Cost of Capital (Hurdle)">
-            +{result.capitalCharge.toFixed(2)}%
-          </BottomMetric>
+          <BottomMetric label="+ Cost of Capital (Hurdle)">+{result.capitalCharge.toFixed(2)}%</BottomMetric>
           {result.capitalIncome != null && result.capitalIncome > 0 && (
             <BottomMetric label="- Capital Income (Risk-Free)" valueClassName="font-mono text-emerald-500">
               -{result.capitalIncome.toFixed(3)}%
@@ -285,11 +256,7 @@ export function PricingReceiptWaterfall({
 
         <div className="flex items-center justify-between pt-2">
           <div className="text-xs text-slate-400">Net Economic Profit</div>
-          <div
-            className={`font-mono font-bold ${
-              result.economicProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
-            }`}
-          >
+          <div className={`font-mono font-bold ${result.economicProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {result.economicProfit >= 0 ? '+' : ''}
             {new Intl.NumberFormat('en-US', {
               style: 'currency',
@@ -328,21 +295,15 @@ function WaterfallItem({
 }) {
   return (
     <div
-      className={`flex items-center justify-between ${
-        highlight ? 'py-1' : 'py-0.5'
-      } ${compact ? 'opacity-80' : ''}`}
+      className={`flex items-center justify-between ${highlight ? 'py-1' : 'py-0.5'} ${compact ? 'opacity-80' : ''}`}
     >
       <div>
         <div
-          className={`flex items-center text-xs ${
-            highlight ? 'font-bold text-white' : 'font-medium text-slate-400'
-          }`}
+          className={`flex items-center text-xs ${highlight ? 'font-bold text-white' : 'font-medium text-slate-400'}`}
         >
           {icon && icon}
           {label}
-          {formula && (
-            <TooltipTrigger content={formula} variant="formula" placement="right" size={11} />
-          )}
+          {formula && <TooltipTrigger content={formula} variant="formula" placement="right" size={11} />}
         </div>
         {subtext && <div className="font-mono text-[10px] text-slate-600">{subtext}</div>}
       </div>

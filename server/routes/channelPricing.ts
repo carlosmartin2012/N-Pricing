@@ -1,13 +1,11 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import crypto from 'crypto';
+import { consume, findApplicableCampaigns, pickBestForBorrower } from '@npricing/commercial';
+import { calculatePricingOutput } from '@npricing/pricing-core';
 import { pool, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
-import { consume } from '../../utils/channels/tokenBucket';
-import { findApplicableCampaigns, pickBestForBorrower } from '../../utils/channels/campaignMatcher';
 import { recorderFromPool } from '../../utils/metering/usageRecorder';
-import { calculatePricing } from '../../utils/pricingEngine';
-import type { Transaction, ApprovalMatrixConfig } from '../../types';
-import type { PricingCampaign, ChannelType } from '../../types/channels';
+import type { ApprovalMatrixConfig, ChannelType, PricingCampaign, Transaction } from '@npricing/domain';
 
 /**
  * Channel pricing API.
@@ -70,7 +68,7 @@ async function channelAuthMiddleware(req: ChannelRequest, res: Response, next: N
        FROM channel_api_keys
        WHERE key_hash = $1
        LIMIT 1`,
-      [hashKey(raw)],
+      [hashKey(raw)]
     );
     if (!row || !row.is_active || row.revoked_at) {
       res.status(403).json({ code: 'channel_key_invalid', message: 'API key invalid or revoked' });
@@ -183,9 +181,10 @@ router.post('/quote', async (req: ChannelRequest, res) => {
       res.status(400).json({ code: 'invalid_payload', message: 'deal required' });
       return;
     }
-    const asOfDate = (body.asOfDate && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate))
-      ? body.asOfDate
-      : new Date().toISOString().slice(0, 10);
+    const asOfDate =
+      body.asOfDate && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate)
+        ? body.asOfDate
+        : new Date().toISOString().slice(0, 10);
 
     // Load campaigns scoped to entity. Engine context loading is out of scope
     // here — channels assume the standard entity pricing context already lives
@@ -194,7 +193,7 @@ router.post('/quote', async (req: ChannelRequest, res) => {
     const campaignRows = await pool.query<CampaignRow>(
       `SELECT * FROM pricing_campaigns
        WHERE entity_id = $1 AND status IN ('approved','active')`,
-      [auth.entityId],
+      [auth.entityId]
     );
     const campaigns = campaignRows.rows.map(mapCampaignRow);
 
@@ -214,7 +213,10 @@ router.post('/quote', async (req: ChannelRequest, res) => {
       l2Threshold: 5,
       ...body.approvalMatrix,
     };
-    const baseResult = calculatePricing(body.deal, approval) as unknown as Record<string, unknown>;
+    const baseResult = calculatePricingOutput({ deal: body.deal, approvalMatrix: approval }) as unknown as Record<
+      string,
+      unknown
+    >;
     const baseRate = Number(baseResult.finalClientRate ?? 0);
     const adjustedRate = winner ? baseRate + winner.rateDeltaBps / 10_000 : baseRate;
 
@@ -235,16 +237,19 @@ router.post('/quote', async (req: ChannelRequest, res) => {
     res.status(500).json({ error: safeError(err), requestId });
   } finally {
     const durationMs = Math.round(performance.now() - t0);
-    pool.query(
-      `INSERT INTO channel_request_log
+    pool
+      .query(
+        `INSERT INTO channel_request_log
         (entity_id, api_key_id, channel, endpoint, status_code, duration_ms, request_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [auth.entityId, auth.apiKeyId, auth.channel, '/channel/quote', statusCode, durationMs, requestId],
-    ).catch(() => { /* best effort */ });
-    pool.query(
-      `UPDATE channel_api_keys SET last_used_at = NOW() WHERE id = $1`,
-      [auth.apiKeyId],
-    ).catch(() => { /* best effort */ });
+        [auth.entityId, auth.apiKeyId, auth.channel, '/channel/quote', statusCode, durationMs, requestId]
+      )
+      .catch(() => {
+        /* best effort */
+      });
+    pool.query(`UPDATE channel_api_keys SET last_used_at = NOW() WHERE id = $1`, [auth.apiKeyId]).catch(() => {
+      /* best effort */
+    });
   }
 });
 

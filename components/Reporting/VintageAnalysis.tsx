@@ -11,7 +11,7 @@ import {
   YAxis,
 } from '../ui/charts/lazyRecharts';
 import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from '../../types';
-import { calculatePricing } from '../../utils/pricingEngine';
+import { calculatePricing } from '@npricing/pricing-core';
 import { buildPricingContext } from '../../utils/pricingContext';
 import { useData } from '../../contexts/DataContext';
 import { Calendar, TrendingDown, AlertTriangle } from 'lucide-react';
@@ -110,7 +110,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
           greeniumGrid: contextData.greeniumGrid,
           behaviouralModels: contextData.behaviouralModels,
         },
-        { clients, products, businessUnits },
+        { clients, products, businessUnits }
       ),
     [
       contextData.yieldCurves,
@@ -124,22 +124,22 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
       clients,
       products,
       businessUnits,
-    ],
+    ]
   );
 
   const bookedDeals = useMemo(
-    () => deals.filter(d => (d.status === 'Booked' || d.status === 'Approved') && d.amount > 0 && d.productType),
-    [deals],
+    () => deals.filter((d) => (d.status === 'Booked' || d.status === 'Approved') && d.amount > 0 && d.productType),
+    [deals]
   );
 
   // Pricing results per deal
   const pricingResults = useMemo(
     () =>
-      bookedDeals.map(deal => ({
+      bookedDeals.map((deal) => ({
         deal,
         result: calculatePricing(deal, contextData.approvalMatrix, pricingContext),
       })),
-    [bookedDeals, contextData.approvalMatrix, pricingContext],
+    [bookedDeals, contextData.approvalMatrix, pricingContext]
   );
 
   // 1. Vintage cohorts grouped by startDate month
@@ -229,7 +229,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
     () =>
       [...vintageCohorts]
         .sort((a, b) => a.cohort.localeCompare(b.cohort))
-        .map(c => ({
+        .map((c) => ({
           cohort: c.cohort,
           ftp: Number((c.avgFTP * 100).toFixed(2)),
           creditCost: Number((c.avgCreditCost * 100).toFixed(2)),
@@ -238,7 +238,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
           margin: Number((c.avgMargin * 100).toFixed(2)),
           raroc: Number(c.avgRaroc.toFixed(2)),
         })),
-    [vintageCohorts],
+    [vintageCohorts]
   );
 
   // 3. Channel / Segment breakdown by clientType
@@ -291,7 +291,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
 
     for (const pr of pricingResults) {
       const bu = pr.deal.businessUnit || 'Unknown';
-      const buName = businessUnits.find(b => b.id === bu)?.name || bu;
+      const buName = businessUnits.find((b) => b.id === bu)?.name || bu;
       const existing = groups.get(buName);
       if (existing) {
         existing.push(pr);
@@ -332,15 +332,14 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
       setSortDir('desc');
     }
   };
 
-  const sortIndicator = (field: SortField) =>
-    sortField === field ? (sortDir === 'asc' ? ' \u25B2' : ' \u25BC') : '';
+  const sortIndicator = (field: SortField) => (sortField === field ? (sortDir === 'asc' ? ' \u25B2' : ' \u25BC') : '');
 
   if (pricingResults.length === 0) {
     return (
@@ -359,9 +358,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
       {/* Header */}
       <div className="flex items-center gap-3">
         <Calendar className="w-5 h-5 text-purple-400" />
-        <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">
-          Vintage Analysis
-        </h2>
+        <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">Vintage Analysis</h2>
         <span className="nfq-label ml-2">
           {vintageCohorts.length} cohorts / {pricingResults.length} deals
         </span>
@@ -382,31 +379,28 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                 { field: 'avgMargin' as SortField, label: 'Avg Margin' },
                 { field: 'avgRaroc' as SortField, label: 'Avg RAROC' },
                 { field: 'belowFloor' as SortField, label: 'Below Floor' },
-              ].map(col => (
+              ].map((col) => (
                 <th
                   key={col.field}
                   onClick={() => handleSort(col.field)}
                   className="py-2 px-3 text-left font-mono uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] cursor-pointer hover:text-white transition-colors whitespace-nowrap"
                 >
-                  {col.label}{sortIndicator(col.field)}
+                  {col.label}
+                  {sortIndicator(col.field)}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {sortedCohorts.map(c => {
-              const rarocClass =
-                c.avgRaroc < 5
-                  ? 'bg-[#f43f5e]/10'
-                  : c.avgRaroc < 10
-                    ? 'bg-[#f59e0b]/10'
-                    : '';
+            {sortedCohorts.map((c) => {
+              const rarocClass = c.avgRaroc < 5 ? 'bg-[#f43f5e]/10' : c.avgRaroc < 10 ? 'bg-[#f59e0b]/10' : '';
 
               return (
-                <tr key={c.cohort} className={`border-b border-[var(--nfq-border-ghost)]/50 hover:bg-white/[0.02] transition-colors ${rarocClass}`}>
-                  <td className="py-2.5 px-3 font-mono font-bold text-[color:var(--nfq-text-primary)]">
-                    {c.cohort}
-                  </td>
+                <tr
+                  key={c.cohort}
+                  className={`border-b border-[var(--nfq-border-ghost)]/50 hover:bg-white/[0.02] transition-colors ${rarocClass}`}
+                >
+                  <td className="py-2.5 px-3 font-mono font-bold text-[color:var(--nfq-text-primary)]">{c.cohort}</td>
                   <td className="py-2.5 px-3 font-mono text-right text-[color:var(--nfq-text-secondary)]">
                     {c.dealCount}
                   </td>
@@ -422,13 +416,15 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                   <td className="py-2.5 px-3 font-mono text-right text-[color:var(--nfq-success)]">
                     {(c.avgMargin * 10000).toFixed(0)} bps
                   </td>
-                  <td className={`py-2.5 px-3 font-mono text-right font-bold ${
-                    c.avgRaroc < 5
-                      ? 'text-[color:var(--nfq-danger)]'
-                      : c.avgRaroc < 10
-                        ? 'text-[color:var(--nfq-warning)]'
-                        : 'text-[color:var(--nfq-success)]'
-                  }`}>
+                  <td
+                    className={`py-2.5 px-3 font-mono text-right font-bold ${
+                      c.avgRaroc < 5
+                        ? 'text-[color:var(--nfq-danger)]'
+                        : c.avgRaroc < 10
+                          ? 'text-[color:var(--nfq-warning)]'
+                          : 'text-[color:var(--nfq-success)]'
+                    }`}
+                  >
                     {c.avgRaroc.toFixed(1)}%
                   </td>
                   <td className="py-2.5 px-3 font-mono text-right">
@@ -476,14 +472,31 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                 tickFormatter={(v: number) => `${v}%`}
               />
               <Tooltip contentStyle={tooltipStyle} />
-              <Legend
-                wrapperStyle={{ fontSize: '10px', fontFamily: 'var(--nfq-font-mono)' }}
-              />
+              <Legend wrapperStyle={{ fontSize: '10px', fontFamily: 'var(--nfq-font-mono)' }} />
               <Bar yAxisId="left" dataKey="ftp" stackId="components" name="FTP" fill={COMPONENT_COLORS.ftp} />
-              <Bar yAxisId="left" dataKey="creditCost" stackId="components" name="Credit Cost" fill={COMPONENT_COLORS.creditCost} />
-              <Bar yAxisId="left" dataKey="capitalCharge" stackId="components" name="Capital Charge" fill={COMPONENT_COLORS.capitalCharge} />
+              <Bar
+                yAxisId="left"
+                dataKey="creditCost"
+                stackId="components"
+                name="Credit Cost"
+                fill={COMPONENT_COLORS.creditCost}
+              />
+              <Bar
+                yAxisId="left"
+                dataKey="capitalCharge"
+                stackId="components"
+                name="Capital Charge"
+                fill={COMPONENT_COLORS.capitalCharge}
+              />
               <Bar yAxisId="left" dataKey="opex" stackId="components" name="Opex" fill={COMPONENT_COLORS.opex} />
-              <Bar yAxisId="left" dataKey="margin" stackId="components" name="Margin" fill={COMPONENT_COLORS.margin} radius={[3, 3, 0, 0]} />
+              <Bar
+                yAxisId="left"
+                dataKey="margin"
+                stackId="components"
+                name="Margin"
+                fill={COMPONENT_COLORS.margin}
+                radius={[3, 3, 0, 0]}
+              />
               <Line
                 yAxisId="right"
                 type="monotone"
@@ -508,20 +521,29 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
           </h4>
           {segmentBreakdown.length > 0 ? (
             <div className="space-y-3">
-              {segmentBreakdown.map(seg => (
-                <div key={seg.segment} className="flex items-center justify-between gap-4 py-2 border-b border-[var(--nfq-border-ghost)]/50">
+              {segmentBreakdown.map((seg) => (
+                <div
+                  key={seg.segment}
+                  className="flex items-center justify-between gap-4 py-2 border-b border-[var(--nfq-border-ghost)]/50"
+                >
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-[color:var(--nfq-text-secondary)] truncate">{seg.segment}</div>
+                    <div className="text-xs font-bold text-[color:var(--nfq-text-secondary)] truncate">
+                      {seg.segment}
+                    </div>
                     <div className="text-[10px] font-mono text-[color:var(--nfq-text-faint)]">
                       {seg.dealCount} deals / {formatVolume(seg.totalVolume)}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className={`text-xs font-mono font-bold ${
-                      seg.avgRaroc < 5 ? 'text-[color:var(--nfq-danger)]' :
-                      seg.avgRaroc < 10 ? 'text-[color:var(--nfq-warning)]' :
-                      'text-[color:var(--nfq-success)]'
-                    }`}>
+                    <div
+                      className={`text-xs font-mono font-bold ${
+                        seg.avgRaroc < 5
+                          ? 'text-[color:var(--nfq-danger)]'
+                          : seg.avgRaroc < 10
+                            ? 'text-[color:var(--nfq-warning)]'
+                            : 'text-[color:var(--nfq-success)]'
+                      }`}
+                    >
                       RAROC {seg.avgRaroc.toFixed(1)}%
                     </div>
                     <div className="text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
@@ -549,20 +571,29 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
           </h4>
           {buBreakdown.length > 0 ? (
             <div className="space-y-3">
-              {buBreakdown.map(seg => (
-                <div key={seg.segment} className="flex items-center justify-between gap-4 py-2 border-b border-[var(--nfq-border-ghost)]/50">
+              {buBreakdown.map((seg) => (
+                <div
+                  key={seg.segment}
+                  className="flex items-center justify-between gap-4 py-2 border-b border-[var(--nfq-border-ghost)]/50"
+                >
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-[color:var(--nfq-text-secondary)] truncate">{seg.segment}</div>
+                    <div className="text-xs font-bold text-[color:var(--nfq-text-secondary)] truncate">
+                      {seg.segment}
+                    </div>
                     <div className="text-[10px] font-mono text-[color:var(--nfq-text-faint)]">
                       {seg.dealCount} deals / {formatVolume(seg.totalVolume)}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className={`text-xs font-mono font-bold ${
-                      seg.avgRaroc < 5 ? 'text-[color:var(--nfq-danger)]' :
-                      seg.avgRaroc < 10 ? 'text-[color:var(--nfq-warning)]' :
-                      'text-[color:var(--nfq-success)]'
-                    }`}>
+                    <div
+                      className={`text-xs font-mono font-bold ${
+                        seg.avgRaroc < 5
+                          ? 'text-[color:var(--nfq-danger)]'
+                          : seg.avgRaroc < 10
+                            ? 'text-[color:var(--nfq-warning)]'
+                            : 'text-[color:var(--nfq-success)]'
+                      }`}
+                    >
                       RAROC {seg.avgRaroc.toFixed(1)}%
                     </div>
                     <div className="text-[10px] font-mono text-[color:var(--nfq-text-muted)]">

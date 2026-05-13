@@ -1,14 +1,15 @@
-import { pool, queryOne, execute } from '../db';
-import { runWorkerTick } from './workerHealth';
 import {
   buildClientRelationship,
-  mapClientPositionRow,
+  computeLtv,
+  defaultAssumptions,
   mapClientMetricsSnapshotRow,
+  mapClientPositionRow,
   mapPricingTargetRow,
-} from '../../utils/customer360/relationshipAggregator';
-import { computeLtv, defaultAssumptions } from '../../utils/clv/ltvEngine';
-import { sha256CanonicalJson } from '../../utils/snapshotHash';
-import type { ClientEntity } from '../../types';
+} from '@npricing/commercial';
+import { sha256CanonicalJson } from '@npricing/evidence';
+import { pool, queryOne, execute } from '../db';
+import { runWorkerTick } from './workerHealth';
+import type { ClientEntity } from '@npricing/domain';
 
 /**
  * LTV snapshot worker — opt-in via LTV_SNAPSHOT_INTERVAL_MS.
@@ -61,15 +62,21 @@ async function listClientsWithActivePositions(): Promise<ClientWithEntityRow[]> 
        c.rating   AS client_rating
      FROM client_positions p
      JOIN clients c ON c.id = p.client_id
-     WHERE p.status = 'Active'`,
+     WHERE p.status = 'Active'`
   );
   return rows;
 }
 
 async function hydrateRelationship(entityId: string, clientId: string, asOfDate: string) {
   const [positions, metrics, targets] = await Promise.all([
-    pool.query(`SELECT * FROM client_positions WHERE entity_id=$1 AND client_id=$2 ORDER BY status ASC, start_date DESC`, [entityId, clientId]),
-    pool.query(`SELECT * FROM client_metrics_snapshots WHERE entity_id=$1 AND client_id=$2 ORDER BY computed_at DESC LIMIT 24`, [entityId, clientId]),
+    pool.query(
+      `SELECT * FROM client_positions WHERE entity_id=$1 AND client_id=$2 ORDER BY status ASC, start_date DESC`,
+      [entityId, clientId]
+    ),
+    pool.query(
+      `SELECT * FROM client_metrics_snapshots WHERE entity_id=$1 AND client_id=$2 ORDER BY computed_at DESC LIMIT 24`,
+      [entityId, clientId]
+    ),
     pool.query(`SELECT * FROM pricing_targets WHERE entity_id=$1 AND is_active=true`, [entityId]),
   ]);
 
@@ -77,7 +84,7 @@ async function hydrateRelationship(entityId: string, clientId: string, asOfDate:
     `SELECT id AS client_id, name AS client_name, type AS client_type, segment AS client_segment, rating AS client_rating,
             $1::text AS entity_id
      FROM clients WHERE id = $2`,
-    [entityId, clientId],
+    [entityId, clientId]
   );
   if (!client) return null;
 
@@ -90,7 +97,9 @@ async function hydrateRelationship(entityId: string, clientId: string, asOfDate:
       rating: client.client_rating ?? 'BBB',
     },
     positions: positions.rows.map(mapClientPositionRow as (r: unknown) => ReturnType<typeof mapClientPositionRow>),
-    metricsHistory: metrics.rows.map(mapClientMetricsSnapshotRow as (r: unknown) => ReturnType<typeof mapClientMetricsSnapshotRow>),
+    metricsHistory: metrics.rows.map(
+      mapClientMetricsSnapshotRow as (r: unknown) => ReturnType<typeof mapClientMetricsSnapshotRow>
+    ),
     targets: targets.rows.map(mapPricingTargetRow as (r: unknown) => ReturnType<typeof mapPricingTargetRow>),
     asOfDate,
   });
@@ -141,17 +150,24 @@ export async function runLtvSnapshotTick(asOfDate?: string): Promise<LtvTickRepo
          WHERE client_ltv_snapshots.assumptions_hash <> EXCLUDED.assumptions_hash
             OR client_ltv_snapshots.clv_point_eur    <> EXCLUDED.clv_point_eur`,
         [
-          c.entity_id, c.client_id, as_of,
-          ltv.horizonYears, ltv.discountRate,
-          ltv.clvPointEur, ltv.clvP5Eur, ltv.clvP95Eur,
-          ltv.churnHazardAnnual, ltv.renewalProb,
-          ltv.shareOfWalletEst, ltv.shareOfWalletGap,
+          c.entity_id,
+          c.client_id,
+          as_of,
+          ltv.horizonYears,
+          ltv.discountRate,
+          ltv.clvPointEur,
+          ltv.clvP5Eur,
+          ltv.clvP95Eur,
+          ltv.churnHazardAnnual,
+          ltv.renewalProb,
+          ltv.shareOfWalletEst,
+          ltv.shareOfWalletGap,
           JSON.stringify(ltv.breakdown),
           JSON.stringify(ltv.assumptions),
           assumptionsHashFull,
           ENGINE_VERSION,
           'worker:ltvSnapshotWorker',
-        ],
+        ]
       );
       computed++;
     } catch (err) {
@@ -170,7 +186,7 @@ let interval: ReturnType<typeof setInterval> | null = null;
 
 export function startLtvSnapshotWorker(): void {
   const ms = Number(process.env.LTV_SNAPSHOT_INTERVAL_MS ?? '0');
-  if (!Number.isFinite(ms) || ms < 60_000) return;      // minimum 1 min
+  if (!Number.isFinite(ms) || ms < 60_000) return; // minimum 1 min
   if (interval) return;
 
   interval = setInterval(() => {

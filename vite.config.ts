@@ -110,6 +110,13 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        '@npricing/commercial': path.resolve(__dirname, 'packages/commercial/src'),
+        '@npricing/data-access': path.resolve(__dirname, 'packages/data-access/src'),
+        '@npricing/domain': path.resolve(__dirname, 'packages/domain/src'),
+        '@npricing/evidence': path.resolve(__dirname, 'packages/evidence/src'),
+        '@npricing/governance': path.resolve(__dirname, 'packages/governance/src'),
+        '@npricing/platform': path.resolve(__dirname, 'packages/platform/src'),
+        '@npricing/pricing-core': path.resolve(__dirname, 'packages/pricing-core/src'),
       },
     },
     test: {

@@ -4,9 +4,8 @@
  * Cross-tenant reference data — no x-entity-id required. Read open to any
  * authenticated user; write is admin-only (enforced server-side).
  *
- * Supersedes `listBenchmarks` / `upsertBenchmark` in api/whatIf.ts — those
- * point to the orphan path `/what-if/benchmarks` and should be removed
- * once callers migrate.
+ * Supersedes the removed What-If benchmark CRUD helpers. What-If now keeps
+ * only `/what-if/benchmarks/compare` for target-grid comparison.
  */
 
 import { apiGet, apiPost, apiDelete } from '../utils/apiFetch';
@@ -24,6 +23,17 @@ export interface MarketBenchmarkFilters {
 export interface MarketBenchmarkWithId extends MarketBenchmark {
   id: string;
   notes: string | null;
+}
+
+export interface MarketBenchmarkImportResult {
+  inserted: number;
+  updated: number;
+  errors: Array<{
+    rowIndex: number;
+    field?: string;
+    message: string;
+    raw?: string;
+  }>;
 }
 
 function mapServerRow(row: Record<string, unknown>): MarketBenchmarkWithId {
@@ -76,5 +86,14 @@ export async function deleteMarketBenchmark(id: string): Promise<boolean> {
   } catch (err) {
     log.error('deleteMarketBenchmark failed', { id }, err as Error);
     return false;
+  }
+}
+
+export async function importMarketBenchmarksCsv(csv: string): Promise<MarketBenchmarkImportResult | null> {
+  try {
+    return await apiPost<MarketBenchmarkImportResult>('/market-benchmarks/import/csv', { csv });
+  } catch (err) {
+    log.error('importMarketBenchmarksCsv failed', {}, err as Error);
+    return null;
   }
 }

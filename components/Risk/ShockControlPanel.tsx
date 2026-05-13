@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertTriangle, FileSpreadsheet, RefreshCcw, TrendingUp } from 'lucide-react';
+import type { PricingShocks } from '@npricing/pricing-core';
 import { Badge, Panel } from '../ui/LayoutComponents';
-import type { PricingShocks } from '../../utils/pricingEngine';
 import type { Language } from '../../translations';
 import { getTranslations } from '../../translations';
 import type { Transaction } from '../../types';
@@ -69,13 +69,9 @@ export const ShockControlPanel: React.FC<Props> = ({
     <Panel title={t.shocksConfig || 'Shocks Configuration'} className="h-full bg-white dark:bg-[#0a0a0a]">
       <div className="space-y-8 p-4">
         <div className="rounded-lg border border-slate-200 bg-slate-100 p-3 dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-1 text-[10px] font-bold uppercase text-slate-500">
-            {t.targetTransaction}
-          </div>
+          <div className="mb-1 text-[10px] font-bold uppercase text-slate-500">{t.targetTransaction}</div>
           <div className="mb-1 flex items-center justify-between">
-            <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">
-              {deal.id || 'NEW-DEAL'}
-            </span>
+            <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400">{deal.id || 'NEW-DEAL'}</span>
             <Badge variant="outline">{deal.productType || t.noProduct}</Badge>
           </div>
           <div className="truncate text-xs font-medium text-slate-700 dark:text-slate-300">

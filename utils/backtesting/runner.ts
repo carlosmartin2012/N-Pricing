@@ -3,15 +3,10 @@
  * to historical deals and compares simulated vs. actual P&L.
  */
 
+import { calculatePricing, type PricingContext, type PricingShocks } from '@npricing/pricing-core';
 import type { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
-import type {
-  BacktestResult,
-  BacktestPeriod,
-  BacktestCohort,
-} from '../../types/whatIf';
+import type { BacktestResult, BacktestPeriod, BacktestCohort } from '../../types/whatIf';
 import type { TargetGridCell } from '../../types/targetGrid';
-import type { PricingContext, PricingShocks } from '../pricingEngine';
-import { calculatePricing } from '../pricingEngine';
 import { resolveCohort, findMatchingCell } from '../discipline/cohortMatcher';
 import { createLogger } from '../logger';
 
@@ -54,10 +49,17 @@ export function runBacktest(input: BacktestInput): BacktestResult {
 
   // Group by period (month) and cohort for breakdown
   const periodMap = new Map<string, { simulated: number; actual: number; count: number }>();
-  const cohortMap = new Map<string, {
-    simRateSum: number; actRateSum: number; count: number;
-    product: string; segment: string; volume: number;
-  }>();
+  const cohortMap = new Map<
+    string,
+    {
+      simRateSum: number;
+      actRateSum: number;
+      count: number;
+      product: string;
+      segment: string;
+      volume: number;
+    }
+  >();
 
   for (const deal of filteredDeals) {
     // Simulate: reprice with provided context
@@ -102,8 +104,12 @@ export function runBacktest(input: BacktestInput): BacktestResult {
 
       const cohortKey = `${deal.productType}|${deal.clientType}`;
       const cohortEntry = cohortMap.get(cohortKey) ?? {
-        simRateSum: 0, actRateSum: 0, count: 0,
-        product: deal.productType, segment: deal.clientType, volume: 0,
+        simRateSum: 0,
+        actRateSum: 0,
+        count: 0,
+        product: deal.productType,
+        segment: deal.clientType,
+        volume: 0,
       };
       cohortEntry.simRateSum += simResult.finalClientRate;
       cohortEntry.actRateSum += actualResult.finalClientRate;
@@ -135,9 +141,7 @@ export function runBacktest(input: BacktestInput): BacktestResult {
     segment: data.segment,
     simulatedAvgRate: data.count > 0 ? data.simRateSum / data.count : 0,
     actualAvgRate: data.count > 0 ? data.actRateSum / data.count : 0,
-    rateDeltaBps: data.count > 0
-      ? ((data.simRateSum - data.actRateSum) / data.count) * 10_000
-      : 0,
+    rateDeltaBps: data.count > 0 ? ((data.simRateSum - data.actRateSum) / data.count) * 10_000 : 0,
     dealCount: data.count,
     volumeEur: data.volume,
   }));

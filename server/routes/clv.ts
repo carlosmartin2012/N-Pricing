@@ -1,25 +1,27 @@
 import { Router } from 'express';
-import { query, queryOne, execute } from '../db';
-import { safeError } from '../middleware/errorHandler';
 import {
   buildClientRelationship,
-  mapClientPositionRow,
+  computeLtv,
+  computeMarginalLtvImpact,
+  defaultAssumptions,
   mapClientMetricsSnapshotRow,
+  mapClientPositionRow,
   mapPricingTargetRow,
-} from '../../utils/customer360/relationshipAggregator';
-import { computeLtv, defaultAssumptions } from '../../utils/clv/ltvEngine';
-import { computeMarginalLtvImpact } from '../../utils/clv/marginalLtvImpact';
-import { rankNextBestActions, REFERENCE_CATALOGUE } from '../../utils/clv/nextBestAction';
-import { sha256CanonicalJson } from '../../utils/snapshotHash';
-import type { ClientEntity } from '../../types';
+  rankNextBestActions,
+  REFERENCE_CATALOGUE,
+} from '@npricing/commercial';
+import { sha256CanonicalJson } from '@npricing/evidence';
+import { query, queryOne, execute } from '../db';
+import { safeError } from '../middleware/errorHandler';
 import type {
+  ClientEntity,
   ClientEvent,
   ClientLtvSnapshot,
   LtvAssumptions,
   LtvBreakdown,
   NbaRecommendation,
   DealCandidate,
-} from '../../types/clv';
+} from '@npricing/domain';
 
 /**
  * CLV + 360º temporal HTTP surface.
@@ -79,7 +81,7 @@ interface LtvSnapshotRow {
 }
 
 function mapSnapshot(row: LtvSnapshotRow): ClientLtvSnapshot {
-  const num = (x: string | null): number | null => x === null ? null : Number(x);
+  const num = (x: string | null): number | null => (x === null ? null : Number(x));
   return {
     id: row.id,
     entityId: row.entity_id,
@@ -180,21 +182,21 @@ async function loadRelationship(entityId: string, clientId: string, asOfDate: st
   // leería su nombre/segmento/rating cross-tenant.
   const client = await queryOne<ClientRow>(
     'SELECT id, name, type, segment, rating FROM clients WHERE id = $1 AND entity_id = $2 LIMIT 1',
-    [clientId, entityId],
+    [clientId, entityId]
   );
   if (!client) return null;
   const [positions, metrics, targets] = await Promise.all([
     query<Parameters<typeof mapClientPositionRow>[0]>(
       `SELECT * FROM client_positions WHERE entity_id=$1 AND client_id=$2 ORDER BY status ASC, start_date DESC`,
-      [entityId, clientId],
+      [entityId, clientId]
     ),
     query<Parameters<typeof mapClientMetricsSnapshotRow>[0]>(
       `SELECT * FROM client_metrics_snapshots WHERE entity_id=$1 AND client_id=$2 ORDER BY computed_at DESC LIMIT 24`,
-      [entityId, clientId],
+      [entityId, clientId]
     ),
     query<Parameters<typeof mapPricingTargetRow>[0]>(
       `SELECT * FROM pricing_targets WHERE entity_id=$1 AND is_active=true`,
-      [entityId],
+      [entityId]
     ),
   ]);
   return buildClientRelationship({
@@ -219,7 +221,7 @@ router.get('/clients/:clientId/timeline', async (req, res) => {
       `SELECT * FROM client_events
        WHERE entity_id = $1 AND client_id = $2
        ORDER BY event_ts DESC LIMIT $3`,
-      [req.tenancy.entityId, req.params.clientId, limit],
+      [req.tenancy.entityId, req.params.clientId, limit]
     );
     res.json(rows.map(mapEvent));
   } catch (err) {
@@ -257,7 +259,7 @@ router.post('/clients/:clientId/timeline', async (req, res) => {
         body.amountEur ?? null,
         JSON.stringify(body.payload ?? {}),
         req.tenancy.userEmail,
-      ],
+      ]
     );
     res.status(201).json(row ? mapEvent(row) : null);
   } catch (err) {
@@ -277,7 +279,7 @@ router.get('/clients/:clientId/ltv', async (req, res) => {
       `SELECT * FROM client_ltv_snapshots
        WHERE entity_id = $1 AND client_id = $2
        ORDER BY as_of_date DESC LIMIT 36`,
-      [req.tenancy.entityId, req.params.clientId],
+      [req.tenancy.entityId, req.params.clientId]
     );
     res.json(rows.map(mapSnapshot));
   } catch (err) {
@@ -292,9 +294,10 @@ router.post('/clients/:clientId/ltv/recompute', async (req, res) => {
       return;
     }
     const body = (req.body ?? {}) as Partial<LtvAssumptions> & { asOfDate?: string };
-    const asOfDate = typeof body.asOfDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate)
-      ? body.asOfDate
-      : new Date().toISOString().slice(0, 10);
+    const asOfDate =
+      typeof body.asOfDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate)
+        ? body.asOfDate
+        : new Date().toISOString().slice(0, 10);
 
     const rel = await loadRelationship(req.tenancy.entityId, req.params.clientId, asOfDate);
     if (!rel) {
@@ -349,7 +352,7 @@ router.post('/clients/:clientId/ltv/recompute', async (req, res) => {
         assumptionsHashFull,
         ENGINE_VERSION,
         req.tenancy.userEmail,
-      ],
+      ]
     );
 
     // Timeline event — best-effort: el insert no debe abortar la
@@ -359,9 +362,12 @@ router.post('/clients/:clientId/ltv/recompute', async (req, res) => {
     await execute(
       `INSERT INTO client_events (entity_id, client_id, event_type, source, payload, created_by)
        VALUES ($1, $2, 'price_review', 'ops', $3::jsonb, $4)`,
-      [req.tenancy.entityId, req.params.clientId,
-       JSON.stringify({ kind: 'ltv_recompute', clvPointEur: computed.clvPointEur, asOfDate }),
-       req.tenancy.userEmail],
+      [
+        req.tenancy.entityId,
+        req.params.clientId,
+        JSON.stringify({ kind: 'ltv_recompute', clvPointEur: computed.clvPointEur, asOfDate }),
+        req.tenancy.userEmail,
+      ]
     ).catch((err) => {
       console.error('[clv/recompute] client_events insert failed (audit trail incomplete)', {
         entityId: req.tenancy?.entityId,
@@ -404,7 +410,9 @@ router.get('/nba', async (req, res) => {
     if (statusParam === 'consumed') statusClause = 'AND nba.consumed_at IS NOT NULL';
     else if (statusParam === 'all') statusClause = '';
 
-    const rows = await query<NbaRow & { client_name: string; client_segment: string | null; client_rating: string | null }>(
+    const rows = await query<
+      NbaRow & { client_name: string; client_segment: string | null; client_rating: string | null }
+    >(
       `SELECT nba.*,
               c.name    AS client_name,
               c.segment AS client_segment,
@@ -415,14 +423,16 @@ router.get('/nba', async (req, res) => {
          ${statusClause}
        ORDER BY nba.generated_at DESC
        LIMIT 500`,
-      [req.tenancy.entityId],
+      [req.tenancy.entityId]
     );
-    res.json(rows.map((row) => ({
-      ...mapNba(row),
-      clientName:    row.client_name,
-      clientSegment: row.client_segment,
-      clientRating:  row.client_rating,
-    })));
+    res.json(
+      rows.map((row) => ({
+        ...mapNba(row),
+        clientName: row.client_name,
+        clientSegment: row.client_segment,
+        clientRating: row.client_rating,
+      }))
+    );
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -440,7 +450,7 @@ router.get('/clients/:clientId/nba', async (req, res) => {
        WHERE entity_id = $1 AND client_id = $2
          ${onlyOpen ? 'AND consumed_at IS NULL' : ''}
        ORDER BY generated_at DESC LIMIT 20`,
-      [req.tenancy.entityId, req.params.clientId],
+      [req.tenancy.entityId, req.params.clientId]
     );
     res.json(rows.map(mapNba));
   } catch (err) {
@@ -494,7 +504,7 @@ router.post('/clients/:clientId/nba/generate', async (req, res) => {
           JSON.stringify(r.reasonCodes),
           r.rationale,
           r.source,
-        ],
+        ]
       );
       if (row) created.push(mapNba(row));
     }
@@ -516,7 +526,7 @@ router.patch('/nba/:id/consume', async (req, res) => {
          SET consumed_at = NOW(), consumed_by = $3
        WHERE id = $1 AND entity_id = $2 AND consumed_at IS NULL
        RETURNING *`,
-      [req.params.id, req.tenancy.entityId, req.tenancy.userEmail],
+      [req.params.id, req.tenancy.entityId, req.tenancy.userEmail]
     );
     if (!row) {
       res.status(404).json({ code: 'not_found', message: 'Recommendation not found or already consumed' });
@@ -546,13 +556,16 @@ router.post('/preview-ltv-impact', async (req, res) => {
     const clientId = String(body.clientId ?? '');
     const c = body.candidate ?? {};
     if (!clientId || !c.productType || !Number.isFinite(c.amountEur) || !Number.isFinite(c.marginBps)) {
-      res.status(400).json({ code: 'invalid_payload', message: 'clientId + candidate{productType, amountEur, marginBps} required' });
+      res
+        .status(400)
+        .json({ code: 'invalid_payload', message: 'clientId + candidate{productType, amountEur, marginBps} required' });
       return;
     }
 
-    const asOfDate = typeof body.asOfDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate)
-      ? body.asOfDate
-      : new Date().toISOString().slice(0, 10);
+    const asOfDate =
+      typeof body.asOfDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.asOfDate)
+        ? body.asOfDate
+        : new Date().toISOString().slice(0, 10);
 
     const rel = await loadRelationship(req.tenancy.entityId, clientId, asOfDate);
     if (!rel) {
@@ -570,7 +583,7 @@ router.post('/preview-ltv-impact', async (req, res) => {
       tenorYears: Number(c.tenorYears ?? 5),
       rateBps: Number(c.rateBps ?? 0),
       marginBps: Number(c.marginBps),
-      capitalEur: Number(c.capitalEur ?? (Number(c.amountEur) * assumptions.capitalAllocationRate)),
+      capitalEur: Number(c.capitalEur ?? Number(c.amountEur) * assumptions.capitalAllocationRate),
       rarocAnnual: c.rarocAnnual,
     };
     const impact = computeMarginalLtvImpact(rel, candidate, before, assumptions);

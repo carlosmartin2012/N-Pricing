@@ -5,6 +5,7 @@
 > Banca March end-to-end). Ver sección "Cobertura Banca March" al final.
 >
 > **Cambios clave desde el último refresh (2026-04-15)**:
+>
 > - 31 `ViewState` registrados; sidebar principal compactado a 22 entradas + destinos AUX vía Command Palette.
 > - 43 migrations SQL; última `20260630000002_push_subscriptions.sql`.
 > - Hash chain tamper-evidence activo: `prev_output_hash` + partial UNIQUE + verifier puro + endpoint admin + Edge writer con retry.
@@ -99,6 +100,23 @@ está modelada como SLOs con 5 canales de alertas.
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Package boundary layer
+
+The platform restructure now exposes stable TypeScript package facades under
+`packages/`:
+
+- `@npricing/pricing-core` — FTP/RAROC pricing entrypoint and batch repricing.
+- `@npricing/domain` — shared banking domain types.
+- `@npricing/evidence` — canonical JSON, snapshot hashing, verify-chain and dossiers.
+- `@npricing/governance` — methodology, approvals, escalation and dossier helpers.
+- `@npricing/commercial` — Customer 360, campaigns, channel pricing and target grid.
+- `@npricing/data-access` — tenancy/session repository contracts.
+- `@npricing/platform` — aggregated namespace for platform consumers.
+
+These facades deliberately wrap the legacy folders first. That keeps the
+current product stable while new code stops depending on deep `utils/*` paths.
+See [`platform-restructure.md`](./platform-restructure.md).
+
 ---
 
 ## Multi-tenancy (Phase 0)
@@ -121,12 +139,14 @@ está modelada como SLOs con 5 canales de alertas.
 ### Defensa en dos capas
 
 **Capa 1 — middleware explícito** (`server/middleware/tenancy.ts`):
+
 - Extrae `x-entity-id`, valida UUID.
 - Verifica que `(user_email, entity_id)` existe en `entity_users`.
 - Si falla, persiste a `tenancy_violations` (append-only) y devuelve 403.
 - Pobla `req.tenancy = { entityId, userEmail, role, requestId }`.
 
 **Capa 2 — `withTenancyTransaction(tenancy, fn)`**:
+
 - Setea via `set_config($1, $2, true)` los `app.current_*` settings dentro de
   una transacción. `SET LOCAL` evita leaks entre conexiones del pool.
 - Las queries dentro del callback ejecutan bajo RLS estricto.
@@ -136,12 +156,12 @@ está modelada como SLOs con 5 canales de alertas.
 
 Controlado por dos env vars (ver `docs/phase-0-rollout.md`):
 
-| Fase | `TENANCY_ENFORCE` | `TENANCY_STRICT` | Comportamiento |
-|---|---|---|---|
-| 0 — Deploy | off | off | Migrations aplicadas, comportamiento legacy |
-| 1 — Warn | on | off | Middleware activo, fallback a Default Entity en DB |
-| 2 — Canary | on | on (1 tenant) | Strict para canary; legacy para el resto |
-| 3 — Global | on | on | Multi-tenant duro |
+| Fase       | `TENANCY_ENFORCE` | `TENANCY_STRICT` | Comportamiento                                     |
+| ---------- | ----------------- | ---------------- | -------------------------------------------------- |
+| 0 — Deploy | off               | off              | Migrations aplicadas, comportamiento legacy        |
+| 1 — Warn   | on                | off              | Middleware activo, fallback a Default Entity en DB |
+| 2 — Canary | on                | on (1 tenant)    | Strict para canary; legacy para el resto           |
+| 3 — Global | on                | on               | Multi-tenant duro                                  |
 
 Kill switch: flip las dos env vars a `off`, sin migración inversa.
 
@@ -151,17 +171,17 @@ Kill switch: flip las dos env vars a `off`, sin migración inversa.
 
 ### Tabla `pricing_snapshots`
 
-| Columna | Propósito |
-|---|---|
-| `id` | UUID surrogate |
-| `entity_id` | Tenancy |
-| `deal_id`, `pricing_result_id` | Lineage opcional |
-| `request_id`, `engine_version`, `as_of_date` | Correlación + versionado |
-| `used_mock_for` | Array con secciones del context que cayeron a mock |
-| `input` JSONB | `{ deal, approvalMatrix, shocks }` |
-| `context` JSONB | curvas + reglas + rate cards + ESG + behavioural + sdrConfig + lrConfig + clients + products + BUs |
-| `output` JSONB | FTPResult completo |
-| `input_hash`, `output_hash` | sha256 hex (CHECK constraint formato) |
+| Columna                                      | Propósito                                                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `id`                                         | UUID surrogate                                                                                     |
+| `entity_id`                                  | Tenancy                                                                                            |
+| `deal_id`, `pricing_result_id`               | Lineage opcional                                                                                   |
+| `request_id`, `engine_version`, `as_of_date` | Correlación + versionado                                                                           |
+| `used_mock_for`                              | Array con secciones del context que cayeron a mock                                                 |
+| `input` JSONB                                | `{ deal, approvalMatrix, shocks }`                                                                 |
+| `context` JSONB                              | curvas + reglas + rate cards + ESG + behavioural + sdrConfig + lrConfig + clients + products + BUs |
+| `output` JSONB                               | FTPResult completo                                                                                 |
+| `input_hash`, `output_hash`                  | sha256 hex (CHECK constraint formato)                                                              |
 
 Inmutable por RLS (sin UPDATE/DELETE) + trigger `enforce_snapshot_hashes`.
 
@@ -183,6 +203,7 @@ al primer mismatch).
 ### Replay
 
 `POST /api/snapshots/:id/replay`:
+
 1. Carga el snapshot.
 2. Llama a `calculatePricing(input.deal, input.approvalMatrix, context, input.shocks)` con el motor **actual**.
 3. Recomputa `sha256(canonicalJson(currentOutput))`.
@@ -199,16 +220,16 @@ T0 puede demostrarse byte-perfect en T+N.
 
 ### 8 SLIs catalogados (`types/phase0.ts` `PRICING_SLOS`)
 
-| SLI | Target inicial | Window | Severity |
-|---|---|---|---|
-| `pricing_single_latency_ms` p95 | < 300 ms | 1h | warning |
-| `pricing_single_latency_ms` p99 | < 800 ms | 1h | warning |
-| `pricing_batch_latency_ms_per_deal` | < 50 ms | 1h | warning |
-| `pricing_error_rate` | < 0.5% | 5 min | page |
-| `tenancy_violations_total` | = 0 | 1 min | critical |
-| `mock_fallback_rate` | < 5% | 1h | warning |
-| `snapshot_write_failures_total` | = 0 | 5 min | page |
-| `auth_failures_total` | (sin SLO formal) | — | — |
+| SLI                                 | Target inicial   | Window | Severity |
+| ----------------------------------- | ---------------- | ------ | -------- |
+| `pricing_single_latency_ms` p95     | < 300 ms         | 1h     | warning  |
+| `pricing_single_latency_ms` p99     | < 800 ms         | 1h     | warning  |
+| `pricing_batch_latency_ms_per_deal` | < 50 ms          | 1h     | warning  |
+| `pricing_error_rate`                | < 0.5%           | 5 min  | page     |
+| `tenancy_violations_total`          | = 0              | 1 min  | critical |
+| `mock_fallback_rate`                | < 5%             | 1h     | warning  |
+| `snapshot_write_failures_total`     | = 0              | 5 min  | page     |
+| `auth_failures_total`               | (sin SLO formal) | —      | —        |
 
 ### Pipeline
 
@@ -234,7 +255,7 @@ estructurado para la UI (`SLOPanel.tsx` embebido en `HealthDashboard`).
 
 **Tenancy violations canary (Ola 6 A).** `GET /api/observability/tenancy-violations?window_minutes=60`
 devuelve total + top-10 breakdown por `(endpoint, error_code)` para el
-tenant solicitante. El widget dedicado *Tenancy violations · last 60m*
+tenant solicitante. El widget dedicado _Tenancy violations · last 60m_
 en `SLOPanel` renderiza cero → mensaje "Safe to hold TENANCY_STRICT flip
 observation" y >0 → tabla con counts. Diseñado para la ventana de 48h de
 observación descrita en [`docs/runbooks/tenancy-strict-flip.md`](./runbooks/tenancy-strict-flip.md).
@@ -343,11 +364,11 @@ Adapters jamás throw — fallas de transporte son datos. Categorías de error:
 
 ### Tres familias
 
-| Kind | Interface | Reference impl | Stubs production-ready |
-|---|---|---|---|
+| Kind           | Interface            | Reference impl        | Stubs production-ready                  |
+| -------------- | -------------------- | --------------------- | --------------------------------------- |
 | `core_banking` | `CoreBankingAdapter` | `InMemoryCoreBanking` | (T24/FIS/FlexCube — pending bank ancla) |
-| `crm` | `CrmAdapter` | `InMemoryCrm` | `SalesforceCrmAdapter` |
-| `market_data` | `MarketDataAdapter` | `InMemoryMarketData` | `BloombergMarketDataAdapter` |
+| `crm`          | `CrmAdapter`         | `InMemoryCrm`         | `SalesforceCrmAdapter`                  |
+| `market_data`  | `MarketDataAdapter`  | `InMemoryMarketData`  | `BloombergMarketDataAdapter`            |
 
 `adapterRegistry` singleton con `coreBanking()`, `crm()`, `marketData()`,
 `healthAll()`. Stubs validan config en constructor (fail fast) y devuelven
@@ -357,6 +378,7 @@ sistema arranque y la observabilidad muestre el adapter down.
 ### SSO
 
 `SsoProvider` interface → dos implementaciones:
+
 - `DemoSsoProvider` — token shape `'demo:<sub>:<email>:<name>:<groups>'` para tests.
 - `GoogleSsoProvider` — `OAuth2Client.verifyIdToken` real, opcionalmente
   restringido a un Workspace domain (`GOOGLE_ALLOWED_HOSTED_DOMAIN`).
@@ -430,17 +452,18 @@ cálculo IRRBB regulatorio (ΔEVE, SOT, ΔNII runoff)".
 
 ### Suite por capas
 
-| Tipo | Tooling | Cuándo correr |
-|---|---|---|
-| Unit | Vitest 4 (~1.37k tests) | Cada commit |
-| Integration RLS | Vitest + Postgres real | Opt-in, cuando se cambian helpers PG |
-| E2E | Playwright (23 specs) | Pre-PR |
-| Component | Storybook 8.6 | Diseño visual aislado |
+| Tipo            | Tooling                 | Cuándo correr                        |
+| --------------- | ----------------------- | ------------------------------------ |
+| Unit            | Vitest 4 (~1.37k tests) | Cada commit                          |
+| Integration RLS | Vitest + Postgres real  | Opt-in, cuando se cambian helpers PG |
+| E2E             | Playwright (23 specs)   | Pre-PR                               |
+| Component       | Storybook 8.6           | Diseño visual aislado                |
 
 ### Integration tests opt-in
 
 `utils/__tests__/integration/tenancy.integration.test.ts` se auto-skip
 sin `INTEGRATION_DATABASE_URL`. Cobertura:
+
 - Strict mode raise vs legacy fallback.
 - `SET LOCAL` no leak entre conexiones del pool.
 - Append-only de `tenancy_violations`.
@@ -456,20 +479,20 @@ Setup: `supabase start` o Docker Postgres, exportar `INTEGRATION_DATABASE_URL`,
 
 ### Variables de entorno críticas
 
-| Var | Default | Rol |
-|---|---|---|
-| `DATABASE_URL` | required | pg pool del server |
-| `JWT_SECRET` | dev fallback | required en prod |
-| `VITE_GOOGLE_CLIENT_ID` | — | habilita Google SSO |
-| `GOOGLE_ALLOWED_HOSTED_DOMAIN` | unset | restringe SSO |
-| `TENANCY_ENFORCE` | off | activa middleware |
-| `TENANCY_STRICT` | off | hace strict el helper PG |
-| `PRICING_ALLOW_MOCKS` | unset (false) | rechaza pricing si falta config |
-| `ENGINE_VERSION` | `dev-local` | grabado en `pricing_snapshots` |
-| `ALERT_EVAL_INTERVAL_MS` | unset | activa alert worker |
-| `DOSSIER_SIGNING_SECRET` | dev fallback | required en prod |
+| Var                              | Default       | Rol                                                                                                          |
+| -------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`                   | required      | pg pool del server                                                                                           |
+| `JWT_SECRET`                     | dev fallback  | required en prod                                                                                             |
+| `VITE_GOOGLE_CLIENT_ID`          | —             | habilita Google SSO                                                                                          |
+| `GOOGLE_ALLOWED_HOSTED_DOMAIN`   | unset         | restringe SSO                                                                                                |
+| `TENANCY_ENFORCE`                | off           | activa middleware                                                                                            |
+| `TENANCY_STRICT`                 | off           | hace strict el helper PG                                                                                     |
+| `PRICING_ALLOW_MOCKS`            | unset (false) | rechaza pricing si falta config                                                                              |
+| `ENGINE_VERSION`                 | `dev-local`   | grabado en `pricing_snapshots`                                                                               |
+| `ALERT_EVAL_INTERVAL_MS`         | unset         | activa alert worker                                                                                          |
+| `DOSSIER_SIGNING_SECRET`         | dev fallback  | required en prod                                                                                             |
 | `VITE_PRICING_APPLY_CURVE_SHIFT` | unset (false) | `true` → motor interpola per-tenor con `ShockScenario.curveShiftBps` (Ola 6 B.4). Off = legacy uniform shift |
-| `INTEGRATION_DATABASE_URL` | unset | activa tests integración |
+| `INTEGRATION_DATABASE_URL`       | unset         | activa tests integración                                                                                     |
 
 ### Runbooks
 
@@ -546,6 +569,7 @@ Modelo formal de **delegated authority by hierarchy** que coexiste con
 el `delegationTier` plano de FTPResult (5 tiers fijos).
 
 **Schema (3 tablas + RLS append-only)**:
+
 - `attribution_levels` — árbol N-ario por entity (Oficina → Zona →
   Territorial → Comité). Soft-delete vía `active=false`.
 - `attribution_thresholds` — umbrales por (nivel × scope jsonb)
@@ -566,6 +590,7 @@ AttributionMatrixView, AttributionReportingView (4 tabs Volume / Drift /
 Funnel / Time-to-decision).
 
 **Workers opt-in**:
+
 - `attributionDriftDetector` — `ATTRIBUTION_DRIFT_INTERVAL_MS`.
 - `attributionThresholdRecalibrator` —
   `ATTRIBUTION_RECALIBRATION_INTERVAL_MS`.
@@ -589,7 +614,7 @@ in-memory que Salesforce/Bloomberg:
 ### AI grounding + Web Push (Ola 10)
 
 - Copilot Cmd+K entiende la matriz: `buildAttributionsContextBlock`
-  + `suggestAttributionsActions` con deep-links.
+  - `suggestAttributionsActions` con deep-links.
 - Web Push real con VAPID: `webPushSender` + `escalationPushDispatcher`.
   Cuando una decision cae como `escalated`, push a usuarios con el
   `rbac_role` del nivel. Failing closed si VAPID no configurado

@@ -20,11 +20,11 @@
 
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
+import { hashSnapshotInput, hashSnapshotOutput } from '@npricing/evidence';
 import { query, queryOne, withTransaction, type Tx } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { routeApproval } from '../../utils/attributions/attributionRouter';
 import { simulate } from '../../utils/attributions/attributionSimulator';
-import { hashSnapshotInput, hashSnapshotOutput } from '../../utils/snapshotHash';
 import {
   buildAttributionSummary,
   type AttributionReportingSummary,
@@ -93,33 +93,33 @@ function num(v: string | number | null): number | null {
 
 function mapLevel(row: LevelRow): AttributionLevel {
   return {
-    id:           row.id,
-    entityId:     row.entity_id,
-    name:         row.name,
-    parentId:     row.parent_id,
-    levelOrder:   row.level_order,
-    rbacRole:     row.rbac_role,
-    metadata:     row.metadata ?? {},
-    active:       row.active,
-    createdAt:    toIsoString(row.created_at),
-    updatedAt:    toIsoString(row.updated_at),
+    id: row.id,
+    entityId: row.entity_id,
+    name: row.name,
+    parentId: row.parent_id,
+    levelOrder: row.level_order,
+    rbacRole: row.rbac_role,
+    metadata: row.metadata ?? {},
+    active: row.active,
+    createdAt: toIsoString(row.created_at),
+    updatedAt: toIsoString(row.updated_at),
   };
 }
 
 function mapThreshold(row: ThresholdRow): AttributionThreshold {
   return {
-    id:                row.id,
-    entityId:          row.entity_id,
-    levelId:           row.level_id,
-    scope:             row.scope ?? {},
-    deviationBpsMax:   num(row.deviation_bps_max),
-    rarocPpMin:        num(row.raroc_pp_min),
-    volumeEurMax:      num(row.volume_eur_max),
-    activeFrom:        toIsoDate(row.active_from),
-    activeTo:          row.active_to === null ? null : toIsoDate(row.active_to),
-    isActive:          row.is_active,
-    createdAt:         toIsoString(row.created_at),
-    updatedAt:         toIsoString(row.updated_at),
+    id: row.id,
+    entityId: row.entity_id,
+    levelId: row.level_id,
+    scope: row.scope ?? {},
+    deviationBpsMax: num(row.deviation_bps_max),
+    rarocPpMin: num(row.raroc_pp_min),
+    volumeEurMax: num(row.volume_eur_max),
+    activeFrom: toIsoDate(row.active_from),
+    activeTo: row.active_to === null ? null : toIsoDate(row.active_to),
+    isActive: row.is_active,
+    createdAt: toIsoString(row.created_at),
+    updatedAt: toIsoString(row.updated_at),
   };
 }
 
@@ -133,20 +133,20 @@ async function loadMatrix(entityId: string): Promise<AttributionMatrix> {
       `SELECT * FROM attribution_levels
        WHERE entity_id = $1 AND active = TRUE
        ORDER BY level_order ASC, name ASC`,
-      [entityId],
+      [entityId]
     ),
     query<ThresholdRow>(
       `SELECT * FROM attribution_thresholds
        WHERE entity_id = $1 AND is_active = TRUE
        ORDER BY level_id ASC, active_from DESC`,
-      [entityId],
+      [entityId]
     ),
   ]);
   return {
     entityId,
-    levels:     levels.map(mapLevel),
+    levels: levels.map(mapLevel),
     thresholds: thresholds.map(mapThreshold),
-    loadedAt:   new Date().toISOString(),
+    loadedAt: new Date().toISOString(),
   };
 }
 
@@ -156,16 +156,16 @@ async function loadMatrix(entityId: string): Promise<AttributionMatrix> {
 
 function requireTenancy(
   req: Parameters<Parameters<typeof router.get>[1]>[0],
-  res: Parameters<Parameters<typeof router.get>[1]>[1],
+  res: Parameters<Parameters<typeof router.get>[1]>[1]
 ): { entityId: string; userEmail: string | null; role: string | null } | null {
   if (!req.tenancy) {
     res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
     return null;
   }
   return {
-    entityId:  req.tenancy.entityId,
+    entityId: req.tenancy.entityId,
     userEmail: req.tenancy.userEmail ?? null,
-    role:      req.tenancy.role ?? null,
+    role: req.tenancy.role ?? null,
   };
 }
 
@@ -179,17 +179,16 @@ function isValidQuoteBody(body: unknown): body is AttributionQuote {
   const q = body as Record<string, unknown>;
   return (
     typeof q.finalClientRateBps === 'number' &&
-    typeof q.standardRateBps   === 'number' &&
-    typeof q.hardFloorRateBps  === 'number' &&
-    typeof q.rarocPp           === 'number' &&
-    typeof q.volumeEur         === 'number' &&
-    typeof q.scope             === 'object' && q.scope !== null
+    typeof q.standardRateBps === 'number' &&
+    typeof q.hardFloorRateBps === 'number' &&
+    typeof q.rarocPp === 'number' &&
+    typeof q.volumeEur === 'number' &&
+    typeof q.scope === 'object' &&
+    q.scope !== null
   );
 }
 
-const ALLOWED_DECISIONS: AttributionDecisionStatus[] = [
-  'approved', 'rejected', 'escalated', 'expired', 'reverted',
-];
+const ALLOWED_DECISIONS: AttributionDecisionStatus[] = ['approved', 'rejected', 'escalated', 'expired', 'reverted'];
 
 // Roles autorizados para registrar AttributionDecision. La matriz
 // configurable de `attribution_levels.rbac_role` declara *qué* role aplica
@@ -201,18 +200,19 @@ const ALLOWED_DECISIONS: AttributionDecisionStatus[] = [
 // Mantener sincronizado con los rbac_role que aparecen en attribution_levels
 // de los deploys reales. Si una entity introduce un nuevo rbac_role que
 // puede decidir, añádelo aquí o el endpoint devolverá 403.
-const DECISION_ALLOWED_ROLES = [
-  'Admin', 'Risk_Manager', 'Director', 'Trader',
-  'BranchManager', 'Compliance_Officer',
-];
+const DECISION_ALLOWED_ROLES = ['Admin', 'Risk_Manager', 'Director', 'Trader', 'BranchManager', 'Compliance_Officer'];
 
 const ESCALATION_REQUEST_ROLES = [
-  'Admin', 'Risk_Manager', 'Director', 'Trader',
-  'BranchManager', 'Commercial', 'Sales',
+  'Admin',
+  'Risk_Manager',
+  'Director',
+  'Trader',
+  'BranchManager',
+  'Commercial',
+  'Sales',
 ];
 
-const ENGINE_VERSION =
-  process.env.ENGINE_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'node-calculator';
+const ENGINE_VERSION = process.env.ENGINE_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'node-calculator';
 
 interface EscalationRequestBody {
   quote?: AttributionQuote;
@@ -252,7 +252,7 @@ async function insertDecision(
     reason: string | null;
     pricingSnapshotHash: string;
     routingMetadata: AttributionRoutingMetadata;
-  },
+  }
 ): Promise<DecisionRow | null> {
   return tx.queryOne<DecisionRow>(
     `INSERT INTO attribution_decisions
@@ -261,19 +261,25 @@ async function insertDecision(
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING *`,
     [
-      tenancy.entityId, dealId, requiredLevelId, decidedByLevelId,
+      tenancy.entityId,
+      dealId,
+      requiredLevelId,
+      decidedByLevelId,
       tenancy.userEmail,
-      decision, reason, pricingSnapshotHash, JSON.stringify(routingMetadata),
-    ],
+      decision,
+      reason,
+      pricingSnapshotHash,
+      JSON.stringify(routingMetadata),
+    ]
   );
 }
 
 function dispatchEscalationDecision(row: DecisionRow, routingMetadata: AttributionRoutingMetadata): void {
   if (row.decision !== 'escalated') return;
   dispatchEscalationPush({
-    entityId:        row.entity_id,
-    dealId:          row.deal_id,
-    decisionId:      row.id,
+    entityId: row.entity_id,
+    dealId: row.deal_id,
+    decisionId: row.id,
     requiredLevelId: row.required_level_id,
     routingMetadata: row.routing_metadata ?? routingMetadata,
   })
@@ -320,11 +326,11 @@ router.post('/levels', async (req, res) => {
     }
 
     const body = req.body ?? {};
-    const name       = typeof body.name       === 'string' ? body.name.trim() : '';
-    const parentId   = body.parentId === null || typeof body.parentId === 'string' ? body.parentId : null;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    const parentId = body.parentId === null || typeof body.parentId === 'string' ? body.parentId : null;
     const levelOrder = Number.isInteger(body.levelOrder) && body.levelOrder >= 1 ? body.levelOrder : null;
-    const rbacRole   = typeof body.rbacRole   === 'string' ? body.rbacRole.trim() : '';
-    const metadata   = body.metadata && typeof body.metadata === 'object' ? body.metadata : {};
+    const rbacRole = typeof body.rbacRole === 'string' ? body.rbacRole.trim() : '';
+    const metadata = body.metadata && typeof body.metadata === 'object' ? body.metadata : {};
 
     if (!name || levelOrder === null || !rbacRole) {
       res.status(400).json({
@@ -339,7 +345,7 @@ router.post('/levels', async (req, res) => {
          (entity_id, name, parent_id, level_order, rbac_role, metadata)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [tenancy.entityId, name, parentId, levelOrder, rbacRole, JSON.stringify(metadata)],
+      [tenancy.entityId, name, parentId, levelOrder, rbacRole, JSON.stringify(metadata)]
     );
     if (!row) {
       res.status(500).json({ code: 'insert_failed', message: 'Could not create level' });
@@ -408,7 +414,7 @@ router.patch('/levels/:id', async (req, res) => {
        SET ${updates.join(', ')}
        WHERE id = $${idx++} AND entity_id = $${idx++}
        RETURNING *`,
-      params,
+      params
     );
     if (!row) {
       res.status(404).json({ code: 'not_found', message: 'Level not found' });
@@ -435,16 +441,16 @@ router.post('/thresholds', async (req, res) => {
 
     const body = req.body ?? {};
     const levelId = typeof body.levelId === 'string' ? body.levelId : null;
-    const scope   = body.scope && typeof body.scope === 'object' ? body.scope : {};
+    const scope = body.scope && typeof body.scope === 'object' ? body.scope : {};
     const deviationBpsMax = typeof body.deviationBpsMax === 'number' ? body.deviationBpsMax : null;
-    const rarocPpMin      = typeof body.rarocPpMin      === 'number' ? body.rarocPpMin      : null;
-    const volumeEurMax    = typeof body.volumeEurMax    === 'number' ? body.volumeEurMax    : null;
-    const activeFrom = typeof body.activeFrom === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.activeFrom)
-      ? body.activeFrom
-      : new Date().toISOString().slice(0, 10);
-    const activeTo = typeof body.activeTo === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.activeTo)
-      ? body.activeTo
-      : null;
+    const rarocPpMin = typeof body.rarocPpMin === 'number' ? body.rarocPpMin : null;
+    const volumeEurMax = typeof body.volumeEurMax === 'number' ? body.volumeEurMax : null;
+    const activeFrom =
+      typeof body.activeFrom === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.activeFrom)
+        ? body.activeFrom
+        : new Date().toISOString().slice(0, 10);
+    const activeTo =
+      typeof body.activeTo === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.activeTo) ? body.activeTo : null;
 
     if (!levelId) {
       res.status(400).json({ code: 'validation_error', message: 'levelId is required' });
@@ -465,10 +471,15 @@ router.post('/thresholds', async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
-        tenancy.entityId, levelId, JSON.stringify(scope),
-        deviationBpsMax, rarocPpMin, volumeEurMax,
-        activeFrom, activeTo,
-      ],
+        tenancy.entityId,
+        levelId,
+        JSON.stringify(scope),
+        deviationBpsMax,
+        rarocPpMin,
+        volumeEurMax,
+        activeFrom,
+        activeTo,
+      ]
     );
     if (!row) {
       res.status(500).json({ code: 'insert_failed', message: 'Could not create threshold' });
@@ -537,7 +548,7 @@ router.patch('/thresholds/:id', async (req, res) => {
        SET ${updates.join(', ')}
        WHERE id = $${idx++} AND entity_id = $${idx++}
        RETURNING *`,
-      params,
+      params
     );
     if (!row) {
       res.status(404).json({ code: 'not_found', message: 'Threshold not found' });
@@ -597,9 +608,8 @@ router.post('/simulate', async (req, res) => {
       res.status(400).json({ code: 'validation_error', message: 'quote required' });
       return;
     }
-    const adjustments = (body.proposedAdjustments && typeof body.proposedAdjustments === 'object')
-      ? body.proposedAdjustments
-      : {};
+    const adjustments =
+      body.proposedAdjustments && typeof body.proposedAdjustments === 'object' ? body.proposedAdjustments : {};
     const input: SimulationInput = { quote: body.quote, proposedAdjustments: adjustments };
 
     const matrix = await loadMatrix(tenancy.entityId);
@@ -638,19 +648,24 @@ interface DecisionRow {
 
 function mapDecision(row: DecisionRow) {
   return {
-    id:                  row.id,
-    entityId:            row.entity_id,
-    dealId:              row.deal_id,
-    requiredLevelId:     row.required_level_id,
-    decidedByLevelId:    row.decided_by_level_id,
-    decidedByUser:       row.decided_by_user,
-    decision:            row.decision,
-    reason:              row.reason,
+    id: row.id,
+    entityId: row.entity_id,
+    dealId: row.deal_id,
+    requiredLevelId: row.required_level_id,
+    decidedByLevelId: row.decided_by_level_id,
+    decidedByUser: row.decided_by_user,
+    decision: row.decision,
+    reason: row.reason,
     pricingSnapshotHash: row.pricing_snapshot_hash,
-    routingMetadata:     row.routing_metadata ?? {
-      deviationBps: 0, rarocPp: 0, volumeEur: 0, scope: {},
-    } as AttributionRoutingMetadata,
-    decidedAt:           toIsoString(row.decided_at),
+    routingMetadata:
+      row.routing_metadata ??
+      ({
+        deviationBps: 0,
+        rarocPp: 0,
+        volumeEur: 0,
+        scope: {},
+      } as AttributionRoutingMetadata),
+    decidedAt: toIsoString(row.decided_at),
   };
 }
 
@@ -658,7 +673,7 @@ async function persistEscalationWithSnapshot(
   tenancy: { entityId: string; userEmail: string | null },
   dealId: string,
   body: Required<Pick<EscalationRequestBody, 'quote'>> & EscalationRequestBody,
-  routing: ReturnType<typeof routeApproval>,
+  routing: ReturnType<typeof routeApproval>
 ): Promise<{ snapshotId: string; snapshotHash: string; decision: DecisionRow } | 'deal_not_found'> {
   const requestId = `ATTR-${randomUUID()}`;
   const snapshotInput = {
@@ -686,9 +701,10 @@ async function persistEscalationWithSnapshot(
   const snapshotOutput = body.pricingResult ?? { attributionQuote: body.quote };
   const inputHash = await hashSnapshotInput(snapshotInput, snapshotContext);
   const outputHash = await hashSnapshotOutput(snapshotOutput);
-  const reason = typeof body.reason === 'string' && body.reason.trim()
-    ? body.reason.trim()
-    : 'Requested from Calculator Attribution Simulator';
+  const reason =
+    typeof body.reason === 'string' && body.reason.trim()
+      ? body.reason.trim()
+      : 'Requested from Calculator Attribution Simulator';
   const maxAttempts = 4;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -697,7 +713,7 @@ async function persistEscalationWithSnapshot(
       const result = await withTransaction(async (tx) => {
         const deal = await tx.queryOne<{ id: string }>(
           'SELECT id FROM deals WHERE id = $1 AND entity_id = $2 LIMIT 1',
-          [dealId, tenancy.entityId],
+          [dealId, tenancy.entityId]
         );
         if (!deal) return 'deal_not_found' as const;
 
@@ -706,7 +722,7 @@ async function persistEscalationWithSnapshot(
            WHERE entity_id = $1
            ORDER BY created_at DESC, id DESC
            LIMIT 1`,
-          [tenancy.entityId],
+          [tenancy.entityId]
         );
         await tx.execute(
           `INSERT INTO pricing_snapshots
@@ -731,7 +747,7 @@ async function persistEscalationWithSnapshot(
             null,
             null,
             last?.output_hash ?? null,
-          ],
+          ]
         );
 
         const row = await insertDecision(tx, tenancy, {
@@ -795,7 +811,12 @@ router.post('/escalations/:dealId', async (req, res) => {
       return;
     }
 
-    const result = await persistEscalationWithSnapshot(tenancy, req.params.dealId, { ...body, quote: body.quote }, routing);
+    const result = await persistEscalationWithSnapshot(
+      tenancy,
+      req.params.dealId,
+      { ...body, quote: body.quote },
+      routing
+    );
     if (result === 'deal_not_found') {
       res.status(404).json({ code: 'deal_not_found', message: 'Deal not found in this entity' });
       return;
@@ -836,9 +857,8 @@ router.post('/decisions/:dealId', async (req, res) => {
     const decidedByLevelId = typeof body.decidedByLevelId === 'string' ? body.decidedByLevelId : null;
     const decision = typeof body.decision === 'string' ? body.decision : null;
     const pricingSnapshotHash = typeof body.pricingSnapshotHash === 'string' ? body.pricingSnapshotHash : null;
-    const routingMetadata = body.routingMetadata && typeof body.routingMetadata === 'object'
-      ? body.routingMetadata
-      : {};
+    const routingMetadata =
+      body.routingMetadata && typeof body.routingMetadata === 'object' ? body.routingMetadata : {};
     const reason = typeof body.reason === 'string' ? body.reason : null;
 
     if (!requiredLevelId || !decision || !pricingSnapshotHash) {
@@ -903,18 +923,28 @@ router.get('/decisions', async (req, res) => {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
 
-    const dealId  = typeof req.query.deal_id === 'string'  ? req.query.deal_id  : null;
+    const dealId = typeof req.query.deal_id === 'string' ? req.query.deal_id : null;
     const levelId = typeof req.query.level_id === 'string' ? req.query.level_id : null;
-    const userId  = typeof req.query.user === 'string'     ? req.query.user     : null;
-    const limit  = Math.min(parseInt(String(req.query.limit  ?? '100'), 10) || 100, 500);
-    const offset = Math.max(parseInt(String(req.query.offset ?? '0'),   10) || 0,   0);
+    const userId = typeof req.query.user === 'string' ? req.query.user : null;
+    const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10) || 100, 500);
+    const offset = Math.max(parseInt(String(req.query.offset ?? '0'), 10) || 0, 0);
 
     const wheres: string[] = ['entity_id = $1'];
     const params: unknown[] = [tenancy.entityId];
     let idx = 2;
-    if (dealId)  { wheres.push(`deal_id = $${idx++}`);              params.push(dealId); }
-    if (levelId) { wheres.push(`(required_level_id = $${idx} OR decided_by_level_id = $${idx})`); params.push(levelId); idx++; }
-    if (userId)  { wheres.push(`decided_by_user = $${idx++}`);      params.push(userId); }
+    if (dealId) {
+      wheres.push(`deal_id = $${idx++}`);
+      params.push(dealId);
+    }
+    if (levelId) {
+      wheres.push(`(required_level_id = $${idx} OR decided_by_level_id = $${idx})`);
+      params.push(levelId);
+      idx++;
+    }
+    if (userId) {
+      wheres.push(`decided_by_user = $${idx++}`);
+      params.push(userId);
+    }
 
     params.push(limit, offset);
     const rows = await query<DecisionRow>(
@@ -922,7 +952,7 @@ router.get('/decisions', async (req, res) => {
        WHERE ${wheres.join(' AND ')}
        ORDER BY decided_at DESC
        LIMIT $${idx++} OFFSET $${idx++}`,
-      params,
+      params
     );
 
     res.json({
@@ -939,34 +969,34 @@ router.get('/decisions', async (req, res) => {
 // ---------------------------------------------------------------------------
 
 interface RecalibrationRow {
-  id:                          string;
-  entity_id:                   string;
-  threshold_id:                string;
-  proposed_deviation_bps_max:  string | number | null;
-  proposed_raroc_pp_min:       string | number | null;
-  proposed_volume_eur_max:     string | number | null;
-  rationale:                   Record<string, unknown> | null;
-  status:                      'pending' | 'approved' | 'rejected' | 'superseded';
-  proposed_at:                 string | Date;
-  decided_at:                  string | Date | null;
-  decided_by_user:             string | null;
-  reason:                      string | null;
+  id: string;
+  entity_id: string;
+  threshold_id: string;
+  proposed_deviation_bps_max: string | number | null;
+  proposed_raroc_pp_min: string | number | null;
+  proposed_volume_eur_max: string | number | null;
+  rationale: Record<string, unknown> | null;
+  status: 'pending' | 'approved' | 'rejected' | 'superseded';
+  proposed_at: string | Date;
+  decided_at: string | Date | null;
+  decided_by_user: string | null;
+  reason: string | null;
 }
 
 function mapRecalibration(row: RecalibrationRow) {
   return {
-    id:                       row.id,
-    entityId:                 row.entity_id,
-    thresholdId:              row.threshold_id,
-    proposedDeviationBpsMax:  num(row.proposed_deviation_bps_max),
-    proposedRarocPpMin:       num(row.proposed_raroc_pp_min),
-    proposedVolumeEurMax:     num(row.proposed_volume_eur_max),
-    rationale:                (row.rationale ?? {}) as Record<string, unknown>,
-    status:                   row.status,
-    proposedAt:               toIsoString(row.proposed_at),
-    decidedAt:                row.decided_at === null ? null : toIsoString(row.decided_at),
-    decidedByUser:            row.decided_by_user,
-    reason:                   row.reason,
+    id: row.id,
+    entityId: row.entity_id,
+    thresholdId: row.threshold_id,
+    proposedDeviationBpsMax: num(row.proposed_deviation_bps_max),
+    proposedRarocPpMin: num(row.proposed_raroc_pp_min),
+    proposedVolumeEurMax: num(row.proposed_volume_eur_max),
+    rationale: (row.rationale ?? {}) as Record<string, unknown>,
+    status: row.status,
+    proposedAt: toIsoString(row.proposed_at),
+    decidedAt: row.decided_at === null ? null : toIsoString(row.decided_at),
+    decidedByUser: row.decided_by_user,
+    reason: row.reason,
   };
 }
 
@@ -983,7 +1013,7 @@ router.get('/recalibrations', async (req, res) => {
       return;
     }
     const status = typeof req.query.status === 'string' ? req.query.status : null;
-    const validStatus = ['pending','approved','rejected','superseded'] as const;
+    const validStatus = ['pending', 'approved', 'rejected', 'superseded'] as const;
     const wheres: string[] = ['entity_id = $1'];
     const params: unknown[] = [tenancy.entityId];
     let idx = 2;
@@ -996,7 +1026,7 @@ router.get('/recalibrations', async (req, res) => {
        WHERE ${wheres.join(' AND ')}
        ORDER BY proposed_at DESC
        LIMIT 200`,
-      params,
+      params
     );
     res.json({ items: rows.map(mapRecalibration) });
   } catch (err) {
@@ -1024,19 +1054,21 @@ router.post('/recalibrations/:id/approve', async (req, res) => {
     // sigue usando el threshold viejo aunque el operador "haya aprobado".
     try {
       const result = await withTransaction(async (tx) => {
-        const proposal = await tx.queryOne<RecalibrationRow & {
-          scope: Record<string, unknown> | null;
-          level_id: string;
-          active_from: string | Date;
-          active_to:   string | Date | null;
-        }>(
+        const proposal = await tx.queryOne<
+          RecalibrationRow & {
+            scope: Record<string, unknown> | null;
+            level_id: string;
+            active_from: string | Date;
+            active_to: string | Date | null;
+          }
+        >(
           `SELECT r.*, t.level_id, t.scope, t.active_from, t.active_to
              FROM attribution_threshold_recalibrations r
              JOIN attribution_thresholds t ON t.id = r.threshold_id
             WHERE r.id = $1 AND r.entity_id = $2 AND r.status = 'pending'
               AND t.entity_id = $2
             FOR UPDATE OF r`,
-          [req.params.id, tenancy.entityId],
+          [req.params.id, tenancy.entityId]
         );
         if (!proposal) return null;
 
@@ -1055,7 +1087,7 @@ router.post('/recalibrations/:id/approve', async (req, res) => {
             proposal.proposed_deviation_bps_max,
             proposal.proposed_raroc_pp_min,
             proposal.proposed_volume_eur_max,
-          ],
+          ]
         );
 
         // Paso 2 — desactivar threshold viejo (soft-delete preserva FK
@@ -1064,7 +1096,7 @@ router.post('/recalibrations/:id/approve', async (req, res) => {
           `UPDATE attribution_thresholds
               SET is_active = FALSE, active_to = CURRENT_DATE, updated_at = NOW()
             WHERE id = $1 AND entity_id = $2`,
-          [proposal.threshold_id, tenancy.entityId],
+          [proposal.threshold_id, tenancy.entityId]
         );
 
         // Paso 3 — marcar la propuesta como approved.
@@ -1074,7 +1106,7 @@ router.post('/recalibrations/:id/approve', async (req, res) => {
                   decided_by_user = $1, reason = $2
             WHERE id = $3 AND entity_id = $4
             RETURNING *`,
-          [tenancy.userEmail, reason, req.params.id, tenancy.entityId],
+          [tenancy.userEmail, reason, req.params.id, tenancy.entityId]
         );
         return updated;
       });
@@ -1114,7 +1146,7 @@ router.post('/recalibrations/:id/reject', async (req, res) => {
        SET status = 'rejected', decided_at = NOW(), decided_by_user = $1, reason = $2
        WHERE id = $3 AND entity_id = $4 AND status = 'pending'
        RETURNING *`,
-      [tenancy.userEmail, reason, req.params.id, tenancy.entityId],
+      [tenancy.userEmail, reason, req.params.id, tenancy.entityId]
     );
     if (!row) {
       res.status(404).json({ code: 'not_found', message: 'Pending recalibration not found' });
@@ -1135,10 +1167,7 @@ router.get('/reporting/summary', async (req, res) => {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
 
-    const windowDays = Math.min(
-      Math.max(parseInt(String(req.query.window_days ?? '90'), 10) || 90, 1),
-      365,
-    );
+    const windowDays = Math.min(Math.max(parseInt(String(req.query.window_days ?? '90'), 10) || 90, 1), 365);
 
     const [decisionRows, levelRows, thresholdRows] = await Promise.all([
       query<DecisionRow>(
@@ -1153,17 +1182,17 @@ router.get('/reporting/summary', async (req, res) => {
          WHERE entity_id = $1
            AND decided_at >= NOW() - make_interval(days => $2::integer)
          ORDER BY decided_at DESC`,
-        [tenancy.entityId, windowDays],
+        [tenancy.entityId, windowDays]
       ),
       query<LevelRow>(
         `SELECT * FROM attribution_levels
          WHERE entity_id = $1 AND active = TRUE`,
-        [tenancy.entityId],
+        [tenancy.entityId]
       ),
       query<ThresholdRow>(
         `SELECT * FROM attribution_thresholds
          WHERE entity_id = $1 AND is_active = TRUE`,
-        [tenancy.entityId],
+        [tenancy.entityId]
       ),
     ]);
 
@@ -1171,9 +1200,7 @@ router.get('/reporting/summary', async (req, res) => {
     const levels = levelRows.map(mapLevel);
     const thresholdsByLevel = new Map<string, number | null>();
     for (const row of thresholdRows) {
-      const max = row.deviation_bps_max === null
-        ? null
-        : Number(row.deviation_bps_max);
+      const max = row.deviation_bps_max === null ? null : Number(row.deviation_bps_max);
       // Si un nivel tiene varios thresholds, conserva el más estricto.
       const existing = thresholdsByLevel.get(row.level_id);
       if (existing === undefined || (max !== null && (existing === null || max < existing))) {

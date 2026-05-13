@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, GitCompare, Plus } from 'lucide-react';
+import { calculatePricing } from '@npricing/pricing-core';
 import type { ApprovalMatrixConfig, FTPResult, Transaction } from '../../types';
-import { calculatePricing } from '../../utils/pricingEngine';
 import { useUI } from '../../contexts/UIContext';
 import { usePricingContext } from '../../hooks/usePricingContext';
 import { PricingComparisonTable } from './PricingComparisonTable';
@@ -33,7 +33,7 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
         const deal: Transaction = { ...baseDeal, ...scenario.overrides };
         return calculatePricing(deal, approvalMatrix, pricingContext, scenario.shocks);
       }),
-    [scenarios, baseDeal, approvalMatrix, pricingContext],
+    [scenarios, baseDeal, approvalMatrix, pricingContext]
   );
 
   const addScenario = useCallback(() => {
@@ -56,45 +56,42 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
     setScenarios((previousScenarios) => previousScenarios.filter((scenario) => scenario.id !== id));
   }, []);
 
-  const duplicateScenario = useCallback((scenario: PricingScenario) => {
-    if (scenarios.length >= MAX_COMPARISON_SCENARIOS) return;
+  const duplicateScenario = useCallback(
+    (scenario: PricingScenario) => {
+      if (scenarios.length >= MAX_COMPARISON_SCENARIOS) return;
 
-    scenarioCounter += 1;
-    setScenarios((previousScenarios) => [
-      ...previousScenarios,
-      {
-        ...scenario,
-        id: `dup-${scenarioCounter}`,
-        name: `${scenario.name} (copy)`,
-      },
-    ]);
-  }, [scenarios.length]);
+      scenarioCounter += 1;
+      setScenarios((previousScenarios) => [
+        ...previousScenarios,
+        {
+          ...scenario,
+          id: `dup-${scenarioCounter}`,
+          name: `${scenario.name} (copy)`,
+        },
+      ]);
+    },
+    [scenarios.length]
+  );
 
   const updateScenario = useCallback((id: string, updates: Partial<PricingScenario>) => {
     setScenarios((previousScenarios) =>
-      previousScenarios.map((scenario) =>
-        scenario.id === id ? { ...scenario, ...updates } : scenario,
-      ),
+      previousScenarios.map((scenario) => (scenario.id === id ? { ...scenario, ...updates } : scenario))
     );
   }, []);
 
   const updateShock = useCallback((id: string, key: keyof PricingScenario['shocks'], value: number) => {
     setScenarios((previousScenarios) =>
       previousScenarios.map((scenario) =>
-        scenario.id === id
-          ? { ...scenario, shocks: { ...scenario.shocks, [key]: value } }
-          : scenario,
-      ),
+        scenario.id === id ? { ...scenario, shocks: { ...scenario.shocks, [key]: value } } : scenario
+      )
     );
   }, []);
 
   const updateOverride = useCallback((id: string, key: keyof Transaction, value: unknown) => {
     setScenarios((previousScenarios) =>
       previousScenarios.map((scenario) =>
-        scenario.id === id
-          ? { ...scenario, overrides: { ...scenario.overrides, [key]: value } }
-          : scenario,
-      ),
+        scenario.id === id ? { ...scenario, overrides: { ...scenario.overrides, [key]: value } } : scenario
+      )
     );
   }, []);
 
@@ -106,9 +103,7 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
       >
         <div className="flex items-center gap-2">
           <GitCompare size={16} className="text-cyan-400" />
-          <span className="text-sm font-medium text-slate-200">
-            {t.compareScenarios || 'Compare Scenarios'}
-          </span>
+          <span className="text-sm font-medium text-slate-200">{t.compareScenarios || 'Compare Scenarios'}</span>
           <span className="font-mono text-xs text-slate-500">
             ({scenarios.length}/{MAX_COMPARISON_SCENARIOS})
           </span>
@@ -146,18 +141,12 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
                 className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600/40 bg-slate-800/30 p-3 transition-colors hover:border-cyan-600/50 hover:bg-slate-800/50"
               >
                 <Plus size={20} className="text-slate-500" />
-                <span className="text-xs text-slate-500">
-                  {t.addScenario || 'Add Scenario'}
-                </span>
+                <span className="text-xs text-slate-500">{t.addScenario || 'Add Scenario'}</span>
               </button>
             )}
           </div>
 
-          <PricingComparisonTable
-            scenarios={scenarios}
-            results={results}
-            deltaLabel={t.delta || 'Delta'}
-          />
+          <PricingComparisonTable scenarios={scenarios} results={results} deltaLabel={t.delta || 'Delta'} />
         </div>
       )}
     </div>

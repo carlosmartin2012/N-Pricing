@@ -3,12 +3,13 @@
  *
  * For each dimension combination:
  *   1. Synthesizes a canonical deal from the template
- *   2. Invokes pricingEngine.calculatePricing()
+ *   2. Invokes the pricing-core package boundary
  *   3. Collects results into TargetGridCell objects
  *
  * Parallelizes with Promise.all in batches to avoid saturation.
  */
 
+import { calculatePricing, type PricingContext, type PricingShocks } from '@npricing/pricing-core';
 import type { Transaction, ApprovalMatrixConfig, FTPResult } from '../../types';
 import type {
   TargetGridCell,
@@ -17,12 +18,7 @@ import type {
   GridComputeResult,
   TenorBucket,
 } from '../../types/targetGrid';
-import type { PricingContext, PricingShocks } from '../pricingEngine';
-import { calculatePricing } from '../pricingEngine';
-import {
-  synthesizeCanonicalDeal,
-  generateDimensionCombos,
-} from './synthesizer';
+import { synthesizeCanonicalDeal, generateDimensionCombos } from './synthesizer';
 import type { DimensionCombo, DimensionConfig } from './synthesizer';
 import { createLogger } from '../logger';
 
@@ -48,7 +44,7 @@ export interface ComputeGridParams {
  * Returns an array of TargetGridCell objects ready for persistence.
  */
 export async function computeTargetGrid(
-  params: ComputeGridParams,
+  params: ComputeGridParams
 ): Promise<{ cells: Omit<TargetGridCell, 'id' | 'computedAt'>[]; result: GridComputeResult }> {
   const start = Date.now();
   const batchSize = params.options?.batchSize ?? DEFAULT_BATCH_SIZE;
@@ -67,14 +63,9 @@ export async function computeTargetGrid(
   for (let i = 0; i < combos.length; i += batchSize) {
     const batch = combos.slice(i, i + batchSize);
 
-    const batchResults = batch.map((combo) => computeSingleCell(
-      combo,
-      templateIndex,
-      params.pricingContext,
-      params.approvalMatrix,
-      params.shocks,
-      snapshotId,
-    ));
+    const batchResults = batch.map((combo) =>
+      computeSingleCell(combo, templateIndex, params.pricingContext, params.approvalMatrix, params.shocks, snapshotId)
+    );
 
     for (const result of batchResults) {
       if (result.error) {
@@ -118,7 +109,7 @@ function computeSingleCell(
   context: PricingContext,
   approvalMatrix: ApprovalMatrixConfig,
   shocks?: PricingShocks,
-  snapshotId?: string,
+  snapshotId?: string
 ): CellComputeResult {
   const cohortKey = buildCohortKey(combo);
 
@@ -138,11 +129,12 @@ function computeSingleCell(
       ftp: result.totalFTP,
       liquidityPremium: result.liquiditySpread,
       capitalCharge: result.capitalCharge,
-      esgAdjustment: (result.esgTransitionCharge ?? 0)
-        + (result.esgPhysicalCharge ?? 0)
-        + (result.esgGreeniumAdj ?? 0)
-        + (result.esgDnshCapitalAdj ?? 0)
-        + (result.esgPillar1Adj ?? 0),
+      esgAdjustment:
+        (result.esgTransitionCharge ?? 0) +
+        (result.esgPhysicalCharge ?? 0) +
+        (result.esgGreeniumAdj ?? 0) +
+        (result.esgDnshCapitalAdj ?? 0) +
+        (result.esgPillar1Adj ?? 0),
       targetMargin: result.finalClientRate - result.totalFTP,
       targetClientRate: result.finalClientRate,
       targetRaroc: result.raroc,
@@ -164,7 +156,13 @@ function buildCohortKey(combo: DimensionCombo): string {
   return `${combo.product}|${combo.segment}|${combo.tenorBucket}|${combo.currency}|${combo.entityId ?? ''}`;
 }
 
-function templateKey(t: { product: string; segment: string; tenorBucket: string; currency: string; entityId?: string }): string {
+function templateKey(t: {
+  product: string;
+  segment: string;
+  tenorBucket: string;
+  currency: string;
+  entityId?: string;
+}): string {
   return `${t.product}|${t.segment}|${t.tenorBucket}|${t.currency}|${t.entityId ?? ''}`;
 }
 

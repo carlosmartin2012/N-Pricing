@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { batchReprice, calculatePricing, type PricingContext } from '@npricing/pricing-core';
 import * as auditApi from '../../../api/audit';
 import * as configApi from '../../../api/config';
 import * as dealsApi from '../../../api/deals';
@@ -6,14 +7,7 @@ import * as pricingDiscipline from '../../../api/pricingDiscipline';
 import { useData } from '../../../contexts/DataContext';
 import { canPersistRemotely } from '../../../utils/dataModeUtils';
 import { isSupabaseConfigured } from '../../../utils/supabaseClient';
-import type {
-  BusinessUnit,
-  ClientEntity,
-  ProductDefinition,
-  Transaction,
-  UserProfile,
-} from '../../../types';
-import { batchReprice, calculatePricing, type PricingContext } from '../../../utils/pricingEngine';
+import type { BusinessUnit, ClientEntity, ProductDefinition, Transaction, UserProfile } from '../../../types';
 import { buildPricingContext } from '../../../utils/pricingContext';
 import {
   buildApprovalTaskForPricingDossier,

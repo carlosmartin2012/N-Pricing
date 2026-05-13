@@ -18,7 +18,7 @@ import {
   upsertPricingDossier,
 } from '../../../utils/governanceWorkflows';
 import { exportPricingPDF } from '../../../utils/pdfExport';
-import type { PricingShocks } from '../../../utils/pricingEngine';
+import type { PricingShocks } from '@npricing/pricing-core';
 import { monitoringService } from '../../../utils/supabase/monitoring';
 import type { ValidationError } from '../../../utils/validation';
 import { errorTracker } from '../../../utils/errorTracking';
@@ -93,14 +93,11 @@ export function usePricingReceiptActions({
         })
         .catch((error: unknown) => {
           if (isMountedRef.current) setSaveStatus('idle');
-          errorTracker.captureException(
-            error instanceof Error ? error : new Error(String(error)),
-            {
-              module: 'PRICING_RECEIPT',
-              dealId,
-              extra: { operation: 'autoSavePricingResult' },
-            }
-          );
+          errorTracker.captureException(error instanceof Error ? error : new Error(String(error)), {
+            module: 'PRICING_RECEIPT',
+            dealId,
+            extra: { operation: 'autoSavePricingResult' },
+          });
         });
     }, 3000);
     return () => {
@@ -189,9 +186,7 @@ export function usePricingReceiptActions({
         persistenceResults.forEach((outcome, index) => {
           if (outcome.status === 'rejected') {
             errorTracker.captureException(
-              outcome.reason instanceof Error
-                ? outcome.reason
-                : new Error(String(outcome.reason)),
+              outcome.reason instanceof Error ? outcome.reason : new Error(String(outcome.reason)),
               {
                 module: 'PRICING_RECEIPT',
                 dealId: resolvedDeal.id,
@@ -228,7 +223,17 @@ export function usePricingReceiptActions({
     } catch {
       setDealSaveStatus('idle');
     }
-  }, [activeScenarioShocks, approvalMatrix, canWriteRemotely, currentUser, data, deal, onDealSaved, result, validationErrors]);
+  }, [
+    activeScenarioShocks,
+    approvalMatrix,
+    canWriteRemotely,
+    currentUser,
+    data,
+    deal,
+    onDealSaved,
+    result,
+    validationErrors,
+  ]);
 
   const handleExportReceipt = useCallback(() => {
     const clientName = data.clients.find((client) => client.id === deal.clientId)?.name || deal.clientId;
@@ -278,14 +283,11 @@ export function usePricingReceiptActions({
     data.setPricingDossiers(nextDossiers);
     if (canWriteRemotely) {
       configApi.savePricingDossiers(nextDossiers).catch((error: unknown) => {
-        errorTracker.captureException(
-          error instanceof Error ? error : new Error(String(error)),
-          {
-            module: 'PRICING_RECEIPT',
-            dealId: deal.id,
-            extra: { operation: 'savePricingDossiers' },
-          }
-        );
+        errorTracker.captureException(error instanceof Error ? error : new Error(String(error)), {
+          module: 'PRICING_RECEIPT',
+          dealId: deal.id,
+          extra: { operation: 'savePricingDossiers' },
+        });
       });
     }
   }, [canWriteRemotely, currentUser, data, deal, result]);

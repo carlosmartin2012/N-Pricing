@@ -1,26 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import type {
-  ApprovalMatrixConfig,
-  CreditRiskResult,
-  FTPResult,
-  Transaction,
-} from '../../types';
+import { calculatePricing, DEFAULT_PRICING_SHOCKS, type PricingShocks } from '@npricing/pricing-core';
+import type { ApprovalMatrixConfig, CreditRiskResult, FTPResult, Transaction } from '../../types';
 import { calculateFullCreditRisk } from '../../utils/pricing/creditRiskEngine';
-import {
-  calculatePricing,
-  DEFAULT_PRICING_SHOCKS,
-  type PricingShocks,
-} from '../../utils/pricingEngine';
 import { validateDeal, type ValidationError } from '../../utils/validation';
 import { Panel } from '../ui/LayoutComponents';
 import { AccessibleLiveRegion } from '../ui/AccessibleLiveRegion';
 import { getTranslations, type Language } from '../../translations';
 import { usePricingContext } from '../../hooks/usePricingContext';
-import {
-  PricingReceiptAccountingPanel,
-  PricingReceiptFooter,
-  PricingReceiptSummary,
-} from './PricingReceiptChrome';
+import { PricingReceiptAccountingPanel, PricingReceiptFooter, PricingReceiptSummary } from './PricingReceiptChrome';
 import { PricingReceiptWaterfall } from './PricingReceiptWaterfall';
 import { usePricingReceiptActions } from './hooks/usePricingReceiptActions';
 import MarketRateChip from './MarketRateChip';
@@ -62,14 +49,7 @@ const VALIDATION_FAILED_RESULT: FTPResult = {
   accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 },
 };
 
-const PricingReceipt: React.FC<Props> = ({
-  deal,
-  setMatchedMethod,
-  approvalMatrix,
-  language,
-  shocks,
-  onDealSaved,
-}) => {
+const PricingReceipt: React.FC<Props> = ({ deal, setMatchedMethod, approvalMatrix, language, shocks, onDealSaved }) => {
   const [showAccounting, setShowAccounting] = useState(false);
   const [showCreditDetail, setShowCreditDetail] = useState(false);
   const [applyShocks, setApplyShocks] = useState(false);
@@ -86,19 +66,8 @@ const PricingReceipt: React.FC<Props> = ({
     if (validationErrors.length > 0) {
       return VALIDATION_FAILED_RESULT;
     }
-    return calculatePricing(
-      deal,
-      approvalMatrix,
-      pricingContext,
-      activeScenarioShocks
-    );
-  }, [
-    activeScenarioShocks,
-    approvalMatrix,
-    deal,
-    pricingContext,
-    validationErrors,
-  ]);
+    return calculatePricing(deal, approvalMatrix, pricingContext, activeScenarioShocks);
+  }, [activeScenarioShocks, approvalMatrix, deal, pricingContext, validationErrors]);
 
   // Sync matched methodology to parent — kept outside useMemo to avoid
   // side effects during render (React anti-pattern).
@@ -118,10 +87,7 @@ const PricingReceipt: React.FC<Props> = ({
         ltvPct: deal.haircutPct ? deal.haircutPct / 100 : 0,
         collateralType: deal.collateralType || 'None',
         collateralValue:
-          deal.collateralType &&
-          deal.collateralType !== 'None' &&
-          deal.haircutPct &&
-          deal.haircutPct > 0
+          deal.collateralType && deal.collateralType !== 'None' && deal.haircutPct && deal.haircutPct > 0
             ? deal.amount / (deal.haircutPct / 100)
             : 0,
         durationMonths: deal.durationMonths,
@@ -141,15 +107,14 @@ const PricingReceipt: React.FC<Props> = ({
     }
   }, [deal, validationErrors]);
 
-  const { dealSaveStatus, handleExportReceipt, handleSaveAsDeal, saveStatus } =
-    usePricingReceiptActions({
-      deal,
-      result,
-      approvalMatrix,
-      activeScenarioShocks,
-      validationErrors,
-      onDealSaved,
-    });
+  const { dealSaveStatus, handleExportReceipt, handleSaveAsDeal, saveStatus } = usePricingReceiptActions({
+    deal,
+    result,
+    approvalMatrix,
+    activeScenarioShocks,
+    validationErrors,
+    onDealSaved,
+  });
 
   const pricingAnnouncement =
     validationErrors.length > 0
@@ -163,10 +128,7 @@ const PricingReceipt: React.FC<Props> = ({
     }).format(value);
 
   return (
-    <Panel
-      title={t.pricingResult || 'Profitability & Pricing Construction'}
-      className="h-full"
-    >
+    <Panel title={t.pricingResult || 'Profitability & Pricing Construction'} className="h-full">
       <AccessibleLiveRegion message={pricingAnnouncement} />
       <div data-testid="pricing-receipt" className="flex h-full flex-col">
         <PricingReceiptSummary
@@ -176,9 +138,7 @@ const PricingReceipt: React.FC<Props> = ({
           result={result}
         />
 
-        {validationErrors.length === 0 && (
-          <MarketRateChip deal={deal} finalClientRatePct={result.finalClientRate} />
-        )}
+        {validationErrors.length === 0 && <MarketRateChip deal={deal} finalClientRatePct={result.finalClientRate} />}
 
         <PricingReceiptWaterfall
           applyShocks={applyShocks}

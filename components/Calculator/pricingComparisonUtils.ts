@@ -1,5 +1,5 @@
 import type { FTPResult, Transaction } from '../../types';
-import type { PricingShocks } from '../../utils/pricingEngine';
+import type { PricingShocks } from '@npricing/pricing-core';
 
 export interface PricingScenario {
   id: string;
@@ -57,10 +57,7 @@ function approvalRank(level: string): number {
   return ranks[level] ?? 99;
 }
 
-export function getMetricValue(
-  result: FTPResult,
-  key: MetricRow['key'],
-): number | string {
+export function getMetricValue(result: FTPResult, key: MetricRow['key']): number | string {
   if (key === 'esgTotal') {
     return (result.esgTransitionCharge || 0) + (result.esgPhysicalCharge || 0) + (result.esgGreeniumAdj || 0);
   }
@@ -73,10 +70,7 @@ export function getMetricValue(
   return typeof value === 'number' || typeof value === 'string' ? value : 0;
 }
 
-export function formatMetricValue(
-  value: number | string,
-  format: MetricFormat,
-): string {
+export function formatMetricValue(value: number | string, format: MetricFormat): string {
   if (format === 'approval') {
     return String(value);
   }
@@ -87,7 +81,7 @@ export function formatMetricValue(
 export function getMetricDeltaState(
   row: MetricRow,
   value: number | string,
-  baseValue: number | string,
+  baseValue: number | string
 ): 'positive' | 'negative' | 'neutral' {
   if (typeof value !== 'number' || typeof baseValue !== 'number') {
     if (row.format === 'approval') {
@@ -108,11 +102,7 @@ export function getMetricDeltaState(
   return improved ? 'positive' : 'negative';
 }
 
-export function formatMetricDelta(
-  value: number | string,
-  baseValue: number | string,
-  format: MetricFormat,
-): string {
+export function formatMetricDelta(value: number | string, baseValue: number | string, format: MetricFormat): string {
   if (format === 'approval') {
     return String(value);
   }

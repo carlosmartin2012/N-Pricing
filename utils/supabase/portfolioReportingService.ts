@@ -1,6 +1,6 @@
 import type { ApprovalMatrixConfig, PortfolioScenario, PortfolioSnapshot, Transaction } from '../../types';
 import * as configApi from '../../api/config';
-import type { PricingContext } from '../pricingEngine';
+import type { PricingContext } from '@npricing/pricing-core';
 import { buildPortfolioSnapshot } from '../governanceWorkflows';
 
 export const portfolioReportingService = {

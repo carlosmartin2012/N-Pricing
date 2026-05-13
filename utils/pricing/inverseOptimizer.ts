@@ -1,14 +1,14 @@
 import type { Transaction, ApprovalMatrixConfig, FTPResult } from '../../types';
 import {
   calculatePricing,
-  PricingContext,
-  PricingShocks,
   DEFAULT_PRICING_SHOCKS,
-} from '../pricingEngine';
+  type PricingContext,
+  type PricingShocks,
+} from '@npricing/pricing-core';
 
 export interface InverseOptimizationInput {
   deal: Transaction;
-  targetRaroc: number;    // target RAROC in %
+  targetRaroc: number; // target RAROC in %
   approvalMatrix: ApprovalMatrixConfig;
   context?: PricingContext;
   shocks?: PricingShocks;
@@ -35,9 +35,7 @@ export interface InverseOptimizationResult {
  * Uses bisection search on marginTarget, since RAROC is monotonically
  * increasing in marginTarget (more margin → more revenue → higher RAROC).
  */
-export function optimizeMarginForTargetRaroc(
-  input: InverseOptimizationInput,
-): InverseOptimizationResult {
+export function optimizeMarginForTargetRaroc(input: InverseOptimizationInput): InverseOptimizationResult {
   const bounds = input.marginBounds ?? [0, 10];
   const precision = input.precision ?? 0.05;
   const maxIterations = input.maxIterations ?? 40;
@@ -48,12 +46,7 @@ export function optimizeMarginForTargetRaroc(
   // Evaluate pricing at a given margin without mutating the input deal.
   const evaluate = (margin: number): FTPResult => {
     const dealCopy: Transaction = { ...input.deal, marginTarget: margin };
-    return calculatePricing(
-      dealCopy,
-      input.approvalMatrix,
-      input.context,
-      input.shocks ?? DEFAULT_PRICING_SHOCKS,
-    );
+    return calculatePricing(dealCopy, input.approvalMatrix, input.context, input.shocks ?? DEFAULT_PRICING_SHOCKS);
   };
 
   const loResult = evaluate(lo);

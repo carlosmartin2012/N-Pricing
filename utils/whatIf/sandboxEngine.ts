@@ -17,12 +17,10 @@ import type {
   CellImpact,
   PortfolioImpact,
 } from '../../types/whatIf';
+import { computeTargetGrid, type DimensionConfig } from '@npricing/commercial';
+import { calculatePricingOutput, type PricingContext, type PricingShocks } from '@npricing/pricing-core';
 import type { TargetGridCell } from '../../types/targetGrid';
-import type { PricingContext, PricingShocks } from '../pricingEngine';
 import type { ApprovalMatrixConfig, Transaction, FTPResult } from '../../types';
-import { calculatePricing } from '../pricingEngine';
-import { computeTargetGrid } from '../targetGrid/gridCompute';
-import type { DimensionConfig } from '../targetGrid/synthesizer';
 import type { CanonicalDealTemplate } from '../../types/targetGrid';
 
 // ---------------------------------------------------------------------------
@@ -33,10 +31,7 @@ import type { CanonicalDealTemplate } from '../../types/targetGrid';
  * Creates a modified PricingContext by applying sandbox diffs.
  * Does NOT mutate the original context.
  */
-export function applySandboxDiffs(
-  baseContext: PricingContext,
-  diffs: SandboxDiff[],
-): PricingContext {
+export function applySandboxDiffs(baseContext: PricingContext, diffs: SandboxDiff[]): PricingContext {
   // Deep clone to avoid mutation
   const modified = structuredClone(baseContext);
 
@@ -101,9 +96,13 @@ function applyDiff(context: PricingContext, diff: SandboxDiff): void {
     case 'threshold': {
       // Apply config thresholds (SDR, LR)
       if (path.startsWith('sdrConfig') && typeof value === 'object' && value !== null) {
-        context.sdrConfig = { ...context.sdrConfig, ...value as Record<string, unknown> } as NonNullable<PricingContext['sdrConfig']>;
+        context.sdrConfig = { ...context.sdrConfig, ...(value as Record<string, unknown>) } as NonNullable<
+          PricingContext['sdrConfig']
+        >;
       } else if (path.startsWith('lrConfig') && typeof value === 'object' && value !== null) {
-        context.lrConfig = { ...context.lrConfig, ...value as Record<string, unknown> } as NonNullable<PricingContext['lrConfig']>;
+        context.lrConfig = { ...context.lrConfig, ...(value as Record<string, unknown>) } as NonNullable<
+          PricingContext['lrConfig']
+        >;
       }
       break;
     }
@@ -128,9 +127,7 @@ export interface SandboxComputeParams {
 /**
  * Computes the full impact report for a sandbox methodology.
  */
-export async function computeSandboxImpact(
-  params: SandboxComputeParams,
-): Promise<ImpactReport> {
+export async function computeSandboxImpact(params: SandboxComputeParams): Promise<ImpactReport> {
   const { sandbox, baseContext, baseGrid, dimensionConfig, templates, approvalMatrix, portfolio, shocks } = params;
 
   // Apply diffs to get modified context
@@ -149,12 +146,7 @@ export async function computeSandboxImpact(
   // Compare cells
   const cellImpacts = computeCellImpacts(baseGrid, newCells);
   const summary = computeImpactSummary(cellImpacts, portfolio);
-  const portfolioImpact = computePortfolioImpact(
-    portfolio ?? [],
-    modifiedContext,
-    approvalMatrix,
-    shocks,
-  );
+  const portfolioImpact = computePortfolioImpact(portfolio ?? [], modifiedContext, approvalMatrix, shocks);
 
   return {
     sandboxId: sandbox.id,
@@ -172,7 +164,7 @@ export async function computeSandboxImpact(
 
 function computeCellImpacts(
   baseCells: TargetGridCell[],
-  newCells: Omit<TargetGridCell, 'id' | 'computedAt'>[],
+  newCells: Omit<TargetGridCell, 'id' | 'computedAt'>[]
 ): CellImpact[] {
   const baseIndex = new Map<string, TargetGridCell>();
   for (const c of baseCells) {
@@ -204,18 +196,14 @@ function computeCellImpacts(
 
 function computeImpactSummary(
   cellImpacts: CellImpact[],
-  _portfolio?: { deal: Transaction; result: FTPResult }[],
+  _portfolio?: { deal: Transaction; result: FTPResult }[]
 ): ImpactSummary {
-  const affected = cellImpacts.filter(
-    (c) => Math.abs(c.ftpDeltaBps) > 1 || Math.abs(c.rarocDeltaPp) > 0.1,
-  );
+  const affected = cellImpacts.filter((c) => Math.abs(c.ftpDeltaBps) > 1 || Math.abs(c.rarocDeltaPp) > 0.1);
 
-  const avgFtpChange = cellImpacts.length > 0
-    ? cellImpacts.reduce((s, c) => s + c.ftpDeltaBps, 0) / cellImpacts.length
-    : 0;
-  const avgRarocChange = cellImpacts.length > 0
-    ? cellImpacts.reduce((s, c) => s + c.rarocDeltaPp, 0) / cellImpacts.length
-    : 0;
+  const avgFtpChange =
+    cellImpacts.length > 0 ? cellImpacts.reduce((s, c) => s + c.ftpDeltaBps, 0) / cellImpacts.length : 0;
+  const avgRarocChange =
+    cellImpacts.length > 0 ? cellImpacts.reduce((s, c) => s + c.rarocDeltaPp, 0) / cellImpacts.length : 0;
 
   return {
     totalCellsAffected: affected.length,
@@ -232,13 +220,18 @@ function computePortfolioImpact(
   portfolio: { deal: Transaction; result: FTPResult }[],
   modifiedContext: PricingContext,
   approvalMatrix: ApprovalMatrixConfig,
-  shocks?: PricingShocks,
+  shocks?: PricingShocks
 ): PortfolioImpact {
   if (portfolio.length === 0) {
     return {
-      currentNii: 0, projectedNii: 0, niiDelta: 0,
-      currentAvgRaroc: 0, projectedAvgRaroc: 0, rarocDelta: 0,
-      dealCount: 0, affectedDealCount: 0,
+      currentNii: 0,
+      projectedNii: 0,
+      niiDelta: 0,
+      currentAvgRaroc: 0,
+      projectedAvgRaroc: 0,
+      rarocDelta: 0,
+      dealCount: 0,
+      affectedDealCount: 0,
     };
   }
 
@@ -254,7 +247,12 @@ function computePortfolioImpact(
     currentRarocSum += result.raroc;
 
     // Reprice with modified context
-    const newResult = calculatePricing(deal, approvalMatrix, modifiedContext, shocks);
+    const newResult = calculatePricingOutput({
+      deal,
+      approvalMatrix,
+      context: modifiedContext,
+      shocks,
+    });
     const newMargin = newResult.finalClientRate - newResult.totalFTP;
     projectedNii += newMargin * deal.amount * (deal.durationMonths / 12);
     projectedRarocSum += newResult.raroc;
@@ -276,6 +274,12 @@ function computePortfolioImpact(
   };
 }
 
-function cellKey(c: { product: string; segment: string; tenorBucket: string; currency: string; entityId?: string }): string {
+function cellKey(c: {
+  product: string;
+  segment: string;
+  tenorBucket: string;
+  currency: string;
+  entityId?: string;
+}): string {
   return `${c.product}|${c.segment}|${c.tenorBucket}|${c.currency}|${c.entityId ?? ''}`;
 }

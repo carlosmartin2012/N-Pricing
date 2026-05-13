@@ -15,7 +15,7 @@ import {
   Area,
   Legend,
 } from '../ui/charts/lazyRecharts';
-import { calculatePricing } from '../../utils/pricingEngine';
+import { calculatePricing } from '@npricing/pricing-core';
 import { useData } from '../../contexts/DataContext';
 import { buildPricingContext } from '../../utils/pricingContext';
 
@@ -54,8 +54,8 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
 
   // Filter to meaningful deals
   const activeDealsList = useMemo(
-    () => deals.filter(d => d.status === 'Booked' || d.status === 'Approved' || d.status === 'Pending_Approval'),
-    [deals],
+    () => deals.filter((d) => d.status === 'Booked' || d.status === 'Approved' || d.status === 'Pending_Approval'),
+    [deals]
   );
 
   // Build pricing context from global data
@@ -76,7 +76,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           clients: contextData.clients,
           products: contextData.products,
           businessUnits: contextData.businessUnits,
-        },
+        }
       ),
     [
       contextData.yieldCurves,
@@ -90,12 +90,12 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
       contextData.clients,
       contextData.products,
       contextData.businessUnits,
-    ],
+    ]
   );
 
   // Compute pricing for each deal
   const pricedDeals = useMemo(() => {
-    return activeDealsList.map(deal => {
+    return activeDealsList.map((deal) => {
       const result = calculatePricing(deal, contextData.approvalMatrix, pricingContext);
       return { deal, result };
     });
@@ -191,7 +191,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
 
   const axisDomain = useMemo(() => {
     if (scatterData.length === 0) return { min: 0, max: 5 };
-    const allVals = scatterData.flatMap(d => [d.technicalPrice, d.finalRate]);
+    const allVals = scatterData.flatMap((d) => [d.technicalPrice, d.finalRate]);
     const min = Math.floor(Math.min(...allVals) * 2) / 2;
     const max = Math.ceil(Math.max(...allVals) * 2) / 2;
     const padding = Math.max(0.25, (max - min) * 0.1);
@@ -230,15 +230,14 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           <div className="font-mono text-2xl font-bold text-[color:var(--nfq-text-primary)]">
             {fmtPct(kpis.avgFinal)}
           </div>
-          <div className="text-xs text-[color:var(--nfq-text-muted)]">
-            Client-facing rate
-          </div>
+          <div className="text-xs text-[color:var(--nfq-text-muted)]">Client-facing rate</div>
         </div>
 
         <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
           <div className="nfq-label mb-1">Pricing Gap</div>
           <div className="font-mono text-2xl font-bold" style={{ color: gapColor }}>
-            {kpis.pricingGap >= 0 ? '+' : ''}{fmtPct(kpis.pricingGap)}
+            {kpis.pricingGap >= 0 ? '+' : ''}
+            {fmtPct(kpis.pricingGap)}
           </div>
           <div className="text-xs text-[color:var(--nfq-text-muted)]">
             {kpis.pricingGap >= 0 ? 'Margin above minimum' : 'Underpricing risk'}
@@ -250,9 +249,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           <div className="font-mono text-2xl font-bold" style={{ color: belowFloorColor }}>
             {kpis.belowFloor}
           </div>
-          <div className="text-xs text-[color:var(--nfq-text-muted)]">
-            Final rate &lt; floor price
-          </div>
+          <div className="text-xs text-[color:var(--nfq-text-muted)]">Final rate &lt; floor price</div>
         </div>
       </div>
 
@@ -270,7 +267,13 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 domain={[axisDomain.min, axisDomain.max]}
                 tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => `${v.toFixed(1)}%`}
-                label={{ value: 'Technical Price (%)', position: 'insideBottom', offset: -5, fill: 'var(--nfq-text-muted)', fontSize: 10 }}
+                label={{
+                  value: 'Technical Price (%)',
+                  position: 'insideBottom',
+                  offset: -5,
+                  fill: 'var(--nfq-text-muted)',
+                  fontSize: 10,
+                }}
               />
               <YAxis
                 type="number"
@@ -279,7 +282,13 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 domain={[axisDomain.min, axisDomain.max]}
                 tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => `${v.toFixed(1)}%`}
-                label={{ value: 'Final Rate (%)', angle: -90, position: 'insideLeft', fill: 'var(--nfq-text-muted)', fontSize: 10 }}
+                label={{
+                  value: 'Final Rate (%)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  fill: 'var(--nfq-text-muted)',
+                  fontSize: 10,
+                }}
               />
               <ZAxis type="number" dataKey="amount" range={[40, 400]} name="Amount" />
               <Tooltip
@@ -331,7 +340,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
           </ResponsiveContainer>
         </div>
         <div className="mt-2 flex flex-wrap gap-3 justify-center">
-          {Object.keys(scatterBySegment).map(segment => (
+          {Object.keys(scatterBySegment).map((segment) => (
             <div key={segment} className="flex items-center gap-1.5 text-xs text-[color:var(--nfq-text-muted)]">
               <div
                 className="h-2.5 w-2.5 rounded-full"
@@ -373,7 +382,12 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 <Tooltip
                   contentStyle={tooltipStyle}
                   formatter={(value: number | undefined, name: string | undefined) => {
-                    const label = name === 'avgTechnical' ? 'Technical Price' : name === 'avgFinal' ? 'Avg Final Rate' : (name ?? '');
+                    const label =
+                      name === 'avgTechnical'
+                        ? 'Technical Price'
+                        : name === 'avgFinal'
+                          ? 'Avg Final Rate'
+                          : (name ?? '');
                     return [value != null ? fmtPct(value) : '-', label] as [React.ReactNode, string];
                   }}
                   labelFormatter={(label: React.ReactNode) => `Month: ${String(label ?? '')}`}
@@ -385,13 +399,7 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                   wrapperStyle={{ fontSize: '11px', fontFamily: 'var(--nfq-font-mono)' }}
                 />
                 {/* Shaded area between the two lines — approximate via stacked area from technical to final */}
-                <Area
-                  type="monotone"
-                  dataKey="avgFinal"
-                  stroke="none"
-                  fill="url(#marginBand)"
-                  fillOpacity={1}
-                />
+                <Area type="monotone" dataKey="avgFinal" stroke="none" fill="url(#marginBand)" fillOpacity={1} />
                 <Line
                   type="monotone"
                   dataKey="avgTechnical"
@@ -412,17 +420,18 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
             </ResponsiveContainer>
           </div>
           <div className="mt-2 text-center text-xs text-[color:var(--nfq-text-muted)]">
-            {monthlyDrift.length > 0 && (() => {
-              const first = monthlyDrift[0];
-              const last = monthlyDrift[monthlyDrift.length - 1];
-              const gapFirst = first.avgFinal - first.avgTechnical;
-              const gapLast = last.avgFinal - last.avgTechnical;
-              const trend = gapLast - gapFirst;
-              if (Math.abs(trend) < 0.05) return 'Pricing margin is stable over the period.';
-              return trend > 0
-                ? 'Pricing margin is widening — rates are moving above technical minimums.'
-                : 'Pricing margin is tightening — commercial pressure on margins.';
-            })()}
+            {monthlyDrift.length > 0 &&
+              (() => {
+                const first = monthlyDrift[0];
+                const last = monthlyDrift[monthlyDrift.length - 1];
+                const gapFirst = first.avgFinal - first.avgTechnical;
+                const gapLast = last.avgFinal - last.avgTechnical;
+                const trend = gapLast - gapFirst;
+                if (Math.abs(trend) < 0.05) return 'Pricing margin is stable over the period.';
+                return trend > 0
+                  ? 'Pricing margin is widening — rates are moving above technical minimums.'
+                  : 'Pricing margin is tightening — commercial pressure on margins.';
+              })()}
           </div>
         </div>
       )}

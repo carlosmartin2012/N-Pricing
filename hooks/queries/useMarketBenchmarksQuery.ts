@@ -11,6 +11,7 @@ import {
   listMarketBenchmarks,
   upsertMarketBenchmark,
   deleteMarketBenchmark,
+  importMarketBenchmarksCsv,
   type MarketBenchmarkFilters,
   type MarketBenchmarkWithId,
 } from '../../api/marketBenchmarks';
@@ -44,6 +45,16 @@ export function useDeleteMarketBenchmarkMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteMarketBenchmark(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.marketBenchmarks.all });
+    },
+  });
+}
+
+export function useImportMarketBenchmarksCsvMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (csv: string) => importMarketBenchmarksCsv(csv),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.marketBenchmarks.all });
     },

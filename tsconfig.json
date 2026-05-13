@@ -18,7 +18,14 @@
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@npricing/commercial": ["./packages/commercial/src/index.ts"],
+      "@npricing/data-access": ["./packages/data-access/src/index.ts"],
+      "@npricing/domain": ["./packages/domain/src/index.ts"],
+      "@npricing/evidence": ["./packages/evidence/src/index.ts"],
+      "@npricing/governance": ["./packages/governance/src/index.ts"],
+      "@npricing/platform": ["./packages/platform/src/index.ts"],
+      "@npricing/pricing-core": ["./packages/pricing-core/src/index.ts"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true

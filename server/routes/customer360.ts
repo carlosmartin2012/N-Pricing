@@ -1,14 +1,15 @@
 import { Router } from 'express';
-import { pool, query, queryOne } from '../db';
-import { safeError } from '../middleware/errorHandler';
 import {
   buildClientRelationship,
-  mapClientPositionRow,
   mapClientMetricsSnapshotRow,
+  mapClientPositionRow,
   mapPricingTargetRow,
-} from '../../utils/customer360/relationshipAggregator';
-import { parsePositionsCsv, parseMetricsCsv } from '../../utils/customer360/csvImport';
-import type { ClientEntity } from '../../types';
+  parseMetricsCsv,
+  parsePositionsCsv,
+} from '@npricing/commercial';
+import { pool, query, queryOne } from '../db';
+import { safeError } from '../middleware/errorHandler';
+import type { ClientEntity } from '@npricing/domain';
 
 const router = Router();
 
@@ -22,11 +23,11 @@ interface ClientRow {
 
 function mapClient(row: ClientRow): ClientEntity {
   return {
-    id:      row.id,
-    name:    row.name,
-    type:    row.type ?? 'Corporate',
+    id: row.id,
+    name: row.name,
+    type: row.type ?? 'Corporate',
     segment: row.segment ?? '',
-    rating:  row.rating ?? 'BBB',
+    rating: row.rating ?? 'BBB',
   };
 }
 
@@ -38,16 +39,17 @@ router.get('/clients/:clientId', async (req, res) => {
     }
     const entityId = req.tenancy.entityId;
     const clientId = req.params.clientId;
-    const asOfDate = typeof req.query.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.as_of)
-      ? req.query.as_of
-      : new Date().toISOString().slice(0, 10);
+    const asOfDate =
+      typeof req.query.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.as_of)
+        ? req.query.as_of
+        : new Date().toISOString().slice(0, 10);
 
     // Tenancy scope obligatorio: la tabla `clients` es multi-tenant.
     // Sin `AND entity_id = $2`, un usuario del tenant A que conozca el
     // UUID de un cliente del tenant B leería su nombre/segmento/rating.
     const client = await queryOne<ClientRow>(
       'SELECT id, name, type, segment, rating FROM clients WHERE id = $1 AND entity_id = $2 LIMIT 1',
-      [clientId, entityId],
+      [clientId, entityId]
     );
     if (!client) {
       res.status(404).json({ code: 'not_found', message: 'Client not found' });
@@ -59,18 +61,18 @@ router.get('/clients/:clientId', async (req, res) => {
         `SELECT * FROM client_positions
          WHERE entity_id = $1 AND client_id = $2
          ORDER BY status ASC, start_date DESC`,
-        [entityId, clientId],
+        [entityId, clientId]
       ),
       query<Parameters<typeof mapClientMetricsSnapshotRow>[0]>(
         `SELECT * FROM client_metrics_snapshots
          WHERE entity_id = $1 AND client_id = $2
          ORDER BY computed_at DESC LIMIT 24`,
-        [entityId, clientId],
+        [entityId, clientId]
       ),
       query<Parameters<typeof mapPricingTargetRow>[0]>(
         `SELECT * FROM pricing_targets
          WHERE entity_id = $1 AND is_active = true`,
-        [entityId],
+        [entityId]
       ),
     ]);
 
@@ -97,7 +99,7 @@ router.get('/clients/:clientId/positions', async (req, res) => {
       `SELECT * FROM client_positions
        WHERE entity_id = $1 AND client_id = $2
        ORDER BY status ASC, start_date DESC`,
-      [req.tenancy.entityId, req.params.clientId],
+      [req.tenancy.entityId, req.params.clientId]
     );
     res.json(rows.map(mapClientPositionRow));
   } catch (err) {
@@ -116,7 +118,7 @@ router.get('/clients/:clientId/metrics', async (req, res) => {
       `SELECT * FROM client_metrics_snapshots
        WHERE entity_id = $1 AND client_id = $2
        ORDER BY computed_at DESC LIMIT $3`,
-      [req.tenancy.entityId, req.params.clientId, limit],
+      [req.tenancy.entityId, req.params.clientId, limit]
     );
     res.json(rows.map(mapClientMetricsSnapshotRow));
   } catch (err) {
@@ -138,7 +140,11 @@ router.post('/clients/:clientId/positions', async (req, res) => {
     const productType = String(body.productType ?? '');
     const category = String(body.category ?? '');
     const amount = Number(body.amount);
-    if (!productType || !['Asset', 'Liability', 'Off-Balance', 'Service'].includes(category) || !Number.isFinite(amount)) {
+    if (
+      !productType ||
+      !['Asset', 'Liability', 'Off-Balance', 'Service'].includes(category) ||
+      !Number.isFinite(amount)
+    ) {
       res.status(400).json({ code: 'invalid_payload', message: 'productType, category and amount are required' });
       return;
     }
@@ -161,7 +167,7 @@ router.post('/clients/:clientId/positions', async (req, res) => {
         body.startDate ?? new Date().toISOString().slice(0, 10),
         body.maturityDate ?? null,
         body.status ?? null,
-      ],
+      ]
     );
     res.status(201).json(row ? mapClientPositionRow(row) : null);
   } catch (err) {
@@ -196,7 +202,7 @@ router.patch('/positions/:id', async (req, res) => {
         body.marginBps ?? null,
         body.maturityDate ?? null,
         body.status ?? null,
-      ],
+      ]
     );
     if (!row) {
       res.status(404).json({ code: 'not_found', message: 'Position not found' });
@@ -242,7 +248,7 @@ router.post('/clients/:clientId/metrics', async (req, res) => {
         body?.totalExposureEur ?? 0,
         body?.source ?? null,
         JSON.stringify(body?.detail ?? {}),
-      ],
+      ]
     );
     res.status(201).json(row ? mapClientMetricsSnapshotRow(row) : null);
   } catch (err) {
@@ -257,9 +263,9 @@ router.post('/pricing-targets', async (req, res) => {
       return;
     }
     const body = req.body as Record<string, unknown> | undefined;
-    const segment      = String(body?.segment ?? '').trim();
-    const productType  = String(body?.productType ?? '').trim();
-    const period       = String(body?.period ?? '').trim();
+    const segment = String(body?.segment ?? '').trim();
+    const productType = String(body?.productType ?? '').trim();
+    const period = String(body?.period ?? '').trim();
     if (!segment || !productType || !period) {
       res.status(400).json({ code: 'invalid_payload', message: 'segment, productType, period required' });
       return;
@@ -287,7 +293,7 @@ router.post('/pricing-targets', async (req, res) => {
         body?.activeTo ?? null,
         body?.isActive ?? null,
         req.tenancy.userEmail,
-      ],
+      ]
     );
     res.status(201).json(row ? mapPricingTargetRow(row) : null);
   } catch (err) {
@@ -305,7 +311,9 @@ router.post('/pricing-targets', async (req, res) => {
 const MAX_CSV_BYTES = 10 * 1024 * 1024;
 
 class CsvTooLargeError extends Error {
-  constructor() { super('CSV body exceeds 10 MB limit'); }
+  constructor() {
+    super('CSV body exceeds 10 MB limit');
+  }
 }
 
 async function consumeCsv(req: import('express').Request): Promise<string> {
@@ -366,9 +374,19 @@ router.post('/import/positions', async (req, res) => {
              amount, currency, margin_bps, start_date, maturity_date, status
            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
           [
-            req.tenancy.entityId, r.clientId, r.productId, r.productType, r.category,
-            r.dealId, r.amount, r.currency, r.marginBps, r.startDate, r.maturityDate, r.status,
-          ],
+            req.tenancy.entityId,
+            r.clientId,
+            r.productId,
+            r.productType,
+            r.category,
+            r.dealId,
+            r.amount,
+            r.currency,
+            r.marginBps,
+            r.startDate,
+            r.maturityDate,
+            r.status,
+          ]
         );
         inserted++;
       }
@@ -423,11 +441,19 @@ router.post('/import/metrics', async (req, res) => {
            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '{}'::jsonb)
            ON CONFLICT (entity_id, client_id, period) DO NOTHING`,
           [
-            req.tenancy.entityId, r.clientId, r.period,
-            r.nimBps, r.feesEur, r.evaEur, r.shareOfWalletPct,
-            r.relationshipAgeYears, r.npsScore,
-            r.activePositionCount, r.totalExposureEur, r.source,
-          ],
+            req.tenancy.entityId,
+            r.clientId,
+            r.period,
+            r.nimBps,
+            r.feesEur,
+            r.evaEur,
+            r.shareOfWalletPct,
+            r.relationshipAgeYears,
+            r.npsScore,
+            r.activePositionCount,
+            r.totalExposureEur,
+            r.source,
+          ]
         );
         inserted++;
       }
@@ -476,7 +502,7 @@ router.get('/pricing-targets', async (req, res) => {
       `SELECT * FROM pricing_targets
        WHERE ${conditions.join(' AND ')}
        ORDER BY active_from DESC LIMIT 500`,
-      params,
+      params
     );
     res.json(rows.map(mapPricingTargetRow));
   } catch (err) {

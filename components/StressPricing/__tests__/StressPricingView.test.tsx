@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   calculatePricing: vi.fn(),
 }));
 
-vi.mock('../../../utils/pricingEngine', () => ({
+vi.mock('@npricing/pricing-core', () => ({
   calculatePricing: mocks.calculatePricing,
 }));
 
@@ -38,16 +38,30 @@ import StressPricingView from '../StressPricingView';
 
 function synthResult(ftp: number, finalClientRate: number, raroc: number) {
   return {
-    baseRate: 0, liquiditySpread: 0,
-    _liquidityPremiumDetails: 0, _clcChargeDetails: 0,
-    strategicSpread: 0, optionCost: 0, regulatoryCost: 0,
-    operationalCost: 0, capitalCharge: 0,
-    esgTransitionCharge: 0, esgPhysicalCharge: 0, esgGreeniumAdj: 0,
-    esgDnshCapitalAdj: 0, esgPillar1Adj: 0,
-    floorPrice: 0, technicalPrice: 0, targetPrice: 0,
-    totalFTP: ftp, finalClientRate, raroc,
-    economicProfit: 0, approvalLevel: 'Auto',
-    matchedMethodology: 'Matched Maturity', matchReason: '',
+    baseRate: 0,
+    liquiditySpread: 0,
+    _liquidityPremiumDetails: 0,
+    _clcChargeDetails: 0,
+    strategicSpread: 0,
+    optionCost: 0,
+    regulatoryCost: 0,
+    operationalCost: 0,
+    capitalCharge: 0,
+    esgTransitionCharge: 0,
+    esgPhysicalCharge: 0,
+    esgGreeniumAdj: 0,
+    esgDnshCapitalAdj: 0,
+    esgPillar1Adj: 0,
+    floorPrice: 0,
+    technicalPrice: 0,
+    targetPrice: 0,
+    totalFTP: ftp,
+    finalClientRate,
+    raroc,
+    economicProfit: 0,
+    approvalLevel: 'Auto',
+    matchedMethodology: 'Matched Maturity',
+    matchReason: '',
     accountingEntry: { source: '-', dest: '-', amountDebit: 0, amountCredit: 0 },
   };
 }

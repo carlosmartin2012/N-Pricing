@@ -6,7 +6,7 @@ import { Badge, Button, Panel, SelectInput, TextInput } from '../ui/LayoutCompon
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGovernance } from '../../contexts/DataContext';
-import type { PricingContext } from '../../utils/pricingEngine';
+import type { PricingContext } from '@npricing/pricing-core';
 import { portfolioReportingService } from '../../utils/supabase/portfolioReportingService';
 import {
   buildPortfolioSnapshotCsv,

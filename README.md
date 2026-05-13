@@ -33,54 +33,59 @@ inmutables** de cada cálculo para reproducibilidad regulatoria (SR 11-7 / EBA).
 ## Funcionalidades por bloque
 
 ### Pricing core
-| Módulo | Descripción |
-|---|---|
-| **Pricing Engine** | Motor FTP con 19 componentes (gaps): base rate, liquidity premium, LCR/NSFR, ESG, capital charge, RAROC |
-| **RAROC Terminal** | Calculadora standalone con desglose de rentabilidad ajustada al riesgo |
-| **Stress Testing** | Shocks dashboard para análisis de sensibilidad |
-| **Stress Pricing** *(`/stress-pricing`)* | 6 escenarios EBA GL 2018/02 (parallel ±200, short ±250, steepener, flattener) × deal · tabla con FTP/Margin/RAROC + deltas · CSV export · flag-gated per-tenor interpolation (Ola 6 B) |
-| **Behavioural Models** | NMD (Parametric + Caterpillar) y Prepayment CPR |
-| **Methodology Config** | Reglas, rate cards, ESG grids, master data, governance |
-| **ESG Integration** | Transición, físico, Greenium, DNSH discount, ISF Pillar I overlay |
 
-### Customer & commercial *(roadmap Phase 1‑2)*
-| Módulo | Descripción |
-|---|---|
-| **Customer Pricing** *(`/customers`)* | Vista relacional con KPI strip, posiciones, métricas periódicas y targets aplicables |
-| **Pricing Campaigns** *(`/campaigns`)* | Campañas versionadas (state machine `draft→approved→active→exhausted`) con form de creación y transiciones inline |
-| **Channel API** | `/api/channel/quote` con `x-channel-key` auth + rate limit + match automático de campaña |
-| **CSV Importer** | `POST /api/customer360/import/{positions\|metrics}` para bulk loads |
+| Módulo                                   | Descripción                                                                                                                                                                            |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pricing Engine**                       | Motor FTP con 19 componentes (gaps): base rate, liquidity premium, LCR/NSFR, ESG, capital charge, RAROC                                                                                |
+| **RAROC Terminal**                       | Calculadora standalone con desglose de rentabilidad ajustada al riesgo                                                                                                                 |
+| **Stress Testing**                       | Shocks dashboard para análisis de sensibilidad                                                                                                                                         |
+| **Stress Pricing** _(`/stress-pricing`)_ | 6 escenarios EBA GL 2018/02 (parallel ±200, short ±250, steepener, flattener) × deal · tabla con FTP/Margin/RAROC + deltas · CSV export · flag-gated per-tenor interpolation (Ola 6 B) |
+| **Behavioural Models**                   | NMD (Parametric + Caterpillar) y Prepayment CPR                                                                                                                                        |
+| **Methodology Config**                   | Reglas, rate cards, ESG grids, master data, governance                                                                                                                                 |
+| **ESG Integration**                      | Transición, físico, Greenium, DNSH discount, ISF Pillar I overlay                                                                                                                      |
 
-### Governance & risk *(roadmap Phase 3)*
-| Módulo | Descripción |
-|---|---|
-| **Model Inventory** | SR 11-7 / EBA inventory con `kind`, `version`, `status`, owner, validation_doc_url |
-| **Signed Dossiers** | Committee dossiers con `sha256(canonicalJson) + HMAC-SHA256` tamper-evident |
-| **Backtesting + Drift** | Runner sobre histórico + `detectDrift` con thresholds calibrados |
-| **Approval Escalations** | Tracker de tiempos por nivel (L1/L2/Committee) |
+### Customer & commercial _(roadmap Phase 1‑2)_
 
-### Operations & SaaS readiness *(roadmap Phase 0, 4, 5)*
-| Módulo | Descripción |
-|---|---|
-| **Multi-tenancy** | Tenancy middleware + `withTenancyTransaction` + flag rollout (`TENANCY_ENFORCE`, `TENANCY_STRICT`) + SLOPanel widget *Tenancy violations · last 60m* para el canary del flip |
-| **Reproducibility** | Tabla `pricing_snapshots` inmutable + `POST /api/snapshots/:id/replay` que re-ejecuta el motor real + **hash chain** (`prev_output_hash`) con writer retry-bounded y `GET /api/snapshots/verify-chain` (Ola 6 C) para tamper-evidence retroactiva |
-| **SLO + Alerts** | 8 SLIs catalogados, vista `pricing_slo_minute`, evaluator opt-in, 5 canales (email/Slack/PagerDuty/webhook/Opsgenie); 3 alertas canónicas seedeadas por migration + provisioning (Ola 6 A) |
-| **Adapter layer** | `CoreBankingAdapter`, `CrmAdapter`, `MarketDataAdapter`, `SsoProvider` con reference in-memory + stubs Salesforce/Bloomberg |
-| **SSO Google real** | `GoogleSsoProvider` con verificación JWT + restricción opcional de hosted domain |
-| **Tenant provisioning** | `scripts/provision-tenant.ts` idempotente, < 60s SLO |
-| **Ops metering** | `usage_events` + `tenant_feature_flags` (sin billing — el motor lo opera el banco) |
+| Módulo                                 | Descripción                                                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Customer Pricing** _(`/customers`)_  | Vista relacional con KPI strip, posiciones, métricas periódicas y targets aplicables                              |
+| **Pricing Campaigns** _(`/campaigns`)_ | Campañas versionadas (state machine `draft→approved→active→exhausted`) con form de creación y transiciones inline |
+| **Channel API**                        | `/api/channel/quote` con `x-channel-key` auth + rate limit + match automático de campaña                          |
+| **CSV Importer**                       | `POST /api/customer360/import/{positions\|metrics}` para bulk loads                                               |
+
+### Governance & risk _(roadmap Phase 3)_
+
+| Módulo                   | Descripción                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| **Model Inventory**      | SR 11-7 / EBA inventory con `kind`, `version`, `status`, owner, validation_doc_url |
+| **Signed Dossiers**      | Committee dossiers con `sha256(canonicalJson) + HMAC-SHA256` tamper-evident        |
+| **Backtesting + Drift**  | Runner sobre histórico + `detectDrift` con thresholds calibrados                   |
+| **Approval Escalations** | Tracker de tiempos por nivel (L1/L2/Committee)                                     |
+
+### Operations & SaaS readiness _(roadmap Phase 0, 4, 5)_
+
+| Módulo                  | Descripción                                                                                                                                                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Multi-tenancy**       | Tenancy middleware + `withTenancyTransaction` + flag rollout (`TENANCY_ENFORCE`, `TENANCY_STRICT`) + SLOPanel widget _Tenancy violations · last 60m_ para el canary del flip                                                                      |
+| **Reproducibility**     | Tabla `pricing_snapshots` inmutable + `POST /api/snapshots/:id/replay` que re-ejecuta el motor real + **hash chain** (`prev_output_hash`) con writer retry-bounded y `GET /api/snapshots/verify-chain` (Ola 6 C) para tamper-evidence retroactiva |
+| **SLO + Alerts**        | 8 SLIs catalogados, vista `pricing_slo_minute`, evaluator opt-in, 5 canales (email/Slack/PagerDuty/webhook/Opsgenie); 3 alertas canónicas seedeadas por migration + provisioning (Ola 6 A)                                                        |
+| **Adapter layer**       | `CoreBankingAdapter`, `CrmAdapter`, `MarketDataAdapter`, `SsoProvider` con reference in-memory + stubs Salesforce/Bloomberg                                                                                                                       |
+| **SSO Google real**     | `GoogleSsoProvider` con verificación JWT + restricción opcional de hosted domain                                                                                                                                                                  |
+| **Tenant provisioning** | `scripts/provision-tenant.ts` idempotente, < 60s SLO                                                                                                                                                                                              |
+| **Ops metering**        | `usage_events` + `tenant_feature_flags` (sin billing — el motor lo opera el banco)                                                                                                                                                                |
 
 ### Misc
-| Módulo | Descripción |
-|---|---|
-| **Deal Blotter** | Gestión de operaciones con workflow Draft → Pending → Approved → Booked |
-| **ALM Reporting** | 10 dashboards (Overview, Executive, NII, Maturity Ladder, Currency Gap, P&L Attribution, Pricing Analytics, Funding, Snapshots, Behaviour) |
-| **Market Data** | Yield curves CRUD, bootstrap zero coupon, liquidity curves |
-| **Target Grid / Discipline / What-If** | Olas 1-3 metodológicas (target rates, leakage analytics, sandbox simulations) |
-| **AI Assistant** | Gemini con grounding de cartera y mercado |
-| **Accounting Ledger** | Asientos contables automáticos por operación |
-| **User Mgmt + Audit** | RBAC (Admin, Trader, Risk_Manager, Auditor) con audit trail inmutable |
-| **System Health** | Dashboard de salud con SLOPanel embebido |
+
+| Módulo                                 | Descripción                                                                                                                                |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Deal Blotter**                       | Gestión de operaciones con workflow Draft → Pending → Approved → Booked                                                                    |
+| **ALM Reporting**                      | 10 dashboards (Overview, Executive, NII, Maturity Ladder, Currency Gap, P&L Attribution, Pricing Analytics, Funding, Snapshots, Behaviour) |
+| **Market Data**                        | Yield curves CRUD, bootstrap zero coupon, liquidity curves                                                                                 |
+| **Target Grid / Discipline / What-If** | Olas 1-3 metodológicas (target rates, leakage analytics, sandbox simulations)                                                              |
+| **AI Assistant**                       | Gemini con grounding de cartera y mercado                                                                                                  |
+| **Accounting Ledger**                  | Asientos contables automáticos por operación                                                                                               |
+| **User Mgmt + Audit**                  | RBAC (Admin, Trader, Risk_Manager, Auditor) con audit trail inmutable                                                                      |
+| **System Health**                      | Dashboard de salud con SLOPanel embebido                                                                                                   |
 
 ## Arquitectura
 
@@ -118,6 +123,12 @@ PostgreSQL (Supabase)
 ```
 
 Detalles completos en [docs/architecture.md](./docs/architecture.md).
+
+La reestructura modular está empezada bajo `packages/` con facades estables
+`@npricing/pricing-core`, `@npricing/evidence`, `@npricing/governance`,
+`@npricing/commercial`, `@npricing/domain` y `@npricing/data-access`.
+Los paquetes están registrados como npm workspaces privados. Ver
+[docs/platform-restructure.md](./docs/platform-restructure.md).
 
 ## Quick Start
 
@@ -168,28 +179,29 @@ Troubleshooting en [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md
 
 ### Variables de entorno principales
 
-| Variable | Required | Descripción |
-|---|---|---|
-| `DATABASE_URL` | sí | Postgres connection string para el server (pg.Pool) |
-| `JWT_SECRET` | sí en prod | Secret HMAC para JWT propio |
-| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | sí | Browser → Supabase |
-| `VITE_GOOGLE_CLIENT_ID` | sí | Habilita Google SSO |
-| `GOOGLE_ALLOWED_HOSTED_DOMAIN` | no | Restringe SSO a un Workspace |
-| `VITE_DEMO_USER` / `VITE_DEMO_PASS` / `VITE_DEMO_EMAIL` | demo | Sin los dos primeros el formulario de login demo NO se renderiza (`components/ui/Login.tsx:287`) |
-| `SEED_DEMO_ON_BOOT` | no | `true` ejecuta `scripts/seed-demo-dataset.ts` tras `runMigrations()` (idempotente). Usado en Replit |
-| `TENANCY_ENFORCE` | no (`off`) | `on` activa middleware de tenancy global |
-| `TENANCY_STRICT` | no (`off`) | `on` hace que el helper PG lance error si falta tenancy |
-| `PRICING_ALLOW_MOCKS` | no (`false`) | `true` permite fallback a mock data en pricing |
-| `ENGINE_VERSION` | no | Git sha para `pricing_snapshots.engine_version` |
-| `ALERT_EVAL_INTERVAL_MS` | no | ≥1000 activa el alert evaluator worker |
-| `ESCALATION_SWEEP_INTERVAL_MS` | no | ≥1000 activa el escalation sweeper |
-| `LTV_SNAPSHOT_INTERVAL_MS` | no | ≥60000 activa refresco de `client_ltv_snapshots` |
-| `CRM_SYNC_INTERVAL_MS` | no | ≥1000 activa pull CRM → `client_events` |
-| `ADAPTER_CRM` / `ADAPTER_MARKET_DATA` | `in-memory` | `salesforce` / `bloomberg` para stubs reales |
-| `DOSSIER_SIGNING_SECRET` | sí en prod | HMAC para firmar committee dossiers |
-| `VITE_PRICING_APPLY_CURVE_SHIFT` | no (`false`) | `true` → motor honra `ShockScenario.curveShiftBps` per-tenor (Ola 6 B.4). Off = legacy uniform shift |
-| `INTEGRATION_DATABASE_URL` | no | Activa tests integración con DB real (opt-in) |
-| `VITE_GEMINI_API_KEY` | no | API key Gemini para AI Assistant |
+| Variable                                                | Required     | Descripción                                                                                          |
+| ------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                          | sí           | Postgres connection string para el server (pg.Pool)                                                  |
+| `JWT_SECRET`                                            | sí en prod   | Secret HMAC para JWT propio                                                                          |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`          | sí           | Browser → Supabase                                                                                   |
+| `VITE_GOOGLE_CLIENT_ID`                                 | sí           | Habilita Google SSO                                                                                  |
+| `GOOGLE_ALLOWED_HOSTED_DOMAIN`                          | no           | Restringe SSO a un Workspace                                                                         |
+| `VITE_DEMO_USER` / `VITE_DEMO_PASS` / `VITE_DEMO_EMAIL` | demo         | Sin los dos primeros el formulario de login demo NO se renderiza (`components/ui/Login.tsx:287`)     |
+| `SEED_DEMO_ON_BOOT`                                     | no           | `true` ejecuta `scripts/seed-demo-dataset.ts` tras `runMigrations()` (idempotente). Usado en Replit  |
+| `TENANCY_ENFORCE`                                       | no (`off`)   | `on` activa middleware de tenancy global                                                             |
+| `TENANCY_STRICT`                                        | no (`off`)   | `on` hace que el helper PG lance error si falta tenancy                                              |
+| `PRICING_ALLOW_MOCKS`                                   | no (`false`) | `true` permite fallback a mock data en pricing                                                       |
+| `ENGINE_VERSION`                                        | no           | Git sha para `pricing_snapshots.engine_version`                                                      |
+| `ALERT_EVAL_INTERVAL_MS`                                | no           | ≥1000 activa el alert evaluator worker                                                               |
+| `ESCALATION_SWEEP_INTERVAL_MS`                          | no           | ≥1000 activa el escalation sweeper                                                                   |
+| `LTV_SNAPSHOT_INTERVAL_MS`                              | no           | ≥60000 activa refresco de `client_ltv_snapshots`                                                     |
+| `CRM_SYNC_INTERVAL_MS`                                  | no           | ≥1000 activa pull CRM → `client_events`                                                              |
+| `ADAPTER_CRM` / `ADAPTER_MARKET_DATA`                   | `in-memory`  | `salesforce` / `bloomberg` para stubs reales                                                         |
+| `DOSSIER_SIGNING_SECRET`                                | sí en prod   | HMAC para firmar committee dossiers                                                                  |
+| `VITE_PRICING_APPLY_CURVE_SHIFT`                        | no (`false`) | `true` → motor honra `ShockScenario.curveShiftBps` per-tenor (Ola 6 B.4). Off = legacy uniform shift |
+| `INTEGRATION_DATABASE_URL`                              | no           | Activa tests integración con DB real (opt-in)                                                        |
+| `VITE_GEMINI_API_KEY`                                   | no           | API key Gemini para AI Assistant                                                                     |
+| `HISTORICAL_BACKTEST_DATASET_PATH`                       | prod gate    | Dataset histórico aprobado por banco para backtesting real                                           |
 
 ### Setup de Supabase
 
@@ -230,6 +242,7 @@ npm run verify:full      # verify + test:e2e
 npm run check:sync       # Validar seed↔schema (migrations)
 npm run check:bundle     # Validar tamaños de bundle
 npm run check:data-quality
+npm run check:external-readiness
 npm run check:security   # Scan deps prod con excepciones gobernadas
 npm run seed:demo        # Puebla DEFAULT_ENTITY_ID (idempotente)
 npm run seed:clv-demo    # Subset CLV Phase 6
@@ -289,12 +302,12 @@ Ver detalle en [docs/pricing-methodology.md](./docs/pricing-methodology.md).
 
 ## Testing
 
-| Tipo | Comando | Cobertura |
-|---|---|---|
-| Unit | `npm run test` | ~1.37k tests · 85 archivos |
-| Integration (opt-in) | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration` | RLS + tenancy + fuzz |
-| E2E | `npm run test:e2e` | 23 specs Playwright |
-| Storybook | `npm run storybook` | Component stories |
+| Tipo                 | Comando                                                                 | Cobertura                  |
+| -------------------- | ----------------------------------------------------------------------- | -------------------------- |
+| Unit                 | `npm run test`                                                          | ~1.37k tests · 85 archivos |
+| Integration (opt-in) | `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration` | RLS + tenancy + fuzz       |
+| E2E                  | `npm run test:e2e`                                                      | 23 specs Playwright        |
+| Storybook            | `npm run storybook`                                                     | Component stories          |
 
 Cubre motor FTP completo, RAROC, curvas, rule matching, deal workflow,
 governance, validación, audit, snapshots reproducibles, drift detector,
@@ -305,12 +318,12 @@ Detalle de integration tests en [docs/integration-tests.md](./docs/integration-t
 
 ## Roles y permisos
 
-| Rol | Permisos |
-|---|---|
-| **Admin** | Acceso total: configuración, usuarios, aprobación, kill switch |
-| **Trader** | Crear/editar deals, ver reporting |
+| Rol              | Permisos                                                       |
+| ---------------- | -------------------------------------------------------------- |
+| **Admin**        | Acceso total: configuración, usuarios, aprobación, kill switch |
+| **Trader**       | Crear/editar deals, ver reporting                              |
 | **Risk_Manager** | Aprobar deals, modificar deals booked, methodology + campaigns |
-| **Auditor** | Solo lectura + acceso a audit log + dossier verify |
+| **Auditor**      | Solo lectura + acceso a audit log + dossier verify             |
 
 ## Deploy
 
@@ -362,24 +375,24 @@ Detalle fase por fase en
 
 ## Documentación
 
-| Para… | Lee… |
-|---|---|
-| Onboarding técnico rápido | [docs/architecture.md](./docs/architecture.md) |
-| Contexto IA / agentes | [CLAUDE.md](./CLAUDE.md) |
-| Demo en Replit (troubleshooting) | [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md) |
-| Estado del roadmap | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md) |
-| Ola 6 — estado por bloque + PR refs | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md) |
-| Operación / on-call | [docs/runbooks/](./docs/runbooks/) (13 plantillas) |
-| Tenancy strict flip playbook | [docs/runbooks/tenancy-strict-flip.md](./docs/runbooks/tenancy-strict-flip.md) |
-| Rollout de tenancy + flags | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md) |
-| Diseño Phase 0 detallado | [docs/phase-0-design.md](./docs/phase-0-design.md) + [phase-0-technical-specs.md](./docs/phase-0-technical-specs.md) |
-| API / contratos | [docs/api-spec.yaml](./docs/api-spec.yaml) |
-| Metodología FTP | [docs/pricing-methodology.md](./docs/pricing-methodology.md) |
-| Setup Supabase | [docs/supabase-setup.md](./docs/supabase-setup.md) |
-| Tests integración | [docs/integration-tests.md](./docs/integration-tests.md) |
-| Seguridad baseline | [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md) |
-| Nueva plataforma greenfield | [docs/next-gen-application-spec.md](./docs/next-gen-application-spec.md) |
-| Extracción hacia greenfield | [docs/next-gen-extraction-map.md](./docs/next-gen-extraction-map.md) |
+| Para…                               | Lee…                                                                                                                 |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Onboarding técnico rápido           | [docs/architecture.md](./docs/architecture.md)                                                                       |
+| Contexto IA / agentes               | [CLAUDE.md](./CLAUDE.md)                                                                                             |
+| Demo en Replit (troubleshooting)    | [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md)                                                       |
+| Estado del roadmap                  | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md)                                             |
+| Ola 6 — estado por bloque + PR refs | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md)                         |
+| Operación / on-call                 | [docs/runbooks/](./docs/runbooks/) (13 plantillas)                                                                   |
+| Tenancy strict flip playbook        | [docs/runbooks/tenancy-strict-flip.md](./docs/runbooks/tenancy-strict-flip.md)                                       |
+| Rollout de tenancy + flags          | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md)                                                                 |
+| Diseño Phase 0 detallado            | [docs/phase-0-design.md](./docs/phase-0-design.md) + [phase-0-technical-specs.md](./docs/phase-0-technical-specs.md) |
+| API / contratos                     | [docs/api-spec.yaml](./docs/api-spec.yaml)                                                                           |
+| Metodología FTP                     | [docs/pricing-methodology.md](./docs/pricing-methodology.md)                                                         |
+| Setup Supabase                      | [docs/supabase-setup.md](./docs/supabase-setup.md)                                                                   |
+| Tests integración                   | [docs/integration-tests.md](./docs/integration-tests.md)                                                             |
+| Seguridad baseline                  | [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md)                                             |
+| Nueva plataforma greenfield         | [docs/next-gen-application-spec.md](./docs/next-gen-application-spec.md)                                             |
+| Extracción hacia greenfield         | [docs/next-gen-extraction-map.md](./docs/next-gen-extraction-map.md)                                                 |
 
 ## Licencia
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Trash2 } from 'lucide-react';
 import type { Transaction } from '../../types';
-import type { PricingShocks } from '../../utils/pricingEngine';
+import type { PricingShocks } from '@npricing/pricing-core';
 import type { PricingScenario } from './pricingComparisonUtils';
 import { useUI } from '../../contexts/UIContext';
 
@@ -69,9 +69,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono tracking-normal text-slate-500">
-          {t.interestRateBps}
-        </label>
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">{t.interestRateBps}</label>
         <input
           type="number"
           value={scenario.shocks.interestRate}
@@ -81,9 +79,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono tracking-normal text-slate-500">
-          {t.liquiditySpreadBps}
-        </label>
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">{t.liquiditySpreadBps}</label>
         <input
           type="number"
           value={scenario.shocks.liquiditySpread}
@@ -93,9 +89,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono tracking-normal text-slate-500">
-          {t.marginTargetPct}
-        </label>
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">{t.marginTargetPct}</label>
         <input
           type="number"
           step="0.01"
@@ -106,9 +100,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-mono tracking-normal text-slate-500">
-          {t.collateralType}
-        </label>
+        <label className="text-[10px] font-mono tracking-normal text-slate-500">{t.collateralType}</label>
         <select
           value={scenario.overrides.collateralType ?? baseDeal.collateralType ?? 'None'}
           onChange={(event) => onUpdateOverride(scenario.id, 'collateralType', event.target.value)}

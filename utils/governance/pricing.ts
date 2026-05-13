@@ -13,19 +13,9 @@ import type {
   PricingRunContext,
   Transaction,
 } from '../../types';
+import { batchReprice, DEFAULT_PRICING_SHOCKS, type PricingContext, type PricingShocks } from '@npricing/pricing-core';
 import { buildDossierGroundedContext } from '../aiGrounding';
-import {
-  batchReprice,
-  DEFAULT_PRICING_SHOCKS,
-  type PricingContext,
-  type PricingShocks,
-} from '../pricingEngine';
-import {
-  buildCorrelation,
-  buildTaskDecisionFields,
-  createGovernanceId,
-  nowIso,
-} from './common';
+import { buildCorrelation, buildTaskDecisionFields, createGovernanceId, nowIso } from './common';
 import { getLiveMethodologyVersionId } from './methodology';
 
 export function buildPricingRunContext({

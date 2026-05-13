@@ -10,7 +10,6 @@ import type {
   SandboxMethodology,
   ElasticityModel,
   BacktestRun,
-  GridFilters,
 } from '../../types';
 
 // ---------------------------------------------------------------------------
@@ -201,18 +200,6 @@ export function useCreateBacktestRun() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.whatIf.backtests });
     },
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Market benchmarks
-// ---------------------------------------------------------------------------
-
-export function useBenchmarksQuery(filters?: GridFilters) {
-  const { dataMode } = useData();
-  return useQuery({
-    queryKey: [...queryKeys.whatIf.benchmarks, dataMode, filters],
-    queryFn: () => whatIfApi.listBenchmarks(filters),
   });
 }
 

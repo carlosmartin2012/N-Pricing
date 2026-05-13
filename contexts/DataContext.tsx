@@ -10,7 +10,7 @@ import type {
   ApprovalMatrixConfig,
   RAROCInputs,
 } from '../types';
-import { PricingShocks } from '../utils/pricingEngine';
+import type { PricingShocks } from '@npricing/pricing-core';
 import { localCache } from '../utils/localCache';
 import type { DataMode } from '../utils/dataModeUtils';
 import { useMarketData } from './MarketDataContext';
@@ -93,19 +93,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [dataMode, setDataMode] = useState<DataMode>(() => localCache.loadLocal('n_pricing_data_mode', 'live'));
   const queryClient = useQueryClient();
 
-  const setPersistedDataMode = useCallback<React.Dispatch<React.SetStateAction<DataMode>>>((nextValue) => {
-    setDataMode((previous) => {
-      const resolved = typeof nextValue === 'function' ? nextValue(previous) : nextValue;
-      localCache.saveLocal('n_pricing_data_mode', resolved);
-      if (resolved !== previous) {
-        // Toggling demo/live changes the x-entity-id header the next fetch
-        // will send (see utils/activeEntity.ts). Clear the React Query cache
-        // so every subscribed view refetches against the new entity.
-        queryClient.clear();
-      }
-      return resolved;
-    });
-  }, [queryClient]);
+  const setPersistedDataMode = useCallback<React.Dispatch<React.SetStateAction<DataMode>>>(
+    (nextValue) => {
+      setDataMode((previous) => {
+        const resolved = typeof nextValue === 'function' ? nextValue(previous) : nextValue;
+        localCache.saveLocal('n_pricing_data_mode', resolved);
+        if (resolved !== previous) {
+          // Toggling demo/live changes the x-entity-id header the next fetch
+          // will send (see utils/activeEntity.ts). Clear the React Query cache
+          // so every subscribed view refetches against the new entity.
+          queryClient.clear();
+        }
+        return resolved;
+      });
+    },
+    [queryClient]
+  );
 
   const value = useMemo(
     () => ({
@@ -152,11 +155,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ]
   );
 
-  return (
-    <CoreDataContext.Provider value={value}>
-      {children}
-    </CoreDataContext.Provider>
-  );
+  return <CoreDataContext.Provider value={value}>{children}</CoreDataContext.Provider>;
 };
 
 export const useCoreData = (): CoreDataContextType => {

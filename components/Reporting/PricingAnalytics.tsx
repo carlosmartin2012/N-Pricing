@@ -1,10 +1,19 @@
 import React, { useMemo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from '../ui/charts/lazyRecharts';
 import { Transaction, BusinessUnit, ProductDefinition, ClientEntity } from '../../types';
-import { calculatePricing } from '../../utils/pricingEngine';
+import { calculatePricing } from '@npricing/pricing-core';
 import { useData } from '../../contexts/DataContext';
 import { TrendingUp, BarChart4, PieChart as PieIcon, Activity } from 'lucide-react';
 import { buildPricingContext } from '../../utils/pricingContext';
@@ -43,27 +52,27 @@ const tooltipStyle: React.CSSProperties = {
 const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, clients }) => {
   const contextData = useData();
 
-  const bookedDeals = useMemo(
-    () => deals.filter(d => d.status === 'Booked' || d.status === 'Approved'),
-    [deals]
-  );
+  const bookedDeals = useMemo(() => deals.filter((d) => d.status === 'Booked' || d.status === 'Approved'), [deals]);
 
   const pricingContext = useMemo(
     () =>
-      buildPricingContext({
-        yieldCurves: contextData.yieldCurves,
-        liquidityCurves: contextData.liquidityCurves,
-        rules: contextData.rules,
-        ftpRateCards: contextData.ftpRateCards,
-        transitionGrid: contextData.transitionGrid,
-        physicalGrid: contextData.physicalGrid,
-        greeniumGrid: contextData.greeniumGrid,
-        behaviouralModels: contextData.behaviouralModels,
-      }, {
-        clients,
-        products,
-        businessUnits,
-      }),
+      buildPricingContext(
+        {
+          yieldCurves: contextData.yieldCurves,
+          liquidityCurves: contextData.liquidityCurves,
+          rules: contextData.rules,
+          ftpRateCards: contextData.ftpRateCards,
+          transitionGrid: contextData.transitionGrid,
+          physicalGrid: contextData.physicalGrid,
+          greeniumGrid: contextData.greeniumGrid,
+          behaviouralModels: contextData.behaviouralModels,
+        },
+        {
+          clients,
+          products,
+          businessUnits,
+        }
+      ),
     [
       contextData.yieldCurves,
       contextData.liquidityCurves,
@@ -81,7 +90,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
 
   // Build pricing context and compute results for all booked deals
   const pricingResults = useMemo(() => {
-    return bookedDeals.map(deal => ({
+    return bookedDeals.map((deal) => ({
       deal,
       result: calculatePricing(deal, contextData.approvalMatrix, pricingContext),
     }));
@@ -91,12 +100,8 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
   const summaryKpis = useMemo(() => {
     const count = pricingResults.length;
     const totalVolume = pricingResults.reduce((s, p) => s + (p.deal.amount || 0), 0);
-    const avgFtp = count > 0
-      ? pricingResults.reduce((s, p) => s + p.result.totalFTP, 0) / count
-      : 0;
-    const avgRaroc = count > 0
-      ? pricingResults.reduce((s, p) => s + p.result.raroc, 0) / count
-      : 0;
+    const avgFtp = count > 0 ? pricingResults.reduce((s, p) => s + p.result.totalFTP, 0) / count : 0;
+    const avgRaroc = count > 0 ? pricingResults.reduce((s, p) => s + p.result.raroc, 0) / count : 0;
     return { count, totalVolume, avgFtp, avgRaroc };
   }, [pricingResults]);
 
@@ -110,9 +115,9 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
       { label: '15-20%', min: 15, max: 20, color: '#10b981' },
       { label: '>20%', min: 20, max: Infinity, color: '#10b981' },
     ];
-    return buckets.map(b => ({
+    return buckets.map((b) => ({
       bucket: b.label,
-      count: pricingResults.filter(p => p.result.raroc >= b.min && p.result.raroc < b.max).length,
+      count: pricingResults.filter((p) => p.result.raroc >= b.min && p.result.raroc < b.max).length,
       color: b.color,
     }));
   }, [pricingResults]);
@@ -120,8 +125,8 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
   // ── Section 3: FTP by Product Category ──
   const ftpByCategory = useMemo(() => {
     const categories: Array<'Asset' | 'Liability' | 'Off-Balance'> = ['Asset', 'Liability', 'Off-Balance'];
-    return categories.map(cat => {
-      const items = pricingResults.filter(p => p.deal.category === cat);
+    return categories.map((cat) => {
+      const items = pricingResults.filter((p) => p.deal.category === cat);
       const count = items.length;
       return {
         category: cat,
@@ -139,7 +144,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
     pricingResults.forEach(({ deal }) => {
       const pid = deal.productType || 'Unknown';
       if (!map[pid]) {
-        const prod = products.find(p => p.id === pid);
+        const prod = products.find((p) => p.id === pid);
         map[pid] = { name: prod?.name || pid, volume: 0, count: 0 };
       }
       map[pid].volume += deal.amount || 0;
@@ -150,15 +155,29 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
 
   // ── Section 5: BU Performance Table ──
   const buPerformance = useMemo(() => {
-    const map: Record<string, {
-      buName: string; dealCount: number; totalFtp: number;
-      totalRaroc: number; totalVolume: number; totalMargin: number;
-    }> = {};
+    const map: Record<
+      string,
+      {
+        buName: string;
+        dealCount: number;
+        totalFtp: number;
+        totalRaroc: number;
+        totalVolume: number;
+        totalMargin: number;
+      }
+    > = {};
     pricingResults.forEach(({ deal, result }) => {
       const buId = deal.businessUnit;
       if (!map[buId]) {
-        const bu = businessUnits.find(b => b.id === buId);
-        map[buId] = { buName: bu?.name || buId, dealCount: 0, totalFtp: 0, totalRaroc: 0, totalVolume: 0, totalMargin: 0 };
+        const bu = businessUnits.find((b) => b.id === buId);
+        map[buId] = {
+          buName: bu?.name || buId,
+          dealCount: 0,
+          totalFtp: 0,
+          totalRaroc: 0,
+          totalVolume: 0,
+          totalMargin: 0,
+        };
       }
       map[buId].dealCount++;
       map[buId].totalFtp += result.totalFTP;
@@ -167,7 +186,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
       map[buId].totalMargin += deal.marginTarget || 0;
     });
     return Object.values(map)
-      .map(bu => ({
+      .map((bu) => ({
         buName: bu.buName,
         dealCount: bu.dealCount,
         avgFtp: bu.dealCount > 0 ? bu.totalFtp / bu.dealCount : 0,
@@ -193,11 +212,36 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
       {/* ── Section 1: Summary KPIs ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Deals', value: `${summaryKpis.count}`, icon: <BarChart4 size={14} />, color: 'text-cyan-400' },
-          { label: 'Avg FTP Rate', value: `${summaryKpis.avgFtp.toFixed(2)}%`, icon: <TrendingUp size={14} />, color: 'text-emerald-400' },
-          { label: 'Avg RAROC', value: `${summaryKpis.avgRaroc.toFixed(1)}%`, icon: <Activity size={14} />, color: summaryKpis.avgRaroc >= 10 ? 'text-emerald-400' : summaryKpis.avgRaroc >= 5 ? 'text-amber-400' : 'text-red-400' },
-          { label: 'Portfolio Volume', value: fmtM(summaryKpis.totalVolume), icon: <PieIcon size={14} />, color: 'text-white' },
-        ].map(kpi => (
+          {
+            label: 'Total Deals',
+            value: `${summaryKpis.count}`,
+            icon: <BarChart4 size={14} />,
+            color: 'text-cyan-400',
+          },
+          {
+            label: 'Avg FTP Rate',
+            value: `${summaryKpis.avgFtp.toFixed(2)}%`,
+            icon: <TrendingUp size={14} />,
+            color: 'text-emerald-400',
+          },
+          {
+            label: 'Avg RAROC',
+            value: `${summaryKpis.avgRaroc.toFixed(1)}%`,
+            icon: <Activity size={14} />,
+            color:
+              summaryKpis.avgRaroc >= 10
+                ? 'text-emerald-400'
+                : summaryKpis.avgRaroc >= 5
+                  ? 'text-amber-400'
+                  : 'text-red-400',
+          },
+          {
+            label: 'Portfolio Volume',
+            value: fmtM(summaryKpis.totalVolume),
+            icon: <PieIcon size={14} />,
+            color: 'text-white',
+          },
+        ].map((kpi) => (
           <div key={kpi.label} className="nfq-kpi-card">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[color:var(--nfq-text-muted)]">{kpi.icon}</span>
@@ -221,7 +265,12 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
               <BarChart data={rarocDistribution}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                 <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} allowDecimals={false} />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#475569', fontSize: 9 }}
+                  allowDecimals={false}
+                />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Bar dataKey="count" name="Deals" radius={[4, 4, 0, 0]}>
                   {rarocDistribution.map((entry, idx) => (
@@ -282,8 +331,14 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
                     <Cell key={idx} fill={COLORS[idx % COLORS.length]} fillOpacity={0.85} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={tooltipStyle} formatter={(value) => typeof value === 'number' ? fmtM(value) : `${value ?? '-'}`} />
-                <Legend wrapperStyle={{ fontSize: '10px' }} formatter={(value) => <span className="text-slate-400">{value}</span>} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(value) => (typeof value === 'number' ? fmtM(value) : `${value ?? '-'}`)}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: '10px' }}
+                  formatter={(value) => <span className="text-slate-400">{value}</span>}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -297,14 +352,20 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
           </h4>
           <div className="space-y-3">
             {productVolume.map((pv, idx) => (
-              <div key={pv.name} className="flex items-center justify-between py-2 last:border-0" style={{ borderBottom: 'none' }}>
+              <div
+                key={pv.name}
+                className="flex items-center justify-between py-2 last:border-0"
+                style={{ borderBottom: 'none' }}
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
                   <span className="text-xs text-[color:var(--nfq-text-secondary)] font-medium">{pv.name}</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs font-mono text-[color:var(--nfq-text-muted)]">{pv.count} deals</span>
-                  <span className="text-xs font-mono font-bold text-[color:var(--nfq-text-primary)]">{fmtM(pv.volume)}</span>
+                  <span className="text-xs font-mono font-bold text-[color:var(--nfq-text-primary)]">
+                    {fmtM(pv.volume)}
+                  </span>
                 </div>
               </div>
             ))}
@@ -325,29 +386,60 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
           <table className="w-full text-xs">
             <thead>
               <tr>
-                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-left font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">BU Name</th>
-                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">Deal Count</th>
-                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">Avg FTP</th>
-                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">Avg RAROC</th>
-                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">Total Volume</th>
-                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">Avg Margin</th>
+                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-left font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  BU Name
+                </th>
+                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  Deal Count
+                </th>
+                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  Avg FTP
+                </th>
+                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  Avg RAROC
+                </th>
+                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  Total Volume
+                </th>
+                <th className="border-b border-[color:var(--nfq-border)] px-4 py-2 text-right font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[color:var(--nfq-text-muted)]">
+                  Avg Margin
+                </th>
               </tr>
             </thead>
             <tbody>
-              {buPerformance.map(bu => (
-                <tr key={bu.buName} className="transition-colors even:bg-[var(--nfq-bg-surface)] odd:bg-[var(--nfq-bg-root)] hover:bg-[var(--nfq-bg-elevated)]">
-                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 font-medium text-[color:var(--nfq-text-secondary)]">{bu.buName}</td>
-                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[color:var(--nfq-text-tertiary)] [font-variant-numeric:tabular-nums]">{bu.dealCount}</td>
-                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[var(--nfq-accent)] [font-variant-numeric:tabular-nums]">{bu.avgFtp.toFixed(2)}%</td>
-                  <td className={`border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums] ${bu.avgRaroc >= 10 ? 'text-[var(--nfq-success)]' : bu.avgRaroc >= 5 ? 'text-[var(--nfq-warning)]' : 'text-[var(--nfq-danger)]'}`}>
+              {buPerformance.map((bu) => (
+                <tr
+                  key={bu.buName}
+                  className="transition-colors even:bg-[var(--nfq-bg-surface)] odd:bg-[var(--nfq-bg-root)] hover:bg-[var(--nfq-bg-elevated)]"
+                >
+                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 font-medium text-[color:var(--nfq-text-secondary)]">
+                    {bu.buName}
+                  </td>
+                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[color:var(--nfq-text-tertiary)] [font-variant-numeric:tabular-nums]">
+                    {bu.dealCount}
+                  </td>
+                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[var(--nfq-accent)] [font-variant-numeric:tabular-nums]">
+                    {bu.avgFtp.toFixed(2)}%
+                  </td>
+                  <td
+                    className={`border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono [font-variant-numeric:tabular-nums] ${bu.avgRaroc >= 10 ? 'text-[var(--nfq-success)]' : bu.avgRaroc >= 5 ? 'text-[var(--nfq-warning)]' : 'text-[var(--nfq-danger)]'}`}
+                  >
                     {bu.avgRaroc.toFixed(1)}%
                   </td>
-                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono font-bold text-[color:var(--nfq-text-primary)] [font-variant-numeric:tabular-nums]">{fmtM(bu.totalVolume)}</td>
-                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[color:var(--nfq-text-tertiary)] [font-variant-numeric:tabular-nums]">{bu.avgMargin.toFixed(2)}%</td>
+                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono font-bold text-[color:var(--nfq-text-primary)] [font-variant-numeric:tabular-nums]">
+                    {fmtM(bu.totalVolume)}
+                  </td>
+                  <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-right font-mono text-[color:var(--nfq-text-tertiary)] [font-variant-numeric:tabular-nums]">
+                    {bu.avgMargin.toFixed(2)}%
+                  </td>
                 </tr>
               ))}
               {buPerformance.length === 0 && (
-                <tr><td colSpan={6} className="py-8 text-center text-[color:var(--nfq-text-muted)]">No data available</td></tr>
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-[color:var(--nfq-text-muted)]">
+                    No data available
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

@@ -2,7 +2,13 @@ import { Router } from 'express';
 import { query, queryOne, withTenancyTransaction } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { replaySnapshot, type SnapshotPayload } from '../workers/snapshotReplay';
-import { verifySnapshotChain, type SnapshotChainLink } from '../../utils/snapshotHash';
+import {
+  listSnapshotSummaries,
+  loadSnapshotDetail,
+  snapshotDetailToDto,
+  snapshotSummaryToDto,
+  verifySnapshotChainForEntity,
+} from '@npricing/evidence';
 
 /**
  * Pricing snapshot read + replay.
@@ -20,54 +26,6 @@ import { verifySnapshotChain, type SnapshotChainLink } from '../../utils/snapsho
  */
 
 const router = Router();
-
-interface SnapshotRow {
-  id: string;
-  entity_id: string;
-  deal_id: string | null;
-  pricing_result_id: string | null;
-  request_id: string;
-  engine_version: string;
-  as_of_date: string;
-  used_mock_for: string[];
-  input: Record<string, unknown>;
-  context: Record<string, unknown>;
-  output: Record<string, unknown>;
-  input_hash: string;
-  output_hash: string;
-  created_at: string;
-}
-
-function rowToDto(row: SnapshotRow): Record<string, unknown> {
-  return {
-    id: row.id,
-    entityId: row.entity_id,
-    dealId: row.deal_id,
-    pricingResultId: row.pricing_result_id,
-    requestId: row.request_id,
-    engineVersion: row.engine_version,
-    asOfDate: row.as_of_date,
-    usedMockFor: row.used_mock_for,
-    input: row.input,
-    context: row.context,
-    output: row.output,
-    inputHash: row.input_hash,
-    outputHash: row.output_hash,
-    createdAt: row.created_at,
-  };
-}
-
-async function loadSnapshot(tenancyEntityId: string, id: string): Promise<SnapshotRow | null> {
-  const row = await queryOne<SnapshotRow>(
-    `SELECT id, entity_id, deal_id, pricing_result_id, request_id, engine_version,
-            as_of_date, used_mock_for, input, context, output, input_hash, output_hash, created_at
-     FROM pricing_snapshots
-     WHERE id = $1 AND entity_id = $2
-     LIMIT 1`,
-    [id, tenancyEntityId],
-  );
-  return row;
-}
 
 /**
  * Ola 6 Bloque C — snapshot hash chain verification.
@@ -96,31 +54,15 @@ router.get('/verify-chain', async (req, res) => {
     const from = typeof req.query.from === 'string' ? req.query.from : null;
     const to = typeof req.query.to === 'string' ? req.query.to : null;
 
-    const filters = ['entity_id = $1'];
-    const params: Array<string> = [req.tenancy.entityId];
-    if (from) { params.push(from); filters.push(`created_at >= $${params.length}`); }
-    if (to)   { params.push(to);   filters.push(`created_at <= $${params.length}`); }
-
-    const rows = await query<{ id: string; output_hash: string; prev_output_hash: string | null }>(
-      `SELECT id, output_hash, prev_output_hash
-       FROM pricing_snapshots
-       WHERE ${filters.join(' AND ')}
-       ORDER BY created_at ASC, id ASC`,
-      params,
+    const result = await verifySnapshotChainForEntity(
+      { query },
+      {
+        entityId: req.tenancy.entityId,
+        from,
+        to,
+      }
     );
-    const links: SnapshotChainLink[] = rows.map((r) => ({
-      id: r.id,
-      outputHash: r.output_hash,
-      prevOutputHash: r.prev_output_hash,
-    }));
-    const result = verifySnapshotChain(links);
-    res.json({
-      entityId: req.tenancy.entityId,
-      from,
-      to,
-      count: links.length,
-      ...result,
-    });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -132,12 +74,12 @@ router.get('/:id', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const row = await loadSnapshot(req.tenancy.entityId, req.params.id);
+    const row = await loadSnapshotDetail({ queryOne }, req.tenancy.entityId, req.params.id);
     if (!row) {
       res.status(404).json({ code: 'not_found', message: 'Snapshot not found' });
       return;
     }
-    res.json(rowToDto(row));
+    res.json(snapshotDetailToDto(row));
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -152,38 +94,8 @@ router.get('/', async (req, res) => {
     const dealId = typeof req.query.deal_id === 'string' ? req.query.deal_id : null;
     const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? '50'), 10) || 50, 1), 200);
 
-    const rows = dealId
-      ? await query<SnapshotRow>(
-          `SELECT id, entity_id, deal_id, pricing_result_id, request_id, engine_version,
-                  as_of_date, used_mock_for, input_hash, output_hash, created_at
-           FROM pricing_snapshots
-           WHERE entity_id = $1 AND deal_id = $2
-           ORDER BY created_at DESC LIMIT $3`,
-          [req.tenancy.entityId, dealId, limit],
-        )
-      : await query<SnapshotRow>(
-          `SELECT id, entity_id, deal_id, pricing_result_id, request_id, engine_version,
-                  as_of_date, used_mock_for, input_hash, output_hash, created_at
-           FROM pricing_snapshots
-           WHERE entity_id = $1
-           ORDER BY created_at DESC LIMIT $2`,
-          [req.tenancy.entityId, limit],
-        );
-
-    res.json(rows.map((r) => {
-      // List view omits heavy input/context/output blobs — they're on the detail endpoint.
-      return {
-        id: r.id,
-        dealId: r.deal_id,
-        requestId: r.request_id,
-        engineVersion: r.engine_version,
-        asOfDate: r.as_of_date,
-        usedMockFor: r.used_mock_for,
-        inputHash: r.input_hash,
-        outputHash: r.output_hash,
-        createdAt: r.created_at,
-      };
-    }));
+    const rows = await listSnapshotSummaries({ query }, { entityId: req.tenancy.entityId, dealId, limit });
+    res.json(rows.map(snapshotSummaryToDto));
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -210,10 +122,7 @@ router.post('/:id/replay', async (req, res) => {
     // en el deploy. Belt + suspenders en queries del replay regulatorio.
     const row = await withTenancyTransaction(
       { entityId: req.tenancy.entityId, userEmail: req.tenancy.userEmail, role: req.tenancy.role },
-      (tx) => tx.queryOne<SnapshotRow>(
-        `SELECT * FROM pricing_snapshots WHERE id = $1 AND entity_id = $2 LIMIT 1`,
-        [req.params.id, req.tenancy!.entityId],
-      ),
+      (tx) => loadSnapshotDetail(tx, req.tenancy!.entityId, req.params.id)
     );
 
     if (!row) {

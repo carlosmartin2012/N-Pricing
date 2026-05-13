@@ -1,4 +1,4 @@
-import type { PricingShocks } from '../../utils/pricingEngine';
+import type { PricingShocks } from '@npricing/pricing-core';
 
 export interface ShockScenarioPreset {
   label: string;
@@ -46,14 +46,9 @@ export function parseImportedShocks(rows: Record<string, unknown>[]) {
   }
 
   return {
-    interestRate:
-      readNumericValue(firstRow.InterestRateShock) ??
-      readNumericValue(firstRow.interestRateShock) ??
-      0,
+    interestRate: readNumericValue(firstRow.InterestRateShock) ?? readNumericValue(firstRow.interestRateShock) ?? 0,
     liquiditySpread:
-      readNumericValue(firstRow.LiquiditySpreadShock) ??
-      readNumericValue(firstRow.liquiditySpreadShock) ??
-      0,
+      readNumericValue(firstRow.LiquiditySpreadShock) ?? readNumericValue(firstRow.liquiditySpreadShock) ?? 0,
   } satisfies PricingShocks;
 }
 
@@ -83,7 +78,7 @@ export function buildShockImpactRows(
     strategicSpread: number;
     regulatoryCost: number;
     capitalCharge: number;
-  },
+  }
 ): ShockImpactRow[] {
   return [
     {

@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently --names \"vite,api\" \"vite\" \"tsx server/index.ts\"",
     "dev:vite": "vite",
@@ -24,6 +27,7 @@
   "check:api-spec": "npx tsx scripts/check-openapi-spec.ts",
     "check:data-quality": "npx tsx scripts/check-data-quality.ts",
     "check:security": "npx tsx scripts/check-dependency-audit.ts",
+    "check:external-readiness": "npx tsx scripts/check-external-readiness.ts",
     "check:bundle": "npx tsx scripts/check-bundle-size.ts",
     "seed:clv-demo": "npx tsx scripts/seed-clv-demo.ts",
     "seed:demo": "npx tsx scripts/seed-demo-dataset.ts",

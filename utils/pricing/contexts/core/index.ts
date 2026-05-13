@@ -5,27 +5,19 @@
  * liquidity, capital, market, governance and analytics into a single
  * `calculatePricing` entry point.
  *
- * Strategy: re-export from the monolithic `utils/pricingEngine.ts` and
- * `utils/pricing/bitemporal.ts` + `utils/pricing/modelInventory.ts`. The
- * physical inversion (so pricingEngine imports *from* its own contexts
- * instead of the flat files) is a subsequent PR — see contexts/README.md.
+ * Strategy: re-export the orchestrator through `@npricing/pricing-core`, plus
+ * bitemporal/model-inventory/formula helpers that still live under `utils`.
+ * The physical inversion (so package files own implementation directly) is a
+ * subsequent mechanical move — see contexts/README.md.
  *
  * This closes the 7-wave extraction plan: all public motor surface is now
  * reachable through the `contexts/` hierarchy + root namespaces.
  */
 
 // Main orchestrator + context + shocks
-export {
-  calculatePricing,
-  batchReprice,
-  resolveEffectiveTenors,
-  DEFAULT_PRICING_SHOCKS,
-} from '../../../pricingEngine';
+export { calculatePricing, batchReprice, resolveEffectiveTenors, DEFAULT_PRICING_SHOCKS } from '@npricing/pricing-core';
 
-export type {
-  PricingContext,
-  PricingShocks,
-} from '../../../pricingEngine';
+export type { PricingContext, PricingShocks } from '@npricing/pricing-core';
 
 // Bitemporal — as-of recomputation support (Gap 18)
 export * as bitemporal from '../../bitemporal';

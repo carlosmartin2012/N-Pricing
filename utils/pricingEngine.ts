@@ -81,11 +81,16 @@ export interface PricingContext {
   sdrConfig?: SDRConfig;
   lrConfig?: LRConfig;
   incentivisationRules?: IncentivisationRule[];
+  featureFlags?: PricingFeatureFlags;
 }
 
 export interface PricingShocks {
   interestRate: number; // bps
   liquiditySpread: number; // bps
+}
+
+export interface PricingFeatureFlags {
+  applyCurveShift?: boolean;
 }
 
 export const DEFAULT_PRICING_SHOCKS: PricingShocks = {
@@ -109,9 +114,11 @@ export const DEFAULT_PRICING_SHOCKS: PricingShocks = {
  */
 function resolveRateShockPct(
   shocks: PricingShocks | { curveShiftBps?: Partial<Record<string, number>> | null; interestRate: number },
-  repricingMonths: number
+  repricingMonths: number,
+  featureFlags?: PricingFeatureFlags
 ): number {
-  const flagOn = String(import.meta.env?.VITE_PRICING_APPLY_CURVE_SHIFT ?? '').toLowerCase() === 'true';
+  const envFlagOn = String(import.meta.env?.VITE_PRICING_APPLY_CURVE_SHIFT ?? '').toLowerCase() === 'true';
+  const flagOn = featureFlags?.applyCurveShift ?? envFlagOn;
   const shifts = (shocks as { curveShiftBps?: Partial<Record<string, number>> | null }).curveShiftBps;
   if (!flagOn || !shifts || Object.keys(shifts).length === 0) {
     return shocks.interestRate / 100;
@@ -358,7 +365,7 @@ export const calculatePricing = (
     // or when the incoming shocks object lacks `curveShiftBps`, the motor
     // falls back to the uniform legacy shift so existing snapshots replay
     // bit-exact. Enable with `VITE_PRICING_APPLY_CURVE_SHIFT=true`.
-    const rateShockPct = resolveRateShockPct(shocks, tenors.rm);
+    const rateShockPct = resolveRateShockPct(shocks, tenors.rm, context?.featureFlags);
     const baseRate = rawBaseRate + rateShockPct;
     const liquidity = totalLiquidityCost + shocks.liquiditySpread / 100;
     const ftp = baseRate + liquidity;

@@ -1,10 +1,5 @@
-import type {
-  ApprovalMatrixConfig,
-  BusinessUnit,
-  ProductDefinition,
-  Transaction,
-} from '../../types';
-import { calculatePricing, type PricingContext } from '../../utils/pricingEngine';
+import type { ApprovalMatrixConfig, BusinessUnit, ProductDefinition, Transaction } from '../../types';
+import { calculatePricing, type PricingContext } from '@npricing/pricing-core';
 
 export type LedgerEntryType = 'LOAN' | 'DEPOSIT' | 'COMMITMENT';
 
@@ -72,22 +67,15 @@ export function buildLedgerEntries(
   approvalMatrix: ApprovalMatrixConfig,
   pricingContext: PricingContext,
   businessUnits: BusinessUnit[],
-  products: ProductDefinition[],
+  products: ProductDefinition[]
 ) {
   return deals
-    .filter(
-      (deal) =>
-        deal.status === 'Booked' ||
-        deal.status === 'Approved' ||
-        deal.status === 'Pending_Approval',
-    )
+    .filter((deal) => deal.status === 'Booked' || deal.status === 'Approved' || deal.status === 'Pending_Approval')
     .map((deal): LedgerEntry => {
       const pricingResult = calculatePricing(deal, approvalMatrix, pricingContext);
       const businessUnitName =
-        businessUnits.find((businessUnit) => businessUnit.id === deal.businessUnit)?.name ||
-        deal.businessUnit;
-      const productName =
-        products.find((product) => product.id === deal.productType)?.name || deal.productType;
+        businessUnits.find((businessUnit) => businessUnit.id === deal.businessUnit)?.name || deal.businessUnit;
+      const productName = products.find((product) => product.id === deal.productType)?.name || deal.productType;
 
       return {
         id: deal.id || 'N/A',
@@ -115,23 +103,23 @@ export function summarizeLedgerEntries(entries: LedgerEntry[]): LedgerSummary {
     assets: buildCurrencyBreakdown(
       entries
         .filter((entry) => entry.type === 'LOAN')
-        .map((entry) => ({ currency: entry.currency, amount: entry.amount })),
+        .map((entry) => ({ currency: entry.currency, amount: entry.amount }))
     ),
     liabilities: buildCurrencyBreakdown(
       entries
         .filter((entry) => entry.type === 'DEPOSIT')
-        .map((entry) => ({ currency: entry.currency, amount: entry.amount })),
+        .map((entry) => ({ currency: entry.currency, amount: entry.amount }))
     ),
     commitments: buildCurrencyBreakdown(
       entries
         .filter((entry) => entry.type === 'COMMITMENT')
-        .map((entry) => ({ currency: entry.currency, amount: entry.amount })),
+        .map((entry) => ({ currency: entry.currency, amount: entry.amount }))
     ),
     ftpIncome: buildCurrencyBreakdown(
       entries.map((entry) => ({
         currency: entry.currency,
         amount: entry.amount * (entry.margin / 100),
-      })),
+      }))
     ),
   };
 }

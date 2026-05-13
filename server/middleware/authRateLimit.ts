@@ -1,5 +1,5 @@
 import type { Request, RequestHandler } from 'express';
-import { consume, type ConsumeResult } from '../../utils/channels/tokenBucket';
+import { consume, type ConsumeResult } from '@npricing/commercial';
 
 /**
  * Lightweight per-IP rate limiter for unauthenticated endpoints (`/api/auth/*`).

@@ -133,18 +133,6 @@ function dateOnly(value: unknown): string {
   return isoDate(value).slice(0, 10);
 }
 
-function listParam(value: unknown): string[] {
-  if (Array.isArray(value)) return value.flatMap((v) => listParam(v));
-  if (typeof value !== 'string') return [];
-  return value.split(',').map((v) => v.trim()).filter(Boolean);
-}
-
-function addAnyFilter(filters: string[], params: unknown[], column: string, values: string[]): void {
-  if (values.length === 0) return;
-  params.push(values);
-  filters.push(`${column} = ANY($${params.length}::text[])`);
-}
-
 function userEmail(req: Request): string {
   return req.tenancy?.userEmail ?? req.user?.email ?? 'system@n-pricing.local';
 }
@@ -816,20 +804,6 @@ async function saveConfigArray(tx: Tx, key: string, value: unknown[]): Promise<v
   );
 }
 
-function benchmarkToDto(row: Record<string, unknown>) {
-  return {
-    id: String(row.id),
-    productType: String(row.product_type ?? ''),
-    tenorBucket: String(row.tenor_bucket ?? ''),
-    clientType: String(row.client_type ?? ''),
-    currency: String(row.currency ?? ''),
-    rate: asNumber(row.rate),
-    source: String(row.source ?? ''),
-    asOfDate: dateOnly(row.as_of_date),
-    notes: row.notes == null ? undefined : String(row.notes),
-  };
-}
-
 function budgetToDto(row: Record<string, unknown>) {
   return {
     id: String(row.id),
@@ -1375,68 +1349,8 @@ router.get('/backtests/:runId/result', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Benchmarks
+// Benchmark comparison
 // ---------------------------------------------------------------------------
-
-router.get('/benchmarks', async (req, res) => {
-  try {
-    const products = listParam(req.query.products);
-    const currencies = listParam(req.query.currencies);
-    const filters: string[] = [];
-    const params: unknown[] = [];
-    addAnyFilter(filters, params, 'product_type', products);
-    addAnyFilter(filters, params, 'currency', currencies);
-    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
-    const rows = await query<Record<string, unknown>>(
-      `SELECT * FROM market_benchmarks ${where}
-       ORDER BY as_of_date DESC, product_type ASC
-       LIMIT 500`,
-      params,
-    );
-    res.json(rows.map(benchmarkToDto));
-  } catch (err) {
-    res.status(500).json({ error: safeError(err) });
-  }
-});
-
-router.post('/benchmarks', async (req, res) => {
-  try {
-    if (!requireMethodologyAuthor(req, res)) return;
-    const body = (req.body ?? {}) as Record<string, unknown>;
-    const productType = asString(body.productType);
-    const tenorBucket = asString(body.tenorBucket);
-    const clientType = asString(body.clientType);
-    const currency = asString(body.currency);
-    const source = asString(body.source);
-    const rate = asNumber(body.rate, Number.NaN);
-    if (!productType || !tenorBucket || !clientType || !currency || !source || !Number.isFinite(rate)) {
-      res.status(400).json({ code: 'invalid_payload' });
-      return;
-    }
-    const row = await queryOne<Record<string, unknown>>(
-      `INSERT INTO market_benchmarks
-         (id, product_type, tenor_bucket, client_type, currency, rate, source, as_of_date, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       ON CONFLICT (product_type, tenor_bucket, client_type, currency, as_of_date)
-       DO UPDATE SET rate = EXCLUDED.rate, source = EXCLUDED.source, notes = EXCLUDED.notes
-       RETURNING *`,
-      [
-        asString(body.id, randomUUID()),
-        productType,
-        tenorBucket,
-        clientType,
-        currency,
-        rate,
-        source,
-        asString(body.asOfDate, new Date().toISOString().slice(0, 10)),
-        body.notes ?? null,
-      ],
-    );
-    res.status(201).json(row ? benchmarkToDto(row) : null);
-  } catch (err) {
-    res.status(500).json({ error: safeError(err) });
-  }
-});
 
 router.get('/benchmarks/compare', async (req, res) => {
   try {

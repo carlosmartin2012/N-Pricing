@@ -326,7 +326,9 @@ Cada semana cierra con un PR mergeable a main. Si se bloquea Bloque B, Bloque A 
 
 El pivot §Bloque H cerró migration + util (`utils/marketBenchmarks.ts`), tests (8) y captura de `competitor_rate` en `DealOutcomeDrawer`. El gap detectado:
 
-- `api/whatIf.ts:213` apunta a `/what-if/benchmarks` — **el server route no existe**.
+- Gap histórico: `api/whatIf.ts` apuntaba a `/what-if/benchmarks` para CRUD.
+  El CRUD vive ahora en `api/marketBenchmarks.ts` + `/api/market-benchmarks`;
+  What-If conserva sólo `/what-if/benchmarks/compare`.
 - Tabla `market_benchmarks` **sin seed**, así que la vista vacía sería permanente aunque la llamada respondiera.
 - Ninguno de los 20 componentes `components/Calculator/*` muestra "Market X.XX% • your Δbps" — el chip diseñado en PIVOT §Bloque H no se cableó.
 - No hay vista admin/CSV importer para alimentar feed manual.
@@ -357,8 +359,8 @@ Cerrar el círculo de "pricing decision support con referencia externa": que un 
 
 ### Fuera de scope Bloque D
 
-- CSV importer UI → Bloque D2 follow-up.
-- Vista admin `MarketBenchmarksView.tsx` con CRUD visual → D2.
+- CSV importer UI → ✅ D2 delivered in `/market-benchmarks`.
+- Vista admin `MarketBenchmarksView.tsx` con CRUD visual → ✅ D2 delivered.
 - Auto-ingest de BBG/Refinitiv → D3 (requiere contrato con banco piloto).
 
 ### Dependencias
@@ -372,6 +374,13 @@ Cerrar el círculo de "pricing decision support con referencia externa": que un 
 | Benchmarks seed en DB | ≥ 24 tuples |
 | `findBenchmark` cobertura para productos core | ≥ 80% de pricing calls encuentran match |
 | Chip visible en PricingReceipt | 100% de deals con product/client soportado |
+
+### Estado D2
+
+`/market-benchmarks` now provides the admin CRUD surface for the shared
+benchmark feed: filters, inline edit/create, delete, CSV paste import, and
+read-only rendering for non-admin users. The legacy What-If CRUD client was
+removed; What-If keeps only `/what-if/benchmarks/compare` for grid comparison.
 
 ---
 

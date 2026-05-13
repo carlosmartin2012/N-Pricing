@@ -12,7 +12,7 @@ import type {
   TransitionRateCard,
   YieldCurvePoint,
 } from '../types';
-import type { PricingContext } from './pricingEngine';
+import type { PricingContext } from '@npricing/pricing-core';
 
 interface PricingContextSource {
   yieldCurves: YieldCurvePoint[];
@@ -31,22 +31,15 @@ interface PricingContextEntities {
   businessUnits: BusinessUnit[];
 }
 
-export function resolveLiquidityCurves(
-  liquidityCurves?: DualLiquidityCurve[],
-): DualLiquidityCurve[] {
+export function resolveLiquidityCurves(liquidityCurves?: DualLiquidityCurve[]): DualLiquidityCurve[] {
   return liquidityCurves?.length ? liquidityCurves : MOCK_LIQUIDITY_CURVES;
 }
 
-export function getPrimaryLiquidityPoints(
-  liquidityCurves?: DualLiquidityCurve[],
-) {
+export function getPrimaryLiquidityPoints(liquidityCurves?: DualLiquidityCurve[]) {
   return resolveLiquidityCurves(liquidityCurves)[0]?.points ?? [];
 }
 
-export function buildPricingContext(
-  source: PricingContextSource,
-  entities: PricingContextEntities,
-): PricingContext {
+export function buildPricingContext(source: PricingContextSource, entities: PricingContextEntities): PricingContext {
   return {
     yieldCurve: source.yieldCurves,
     liquidityCurves: resolveLiquidityCurves(source.liquidityCurves),

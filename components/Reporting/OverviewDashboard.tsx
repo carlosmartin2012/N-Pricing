@@ -15,14 +15,10 @@ import {
   YAxis,
 } from '../ui/charts/lazyRecharts';
 import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from '../../types';
-import { calculatePricing } from '../../utils/pricingEngine';
+import { calculatePricing } from '@npricing/pricing-core';
 import { buildPricingContext } from '../../utils/pricingContext';
 import FtpLedgerSummaryCard, { type FtpLedgerSummary } from './FtpLedgerSummaryCard';
-import type {
-  LcrHistoryPoint,
-  PortfolioBusinessUnitSummary,
-  ScenarioMetrics,
-} from './reportingTypes';
+import type { LcrHistoryPoint, PortfolioBusinessUnitSummary, ScenarioMetrics } from './reportingTypes';
 
 interface Props {
   metrics: ScenarioMetrics;
@@ -35,14 +31,14 @@ interface Props {
 }
 
 const WATERFALL_COLORS: Record<string, string> = {
-  baseRate: '#06b6d4',        // cyan
+  baseRate: '#06b6d4', // cyan
   liquidityPremium: '#f59e0b', // amber
-  strategicSpread: '#3b82f6',  // blue
-  creditCost: '#f43f5e',       // rose
-  capitalCharge: '#e879f9',    // pink
-  esgCharges: '#10b981',       // emerald
-  operationalCost: '#8b5cf6',  // violet
-  margin: '#22c55e',           // green
+  strategicSpread: '#3b82f6', // blue
+  creditCost: '#f43f5e', // rose
+  capitalCharge: '#e879f9', // pink
+  esgCharges: '#10b981', // emerald
+  operationalCost: '#8b5cf6', // violet
+  margin: '#22c55e', // green
 };
 
 const tooltipStyleWaterfall: React.CSSProperties = {
@@ -79,7 +75,7 @@ const OverviewDashboard: React.FC<Props> = ({
           greeniumGrid: contextData.greeniumGrid,
           behaviouralModels: contextData.behaviouralModels,
         },
-        { clients, products, businessUnits },
+        { clients, products, businessUnits }
       ),
     [
       contextData.yieldCurves,
@@ -93,13 +89,13 @@ const OverviewDashboard: React.FC<Props> = ({
       clients,
       products,
       businessUnits,
-    ],
+    ]
   );
 
   // Compute weighted-average FTP waterfall across portfolio
   const waterfallData = useMemo(() => {
     const bookedDeals = deals.filter(
-      d => (d.status === 'Booked' || d.status === 'Approved') && d.amount > 0 && d.productType,
+      (d) => (d.status === 'Booked' || d.status === 'Approved') && d.amount > 0 && d.productType
     );
 
     if (bookedDeals.length === 0) return null;
@@ -149,7 +145,7 @@ const OverviewDashboard: React.FC<Props> = ({
     // the invisible base bar must start at the lower endpoint so the visible
     // bar always rises upward (Recharts cannot render downward-going stacked bars).
     let cumulative = 0;
-    const chartData = components.map(c => {
+    const chartData = components.map((c) => {
       const before = cumulative;
       cumulative += c.value;
       const after = cumulative;
@@ -175,10 +171,7 @@ const OverviewDashboard: React.FC<Props> = ({
     };
   }, [deals, contextData.approvalMatrix, pricingContext]);
 
-  const maxVolume = useMemo(
-    () => Math.max(0, ...portfolioByBU.map(item => item.volume)),
-    [portfolioByBU],
-  );
+  const maxVolume = useMemo(() => Math.max(0, ...portfolioByBU.map((item) => item.volume)), [portfolioByBU]);
 
   /**
    * FTP ledger summary — derived from booked deals in the last 30 days and
@@ -198,7 +191,7 @@ const OverviewDashboard: React.FC<Props> = ({
       return Number.isFinite(ts) && now - ts <= MS_30D;
     });
     const mtdVolume = mtdDeals.reduce((s, d) => s + (d.amount ?? 0), 0);
-    const ftpIncomeMtdEur = mtdVolume * (waterfallData.avgFTP / 100) / 12;
+    const ftpIncomeMtdEur = (mtdVolume * (waterfallData.avgFTP / 100)) / 12;
     // MoM growth vs prior 30d window — rough proxy so the card has motion.
     const prevDeals = deals.filter((d) => {
       if (!d.startDate) return false;
@@ -208,10 +201,8 @@ const OverviewDashboard: React.FC<Props> = ({
       return age > MS_30D && age <= 2 * MS_30D;
     });
     const prevVolume = prevDeals.reduce((s, d) => s + (d.amount ?? 0), 0);
-    const prevIncome = prevVolume * (waterfallData.avgFTP / 100) / 12;
-    const mtdGrowthPct = prevIncome > 0
-      ? ((ftpIncomeMtdEur - prevIncome) / prevIncome) * 100
-      : 0;
+    const prevIncome = (prevVolume * (waterfallData.avgFTP / 100)) / 12;
+    const mtdGrowthPct = prevIncome > 0 ? ((ftpIncomeMtdEur - prevIncome) / prevIncome) * 100 : 0;
     return {
       ftpIncomeMtdEur,
       dealsLedgerizedMtd: mtdDeals.length,
@@ -330,12 +321,10 @@ const OverviewDashboard: React.FC<Props> = ({
             <div className="flex flex-wrap gap-4 mt-4 justify-center">
               {waterfallData.chartData.map((entry) => (
                 <div key={entry.name} className="flex items-center gap-1.5">
-                  <div
-                    className="w-3 h-3 rounded-sm"
-                    style={{ backgroundColor: entry.color }}
-                  />
+                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.color }} />
                   <span className="text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
-                    {entry.name}: {entry.rawValue >= 0 ? '+' : ''}{entry.rawValue.toFixed(1)} bps
+                    {entry.name}: {entry.rawValue >= 0 ? '+' : ''}
+                    {entry.rawValue.toFixed(1)} bps
                   </span>
                 </div>
               ))}
@@ -352,7 +341,9 @@ const OverviewDashboard: React.FC<Props> = ({
           <div className="nfq-kpi-label mb-2">LCR Ratio</div>
           <div className="flex items-baseline gap-2">
             <div className="nfq-kpi-value">{metrics.lcr.toFixed(1)}%</div>
-            <div className={`text-[10px] font-mono font-bold uppercase tracking-[0.18em] ${metrics.lcr > 100 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
+            <div
+              className={`text-[10px] font-mono font-bold uppercase tracking-[0.18em] ${metrics.lcr > 100 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}
+            >
               {metrics.lcr > 100 ? '+SAFE' : '-RISK'}
             </div>
           </div>
@@ -366,7 +357,9 @@ const OverviewDashboard: React.FC<Props> = ({
           <div className="nfq-kpi-label mb-2">NSFR Ratio</div>
           <div className="flex items-baseline gap-2">
             <div className="nfq-kpi-value">{metrics.nsfr.toFixed(1)}%</div>
-            <div className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-[color:var(--nfq-success)]">OK</div>
+            <div className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-[color:var(--nfq-success)]">
+              OK
+            </div>
           </div>
           <div className="mt-2 nfq-label">Target: {'>'}100%</div>
         </div>
@@ -390,16 +383,16 @@ const OverviewDashboard: React.FC<Props> = ({
           <div className="nfq-kpi-label mb-2">CLC Index</div>
           <div className="flex items-baseline gap-2">
             <div className="nfq-kpi-value">{metrics.clc.toFixed(1)}%</div>
-            <div className="text-[10px] font-mono font-bold text-[color:var(--nfq-text-muted)]">WLP: {metrics.wlp.toFixed(0)}</div>
+            <div className="text-[10px] font-mono font-bold text-[color:var(--nfq-text-muted)]">
+              WLP: {metrics.wlp.toFixed(0)}
+            </div>
           </div>
           <div className="mt-2 nfq-label">Cash Coverage</div>
         </div>
 
         <div className="group relative overflow-hidden nfq-kpi-card">
           <div className="nfq-kpi-label mb-2">Entity Scope</div>
-          <div className="nfq-kpi-value text-base">
-            {isGroupScope ? 'Group' : (activeEntity?.shortCode ?? '—')}
-          </div>
+          <div className="nfq-kpi-value text-base">{isGroupScope ? 'Group' : (activeEntity?.shortCode ?? '—')}</div>
           <div className="mt-2 nfq-label">
             {isGroupScope ? 'Consolidated view' : (activeEntity?.name ?? 'Single entity')}
           </div>
@@ -437,7 +430,14 @@ const OverviewDashboard: React.FC<Props> = ({
                   }}
                 />
                 <Area type="monotone" dataKey="lcr" stroke="#06b6d4" strokeWidth={2} fill="url(#colorLcr)" />
-                <Area type="monotone" dataKey="simulated" stroke="#f43f5e" strokeWidth={2} strokeDasharray="5 5" fill="none" />
+                <Area
+                  type="monotone"
+                  dataKey="simulated"
+                  stroke="#f43f5e"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  fill="none"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -447,7 +447,7 @@ const OverviewDashboard: React.FC<Props> = ({
           <h4 className="nfq-kpi-label mb-4">Portfolio by Business Unit</h4>
           <div className="space-y-3">
             {portfolioByBU.length > 0 ? (
-              portfolioByBU.map(item => {
+              portfolioByBU.map((item) => {
                 const pct = maxVolume > 0 ? (item.volume / maxVolume) * 100 : 0;
 
                 return (
@@ -459,7 +459,10 @@ const OverviewDashboard: React.FC<Props> = ({
                       </span>
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--nfq-bg-elevated)]">
-                      <div className="h-full rounded-full bg-[var(--nfq-accent-secondary)]" style={{ width: `${pct}%` }} />
+                      <div
+                        className="h-full rounded-full bg-[var(--nfq-accent-secondary)]"
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
                     <div className="text-[10px] font-mono text-[color:var(--nfq-text-faint)]">
                       Avg margin: {item.avgMargin.toFixed(2)}%
@@ -468,7 +471,9 @@ const OverviewDashboard: React.FC<Props> = ({
                 );
               })
             ) : (
-              <div className="py-8 text-center text-xs text-[color:var(--nfq-text-faint)]">No booked deals in portfolio</div>
+              <div className="py-8 text-center text-xs text-[color:var(--nfq-text-faint)]">
+                No booked deals in portfolio
+              </div>
             )}
           </div>
         </div>

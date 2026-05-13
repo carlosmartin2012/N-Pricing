@@ -1,15 +1,6 @@
-import { calculatePricing } from '../../utils/pricingEngine';
-import { canonicalJson } from '../../utils/canonicalJson';
-import { sha256Hex } from '../../utils/snapshotHash';
-import type {
-  Transaction,
-  ApprovalMatrixConfig,
-  FTPResult,
-} from '../../types';
-import type {
-  PricingContext,
-  PricingShocks,
-} from '../../utils/pricingEngine';
+import { calculatePricing, type PricingContext, type PricingShocks } from '@npricing/pricing-core';
+import { canonicalJson, sha256Hex } from '@npricing/evidence';
+import type { Transaction, ApprovalMatrixConfig, FTPResult } from '../../types';
 
 /**
  * Re-executes a stored pricing snapshot with the current engine version.
@@ -25,7 +16,7 @@ export interface SnapshotInput {
 
 export interface SnapshotPayload {
   input: SnapshotInput;
-  context: unknown;          // JSONB — cast to PricingContext at the boundary
+  context: unknown; // JSONB — cast to PricingContext at the boundary
   output: Record<string, unknown>;
   outputHash: string;
   engineVersion: string;
@@ -113,10 +104,7 @@ function computeDiff(original: Record<string, unknown>, current: Record<string, 
  * stored output. `currentEngineVersion` is threaded in from the caller (env)
  * so this module stays pure.
  */
-export async function replaySnapshot(
-  snapshot: SnapshotPayload,
-  currentEngineVersion: string,
-): Promise<ReplayResult> {
+export async function replaySnapshot(snapshot: SnapshotPayload, currentEngineVersion: string): Promise<ReplayResult> {
   const { input, context, output, outputHash, engineVersion } = snapshot;
   const approval = input.approvalMatrix ?? DEFAULT_APPROVAL;
   const shocks: PricingShocks = {

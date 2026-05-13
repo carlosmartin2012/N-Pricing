@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { ArrowDown, ArrowUp, Equal, GitCompare } from 'lucide-react';
 import { Drawer } from '../ui/Drawer';
 import type { FTPResult, Transaction } from '../../types';
-import { calculatePricing } from '../../utils/pricingEngine';
+import { calculatePricing } from '@npricing/pricing-core';
 import { usePricingContext } from '../../hooks/usePricingContext';
 import { useData } from '../../contexts/DataContext';
 
@@ -56,7 +56,9 @@ const DeltaIndicator: React.FC<{ delta: number; higherIsBetter?: boolean }> = ({
   const isGood = higherIsBetter ? isPositive : !isPositive;
   const Icon = isPositive ? ArrowUp : ArrowDown;
   return (
-    <span className={`flex items-center gap-0.5 font-mono text-[11px] ${isGood ? 'text-emerald-400' : 'text-rose-400'}`}>
+    <span
+      className={`flex items-center gap-0.5 font-mono text-[11px] ${isGood ? 'text-emerald-400' : 'text-rose-400'}`}
+    >
       <Icon size={10} />
       {Math.abs(delta).toFixed(2)}bp
     </span>
@@ -75,12 +77,7 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
   }, [dealA, dealB, approvalMatrix, pricingContext]);
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Deal Comparison"
-      size="xl"
-    >
+    <Drawer isOpen={isOpen} onClose={onClose} title="Deal Comparison" size="xl">
       {!dealA || !dealB || !results ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <GitCompare size={32} className="text-[var(--nfq-text-muted)] opacity-40" />
@@ -93,11 +90,15 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
             <div className="text-xs font-semibold tracking-normal text-[var(--nfq-text-muted)]">Metric</div>
             <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3 text-center">
               <div className="font-mono text-xs font-bold text-[var(--nfq-accent)]">{dealA.id || 'Deal A'}</div>
-              <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">{dealA.clientId} · {dealA.productType}</div>
+              <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">
+                {dealA.clientId} · {dealA.productType}
+              </div>
             </div>
             <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3 text-center">
               <div className="font-mono text-xs font-bold text-violet-400">{dealB.id || 'Deal B'}</div>
-              <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">{dealB.clientId} · {dealB.productType}</div>
+              <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">
+                {dealB.clientId} · {dealB.productType}
+              </div>
             </div>
           </div>
 
@@ -108,16 +109,26 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
               <table className="w-full text-xs">
                 <tbody>
                   {[
-                    { label: 'Amount', a: `${dealA.currency} ${(dealA.amount || 0).toLocaleString()}`, b: `${dealB.currency} ${(dealB.amount || 0).toLocaleString()}` },
+                    {
+                      label: 'Amount',
+                      a: `${dealA.currency} ${(dealA.amount || 0).toLocaleString()}`,
+                      b: `${dealB.currency} ${(dealB.amount || 0).toLocaleString()}`,
+                    },
                     { label: 'Tenor', a: `${dealA.durationMonths}m`, b: `${dealB.durationMonths}m` },
                     { label: 'Risk Weight', a: `${dealA.riskWeight}%`, b: `${dealB.riskWeight}%` },
-                    { label: 'Margin', a: `${dealA.marginTarget?.toFixed(2)}%`, b: `${dealB.marginTarget?.toFixed(2)}%` },
+                    {
+                      label: 'Margin',
+                      a: `${dealA.marginTarget?.toFixed(2)}%`,
+                      b: `${dealB.marginTarget?.toFixed(2)}%`,
+                    },
                     { label: 'ESG Transition', a: dealA.transitionRisk, b: dealB.transitionRisk },
                   ].map((row) => (
                     <tr key={row.label} className="border-b border-[var(--nfq-border-ghost)] last:border-0">
                       <td className="px-3 py-2 text-[var(--nfq-text-muted)] w-1/3">{row.label}</td>
                       <td className="px-3 py-2 text-center font-mono text-[var(--nfq-text-primary)]">{row.a}</td>
-                      <td className={`px-3 py-2 text-center font-mono ${row.a !== row.b ? 'text-amber-400 font-semibold' : 'text-[var(--nfq-text-primary)]'}`}>
+                      <td
+                        className={`px-3 py-2 text-center font-mono ${row.a !== row.b ? 'text-amber-400 font-semibold' : 'text-[var(--nfq-text-primary)]'}`}
+                      >
                         {row.b}
                       </td>
                     </tr>
@@ -129,7 +140,9 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
 
           {/* FTP Results diff */}
           <div>
-            <h3 className="mb-2 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">FTP Decomposition</h3>
+            <h3 className="mb-2 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-faint)]">
+              FTP Decomposition
+            </h3>
             <div className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] overflow-hidden">
               <table className="w-full text-xs">
                 <tbody>

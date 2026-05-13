@@ -499,6 +499,7 @@ export type ViewState =
   | 'BLOTTER'
   | 'CONFIG'
   | 'MARKET_DATA'
+  | 'MARKET_BENCHMARKS'
   | 'ACCOUNTING'
   | 'BEHAVIOURAL'
   | 'MANUAL'

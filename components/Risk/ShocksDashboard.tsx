@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { DEFAULT_PRICING_SHOCKS, calculatePricing, type PricingShocks } from '@npricing/pricing-core';
 import { logAudit } from '../../api/audit';
 import type { Transaction } from '../../types';
-import { DEFAULT_PRICING_SHOCKS, calculatePricing, type PricingShocks } from '../../utils/pricingEngine';
 import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -61,7 +61,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
         auditTimerRef.current = null;
       }, 500);
     },
-    [flushShockAudit],
+    [flushShockAudit]
   );
 
   useEffect(() => {
@@ -76,32 +76,32 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
 
   const baseResult = useMemo(
     () => calculatePricing(deal, approvalMatrix, pricingContext, DEFAULT_PRICING_SHOCKS),
-    [deal, approvalMatrix, pricingContext],
+    [deal, approvalMatrix, pricingContext]
   );
 
   const shockedResult = useMemo(
     () => calculatePricing(deal, approvalMatrix, pricingContext, shocks),
-    [deal, approvalMatrix, pricingContext, shocks],
+    [deal, approvalMatrix, pricingContext, shocks]
   );
 
   const updateShock = useCallback(
     (key: keyof PricingShocks, value: number) => {
       setShocks({ ...shocks, [key]: value });
       logShockAudit(
-        `Adjusted ${key === 'interestRate' ? 'Interest Rate' : 'Liquidity Spread'} shock to ${value}bps for deal ${deal.id || 'NEW-DEAL'}`,
+        `Adjusted ${key === 'interestRate' ? 'Interest Rate' : 'Liquidity Spread'} shock to ${value}bps for deal ${deal.id || 'NEW-DEAL'}`
       );
     },
-    [shocks, setShocks, logShockAudit, deal.id],
+    [shocks, setShocks, logShockAudit, deal.id]
   );
 
   const applyPreset = useCallback(
     (nextShocks: PricingShocks) => {
       setShocks(nextShocks);
       logShockAudit(
-        `Applied preset shocks IR ${nextShocks.interestRate}bps / Liq ${nextShocks.liquiditySpread}bps for deal ${deal.id || 'NEW-DEAL'}`,
+        `Applied preset shocks IR ${nextShocks.interestRate}bps / Liq ${nextShocks.liquiditySpread}bps for deal ${deal.id || 'NEW-DEAL'}`
       );
     },
-    [setShocks, logShockAudit, deal.id],
+    [setShocks, logShockAudit, deal.id]
   );
 
   const handleReset = useCallback(() => {
@@ -114,15 +114,15 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
       setShocks(scenarioShocks);
       setActiveScenarioId(scenarioId);
       logShockAudit(
-        `Applied macro scenario ${scenarioId} (IR ${scenarioShocks.interestRate}bps / Liq ${scenarioShocks.liquiditySpread}bps) for deal ${deal.id || 'NEW-DEAL'}`,
+        `Applied macro scenario ${scenarioId} (IR ${scenarioShocks.interestRate}bps / Liq ${scenarioShocks.liquiditySpread}bps) for deal ${deal.id || 'NEW-DEAL'}`
       );
     },
-    [setShocks, logShockAudit, deal.id],
+    [setShocks, logShockAudit, deal.id]
   );
 
   const handleDownloadTemplate = useCallback(
     async () => downloadTemplate('STRESS_TESTING', 'Stress_Testing_Template'),
-    [],
+    []
   );
 
   const handleImport = useCallback(
@@ -139,11 +139,9 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
         if (importedShocks) {
           setShocks(importedShocks);
           logShockAudit(
-            `Imported shocks IR ${importedShocks.interestRate}bps / Liq ${importedShocks.liquiditySpread}bps for deal ${deal.id || 'NEW-DEAL'}`,
+            `Imported shocks IR ${importedShocks.interestRate}bps / Liq ${importedShocks.liquiditySpread}bps for deal ${deal.id || 'NEW-DEAL'}`
           );
-          alert(
-            `Shocks imported: IR ${importedShocks.interestRate}bps, Liq ${importedShocks.liquiditySpread}bps`,
-          );
+          alert(`Shocks imported: IR ${importedShocks.interestRate}bps, Liq ${importedShocks.liquiditySpread}bps`);
         }
       } catch (error) {
         log.error('Error importing shocks', {}, error instanceof Error ? error : undefined);
@@ -152,16 +150,13 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
         event.target.value = '';
       }
     },
-    [setShocks, logShockAudit, deal.id],
+    [setShocks, logShockAudit, deal.id]
   );
 
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Macro scenario picker (EBA-style) */}
-      <MacroScenarioPicker
-        activeScenarioId={activeScenarioId}
-        onSelectScenario={handleSelectMacroScenario}
-      />
+      <MacroScenarioPicker activeScenarioId={activeScenarioId} onSelectScenario={handleSelectMacroScenario} />
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-12">
         <div className="h-full lg:col-span-4">
@@ -178,11 +173,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
         </div>
 
         <div className="h-full lg:col-span-8">
-          <ShockImpactPanel
-            language={language}
-            baseResult={baseResult}
-            shockedResult={shockedResult}
-          />
+          <ShockImpactPanel language={language} baseResult={baseResult} shockedResult={shockedResult} />
         </div>
       </div>
     </div>

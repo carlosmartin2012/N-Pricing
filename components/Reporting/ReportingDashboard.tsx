@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react';
+import { batchReprice } from '@npricing/pricing-core';
 import { INITIAL_DEAL } from '../../utils/seedData';
 import { Badge } from '../ui/LayoutComponents';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -31,7 +32,6 @@ import type { Transaction } from '../../types';
 import ExecutiveDashboard from './ExecutiveDashboard';
 import PortfolioSnapshotsDashboard from './PortfolioSnapshotsDashboard';
 import { buildPricingContext, getPrimaryLiquidityPoints } from '../../utils/pricingContext';
-import { batchReprice } from '../../utils/pricingEngine';
 import { usePortfolioMetrics } from './hooks/usePortfolioMetrics';
 import { useScenarioAnalysis } from './hooks/useScenarioAnalysis';
 import { useFundingCurveData } from './hooks/useFundingCurveData';

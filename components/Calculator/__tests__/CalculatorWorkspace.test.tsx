@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock('../../../utils/pricingEngine', () => ({
+vi.mock('@npricing/pricing-core', () => ({
   calculatePricing: mocks.calculatePricing,
 }));
 
@@ -113,7 +113,7 @@ describe('CalculatorWorkspace', () => {
         <UIProvider>
           <CalculatorWorkspace dealParams={deal} setDealParams={setDealParams} />
         </UIProvider>
-      </MemoryRouter>,
+      </MemoryRouter>
     );
   }
 
@@ -127,7 +127,7 @@ describe('CalculatorWorkspace', () => {
     renderWorkspace();
     expect(mocks.calculatePricing).toHaveBeenCalledWith(
       expect.objectContaining({ productType: 'LOAN_COMM', amount: 5000000 }),
-      { autoApprovalThreshold: 15, l1Threshold: 10, l2Threshold: 5 },
+      { autoApprovalThreshold: 15, l1Threshold: 10, l2Threshold: 5 }
     );
   });
 

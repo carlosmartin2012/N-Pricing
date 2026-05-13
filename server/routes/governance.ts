@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { pool, query, queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
-import { signDossier, verifyDossierSignature } from '../../utils/governance/dossierSigning';
 import { recorderFromPool } from '../../utils/metering/usageRecorder';
 import {
-  evaluateEscalation,
-  sweepEscalations,
   computeDueAt,
-} from '../../utils/governance/escalationEvaluator';
+  evaluateEscalation,
+  signDossier,
+  sweepEscalations,
+  verifyDossierSignature,
+} from '../../packages/governance/src';
 import type {
   ApprovalEscalation,
   ApprovalEscalationConfig,
@@ -43,10 +44,20 @@ interface ModelRow {
 
 function mapModel(r: ModelRow): ModelInventoryEntry {
   return {
-    id: r.id, entityId: r.entity_id, kind: r.kind, name: r.name, version: r.version,
-    status: r.status, ownerEmail: r.owner_email, validationDocUrl: r.validation_doc_url,
-    validatedAt: r.validated_at, effectiveFrom: r.effective_from, effectiveTo: r.effective_to,
-    notes: r.notes, createdAt: r.created_at, updatedAt: r.updated_at,
+    id: r.id,
+    entityId: r.entity_id,
+    kind: r.kind,
+    name: r.name,
+    version: r.version,
+    status: r.status,
+    ownerEmail: r.owner_email,
+    validationDocUrl: r.validation_doc_url,
+    validatedAt: r.validated_at,
+    effectiveFrom: r.effective_from,
+    effectiveTo: r.effective_to,
+    notes: r.notes,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
   };
 }
 
@@ -60,13 +71,19 @@ router.get('/models', async (req, res) => {
     const status = typeof req.query.status === 'string' ? req.query.status : null;
     const conditions = ['(entity_id IS NULL OR entity_id = $1)'];
     const params: unknown[] = [req.tenancy.entityId];
-    if (kind)   { params.push(kind);   conditions.push(`kind = $${params.length}`); }
-    if (status) { params.push(status); conditions.push(`status = $${params.length}`); }
+    if (kind) {
+      params.push(kind);
+      conditions.push(`kind = $${params.length}`);
+    }
+    if (status) {
+      params.push(status);
+      conditions.push(`status = $${params.length}`);
+    }
     const rows = await query<ModelRow>(
       `SELECT * FROM model_inventory
        WHERE ${conditions.join(' AND ')}
        ORDER BY status ASC, kind ASC, name ASC, effective_from DESC LIMIT 500`,
-      params,
+      params
     );
     res.json(rows.map(mapModel));
   } catch (err) {
@@ -93,11 +110,17 @@ router.post('/models', async (req, res) => {
        RETURNING *`,
       [
         body.entityScope === 'global' ? null : req.tenancy.entityId,
-        body.kind, body.name, body.version,
-        body.status ?? null, body.ownerEmail ?? req.tenancy.userEmail,
-        body.validationDocUrl ?? null, body.validatedAt ?? null,
-        body.effectiveFrom ?? null, body.effectiveTo ?? null, body.notes ?? null,
-      ],
+        body.kind,
+        body.name,
+        body.version,
+        body.status ?? null,
+        body.ownerEmail ?? req.tenancy.userEmail,
+        body.validationDocUrl ?? null,
+        body.validatedAt ?? null,
+        body.effectiveFrom ?? null,
+        body.effectiveTo ?? null,
+        body.notes ?? null,
+      ]
     );
     res.status(201).json(row ? mapModel(row) : null);
   } catch (err) {
@@ -121,7 +144,7 @@ router.patch('/models/:id/status', async (req, res) => {
        SET status = $2, updated_at = NOW()
        WHERE id = $1 AND (entity_id IS NULL OR entity_id = $3)
        RETURNING *`,
-      [req.params.id, status, req.tenancy.entityId],
+      [req.params.id, status, req.tenancy.entityId]
     );
     if (!row) {
       res.status(404).json({ code: 'not_found' });
@@ -149,11 +172,15 @@ interface DossierRow {
 
 function mapDossier(r: DossierRow): SignedDossier {
   return {
-    id: r.id, entityId: r.entity_id, dealId: r.deal_id,
+    id: r.id,
+    entityId: r.entity_id,
+    dealId: r.deal_id,
     pricingSnapshotId: r.pricing_snapshot_id,
     dossierPayload: r.dossier_payload,
-    payloadHash: r.payload_hash, signatureHex: r.signature_hex,
-    signedByEmail: r.signed_by_email, signedAt: r.signed_at,
+    payloadHash: r.payload_hash,
+    signatureHex: r.signature_hex,
+    signedByEmail: r.signed_by_email,
+    signedAt: r.signed_at,
   };
 }
 
@@ -183,7 +210,7 @@ router.post('/dossiers', async (req, res) => {
         payloadHash,
         signatureHex,
         req.tenancy.userEmail,
-      ],
+      ]
     );
     if (row && req.tenancy?.entityId) {
       void meter.insert(req.tenancy.entityId, 'dossier_sign', 1, { dealId: row.deal_id });
@@ -203,12 +230,15 @@ router.get('/dossiers', async (req, res) => {
     const dealId = typeof req.query.dealId === 'string' ? req.query.dealId : null;
     const conditions = ['entity_id = $1'];
     const params: unknown[] = [req.tenancy.entityId];
-    if (dealId) { params.push(dealId); conditions.push(`deal_id = $${params.length}`); }
+    if (dealId) {
+      params.push(dealId);
+      conditions.push(`deal_id = $${params.length}`);
+    }
     const rows = await query<DossierRow>(
       `SELECT * FROM signed_committee_dossiers
        WHERE ${conditions.join(' AND ')}
        ORDER BY signed_at DESC LIMIT 500`,
-      params,
+      params
     );
     res.json({ dossiers: rows.map(mapDossier) });
   } catch (err) {
@@ -222,10 +252,10 @@ router.get('/dossiers/:id', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const row = await queryOne<DossierRow>(
-      'SELECT * FROM signed_committee_dossiers WHERE id = $1 AND entity_id = $2',
-      [req.params.id, req.tenancy.entityId],
-    );
+    const row = await queryOne<DossierRow>('SELECT * FROM signed_committee_dossiers WHERE id = $1 AND entity_id = $2', [
+      req.params.id,
+      req.tenancy.entityId,
+    ]);
     if (!row) {
       res.status(404).json({ code: 'not_found' });
       return;
@@ -242,10 +272,10 @@ router.post('/dossiers/:id/verify', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const row = await queryOne<DossierRow>(
-      'SELECT * FROM signed_committee_dossiers WHERE id = $1 AND entity_id = $2',
-      [req.params.id, req.tenancy.entityId],
-    );
+    const row = await queryOne<DossierRow>('SELECT * FROM signed_committee_dossiers WHERE id = $1 AND entity_id = $2', [
+      req.params.id,
+      req.tenancy.entityId,
+    ]);
     if (!row) {
       res.status(404).json({ code: 'not_found' });
       return;
@@ -277,10 +307,19 @@ interface EscalationRow {
 
 function mapEscalation(r: EscalationRow): ApprovalEscalation {
   return {
-    id: r.id, entityId: r.entity_id, dealId: r.deal_id, exceptionId: r.exception_id,
-    level: r.level, dueAt: r.due_at, status: r.status,
-    notifiedAt: r.notified_at, resolvedAt: r.resolved_at, createdAt: r.created_at,
-    openedBy: r.opened_by, currentNotes: r.current_notes, escalatedFromId: r.escalated_from_id,
+    id: r.id,
+    entityId: r.entity_id,
+    dealId: r.deal_id,
+    exceptionId: r.exception_id,
+    level: r.level,
+    dueAt: r.due_at,
+    status: r.status,
+    notifiedAt: r.notified_at,
+    resolvedAt: r.resolved_at,
+    createdAt: r.created_at,
+    openedBy: r.opened_by,
+    currentNotes: r.current_notes,
+    escalatedFromId: r.escalated_from_id,
   };
 }
 
@@ -299,20 +338,25 @@ interface EscalationConfigRow {
 
 function mapEscalationConfig(r: EscalationConfigRow): ApprovalEscalationConfig {
   return {
-    id: r.id, entityId: r.entity_id, level: r.level,
+    id: r.id,
+    entityId: r.entity_id,
+    level: r.level,
     timeoutHours: Number(r.timeout_hours),
     notifyBeforeHours: Number(r.notify_before_hours),
-    channelType: r.channel_type, channelConfig: r.channel_config,
-    isActive: r.is_active, createdAt: r.created_at, updatedAt: r.updated_at,
+    channelType: r.channel_type,
+    channelConfig: r.channel_config,
+    isActive: r.is_active,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
   };
 }
 
 async function loadConfigsForEntity(
-  entityId: string,
+  entityId: string
 ): Promise<Partial<Record<EscalationLevel, ApprovalEscalationConfig>>> {
   const rows = await query<EscalationConfigRow>(
     'SELECT * FROM approval_escalation_configs WHERE entity_id = $1 AND is_active = TRUE',
-    [entityId],
+    [entityId]
   );
   const byLevel: Partial<Record<EscalationLevel, ApprovalEscalationConfig>> = {};
   for (const r of rows) byLevel[r.level] = mapEscalationConfig(r);
@@ -328,12 +372,15 @@ router.get('/escalations', async (req, res) => {
     const status = typeof req.query.status === 'string' ? req.query.status : null;
     const conditions = ['entity_id = $1'];
     const params: unknown[] = [req.tenancy.entityId];
-    if (status) { params.push(status); conditions.push(`status = $${params.length}`); }
+    if (status) {
+      params.push(status);
+      conditions.push(`status = $${params.length}`);
+    }
     const rows = await query<EscalationRow>(
       `SELECT * FROM approval_escalations
        WHERE ${conditions.join(' AND ')}
        ORDER BY due_at ASC LIMIT 500`,
-      params,
+      params
     );
     res.json({ escalations: rows.map(mapEscalation) });
   } catch (err) {
@@ -376,7 +423,7 @@ router.post('/escalations', async (req, res) => {
         dueAt,
         body.openedBy ?? null,
         body.notes ?? null,
-      ],
+      ]
     );
     if (!row) {
       res.status(500).json({ code: 'insert_failed' });
@@ -403,7 +450,7 @@ router.post('/escalations/:id/resolve', async (req, res) => {
          SET status = 'resolved', resolved_at = NOW(), current_notes = COALESCE($3, current_notes)
        WHERE id = $1 AND entity_id = $2 AND status = 'open'
        RETURNING *`,
-      [req.params.id, req.tenancy.entityId, req.body?.notes ?? null],
+      [req.params.id, req.tenancy.entityId, req.body?.notes ?? null]
     );
     if (!row) {
       res.status(404).json({ code: 'not_found_or_not_open' });
@@ -436,30 +483,26 @@ router.post('/escalations/sweep', async (req, res) => {
     }
     const rows = await query<EscalationRow>(
       "SELECT * FROM approval_escalations WHERE entity_id = $1 AND status = 'open' LIMIT 1000",
-      [req.tenancy.entityId],
+      [req.tenancy.entityId]
     );
     const configs = await loadConfigsForEntity(req.tenancy.entityId);
     const now = new Date();
-    const plans = sweepEscalations(
-      rows.map(mapEscalation),
-      { [req.tenancy.entityId]: configs },
-      now,
-    );
+    const plans = sweepEscalations(rows.map(mapEscalation), { [req.tenancy.entityId]: configs }, now);
 
     const summary = { notified: 0, escalated: 0, expired: 0, untouched: 0 };
 
     for (const { escalation, action } of plans) {
       if (action.kind === 'notify') {
-        await query(
-          "UPDATE approval_escalations SET notified_at = $2 WHERE id = $1",
-          [escalation.id, now.toISOString()],
-        );
+        await query('UPDATE approval_escalations SET notified_at = $2 WHERE id = $1', [
+          escalation.id,
+          now.toISOString(),
+        ]);
         summary.notified += 1;
       } else if (action.kind === 'escalate') {
-        await query(
-          "UPDATE approval_escalations SET status = 'escalated', resolved_at = $2 WHERE id = $1",
-          [escalation.id, now.toISOString()],
-        );
+        await query("UPDATE approval_escalations SET status = 'escalated', resolved_at = $2 WHERE id = $1", [
+          escalation.id,
+          now.toISOString(),
+        ]);
         await query(
           `INSERT INTO approval_escalations
              (entity_id, deal_id, exception_id, level, due_at, status, opened_by, current_notes, escalated_from_id)
@@ -473,14 +516,14 @@ router.post('/escalations/sweep', async (req, res) => {
             escalation.openedBy,
             escalation.currentNotes,
             escalation.id,
-          ],
+          ]
         );
         summary.escalated += 1;
       } else if (action.kind === 'expire') {
-        await query(
-          "UPDATE approval_escalations SET status = 'expired', resolved_at = $2 WHERE id = $1",
-          [escalation.id, now.toISOString()],
-        );
+        await query("UPDATE approval_escalations SET status = 'expired', resolved_at = $2 WHERE id = $1", [
+          escalation.id,
+          now.toISOString(),
+        ]);
         summary.expired += 1;
       } else {
         summary.untouched += 1;
@@ -548,7 +591,7 @@ router.put('/escalation-configs/:level', async (req, res) => {
         body.channelType ?? 'email',
         body.channelConfig ?? {},
         body.isActive ?? true,
-      ],
+      ]
     );
     if (!row) {
       res.status(500).json({ code: 'upsert_failed' });
@@ -568,10 +611,10 @@ router.get('/escalations/:id/evaluate', async (req, res) => {
       res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
       return;
     }
-    const row = await queryOne<EscalationRow>(
-      'SELECT * FROM approval_escalations WHERE id = $1 AND entity_id = $2',
-      [req.params.id, req.tenancy.entityId],
-    );
+    const row = await queryOne<EscalationRow>('SELECT * FROM approval_escalations WHERE id = $1 AND entity_id = $2', [
+      req.params.id,
+      req.tenancy.entityId,
+    ]);
     if (!row) {
       res.status(404).json({ code: 'not_found' });
       return;

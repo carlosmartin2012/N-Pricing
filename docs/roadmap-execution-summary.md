@@ -417,6 +417,10 @@ decision queda escalated.
   el follow-up #1 documentado en el plan.
 - ⏳ **Adapters reales PUZZLE/HOST/ALQUID** — stubs listos, esperando
   workshop con IT BM para cerrar contratos HTTP/SFTP.
+- ✅ **External readiness gates** — `scripts/check-external-readiness.ts`
+  codifica credenciales, dataset histórico y flip strict como gates
+  verificables. `--require-all` falla hasta que el banco entregue contratos,
+  credenciales y decisión ops.
 - ✅ **Documentación final** — CLAUDE.md, architecture.md, README,
   roadmap-execution-summary actualizados (este commit).
 

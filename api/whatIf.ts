@@ -2,7 +2,7 @@
  * API layer for Methodology What-If & Optimization (Ola 3).
  *
  * Provides operations for sandbox methodologies, impact reports,
- * elasticity models, backtesting runs, and market benchmarks.
+ * elasticity models, backtesting runs, and benchmark comparisons.
  */
 
 import type {
@@ -11,12 +11,10 @@ import type {
   ElasticityModel,
   BacktestRun,
   BacktestResult,
-  MarketBenchmark,
   BenchmarkComparison,
   BudgetTarget,
   BudgetConsistency,
 } from '../types';
-import type { GridFilters } from '../types';
 import { apiGet, apiPost, apiPatch, apiDelete } from '../utils/apiFetch';
 import { createLogger } from '../utils/logger';
 
@@ -194,35 +192,6 @@ export async function getBacktestResult(runId: string): Promise<BacktestResult |
     return await apiGet<BacktestResult>(`/what-if/backtests/${runId}/result`);
   } catch (err) {
     log.error('getBacktestResult failed', { runId }, err as Error);
-    return null;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Market Benchmarks
-// ---------------------------------------------------------------------------
-
-export async function listBenchmarks(
-  filters?: GridFilters,
-): Promise<MarketBenchmark[]> {
-  try {
-    const params = new URLSearchParams();
-    if (filters?.products?.length) params.set('products', filters.products.join(','));
-    if (filters?.currencies?.length) params.set('currencies', filters.currencies.join(','));
-    const qs = params.toString() ? `?${params.toString()}` : '';
-    const rows = await apiGet<MarketBenchmark[]>(`/what-if/benchmarks${qs}`);
-    return Array.isArray(rows) ? rows : [];
-  } catch (err) {
-    log.error('listBenchmarks failed', {}, err as Error);
-    return [];
-  }
-}
-
-export async function upsertBenchmark(benchmark: MarketBenchmark): Promise<MarketBenchmark | null> {
-  try {
-    return await apiPost<MarketBenchmark>('/what-if/benchmarks', benchmark);
-  } catch (err) {
-    log.error('upsertBenchmark failed', { id: benchmark.id }, err as Error);
     return null;
   }
 }

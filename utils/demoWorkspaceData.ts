@@ -6,6 +6,7 @@ import type {
   PortfolioSnapshot,
   PricingDossier,
 } from '../types';
+import { calculatePricing } from '@npricing/pricing-core';
 import {
   MOCK_BEHAVIOURAL_MODELS,
   MOCK_BUSINESS_UNITS,
@@ -23,7 +24,6 @@ import {
 import { createMethodologyVersionSnapshot } from './governance/methodologyRequests';
 import { buildApprovalTaskForPricingDossier, buildPortfolioSnapshot, buildPricingDossier } from './governance/pricing';
 import { buildPricingContext } from './pricingContext';
-import { calculatePricing } from './pricingEngine';
 
 export interface DemoWorkspaceData {
   methodologyVersions: MethodologyVersion[];

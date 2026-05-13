@@ -1,11 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Download, Info, LineChart as LineChartIcon } from 'lucide-react';
+import { calculatePricing } from '@npricing/pricing-core';
 import type { FTPResult, Transaction } from '../../types';
-import { calculatePricing } from '../../utils/pricingEngine';
-import {
-  BASE_SHOCK_SCENARIO,
-  type ShockScenario,
-} from '../../types/pricingShocks';
+import { BASE_SHOCK_SCENARIO, type ShockScenario } from '../../types/pricingShocks';
 import { EBA_STRESS_PRESETS } from '../../utils/pricing/shockPresets';
 import { useData } from '../../contexts/DataContext';
 import { useEntity } from '../../contexts/EntityContext';
@@ -56,7 +53,7 @@ const StressPricingView: React.FC = () => {
 
   const selectedDeal = useMemo(
     () => priceable.find((d) => d.id === selectedId) ?? priceable[0] ?? null,
-    [priceable, selectedId],
+    [priceable, selectedId]
   );
 
   const rows: ComputedRow[] = useMemo(() => {
@@ -64,9 +61,8 @@ const StressPricingView: React.FC = () => {
     const base = calculatePricing(selectedDeal, approvalMatrix, pricingContext, BASE_SHOCK_SCENARIO);
     const baseMargin = base.finalClientRate - base.totalFTP;
     return SCENARIOS.map((scenario) => {
-      const result = scenario.id === 'base'
-        ? base
-        : calculatePricing(selectedDeal, approvalMatrix, pricingContext, scenario);
+      const result =
+        scenario.id === 'base' ? base : calculatePricing(selectedDeal, approvalMatrix, pricingContext, scenario);
       const margin = result.finalClientRate - result.totalFTP;
       return {
         scenario,
@@ -111,12 +107,8 @@ const StressPricingView: React.FC = () => {
       <header className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <LineChartIcon className="h-5 w-5 text-cyan-400" />
-          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
-            Stress Pricing
-          </h2>
-          {activeEntity && (
-            <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>
-          )}
+          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">Stress Pricing</h2>
+          {activeEntity && <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>}
           <span
             className={`nfq-label text-[10px] ${flagOn ? 'text-emerald-300' : 'text-amber-300'}`}
             title="VITE_PRICING_APPLY_CURVE_SHIFT"
@@ -186,15 +178,21 @@ const StressPricingView: React.FC = () => {
                       {isBase && <span className="ml-2 text-[10px] uppercase text-slate-500">base</span>}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-slate-100">{fmtPct(row.result.totalFTP)}</td>
-                    <td className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(row.deltaFtpPct)}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(row.deltaFtpPct)}`}
+                    >
                       {isBase ? '—' : fmtBps(row.deltaFtpPct)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-slate-100">{fmtPct(row.margin)}</td>
-                    <td className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(-row.deltaMarginPct)}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(-row.deltaMarginPct)}`}
+                    >
                       {isBase ? '—' : fmtBps(row.deltaMarginPct)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-slate-100">{fmtPct(row.result.raroc)}</td>
-                    <td className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(-row.deltaRarocPp)}`}>
+                    <td
+                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(-row.deltaRarocPp)}`}
+                    >
                       {isBase ? '—' : fmtPp(row.deltaRarocPp)}
                     </td>
                   </tr>
@@ -208,9 +206,9 @@ const StressPricingView: React.FC = () => {
       <footer className="flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-200/80">
         <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
         <p>
-          Stress Pricing shows how FTP, margin and RAROC move under EBA GL 2018/02 curve shocks
-          for price-testing purposes. It does <strong>not</strong> replace the regulatory IRRBB
-          calculation (ΔEVE, SOT, ΔNII runoff) — that lives in the bank&apos;s ALM engine.
+          Stress Pricing shows how FTP, margin and RAROC move under EBA GL 2018/02 curve shocks for price-testing
+          purposes. It does <strong>not</strong> replace the regulatory IRRBB calculation (ΔEVE, SOT, ΔNII runoff) —
+          that lives in the bank&apos;s ALM engine.
         </p>
       </footer>
     </div>
