@@ -1,9 +1,10 @@
 # CLAUDE.md — N-Pricing
 
 > Contexto esencial para agentes IA que trabajan en este repositorio.
-> Última actualización: 2026-04-23 (Ola 6 completa en `main` — A + B + C merged).
+> Última actualización: 2026-05-13 (post platform restructure — packages/* facades introducidas; Olas 6-10 ya en `main`).
 > **Lectura obligatoria antes de tocar código:** [`docs/architecture.md`](docs/architecture.md)
-> para el estado vivo del producto y [`docs/next-gen-application-spec.md`](docs/next-gen-application-spec.md)
+> para el estado vivo del producto, [`docs/platform-restructure.md`](docs/platform-restructure.md)
+> para el split en `packages/`, y [`docs/next-gen-application-spec.md`](docs/next-gen-application-spec.md)
 > para la dirección greenfield.
 > **Ola 6 completa (22 PRs merged, `#42–#63`):** estado por bloque en
 > [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md);
@@ -39,7 +40,7 @@ PWA con soporte offline. **Multi-tenant** vía RLS Postgres.
 | Backend | Express + pg.Pool sobre Postgres (Supabase para client/Edge) |
 | Edge Functions | Deno (Supabase Edge) — pricing, realize-raroc, elasticity-recalibrate |
 | Auth | JWT propio HMAC + Google SSO real (`GoogleSsoProvider`) |
-| Testing | Vitest 4 (~1.37k tests, ~85 archivos) + Playwright 1.59 (23 specs) |
+| Testing | Vitest 4 (~1.4k+ tests, **118+** archivos en `utils/__tests__/`) + Playwright 1.59 (**24** specs, incl. `smoke.spec.ts`) |
 | Storybook | Storybook 8.6 (React Vite) |
 | IA | Google Generative AI (@google/genai) |
 | Charts | Recharts 3.7 |
@@ -56,8 +57,8 @@ npm run build            # Build producción (PWA incluido)
 npm run lint             # ESLint
 npm run typecheck        # tsc --noEmit
 npm run typecheck:edge   # Build + deno check de Edge Functions
-npm run test             # Vitest (~1.37k tests, ~85 archivos)
-npm run test:e2e         # Playwright (23 specs)
+npm run test             # Vitest (~1.4k+ tests, 118+ archivos)
+npm run test:e2e         # Playwright (24 specs, incluye smoke.spec.ts)
 npm run verify           # lint + typecheck + edge + sync + data + security + test + build + bundle
 npm run verify:full      # verify + test:e2e
 npm run check:sync       # Validar seed↔schema (lee migrations)
@@ -78,6 +79,7 @@ tsx scripts/provision-tenant.ts --short-code BANK-ES --name "Bank S.A." --admin-
 ### Puertos (dev + Replit)
 
 - **Vite** `:5000` — host `0.0.0.0`, `strictPort: true` (mapea a external `:80` en Replit). Fijado así para que la webview de Replit funcione; no es el `:3000` histórico.
+  > **Excepción documentada del workspace CLAUDE.md** (que prohíbe `:5000` por colisión con macOS AirPlay): aquí es no-negociable para Replit. Si trabajas en macOS local, desactiva "Receiver" en Sharing → AirPlay, o usa `VITE_PORT=3000` por env (no recomendado: rompe el workflow de Replit).
 - **Express** `:3001` — API. Vite proxya `/api/*` a este puerto.
 - En Replit ambos arrancan con `npm run dev` (concurrently). El workflow espera `waitForPort = 5000`.
 
@@ -91,13 +93,30 @@ Replit automáticamente. El server ejecuta `runMigrations()` al boot y, si
 hijo idempotente para poblar clientes/deals/posiciones/targets antes de que
 el usuario abra la UI. Ver [`docs/runbooks/replit-demo.md`](docs/runbooks/replit-demo.md).
 
-## Estructura del proyecto (post-roadmap)
+## Estructura del proyecto (post-roadmap + restructure)
+
+> **Restructure en curso (commit `5c37640`):** `packages/*` introducidas como
+> boundaries nominales. La implementación sigue viviendo en `utils/`,
+> `server/`, `components/`. Tests `packageBoundaryImports.test.ts` y
+> `pricingCoreBoundary.test.ts` validan que código fuera de los packages no
+> importe directamente de los módulos cubiertos. **Estado: facades, no
+> aislamiento físico.** Ver `docs/platform-restructure.md`.
 
 ```text
 App.tsx                    # Shell principal, lazy loading, routing
 appNavigation.ts           # Navegación (31 ViewState; 22 sidebar + AUX)
 types.ts                   # Tipos de dominio + re-exports de types/*
-translations.ts            # i18n (en/es)
+translations.ts            # i18n monolítica histórica (1622L) — conviviendo
+                           # con translations/ split-by-domain (ver Pitfalls)
+
+packages/                  # NUEVO — workspace facades (re-exports a utils/)
+  pricing-core/            # @npricing/pricing-core — calculatePricing batch + DEFAULT_PRICING_SHOCKS
+  commercial/              # @npricing/commercial — channels, customer360, clv, targetGrid
+  domain/                  # @npricing/domain — tipos compartidos
+  evidence/                # @npricing/evidence — snapshots, canonicalJson, snapshotHash
+  governance/              # @npricing/governance — dossiers, escalations, methodology
+  data-access/             # @npricing/data-access — contratos TenantSession/QueryReader
+  platform/                # @npricing/platform — stub mínimo (6 líneas)
 
 api/                       # Cliente API tipado (browser → server)
   index.ts                 # Re-exports
@@ -138,23 +157,38 @@ server/                    # Express server
     tenancy.ts             # Phase 0, valida x-entity-id contra entity_users
     requireTenancy.ts      # Belt-and-suspenders guard + helpers tenancyScope / entityScopedClause
     errorHandler.ts validate.ts
-  routes/
+  routes/                  # 28 routers; reagrupados por ola
+    # Core (pre-ola)
     deals.ts audit.ts config.ts marketData.ts entities.ts
     reportSchedules.ts observability.ts auth.ts gemini.ts pricing.ts
-    snapshots.ts           # Phase 0, replay endpoint
-    customer360.ts         # Phase 1, CRUD + CSV import
-    channelPricing.ts      # Phase 2, /api/channel/quote
-    campaigns.ts           # Phase 2, CRUD + state machine
-    governance.ts          # Phase 3, model inventory + signed dossiers
-    metering.ts            # Phase 5, ops usage observability
-    clv.ts reconciliation.ts   # Phase 6 — CLV + FTP reconciliation
-  workers/
+    # Phase 0
+    snapshots.ts           # replay endpoint
+    # Phase 1
+    customer360.ts         # CRUD + CSV import
+    # Phase 2
+    channelPricing.ts campaigns.ts
+    # Phase 3
+    governance.ts          # model inventory + signed dossiers
+    # Phase 5
+    metering.ts            # ops usage observability
+    # Phase 6
+    clv.ts reconciliation.ts
+    # Olas 8-10 (Banca March)
+    attributions.ts        # Ola 8: jerárquico, append-only
+    admission.ts coreBanking.ts budget.ts  # Ola 9: PUZZLE/HOST/ALQUID
+    copilot.ts             # Ola 10: AI grounding Cmd+K
+    dealTimeline.ts marketBenchmarks.ts notifications.ts  # surfaces auxiliares
+    targetGrid.ts whatIf.ts                                # Olas 1-3
+  workers/                 # 9 workers, todos opt-in via env vars
     alertEvaluatorCore.ts  # Pure evaluation (testable sin DB)
     alertEvaluator.ts      # DB adapters + setInterval loop opt-in
     snapshotReplay.ts      # Re-ejecuta motor con snapshot guardado
     escalationSweeper.ts   # Phase 3.5 — temporal approval escalations
     ltvSnapshotWorker.ts   # Phase 6 — refresca client_ltv_snapshots
     crmEventSync.ts        # Phase 6 — tira eventos CRM → client_events
+    attributionDriftDetector.ts        # Ola 8 — alerta sobre drift de matrices
+    attributionThresholdRecalibrator.ts # Ola 10 — recalibración automática
+    workerHealth.ts        # Shared liveness/error counters
   integrations/
     alertChannels.ts       # email/slack/pagerduty/webhook/opsgenie
     bootstrap.ts           # Registra adapters (inMemory | salesforce | bloomberg) al boot
@@ -595,6 +629,16 @@ Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
   `SEED_DEMO_ON_BOOT` está desactivado contra una DB vacía las vistas
   Customer Pricing / Blotter / Target Grid aparecerán sin filas. Ver
   [`docs/runbooks/replit-demo.md`](docs/runbooks/replit-demo.md).
+- **CSP reporting necesita proxy en Vercel:** `vercel.json` declara
+  `report-uri /api/csp-report` y `Reporting-Endpoints: csp-endpoint=...`,
+  y `server/routes/cspReport.ts` recibe los reportes. Pero en deploys
+  Vercel-only (SPA estática) `/api/*` no llega al Express salvo que se
+  añada un rewrite o serverless function. Hoy las violations se pierden
+  silenciosamente en Vercel; el endpoint funciona en Replit y en cualquier
+  setup que sirva SPA + API desde el mismo origen. **Follow-up:** o (a)
+  añadir `{ "source": "/api/csp-report", "destination": "<express-url>" }`
+  a `vercel.json` rewrites, o (b) crear `api/csp-report.ts` como Vercel
+  serverless function que duplique el handler.
 - Las ramas antiguas pueden traer documentación útil pero también supuestos
   desactualizados.
 - Recharts y módulos lazy pueden introducir warnings no bloqueantes;
