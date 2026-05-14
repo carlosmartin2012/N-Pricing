@@ -31,6 +31,13 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: TypeScript strict check (audited files only)
+        # Opt-in incremental adoption del Bloque 3.a (noUncheckedIndexedAccess).
+        # tsconfig.strict.json lista archivos auditados — TS exige `!`/guards
+        # en cada arr[i]. Bloquea regresión en código ya endurecido sin
+        # imponer el flag global todavía. Ver tsconfig.strict.json para detalles.
+        run: npm run typecheck:strict-audited
+
       - name: Seed/schema sync check
         run: npm run check:sync
 

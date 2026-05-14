@@ -8,6 +8,9 @@
 
     /* Strict Type-Checking */
     "strict": true,
+    // Mantengo false aquí (global) pero hay un opt-in incremental via
+    // tsconfig.strict.json que aplica este flag a archivos auditados.
+    // Run: `npm run typecheck:strict-audited`. Ver CLAUDE.md > Bloque 3.a.
     "noUncheckedIndexedAccess": false,
     "forceConsistentCasingInFileNames": true,
 
