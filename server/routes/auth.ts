@@ -2,7 +2,10 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { signToken } from '../middleware/auth';
 import { query, queryOne } from '../db';
+import { createLogger } from '../logger';
 import { GoogleSsoProvider } from '../../integrations/sso/google';
+
+const logger = createLogger('auth');
 
 /**
  * Constant-time string equality to avoid leaking the demo credential length
@@ -110,7 +113,7 @@ router.get('/me', async (req, res) => {
       [req.user.email],
     );
   } catch (err) {
-    console.error('[auth/me] memberships query failed', err);
+    logger.error('me/memberships query failed', undefined, err);
     res.status(503).json({
       code: 'memberships_lookup_failed',
       message: 'Could not load tenant memberships. Try again.',

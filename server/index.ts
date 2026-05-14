@@ -32,6 +32,9 @@ import coreBankingRouter from './routes/coreBanking';
 import budgetRouter from './routes/budget';
 import notificationsRouter from './routes/notifications';
 import cspReportRouter from './routes/cspReport';
+import { createLogger } from './logger';
+
+const logger = createLogger('server');
 import { authMiddleware } from './middleware/auth';
 import { tenancyMiddleware, liteTenancyMiddleware } from './middleware/tenancy';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -278,7 +281,7 @@ const errorHandler: ErrorRequestHandler = (err: unknown, req: Request, res: Resp
       return;
     }
   }
-  console.error('[server] Unhandled route error', { requestId, err });
+  logger.error('Unhandled route error', { requestId }, err);
   res.status(500).json({ error: safeError(err), requestId });
 };
 app.use(errorHandler);
@@ -287,10 +290,10 @@ app.use(errorHandler);
 // anywhere in the process would either be silently swallowed or crash the
 // Node process in a future runtime (Node 15+ defaults), leaving no log trail.
 process.on('unhandledRejection', (reason) => {
-  console.error('[server] Unhandled promise rejection', reason);
+  logger.error('Unhandled promise rejection', undefined, reason);
 });
 process.on('uncaughtException', (err) => {
-  console.error('[server] Uncaught exception', err);
+  logger.error('Uncaught exception', undefined, err);
 });
 
 async function main() {
@@ -307,7 +310,7 @@ async function main() {
       try {
         await seedDemoDataset(pool);
       } catch (err) {
-        console.error('[server] seedDemoDataset crashed (startup continues):', err);
+        logger.error('seedDemoDataset crashed (startup continues)', undefined, err);
       }
     }
     // Register integration adapters BEFORE the server starts accepting
@@ -315,7 +318,7 @@ async function main() {
     // MarketDataAdapter will otherwise see an empty registry.
     bootstrapAdapters();
     app.listen(PORT, '0.0.0.0', () => {
-      console.info(`[server] Running on http://0.0.0.0:${PORT} (${IS_PROD ? 'production' : 'development'})`);
+      logger.info('Running', { port: PORT, env: IS_PROD ? 'production' : 'development' });
     });
     // Alert evaluator is opt-in: set ALERT_EVAL_INTERVAL_MS to a positive
     // integer (milliseconds) to start the background tick. Disabled by default
@@ -342,7 +345,7 @@ async function main() {
     // governance flow Admin/Risk_Manager review.
     startThresholdRecalibrator();
   } catch (err) {
-    console.error('[server] Failed to start:', err);
+    logger.error('Failed to start', undefined, err);
     process.exit(1);
   }
 }

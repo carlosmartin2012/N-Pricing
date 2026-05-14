@@ -12,7 +12,10 @@ import {
 } from '@npricing/commercial';
 import { sha256CanonicalJson } from '@npricing/evidence';
 import { query, queryOne, execute } from '../db';
+import { createLogger } from '../logger';
 import { safeError } from '../middleware/errorHandler';
+
+const logger = createLogger('clv');
 import type {
   ClientEntity,
   ClientEvent,
@@ -369,11 +372,10 @@ router.post('/clients/:clientId/ltv/recompute', async (req, res) => {
         req.tenancy.userEmail,
       ]
     ).catch((err) => {
-      console.error('[clv/recompute] client_events insert failed (audit trail incomplete)', {
+      logger.error('recompute/client_events insert failed (audit trail incomplete)', {
         entityId: req.tenancy?.entityId,
         clientId: req.params.clientId,
-        err: err instanceof Error ? err.message : String(err),
-      });
+      }, err);
     });
 
     res.status(201).json(row ? mapSnapshot(row) : null);

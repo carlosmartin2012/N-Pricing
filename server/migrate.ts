@@ -1,5 +1,8 @@
 import { pool } from './db';
+import { createLogger } from './logger';
 import { runConsolidatedMigrations } from './migrationRunner';
+
+const logger = createLogger('migrate');
 
 /**
  * Boot-time migration entrypoint. Replaces the historical 1140-line inline
@@ -21,15 +24,15 @@ export async function runMigrations(): Promise<void> {
   const client = await pool.connect();
   try {
     const report = await runConsolidatedMigrations(client);
-    console.info(
-      `[migrate] schema applied | applied=${report.applied.length} ` +
-      `skipped=${report.skippedAlreadyApplied.length}`,
-    );
+    logger.info('schema applied', {
+      applied: report.applied.length,
+      skipped: report.skippedAlreadyApplied.length,
+    });
     if (report.applied.length > 0) {
-      console.info(`[migrate] newly applied: ${report.applied.join(', ')}`);
+      logger.info('newly applied migrations', { files: report.applied });
     }
   } catch (err) {
-    console.error('[migrate] Migration failed:', err);
+    logger.error('Migration failed', undefined, err);
     throw err;
   } finally {
     client.release();

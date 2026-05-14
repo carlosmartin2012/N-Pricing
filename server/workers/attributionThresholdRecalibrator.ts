@@ -1,3 +1,7 @@
+import { createLogger } from '../logger';
+
+const logger = createLogger('attribution-recalibrator');
+
 /**
  * Ola 10 Bloque B — Attribution threshold recalibrator worker.
  *
@@ -250,7 +254,7 @@ export function startThresholdRecalibrator(): void {
     void runWorkerTick('attribution-recalibrator', async () => {
       const report = await runRecalibrationSweep();
       if (report.proposalsEmitted > 0 || report.errors.length > 0) {
-        console.info('[attribution-recalibrator]', report);
+        logger.info('tick', report as unknown as Record<string, unknown>);
       }
     });
   }, ms);

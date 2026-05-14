@@ -1,6 +1,8 @@
 import express, { Router, Request, Response } from 'express';
+import { createLogger } from '../logger';
 
 const router = Router();
+const logger = createLogger('csp');
 
 // Browsers send CSP reports with `application/csp-report` (legacy) or
 // `application/reports+json` (Reporting API). The global express.json() only
@@ -69,7 +71,7 @@ function normalize(body: unknown): {
 router.post('/', (req: Request, res: Response) => {
   const report = normalize(req.body);
   if (report) {
-    console.warn('[csp]', JSON.stringify(report));
+    logger.warn('violation', report as unknown as Record<string, unknown>);
   }
   res.status(204).end();
 });

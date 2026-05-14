@@ -22,7 +22,10 @@ import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { hashSnapshotInput, hashSnapshotOutput } from '@npricing/evidence';
 import { query, queryOne, withTransaction, type Tx } from '../db';
+import { createLogger } from '../logger';
 import { safeError } from '../middleware/errorHandler';
+
+const escalationLogger = createLogger('escalation-push');
 import { routeApproval } from '../../utils/attributions/attributionRouter';
 import { simulate } from '../../utils/attributions/attributionSimulator';
 import {
@@ -285,7 +288,7 @@ function dispatchEscalationDecision(row: DecisionRow, routingMetadata: Attributi
   })
     .then((report) => {
       if (report.notified > 0 || report.errors.length > 0 || report.skipped) {
-        console.info('[escalation-push]', {
+        escalationLogger.info('dispatch', {
           dealId: row.deal_id,
           decisionId: row.id,
           ...report,
@@ -293,7 +296,7 @@ function dispatchEscalationDecision(row: DecisionRow, routingMetadata: Attributi
       }
     })
     .catch((err) => {
-      console.error('[escalation-push] dispatch failed', err);
+      escalationLogger.error('dispatch failed', undefined, err);
     });
 }
 

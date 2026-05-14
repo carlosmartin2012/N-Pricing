@@ -1,6 +1,8 @@
 import { Router } from 'express';
+import { createLogger } from '../logger';
 
 const router = Router();
+const logger = createLogger('gemini');
 
 // Allowlist of Gemini model ids we are willing to proxy. Anything not in this
 // list is rejected — the raw model name is interpolated into the Gemini URL
@@ -57,7 +59,7 @@ router.post('/chat', async (req, res) => {
     res.json(data);
   } catch (err) {
     const aborted = (err as { name?: string })?.name === 'AbortError';
-    console.error('[gemini] proxy error', err);
+    logger.error('proxy error', undefined, err);
     res
       .status(aborted ? 504 : 500)
       .json({ error: aborted ? 'Gemini proxy timeout' : 'Gemini proxy error' });
