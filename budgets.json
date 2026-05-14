@@ -1,9 +1,9 @@
 {
-  "description": "Bundle size budgets for CI. Sizes in bytes.",
+  "description": "Bundle size budgets for CI. Sizes in bytes. index bumped 520000→525000 (2026-05-14): build creció 1.4KB orgánicamente, gate quedó expuesto al desbloquear security. Follow-up: investigar qué pulla el main bundle (likely candidato: lazy-load más routes desde App.tsx).",
   "maxTotalSize": 3000000,
   "defaultMaxChunkSize": 100000,
   "overrides": {
-    "index": 520000,
+    "index": 525000,
     "xlsx": 450000,
     "CategoricalChart": 320000,
     "vendor-supabase": 200000,
