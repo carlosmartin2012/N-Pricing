@@ -63,7 +63,8 @@ interface ParsedTable {
 function parseCsv(text: string): ParsedTable {
   const lines = text.replace(/\r\n?/g, '\n').split('\n').filter((l) => l.length > 0);
   if (lines.length === 0) return { header: [], rows: [] };
-  const header = splitCsvLine(lines[0]);
+  // lines[0] guaranteed by the length check above.
+  const header = splitCsvLine(lines[0]!);
   const rows = lines.slice(1).map(splitCsvLine);
   return { header, rows };
 }
@@ -74,7 +75,8 @@ function indexOfHeader(header: string[], name: string): number {
 
 function getCell(row: string[], idx: number): string | null {
   if (idx < 0 || idx >= row.length) return null;
-  const v = row[idx].trim();
+  // Bounds check above guarantees row[idx] is defined.
+  const v = row[idx]!.trim();
   return v.length === 0 ? null : v;
 }
 
@@ -106,7 +108,8 @@ export function parsePositionsCsv(text: string): ParseResult<ParsedPosition> {
 
   const idx = (name: string) => indexOfHeader(header, name);
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
+    // i < rows.length guarantees rows[i] is defined.
+    const row = rows[i]!;
     const ri = i + 1;
     const clientId = getCell(row, idx('client_id'));
     const productType = getCell(row, idx('product_type'));
@@ -173,7 +176,8 @@ export function parseMetricsCsv(text: string): ParseResult<ParsedMetrics> {
 
   const idx = (name: string) => indexOfHeader(header, name);
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
+    // i < rows.length guarantees rows[i] is defined.
+    const row = rows[i]!;
     const ri = i + 1;
     const clientId = getCell(row, idx('client_id'));
     const period = getCell(row, idx('period'));

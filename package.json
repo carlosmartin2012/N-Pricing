@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "test:e2e:critical": "playwright test e2e/auth.spec.ts e2e/pricing-flow.spec.ts e2e/offline-pwa.spec.ts e2e/rbac.spec.ts",
     "typecheck": "tsc --noEmit",
+    "typecheck:strict-audited": "tsc --noEmit -p tsconfig.strict.json",
     "build:edge": "node supabase/functions/pricing/build.mjs",
     "typecheck:edge": "npm run build:edge && deno check supabase/functions/pricing/index.ts",
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",

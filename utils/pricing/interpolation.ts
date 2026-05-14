@@ -9,17 +9,21 @@ export function linearInterpolate(
 ): number {
   if (!points || points.length === 0) return 0;
   if (!Number.isFinite(targetX)) return 0;
-  if (targetX <= points[0].x) return Number.isFinite(points[0].y) ? points[0].y : 0;
-  if (targetX >= points[points.length - 1].x) {
-    const last = points[points.length - 1];
+  // Bounds-check above guarantees first/last points exist.
+  const first = points[0]!;
+  if (targetX <= first.x) return Number.isFinite(first.y) ? first.y : 0;
+  const last = points[points.length - 1]!;
+  if (targetX >= last.x) {
     return Number.isFinite(last.y) ? last.y : 0;
   }
 
   const upperIdx = points.findIndex(p => p.x >= targetX);
-  if (upperIdx <= 0) return Number.isFinite(points[0].y) ? points[0].y : 0;
+  if (upperIdx <= 0) return Number.isFinite(first.y) ? first.y : 0;
 
-  const lower = points[upperIdx - 1];
-  const upper = points[upperIdx];
+  // upperIdx > 0 means upperIdx >= 1, and since findIndex returned a non-(-1),
+  // upperIdx < points.length. Both neighbours are therefore defined.
+  const lower = points[upperIdx - 1]!;
+  const upper = points[upperIdx]!;
   const denom = upper.x - lower.x;
   if (denom === 0) return Number.isFinite(upper.y) ? upper.y : 0;
   const ratio = (targetX - lower.x) / denom;
@@ -39,9 +43,10 @@ export function prepareYieldCurvePoints(
   curve: { tenor: string; rate: number }[],
   tenorMonths: Record<string, number>,
 ): { x: number; y: number }[] {
+  // `p.tenor in tenorMonths` guarantees the lookup is defined.
   return curve
     .filter(p => p.tenor in tenorMonths)
-    .map(p => ({ x: tenorMonths[p.tenor], y: p.rate }))
+    .map(p => ({ x: tenorMonths[p.tenor]!, y: p.rate }))
     .sort((a, b) => a.x - b.x);
 }
 
@@ -51,6 +56,6 @@ export function prepareLiquidityCurvePoints(
 ): { x: number; y: number }[] {
   return points
     .filter(p => p.tenor in tenorMonths)
-    .map(p => ({ x: tenorMonths[p.tenor], y: p.termLP }))
+    .map(p => ({ x: tenorMonths[p.tenor]!, y: p.termLP }))
     .sort((a, b) => a.x - b.x);
 }

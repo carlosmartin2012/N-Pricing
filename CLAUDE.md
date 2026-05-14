@@ -391,6 +391,20 @@ docs/                               # Doc operativa (ver índice abajo)
 - Usar unions string literal, no `enum`.
 - **Result type para integraciones**: nunca throw en adapters; devolver
   `AdapterResult<T>` discriminado.
+- **`noUncheckedIndexedAccess` opt-in incremental** (Bloque 3.a): el flag
+  está `false` global pero `tsconfig.strict.json` lo activa para una lista
+  de archivos auditados. CI corre `npm run typecheck:strict-audited` además
+  del typecheck normal. Para auditar un archivo nuevo:
+  1. Revisar cada `arr[i]`; añadir `!` solo donde el bound sea provable
+     (post-length-check, dentro de loop bounded, post-regex-match).
+  2. Añadir guards (`if`, `??`) donde NO sea provable.
+  3. Añadir el archivo a `tsconfig.strict.json` `include`.
+  4. `npm run typecheck:strict-audited` debe pasar.
+  Estado: 4 archivos auditados (utils/pricing/{nelsonSiegelSvensson,
+  interpolation}, utils/ruleMatchingEngine, utils/customer360/csvImport).
+  Próximos candidatos prioritarios: shockPresets, liquidityEngine,
+  snapshotHash, creditRiskEngine. Cuando todo prod-code esté auditado,
+  mover el flag a tsconfig.json global y borrar tsconfig.strict.json.
 
 ### React
 

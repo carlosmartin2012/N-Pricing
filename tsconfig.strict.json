@@ -1,0 +1,34 @@
+{
+  // Opt-in strict array access — adoption gradual del Bloque 3.a del análisis.
+  //
+  // Cada archivo listado en `include` ha sido **auditado**: revisado para que
+  // todos los accesos `arr[i]` con `noUncheckedIndexedAccess: true` sean
+  // semánticamente correctos (bounds-checked, regex-captured, post-filter
+  // guarded). Las assertions `!` en estos archivos están documentadas inline.
+  //
+  // Workflow:
+  //   1. Auditar un archivo: revisar cada `arr[i]`, añadir `!` o guard
+  //      donde el bound sea provable por construcción.
+  //   2. Añadir el archivo a `include` abajo.
+  //   3. Verificar: `npm run typecheck:strict-audited` debe pasar.
+  //   4. CI corre tanto `tsc --noEmit` como este config — regresión bloqueada
+  //      en el subset auditado, sin imponer el flag global todavía.
+  //
+  // Cuando todos los archivos prod estén auditados, mover el flag a
+  // tsconfig.json (global) y borrar este file.
+  //
+  // Estado: 4 archivos auditados (2026-05-14). 700+ errores TS restantes en
+  // ~115 archivos. Próximos candidatos por prioridad regulatoria:
+  // utils/pricing/shockPresets.ts, liquidityEngine.ts, snapshotHash.ts,
+  // creditRiskEngine.ts, bitemporal.ts, curveUtils.ts.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true
+  },
+  "include": [
+    "utils/pricing/nelsonSiegelSvensson.ts",
+    "utils/pricing/interpolation.ts",
+    "utils/ruleMatchingEngine.ts",
+    "utils/customer360/csvImport.ts"
+  ]
+}

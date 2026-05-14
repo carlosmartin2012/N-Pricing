@@ -137,28 +137,37 @@ export function fitNSSLinear(
     [0, 0, 0, 0],
   ];
   const XTy: number[] = [0, 0, 0, 0];
+  // Bounded-index accesses below: `i ∈ [0, n)` over the observations array
+  // we just populated, `j,k ∈ [0, 4)` over the fixed 4×4 design matrix.
+  // The `!` assertions are runtime-correct by construction; needed because
+  // `noUncheckedIndexedAccess` types every `arr[i]` as `T | undefined`.
   for (let i = 0; i < n; i++) {
+    const Xi = X[i]!;
+    const yi = y[i]!;
     for (let j = 0; j < 4; j++) {
-      XTy[j] += X[i][j] * y[i];
+      const Xij = Xi[j]!;
+      XTy[j] = XTy[j]! + Xij * yi;
+      const XTXj = XTX[j]!;
       for (let k = 0; k < 4; k++) {
-        XTX[j][k] += X[i][j] * X[i][k];
+        XTXj[k] = XTXj[k]! + Xij * Xi[k]!;
       }
     }
   }
 
   // Solve XTX × β = XTy via Gauss-Jordan elimination
-  const augmented: number[][] = XTX.map((row, i) => [...row, XTy[i]]);
+  const augmented: number[][] = XTX.map((row, i) => [...row, XTy[i]!]);
   for (let i = 0; i < 4; i++) {
     // Partial pivoting
     let maxRow = i;
     for (let k = i + 1; k < 4; k++) {
-      if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
+      if (Math.abs(augmented[k]![i]!) > Math.abs(augmented[maxRow]![i]!)) {
         maxRow = k;
       }
     }
-    [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+    [augmented[i], augmented[maxRow]] = [augmented[maxRow]!, augmented[i]!];
 
-    if (Math.abs(augmented[i][i]) < 1e-12) {
+    const rowI = augmented[i]!;
+    if (Math.abs(rowI[i]!) < 1e-12) {
       // Singular matrix — fall back to flat curve
       const avg = y.reduce((s, v) => s + v, 0) / n;
       return {
@@ -170,28 +179,29 @@ export function fitNSSLinear(
     }
 
     // Normalize pivot row
-    const pivot = augmented[i][i];
+    const pivot = rowI[i]!;
     for (let j = 0; j <= 4; j++) {
-      augmented[i][j] /= pivot;
+      rowI[j] = rowI[j]! / pivot;
     }
 
     // Eliminate other rows
     for (let k = 0; k < 4; k++) {
       if (k !== i) {
-        const factor = augmented[k][i];
+        const rowK = augmented[k]!;
+        const factor = rowK[i]!;
         for (let j = 0; j <= 4; j++) {
-          augmented[k][j] -= factor * augmented[i][j];
+          rowK[j] = rowK[j]! - factor * rowI[j]!;
         }
       }
     }
   }
 
-  const beta: number[] = augmented.map((row) => row[4]);
+  const beta: number[] = augmented.map((row) => row[4]!);
   const params: NSSParameters = {
-    beta0: beta[0],
-    beta1: beta[1],
-    beta2: beta[2],
-    beta3: beta[3],
+    beta0: beta[0]!,
+    beta1: beta[1]!,
+    beta2: beta[2]!,
+    beta3: beta[3]!,
     tau1,
     tau2,
   };

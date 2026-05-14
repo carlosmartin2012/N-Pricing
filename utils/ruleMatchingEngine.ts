@@ -35,24 +35,28 @@ export function clearRuleMatchCache(): void {
 function evaluateTenorCondition(tenorStr: string, months: number): boolean {
   if (!tenorStr || tenorStr === 'Any') return true;
   const clean = tenorStr.replace(/\s/g, '');
+  // Regex matches return string[] but TS now types `match[i]` as `string |
+  // undefined` under noUncheckedIndexedAccess. The capture groups are
+  // guaranteed by the regex shape (e.g. `(\d+)` always captures), so `!`
+  // assertions are correct by construction.
   const ltMatch = clean.match(/^[<≤](\d+)([MY]?)$/);
   if (ltMatch) {
-    const val = parseInt(ltMatch[1]);
+    const val = parseInt(ltMatch[1]!);
     const unit = ltMatch[2] || 'M';
     const targetMonths = unit === 'Y' ? val * 12 : val;
     return months < targetMonths;
   }
   const gtMatch = clean.match(/^[>≥](\d+)([MY]?)$/);
   if (gtMatch) {
-    const val = parseInt(gtMatch[1]);
+    const val = parseInt(gtMatch[1]!);
     const unit = gtMatch[2] || 'M';
     const targetMonths = unit === 'Y' ? val * 12 : val;
     return months > targetMonths;
   }
   const rangeMatch = clean.match(/^(\d+)-(\d+)([MY]?)$/);
   if (rangeMatch) {
-    const lo = parseInt(rangeMatch[1]);
-    const hi = parseInt(rangeMatch[2]);
+    const lo = parseInt(rangeMatch[1]!);
+    const hi = parseInt(rangeMatch[2]!);
     const unit = rangeMatch[3] || 'M';
     const loM = unit === 'Y' ? lo * 12 : lo;
     const hiM = unit === 'Y' ? hi * 12 : hi;
@@ -130,7 +134,7 @@ export function matchDealToRule(
   .sort((a, b) => b.score - a.score);
 
   if (scored.length > 0) {
-    const best = scored[0].rule;
+    const best = scored[0]!.rule;
     const result: MatchResult = {
       rule: best,
       methodology: best.baseMethod || 'Matched Maturity',
@@ -162,19 +166,24 @@ export function interpolateRateCard(
   card: FtpRateCard,
   targetMonths: number,
 ): number {
+  // The filter guarantees `p.tenor in TENOR_MONTHS`, so the lookup result is
+  // a number (not undefined). `!` makes that explicit for the type system.
   const points = card.points
     .filter(p => p.tenor in TENOR_MONTHS)
-    .map(p => ({ months: TENOR_MONTHS[p.tenor], rate: p.rate }))
+    .map(p => ({ months: TENOR_MONTHS[p.tenor]!, rate: p.rate }))
     .sort((a, b) => a.months - b.months);
 
   if (points.length === 0) return 0;
-  if (targetMonths <= points[0].months) return points[0].rate;
-  if (targetMonths >= points[points.length - 1].months) return points[points.length - 1].rate;
+  // Bounds checks above guarantee `points[0]` and `points[length-1]` exist.
+  if (targetMonths <= points[0]!.months) return points[0]!.rate;
+  if (targetMonths >= points[points.length - 1]!.months) return points[points.length - 1]!.rate;
 
   const upperIdx = points.findIndex(p => p.months >= targetMonths);
-  if (upperIdx <= 0) return points[0].rate;
-  const lower = points[upperIdx - 1];
-  const upper = points[upperIdx];
+  if (upperIdx <= 0) return points[0]!.rate;
+  // `upperIdx > 0` and `upperIdx < points.length` here (otherwise the
+  // findIndex contract or the length check above would have short-circuited).
+  const lower = points[upperIdx - 1]!;
+  const upper = points[upperIdx]!;
   const denom = upper.months - lower.months;
   if (denom === 0) return upper.rate;
   const ratio = (targetMonths - lower.months) / denom;
