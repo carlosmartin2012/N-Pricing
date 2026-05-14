@@ -29,11 +29,18 @@ describe.skipIf(!SUITE_ENABLED)('integration: attributions (Ola 8 Bloque A)', ()
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: URL });
-    // Asegura que entities A/B existen (idempotente).
+    // Asegura que entities A/B existen (idempotente). DEFAULT_GROUP_ID
+    // ('...0001') lo crea la migration 20260406000001_multi_entity.sql en
+    // beforeAll del runner, así que no necesitamos seed de groups aquí.
+    // entities.group_id y entities.short_code son NOT NULL — pasar siempre.
+    const DEFAULT_GROUP_ID = '00000000-0000-0000-0000-000000000001';
     for (const id of [ENTITY_A, ENTITY_B]) {
+      const suffix = id.slice(-3);
       await pool.query(
-        `INSERT INTO entities (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`,
-        [id, `Test Entity ${id.slice(-3)}`],
+        `INSERT INTO entities (id, group_id, name, short_code)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (id) DO NOTHING`,
+        [id, DEFAULT_GROUP_ID, `Test Entity ${suffix}`, `TEST-${suffix.toUpperCase()}`],
       );
     }
   });
@@ -85,18 +92,19 @@ describe.skipIf(!SUITE_ENABLED)('integration: attributions (Ola 8 Bloque A)', ()
       `INSERT INTO deals (id, entity_id) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`,
       [dealId, ENTITY_A],
     );
+    // pricing_snapshots (20260602000004 + 20260619000003) tiene columnas
+    // NOT NULL: input_hash, output_hash, request_id, engine_version, as_of_date.
+    // El test antiguo asumía un schema mínimo y caía cuando se aplicaba el
+    // schema completo. Ahora pasa todas las columnas requeridas.
+    const inputHash = createHash('sha256').update('input-' + randomUUID()).digest('hex');
     await pool.query(
-      `INSERT INTO pricing_snapshots (entity_id, deal_id, hash, input, context, output)
-       VALUES ($1, $2, $3, '{}'::jsonb, '{}'::jsonb, '{}'::jsonb)`,
-      [ENTITY_A, dealId, snapshotHash],
-    ).catch(async () => {
-      // Si la columna es output_hash en lugar de hash (depende de migration order):
-      await pool.query(
-        `INSERT INTO pricing_snapshots (entity_id, deal_id, output_hash, input, context, output)
-         VALUES ($1, $2, $3, '{}'::jsonb, '{}'::jsonb, '{}'::jsonb)`,
-        [ENTITY_A, dealId, snapshotHash],
-      );
-    });
+      `INSERT INTO pricing_snapshots
+         (entity_id, deal_id, input_hash, output_hash, request_id, engine_version, as_of_date,
+          input, context, output)
+       VALUES ($1, $2, $3, $4, $5, 'test-engine', CURRENT_DATE,
+          '{}'::jsonb, '{}'::jsonb, '{}'::jsonb)`,
+      [ENTITY_A, dealId, inputHash, snapshotHash, 'test-req-' + randomUUID().slice(0, 8)],
+    );
 
     const { rows: levelRows } = await pool.query<{ id: string }>(
       `INSERT INTO attribution_levels (entity_id, name, level_order, rbac_role)
