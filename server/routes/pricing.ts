@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { safeError } from '../middleware/errorHandler';
 import { pool } from '../db';
+import { createLogger } from '../logger';
 import { recorderFromPool } from '../../utils/metering/usageRecorder';
 
 const router = Router();
 const meter = recorderFromPool(pool);
+const logger = createLogger('pricing');
 
 /**
  * POST /api/pricing/inverse-optimize
@@ -62,7 +64,7 @@ router.post('/inverse-optimize', async (req, res) => {
     }
     res.json(result);
   } catch (err) {
-    console.error('[pricing] inverse-optimize error', err);
+    logger.error('inverse-optimize error', undefined, err);
     res.status(500).json({ error: safeError(err) });
   }
 });
@@ -165,7 +167,7 @@ router.post('/fit-nss-curve', async (req, res) => {
 
     res.json({ ...fit, evaluated });
   } catch (err) {
-    console.error('[pricing] fit-nss-curve error', err);
+    logger.error('fit-nss-curve error', undefined, err);
     res.status(500).json({ error: safeError(err) });
   }
 });
@@ -238,7 +240,7 @@ router.post('/portfolio-review', async (req, res) => {
     const result = runPortfolioReview(portfolio, asOfDate);
     res.json(result);
   } catch (err) {
-    console.error('[pricing] portfolio-review error', err);
+    logger.error('portfolio-review error', undefined, err);
     res.status(500).json({ error: safeError(err) });
   }
 });

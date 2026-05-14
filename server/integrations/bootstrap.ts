@@ -1,7 +1,10 @@
 import { adapterRegistry } from '../../integrations/registry';
+import { createLogger } from '../logger';
 import {
   InMemoryCoreBanking, InMemoryCrm, InMemoryMarketData, InMemoryAdmission, InMemoryBudgetSource,
 } from '../../integrations/inMemory';
+
+const logger = createLogger('adapters');
 import { SalesforceCrmAdapter } from '../../integrations/crm/salesforce';
 import { BloombergMarketDataAdapter } from '../../integrations/marketData/bloomberg';
 import { PuzzleAdmissionAdapter } from '../../integrations/admission/puzzle';
@@ -42,7 +45,7 @@ function assertMockFallbackAllowed(adapterKind: string, requestedImpl: string, r
       `to acknowledge the mock fallback explicitly.`,
     );
   }
-  console.warn(`${message} — falling back to in-memory`);
+  logger.warn(`${message} — falling back to in-memory`);
 }
 
 /**
@@ -136,14 +139,14 @@ export function bootstrapAdapters(): void {
             if (process.env.NODE_ENV === 'production' && process.env.PRICING_ALLOW_MOCKS !== 'true') {
               throw new Error(`[adapters] ${reason}`);
             }
-            console.error(`[adapters] ${reason} — using empty curve tickers map`);
+            logger.error(`${reason} — using empty curve tickers map`);
           }
         } catch (parseErr) {
           const reason = `BLOOMBERG_CURVE_TICKERS is not valid JSON: ${(parseErr as Error).message}`;
           if (process.env.NODE_ENV === 'production' && process.env.PRICING_ALLOW_MOCKS !== 'true') {
             throw new Error(`[adapters] ${reason}`, { cause: parseErr });
           }
-          console.error(`[adapters] ${reason} — using empty curve tickers map`);
+          logger.error(`${reason} — using empty curve tickers map`, undefined, parseErr);
         }
       }
       adapterRegistry.register(new BloombergMarketDataAdapter({

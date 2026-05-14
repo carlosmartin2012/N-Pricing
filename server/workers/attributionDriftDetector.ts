@@ -18,6 +18,9 @@
  */
 
 import { query } from '../db';
+import { createLogger } from '../logger';
+
+const logger = createLogger('attribution-drift');
 import { runWorkerTick } from './workerHealth';
 import {
   aggregateByUser,
@@ -146,7 +149,7 @@ export async function runAttributionDriftSweep(
         for (const s of signals) {
           // Log estructurado — alertEvaluator puede recoger via métrica
           // attribution_drift_signals_total.
-          console.warn('[attribution-drift]', {
+          logger.warn('signal', {
             entityId,
             userId:    s.userId,
             severity:  s.severity,
@@ -180,7 +183,7 @@ export function startAttributionDriftDetector(): void {
     void runWorkerTick('attribution-drift', async () => {
       const report = await runAttributionDriftSweep();
       if (report.signalsTotal > 0 || report.errors.length > 0) {
-        console.info('[attribution-drift] sweep', {
+        logger.info('sweep', {
           entitiesScanned: report.entitiesScanned,
           signalsTotal:    report.signalsTotal,
           errors:          report.errors.length,

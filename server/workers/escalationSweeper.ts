@@ -1,6 +1,9 @@
 import { pool, withTransaction } from '../db';
+import { createLogger } from '../logger';
 import { sweepEscalations } from '../../utils/governance/escalationEvaluator';
 import { runWorkerTick } from './workerHealth';
+
+const logger = createLogger('escalation-sweep');
 import type {
   ApprovalEscalation,
   ApprovalEscalationConfig,
@@ -175,7 +178,7 @@ export function startEscalationSweeper(): void {
     void runWorkerTick('escalation-sweep', async () => {
       const report = await runSweep();
       if (report.escalated + report.notified + report.expired > 0 || report.errors.length > 0) {
-        console.info('[escalation-sweep]', report);
+        logger.info('tick', report as unknown as Record<string, unknown>);
       }
     });
   }, ms);

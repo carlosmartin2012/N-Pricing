@@ -1,4 +1,7 @@
 import { Pool, PoolClient } from 'pg';
+import { createLogger } from './logger';
+
+const logger = createLogger('db');
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required');
@@ -30,7 +33,7 @@ export const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  console.error('[db] Unexpected pool error', err);
+  logger.error('Unexpected pool error', undefined, err);
 });
 
 export async function query<T = Record<string, unknown>>(
@@ -102,7 +105,7 @@ export async function withTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T>
     try {
       await client.query('ROLLBACK');
     } catch (rollbackErr) {
-      console.error('[db] ROLLBACK failed after transaction error', rollbackErr);
+      logger.error('ROLLBACK failed after transaction error', undefined, rollbackErr);
     }
     throw err;
   } finally {

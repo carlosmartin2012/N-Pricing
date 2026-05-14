@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { pool, queryOne } from '../db';
+import { createLogger } from '../logger';
 import type { TenancyContext, TenancyErrorCode, EntityRole } from '../../types/phase0';
+
+const logger = createLogger('tenancy');
 
 /**
  * Tenancy middleware — layer 1 of multi-tenant defence.
@@ -76,7 +79,7 @@ async function logViolation(params: {
     );
   } catch (err) {
     // Never let the logger block the request — the 403 response is authoritative.
-    console.error('[tenancy] Failed to persist violation', err);
+    logger.error('Failed to persist violation', undefined, err);
   }
 }
 
@@ -158,7 +161,7 @@ export function tenancyMiddleware(): RequestHandler {
         [userEmail, uuid],
       );
     } catch (err) {
-      console.error('[tenancy] DB lookup failed', err);
+      logger.error('DB lookup failed', undefined, err);
       res.status(500).json({ code: 'tenancy_lookup_failed', message: 'Tenancy check failed', requestId });
       return;
     }

@@ -1,6 +1,9 @@
 import { pool, execute } from '../db';
+import { createLogger } from '../logger';
 import { adapterRegistry } from '../../integrations/registry';
 import { runWorkerTick } from './workerHealth';
+
+const logger = createLogger('crm-sync');
 import type { CrmPulledEvent, CrmEventKind } from '../../integrations/types';
 import type { ClientEventType } from '../../types/clv';
 
@@ -123,7 +126,7 @@ export function startCrmEventSync(): void {
     void runWorkerTick('crm-sync', async () => {
       const report = await runCrmSyncTick();
       if (report.inserted > 0 || report.errors.length > 0) {
-        console.info('[crm-sync]', report);
+        logger.info('tick', report as unknown as Record<string, unknown>);
       }
     });
   }, ms);

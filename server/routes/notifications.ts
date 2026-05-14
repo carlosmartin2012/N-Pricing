@@ -12,7 +12,10 @@
 
 import { Router } from 'express';
 import { query, queryOne } from '../db';
+import { createLogger } from '../logger';
 import { safeError } from '../middleware/errorHandler';
+
+const notifLogger = createLogger('notifications');
 import {
   sendPushToMany,
   getVapidPublicKey,
@@ -292,10 +295,7 @@ router.post('/push/test', async (req, res) => {
         );
         staleEndpointsPurged = report.staleEndpoints.length;
       } catch (purgeErr) {
-        console.error(
-          '[notifications/push/test] stale purge failed (push DID send)',
-          purgeErr,
-        );
+        notifLogger.error('push/test stale purge failed (push DID send)', undefined, purgeErr);
       }
     }
 

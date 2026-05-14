@@ -47,9 +47,16 @@ describe('attributionDriftDetector · runAttributionDriftSweep', () => {
     expect(report.signalsTotal).toBeGreaterThan(0);
     expect(report.signalsByEntity['E1']).toBeDefined();
     expect(report.signalsByEntity['E1'][0].severity).toBe('breached');
-    expect(warnSpy).toHaveBeenCalledWith('[attribution-drift]', expect.objectContaining({
-      entityId: 'E1', userId: 'usuario-x', severity: 'breached',
-    }));
+    // El worker ahora emite vía `server/logger.ts` (estructurado, una sola
+    // línea). En formato pretty (default fuera de prod) sale como
+    // `[attribution-drift] signal {"entityId":"E1",...}`. La aserción se
+    // hace sobre la línea completa, no sobre `(prefix, obj)`.
+    expect(warnSpy).toHaveBeenCalled();
+    const firstCallLine = warnSpy.mock.calls[0]?.[0] as string | undefined;
+    expect(firstCallLine).toMatch(/\[attribution-drift\] signal /);
+    expect(firstCallLine).toContain('"entityId":"E1"');
+    expect(firstCallLine).toContain('"userId":"usuario-x"');
+    expect(firstCallLine).toContain('"severity":"breached"');
     warnSpy.mockRestore();
   });
 

@@ -1,6 +1,9 @@
 import { pool } from '../db';
+import { createLogger } from '../logger';
 import { dispatchAlert, type DeliveryResult } from '../integrations/alertChannels';
 import { runWorkerTick } from './workerHealth';
+
+const logger = createLogger('alert-eval');
 import type {
   AlertChannelConfig,
   AlertChannelType,
@@ -166,7 +169,7 @@ export function startAlertEvaluator(): void {
     void runWorkerTick('alert-eval', async () => {
       const report = await evaluateAlerts(deps);
       if (report.triggered > 0 || report.errors.length > 0) {
-        console.info('[alert-eval]', report);
+        logger.info('tick', report as unknown as Record<string, unknown>);
       }
     });
   }, ms);

@@ -8,6 +8,9 @@ import {
 } from '@npricing/commercial';
 import { sha256CanonicalJson } from '@npricing/evidence';
 import { pool, queryOne, execute } from '../db';
+import { createLogger } from '../logger';
+
+const logger = createLogger('ltv-snapshot');
 import { runWorkerTick } from './workerHealth';
 import type { ClientEntity } from '@npricing/domain';
 
@@ -193,7 +196,7 @@ export function startLtvSnapshotWorker(): void {
     void runWorkerTick('ltv-snapshot', async () => {
       const report = await runLtvSnapshotTick();
       if (report.computed > 0 || report.errors.length > 0) {
-        console.info('[ltv-snapshot]', report);
+        logger.info('tick', report as unknown as Record<string, unknown>);
       }
     });
   }, ms);

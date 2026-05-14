@@ -1,3 +1,7 @@
+import { createLogger } from '../logger';
+
+const logger = createLogger('worker-tick');
+
 /**
  * Worker health observability — Ola 11.3.
  *
@@ -83,7 +87,7 @@ export function recordWorkerTickFailure(worker: string, err: unknown): void {
   snapshot.lastFailureAt = new Date().toISOString();
   const message = err instanceof Error ? err.message : String(err ?? 'unknown');
   snapshot.lastFailureMessage = message.slice(0, 256);
-  console.error('[worker-tick] failure', {
+  logger.error('failure', {
     worker,
     failureCount: snapshot.failureCount,
     successCount: snapshot.successCount,
