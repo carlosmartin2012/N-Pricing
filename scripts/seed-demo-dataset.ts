@@ -467,11 +467,11 @@ async function seedDeals(pool: Pool, entityId: string): Promise<number> {
          business_line, product_type, currency, amount, start_date, duration_months,
          amortization, repricing_freq, margin_target, risk_weight, capital_ratio,
          target_roe, operational_cost_bps, lcr_outflow_pct, category,
-         drawn_amount, undrawn_amount, is_committed,
+         undrawn_amount,
          transition_risk, physical_risk, entity_id
        ) VALUES (
          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-         $22,$23,$24,$25,$26,$27::uuid
+         $22,$23,$24,$25::uuid
        )
        ON CONFLICT (id) DO NOTHING`,
       [
@@ -483,7 +483,7 @@ async function seedDeals(pool: Pool, entityId: string): Promise<number> {
         d.riskWeight ?? null, d.capitalRatio ?? null,
         d.targetROE ?? null, d.operationalCostBps ?? null, d.lcrOutflowPct ?? 0,
         d.category ?? null,
-        d.drawnAmount ?? 0, d.undrawnAmount ?? 0, d.isCommitted ?? false,
+        d.undrawnAmount ?? 0,
         d.transitionRisk ?? null, d.physicalRisk ?? null, entityId,
       ],
     );
@@ -557,7 +557,7 @@ async function seedCampaigns(pool: Pool, entityId: string): Promise<number> {
       segment: 'Large Corporate',
       product_type: 'FX',
       currency: 'EUR',
-      channel: 'digital',
+      channel: 'web',
       rate_delta_bps: -10,
       max_volume_eur: 20000000,
       active_from: '2026-03-15',
@@ -605,7 +605,7 @@ async function seedModelInventory(pool: Pool, entityId: string): Promise<number>
   const rows = [
     {
       id: '00000000-0000-0000-0000-00000000e001',
-      kind: 'FTP',
+      kind: 'engine',
       name: 'Pooled Cost of Funds FTP',
       version: '3.2.1',
       status: 'active',
@@ -615,7 +615,7 @@ async function seedModelInventory(pool: Pool, entityId: string): Promise<number>
     },
     {
       id: '00000000-0000-0000-0000-00000000e002',
-      kind: 'LTV',
+      kind: 'other',
       name: 'Client Lifetime Value Engine',
       version: '1.4.0',
       status: 'active',
@@ -625,7 +625,7 @@ async function seedModelInventory(pool: Pool, entityId: string): Promise<number>
     },
     {
       id: '00000000-0000-0000-0000-00000000e003',
-      kind: 'PD',
+      kind: 'other',
       name: 'PD Retail — Logistic v2',
       version: '2.1.0',
       status: 'active',
@@ -635,7 +635,7 @@ async function seedModelInventory(pool: Pool, entityId: string): Promise<number>
     },
     {
       id: '00000000-0000-0000-0000-00000000e004',
-      kind: 'RAROC',
+      kind: 'other',
       name: 'RAROC Attribution Model',
       version: '1.0.2',
       status: 'candidate',

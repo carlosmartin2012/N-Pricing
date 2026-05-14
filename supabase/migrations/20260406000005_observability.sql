@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS metrics (
   recorded_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_metrics_entity_name ON metrics(entity_id, metric_name, recorded_at DESC);
-CREATE INDEX idx_metrics_recent ON metrics(recorded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_metrics_entity_name ON metrics(entity_id, metric_name, recorded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_metrics_recent ON metrics(recorded_at DESC);
 
 ALTER TABLE metrics ENABLE ROW LEVEL SECURITY;
 CREATE POLICY metrics_read ON metrics FOR SELECT TO authenticated
@@ -38,4 +38,4 @@ CREATE POLICY alert_rules_read ON alert_rules FOR SELECT TO authenticated
 CREATE POLICY alert_rules_write ON alert_rules FOR ALL TO authenticated
   USING (entity_id = get_current_entity_id());
 
-CREATE INDEX idx_alert_rules_entity ON alert_rules(entity_id);
+CREATE INDEX IF NOT EXISTS idx_alert_rules_entity ON alert_rules(entity_id);

@@ -1,5 +1,23 @@
 -- Move greenium_rate_cards into the entity-scoped model.
 -- Pre-condition: greenium_rate_cards exists (see 20260407000001_esg_greenium_dnsh_isf.sql).
+-- Guard: create the table if it was dropped or never created by the pre-condition migration.
+
+CREATE TABLE IF NOT EXISTS greenium_rate_cards (
+  id              SERIAL PRIMARY KEY,
+  green_format    TEXT NOT NULL,
+  sector          TEXT NOT NULL DEFAULT 'All',
+  adjustment_bps  NUMERIC NOT NULL,
+  description     TEXT,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO greenium_rate_cards (green_format, sector, adjustment_bps, description) VALUES
+  ('Green_Bond',          'All', -20, 'EU Green Bond Standard — full taxonomy alignment discount'),
+  ('Green_Loan',          'All', -15, 'Green Loan Principles (LMA) — verified use of proceeds'),
+  ('Sustainability_Linked','All', -10, 'Sustainability-Linked Loan — KPI-based margin ratchet'),
+  ('Social_Bond',         'All',  -8, 'Social Bond Principles — affordable housing/healthcare')
+ON CONFLICT DO NOTHING;
 
 ALTER TABLE greenium_rate_cards
   ADD COLUMN IF NOT EXISTS entity_id UUID

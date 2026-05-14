@@ -70,6 +70,9 @@ CREATE POLICY usage_events_read ON usage_events
 -- Writes via service role / server only.
 
 -- ---------- 3) usage_aggregates_daily ----------
+-- Guard: the old inline schema may have created this as a regular TABLE
+-- instead of a MATERIALIZED VIEW. Drop whichever variant exists.
+DROP TABLE IF EXISTS usage_aggregates_daily;
 DROP MATERIALIZED VIEW IF EXISTS usage_aggregates_daily;
 CREATE MATERIALIZED VIEW usage_aggregates_daily AS
 SELECT
