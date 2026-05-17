@@ -11,6 +11,9 @@
 
 import { readFileSync, readdirSync } from 'fs';
 import { resolve } from 'path';
+import { createLogger } from './lib/cliLogger';
+
+const logger = createLogger('check-seed-schema-sync');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -338,8 +341,8 @@ function main(): void {
   // sense of security.
   const MIN_EXPECTED_TABLES = 15;
   if (schemaCols.size < MIN_EXPECTED_TABLES) {
-    console.error(
-      `FAIL: parsed only ${schemaCols.size} tables from supabase/migrations ` +
+    logger.error(
+      `parsed only ${schemaCols.size} tables from supabase/migrations ` +
         `(expected ≥ ${MIN_EXPECTED_TABLES}). ` +
         `Check that supabase/migrations/ is present and non-empty.`
     );
@@ -409,10 +412,10 @@ function main(): void {
 
   console.log();
   if (hasErrors) {
-    console.log('FAIL: Mismatches detected. Please review seed data vs schema.');
+    logger.error('Mismatches detected. Please review seed data vs schema.');
     process.exit(1);
   } else {
-    console.log('PASS: All seed data fields match the schema. No drift detected.');
+    logger.info('All seed data fields match the schema. No drift detected.');
     process.exit(0);
   }
 }

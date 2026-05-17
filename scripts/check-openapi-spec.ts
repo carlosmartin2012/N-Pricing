@@ -1,4 +1,7 @@
 import { readFileSync } from 'node:fs';
+import { createLogger } from './lib/cliLogger';
+
+const logger = createLogger('check-openapi-spec');
 
 const SPEC_PATH = 'docs/api-spec.yaml';
 
@@ -6,7 +9,7 @@ const text = readFileSync(SPEC_PATH, 'utf8');
 const lines = text.split(/\r?\n/);
 
 function fail(message: string): never {
-  console.error(`[openapi] ${message}`);
+  logger.error(message);
   process.exit(1);
 }
 
@@ -110,4 +113,4 @@ for (const schema of ['PricingRequest', 'FTPResult', 'ClientEvent', 'Attribution
   if (!componentSchemas.has(schema)) fail(`missing component schema ${schema}`);
 }
 
-console.info(`[openapi] ${pathKeys.size} paths, ${componentSchemas.size} schemas, ${operationIds.size} operationIds`);
+logger.info(`${pathKeys.size} paths, ${componentSchemas.size} schemas, ${operationIds.size} operationIds`);

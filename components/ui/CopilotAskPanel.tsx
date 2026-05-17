@@ -174,16 +174,17 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
 
       {ask.isSuccess && ask.data && (
         <article
-          className="rounded-md border border-cyan-500/20 bg-cyan-500/5 px-3 py-3 text-xs text-[var(--nfq-text-primary)]"
+          className="max-h-[280px] overflow-auto rounded-md border border-cyan-500/20 bg-cyan-500/5 px-3 py-3 text-xs text-[var(--nfq-text-primary)]"
           data-testid="copilot-answer"
         >
           <div className="flex justify-end mb-1 gap-2">
             <button
               onClick={() => {
                 navigator.clipboard.writeText(ask.data!.answer);
+                // Simple feedback (could be improved with a toast in the future)
               }}
               aria-label="Copy explanation to clipboard"
-              className="text-[10px] text-cyan-300 hover:text-cyan-200 flex items-center gap-1"
+              className="text-[10px] text-cyan-300 hover:text-cyan-200 flex items-center gap-1 active:text-emerald-400"
             >
               Copy
             </button>

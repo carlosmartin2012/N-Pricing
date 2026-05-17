@@ -8,6 +8,10 @@
  * Exit 0 = all budgets met, Exit 1 = at least one budget exceeded.
  */
 
+import { createLogger } from './lib/cliLogger';
+
+const logger = createLogger('check-bundle-size');
+
 import { readdirSync, statSync, readFileSync } from 'fs';
 import { resolve, join } from 'path';
 
@@ -75,7 +79,7 @@ function main(): void {
   try {
     budgets = JSON.parse(readFileSync(budgetsPath, 'utf-8')) as Budgets;
   } catch {
-    console.error(`ERROR: Could not read ${budgetsPath}`);
+    logger.error(`Could not read ${budgetsPath}`);
     process.exit(1);
   }
 
@@ -84,8 +88,8 @@ function main(): void {
   try {
     files = readdirSync(distAssetsDir);
   } catch {
-    console.error(`ERROR: Could not read ${distAssetsDir}`);
-    console.error('Make sure to run "npm run build" first.');
+    logger.error(`Could not read ${distAssetsDir}`);
+    logger.error('Make sure to run "npm run build" first.');
     process.exit(1);
   }
 
@@ -96,7 +100,7 @@ function main(): void {
   );
 
   if (assetFiles.length === 0) {
-    console.error('ERROR: No JS/CSS files found in dist/assets/.');
+    logger.error('No JS/CSS files found in dist/assets/.');
     process.exit(1);
   }
 

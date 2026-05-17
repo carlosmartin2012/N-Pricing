@@ -17,6 +17,10 @@ import {
   MOCK_YIELD_CURVE,
 } from '../utils/seedData';
 
+import { createLogger } from './lib/cliLogger';
+
+const logger = createLogger('check-data-quality');
+
 const issues: string[] = [];
 const allowedRoles = new Set(['Admin', 'Trader', 'Risk_Manager', 'Auditor']);
 const allowedStatuses = new Set(['Draft', 'Pending', 'Pending_Approval', 'Approved', 'Booked', 'Rejected', 'Review']);
@@ -204,11 +208,11 @@ for (const [userId, primaryCount] of primaryEntityCountByUser.entries()) {
 }
 
 if (issues.length > 0) {
-  console.error(`FAIL: ${issues.length} data-quality issue(s) found.\n`);
-  issues.forEach((issue) => console.error(`- ${issue}`));
+  logger.error(`FAIL: ${issues.length} data-quality issue(s) found.`);
+  issues.forEach((issue) => logger.error(`- ${issue}`));
   process.exit(1);
 }
 
-console.log(
+logger.info(
   `PASS: Seed/master data quality checks passed for ${MOCK_DEALS.length} deals, ${MOCK_USERS.length} users, ${MOCK_ENTITIES.length} entities, and ${MOCK_RULES.length} rules.`,
 );

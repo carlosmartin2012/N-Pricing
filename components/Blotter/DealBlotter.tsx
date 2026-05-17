@@ -287,6 +287,13 @@ const DealBlotter: React.FC = () => {
     {/* Live cursors (Ola 7 B) — viewport 'BLOTTER' */}
     {cursorsActive && <LiveCursorOverlay cursors={cursors} />}
 
+    {/* Small indicator when other users have active cursors */}
+    {cursorsActive && cursors.length > 0 && (
+      <div className="pointer-events-none absolute right-3 top-3 z-[70] rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[10px] font-mono text-white shadow">
+        {cursors.length} live
+      </div>
+    )}
+
     <Panel
       title={t.dealBlotter}
       className="h-full overflow-hidden"

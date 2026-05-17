@@ -170,9 +170,15 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   return (
     <ErrorBoundary fallbackMessage="Pricing calculator encountered an error">
       <div className="relative z-0 w-full">
-        {/* Live cursors (Ola 7 B) — global mousemove broadcast filtered by viewport='CALCULATOR'.
-           Overlay is pointer-events-none. Only rendered when the channel is active. */}
+        {/* Live cursors (Ola 7 B) — global mousemove broadcast filtered by viewport='CALCULATOR' */}
         {cursorsActive && <LiveCursorOverlay cursors={cursors} />}
+
+        {/* Small floating indicator when other users have active cursors */}
+        {cursorsActive && cursors.length > 0 && (
+          <div className="pointer-events-none absolute right-3 top-3 z-[70] rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[10px] font-mono text-white shadow">
+            {cursors.length} live
+          </div>
+        )}
 
         {/* Landing insights — pivot §Bloque G */}
         <Suspense fallback={null}>

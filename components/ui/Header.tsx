@@ -227,7 +227,14 @@ export const Header: React.FC<HeaderProps> = ({
           isSyncing={offlineIsSyncing}
           onSync={onOfflineSync ?? (() => undefined)}
         />
-        {onlineUsers && onlineUsers.length > 0 && <PresenceAvatars users={onlineUsers} />}
+        {onlineUsers && onlineUsers.length > 0 && (
+          <>
+            <PresenceAvatars users={onlineUsers} />
+            <span className="ml-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300">
+              {onlineUsers.length} live
+            </span>
+          </>
+        )}
         {entityLabels && <EntitySwitcher labels={entityLabels} />}
 
         <button
