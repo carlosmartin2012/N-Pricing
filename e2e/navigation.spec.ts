@@ -22,20 +22,20 @@ test.beforeEach(async ({ page }) => {
   await page.getByTestId('demo-password').fill('demo');
   await page.getByTestId('demo-login-btn').click();
 
-  // Wait for the default Calculator view to load
-  await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
+  // Wait for the default Control Room view to load
+  await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 10_000 });
 
   // Ensure the sidebar is expanded so nav items are clickable.
   // Post-Option B (2026-04) el label es "Calculator" — antes "Pricing Engine".
   const sidebarHasLabels = await page
     .getByTestId('sidebar')
-    .getByText('Calculator')
+    .getByText('Control Room')
     .isVisible()
     .catch(() => false);
 
   if (!sidebarHasLabels) {
     await page.getByTestId('menu-toggle').click();
-    await expect(page.getByTestId('sidebar').getByText('Calculator')).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId('sidebar').getByText('Control Room')).toBeVisible({ timeout: 3_000 });
   }
 });
 
@@ -43,6 +43,7 @@ test.describe('Main Navigation Items', () => {
   // Cockpit taxonomy (2026-05): daily surfaces stay in the sidebar;
   // specialist surfaces move to Command Palette/AUX.
   const mainNavItems = [
+    { testId: 'nav-CONTROL_ROOM', label: 'Control Room' },
     { testId: 'nav-CALCULATOR', label: 'Calculator' },
     { testId: 'nav-SHOCKS', label: 'Stress Test' },
     { testId: 'nav-STRESS_PRICING', label: 'Stress Pricing' },
@@ -95,6 +96,15 @@ test.describe('Bottom Navigation Items', () => {
 });
 
 test.describe('View Switching', () => {
+  test('navigating to Control Room loads the decision cockpit', async ({ page }) => {
+    await page.getByTestId('nav-CALCULATOR').click();
+    await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 5_000 });
+
+    await page.getByTestId('nav-CONTROL_ROOM').click();
+    await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('control-room-decision-queue')).toBeVisible();
+  });
+
   test('navigating to Deal Blotter loads the blotter view', async ({ page }) => {
     await page.getByTestId('nav-BLOTTER').click();
 

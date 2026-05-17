@@ -14,6 +14,8 @@ import CrossBonusesPicker from './CrossBonusesPicker';
 import IFRS9StagePanel from './IFRS9StagePanel';
 import LineagePanel from './LineagePanel';
 import { WaterfallExplainerCard } from '../RAROC/WaterfallExplainerCard';
+import { DealFlowRail } from './DealFlowRail';
+import { PricingDriversSummary } from './PricingDriversSummary';
 
 const MethodologyVisualizer = React.lazy(() => import('./MethodologyVisualizer'));
 const PricingReceipt = React.lazy(() => import('./PricingReceipt'));
@@ -177,6 +179,39 @@ export const CalculatorWorkspace: React.FC<Props> = ({
         {cursorsActive && cursors.length > 0 && (
           <div className="pointer-events-none absolute right-3 top-3 z-[70] rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[10px] font-mono text-white shadow">
             {cursors.length} live
+          </div>
+        )}
+
+        <div className="mb-4">
+          <DealFlowRail
+            deal={dealParams}
+            result={currentResult}
+            labels={{
+              title: t.dealFlowTitle,
+              quote: t.dealFlowQuote,
+              dossier: t.dealFlowDossier,
+              approval: t.dealFlowApproval,
+              timeline: t.dealFlowTimeline,
+              savedRequired: t.dealFlowSavedRequired,
+            }}
+          />
+        </div>
+
+        {currentResult && (
+          <div className="mb-4">
+            <PricingDriversSummary
+              result={currentResult}
+              labels={{
+                title: t.pricingDriversTitle,
+                subtitle: t.pricingDriversSubtitle,
+                baseRate: t.pricingDriverBaseRate,
+                liquidity: t.pricingDriverLiquidity,
+                capital: t.pricingDriverCapital,
+                credit: t.pricingDriverCredit,
+                operational: t.pricingDriverOperational,
+                esg: t.pricingDriverEsg,
+              }}
+            />
           </div>
         )}
 

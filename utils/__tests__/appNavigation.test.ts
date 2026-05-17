@@ -7,7 +7,7 @@ describe('appNavigation routing helpers', () => {
   describe('viewToPath', () => {
     it('maps every known view to a path', () => {
       const views: ViewState[] = [
-        'CALCULATOR', 'RAROC', 'SHOCKS', 'BLOTTER', 'ACCOUNTING',
+        'CONTROL_ROOM', 'CALCULATOR', 'RAROC', 'SHOCKS', 'BLOTTER', 'ACCOUNTING',
         'REPORTING', 'MARKET_DATA', 'METHODOLOGY', 'CONFIG',
         'BEHAVIOURAL', 'AI_LAB', 'USER_MGMT', 'AUDIT_LOG', 'HEALTH', 'MANUAL',
       ];
@@ -30,6 +30,7 @@ describe('appNavigation routing helpers', () => {
 
   describe('pathToView', () => {
     it('resolves all registered paths', () => {
+      expect(pathToView('/control-room')).toBe('CONTROL_ROOM');
       expect(pathToView('/pricing')).toBe('CALCULATOR');
       expect(pathToView('/blotter')).toBe('BLOTTER');
       expect(pathToView('/raroc')).toBe('RAROC');
@@ -85,9 +86,9 @@ describe('appNavigation routing helpers', () => {
 
     it('uses the 4-hub operating taxonomy', () => {
       const sections = Array.from(new Set(items.map((i) => i.section).filter(Boolean)));
-      // Order matters: Relationship Cockpit → Pricing Cockpit → Data & Ops Hub → Governance Hub → Assistant
+      // Order matters: Today → Relationship Cockpit → Pricing Cockpit → Data & Ops Hub → Governance Hub → Assistant
       expect(sections).toEqual([
-        'Relationship Cockpit', 'Pricing Cockpit', 'Data & Ops Hub', 'Governance Hub', 'Assistant',
+        'Today', 'Relationship Cockpit', 'Pricing Cockpit', 'Data & Ops Hub', 'Governance Hub', 'Assistant',
       ]);
     });
 
@@ -190,10 +191,10 @@ describe('appNavigation routing helpers', () => {
       ]);
     });
 
-    it('main sidebar holds at most 14 daily entries', () => {
+    it('main sidebar holds at most 15 daily entries', () => {
       // Density floor — alerta si alguien añade entries sin pasar por
       // density review. Specialist destinations belong in AUX.
-      expect(items.length).toBeLessThanOrEqual(14);
+      expect(items.length).toBeLessThanOrEqual(15);
     });
   });
 
@@ -243,7 +244,7 @@ describe('appNavigation routing helpers', () => {
   describe('round-trip consistency', () => {
     it('viewToPath → pathToView returns the canonical view', () => {
       const canonicalViews: ViewState[] = [
-        'CALCULATOR', 'RAROC', 'SHOCKS', 'BLOTTER', 'ACCOUNTING',
+        'CONTROL_ROOM', 'CALCULATOR', 'RAROC', 'SHOCKS', 'BLOTTER', 'ACCOUNTING',
         'REPORTING', 'MARKET_DATA', 'METHODOLOGY', 'BEHAVIOURAL',
         'AI_LAB', 'USER_MGMT', 'AUDIT_LOG', 'HEALTH', 'MANUAL',
       ];

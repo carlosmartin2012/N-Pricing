@@ -12,6 +12,7 @@ import {
   FlaskConical,
   GitBranch,
   Grid3X3,
+  Gauge,
   HeartPulse,
   History,
   LayoutDashboard,
@@ -39,6 +40,7 @@ type NavigationLabels = typeof translations.en;
 // ---------------------------------------------------------------------------
 
 const VIEW_PATHS: Record<ViewState, string> = {
+  CONTROL_ROOM: '/control-room',
   // Pricing workspace — 4 tabs, now surfaced as individual sidebar entries
   CALCULATOR: '/pricing',
   RAROC: '/raroc',
@@ -133,6 +135,7 @@ export function getAllRoutePaths(): { path: string; view: ViewState }[] {
  */
 export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   const sectionLabels = {
+    today: t.navSectionToday,
     relationships: t.navSectionRelationships,
     pricing: t.navSectionPricing,
     dataOps: t.navSectionMarketData,
@@ -141,6 +144,8 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
   };
 
   return [
+    { id: 'CONTROL_ROOM', label: t.navControlRoom, icon: Gauge, section: 'Today', sectionLabel: sectionLabels.today, path: '/control-room' },
+
     // ─────────────── RELATIONSHIP COCKPIT ───────────────
     { id: 'CUSTOMER_360', label: t.navClients,  icon: Users,               section: 'Relationship Cockpit', sectionLabel: sectionLabels.relationships, path: '/customers' },
     { id: 'PIPELINE',     label: t.navPipeline, icon: GitPullRequestArrow, section: 'Relationship Cockpit', sectionLabel: sectionLabels.relationships, path: '/pipeline' },
@@ -188,6 +193,7 @@ export function getViewNavigationMeta(
     BEHAVIOURAL: { label: t.behaviouralModels, section: 'Data & Ops Hub' },
     MARKET_BENCHMARKS: { label: t.navMarketBenchmarks, section: 'Data & Ops Hub' },
     CAMPAIGNS: { label: t.navCampaigns, section: 'Relationship Cockpit' },
+    CONTROL_ROOM: { label: t.navControlRoom, section: 'Today' },
     MODEL_INVENTORY: { label: t.navModelInventory, section: 'Governance Hub' },
     DOSSIERS: { label: t.navDossiers, section: 'Governance Hub' },
     BUDGET_RECONCILIATION: { label: t.navBudgetReconciliation, section: 'Governance Hub' },

@@ -5,7 +5,6 @@ import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
 import { AppRoutes } from './appRoutes';
 import { buildBottomNavItems, buildMainNavItems, getViewNavigationMeta } from './appNavigation';
-import { Header } from './components/ui/Header';
 import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { SkipNav } from './components/ui/SkipNav';
@@ -13,7 +12,6 @@ import { PricingStateProvider } from './contexts/PricingStateContext';
 import { useAuth } from './contexts/AuthContext';
 import { useWalkthrough } from './contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from './constants/walkthroughTours';
-import { tourIdForRole } from './utils/roleOnboarding';
 import { useData } from './contexts/DataContext';
 import { useUI } from './contexts/UIContext';
 import { useSupabaseSync } from './hooks/useSupabaseSync';
@@ -27,6 +25,10 @@ import { useLiveCursors } from './hooks/useLiveCursors';
 import LiveCursorOverlay from './components/ui/LiveCursorOverlay';
 
 const GeminiAssistant = React.lazy(() => import('./components/Intelligence/GeminiAssistant'));
+const Header = React.lazy(() => import('./components/ui/Header').then((module) => ({ default: module.Header })));
+const DataFreshnessStrip = React.lazy(() =>
+  import('./components/ui/DataFreshnessStrip').then((module) => ({ default: module.DataFreshnessStrip }))
+);
 // CommandPalette is only rendered on demand (⌘K). Lazy-loading it pulls
 // ~12 KB of source + lucide-react icon barrel out of the initial `index`
 // chunk — cheap win toward the 520 KB budget. The button that opens it
@@ -64,26 +66,17 @@ const AppContent: React.FC = () => {
   const walkthrough = useWalkthrough();
   const handleUniversalImport = useUniversalImport();
 
-  // Auto-start the most-relevant onboarding tour on the very first
-  // authenticated render. Role-specific tours (Ola 7 Bloque E) take
-  // precedence over the generic business-flow tour, so a Trader sees
-  // a Trader tour, a Risk Officer sees a Risk Officer tour, etc.
-  // Storage (WalkthroughContext.hasCompletedTour) keeps this idempotent
-  // across logins.
+  // Auto-start only the centered business-flow tour on first login. The
+  // role-specific tours remain available from the manual docs/replay entry,
+  // but they are no longer forced immediately after auth because they navigate
+  // away from the Control Room before the user can orient themselves.
   useEffect(() => {
     if (!isAuthenticated) return;
     if (walkthrough.isActive) return;
-    const roleTourId = tourIdForRole(currentUser?.role);
-    const candidate =
-      roleTourId && !walkthrough.hasCompletedTour(roleTourId)
-        ? roleTourId
-        : !walkthrough.hasCompletedTour(FIRST_LOGIN_TOUR_ID)
-          ? FIRST_LOGIN_TOUR_ID
-          : null;
-    if (!candidate) return;
-    const timer = setTimeout(() => walkthrough.startTour(candidate), 600);
+    if (walkthrough.hasCompletedTour(FIRST_LOGIN_TOUR_ID)) return;
+    const timer = setTimeout(() => walkthrough.startTour(FIRST_LOGIN_TOUR_ID), 600);
     return () => clearTimeout(timer);
-  }, [isAuthenticated, walkthrough, currentUser?.role]);
+  }, [isAuthenticated, walkthrough]);
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
@@ -194,35 +187,42 @@ const AppContent: React.FC = () => {
         />
 
         <div className="relative z-10 flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-          <Header
-            isSidebarOpen={ui.isSidebarOpen}
-            setSidebarOpen={ui.setSidebarOpen}
-            currentView={ui.currentView}
-            mainNavItems={mainNavItems}
-            bottomNavItems={bottomNavItems}
-            theme={ui.theme}
-            themeMode={ui.themeMode}
-            setTheme={ui.setTheme}
-            language={ui.language}
-            setLanguage={ui.setLanguage}
-            user={currentUser}
-            onLogout={handleLogout}
-            onOpenImport={() => ui.setIsImportModalOpen(true)}
-            entityLabels={{
-              entitySwitcher: ui.t.entitySwitcher,
-              groupScope: ui.t.groupScope,
-              activeEntity: ui.t.activeEntity,
-              allEntities: ui.t.allEntities,
-            }}
-            onlineUsers={onlineUsers}
-            offlinePendingCount={pendingCount}
-            offlineIsSyncing={isSyncing}
-            onOfflineSync={syncAll}
-            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-            dataMode={data.dataMode}
-            syncStatus={data.syncStatus}
-            onDataModeChange={data.setDataMode}
-          />
+          <Suspense fallback={<div className="border-b border-[color:var(--nfq-border-ghost)]" style={{ height: 'var(--nfq-topbar-height)' }} />}>
+            <Header
+              isSidebarOpen={ui.isSidebarOpen}
+              setSidebarOpen={ui.setSidebarOpen}
+              currentView={ui.currentView}
+              mainNavItems={mainNavItems}
+              bottomNavItems={bottomNavItems}
+              theme={ui.theme}
+              themeMode={ui.themeMode}
+              setTheme={ui.setTheme}
+              language={ui.language}
+              setLanguage={ui.setLanguage}
+              user={currentUser}
+              onLogout={handleLogout}
+              onOpenImport={() => ui.setIsImportModalOpen(true)}
+              entityLabels={{
+                entitySwitcher: ui.t.entitySwitcher,
+                groupScope: ui.t.groupScope,
+                activeEntity: ui.t.activeEntity,
+                allEntities: ui.t.allEntities,
+              }}
+              onlineUsers={onlineUsers}
+              offlinePendingCount={pendingCount}
+              offlineIsSyncing={isSyncing}
+              onOfflineSync={syncAll}
+              onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+              dataMode={data.dataMode}
+              syncStatus={data.syncStatus}
+              onDataModeChange={data.setDataMode}
+              workspaceMode={ui.workspaceMode}
+              onWorkspaceModeChange={ui.setWorkspaceMode}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <DataFreshnessStrip />
+          </Suspense>
 
           <main
             id="main-content"

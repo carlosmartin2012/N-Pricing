@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Bell, HelpCircle, Languages, Menu, Monitor, Moon, Search, Sun, Upload } from 'lucide-react';
 import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from '../../constants/walkthroughTours';
@@ -13,6 +13,11 @@ import { NotificationPanel } from './NotificationPanel';
 import { OfflineBadge } from './OfflineBadge';
 import { PresenceAvatars } from './PresenceAvatars';
 import type { PresenceUser } from '../../hooks/usePresenceAwareness';
+import type { WorkspaceMode } from '../../contexts/UIContext';
+
+const PersonaModeSwitch = React.lazy(() =>
+  import('./PersonaModeSwitch').then((module) => ({ default: module.PersonaModeSwitch }))
+);
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -38,6 +43,8 @@ interface HeaderProps {
   dataMode: DataMode;
   syncStatus: 'idle' | 'mock' | 'synced' | 'error';
   onDataModeChange: (mode: DataMode) => void;
+  workspaceMode: WorkspaceMode;
+  onWorkspaceModeChange: (mode: WorkspaceMode) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -63,6 +70,8 @@ export const Header: React.FC<HeaderProps> = ({
   dataMode,
   syncStatus,
   onDataModeChange,
+  workspaceMode,
+  onWorkspaceModeChange,
 }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const t = getTranslations(language);
@@ -78,6 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
     'Pricing Cockpit': 'text-[color:var(--nfq-accent)]',
     'Data & Ops Hub': 'text-sky-300',
     'Governance Hub': 'text-violet-300',
+    Today: 'text-emerald-300',
     Assistant:  'text-fuchsia-300',
     System:     'text-slate-400',
   };
@@ -86,6 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
     'Pricing Cockpit': 'bg-[var(--nfq-accent)]',
     'Data & Ops Hub': 'bg-sky-400',
     'Governance Hub': 'bg-violet-400',
+    Today: 'bg-emerald-400',
     Assistant:  'bg-fuchsia-400',
     System:     'bg-slate-400',
   };
@@ -235,6 +246,20 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </>
         )}
+
+        <Suspense fallback={null}>
+          <PersonaModeSwitch
+            mode={workspaceMode}
+            onChange={onWorkspaceModeChange}
+            labels={{
+              mode: t.workspaceMode,
+              trader: t.workspaceModeTrader,
+              risk: t.workspaceModeRisk,
+              admin: t.workspaceModeAdmin,
+            }}
+          />
+        </Suspense>
+
         {entityLabels && <EntitySwitcher labels={entityLabels} />}
 
         <button

@@ -495,6 +495,7 @@ export interface RAROCInputs {
 }
 
 export type ViewState =
+  | 'CONTROL_ROOM'
   | 'CALCULATOR'
   | 'BLOTTER'
   | 'CONFIG'

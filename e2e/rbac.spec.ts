@@ -36,7 +36,7 @@ async function seedAuthenticatedSession(page: Page, email: string) {
   }, user);
 
   await page.goto('/');
-  await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 10_000 });
 }
 
 async function openBlotter(page: Page) {

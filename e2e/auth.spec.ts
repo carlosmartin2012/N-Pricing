@@ -70,11 +70,11 @@ test.describe('Login Page', () => {
 });
 
 test.describe('Demo Login Flow', () => {
-  test('successful demo login navigates to the calculator workspace', async ({ page }) => {
+  test('successful demo login navigates to the control room workspace', async ({ page }) => {
     await submitDemoLogin(page, 'demo', 'demo');
 
-    // After login, the deal input panel (calculator) should be visible
-    await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('data-freshness-strip')).toBeVisible();
   });
 
   test('invalid credentials show an error message', async ({ page }) => {
@@ -98,7 +98,7 @@ test.describe('Post-Login User Identity', () => {
   test.beforeEach(async ({ page }) => {
     await submitDemoLogin(page, 'demo', 'demo');
 
-    await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 10_000 });
   });
 
   test('header displays the logged-in user name', async ({ page }) => {
@@ -114,7 +114,7 @@ test.describe('Post-Login User Identity', () => {
     await expect(header).toBeVisible();
 
     // Demo user has role "Admin" and department "Demo"
-    await expect(header.getByText(/Admin/)).toBeVisible();
+    await expect(header.getByText('Admin / Demo')).toBeVisible();
   });
 
   test('sidebar is present after login', async ({ page }) => {
@@ -129,6 +129,7 @@ test.describe('Post-Login User Identity', () => {
     }
 
     await expect(page.getByTestId('nav-CALCULATOR')).toBeVisible();
+    await expect(page.getByTestId('nav-CONTROL_ROOM')).toBeVisible();
     await expect(page.getByTestId('nav-BLOTTER')).toBeVisible();
     await expect(page.getByTestId('nav-REPORTING')).toBeVisible();
   });

@@ -21,7 +21,10 @@ describe('apiFetch', () => {
 
   beforeEach(() => {
     originalFetch = globalThis.fetch;
-    if (typeof localStorage.clear !== 'function') {
+    if (
+      typeof globalThis.localStorage === 'undefined' ||
+      typeof globalThis.localStorage.clear !== 'function'
+    ) {
       installLocalStorageShim();
     }
     localStorage.clear();

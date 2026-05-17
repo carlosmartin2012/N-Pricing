@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const dbMock = vi.hoisted(() => ({
   pool:                   { query: vi.fn(), connect: vi.fn() },
@@ -13,8 +13,19 @@ vi.mock('../../server/db', () => dbMock);
 
 import { runAttributionDriftSweep } from '../../server/workers/attributionDriftDetector';
 
+const ORIGINAL_LOG_FORMAT = process.env.LOG_FORMAT;
+
 beforeEach(() => {
+  process.env.LOG_FORMAT = 'pretty';
   dbMock.query.mockReset();
+});
+
+afterEach(() => {
+  if (ORIGINAL_LOG_FORMAT === undefined) {
+    delete process.env.LOG_FORMAT;
+  } else {
+    process.env.LOG_FORMAT = ORIGINAL_LOG_FORMAT;
+  }
 });
 
 describe('attributionDriftDetector · runAttributionDriftSweep', () => {

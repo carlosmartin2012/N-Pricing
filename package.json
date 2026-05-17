@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test e2e/smoke.spec.ts",
     "test:e2e:critical": "playwright test e2e/auth.spec.ts e2e/pricing-flow.spec.ts e2e/offline-pwa.spec.ts e2e/rbac.spec.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:strict-audited": "tsc --noEmit -p tsconfig.strict.json",

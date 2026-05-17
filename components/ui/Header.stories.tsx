@@ -52,6 +52,8 @@ const meta = {
     dataMode: 'live',
     syncStatus: 'synced',
     onDataModeChange: action('onDataModeChange'),
+    workspaceMode: 'Trader',
+    onWorkspaceModeChange: action('onWorkspaceModeChange'),
   },
 } satisfies Meta<typeof Header>;
 

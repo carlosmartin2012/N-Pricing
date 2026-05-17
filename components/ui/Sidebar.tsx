@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, LucideIcon, Layers, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, LucideIcon, Layers, MoreHorizontal, X } from 'lucide-react';
 import { ViewState } from '../../types';
 import { getTranslations, Language } from '../../translations';
 import { Logo } from './Logo';
@@ -202,12 +202,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Logo className="h-6 w-6" />
             </div>
             {isSidebarOpen && (
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="nfq-section-label">NFQ Advisory</div>
                 <div className="truncate text-[15px] font-semibold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
                   N Pricing
                 </div>
               </div>
+            )}
+            {isSidebarOpen && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={t.close}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] md:hidden"
+              >
+                <X size={16} />
+              </button>
             )}
           </div>
         </div>

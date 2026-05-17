@@ -5,7 +5,7 @@ import {
   HeartPulse, Plus, Upload, Moon, Sun, Search, ArrowRight,
   Grid3X3, User2,
   MessageSquare, Compass, GitPullRequestArrow, LineChart, Scale, Sparkles,
-  Zap,
+  Zap, Gauge,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
@@ -35,6 +35,7 @@ type TranslationLabels = typeof translations.en;
 
 function buildViewItems(t: TranslationLabels): { id: ViewState; label: string; icon: LucideIcon }[] {
   return [
+    { id: 'CONTROL_ROOM',    label: t.navControlRoom,      icon: Gauge },
     { id: 'CUSTOMER_360',    label: t.navClients,          icon: Users },
     { id: 'PIPELINE',        label: t.navPipeline,         icon: GitPullRequestArrow },
     { id: 'TARGET_GRID',     label: t.targetGrid,          icon: Grid3X3 },

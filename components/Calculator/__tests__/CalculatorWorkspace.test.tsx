@@ -5,10 +5,16 @@ import { MemoryRouter } from 'react-router';
 import { UIProvider } from '../../../contexts/UIContext';
 import { CalculatorWorkspace } from '../CalculatorWorkspace';
 import { INITIAL_DEAL } from '../../../utils/seedData';
+import { translations } from '../../../translations';
 import type { Transaction } from '../../../types';
 
 const mocks = vi.hoisted(() => ({
   calculatePricing: vi.fn(() => ({
+    baseRate: 4.85,
+    liquiditySpread: 0.508,
+    regulatoryCost: 0.016,
+    capitalCharge: 1.113,
+    operationalCost: 0.45,
     ftpRate: 3.5,
     totalCharge: 1.2,
     finalClientRate: 4.7,
@@ -39,7 +45,7 @@ vi.mock('../../../contexts/UIContext', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../contexts/UIContext')>();
   return {
     ...actual,
-    useUI: () => ({ language: 'en' }),
+    useUI: () => ({ language: 'en', t: translations.en, workspaceMode: 'Trader' }),
   };
 });
 
@@ -119,6 +125,8 @@ describe('CalculatorWorkspace', () => {
 
   it('renders deal input panel and pricing receipt', async () => {
     renderWorkspace();
+    expect(screen.getByTestId('deal-flow-rail')).toBeInTheDocument();
+    expect(screen.getByTestId('pricing-drivers-summary')).toBeInTheDocument();
     expect(screen.getByTestId('deal-input-panel')).toBeInTheDocument();
     expect(await screen.findByTestId('pricing-receipt')).toBeInTheDocument();
   });

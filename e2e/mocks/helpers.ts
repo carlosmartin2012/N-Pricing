@@ -9,6 +9,7 @@
 
 import type { Route } from '@playwright/test';
 import { DEFAULT_ENTITY_ID, MOCK_ENTITIES } from '../../utils/seedData.entities';
+import { buildDemoWorkspaceData } from '../../utils/demoWorkspaceData';
 import {
   INITIAL_DEAL,
   MOCK_CLIENTS,
@@ -64,6 +65,15 @@ export function makeDealRow(deal = INITIAL_DEAL): MockDealRow {
 }
 
 export function defaultSystemConfig(): Record<string, unknown> {
+  const demoWorkspace = buildDemoWorkspaceData({
+    approvalMatrix:
+      MOCK_ENTITIES[0]?.approvalMatrix ?? {
+        autoApprovalThreshold: 15,
+        l1Threshold: 10,
+        l2Threshold: 5,
+      },
+  });
+
   return {
     approval_matrix:
       MOCK_ENTITIES[0]?.approvalMatrix ?? {
@@ -71,17 +81,17 @@ export function defaultSystemConfig(): Record<string, unknown> {
         l1Threshold: 10,
         l2Threshold: 5,
       },
-    approval_tasks: [],
+    approval_tasks: demoWorkspace.approvalTasks,
     greenium_grid: MOCK_GREENIUM_GRID,
     incentivisation_rules: [],
     liquidity_curves: MOCK_LIQUIDITY_CURVES,
     lr_config: MOCK_ENTITIES[0]?.lrConfig ?? null,
-    market_data_sources: [],
+    market_data_sources: demoWorkspace.marketDataSources,
     methodology_change_requests: [],
-    methodology_versions: [],
+    methodology_versions: demoWorkspace.methodologyVersions,
     physical_grid: MOCK_PHYSICAL_GRID,
-    portfolio_snapshots: [],
-    pricing_dossiers: [],
+    portfolio_snapshots: demoWorkspace.portfolioSnapshots,
+    pricing_dossiers: demoWorkspace.pricingDossiers,
     raroc_inputs: null,
     rate_cards: MOCK_FTP_RATE_CARDS,
     sdr_config: MOCK_ENTITIES[0]?.sdrConfig ?? null,

@@ -3,8 +3,10 @@ import { useLocation, useNavigate } from 'react-router';
 import { ViewState } from '../types';
 import { Language, translations, getTranslations } from '../translations';
 import { pathToView, viewToPath } from '../appNavigation';
+import { localCache } from '../utils/localCache';
 
 export type ThemeMode = 'dark' | 'light' | 'system';
+export type WorkspaceMode = 'Trader' | 'Risk' | 'Admin';
 
 interface UIContextType {
   currentView: ViewState;
@@ -16,6 +18,8 @@ interface UIContextType {
   /** User preference including 'system' option */
   themeMode: ThemeMode;
   setTheme: (mode: ThemeMode) => void;
+  workspaceMode: WorkspaceMode;
+  setWorkspaceMode: (mode: WorkspaceMode) => void;
   t: (typeof translations)['en'];
   isSidebarOpen: boolean;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -60,6 +64,9 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // Theme: preference can be 'dark' | 'light' | 'system'
   const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(getSystemTheme);
+  const [workspaceModeState, setWorkspaceModeState] = useState<WorkspaceMode>(() =>
+    localCache.loadLocal<WorkspaceMode>('n_pricing_workspace_mode', 'Trader')
+  );
 
   // Listen to OS theme changes when mode is 'system'
   useEffect(() => {
@@ -71,13 +78,20 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const theme: 'dark' | 'light' = themeMode === 'system' ? systemTheme : themeMode;
   const setTheme = useCallback((mode: ThemeMode) => setThemeMode(mode), []);
+  const setWorkspaceMode = useCallback((mode: WorkspaceMode) => {
+    setWorkspaceModeState(mode);
+    localCache.saveLocal('n_pricing_workspace_mode', mode);
+  }, []);
 
   const t = useMemo(() => getTranslations(language), [language]);
   const value = useMemo(
     () => ({
       currentView, setCurrentView,
       language, setLanguage,
-      theme, themeMode, setTheme, t,
+      theme, themeMode, setTheme,
+      workspaceMode: workspaceModeState,
+      setWorkspaceMode,
+      t,
       isSidebarOpen, setSidebarOpen,
       isImportModalOpen, setIsImportModalOpen,
       isConfigModalOpen, setIsConfigModalOpen,
@@ -91,6 +105,8 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       theme,
       themeMode,
       setTheme,
+      workspaceModeState,
+      setWorkspaceMode,
       t,
       isSidebarOpen,
       isImportModalOpen,

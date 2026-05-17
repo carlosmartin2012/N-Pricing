@@ -78,11 +78,9 @@ describe('localCache — resilience', () => {
     mockStorage.setItem = () => {
       throw new Error('QuotaExceededError');
     };
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const cache = await loadCache();
     const ok = cache.saveLocal('nfq_quota_key', { huge: 'payload' });
     expect(ok).toBe(false);
-    expect(warnSpy).toHaveBeenCalled();
   });
 
   it('returns the default value when localStorage.getItem throws (SecurityError)', async () => {

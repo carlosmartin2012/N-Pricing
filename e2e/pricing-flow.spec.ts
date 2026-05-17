@@ -24,7 +24,8 @@ test.beforeEach(async ({ page }) => {
   await page.getByTestId('demo-password').fill('demo');
   await page.getByTestId('demo-login-btn').click();
 
-  // Calculator is the default landing view
+  await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 10_000 });
+  await page.getByTestId('nav-CALCULATOR').click();
   await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
 });
 
@@ -37,16 +38,21 @@ test.describe('Calculator Workspace Layout', () => {
     await expect(page.getByTestId('pricing-receipt')).toBeVisible();
   });
 
+  test('displays the guided flow and driver summary rails', async ({ page }) => {
+    await expect(page.getByTestId('deal-flow-rail')).toBeVisible();
+    await expect(page.getByTestId('pricing-drivers-summary')).toBeVisible();
+  });
+
   test('shows the workspace title "Calculator"', async ({ page }) => {
     // The main heading in the hero section reflects the active view
     await expect(page.getByRole('heading', { name: 'Calculator' })).toBeVisible();
   });
 
   test('shows portfolio KPI cards (Deals, Pending, Snapshots, AI traces)', async ({ page }) => {
-    await expect(page.getByText('Live book')).toBeVisible();
-    await expect(page.getByText('Approval queue')).toBeVisible();
-    await expect(page.getByText('Portfolio frames')).toBeVisible();
-    await expect(page.getByText('Grounded evidence')).toBeVisible();
+    await expect(page.getByText('Live book').first()).toBeVisible();
+    await expect(page.getByText('Approval queue').first()).toBeVisible();
+    await expect(page.getByText('Portfolio frames').first()).toBeVisible();
+    await expect(page.getByText('Grounded evidence').first()).toBeVisible();
   });
 });
 

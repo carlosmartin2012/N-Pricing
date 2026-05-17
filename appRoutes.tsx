@@ -4,6 +4,7 @@ import AppLayout from './components/ui/AppLayout';
 import { CalculatorSkeleton, ConfigSkeleton, DashboardSkeleton, TableSkeleton } from './components/ui/ViewSkeleton';
 
 const PricingLayoutShell = React.lazy(() => import('./components/Pricing/PricingLayoutShell'));
+const ControlRoomView = React.lazy(() => import('./components/ControlRoom/ControlRoomView'));
 const CalculatorWorkspaceLazy = React.lazy(() =>
   import('./components/Calculator/CalculatorWorkspace').then((m) => ({ default: m.CalculatorWorkspace }))
 );
@@ -82,6 +83,7 @@ export const AppRoutes: React.FC = () => (
       </Route>
 
       <Route element={<AppLayout variant="flex-col" />}>
+        <Route path="/control-room" element={<ControlRoomView />} />
         <Route path="/analytics" element={<ReportingDashboard />} />
         <Route path="/discipline" element={<ReportingDashboard initialTab="discipline" />} />
         <Route path="/users" element={<UserManagement />} />
@@ -108,8 +110,8 @@ export const AppRoutes: React.FC = () => (
         <Route path="/deals/:id/timeline" element={<DealTimelineRoute />} />
       </Route>
 
-      <Route path="/" element={<Navigate to="/pricing" replace />} />
-      <Route path="*" element={<Navigate to="/pricing" replace />} />
+      <Route path="/" element={<Navigate to="/control-room" replace />} />
+      <Route path="*" element={<Navigate to="/control-room" replace />} />
     </Routes>
   </Suspense>
 );

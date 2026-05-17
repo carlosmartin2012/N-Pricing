@@ -16,20 +16,48 @@ function requireAuth(req: { tenancy?: { entityId: string; role?: string | null }
   return true;
 }
 
-function requireAdmin(req: { tenancy?: { role?: string | null } }, res: { status: (n: number) => { json: (b: unknown) => void } }): boolean {
-  const role = req.tenancy?.role ?? null;
-  if (role !== 'Admin') {
-    res.status(403).json({ code: 'forbidden', message: 'Admin role required' });
-    return false;
-  }
-  return true;
+function isTokenAdmin(req: { user?: { role?: string } | null }): boolean {
+  return req.user?.role === 'Admin';
+}
+
+async function isEntityAdmin(userEmail: string | undefined, entityId: unknown): Promise<boolean> {
+  if (!userEmail || typeof entityId !== 'string') return false;
+  const row = await queryOne<{ role: string }>(
+    'SELECT role FROM entity_users WHERE user_id=$1 AND entity_id=$2 LIMIT 1',
+    [userEmail, entityId],
+  );
+  return row?.role === 'Admin';
+}
+
+async function requireAdminForEntity(
+  req: { user?: { email?: string; role?: string } | null },
+  res: { status: (n: number) => { json: (b: unknown) => void } },
+  entityId: unknown,
+): Promise<boolean> {
+  if (isTokenAdmin(req)) return true;
+  if (await isEntityAdmin(req.user?.email, entityId)) return true;
+  res.status(403).json({ code: 'forbidden', message: 'Admin role required for entity' });
+  return false;
 }
 
 // --- Groups ---
 router.get('/groups', async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    res.json(await query('SELECT * FROM groups ORDER BY name LIMIT 1000'));
+    if (isTokenAdmin(req)) {
+      res.json(await query('SELECT * FROM groups ORDER BY name LIMIT 1000'));
+      return;
+    }
+    res.json(await query(
+      `SELECT DISTINCT g.*
+       FROM groups g
+       JOIN entities e ON e.group_id = g.id
+       JOIN entity_users eu ON eu.entity_id = e.id
+       WHERE eu.user_id = $1
+       ORDER BY g.name
+       LIMIT 1000`,
+      [req.user?.email],
+    ));
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -38,7 +66,17 @@ router.get('/groups', async (req, res) => {
 router.get('/groups/:id', async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    const row = await queryOne('SELECT * FROM groups WHERE id=$1', [req.params.id]);
+    const row = isTokenAdmin(req)
+      ? await queryOne('SELECT * FROM groups WHERE id=$1', [req.params.id])
+      : await queryOne(
+        `SELECT g.*
+         FROM groups g
+         JOIN entities e ON e.group_id = g.id
+         JOIN entity_users eu ON eu.entity_id = e.id
+         WHERE g.id=$1 AND eu.user_id=$2
+         LIMIT 1`,
+        [req.params.id, req.user?.email],
+      );
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json(row);
   } catch (err) {
@@ -47,7 +85,11 @@ router.get('/groups/:id', async (req, res) => {
 });
 
 router.post('/groups', async (req, res) => {
-  if (!requireAuth(req, res) || !requireAdmin(req, res)) return;
+  if (!requireAuth(req, res)) return;
+  if (!isTokenAdmin(req)) {
+    res.status(403).json({ code: 'forbidden', message: 'Admin role required' });
+    return;
+  }
   try {
     const g = req.body;
     const id = g.id || randomUUID();
@@ -65,7 +107,19 @@ router.post('/groups', async (req, res) => {
 router.get('/entities', async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    res.json(await query('SELECT * FROM entities ORDER BY name LIMIT 1000'));
+    if (isTokenAdmin(req)) {
+      res.json(await query('SELECT * FROM entities ORDER BY name LIMIT 1000'));
+      return;
+    }
+    res.json(await query(
+      `SELECT e.*
+       FROM entities e
+       JOIN entity_users eu ON eu.entity_id = e.id
+       WHERE eu.user_id = $1
+       ORDER BY e.name
+       LIMIT 1000`,
+      [req.user?.email],
+    ));
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
@@ -74,7 +128,16 @@ router.get('/entities', async (req, res) => {
 router.get('/entities/:id', async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    const row = await queryOne('SELECT * FROM entities WHERE id=$1', [req.params.id]);
+    const row = isTokenAdmin(req)
+      ? await queryOne('SELECT * FROM entities WHERE id=$1', [req.params.id])
+      : await queryOne(
+        `SELECT e.*
+         FROM entities e
+         JOIN entity_users eu ON eu.entity_id = e.id
+         WHERE e.id=$1 AND eu.user_id=$2
+         LIMIT 1`,
+        [req.params.id, req.user?.email],
+      );
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json(row);
   } catch (err) {
@@ -83,7 +146,11 @@ router.get('/entities/:id', async (req, res) => {
 });
 
 router.post('/entities', async (req, res) => {
-  if (!requireAuth(req, res) || !requireAdmin(req, res)) return;
+  if (!requireAuth(req, res)) return;
+  if (!isTokenAdmin(req)) {
+    res.status(403).json({ code: 'forbidden', message: 'Admin role required' });
+    return;
+  }
   try {
     const e = req.body;
     const id = e.id || randomUUID();
@@ -106,17 +173,29 @@ router.get('/entity-users', async (req, res) => {
   try {
     const { entity_id, user_id, email } = req.query;
     if (email) {
-      // Look up entity-users by user email (join with users table)
+      if (email !== req.user?.email && !isTokenAdmin(req)) {
+        res.status(403).json({ code: 'forbidden', message: 'Cannot inspect another user memberships' });
+        return;
+      }
       res.json(await query(
-        'SELECT eu.* FROM entity_users eu JOIN users u ON u.id=eu.user_id WHERE u.email=$1',
+        'SELECT * FROM entity_users WHERE user_id=$1 ORDER BY is_primary_entity DESC, created_at ASC',
         [email],
       ));
     } else if (entity_id) {
+      if (!await requireAdminForEntity(req, res, entity_id)) return;
       res.json(await query('SELECT * FROM entity_users WHERE entity_id=$1', [entity_id]));
     } else if (user_id) {
+      if (user_id !== req.user?.email && !isTokenAdmin(req)) {
+        res.status(403).json({ code: 'forbidden', message: 'Cannot inspect another user memberships' });
+        return;
+      }
       res.json(await query('SELECT * FROM entity_users WHERE user_id=$1', [user_id]));
     } else {
-      res.json(await query('SELECT * FROM entity_users LIMIT 1000'));
+      if (isTokenAdmin(req)) {
+        res.json(await query('SELECT * FROM entity_users LIMIT 1000'));
+        return;
+      }
+      res.json(await query('SELECT * FROM entity_users WHERE user_id=$1 ORDER BY is_primary_entity DESC, created_at ASC', [req.user?.email]));
     }
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
@@ -126,9 +205,10 @@ router.get('/entity-users', async (req, res) => {
 router.post('/entity-users', async (req, res) => {
   // Admin only — manipular entity_users es privilege escalation directo
   // (cualquiera podía asignarse role='Admin' en cualquier entity).
-  if (!requireAuth(req, res) || !requireAdmin(req, res)) return;
+  if (!requireAuth(req, res)) return;
   try {
     const { entity_id, user_id, role, is_primary_entity } = req.body;
+    if (!await requireAdminForEntity(req, res, entity_id)) return;
     await execute(
       'INSERT INTO entity_users (entity_id,user_id,role,is_primary_entity) VALUES ($1,$2,$3,$4) ON CONFLICT (entity_id,user_id) DO UPDATE SET role=EXCLUDED.role,is_primary_entity=EXCLUDED.is_primary_entity',
       [entity_id, user_id, role, is_primary_entity ?? false],

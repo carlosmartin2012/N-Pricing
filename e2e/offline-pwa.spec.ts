@@ -20,7 +20,7 @@ async function loginToDemoWorkspace(page: import('@playwright/test').Page) {
   await page.getByTestId('demo-username').fill('demo');
   await page.getByTestId('demo-password').fill('demo');
   await page.getByTestId('demo-login-btn').click();
-  await expect(page.getByTestId('deal-input-panel')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('control-room-view')).toBeVisible({ timeout: 10_000 });
 }
 
 test('queues a new deal while offline and auto-syncs it when connectivity returns', async ({ page, context }) => {
