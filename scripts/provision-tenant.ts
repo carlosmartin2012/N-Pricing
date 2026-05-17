@@ -19,6 +19,7 @@
 
 import { Pool } from 'pg';
 import crypto from 'crypto';
+import { createLogger } from './lib/cliLogger';
 
 interface Args {
   shortCode: string;
@@ -41,7 +42,8 @@ function parseArgs(argv: string[]): Args {
   const required = ['short-code', 'name', 'admin-email'];
   for (const r of required) {
     if (!out[r]) {
-      console.error(`missing required arg --${r}`);
+      const logger = createLogger('provision-tenant');
+      logger.error(`missing required arg --${r}`);
       process.exit(1);
     }
   }
@@ -178,17 +180,19 @@ async function provision(args: Args): Promise<{ entityId: string; userId: string
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
-  console.info('[provision-tenant] starting', { shortCode: args.shortCode, name: args.name });
+  const logger = createLogger('provision-tenant');
+  logger.info('starting', { shortCode: args.shortCode, name: args.name });
   const start = Date.now();
   const out = await provision(args);
   const elapsedMs = Date.now() - start;
-  console.info('[provision-tenant] done', { ...out, elapsedMs });
-  console.info(`[provision-tenant] took ${elapsedMs}ms (target < 60_000ms per Phase 5 SLO)`);
+  logger.info('done', { ...out, elapsedMs });
+  logger.info(`took ${elapsedMs}ms (target < 60_000ms per Phase 5 SLO)`);
 }
 
 if (process.argv[1]?.endsWith('provision-tenant.ts') || process.argv[1]?.endsWith('provision-tenant.js')) {
   main().catch((err) => {
-    console.error('[provision-tenant] failed', err);
+    const logger = createLogger('provision-tenant');
+    logger.error('failed', undefined, err);
     process.exit(1);
   });
 }

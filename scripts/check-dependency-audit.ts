@@ -1,4 +1,7 @@
 import { execFileSync } from 'node:child_process';
+import { createLogger } from './lib/cliLogger';
+
+const logger = createLogger('check-dependency-audit');
 
 interface AuditVia {
   source?: number;
@@ -80,23 +83,20 @@ for (const [name, vulnerability] of vulnerabilities) {
   blocking.push({ name, vulnerability });
 }
 
-console.log('=== Dependency Security Audit ===');
-console.log(
-  `Reported vulnerabilities: ${report.metadata?.vulnerabilities?.total ?? vulnerabilities.length}`,
-);
+logger.info('Dependency Security Audit');
+logger.info(`Reported vulnerabilities: ${report.metadata?.vulnerabilities?.total ?? vulnerabilities.length}`);
 
 if (allowlisted.length > 0) {
-  console.log('\nAllowlisted exceptions:');
+  logger.info('Allowlisted exceptions');
   allowlisted.forEach(({ name, vulnerability }) => {
-    console.log(`- ${name} (${vulnerability.severity})`);
-    console.log(`  ${ALLOWLIST[name]?.rationale}`);
+    logger.info(`- ${name} (${vulnerability.severity})`, { rationale: ALLOWLIST[name]?.rationale });
   });
 }
 
 if (blocking.length > 0) {
-  console.error('\nBlocking vulnerabilities:');
+  logger.error('Blocking vulnerabilities found');
   blocking.forEach(({ name, vulnerability }) => {
-    console.error(`- ${name} (${vulnerability.severity})`);
+    logger.error(`- ${name} (${vulnerability.severity})`);
     vulnerability.via.forEach((entry) => {
       if (typeof entry === 'string') {
         console.error(`  via: ${entry}`);

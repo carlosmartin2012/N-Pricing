@@ -1,4 +1,8 @@
 #!/usr/bin/env tsx
+
+import { createLogger } from './lib/cliLogger';
+
+const logger = createLogger('backfill-hash-chain');
 /**
  * Backfill `prev_output_hash` on historical pricing_snapshots — opt-in.
  *
@@ -158,13 +162,16 @@ async function verifyEntity(pool: Pool, entityId: string): Promise<boolean> {
   }));
   const result = verifySnapshotChain(links);
   if (!result.valid) {
-    console.error(
-      `CHAIN BROKEN entity=${entityId} at=${result.brokenAt?.snapshotId} ` +
-        `expected=${result.brokenAt?.expectedPrev} actual=${result.brokenAt?.actualPrev}`,
+    logger.error(
+      `CHAIN BROKEN entity=${entityId} at=${result.brokenAt?.snapshotId}`,
+      {
+        expected: result.brokenAt?.expectedPrev,
+        actual: result.brokenAt?.actualPrev,
+      }
     );
     return false;
   }
-  console.log(`entity=${entityId} chain_valid=true checked=${result.checked}`);
+  logger.info(`entity=${entityId} chain_valid=true checked=${result.checked}`);
   return true;
 }
 
@@ -172,7 +179,7 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
 
   if (!process.env.DATABASE_URL) {
-    console.error('DATABASE_URL is required');
+    logger.error('DATABASE_URL is required');
     process.exit(1);
   }
 
@@ -188,25 +195,21 @@ async function main(): Promise<void> {
         ).rows;
 
     if (entities.length === 0) {
-      console.log('no snapshots found; nothing to backfill');
+      logger.info('no snapshots found; nothing to backfill');
       return;
     }
 
-    console.log(
-      `mode=${args.dryRun ? 'dry-run' : 'write'} entities=${entities.length}`,
-    );
+    logger.info(`mode=${args.dryRun ? 'dry-run' : 'write'} entities=${entities.length}`);
 
     for (const ent of entities) {
       const r = await backfillEntity(pool, ent.id, args.dryRun);
-      console.log(
-        `entity=${r.entityId} total=${r.total} updated=${r.updated} ` +
-          `skipped_set=${r.skippedAlreadySet} genesis=${r.skippedGenesis} ` +
-          `conflicts=${r.conflicts}`,
+      logger.info(
+        `entity=${r.entityId} total=${r.total} updated=${r.updated} skipped_set=${r.skippedAlreadySet} genesis=${r.skippedGenesis} conflicts=${r.conflicts}`
       );
     }
 
     if (args.dryRun) {
-      console.log('dry-run complete — no rows modified; re-run without --dry-run to apply');
+      logger.info('dry-run complete — no rows modified; re-run without --dry-run to apply');
       return;
     }
 

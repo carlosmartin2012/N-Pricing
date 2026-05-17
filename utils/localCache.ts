@@ -1,4 +1,7 @@
 import { Transaction, YieldCurvePoint, UserProfile } from '../types';
+import { createLogger } from './logger';
+
+const logger = createLogger('localCache');
 
 const STORAGE_KEYS = {
     DEALS: 'n_pricing_deals',
@@ -41,7 +44,7 @@ function safeSetItem(key: string, value: string): boolean {
     } catch (err) {
         // Most common cause is QuotaExceededError on a full localStorage.
         // Log once per key to aid debugging without flooding the console.
-        console.warn('[localCache] Failed to persist key', key, err);
+        logger.warn('Failed to persist key', { key, error: String(err) });
         return false;
     }
 }
@@ -62,7 +65,7 @@ export const localCache = {
         try {
             serialized = JSON.stringify(data);
         } catch (err) {
-            console.warn('[localCache] Failed to serialize value for key', key, err);
+            logger.warn('Failed to serialize value for key', { key, error: String(err) });
             return false;
         }
         return safeSetItem(key, serialized);

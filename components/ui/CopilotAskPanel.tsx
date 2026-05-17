@@ -22,6 +22,9 @@ interface Props {
   /** Called when the user accepts the answer and wants to close
    *  the palette. */
   onClose: () => void;
+  /** Optional initial question to pre-fill the textarea (used when
+   *  opening the copilot from a contextual action like "Explain this recommendation"). */
+  initialQuestion?: string;
 }
 
 const COPY = {
@@ -62,8 +65,21 @@ function classifyError(err: unknown): 'rate_limit' | 'service_unavailable' | 'ge
   return 'generic';
 }
 
-const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose }) => {
-  const [question, setQuestion] = useState('');
+const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQuestion }) => {
+  const [question, setQuestion] = useState(initialQuestion ?? '');
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Auto-focus textarea when panel opens (especially useful when opened from "Explain" button)
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      // Move cursor to end if there's initial text
+      if (initialQuestion) {
+        const len = textareaRef.current.value.length;
+        textareaRef.current.setSelectionRange(len, len);
+      }
+    }
+  }, [initialQuestion]);
   const ask = useCopilotAsk();
   const navigate = useNavigate();
   const t = COPY[language];
@@ -122,6 +138,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose }) => {
       {/* Textarea */}
       <div className="relative">
         <textarea
+          ref={textareaRef}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -160,6 +177,27 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose }) => {
           className="rounded-md border border-cyan-500/20 bg-cyan-500/5 px-3 py-3 text-xs text-[var(--nfq-text-primary)]"
           data-testid="copilot-answer"
         >
+          <div className="flex justify-end mb-1 gap-2">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(ask.data!.answer);
+              }}
+              aria-label="Copy explanation to clipboard"
+              className="text-[10px] text-cyan-300 hover:text-cyan-200 flex items-center gap-1"
+            >
+              Copy
+            </button>
+            <button
+              onClick={() => {
+                ask.mutate({ question, context, lang: language });
+              }}
+              disabled={ask.isPending}
+              aria-label="Regenerate explanation"
+              className="text-[10px] text-cyan-300 hover:text-cyan-200 flex items-center gap-1 disabled:opacity-50"
+            >
+              Regenerate
+            </button>
+          </div>
           <p className="whitespace-pre-wrap leading-relaxed">{ask.data.answer}</p>
           {ask.data.citations.length > 0 && (
             <div className="mt-3 border-t border-cyan-500/10 pt-2">

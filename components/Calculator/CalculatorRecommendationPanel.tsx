@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
-import { Sparkles, Target, TrendingUp } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Sparkles, Target, TrendingUp, MessageSquare } from 'lucide-react';
 import type { Transaction } from '../../types';
+import CopilotAskPanel from '../ui/CopilotAskPanel';
 import { calibrateFromDeals } from '../../utils/pricing/elasticityCalibration';
 import {
   buildSegmentKey,
@@ -44,6 +45,18 @@ const CalculatorRecommendationPanel: React.FC<Props> = ({
   hurdleRate,
   proposedRate,
 }) => {
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+
+  // Close Copilot on Escape
+  React.useEffect(() => {
+    if (!isCopilotOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsCopilotOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isCopilotOpen]);
+
   // Calibrate from portfolio; pick the segment matching this deal.
   const { model, isFallback } = useMemo(() => {
     const calibrated = calibrateFromDeals(deals);
@@ -171,6 +184,78 @@ const CalculatorRecommendationPanel: React.FC<Props> = ({
       {proposedRate < floorPrice && (
         <div className="rounded-[8px] bg-[rgba(244,63,94,0.08)] px-3 py-2 text-[11px] text-[var(--nfq-danger)]">
           ⚠︎ Commercial rate below economic floor. Relationship NPV required to justify.
+        </div>
+      )}
+
+      {/* AI Copilot explain — Pivot Plan + Ola 7 AI Refocus */}
+      <button
+        onClick={() => setIsCopilotOpen(true)}
+        className="group mt-1 flex w-full items-center justify-center gap-2 rounded-[8px] border border-[var(--nfq-border)] bg-[var(--nfq-bg-elevated)] px-3 py-2 text-[12px] font-medium text-[var(--nfq-text-primary)] transition hover:border-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)]/5"
+      >
+        <Sparkles size={14} className="text-[var(--nfq-accent)] group-hover:scale-110 transition" />
+        Explain this recommendation with AI
+        <MessageSquare size={14} className="opacity-60" />
+      </button>
+
+      {/* Copilot slideover (mejorado) */}
+      {isCopilotOpen && (
+        <div className="fixed inset-0 z-[100] flex items-start justify-end bg-black/70" onClick={() => setIsCopilotOpen(false)}>
+          <div
+            className="h-full w-full max-w-[560px] overflow-auto border-l border-[var(--nfq-border)] bg-[var(--nfq-bg-surface)] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header premium con contexto */}
+            <div className="sticky top-0 z-10 border-b border-[var(--nfq-border)] bg-[var(--nfq-bg-surface)]/95 backdrop-blur px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={18} className="text-[var(--nfq-accent)]" />
+                  <div>
+                    <div className="text-sm font-semibold text-[var(--nfq-text-primary)]">Pricing Copilot</div>
+                    <div className="text-[11px] text-[var(--nfq-text-muted)] font-mono">
+                      {deal.id} · Rec {optimal ? fmtPct(optimal.rate) : '—'} · Proposed {fmtPct(proposedRate)}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsCopilotOpen(false)}
+                  className="rounded px-2 py-1 text-[var(--nfq-text-muted)] hover:bg-[var(--nfq-bg-elevated)] hover:text-[var(--nfq-text-primary)]"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Context chips */}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <div className="rounded-full bg-[var(--nfq-bg-elevated)] px-2.5 py-0.5 text-[10px] font-mono text-[var(--nfq-text-primary)]">
+                  EVA {evaBp > 0 ? '+' : ''}{evaBp}bp
+                </div>
+                <div className="rounded-full bg-[var(--nfq-bg-elevated)] px-2.5 py-0.5 text-[10px] font-mono text-[var(--nfq-text-primary)]">
+                  RAROC {fmtPct(raroc)}
+                </div>
+                <div className="rounded-full bg-[var(--nfq-bg-elevated)] px-2.5 py-0.5 text-[10px] font-mono text-[var(--nfq-text-primary)]">
+                  Hurdle {fmtPct(hurdleRate)}
+                </div>
+                {optimal && (
+                  <div className="rounded-full bg-[var(--nfq-accent)]/10 px-2.5 py-0.5 text-[10px] font-mono text-[var(--nfq-accent)]">
+                    Δ {deltaBp > 0 ? '+' : ''}{deltaBp}bp vs rec
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4">
+              <CopilotAskPanel
+                context={{
+                  dealId: deal.id,
+                  oneLine: `Deal ${deal.id} | Rec ${optimal ? fmtPct(optimal.rate) : '—'} | Proposed ${fmtPct(proposedRate)} | EVA ${evaBp > 0 ? '+' : ''}${evaBp}bp | RAROC ${fmtPct(raroc)} | FTP ${fmtPct(ftp)} | Capital ${fmtPct(capitalCharge)} | Regulatory ${fmtPct(regulatoryCost)}`,
+                  view: 'CALCULATOR',
+                }}
+                language="es"
+                onClose={() => setIsCopilotOpen(false)}
+                initialQuestion={`Explica por qué el precio recomendado (${optimal ? fmtPct(optimal.rate) : '—'}) difiere del propuesto comercial (${fmtPct(proposedRate)}). Incluye desglose de FTP (${fmtPct(ftp)}), Capital Charge (${fmtPct(capitalCharge)}), Regulatory Cost (${fmtPct(regulatoryCost)}), RAROC vs Hurdle (${fmtPct(hurdleRate)}), y cualquier ajuste por relación o ESG.`}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

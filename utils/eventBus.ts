@@ -1,3 +1,7 @@
+import { createLogger } from './logger';
+
+const logger = createLogger('eventBus');
+
 export type DomainEvent =
   | 'deal.created'
   | 'deal.updated'
@@ -69,7 +73,7 @@ class EventBusImpl {
         try {
           await handler(payload);
         } catch (err) {
-          console.error('[eventBus] handler failed', {
+          logger.error('handler failed', {
             event,
             correlationId: payload.correlationId,
             err,
@@ -114,7 +118,7 @@ class EventBusImpl {
         lastStatus = response.status;
         if (response.status >= 400 && response.status < 500) {
           // Client error — no retry, but log final.
-          console.warn('[eventBus] webhook delivery rejected (4xx)', {
+          logger.warn('webhook delivery rejected (4xx)', {
             url: webhook.url,
             event: payload.event,
             correlationId: payload.correlationId,
@@ -134,7 +138,7 @@ class EventBusImpl {
     // Retries exhausted: log final con detalle. Antes esto era silencio
     // total — un banco que registraba un webhook nunca se enteraba de que
     // sus eventos no llegaban tras 3 intentos fallidos.
-    console.error('[eventBus] webhook delivery exhausted', {
+    logger.error('webhook delivery exhausted', {
       url: webhook.url,
       event: payload.event,
       correlationId: payload.correlationId,

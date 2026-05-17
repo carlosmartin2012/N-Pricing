@@ -7,6 +7,9 @@
  */
 
 import { logAudit } from '../api/audit';
+import { createLogger } from './logger';
+
+const devLogger = createLogger('errorTracker');
 
 // ---------------------------------------------------------------------------
 // Types
@@ -137,16 +140,17 @@ function createConsoleReporter(): ErrorReporter {
   return {
     name: 'console',
     onException(error: Error, context?: ErrorContext) {
-      console.error(
-        '[ErrorTracker]',
-        error.message,
-        context ? { ...context } : '',
-        error.stack || '',
-      );
+      devLogger.error(error.message, { ...context, hasStack: !!error.stack }, error);
     },
     onMessage(message: string, level: 'info' | 'warning' | 'error', context?: ErrorContext) {
-      const logFn = level === 'error' ? console.error : level === 'warning' ? console.warn : console.info;
-      logFn('[ErrorTracker]', message, context ? { ...context } : '');
+      const data = context ? { ...context } : undefined;
+      if (level === 'error') {
+        devLogger.error(message, data);
+      } else if (level === 'warning') {
+        devLogger.warn(message, data);
+      } else {
+        devLogger.info(message, data);
+      }
     },
   };
 }

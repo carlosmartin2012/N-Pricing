@@ -13,6 +13,9 @@ import { saveRarocInputs } from '../../api/config';
 import { useData } from '../../contexts/DataContext';
 import { RAROCBreakdownPanel } from './RAROCBreakdownPanel';
 import { RAROCInputSection } from './RAROCInputSection';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('RAROCCalculator');
 import { RAROCMetricCard } from './RAROCMetricCard';
 import {
     INITIAL_RAROC_INPUTS,
@@ -34,7 +37,7 @@ const RAROCCalculator: React.FC = () => {
     const { rarocInputs: externalInputs, setRarocInputs } = useData();
     const onUpdateExternal = useCallback((inputs: RAROCInputs) => {
         setRarocInputs(inputs);
-        saveRarocInputs(inputs).catch(console.error);
+        saveRarocInputs(inputs).catch((err) => logger.error('Failed to save RAROC inputs', undefined, err));
     }, [setRarocInputs]);
     const [inputs, setInputs] = useState<RAROCInputs>(() => normalizeRarocInputs(externalInputs || INITIAL_RAROC_INPUTS));
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);

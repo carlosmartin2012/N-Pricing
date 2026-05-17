@@ -1,5 +1,8 @@
 import type { Pool } from 'pg';
 import type { UsageEventKind } from '../../types/metering';
+import { createLogger } from '../logger';
+
+const logger = createLogger('usageRecorder');
 
 /**
  * Thin recorder used by server routes / Edge Functions to drop a
@@ -21,7 +24,7 @@ export function recorderFromPool(pool: Pool): UsageRecorderDeps {
           [entityId, kind, units, JSON.stringify(detail)],
         );
       } catch (err) {
-        console.error('[metering] usage_events insert failed', { kind, units, error: String(err) });
+        logger.error('usage_events insert failed', { kind, units, error: String(err) });
       }
     },
   };

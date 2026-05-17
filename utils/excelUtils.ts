@@ -1,4 +1,7 @@
 import type { FTPResult, Transaction } from '../types';
+import { createLogger } from './logger';
+
+const logger = createLogger('excelUtils');
 
 type ExcelCellValue = string | number | boolean | null | undefined;
 type ExcelRow = Record<string, ExcelCellValue>;
@@ -65,7 +68,7 @@ export const downloadTemplate = async (
     const wb = XLSX.utils.book_new();
 
     if (!templateData) {
-        console.error("No template data found for:", templateKey);
+        logger.error('No template data found for template', { templateKey });
         return;
     }
 

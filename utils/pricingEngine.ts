@@ -21,6 +21,10 @@ import { PRICING_CONSTANTS as PC, TENOR_MONTHS } from './pricingConstants';
 import { matchDealToRule, clearRuleMatchCache } from './ruleMatchingEngine';
 import { calculateRAROC, buildRAROCInputsFromDeal } from './rarocEngine';
 import { resolveApprovalLevel } from './pricing/contexts/governance';
+import { createLogger } from './logger';
+
+const logger = createLogger('pricingEngine');
+
 import {
   MOCK_TRANSITION_GRID,
   MOCK_PHYSICAL_GRID,
@@ -660,7 +664,7 @@ export const calculatePricing = (
     // Catch unexpected exceptions in pricing to prevent UI crash.
     // Return EMPTY_RESULT so consumers degrade gracefully.
     if (import.meta.env.DEV) {
-      console.error('[pricingEngine] calculatePricing threw:', err);
+      logger.error('calculatePricing threw unexpected error', undefined, err as Error);
     }
     return { ...EMPTY_RESULT };
   }

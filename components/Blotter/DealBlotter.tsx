@@ -11,6 +11,7 @@ import type {
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
+import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { errorTracker } from '../../utils/errorTracking';
 import type { UserRole } from '../../utils/dealWorkflow';
 import { useVariancesQuery } from '../../hooks/queries/useDisciplineQueries';
@@ -21,6 +22,10 @@ import BlotterToolbar from './BlotterToolbar';
 // Drawers only mount on user interaction (edit, dossier, import, outcome…).
 // Lazy-loading them keeps their ~30 KB out of the initial DealBlotter chunk.
 const DealBlotterDrawers = lazy(() => import('./DealBlotterDrawers'));
+
+// Live cursors (Ola 7)
+import LiveCursorOverlay from '../ui/LiveCursorOverlay';
+import { useLiveCursors } from '../../hooks/useLiveCursors';
 import { buildDealsCsv, formatDealCurrency } from './blotterUtils';
 import { buildCommitteePackage, downloadCommitteePackage } from './committeeDossierUtils';
 import { BulkActionBar } from './BulkActionBar';
@@ -67,6 +72,15 @@ const DealBlotter: React.FC = () => {
     selectedAvailableActions,
     setSelectedDossierDealId,
   } = useBlotterState({ deals, data, userRole });
+
+  // Live cursors (Ola 7 B) — viewport 'BLOTTER'
+  const { currentUser } = useAuth();
+  const { cursors, active: cursorsActive } = useLiveCursors({
+    enabled: isSupabaseConfigured && data.dataMode !== 'demo' && !!currentUser,
+    userId: currentUser?.id ?? 'anonymous',
+    name: currentUser?.name ?? currentUser?.email ?? 'Usuario',
+    viewport: 'BLOTTER',
+  });
 
   const {
     behaviouralModels,
@@ -270,6 +284,9 @@ const DealBlotter: React.FC = () => {
 
   return (
     <>
+    {/* Live cursors (Ola 7 B) — viewport 'BLOTTER' */}
+    {cursorsActive && <LiveCursorOverlay cursors={cursors} />}
+
     <Panel
       title={t.dealBlotter}
       className="h-full overflow-hidden"

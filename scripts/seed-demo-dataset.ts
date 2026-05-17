@@ -44,11 +44,14 @@ import {
   MOCK_BUSINESS_UNITS,
   MOCK_DEALS,
 } from '../utils/seedData';
+import { createLogger } from './lib/cliLogger';
 import { DEFAULT_ENTITY_ID } from '../utils/seedData.entities';
 import { computeLtv, defaultAssumptions } from '../utils/clv/ltvEngine';
 import { buildClientRelationship } from '../utils/customer360/relationshipAggregator';
 import { sha256CanonicalJson } from '@npricing/evidence';
 import type { ClientPosition, ClientMetricsSnapshot } from '../types/customer360';
+
+const logger = createLogger('seed-demo-dataset');
 
 interface Args {
   entityId: string;
@@ -694,10 +697,10 @@ export async function seedDemoDataset(
   const entityId = options.entityId ?? DEFAULT_ENTITY_ID;
   const reset = options.reset ?? false;
 
-  console.info(`[seed-demo-dataset] entity=${entityId} reset=${reset}`);
+  logger.info(`entity=${entityId} reset=${reset}`);
 
   if (reset) {
-    console.info('[seed-demo-dataset] Resetting Phase 6 demo rows…');
+    logger.info('Resetting Phase 6 demo rows…');
     await resetDemo(pool, entityId);
   }
 
@@ -715,7 +718,7 @@ export async function seedDemoDataset(
     try {
       totals[name] = await run();
     } catch (err) {
-      console.error(`[seed-demo-dataset] ${name} failed:`, err instanceof Error ? err.message : err);
+      logger.error(`${name} failed`, undefined, err);
     }
   };
 
@@ -737,7 +740,7 @@ export async function seedDemoDataset(
       }
       totals.nba       += await seedNba(pool, entityId, clientId, profile);
     } catch (err) {
-      console.error(`[seed-demo-dataset] profile ${clientId} failed:`, err instanceof Error ? err.message : err);
+      logger.error(`profile ${clientId} failed`, undefined, err);
     }
   }
 
@@ -746,26 +749,26 @@ export async function seedDemoDataset(
   try {
     if (await seedMethodologySnapshot(pool, entityId)) totals.methodologySnapshot++;
   } catch (err) {
-    console.error('[seed-demo-dataset] methodologySnapshot failed:', err instanceof Error ? err.message : err);
+    logger.error('methodologySnapshot failed', undefined, err);
   }
   await step('gridCells',      () => seedGridCells(pool, entityId));
   await step('toleranceBands', () => seedToleranceBands(pool, entityId));
   await step('campaigns',      () => seedCampaigns(pool, entityId));
   await step('modelInventory', () => seedModelInventory(pool, entityId));
 
-  console.info(`[seed-demo-dataset] ✅ ${JSON.stringify(totals)}`);
+  logger.info(`✅ ${JSON.stringify(totals)}`);
   return totals;
 }
 
 async function runCli(): Promise<void> {
   const args = parseArgs();
   if (!process.env.DATABASE_URL) {
-    console.error('DATABASE_URL env var required');
+    logger.error('DATABASE_URL env var required');
     process.exit(1);
   }
 
   if (args.dryRun) {
-    console.info(`[seed-demo-dataset] entity=${args.entityId} dryRun=true`);
+    logger.info(`entity=${args.entityId} dryRun=true`);
     console.info(`[seed-demo-dataset] Would seed:`);
     console.info(`  ${MOCK_CLIENTS.length} clients`);
     console.info(`  ${MOCK_PRODUCT_DEFS.length} products`);

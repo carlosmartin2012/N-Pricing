@@ -5,6 +5,7 @@ import type { Transaction } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { useOptionalPricingState } from '../../contexts/PricingStateContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import DealInputPanel from './DealInputPanel';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
@@ -24,6 +25,8 @@ const LtvImpactPanel = React.lazy(() => import('../Customer360/LtvImpactPanel'))
 const AttributionSimulator = React.lazy(() => import('../Attributions/AttributionSimulator'));
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
+import LiveCursorOverlay from '../ui/LiveCursorOverlay';
+import { useLiveCursors } from '../../hooks/useLiveCursors';
 import { quoteFromFtpResult } from '../../utils/attributions';
 import * as dealsApi from '../../api/deals';
 import * as attributionsApi from '../../api/attributions';
@@ -55,11 +58,22 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   const navigate = useNavigate();
   const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = data;
   const { language, t } = useUI();
+  const { currentUser } = useAuth();
+
   const canWriteRemotely = canPersistRemotely({
     dataMode: data.dataMode,
     isSupabaseConfigured,
   });
   const [matchedMethod, setMatchedMethod] = useState('Matched Maturity');
+
+  // Live cursors (Ola 7 B) — viewport 'CALCULATOR'
+  const { cursors, active: cursorsActive } = useLiveCursors({
+    enabled: isSupabaseConfigured && data.dataMode !== 'demo' && !!currentUser,
+    userId: currentUser?.id ?? 'anonymous',
+    name: currentUser?.name ?? currentUser?.email ?? 'Usuario',
+    viewport: 'CALCULATOR',
+  });
+
   const handleParamChange = useCallback(
     (key: keyof Transaction, value: Transaction[keyof Transaction] | undefined) => {
       setDealParams((previousDeal) => ({ ...previousDeal, [key]: value }));
@@ -156,6 +170,10 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   return (
     <ErrorBoundary fallbackMessage="Pricing calculator encountered an error">
       <div className="relative z-0 w-full">
+        {/* Live cursors (Ola 7 B) — global mousemove broadcast filtered by viewport='CALCULATOR'.
+           Overlay is pointer-events-none. Only rendered when the channel is active. */}
+        {cursorsActive && <LiveCursorOverlay cursors={cursors} />}
+
         {/* Landing insights — pivot §Bloque G */}
         <Suspense fallback={null}>
           <div className="mb-4">

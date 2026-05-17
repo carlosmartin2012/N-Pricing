@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { X, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import type { GridFilters, TargetGridCell } from '../../types';
 import { useUI } from '../../contexts/UIContext';
+import { createLogger } from '../../utils/logger';
+
+const logger = createLogger('ExportGridModal');
 
 interface Props {
   isOpen: boolean;
@@ -56,7 +59,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
         }
       }
     } catch (err) {
-      console.error('Export failed', err);
+      logger.error('Export failed', undefined, err instanceof Error ? err : undefined);
       setError('Export failed. Please try again.');
       setIsExporting(false);
       return;
