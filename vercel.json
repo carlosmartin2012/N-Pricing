@@ -38,6 +38,12 @@
   "rewrites": [
     { "source": "/((?!api|assets|icon-|favicon|robots|sw|workbox).*)", "destination": "/index.html" }
   ],
+  "functions": {
+    "api/csp-report.ts": {
+      "memory": 128,
+      "maxDuration": 5
+    }
+  },
   "build": {
     "env": {
       "VERCEL_FORCE_NO_BUILD_CACHE": "1",

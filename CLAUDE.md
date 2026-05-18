@@ -649,16 +649,18 @@ Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
   `SEED_DEMO_ON_BOOT` está desactivado contra una DB vacía las vistas
   Customer Pricing / Blotter / Target Grid aparecerán sin filas. Ver
   [`docs/runbooks/replit-demo.md`](docs/runbooks/replit-demo.md).
-- **CSP reporting necesita proxy en Vercel:** `vercel.json` declara
-  `report-uri /api/csp-report` y `Reporting-Endpoints: csp-endpoint=...`,
-  y `server/routes/cspReport.ts` recibe los reportes. Pero en deploys
-  Vercel-only (SPA estática) `/api/*` no llega al Express salvo que se
-  añada un rewrite o serverless function. Hoy las violations se pierden
-  silenciosamente en Vercel; el endpoint funciona en Replit y en cualquier
-  setup que sirva SPA + API desde el mismo origen. **Follow-up:** o (a)
-  añadir `{ "source": "/api/csp-report", "destination": "<express-url>" }`
-  a `vercel.json` rewrites, o (b) crear `api/csp-report.ts` como Vercel
-  serverless function que duplique el handler.
+- **CSP reporting — dos handlers paralelos (RESUELTO 2026-05-18):**
+  `vercel.json` declara `report-uri /api/csp-report`. Hay dos receptores
+  según el deploy:
+  - **Replit / self-hosted (SPA + Express mismo origen):** `server/routes/cspReport.ts`
+    recibe los reports.
+  - **Vercel-only (SPA estática):** `api/csp-report.ts` es la Serverless
+    Function declarada explícitamente en `vercel.json` `functions`. Loggea
+    a stdout como JSON (capturado por Vercel Function logs).
+  Ambos handlers comparten el `normalize()` con el mismo shape; si añades
+  campos nuevos, replica en ambos. Las otras `api/*.ts` son módulos cliente
+  (no son serverless functions) y NO están declarados en `vercel.json`
+  `functions`, así que Vercel sólo despliega el CSP handler.
 - Las ramas antiguas pueden traer documentación útil pero también supuestos
   desactualizados.
 - Recharts y módulos lazy pueden introducir warnings no bloqueantes;
