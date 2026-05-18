@@ -173,6 +173,46 @@ export const RISK_MANAGER_TOUR: WalkthroughTour = {
   ],
 };
 
+/**
+ * Admin tour — platform operations: user management, model inventory,
+ * tenancy / feature flags and system health. Surfaced when role is `Admin`.
+ */
+export const ADMIN_TOUR: WalkthroughTour = {
+  id: 'admin-tour',
+  steps: [
+    MAIN_TOUR.steps[0], // sidebar
+    {
+      id: 'admin-user-mgmt',
+      targetSelector: '[data-testid="nav-USER_MGMT"]',
+      titleKey: 'walkthrough_admin_userMgmt',
+      descriptionKey: 'walkthrough_admin_userMgmtDesc',
+      placement: 'right',
+    },
+    {
+      id: 'admin-model-inventory',
+      targetSelector: '[data-testid="nav-MODEL_INVENTORY"]',
+      titleKey: 'walkthrough_admin_modelInventory',
+      descriptionKey: 'walkthrough_admin_modelInventoryDesc',
+      placement: 'right',
+    },
+    {
+      id: 'admin-tenancy',
+      targetSelector: '[data-testid="nav-CONTROL_ROOM"]',
+      titleKey: 'walkthrough_admin_tenancy',
+      descriptionKey: 'walkthrough_admin_tenancyDesc',
+      placement: 'right',
+      view: 'CONTROL_ROOM',
+    },
+    {
+      id: 'admin-health',
+      targetSelector: '[data-testid="nav-HEALTH"]',
+      titleKey: 'walkthrough_admin_health',
+      descriptionKey: 'walkthrough_admin_healthDesc',
+      placement: 'right',
+    },
+  ],
+};
+
 /** Auditor tour — read-only: audit log, blotter, reporting */
 export const AUDITOR_TOUR: WalkthroughTour = {
   id: 'auditor-tour',
@@ -351,15 +391,21 @@ export const ALL_TOURS: Record<string, WalkthroughTour> = {
   'trader-tour': TRADER_TOUR,
   'risk-manager-tour': RISK_MANAGER_TOUR,
   'auditor-tour': AUDITOR_TOUR,
+  'admin-tour': ADMIN_TOUR,
   'business-flow-tour': BUSINESS_FLOW_TOUR,
 };
 
-/** Get the recommended tour for a user role */
+/**
+ * Maps every `UserProfile.role` value to a dedicated tour. Falls back to
+ * `main-tour` for unknown strings (legacy users, test fixtures). Roles are
+ * declared in `types.ts` (Admin / Trader / Risk_Manager / Auditor).
+ */
 export function getRecommendedTourId(role: string): string {
   switch (role) {
     case 'Trader': return 'trader-tour';
     case 'Risk_Manager': return 'risk-manager-tour';
     case 'Auditor': return 'auditor-tour';
+    case 'Admin': return 'admin-tour';
     default: return 'main-tour';
   }
 }

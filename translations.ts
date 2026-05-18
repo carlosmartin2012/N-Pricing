@@ -658,6 +658,29 @@ export const translations = {
         walkthrough_configDesc: 'Administrators configure pricing rules, rate cards, ESG grids, approval thresholds, and master data here.',
         walkthrough_replay: 'Replay Tour',
 
+        // ── Role-specific tour steps (Trader / Risk / Auditor / Admin) ──
+        walkthrough_blotter: 'Deal Blotter',
+        walkthrough_blotterDesc: 'Every priced deal lands here. Filter by status, drill into the lineage, or export the working set as CSV.',
+        walkthrough_governance: 'Methodology & Governance',
+        walkthrough_governanceDesc: 'Pricing rules, rate cards, approval thresholds and model inventory live under Methodology. Changes here are versioned and signed.',
+        walkthrough_shocks: 'Stress Testing',
+        walkthrough_shocksDesc: 'Apply EBA parallel and steepener shocks to the portfolio, inspect the 7×7 stress pricing grid and export the resulting diff.',
+        walkthrough_auditLog: 'Audit Log',
+        walkthrough_auditLogDesc: 'Every write operation produces an immutable audit entry — auth, pricing, governance, integrations. Filter by user, scope or time.',
+        walkthrough_reporting: 'Attribution Reporting',
+        walkthrough_reportingDesc: 'Drill into approvals by figure, zone, product and segment. Charts and tables export to CSV/PDF for the committee.',
+        walkthrough_blotterReadonly: 'Deal Blotter (read-only)',
+        walkthrough_blotterReadonlyDesc: 'You can inspect any deal but Auditor role cannot modify pricing. Use this view for replay sessions and walk-throughs with the committee.',
+        // Admin tour
+        walkthrough_admin_userMgmt: 'User Management',
+        walkthrough_admin_userMgmtDesc: 'Invite teammates, assign roles (Admin / Trader / Risk / Auditor) and revoke access. Each change is audited.',
+        walkthrough_admin_modelInventory: 'Model Inventory',
+        walkthrough_admin_modelInventoryDesc: 'SR 11-7 / EBA-compliant catalogue: every pricing or risk model has an owner, status and validation document.',
+        walkthrough_admin_tenancy: 'Tenancy & Entities',
+        walkthrough_admin_tenancyDesc: 'Provision new banking entities, manage feature flags per tenant and watch the strict-flip readiness widget in the SLO panel.',
+        walkthrough_admin_health: 'System Health',
+        walkthrough_admin_healthDesc: 'p50/p95/p99 of the pricing engine, alert evaluator status, adapter health for CRM / market data / core banking and the recent CSP violations widget.',
+
         // ── Business-flow tour (post-login welcome) ─────────────────
         walkthrough_bf_welcomeEyebrow: 'Welcome to N-Pricing',
         walkthrough_bf_welcome: 'Pricing de banca, organizado por ciclo de vida.',
@@ -1468,6 +1491,29 @@ export const translations = {
         walkthrough_config: 'Reglas y Configuración',
         walkthrough_configDesc: 'Los administradores configuran reglas de pricing, rate cards, tablas ESG, umbrales de aprobación y datos maestros aquí.',
         walkthrough_replay: 'Repetir tour',
+
+        // ── Tours específicos por rol (Trader / Risk / Auditor / Admin) ──
+        walkthrough_blotter: 'Blotter de operaciones',
+        walkthrough_blotterDesc: 'Todas las operaciones valoradas llegan aquí. Filtra por estado, abre el linaje o exporta el conjunto activo como CSV.',
+        walkthrough_governance: 'Metodología y gobernanza',
+        walkthrough_governanceDesc: 'Las reglas de pricing, rate cards, umbrales de aprobación y el inventario de modelos viven en Metodología. Los cambios se versionan y se firman.',
+        walkthrough_shocks: 'Pruebas de estrés',
+        walkthrough_shocksDesc: 'Aplica shocks paralelos y steepener (EBA) a la cartera, revisa la matriz 7×7 de stress pricing y exporta el diff resultante.',
+        walkthrough_auditLog: 'Registro de auditoría',
+        walkthrough_auditLogDesc: 'Cada operación de escritura produce un audit entry inmutable — auth, pricing, governance, integraciones. Filtra por usuario, scope o tiempo.',
+        walkthrough_reporting: 'Reporting de atribuciones',
+        walkthrough_reportingDesc: 'Drill-down de aprobaciones por figura, zona, producto y segmento. Gráficos y tablas se exportan a CSV/PDF para el comité.',
+        walkthrough_blotterReadonly: 'Blotter (solo lectura)',
+        walkthrough_blotterReadonlyDesc: 'Puedes inspeccionar cualquier operación, pero el rol Auditor no puede modificar pricing. Úsalo para sesiones de replay y walk-throughs con el comité.',
+        // Tour de administrador
+        walkthrough_admin_userMgmt: 'Gestión de usuarios',
+        walkthrough_admin_userMgmtDesc: 'Invita compañeros, asigna roles (Admin / Trader / Risk / Auditor) y revoca accesos. Cada cambio queda auditado.',
+        walkthrough_admin_modelInventory: 'Inventario de modelos',
+        walkthrough_admin_modelInventoryDesc: 'Catálogo SR 11-7 / EBA: cada modelo de pricing o riesgo tiene un owner, estado y documento de validación.',
+        walkthrough_admin_tenancy: 'Tenancy y entidades',
+        walkthrough_admin_tenancyDesc: 'Provisiona nuevas entidades bancarias, gestiona feature flags por tenant y monitoriza el widget de readiness del strict-flip en el panel SLO.',
+        walkthrough_admin_health: 'Salud del sistema',
+        walkthrough_admin_healthDesc: 'p50/p95/p99 del motor de pricing, estado del evaluador de alertas, salud de adapters de CRM / mercado / core banking y el widget de violaciones CSP recientes.',
 
         // ── Tour de flujo de negocio (bienvenida tras login) ────────
         walkthrough_bf_welcomeEyebrow: 'Bienvenido a N-Pricing',
