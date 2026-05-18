@@ -3,6 +3,7 @@ import { Transaction, FTPResult } from '../../types';
 import { apiPost } from '../../utils/apiFetch';
 import { resolveDelegation } from '../../utils/pricing/delegationEngine';
 import { Shield, Check, X, ChevronDown, ChevronRight, RefreshCw, Info } from 'lucide-react';
+import { useUI } from '../../contexts/UIContext';
 
 interface DelegationAuditPanelProps {
   deal: Transaction;
@@ -54,6 +55,7 @@ const formatConstraintLabel = (key: string): string =>
   CONSTRAINT_LABELS[key] ?? key;
 
 const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, result }) => {
+  const { t } = useUI();
   const [evaluatedRules, setEvaluatedRules] = useState<EvaluatedRule[] | null>(null);
   const [reevaluating, setReevaluating] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -125,7 +127,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
               id="delegation-audit-heading"
               className="text-sm font-semibold text-[var(--nfq-text-primary)]"
             >
-              Delegación de precio
+              {t.calcTitleDelegationAudit}
             </h3>
             <p className="mt-0.5 text-xs text-[var(--nfq-text-muted)]">
               Auditoría multi-dimensional de la aprobación
@@ -160,7 +162,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
               id="delegation-audit-heading"
               className="text-sm font-semibold text-[var(--nfq-text-primary)]"
             >
-              Delegación de precio
+              {t.calcTitleDelegationAudit}
             </h3>
             <p className="mt-0.5 text-xs text-[var(--nfq-text-muted)]">
               Auditoría multi-dimensional de la aprobación

@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Check, Plus, Minus } from 'lucide-react';
 import { DEFAULT_CROSS_BONUS_CATALOGUE } from '../../utils/pricing/crossBonuses';
+import { useUI } from '../../contexts/UIContext';
 
 export interface CrossBonusesPickerProps {
   attachments: Array<{ ruleId: string; overrideProbability?: number }>;
@@ -20,6 +21,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
   attachments,
   onChange,
 }) => {
+  const { t } = useUI();
   // Memoize the lookup map so it is stable across renders — otherwise every
   // render would rebuild the Map and invalidate the useCallback dependency
   // chain that reads it.
@@ -83,7 +85,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
       {/* Header */}
       <div className="mb-5">
         <h3 className="text-sm font-semibold text-slate-200">
-          Bonificaciones cruzadas
+          {t.calcTitleCrossBonuses}
         </h3>
         <p className="mt-1 text-[11px] text-[var(--nfq-text-muted)]">
           Productos vinculados que reducen la tasa al cliente

@@ -158,9 +158,36 @@ const AppContent: React.FC = () => {
     setDealParams(INITIAL_DEAL);
   }, [data.dataMode]);
 
+  // Reset main scroll to top on view change. Without this, navigating to
+  // a tall view (Calculator, 5k+ px) and then to a shorter one leaves the
+  // shorter view scrolled past its content.
+  useEffect(() => {
+    document.getElementById('main-content')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [ui.currentView]);
+
   const mainNavItems = useMemo(() => buildMainNavItems(ui.t), [ui.t]);
   const bottomNavItems = useMemo(() => buildBottomNavItems(ui.t), [ui.t]);
   const currentViewMeta = useMemo(() => getViewNavigationMeta(ui.t, ui.currentView), [ui.currentView, ui.t]);
+
+  // Hero compaction: tool views (Calculator and siblings) get a 1-line hero
+  // so the work surface starts at ~140px instead of ~600px. Dashboard views
+  // keep the spacious hero. The KPI strip moves inline next to the title in
+  // compact mode.
+  const COMPACT_HERO_VIEWS: ReadonlySet<string> = new Set([
+    'CALCULATOR',
+    'RAROC',
+    'SHOCKS',
+    'STRESS_PRICING',
+    'WHAT_IF',
+    'TARGET_GRID',
+    'GOV_SNAPSHOTS',
+    'ESCALATIONS',
+    'ATTRIBUTION_MATRIX',
+    'ATTRIBUTION_REPORTING',
+    'BUDGET_RECONCILIATION',
+    'RECONCILIATION',
+  ]);
+  const compactHero = COMPACT_HERO_VIEWS.has(ui.currentView);
 
   if (!isAuthenticated) {
     return (
@@ -232,67 +259,108 @@ const AppContent: React.FC = () => {
             <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]" />
 
             <div className="relative z-10 flex h-full min-h-0 flex-col gap-4">
-              <section className="rounded-[28px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)] md:px-7 md:py-6">
-                <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-                  <div className="max-w-3xl">
-                    <div className="nfq-eyebrow">{ui.t.workspaceEyebrow}</div>
-                    <h1 className="mt-4 text-[clamp(2rem,3.5vw,56px)] font-semibold tracking-[var(--nfq-tracking-tight)] leading-[1.1] text-[color:var(--nfq-text-primary)]">
-                      {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
-                        bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
-                        currentViewMeta?.label ||
-                        ui.t.workspaceFallback}
-                    </h1>
-                    <p className="mt-3 max-w-2xl text-[14px] leading-6 text-[color:var(--nfq-text-secondary)]">
-                      {ui.t.workspaceDescription}
-                    </p>
+              {compactHero ? (
+                <section className="rounded-[18px] bg-[var(--nfq-bg-surface)] px-4 py-3 shadow-[var(--nfq-shadow-platform)] md:px-5 md:py-3">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <div className="flex min-w-0 items-baseline gap-3">
+                      <h1 className="text-xl font-semibold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)] md:text-2xl">
+                        {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
+                          bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
+                          currentViewMeta?.label ||
+                          ui.t.workspaceFallback}
+                      </h1>
+                      <span className="nfq-label hidden md:inline">{ui.t.workspaceEyebrow}</span>
+                    </div>
+                    <div className="ml-auto flex flex-wrap items-center gap-x-5 gap-y-1 font-mono-nums text-xs">
+                      <span className="flex items-baseline gap-1.5">
+                        <span className="nfq-label text-[10px]">{ui.t.workspaceDeals}</span>
+                        <span className="font-semibold text-[color:var(--nfq-text-primary)]">{data.deals.length}</span>
+                      </span>
+                      <span className="flex items-baseline gap-1.5">
+                        <span className="nfq-label text-[10px]">{ui.t.workspacePending}</span>
+                        <span className="font-semibold text-[color:var(--nfq-warning)]">
+                          {data.deals.filter((deal) => deal.status === 'Pending_Approval').length}
+                        </span>
+                      </span>
+                      <span className="flex items-baseline gap-1.5">
+                        <span className="nfq-label text-[10px]">{ui.t.workspaceSnapshots}</span>
+                        <span className="font-semibold text-[color:var(--nfq-accent)]">{data.portfolioSnapshots.length}</span>
+                      </span>
+                      <span className="flex items-baseline gap-1.5">
+                        <span className="nfq-label text-[10px]">{ui.t.workspaceAiTraces}</span>
+                        <span className="font-semibold text-violet-300">
+                          {data.pricingDossiers.reduce(
+                            (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
+                            0
+                          )}
+                        </span>
+                      </span>
+                    </div>
                   </div>
+                </section>
+              ) : (
+                <section className="rounded-[28px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)] md:px-7 md:py-6">
+                  <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+                    <div className="max-w-3xl">
+                      <div className="nfq-eyebrow">{ui.t.workspaceEyebrow}</div>
+                      <h1 className="mt-4 text-[clamp(2rem,3.5vw,56px)] font-semibold tracking-[var(--nfq-tracking-tight)] leading-[1.1] text-[color:var(--nfq-text-primary)]">
+                        {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
+                          bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
+                          currentViewMeta?.label ||
+                          ui.t.workspaceFallback}
+                      </h1>
+                      <p className="mt-3 max-w-2xl text-[14px] leading-6 text-[color:var(--nfq-text-secondary)]">
+                        {ui.t.workspaceDescription}
+                      </p>
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                    <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                      <div className="nfq-label">{ui.t.workspaceDeals}</div>
-                      <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
-                        {data.deals.length}
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                        <div className="nfq-label">{ui.t.workspaceDeals}</div>
+                        <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
+                          {data.deals.length}
+                        </div>
+                        <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
+                          {data.dataMode === 'demo' ? ui.t.workspaceDemoBook : ui.t.workspaceLiveBook}
+                        </div>
                       </div>
-                      <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
-                        {data.dataMode === 'demo' ? ui.t.workspaceDemoBook : ui.t.workspaceLiveBook}
+                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                        <div className="nfq-label">{ui.t.workspacePending}</div>
+                        <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">
+                          {data.deals.filter((deal) => deal.status === 'Pending_Approval').length}
+                        </div>
+                        <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
+                          {ui.t.workspaceApprovalQueue}
+                        </div>
                       </div>
-                    </div>
-                    <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                      <div className="nfq-label">{ui.t.workspacePending}</div>
-                      <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">
-                        {data.deals.filter((deal) => deal.status === 'Pending_Approval').length}
+                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                        <div className="nfq-label">{ui.t.workspaceSnapshots}</div>
+                        <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">
+                          {data.portfolioSnapshots.length}
+                        </div>
+                        <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
+                          {ui.t.workspacePortfolioFrames}
+                        </div>
                       </div>
-                      <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
-                        {ui.t.workspaceApprovalQueue}
-                      </div>
-                    </div>
-                    <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                      <div className="nfq-label">{ui.t.workspaceSnapshots}</div>
-                      <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">
-                        {data.portfolioSnapshots.length}
-                      </div>
-                      <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
-                        {ui.t.workspacePortfolioFrames}
-                      </div>
-                    </div>
-                    <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
-                      <div className="nfq-label">{ui.t.workspaceAiTraces}</div>
-                      <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">
-                        {data.pricingDossiers.reduce(
-                          (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
-                          0
-                        )}
-                      </div>
-                      <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
-                        {ui.t.workspaceGroundedEvidence}
+                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                        <div className="nfq-label">{ui.t.workspaceAiTraces}</div>
+                        <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">
+                          {data.pricingDossiers.reduce(
+                            (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
+                            0
+                          )}
+                        </div>
+                        <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
+                          {ui.t.workspaceGroundedEvidence}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
 
               <div className="relative min-h-0 flex-1">
-                <ErrorBoundary>
+                <ErrorBoundary key={ui.currentView}>
                   {/* Pricing state provider — controlled by App.tsx's existing
                     useState so prop-drilled components keep working. New
                     components can read via usePricingState() without props. */}

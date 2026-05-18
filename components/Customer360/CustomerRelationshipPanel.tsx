@@ -170,17 +170,19 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
             )}
           </section>
 
-          {/* Targets */}
-          <section>
-            <h4 className="nfq-label text-[10px] mb-2 flex items-center gap-2">
+          {/* Targets — render a compact inline hint when empty to avoid
+              taking ~120px for "0 results" in the Calculator's tall layout. */}
+          {data.applicableTargets.length === 0 ? (
+            <section className="nfq-label flex items-center gap-2 text-[10px] text-slate-500">
               <Target className="h-3 w-3" />
-              Applicable targets ({data.applicableTargets.length})
-            </h4>
-            {data.applicableTargets.length === 0 ? (
-              <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-xs text-slate-400">
-                No top-down targets cover this client today.
-              </div>
-            ) : (
+              <span>Applicable targets — none cover this client today</span>
+            </section>
+          ) : (
+            <section>
+              <h4 className="nfq-label text-[10px] mb-2 flex items-center gap-2">
+                <Target className="h-3 w-3" />
+                Applicable targets ({data.applicableTargets.length})
+              </h4>
               <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {data.applicableTargets.map((tgt) => (
                   <li key={tgt.id} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
@@ -205,8 +207,8 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* Latest metrics */}
           {data.metrics.latest && (

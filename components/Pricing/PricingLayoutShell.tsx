@@ -22,11 +22,11 @@ import { Calculator as CalculatorIcon, Percent, Zap, FlaskConical } from 'lucide
 
 type TabId = 'deal' | 'raroc' | 'stress' | 'what-if';
 
-const TABS: { id: TabId; path: string; label: string; sublabel: string; icon: typeof CalculatorIcon }[] = [
-  { id: 'deal', path: '/pricing', label: 'Deal', sublabel: 'Motor + recomendación', icon: CalculatorIcon },
-  { id: 'raroc', path: '/raroc', label: 'RAROC', sublabel: 'Economic profit + hurdle', icon: Percent },
-  { id: 'stress', path: '/stress-testing', label: 'Stress', sublabel: 'EBA 6 escenarios', icon: Zap },
-  { id: 'what-if', path: '/what-if', label: 'What-If', sublabel: 'Simulación + backtest', icon: FlaskConical },
+const TABS: { id: TabId; path: string; label: string; icon: typeof CalculatorIcon }[] = [
+  { id: 'deal', path: '/pricing', label: 'Deal', icon: CalculatorIcon },
+  { id: 'raroc', path: '/raroc', label: 'RAROC', icon: Percent },
+  { id: 'stress', path: '/stress-testing', label: 'Stress', icon: Zap },
+  { id: 'what-if', path: '/what-if', label: 'What-If', icon: FlaskConical },
 ];
 
 function pathToTab(pathname: string): TabId {
@@ -59,10 +59,7 @@ const PricingLayoutShell: React.FC = () => {
               }`}
             >
               <Icon size={14} className={isActive ? 'text-[color:var(--nfq-accent)]' : ''} />
-              <span className="flex flex-col items-start leading-tight">
-                <span>{tab.label}</span>
-                <span className="nfq-label text-[9px]">{tab.sublabel}</span>
-              </span>
+              <span>{tab.label}</span>
             </button>
           );
         })}

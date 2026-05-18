@@ -55,7 +55,15 @@ vi.mock('pg', () => {
     on() { /* noop */ }
     async connect() { return client; }
   }
-  return { Pool, default: { Pool } };
+  // server/db.ts now registers pg type parsers at module load (NUMERIC + INT8).
+  // The real `pg` package exports a `types` object with builtins + setTypeParser;
+  // we stub the same shape here so the import doesn't crash. The parsers
+  // themselves are no-ops in tests because no real query goes through pg.
+  const types = {
+    setTypeParser: () => undefined,
+    builtins: { NUMERIC: 1700, INT8: 20 },
+  };
+  return { Pool, types, default: { Pool, types } };
 });
 
 beforeEach(() => {

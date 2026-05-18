@@ -3,6 +3,7 @@ import { Target, Loader2, Check, AlertTriangle } from 'lucide-react';
 import type { Transaction, FTPResult, ApprovalMatrixConfig } from '../../types';
 import { apiPost } from '../../utils/apiFetch';
 import { optimizeMarginForTargetRaroc } from '../../utils/pricing/inverseOptimizer';
+import { useUI } from '../../contexts/UIContext';
 
 interface InverseOptimizationResult {
   converged: boolean;
@@ -41,6 +42,7 @@ export const InverseOptimizerPanel: React.FC<InverseOptimizerPanelProps> = ({
   targetRoe,
   onApplyMargin,
 }) => {
+  const { t } = useUI();
   const initialTarget = Number.isFinite(targetRoe) && targetRoe > 0 ? targetRoe : 15;
   const [targetRaroc, setTargetRaroc] = useState<number>(initialTarget);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -102,7 +104,7 @@ export const InverseOptimizerPanel: React.FC<InverseOptimizerPanelProps> = ({
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
-            Optimización inversa
+            {t.calcTitleInverseOptimizer}
           </h3>
           <p className="mt-0.5 text-xs text-[color:var(--nfq-text-muted)]">
             Calcula el margen mínimo para alcanzar un RAROC objetivo

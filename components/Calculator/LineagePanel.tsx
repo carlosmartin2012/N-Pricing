@@ -7,6 +7,7 @@ import {
   type BitemporalQuery,
   type LineageEntry,
 } from '../../utils/pricing/bitemporal';
+import { useUI } from '../../contexts/UIContext';
 import {
   History,
   Check,
@@ -185,6 +186,7 @@ function formatDateTime(d: string | null): string {
 }
 
 const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _result }) => {
+  const { t } = useUI();
   const [queryMode, setQueryMode] = useState<QueryModeUI>('CURRENT');
   const [validAt, setValidAt] = useState<string>('2026-04-09');
   const [systemAt, setSystemAt] = useState<string>('2026-04-09');
@@ -260,7 +262,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
         <div>
           <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-[var(--nfq-accent,#F48B4A)]" />
-            <h2 className="text-lg font-semibold tracking-tight">Linaje de parámetros</h2>
+            <h3 className="text-lg font-semibold tracking-tight">{t.calcTitleLineage}</h3>
           </div>
           <p className="mt-1 text-xs text-white/55">
             Trazabilidad bitemporal del waterfall de pricing

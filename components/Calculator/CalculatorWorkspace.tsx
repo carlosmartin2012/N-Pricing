@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { calculatePricing } from '@npricing/pricing-core';
 import type { Transaction } from '../../types';
@@ -67,6 +67,35 @@ export const CalculatorWorkspace: React.FC<Props> = ({
     isSupabaseConfigured,
   });
   const [matchedMethod, setMatchedMethod] = useState('Matched Maturity');
+
+  // Progressive disclosure: collapse non-primary panels behind two toggles
+  // persisted in localStorage. Primary (Quote) is always rendered — secondary
+  // (Context, default open) and tertiary (Optimization, default closed) cut
+  // the page from ~5000px to ~1300px in the default Quote+Context state.
+  type CalcDisclosure = { context: boolean; optimization: boolean };
+  const DISCLOSURE_KEY = 'n_pricing_calc_disclosure';
+  const [disclosure, setDisclosure] = useState<CalcDisclosure>(() => {
+    if (typeof window === 'undefined') return { context: true, optimization: false };
+    try {
+      const raw = window.localStorage.getItem(DISCLOSURE_KEY);
+      if (!raw) return { context: true, optimization: false };
+      const parsed = JSON.parse(raw) as Partial<CalcDisclosure>;
+      return {
+        context: typeof parsed.context === 'boolean' ? parsed.context : true,
+        optimization: typeof parsed.optimization === 'boolean' ? parsed.optimization : false,
+      };
+    } catch {
+      return { context: true, optimization: false };
+    }
+  });
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(DISCLOSURE_KEY, JSON.stringify(disclosure));
+    } catch {
+      // Silent ignore — preference persistence is best-effort.
+    }
+  }, [disclosure]);
 
   // Live cursors (Ola 7 B) — viewport 'CALCULATOR'
   const { cursors, active: cursorsActive } = useLiveCursors({
@@ -182,7 +211,16 @@ export const CalculatorWorkspace: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="mb-4">
+        {/* QUOTE — always visible primary work surface. The DealFlowRail
+            shows the deal lifecycle indicator; the pricing drivers summary
+            surfaces the headline contributors as soon as the engine has a
+            result; and the 3-column input → methodology → receipt row is the
+            core action area. PricingReceipt is sticky on desktop so the
+            RAROC + CTA stay visible while the user scrolls Context and
+            Optimization sections. */}
+        <section aria-labelledby="calc-group-quote" className="space-y-4">
+          <h2 id="calc-group-quote" className="sr-only">{t.calcGroupQuote}</h2>
+
           <DealFlowRail
             deal={dealParams}
             result={currentResult}
@@ -195,10 +233,8 @@ export const CalculatorWorkspace: React.FC<Props> = ({
               savedRequired: t.dealFlowSavedRequired,
             }}
           />
-        </div>
 
-        {currentResult && (
-          <div className="mb-4">
+          {currentResult && (
             <PricingDriversSummary
               result={currentResult}
               labels={{
@@ -212,169 +248,200 @@ export const CalculatorWorkspace: React.FC<Props> = ({
                 esg: t.pricingDriverEsg,
               }}
             />
-          </div>
-        )}
-
-        {/* Landing insights — pivot §Bloque G */}
-        <Suspense fallback={null}>
-          <div className="mb-4">
-            <PricingInsightsWidget deals={deals} />
-          </div>
-        </Suspense>
-
-        {/* Recommendation panel — pivot §Bloque E (EV-optimal, floor, commercial) */}
-        {currentResult && (
-          <Suspense fallback={null}>
-            <div className="mb-4">
-              <CalculatorRecommendationPanel
-                deal={dealParams}
-                deals={deals}
-                ftp={currentResult.baseRate + (currentResult.liquiditySpread ?? 0)}
-                capitalCharge={currentResult.capitalCharge ?? 0}
-                regulatoryCost={currentResult.regulatoryCost ?? 0}
-                raroc={currentResult.raroc ?? 0}
-                hurdleRate={dealParams.targetROE}
-                proposedRate={currentResult.finalClientRate ?? currentResult.baseRate + dealParams.marginTarget}
-              />
-            </div>
-          </Suspense>
-        )}
-
-        {/* Attribution Simulator — Ola 8 Bloque B. Widget contextual: el comercial
-          ve quién tiene atribución sobre el quote actual + simula bajadas/subidas
-          para encontrar el sweet-spot de aprobación. Recálculo cliente-side; el
-          motor puro de utils/attributions/ corre el mismo código que el server.
-          Handlers cableados (Ola 10 Bloque C cierre): onApply genera un
-          pricing_snapshot y pre-llena el calculator; onRequestApproval crea una
-          decision 'escalated' que dispara push notif al approver. */}
-        {currentResult && (
-          <Suspense fallback={null}>
-            <div className="mb-4">
-              <AttributionSimulator
-                compact
-                quote={quoteFromFtpResult(
-                  currentResult,
-                  {
-                    product: [dealParams.productType],
-                    segment: [dealParams.clientType],
-                    currency: [dealParams.currency],
-                    tenorMaxMonths: dealParams.durationMonths,
-                  } as AttributionScope,
-                  dealParams.amount
-                )}
-                onApply={(input) => {
-                  // Aplica el delta de margen al deal actual — el comercial
-                  // sigue iterando en el calculator con los nuevos parámetros.
-                  const deltaBps = input.proposedAdjustments.deviationBpsDelta ?? 0;
-                  if (deltaBps !== 0 && setDealParams) {
-                    setDealParams((prev) => ({
-                      ...prev,
-                      marginTarget: prev.marginTarget + deltaBps / 100,
-                    }));
-                  }
-                }}
-                onRequestApproval={(input) => {
-                  void handleRequestAttributionApproval(input);
-                }}
-              />
-            </div>
-          </Suspense>
-        )}
-
-        <div className="grid gap-4 lg:grid-cols-12">
-          <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
-            <DealInputPanel
-              values={dealParams}
-              onChange={handleParamChange}
-              setDealParams={setDealParams}
-              deals={deals}
-              clients={clients}
-              products={products}
-              businessUnits={businessUnits}
-              language={language}
-              behaviouralModels={behaviouralModels}
-            />
-          </div>
-
-          <div data-tour="methodology-panel" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
-            <Suspense
-              fallback={
-                <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
-              }
-            >
-              <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
-            </Suspense>
-          </div>
-
-          <div data-tour="pricing-receipt" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
-            <Suspense
-              fallback={
-                <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
-              }
-            >
-              <PricingReceipt
-                deal={dealParams}
-                setMatchedMethod={setMatchedMethod}
-                approvalMatrix={approvalMatrix}
-                language={language}
-                onDealSaved={(savedDeal) => {
-                  setDealParams(savedDeal);
-                }}
-              />
-            </Suspense>
-          </div>
-
-          {/* Customer 360 — relationship context for the approval/analysis flow */}
-          {dealParams.clientId && (
-            <>
-              <div data-tour="customer-360-panel" className="w-full lg:col-span-8">
-                <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
-                  <CustomerRelationshipPanel clientId={dealParams.clientId} />
-                </Suspense>
-              </div>
-              <div data-tour="ltv-impact-panel" className="w-full lg:col-span-4">
-                <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
-                  <LtvImpactPanel
-                    clientId={dealParams.clientId}
-                    candidate={{
-                      productType: dealParams.productType,
-                      currency: dealParams.currency,
-                      amountEur: dealParams.amount,
-                      tenorYears: (dealParams.durationMonths ?? 0) / 12,
-                      rateBps: (currentResult?.finalClientRate ?? 0) * 100,
-                      marginBps: (dealParams.marginTarget ?? 0) * 100,
-                      capitalEur: dealParams.amount * (dealParams.capitalRatio ?? 0.08),
-                      rarocAnnual: currentResult?.raroc ?? undefined,
-                    }}
-                  />
-                </Suspense>
-              </div>
-            </>
           )}
 
-          {/* Phase 1: IFRS 9 Stage/SICR + Cross-bonuses inputs */}
-          <div className="w-full lg:col-span-6">
-            <IFRS9StagePanel deal={dealParams} onChange={handleIFRS9Change} />
-          </div>
-          <div className="w-full lg:col-span-6">
-            <CrossBonusesPicker attachments={dealParams.crossBonusAttachments ?? []} onChange={handleBonusesChange} />
-          </div>
+          <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+            <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
+              <DealInputPanel
+                values={dealParams}
+                onChange={handleParamChange}
+                setDealParams={setDealParams}
+                deals={deals}
+                clients={clients}
+                products={products}
+                businessUnits={businessUnits}
+                language={language}
+                behaviouralModels={behaviouralModels}
+              />
+            </div>
 
-          {/* Phase 1: Inverse Optimizer + Delegation Audit side-by-side */}
-          <div className="w-full lg:col-span-6">
-            <InverseOptimizerPanel
-              deal={dealParams}
-              currentRaroc={currentResult?.raroc ?? 0}
-              targetRoe={dealParams.targetROE}
-              onApplyMargin={handleApplyMargin}
-            />
-          </div>
-          <div className="w-full lg:col-span-6">
-            {currentResult && <DelegationAuditPanel deal={dealParams} result={currentResult} />}
-          </div>
+            <div data-tour="methodology-panel" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
+              <Suspense
+                fallback={
+                  <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
+                }
+              >
+                <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
+              </Suspense>
+            </div>
 
-          {/* Phase 1: Waterfall Explainer (full width) */}
-          <div className="w-full lg:col-span-12">
+            <div
+              data-tour="pricing-receipt"
+              className="flex h-full w-full min-h-0 flex-col lg:col-span-4 lg:sticky lg:top-2 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
+            >
+              <Suspense
+                fallback={
+                  <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
+                }
+              >
+                <PricingReceipt
+                  deal={dealParams}
+                  setMatchedMethod={setMatchedMethod}
+                  approvalMatrix={approvalMatrix}
+                  language={language}
+                  onDealSaved={(savedDeal) => {
+                    setDealParams(savedDeal);
+                  }}
+                />
+              </Suspense>
+            </div>
+          </div>
+        </section>
+
+        {/* Disclosure toggle — controls the two secondary groups so the
+            user can hide everything below the quote surface in 1 click. */}
+        <div className="my-5 flex flex-wrap items-center gap-2 text-xs">
+          <span className="nfq-label mr-1 text-[10px] text-[color:var(--nfq-text-muted)]">
+            {t.calcGroupHint}
+          </span>
+          <button
+            type="button"
+            onClick={() => setDisclosure((prev) => ({ ...prev, context: !prev.context }))}
+            aria-pressed={disclosure.context}
+            className={`rounded-full px-3 py-1 font-medium transition-colors ${
+              disclosure.context
+                ? 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.35)]'
+                : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
+            }`}
+          >
+            {disclosure.context ? '✓ ' : '+ '}
+            {t.calcGroupContext}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDisclosure((prev) => ({ ...prev, optimization: !prev.optimization }))}
+            aria-pressed={disclosure.optimization}
+            className={`rounded-full px-3 py-1 font-medium transition-colors ${
+              disclosure.optimization
+                ? 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.35)]'
+                : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
+            }`}
+          >
+            {disclosure.optimization ? '✓ ' : '+ '}
+            {t.calcGroupOptimization}
+          </button>
+        </div>
+
+        {/* CONTEXT — secondary surface: recommendation, customer relationship,
+            credit/cross-bonus inputs. Default open. */}
+        {disclosure.context && (
+          <section aria-labelledby="calc-group-context" className="space-y-4">
+            <h2 id="calc-group-context" className="sr-only">{t.calcGroupContext}</h2>
+
+            {currentResult && (
+              <Suspense fallback={null}>
+                <CalculatorRecommendationPanel
+                  deal={dealParams}
+                  deals={deals}
+                  ftp={currentResult.baseRate + (currentResult.liquiditySpread ?? 0)}
+                  capitalCharge={currentResult.capitalCharge ?? 0}
+                  regulatoryCost={currentResult.regulatoryCost ?? 0}
+                  raroc={currentResult.raroc ?? 0}
+                  hurdleRate={dealParams.targetROE}
+                  proposedRate={currentResult.finalClientRate ?? currentResult.baseRate + dealParams.marginTarget}
+                />
+              </Suspense>
+            )}
+
+            {dealParams.clientId && (
+              <div className="grid gap-4 lg:grid-cols-12">
+                <div data-tour="customer-360-panel" className="w-full lg:col-span-8">
+                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                    <CustomerRelationshipPanel clientId={dealParams.clientId} />
+                  </Suspense>
+                </div>
+                <div data-tour="ltv-impact-panel" className="w-full lg:col-span-4">
+                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                    <LtvImpactPanel
+                      clientId={dealParams.clientId}
+                      candidate={{
+                        productType: dealParams.productType,
+                        currency: dealParams.currency,
+                        amountEur: dealParams.amount,
+                        tenorYears: (dealParams.durationMonths ?? 0) / 12,
+                        rateBps: (currentResult?.finalClientRate ?? 0) * 100,
+                        marginBps: (dealParams.marginTarget ?? 0) * 100,
+                        capitalEur: dealParams.amount * (dealParams.capitalRatio ?? 0.08),
+                        rarocAnnual: currentResult?.raroc ?? undefined,
+                      }}
+                    />
+                  </Suspense>
+                </div>
+              </div>
+            )}
+
+            <div className="grid gap-4 lg:grid-cols-12">
+              <div className="w-full lg:col-span-6">
+                <IFRS9StagePanel deal={dealParams} onChange={handleIFRS9Change} />
+              </div>
+              <div className="w-full lg:col-span-6">
+                <CrossBonusesPicker attachments={dealParams.crossBonusAttachments ?? []} onChange={handleBonusesChange} />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* OPTIMIZATION — tertiary surface: attribution simulator, inverse
+            margin, delegation audit, lineage, comparison, scenarios, landing
+            insights. Default closed to cut page height in normal use. */}
+        {disclosure.optimization && (
+          <section aria-labelledby="calc-group-optimization" className="mt-5 space-y-4">
+            <h2 id="calc-group-optimization" className="sr-only">{t.calcGroupOptimization}</h2>
+
+            {currentResult && (
+              <Suspense fallback={null}>
+                <AttributionSimulator
+                  compact
+                  quote={quoteFromFtpResult(
+                    currentResult,
+                    {
+                      product: [dealParams.productType],
+                      segment: [dealParams.clientType],
+                      currency: [dealParams.currency],
+                      tenorMaxMonths: dealParams.durationMonths,
+                    } as AttributionScope,
+                    dealParams.amount
+                  )}
+                  onApply={(input) => {
+                    const deltaBps = input.proposedAdjustments.deviationBpsDelta ?? 0;
+                    if (deltaBps !== 0 && setDealParams) {
+                      setDealParams((prev) => ({
+                        ...prev,
+                        marginTarget: prev.marginTarget + deltaBps / 100,
+                      }));
+                    }
+                  }}
+                  onRequestApproval={(input) => {
+                    void handleRequestAttributionApproval(input);
+                  }}
+                />
+              </Suspense>
+            )}
+
+            <div className="grid gap-4 lg:grid-cols-12">
+              <div className="w-full lg:col-span-6">
+                <InverseOptimizerPanel
+                  deal={dealParams}
+                  currentRaroc={currentResult?.raroc ?? 0}
+                  targetRoe={dealParams.targetROE}
+                  onApplyMargin={handleApplyMargin}
+                />
+              </div>
+              <div className="w-full lg:col-span-6">
+                {currentResult && <DelegationAuditPanel deal={dealParams} result={currentResult} />}
+              </div>
+            </div>
+
             {currentResult && (
               <WaterfallExplainerCard
                 deal={dealParams}
@@ -382,29 +449,32 @@ export const CalculatorWorkspace: React.FC<Props> = ({
                 language={language === 'es' ? 'es' : 'en'}
               />
             )}
-          </div>
 
-          {/* Phase 2: Bitemporal Lineage Panel (full width) */}
-          <div className="w-full lg:col-span-12">
             {currentResult && <LineagePanel deal={dealParams} result={currentResult} />}
-          </div>
 
-          <div className="w-full lg:col-span-9">
-            <Suspense fallback={<div className="h-24 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
-              <PricingComparison baseDeal={dealParams} approvalMatrix={approvalMatrix} />
+            <div className="grid gap-4 lg:grid-cols-12">
+              <div className="w-full lg:col-span-9">
+                <Suspense fallback={<div className="h-24 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                  <PricingComparison baseDeal={dealParams} approvalMatrix={approvalMatrix} />
+                </Suspense>
+              </div>
+              <div className="w-full lg:col-span-3">
+                <ScenarioLibraryPanel
+                  currentScenarios={DEFAULT_PRICING_SCENARIOS}
+                  onLoadScenario={(scenario: PricingScenario) => {
+                    if (scenario.overrides.marginTarget != null) {
+                      setDealParams((prev) => ({ ...prev, marginTarget: scenario.overrides.marginTarget! }));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <Suspense fallback={null}>
+              <PricingInsightsWidget deals={deals} />
             </Suspense>
-          </div>
-          <div className="w-full lg:col-span-3">
-            <ScenarioLibraryPanel
-              currentScenarios={DEFAULT_PRICING_SCENARIOS}
-              onLoadScenario={(scenario: PricingScenario) => {
-                if (scenario.overrides.marginTarget != null) {
-                  setDealParams((prev) => ({ ...prev, marginTarget: scenario.overrides.marginTarget! }));
-                }
-              }}
-            />
-          </div>
-        </div>
+          </section>
+        )}
       </div>
     </ErrorBoundary>
   );
