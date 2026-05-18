@@ -88,9 +88,9 @@ Cinco bloques ortogonales del plan original. Auditoría 2026-05-18 confirmó que
 | Item | Esfuerzo | Razón |
 |---|---|---|
 | ~~**CSP reporting en Vercel**~~ | ✅ Hecho 2026-05-18 | `api/csp-report.ts` Vercel Serverless Function declarada explícitamente en `vercel.json` `functions`. Mirrors `server/routes/cspReport.ts` normalize logic. 4 tests. |
-| **Bloque 6 follow-up — `legacy-peer-deps` audit** | 4 h | `npm ls react react-dom @types/react` para identificar la lib que pin <19. Si se resuelve, builds más predecibles. |
-| **`VERCEL_FORCE_NO_BUILD_CACHE` audit** | 2 h | Si el bug que motivó el flag ya no aplica, ahorro ~30-60s/deploy. |
-| **Ampliar `noUncheckedIndexedAccess`** | iterativo | 4 archivos auditados; próximos candidatos: `shockPresets`, `liquidityEngine`, `snapshotHash`, `creditRiskEngine`. Cuando todo prod-code esté auditado, mover flag a `tsconfig.json` global. |
+| ~~**`legacy-peer-deps` audit**~~ | ✅ Hecho 2026-05-18 | `eslint-plugin-react-hooks` bumped 7.0.1 → 7.1.1 (peer eslint ahora `^10.0.0`). `.npmrc` borrado, `vercel.json installCommand` sin `--legacy-peer-deps`. Side-effect: recharts 3.7→3.8 — 6 formatters de Tooltip ajustados al nuevo `Formatter<ValueType, NameType>`. |
+| ~~**`VERCEL_FORCE_NO_BUILD_CACHE` audit**~~ | ✅ Hecho 2026-05-18 | Flag retirado. `buildCommand` ya hace `rm -rf node_modules/.vite` (la caché crítica). Esperado 30-60s/deploy más rápidos. Re-añadir sólo si reaparece el bug original. |
+| **Ampliar `noUncheckedIndexedAccess`** | iterativo (en progreso) | 4 → 23 archivos auditados (2026-05-18). Cubre TODOS los módulos puros del motor financiero (pricing helpers, attributions, governance, customer360, dealTimeline aggregator, backtesting drift). Pendientes: server/* routes (lower priority — bound viene del SQL), components/* UI. Mover flag a `tsconfig.json` global cuando prod-code esté completo. |
 
 ### 3.3 Bloqueados por input externo (no código)
 
