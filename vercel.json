@@ -3,7 +3,7 @@
   "buildCommand": "rm -rf node_modules/.vite && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm install",
   "headers": [
     {
       "source": "/(.*)",

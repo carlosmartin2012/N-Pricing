@@ -381,14 +381,19 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
-                  formatter={(value: number | undefined, name: string | undefined) => {
+                  formatter={(value, name) => {
+                    const numeric = typeof value === 'number' ? value : Number(value);
+                    const nameStr = typeof name === 'string' ? name : String(name ?? '');
                     const label =
-                      name === 'avgTechnical'
+                      nameStr === 'avgTechnical'
                         ? 'Technical Price'
-                        : name === 'avgFinal'
+                        : nameStr === 'avgFinal'
                           ? 'Avg Final Rate'
-                          : (name ?? '');
-                    return [value != null ? fmtPct(value) : '-', label] as [React.ReactNode, string];
+                          : nameStr;
+                    return [Number.isFinite(numeric) ? fmtPct(numeric) : '-', label] as [
+                      React.ReactNode,
+                      string,
+                    ];
                   }}
                   labelFormatter={(label: React.ReactNode) => `Month: ${String(label ?? '')}`}
                 />

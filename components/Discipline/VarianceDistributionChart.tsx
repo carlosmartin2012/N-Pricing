@@ -123,7 +123,7 @@ const VarianceDistributionChart: React.FC<Props> = ({ variances, toleranceBps = 
               fontFamily: 'var(--nfq-font-mono)',
               color: 'var(--nfq-text-primary)',
             }}
-            formatter={(value: number | string | undefined) => `${Number(value ?? 0)} deals`}
+            formatter={(value) => `${Number(Array.isArray(value) ? value[0] : value ?? 0)} deals`}
             labelFormatter={(label: unknown) => `${String(label)} bps`}
           />
           <ReferenceLine

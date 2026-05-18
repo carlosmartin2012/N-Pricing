@@ -139,7 +139,7 @@ const OriginatorScorecardComponent: React.FC<Props> = ({ scorecard, isLoading })
                   fontFamily: 'var(--nfq-font-mono)',
                   color: 'var(--nfq-text-primary)',
                 }}
-                formatter={(value: number | string | undefined) => `${Number(value ?? 0).toFixed(1)}%`}
+                formatter={(value) => `${Number(Array.isArray(value) ? value[0] : value ?? 0).toFixed(1)}%`}
               />
               <Line
                 type="monotone"

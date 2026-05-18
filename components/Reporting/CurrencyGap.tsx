@@ -76,7 +76,7 @@ const CurrencyGap: React.FC<Props> = React.memo(({ deals }) => {
               </Pie>
               <Tooltip
                 contentStyle={{ backgroundColor: 'var(--nfq-bg-elevated)', border: '1px solid var(--nfq-border-ghost)', borderRadius: 'var(--nfq-radius-lg)', padding: '8px 12px', fontFamily: 'var(--nfq-font-mono)', fontSize: 12 }}
-                formatter={(val: number | string | undefined) => fmtM(Number(val ?? 0))}
+                formatter={(val) => fmtM(Number(Array.isArray(val) ? val[0] : val ?? 0))}
               />
             </PieChart>
           </ResponsiveContainer>

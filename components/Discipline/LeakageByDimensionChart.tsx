@@ -99,7 +99,7 @@ const LeakageByDimensionChart: React.FC<Props> = ({ variances, isLoading }) => {
                 fontFamily: 'var(--nfq-font-mono)',
                 color: 'var(--nfq-text-primary)',
               }}
-              formatter={(value: number | string | undefined) => `EUR ${fmtEur(Number(value ?? 0))}`}
+              formatter={(value) => `EUR ${fmtEur(Number(Array.isArray(value) ? value[0] : value ?? 0))}`}
             />
             <Bar dataKey="leakage" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {chartData.map((entry) => (
