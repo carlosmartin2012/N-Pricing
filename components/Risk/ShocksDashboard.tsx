@@ -13,6 +13,7 @@ import { ShockControlPanel } from './ShockControlPanel';
 import { ShockImpactPanel } from './ShockImpactPanel';
 import { parseImportedShocks } from './shockUtils';
 import { MacroScenarioPicker } from './MacroScenarioPicker';
+import { useToast } from '../ui/Toast';
 
 const log = createLogger('ShocksDashboard');
 
@@ -30,6 +31,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
   const { currentUser: user } = useAuth();
   const { approvalMatrix, shocks, setShocks } = useData();
   const { language } = useUI();
+  const { addToast } = useToast();
   const pricingContext = usePricingContext();
   const auditTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingAuditDescriptionRef = useRef<string | null>(null);
@@ -141,16 +143,16 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
           logShockAudit(
             `Imported shocks IR ${importedShocks.interestRate}bps / Liq ${importedShocks.liquiditySpread}bps for deal ${deal.id || 'NEW-DEAL'}`
           );
-          alert(`Shocks imported: IR ${importedShocks.interestRate}bps, Liq ${importedShocks.liquiditySpread}bps`);
+          addToast('success', `Shocks imported: IR ${importedShocks.interestRate}bps, Liq ${importedShocks.liquiditySpread}bps`);
         }
       } catch (error) {
         log.error('Error importing shocks', {}, error instanceof Error ? error : undefined);
-        alert('Error al importar shocks. Verifique el formato del archivo.');
+        addToast('error', 'Error al importar shocks. Verifique el formato del archivo.');
       } finally {
         event.target.value = '';
       }
     },
-    [setShocks, logShockAudit, deal.id]
+    [setShocks, logShockAudit, deal.id, addToast]
   );
 
   return (

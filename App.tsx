@@ -4,7 +4,8 @@ import { Sparkles } from 'lucide-react';
 import { INITIAL_DEAL } from './utils/seedData';
 import type { Transaction } from './types';
 import { AppRoutes } from './appRoutes';
-import { buildBottomNavItems, buildMainNavItems, getViewNavigationMeta } from './appNavigation';
+import { buildAuxDestinations, buildBottomNavItems, buildMainNavItems, getViewNavigationMeta } from './appNavigation';
+import { useLocation } from 'react-router';
 import { Sidebar } from './components/ui/Sidebar';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { SkipNav } from './components/ui/SkipNav';
@@ -167,7 +168,19 @@ const AppContent: React.FC = () => {
 
   const mainNavItems = useMemo(() => buildMainNavItems(ui.t), [ui.t]);
   const bottomNavItems = useMemo(() => buildBottomNavItems(ui.t), [ui.t]);
+  const auxDestinations = useMemo(() => buildAuxDestinations(ui.t), [ui.t]);
   const currentViewMeta = useMemo(() => getViewNavigationMeta(ui.t, ui.currentView), [ui.currentView, ui.t]);
+  // The cockpit-hero title resolves against the actual pathname first
+  // because some AUX-only routes (/snapshots, /slo, /adapters) have ids
+  // (GOV_SNAPSHOTS, GOV_SLO, GOV_ADAPTERS) that live outside the ViewState
+  // union — pathToView() falls back to CALCULATOR for those, so a
+  // currentView-based lookup would show "Calculator" everywhere. Looking
+  // by path covers main, bottom and aux destinations in one pass.
+  const location = useLocation();
+  const currentDestinationLabel = useMemo(() => {
+    const all = [...mainNavItems, ...bottomNavItems, ...auxDestinations];
+    return all.find((d) => d.path === location.pathname)?.label;
+  }, [auxDestinations, bottomNavItems, location.pathname, mainNavItems]);
 
   // Hero compaction: tool views (Calculator and siblings) get a 1-line hero
   // so the work surface starts at ~140px instead of ~600px. Dashboard views
@@ -264,8 +277,7 @@ const AppContent: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <div className="flex min-w-0 items-baseline gap-3">
                       <h1 className="text-xl font-semibold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)] md:text-2xl">
-                        {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
-                          bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
+                        {currentDestinationLabel ||
                           currentViewMeta?.label ||
                           ui.t.workspaceFallback}
                       </h1>
@@ -304,8 +316,7 @@ const AppContent: React.FC = () => {
                     <div className="max-w-3xl">
                       <div className="nfq-eyebrow">{ui.t.workspaceEyebrow}</div>
                       <h1 className="mt-4 text-[clamp(2rem,3.5vw,56px)] font-semibold tracking-[var(--nfq-tracking-tight)] leading-[1.1] text-[color:var(--nfq-text-primary)]">
-                        {mainNavItems.find((item) => item.id === ui.currentView)?.label ||
-                          bottomNavItems.find((item) => item.id === ui.currentView)?.label ||
+                        {currentDestinationLabel ||
                           currentViewMeta?.label ||
                           ui.t.workspaceFallback}
                       </h1>

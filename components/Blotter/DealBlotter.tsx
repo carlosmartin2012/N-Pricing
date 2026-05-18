@@ -13,6 +13,7 @@ import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { isSupabaseConfigured } from '../../utils/supabaseClient';
 import { errorTracker } from '../../utils/errorTracking';
+import { useToast } from '../ui/Toast';
 import type { UserRole } from '../../utils/dealWorkflow';
 import { useVariancesQuery } from '../../hooks/queries/useDisciplineQueries';
 import BlotterFooter from './BlotterFooter';
@@ -42,6 +43,7 @@ const DealBlotter: React.FC = () => {
   const data = useData();
   const { currentUser: user } = useAuth();
   const { t } = useUI();
+  const { addToast } = useToast();
   const { deals, setDeals, products, clients, businessUnits } = data;
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [selectedDealIds, setSelectedDealIds] = useState<Set<string>>(new Set());
@@ -267,11 +269,14 @@ const DealBlotter: React.FC = () => {
         dealId: selectedDossierDeal.id,
         extra: { operation: 'exportCommitteePackage' },
       });
-      window.alert(
+      addToast(
+        'warning',
         'The committee package was exported locally, but its persistence record could not be saved. Please retry or check the backend connection.',
+        8000,
       );
     }
   }, [
+    addToast,
     data,
     selectedApprovalTask,
     selectedDossierDeal,

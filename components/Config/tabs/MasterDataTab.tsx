@@ -5,6 +5,7 @@ import { Badge } from '../../ui/LayoutComponents';
 import { ClientEntity, ProductDefinition, BusinessUnit } from '../../../types';
 import { Plus, Edit, Trash2, Users, Briefcase, Building2 } from 'lucide-react';
 import { useAudit } from '../../../hooks/useAudit';
+import { useToast } from '../../ui/Toast';
 import type { ConfigUser } from '../configTypes';
 import MasterDataEditor from './MasterDataEditor';
 import MasterDataSection from './MasterDataSection';
@@ -32,6 +33,7 @@ interface Props {
 
 const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProducts, businessUnits, setBusinessUnits, user }) => {
    const logAudit = useAudit(user);
+   const { addToast } = useToast();
    const [isDrawerOpen, setDrawerOpen] = useState(false);
    const [editorState, setEditorState] = useState<MasterDataEditorState>(null);
 
@@ -52,7 +54,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
    const handleSaveClient = async () => {
       if (editorState?.kind === 'client' && editorState.value.id && editorState.value.name && setClients) {
          if (editorState.isNew && clients.some(client => client.id === editorState.value.id)) {
-            window.alert('A client with this ID already exists.');
+            addToast('error', 'A client with this ID already exists.');
             return;
          }
 
@@ -94,7 +96,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
    const handleSaveProduct = async () => {
       if (editorState?.kind === 'product' && editorState.value.id && editorState.value.name && setProducts) {
          if (editorState.isNew && products.some(product => product.id === editorState.value.id)) {
-            window.alert('A product with this ID already exists.');
+            addToast('error', 'A product with this ID already exists.');
             return;
          }
 
@@ -136,7 +138,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
    const handleSaveBU = async () => {
       if (editorState?.kind === 'businessUnit' && editorState.value.id && editorState.value.name && setBusinessUnits) {
          if (editorState.isNew && businessUnits.some(unit => unit.id === editorState.value.id)) {
-            window.alert('A business unit with this ID already exists.');
+            addToast('error', 'A business unit with this ID already exists.');
             return;
          }
 

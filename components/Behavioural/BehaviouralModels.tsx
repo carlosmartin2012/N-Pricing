@@ -11,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { createLogger } from '../../utils/logger';
+import { useToast } from '../ui/Toast';
 import BehaviouralModelCard from './BehaviouralModelCard';
 import BehaviouralModelEditor from './BehaviouralModelEditor';
 import {
@@ -28,6 +29,7 @@ const BehaviouralModels: React.FC = () => {
    const { currentUser: user } = useAuth();
    const { behaviouralModels: models, setBehaviouralModels: setModels } = useData();
    const { t } = useUI();
+   const { addToast } = useToast();
    const [activeTab, setActiveTab] = useState<'NMD_Replication' | 'Prepayment_CPR'>('NMD_Replication');
    const [searchTerm, setSearchTerm] = useState('');
 
@@ -51,7 +53,7 @@ const BehaviouralModels: React.FC = () => {
 
    const handleSave = async () => {
       if (!editingModel || !editingModel.name || !editingModel.description) {
-         alert('Please provide a name and description for the model.');
+         addToast('warning', 'Please provide a name and description for the model.');
          return;
       }
 
@@ -73,11 +75,11 @@ const BehaviouralModels: React.FC = () => {
                description: `${exists ? 'Updated' : 'Created'} behavioural model: ${finalModel.name}`
             });
 
-            alert(`Modelo "${finalModel.name}" guardado correctamente.`);
+            addToast('success', `Modelo "${finalModel.name}" guardado correctamente.`);
             setDrawerOpen(false);
          } catch (error) {
             log.error('Error saving model', {}, error instanceof Error ? error : undefined);
-            alert(`Error al guardar el modelo: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            addToast('error', `Error al guardar el modelo: ${error instanceof Error ? error.message : 'Unknown error'}`);
          }
       }
    }
@@ -126,7 +128,7 @@ const BehaviouralModels: React.FC = () => {
             log.error('Error deleting model', { modelId: id }, error instanceof Error ? error : undefined);
             // Rollback if failed
             if (modelToDelete) setModels(prev => [...prev, modelToDelete]);
-            alert('Failed to delete model. Please try again.');
+            addToast('error', 'Failed to delete model. Please try again.');
          }
       }
    }

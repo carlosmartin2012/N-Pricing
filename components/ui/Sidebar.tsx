@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, LucideIcon, Layers, MoreHorizontal, X } from 'lucide-react';
+import { ChevronDown, LucideIcon, Layers, MoreHorizontal, Search, X } from 'lucide-react';
 import { ViewState } from '../../types';
 import { getTranslations, Language } from '../../translations';
 import { Logo } from './Logo';
@@ -178,6 +178,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (isCurrentBottomView) setBottomExpanded(true);
   }, [isCurrentBottomView]);
 
+  // Quick-filter for the main + bottom nav. Helps users with 20+ entries
+  // find a destination by typing instead of scanning sections. When empty,
+  // the sidebar renders normally with section grouping.
+  const [filterQuery, setFilterQuery] = React.useState('');
+  const normalizedQuery = filterQuery.trim().toLowerCase();
+  const filterMatch = React.useCallback(
+    (item: NavItem) => !normalizedQuery || item.label.toLowerCase().includes(normalizedQuery),
+    [normalizedQuery],
+  );
+  const filteredMainItems = React.useMemo(
+    () => mainNavItems.filter(filterMatch),
+    [mainNavItems, filterMatch],
+  );
+  const filteredBottomItems = React.useMemo(
+    () => bottomNavItems.filter(filterMatch),
+    [bottomNavItems, filterMatch],
+  );
+
   let lastSection: string | undefined;
 
   return (
@@ -222,11 +240,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
+        {/* Quick filter — hidden when collapsed since the input would not fit. */}
+        {isSidebarOpen && (
+          <div className="px-3 pb-2">
+            <label className="relative block">
+              <span className="sr-only">Filter navigation</span>
+              <Search
+                size={14}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[color:var(--nfq-text-muted)]"
+              />
+              <input
+                type="text"
+                value={filterQuery}
+                onChange={(e) => setFilterQuery(e.target.value)}
+                placeholder="Filter…"
+                aria-label="Filter navigation"
+                className="w-full rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] py-1.5 pl-8 pr-7 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-muted)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
+              />
+              {filterQuery && (
+                <button
+                  type="button"
+                  onClick={() => setFilterQuery('')}
+                  aria-label="Clear filter"
+                  className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-[color:var(--nfq-text-muted)] hover:bg-[color:rgba(255,255,255,0.04)] hover:text-[color:var(--nfq-text-primary)]"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </label>
+          </div>
+        )}
+
         {/* Main navigation */}
         <nav role="navigation" aria-label="Main navigation" data-tour="sidebar-nav" className="flex-1 overflow-y-auto px-2">
           <div className="space-y-0.5">
-            {mainNavItems.map((item) => {
-              const showSection = item.section && item.section !== lastSection;
+            {filteredMainItems.length === 0 && normalizedQuery && (
+              <div className="px-3 py-2 text-xs text-[color:var(--nfq-text-muted)]">
+                No matches.
+              </div>
+            )}
+            {filteredMainItems.map((item) => {
+              // Hide section headers when filtering — flat list is easier
+              // to scan when the user is already narrowing intent.
+              const showSection = !normalizedQuery && item.section && item.section !== lastSection;
               if (item.section) lastSection = item.section;
 
               const accent = item.section ? SECTION_ACCENTS[item.section] : undefined;
@@ -294,9 +351,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   aria-hidden="true"
                 />
               </button>
-              {bottomExpanded && (
+              {(bottomExpanded || normalizedQuery) && (
                 <div id="sidebar-utility-items" className="mt-0.5 space-y-0.5">
-                  {bottomNavItems.map((item) => (
+                  {filteredBottomItems.map((item) => (
                     <NavButton
                       key={item.id}
                       item={item}
@@ -312,7 +369,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </>
           ) : (
             <div className="space-y-0.5">
-              {bottomNavItems.map((item) => (
+              {filteredBottomItems.map((item) => (
                 <NavButton
                   key={item.id}
                   item={item}

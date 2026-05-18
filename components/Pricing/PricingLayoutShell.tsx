@@ -42,7 +42,7 @@ const PricingLayoutShell: React.FC = () => {
     <div className="flex h-full flex-col">
       <div
         data-tour="pricing-workspace-tabs"
-        className="sticky top-0 z-10 -mx-6 mb-4 flex items-center gap-1 border-b border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/90 px-6 pb-2 pt-1 backdrop-blur"
+        className="sticky top-0 z-10 -mx-3 mb-4 flex items-center gap-1 overflow-x-auto border-b border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/90 px-3 pb-2 pt-1 backdrop-blur md:-mx-5 md:px-5 xl:-mx-6 xl:px-6"
       >
         {TABS.map((tab) => {
           const isActive = tab.id === activeTab;

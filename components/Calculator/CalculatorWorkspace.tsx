@@ -4,6 +4,7 @@ import { calculatePricing } from '@npricing/pricing-core';
 import type { Transaction } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
+import { useToast } from '../ui/Toast';
 import { useOptionalPricingState } from '../../contexts/PricingStateContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
@@ -61,6 +62,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
   const { deals, clients, products, businessUnits, behaviouralModels, approvalMatrix } = data;
   const { language, t } = useUI();
   const { currentUser } = useAuth();
+  const { addToast } = useToast();
 
   const canWriteRemotely = canPersistRemotely({
     dataMode: data.dataMode,
@@ -190,12 +192,10 @@ export const CalculatorWorkspace: React.FC<Props> = ({
           navigate(`/approvals?focus=${encodeURIComponent(resolvedDeal.id)}`);
         }
       } catch (err) {
-        if (typeof window !== 'undefined') {
-          window.alert(err instanceof Error ? err.message : t.attributionApprovalRequestFailed);
-        }
+        addToast('error', err instanceof Error ? err.message : t.attributionApprovalRequestFailed);
       }
     },
-    [approvalMatrix, canWriteRemotely, currentResult, data, dealParams, navigate, setDealParams, t]
+    [addToast, approvalMatrix, canWriteRemotely, currentResult, data, dealParams, navigate, setDealParams, t]
   );
 
   return (
@@ -251,7 +251,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
           )}
 
           <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-            <div className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
+            <div className="flex h-full w-full min-w-0 min-h-0 flex-col lg:col-span-4">
               <DealInputPanel
                 values={dealParams}
                 onChange={handleParamChange}
@@ -265,7 +265,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
               />
             </div>
 
-            <div data-tour="methodology-panel" className="flex h-full w-full min-h-0 flex-col lg:col-span-4">
+            <div data-tour="methodology-panel" className="flex h-full w-full min-w-0 min-h-0 flex-col lg:col-span-4">
               <Suspense
                 fallback={
                   <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
@@ -277,7 +277,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
 
             <div
               data-tour="pricing-receipt"
-              className="flex h-full w-full min-h-0 flex-col lg:col-span-4 lg:sticky lg:top-2 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
+              className="flex h-full w-full min-w-0 min-h-0 flex-col lg:col-span-4 lg:sticky lg:top-2 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
             >
               <Suspense
                 fallback={
@@ -355,12 +355,12 @@ export const CalculatorWorkspace: React.FC<Props> = ({
 
             {dealParams.clientId && (
               <div className="grid gap-4 lg:grid-cols-12">
-                <div data-tour="customer-360-panel" className="w-full lg:col-span-8">
+                <div data-tour="customer-360-panel" className="w-full min-w-0 lg:col-span-8">
                   <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
                     <CustomerRelationshipPanel clientId={dealParams.clientId} />
                   </Suspense>
                 </div>
-                <div data-tour="ltv-impact-panel" className="w-full lg:col-span-4">
+                <div data-tour="ltv-impact-panel" className="w-full min-w-0 lg:col-span-4">
                   <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
                     <LtvImpactPanel
                       clientId={dealParams.clientId}
@@ -381,10 +381,10 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             )}
 
             <div className="grid gap-4 lg:grid-cols-12">
-              <div className="w-full lg:col-span-6">
+              <div className="w-full min-w-0 lg:col-span-6">
                 <IFRS9StagePanel deal={dealParams} onChange={handleIFRS9Change} />
               </div>
-              <div className="w-full lg:col-span-6">
+              <div className="w-full min-w-0 lg:col-span-6">
                 <CrossBonusesPicker attachments={dealParams.crossBonusAttachments ?? []} onChange={handleBonusesChange} />
               </div>
             </div>
@@ -429,7 +429,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             )}
 
             <div className="grid gap-4 lg:grid-cols-12">
-              <div className="w-full lg:col-span-6">
+              <div className="w-full min-w-0 lg:col-span-6">
                 <InverseOptimizerPanel
                   deal={dealParams}
                   currentRaroc={currentResult?.raroc ?? 0}
@@ -437,7 +437,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
                   onApplyMargin={handleApplyMargin}
                 />
               </div>
-              <div className="w-full lg:col-span-6">
+              <div className="w-full min-w-0 lg:col-span-6">
                 {currentResult && <DelegationAuditPanel deal={dealParams} result={currentResult} />}
               </div>
             </div>
@@ -453,12 +453,12 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             {currentResult && <LineagePanel deal={dealParams} result={currentResult} />}
 
             <div className="grid gap-4 lg:grid-cols-12">
-              <div className="w-full lg:col-span-9">
+              <div className="w-full min-w-0 lg:col-span-9">
                 <Suspense fallback={<div className="h-24 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
                   <PricingComparison baseDeal={dealParams} approvalMatrix={approvalMatrix} />
                 </Suspense>
               </div>
-              <div className="w-full lg:col-span-3">
+              <div className="w-full min-w-0 lg:col-span-3">
                 <ScenarioLibraryPanel
                   currentScenarios={DEFAULT_PRICING_SCENARIOS}
                   onLoadScenario={(scenario: PricingScenario) => {

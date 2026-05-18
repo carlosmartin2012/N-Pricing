@@ -133,8 +133,8 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
                 No positions on file.
               </div>
             ) : (
-              <div className="overflow-hidden rounded-lg border border-white/10">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto rounded-lg border border-white/10">
+                <table className="w-full min-w-[480px] text-sm">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/[0.02]">
                       <th className="nfq-label text-[10px] px-3 py-2 text-left">Product</th>

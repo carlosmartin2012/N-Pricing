@@ -276,7 +276,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => walkthrough.startTour(FIRST_LOGIN_TOUR_ID)}
             aria-label={t.walkthrough_replay ?? 'Replay product tour'}
             title={t.walkthrough_replay ?? 'Replay product tour'}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-accent)]"
+            className="hidden h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-accent)] min-[1280px]:flex"
           >
             <HelpCircle size={17} />
           </button>

@@ -28,6 +28,7 @@ import {
 } from '../../../utils/dealWorkflow';
 import { exportDealsToExcel } from '../../../utils/excelUtils';
 import { mapWorkflowStatusToDossierStatus } from '../blotterReferenceUtils';
+import { useToast } from '../../ui/Toast';
 
 interface UseBlotterWorkflowActionsOptions {
   deals: Transaction[];
@@ -49,6 +50,7 @@ export function useBlotterWorkflowActions({
   userRole,
 }: UseBlotterWorkflowActionsOptions) {
   const data = useData();
+  const { addToast } = useToast();
   const canWriteRemotely = canPersistRemotely({
     dataMode: data.dataMode,
     isSupabaseConfigured,
@@ -134,7 +136,7 @@ export function useBlotterWorkflowActions({
       const result = executeTransition(deal, action.to, userRole, user?.email || 'unknown', pricingSnapshot);
 
       if (!result.success) {
-        window.alert(result.error || 'Transition not allowed.');
+        addToast('error', result.error || 'Transition not allowed.');
         return;
       }
 
@@ -223,7 +225,7 @@ export function useBlotterWorkflowActions({
         },
       });
     },
-    [canWriteRemotely, data, pricingContext, setDeals, user, userRole]
+    [addToast, canWriteRemotely, data, pricingContext, setDeals, user, userRole]
   );
 
   const handleBatchReprice = useCallback(async () => {

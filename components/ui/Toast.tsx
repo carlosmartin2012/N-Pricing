@@ -17,10 +17,18 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
+// Fallback used when the hook is called outside a ToastProvider — common in
+// Vitest unit tests that render leaf components without the App tree. The
+// toasts silently no-op rather than throwing so tests don't have to wrap
+// every render in <ToastProvider>. Real apps always provide one (App.tsx).
+const NOOP_TOAST_CONTEXT: ToastContextType = {
+  addToast: () => undefined,
+  removeToast: () => undefined,
+};
+
 export const useToast = () => {
   const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used within ToastProvider');
-  return ctx;
+  return ctx ?? NOOP_TOAST_CONTEXT;
 };
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
