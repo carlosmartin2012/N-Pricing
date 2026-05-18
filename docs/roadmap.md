@@ -14,7 +14,7 @@
 
 | Capa | Estado | Métrica |
 |---|---|---|
-| Tests | ✅ Verde | 1917 passing / 31 skipped (integration opt-in) |
+| Tests | ✅ Verde | 1944 passing / 31 skipped (integration opt-in) |
 | Lint | ✅ Verde | `--max-warnings=0` |
 | Typecheck | ✅ Verde | `strict` global; `noUncheckedIndexedAccess` opt-in en 4 archivos |
 | Migrations | 48 SQL secuenciales | última: `20260630000003_market_data_tenancy_hardening.sql` |
@@ -71,23 +71,23 @@ Aplicado en `refactor/8-bloques-mejora`: smoke spec rename, JSDoc, CSP reporting
 
 ## 3. Lo que está pendiente (en orden de prioridad)
 
-### 3.1 Ola 7 — UX colaborativa y copiloto contextual 🟡 Parcial
+### 3.1 Ola 7 — UX colaborativa y copiloto contextual ✅ Completa (2026-05-18)
 
-Cinco bloques ortogonales del plan original (`ola-7-collaborative-ux.md`):
+Cinco bloques ortogonales del plan original. Auditoría 2026-05-18 confirmó que A y C estaban ya integrados en `main` antes de la sesión actual; D y E se cerraron en la misma sesión.
 
-| Bloque | Estado | Plan |
+| Bloque | Estado | Evidencia |
 |---|---|---|
-| **A — Deal Timeline unificado** `/deals/:id/timeline` | ❌ Pendiente | Agregador server `buildDealTimeline(dealId)` fusionando Escalations + Dossiers + Audit + Snapshots; cliente API + React Query hook; vista con orden cronológico y links a snapshot replay. Server tiene `deal_id` en `escalations`, `signed_dossiers`, `audit_log`. Esfuerzo: **3 semanas**. La rama `feat/ola-7-deal-timeline-client` (105 commits behind) fue borrada en 2026-05-18 sin mergear — se reescribe limpio sobre el `main` actual. |
+| **A — Deal Timeline unificado** `/deals/:id/timeline` | ✅ Hecho | `utils/dealTimeline/aggregator.ts` + `server/routes/dealTimeline.ts` + `api/dealTimeline.ts` + `hooks/queries/useDealTimelineQuery.ts` + `components/Deals/DealTimeline{Route,View,Filters}.tsx` + `TimelineEventCard`. Linkado desde Blotter, Calculator/DealFlowRail, Control Room y Copilot suggest-actions. 65 tests verdes. La rama `feat/ola-7-deal-timeline-client` (borrada 2026-05-18) era un duplicado obsoleto — el trabajo real ya estaba en `main`. |
 | **B — Live presence + locks** | ✅ Hecho | `usePresenceAwareness` + `PresenceAvatars` integrados en Calculator y Blotter (commits `6f60309`/`a682a21`). |
-| **C — Copiloto Cmd+K "Ask"** | 🟡 Parcial | `f18fbd2 feat(copilot): Ola 7 Bloque C.2` ya en main (citation validator + server route). Falta: integrar tab "Ask" en `CommandPalette.tsx` cliente con UX final. Esfuerzo: **3-5 días**. |
-| **D — i18n namespaces** | ❌ Pendiente | `translations.ts` raíz (1622L → ahora +116L mayo) coexiste con `translations/` split-by-domain (1147L). Decisión: `translations/` es source, `translations.ts` raíz pasa a barrel auto-generado o se borra. Code-split por locale. Esfuerzo: **1 semana**. |
-| **E — Onboarding por rol** | ❌ Pendiente | Tours `WalkthroughContext` ya cableado. Crear 3 secuencias en `constants/walkthroughTours.ts`: `tourTrader`, `tourRiskOfficer`, `tourCommitteeMember`. Disparar por rol detectado en `AuthContext`. Esfuerzo: **1 semana**. |
+| **C — Copiloto Cmd+K "Ask"** | ✅ Hecho | `CopilotAskPanel` integrado en `CommandPalette.tsx` con modo `mode === 'ask'` (commit `f18fbd2`). Server route + citation validator + types/copilot. |
+| **D — i18n namespaces** | ✅ Hecho (2026-05-18) | 28 `nav*` keys migradas a `translations/navigation.{en,es}.ts`. `getTranslations()` mergea el namespace. `TranslationKeys` exportado e intersectado. Test de monolith hygiene previene regresiones. 10 namespaces totales con lazy loaders. |
+| **E — Onboarding por rol** | ✅ Hecho (2026-05-18) | ADMIN_TOUR añadido (5 pasos). `getRecommendedTourId('Admin') → 'admin-tour'` (era fallback a main-tour). Translations completas para los tours de Trader/Risk/Auditor (eran refs muertas) + nuevas de Admin. Test hygiene verifica que cada `UserProfile.role` mapea a tour registrado y que todas las titleKey/descriptionKey resuelven en en+es. |
 
 ### 3.2 Deudas técnicas concretas
 
 | Item | Esfuerzo | Razón |
 |---|---|---|
-| **CSP reporting en Vercel** | 2 h | `server/routes/cspReport.ts` existe pero deploys Vercel-only no lo alcanzan. Opciones: rewrite en `vercel.json` o `api/csp-report.ts` serverless. Hoy las violations se pierden silenciosamente en Vercel. |
+| ~~**CSP reporting en Vercel**~~ | ✅ Hecho 2026-05-18 | `api/csp-report.ts` Vercel Serverless Function declarada explícitamente en `vercel.json` `functions`. Mirrors `server/routes/cspReport.ts` normalize logic. 4 tests. |
 | **Bloque 6 follow-up — `legacy-peer-deps` audit** | 4 h | `npm ls react react-dom @types/react` para identificar la lib que pin <19. Si se resuelve, builds más predecibles. |
 | **`VERCEL_FORCE_NO_BUILD_CACHE` audit** | 2 h | Si el bug que motivó el flag ya no aplica, ahorro ~30-60s/deploy. |
 | **Ampliar `noUncheckedIndexedAccess`** | iterativo | 4 archivos auditados; próximos candidatos: `shockPresets`, `liquidityEngine`, `snapshotHash`, `creditRiskEngine`. Cuando todo prod-code esté auditado, mover flag a `tsconfig.json` global. |
