@@ -55,13 +55,12 @@ type WorkspaceTab = 'sandboxes' | 'elasticity' | 'backtesting' | 'benchmarks';
 const WORKSPACE_TABS: Array<{
   id: WorkspaceTab;
   label: string;
-  sublabel: string;
   icon: typeof FlaskConical;
 }> = [
-  { id: 'sandboxes', label: 'Sandbox Lab', sublabel: 'Policy diffs + impact', icon: FlaskConical },
-  { id: 'elasticity', label: 'Elasticity', sublabel: 'Models + calibration', icon: TrendingUp },
-  { id: 'backtesting', label: 'Backtesting', sublabel: 'Historical P&L replay', icon: History },
-  { id: 'benchmarks', label: 'Benchmarks', sublabel: 'Market + budget checks', icon: BarChart3 },
+  { id: 'sandboxes', label: 'Sandbox Lab', icon: FlaskConical },
+  { id: 'elasticity', label: 'Elasticity', icon: TrendingUp },
+  { id: 'backtesting', label: 'Backtesting', icon: History },
+  { id: 'benchmarks', label: 'Benchmarks', icon: BarChart3 },
 ];
 
 function formatChangeValue(value: unknown): string {
@@ -382,12 +381,7 @@ const WhatIfWorkspace: React.FC = () => {
                 }`}
               >
                 <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-cyan-300' : ''}`} />
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold">{tab.label}</span>
-                  <span className="block truncate text-[10px] uppercase tracking-[0.12em] text-[color:var(--nfq-text-secondary)]">
-                    {tab.sublabel}
-                  </span>
-                </span>
+                <span className="truncate text-sm font-semibold">{tab.label}</span>
               </button>
             );
           })}
@@ -397,7 +391,7 @@ const WhatIfWorkspace: React.FC = () => {
       {activeTab === 'sandboxes' && (
         <div className="flex min-h-0 flex-1 gap-4">
       {/* --- Left sidebar: sandbox list --- */}
-      <aside className="flex w-72 shrink-0 flex-col rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5 overflow-hidden">
+      <aside className="flex w-72 shrink-0 flex-col self-start rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5 overflow-hidden lg:sticky lg:top-2 lg:max-h-[calc(100vh-6rem)]">
         <div className="flex items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--nfq-text-primary)]">
             <FlaskConical className="h-4 w-4 text-cyan-400" />

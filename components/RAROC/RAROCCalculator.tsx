@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Calculator,
     Info,
     PieChart,
     Settings,
@@ -77,28 +76,23 @@ const RAROCCalculator: React.FC = () => {
 
     return (
         <div className="flex flex-col gap-4 p-2 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between bg-slate-900/40 p-4 rounded-[var(--nfq-radius-card)] border border-white/10 backdrop-blur-sm">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-cyan-500/20 rounded-[var(--nfq-radius-card)]">
-                        <Calculator className="text-cyan-400 w-6 h-6" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">RAROC Advanced Terminal</h2>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-slate-500 font-mono">MODEL_v4.2.X</span>
-                            <Badge variant="outline" className="text-[9px] border-cyan-500/30 text-cyan-400">BASIL III COMPLIANT</Badge>
-                            <Badge variant="secondary" className="text-[9px]">ENGINE SYNCED</Badge>
-                        </div>
-                    </div>
+            {/* Compact metadata strip — replaces the older in-page header block.
+                The view title ('RAROC') lives in the App.tsx compact hero now,
+                so this strip carries only the model + transaction context. */}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--nfq-radius-card)] border border-white/5 bg-slate-900/30 px-4 py-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[10px] text-slate-500">MODEL_v4.2.X</span>
+                    <Badge variant="outline" className="text-[9px] border-cyan-500/30 text-cyan-400">BASIL III COMPLIANT</Badge>
+                    <Badge variant="secondary" className="text-[9px]">ENGINE SYNCED</Badge>
                 </div>
-                <div className="flex flex-col items-end">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase">Transaction Context</span>
-                    <span className="text-lg font-mono font-bold text-cyan-400">{inputs.transactionId}</span>
+                <div className="flex items-baseline gap-2 font-mono">
+                    <span className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Tx</span>
+                    <span className="text-sm font-bold text-cyan-400">{inputs.transactionId}</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <div className="xl:col-span-4 space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 xl:items-start">
+                <div className="xl:col-span-4 space-y-6 xl:sticky xl:top-2 xl:self-start xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto">
                     <Panel title="Configuration Inputs" icon={<Settings size={18} className="text-cyan-500" />}>
                         <div className="space-y-6 p-2">
                             {RAROC_INPUT_SECTIONS.map((section) => (

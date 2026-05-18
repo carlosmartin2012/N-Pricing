@@ -158,8 +158,11 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
       {/* Macro scenario picker (EBA-style) */}
       <MacroScenarioPicker activeScenarioId={activeScenarioId} onSelectScenario={handleSelectMacroScenario} />
 
-      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-12">
-        <div className="h-full lg:col-span-4">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:items-start">
+        {/* Shock controls — sticky on desktop so the user can tweak ±200bp
+            parallel / ±250bp short / steepener / flattener and watch the
+            impact panel update without losing the slider context. */}
+        <div className="lg:col-span-4 lg:sticky lg:top-2 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
           <ShockControlPanel
             deal={deal}
             shocks={shocks}
@@ -172,7 +175,7 @@ const ShocksDashboard: React.FC<Props> = ({ deal: dealProp }) => {
           />
         </div>
 
-        <div className="h-full lg:col-span-8">
+        <div className="lg:col-span-8">
           <ShockImpactPanel language={language} baseResult={baseResult} shockedResult={shockedResult} />
         </div>
       </div>
