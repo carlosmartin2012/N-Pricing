@@ -31,9 +31,9 @@ import {
 } from 'lucide-react';
 import type { NavItem } from './components/ui/Sidebar';
 import type { ViewState } from './types';
-import type { translations } from './translations';
+import type { TranslationKeys } from './translations';
 
-type NavigationLabels = typeof translations.en;
+type NavigationLabels = TranslationKeys;
 
 // ---------------------------------------------------------------------------
 // View ↔ Path mapping — single source of truth for routing

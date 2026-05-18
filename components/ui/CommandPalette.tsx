@@ -15,7 +15,7 @@ import { viewToPath, buildAuxDestinations } from '../../appNavigation';
 import type { ViewState } from '../../types';
 import type { CopilotContextSummary } from '../../types/copilot';
 import CopilotAskPanel from './CopilotAskPanel';
-import type { translations } from '../../translations';
+import type { TranslationKeys } from '../../translations';
 
 interface CommandItem {
   id: string;
@@ -31,7 +31,7 @@ interface Props {
   onClose: () => void;
 }
 
-type TranslationLabels = typeof translations.en;
+type TranslationLabels = TranslationKeys;
 
 function buildViewItems(t: TranslationLabels): { id: ViewState; label: string; icon: LucideIcon }[] {
   return [

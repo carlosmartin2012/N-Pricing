@@ -1,4 +1,11 @@
+import { navigationEn } from './translations/navigation.en';
+import { navigationEs } from './translations/navigation.es';
+import type { NavigationTranslationKeys } from './translations/navigation.en';
+
 export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
+
+// Re-export so the namespace barrel and direct importers find the type here.
+export type { NavigationTranslationKeys };
 
 export const translations = {
     en: {
@@ -46,34 +53,8 @@ export const translations = {
         aiLab: 'N Pricing AI Lab',
         auditLog: 'System Audit',
         shocks: 'Stress Testing',
-        navClients: 'Clients',
-        navControlRoom: 'Control Room',
-        navPipeline: 'Pipeline',
-        navCampaigns: 'Campaigns',
-        navTargets: 'Targets',
-        navCalculator: 'Calculator',
-        navRaroc: 'RAROC',
-        navStressTest: 'Stress Test',
-        navStressPricing: 'Stress Pricing',
-        navWhatIf: 'What-If',
-        navMarketBenchmarks: 'Market Benchmarks',
-        navMethodology: 'Methodology',
-        navAnalytics: 'Analytics',
-        navAttributionReporting: 'Attribution reporting',
-        navModelInventory: 'Model Inventory',
-        navDossiers: 'Dossiers',
-        navApprovals: 'Approvals',
-        navBudgetReconciliation: 'Budget reconciliation',
-        navFtpReconciliation: 'FTP Reconciliation',
-        navAiAssistant: 'AI Assistant',
-        navSectionToday: 'Today',
-        navSectionRelationships: 'Relationships',
-        navSectionPricing: 'Pricing',
-        navSectionMarketData: 'Market Data',
-        navSectionInsights: 'Insights',
-        navSectionGovernance: 'Governance',
-        navSectionAssistant: 'Assistant',
-        navSectionSystem: 'System',
+        // Navigation keys live in translations/navigation.{en,es}.ts now
+        // (Ola 7 Bloque D, 2026-05-18). getTranslations() merges them in.
         auxAccountingLedger: 'Accounting Ledger',
         auxAccountingLedgerDesc: 'FTP journal + BU vs Treasury T-accounts (legacy)',
         auxSnapshotReplay: 'Snapshot Replay',
@@ -883,34 +864,8 @@ export const translations = {
         aiLab: 'N Pricing AI Lab',
         auditLog: 'Auditoría del Sistema',
         shocks: 'Stress Testing',
-        navClients: 'Clientes',
-        navControlRoom: 'Sala de control',
-        navPipeline: 'Pipeline',
-        navCampaigns: 'Campañas',
-        navTargets: 'Targets',
-        navCalculator: 'Calculadora',
-        navRaroc: 'RAROC',
-        navStressTest: 'Stress Test',
-        navStressPricing: 'Stress Pricing',
-        navWhatIf: 'What-If',
-        navMarketBenchmarks: 'Benchmarks de mercado',
-        navMethodology: 'Metodología',
-        navAnalytics: 'Analytics',
-        navAttributionReporting: 'Reporting de atribuciones',
-        navModelInventory: 'Inventario de modelos',
-        navDossiers: 'Dossiers',
-        navApprovals: 'Aprobaciones',
-        navBudgetReconciliation: 'Reconciliación budget',
-        navFtpReconciliation: 'Reconciliación FTP',
-        navAiAssistant: 'Asistente IA',
-        navSectionToday: 'Hoy',
-        navSectionRelationships: 'Relaciones',
-        navSectionPricing: 'Pricing',
-        navSectionMarketData: 'Datos de mercado',
-        navSectionInsights: 'Insights',
-        navSectionGovernance: 'Gobernanza',
-        navSectionAssistant: 'Asistente',
-        navSectionSystem: 'Sistema',
+        // Navigation keys live in translations/navigation.{en,es}.ts now
+        // (Ola 7 Bloque D, 2026-05-18). getTranslations() merges them in.
         auxAccountingLedger: 'Libro contable',
         auxAccountingLedgerDesc: 'Diario FTP + T-accounts BU vs Tesorería (legacy)',
         auxSnapshotReplay: 'Replay de snapshots',
@@ -1677,7 +1632,10 @@ export const translations = {
     }
 };
 
-type TranslationKeys = (typeof translations)['en'];
+// `TranslationKeys` intersects the monolith with namespace packs that have
+// been migrated out. As more namespaces move to `translations/*.ts`, add
+// them here. `getTranslations()` merges them at runtime.
+export type TranslationKeys = (typeof translations)['en'] & NavigationTranslationKeys;
 
 /** Partial translations for additional languages */
 const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
@@ -1724,9 +1682,12 @@ const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> =
  * Use this instead of `translations[language]` for Language types that include pt/fr/de.
  */
 export function getTranslations(lang: Language): TranslationKeys {
-  if (lang === 'en' || lang === 'es') return translations[lang];
+  const navigation: NavigationTranslationKeys = lang === 'es' ? navigationEs : navigationEn;
+  if (lang === 'en' || lang === 'es') {
+    return { ...translations[lang], ...navigation };
+  }
   const partial = partialTranslations[lang] || {};
-  return { ...translations.en, ...partial } as TranslationKeys;
+  return { ...translations.en, ...navigation, ...partial } as TranslationKeys;
 }
 
 export const AVAILABLE_LANGUAGES: { code: Language; label: string }[] = [

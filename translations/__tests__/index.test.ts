@@ -7,7 +7,11 @@ import {
   insightsTranslations,
   systemTranslations,
   sharedTranslations,
+  attributionsTranslations,
+  budgetTranslations,
+  navigationTranslations,
 } from '../index';
+import { translations, getTranslations } from '../../translations';
 import type { Language } from '../../translations';
 
 /**
@@ -20,13 +24,16 @@ import type { Language } from '../../translations';
  */
 
 const PACKS = [
-  { name: 'clv',        fn: clvTranslations },
-  { name: 'commercial', fn: commercialTranslations },
-  { name: 'pricing',    fn: pricingTranslations },
-  { name: 'governance', fn: governanceTranslations },
-  { name: 'insights',   fn: insightsTranslations },
-  { name: 'system',     fn: systemTranslations },
-  { name: 'shared',     fn: sharedTranslations },
+  { name: 'clv',          fn: clvTranslations },
+  { name: 'commercial',   fn: commercialTranslations },
+  { name: 'pricing',      fn: pricingTranslations },
+  { name: 'governance',   fn: governanceTranslations },
+  { name: 'insights',     fn: insightsTranslations },
+  { name: 'system',       fn: systemTranslations },
+  { name: 'shared',       fn: sharedTranslations },
+  { name: 'attributions', fn: attributionsTranslations },
+  { name: 'budget',       fn: budgetTranslations },
+  { name: 'navigation',   fn: navigationTranslations },
 ];
 
 const LANGS: Language[] = ['en', 'es', 'pt', 'fr', 'de'];
@@ -69,4 +76,36 @@ describe('translations barrel', () => {
       });
     });
   }
+});
+
+/**
+ * Hygiene: keys migrated to a namespace must NOT survive in the monolith.
+ * Catches the regression where someone re-adds a `nav*` key in
+ * `translations.ts` instead of `translations/navigation.{en,es}.ts`.
+ */
+describe('monolith hygiene', () => {
+  const MIGRATED_KEY_PREFIXES: { ns: string; prefixes: string[] }[] = [
+    { ns: 'navigation', prefixes: ['nav'] },
+  ];
+
+  for (const { ns, prefixes } of MIGRATED_KEY_PREFIXES) {
+    it(`monolith has no keys with prefix [${prefixes.join(', ')}] (migrated to ${ns} namespace)`, () => {
+      for (const lang of ['en', 'es'] as const) {
+        const bucket = translations[lang];
+        const stray = Object.keys(bucket).filter((k) =>
+          prefixes.some((p) => k.startsWith(p)),
+        );
+        expect(stray, `${lang} has stray ${ns} keys still in monolith`).toEqual([]);
+      }
+    });
+  }
+
+  it('getTranslations() merges navigation namespace into the resolved bag', () => {
+    const en = getTranslations('en');
+    const es = getTranslations('es');
+    expect(en.navClients).toBe('Clients');
+    expect(es.navClients).toBe('Clientes');
+    expect(en.navSectionToday).toBe('Today');
+    expect(es.navSectionToday).toBe('Hoy');
+  });
 });

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { ViewState } from '../types';
-import { Language, translations, getTranslations } from '../translations';
+import { Language, getTranslations } from '../translations';
+import type { TranslationKeys } from '../translations';
 import { pathToView, viewToPath } from '../appNavigation';
 import { localCache } from '../utils/localCache';
 
@@ -20,7 +21,7 @@ interface UIContextType {
   setTheme: (mode: ThemeMode) => void;
   workspaceMode: WorkspaceMode;
   setWorkspaceMode: (mode: WorkspaceMode) => void;
-  t: (typeof translations)['en'];
+  t: TranslationKeys;
   isSidebarOpen: boolean;
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isImportModalOpen: boolean;

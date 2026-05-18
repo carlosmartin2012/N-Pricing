@@ -32,15 +32,21 @@ import type { GovernanceTranslationKeys } from './governance.en';
 import type { InsightsTranslationKeys } from './insights.en';
 import type { SystemTranslationKeys } from './system.en';
 import type { SharedTranslationKeys } from './shared.en';
+import type { AttributionsTranslationKeys } from './attributions.en';
+import type { BudgetTranslationKeys } from './budget.en';
+import type { NavigationTranslationKeys } from './navigation.en';
 
 export interface NamespacePackByName {
-  clv:        ClvTranslationKeys;
-  commercial: CommercialTranslationKeys;
-  pricing:    PricingTranslationKeys;
-  governance: GovernanceTranslationKeys;
-  insights:   InsightsTranslationKeys;
-  system:     SystemTranslationKeys;
-  shared:     SharedTranslationKeys;
+  clv:          ClvTranslationKeys;
+  commercial:   CommercialTranslationKeys;
+  pricing:      PricingTranslationKeys;
+  governance:   GovernanceTranslationKeys;
+  insights:     InsightsTranslationKeys;
+  system:       SystemTranslationKeys;
+  shared:       SharedTranslationKeys;
+  attributions: AttributionsTranslationKeys;
+  budget:       BudgetTranslationKeys;
+  navigation:   NavigationTranslationKeys;
 }
 
 export type NamespaceName = keyof NamespacePackByName;
@@ -75,6 +81,18 @@ const LOADERS = {
   shared: {
     en: () => import('./shared.en').then((m) => m.sharedEn),
     es: () => import('./shared.es').then((m) => m.sharedEs),
+  },
+  attributions: {
+    en: () => import('./attributions.en').then((m) => m.attributionsEn),
+    es: () => import('./attributions.es').then((m) => m.attributionsEs),
+  },
+  budget: {
+    en: () => import('./budget.en').then((m) => m.budgetEn),
+    es: () => import('./budget.es').then((m) => m.budgetEs),
+  },
+  navigation: {
+    en: () => import('./navigation.en').then((m) => m.navigationEn),
+    es: () => import('./navigation.es').then((m) => m.navigationEs),
   },
 } as const;
 

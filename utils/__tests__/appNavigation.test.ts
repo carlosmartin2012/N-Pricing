@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { viewToPath, pathToView, getAllRoutePaths, buildMainNavItems, buildBottomNavItems, buildAuxDestinations } from '../../appNavigation';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import type { ViewState } from '../../types';
 
 describe('appNavigation routing helpers', () => {
@@ -69,7 +69,7 @@ describe('appNavigation routing helpers', () => {
     it('covers all main and bottom nav paths', () => {
       const routes = getAllRoutePaths();
       const paths = new Set(routes.map(r => r.path));
-      const t = translations.en;
+      const t = getTranslations('en');
       const main = buildMainNavItems(t);
       const bottom = buildBottomNavItems(t);
       for (const item of [...main, ...bottom]) {
@@ -81,7 +81,7 @@ describe('appNavigation routing helpers', () => {
   });
 
   describe('cockpit taxonomy', () => {
-    const t = translations.en;
+    const t = getTranslations('en');
     const items = buildMainNavItems(t);
 
     it('uses the 4-hub operating taxonomy', () => {
@@ -142,7 +142,7 @@ describe('appNavigation routing helpers', () => {
     });
 
     it('keeps stable section keys while rendering localized section labels', () => {
-      const spanishItems = buildMainNavItems(translations.es);
+      const spanishItems = buildMainNavItems(getTranslations('es'));
       const clients = spanishItems.find((i) => i.id === 'CUSTOMER_360');
       const market = spanishItems.find((i) => i.id === 'MARKET_DATA');
       expect(clients?.section).toBe('Relationship Cockpit');
@@ -157,7 +157,7 @@ describe('appNavigation routing helpers', () => {
   // Ola 10.7 — Sidebar density pass (28 → 26 entries).
   // -----------------------------------------------------------------
   describe('cockpit density pass', () => {
-    const t = translations.en;
+    const t = getTranslations('en');
     const items = buildMainNavItems(t);
 
     it('demotes ESCALATIONS from sidebar to AUX (edge case, no daily inbox)', () => {
@@ -200,14 +200,14 @@ describe('appNavigation routing helpers', () => {
 
   describe('AUX destinations', () => {
     it('includes ACCOUNTING after its demotion from main sidebar', () => {
-      const aux = buildAuxDestinations(translations.en);
+      const aux = buildAuxDestinations(getTranslations('en'));
       const accounting = aux.find((d) => d.id === 'ACCOUNTING');
       expect(accounting).toBeDefined();
       expect(accounting?.path).toBe('/accounting');
     });
 
     it('includes ESCALATIONS + ATTRIBUTION_MATRIX after Ola 10.7 demotion', () => {
-      const aux = buildAuxDestinations(translations.en);
+      const aux = buildAuxDestinations(getTranslations('en'));
       const escalations = aux.find((d) => d.id === 'ESCALATIONS');
       const matrix = aux.find((d) => d.id === 'ATTRIBUTION_MATRIX');
       expect(escalations?.path).toBe('/escalations');
@@ -219,7 +219,7 @@ describe('appNavigation routing helpers', () => {
     });
 
     it('includes specialist views demoted by the cockpit density pass', () => {
-      const aux = buildAuxDestinations(translations.en);
+      const aux = buildAuxDestinations(getTranslations('en'));
       expect(aux.map((d) => d.id).sort()).toEqual(expect.arrayContaining([
         'ACCOUNTING',
         'ATTRIBUTION_REPORTING',
@@ -234,7 +234,7 @@ describe('appNavigation routing helpers', () => {
     });
 
     it('builds auxiliary labels from the active language', () => {
-      const aux = buildAuxDestinations(translations.es);
+      const aux = buildAuxDestinations(getTranslations('es'));
       const accounting = aux.find((d) => d.id === 'ACCOUNTING');
       expect(accounting?.label).toBe('Libro contable');
       expect(accounting?.sublabel).toContain('Tesorería');
