@@ -39,7 +39,14 @@ const noopChannel = {
   on: () => noopChannel,
   subscribe: (_cb?: (status: string) => void) => { _cb?.('SUBSCRIBED'); return noopChannel; },
   unsubscribe: () => {},
+  // Realtime broadcast helpers — Ola 7 Bloque B (live cursors) calls
+  // `channel.send(...)`. Without these no-ops the SPA throws on every
+  // mousemove in environments where Supabase is the stub (Express-backed
+  // local dev, on-prem deploys). They return a resolved promise so the
+  // caller's `void channel.send(...)` pattern stays correct.
+  send: async () => 'ok' as const,
   track: async () => {},
+  untrack: async () => {},
   presenceState: () => ({}),
 };
 

@@ -1,7 +1,17 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient, types as pgTypes } from 'pg';
 import { createLogger } from './logger';
 
 const logger = createLogger('db');
+
+// pg defaults NUMERIC (oid 1700) and INT8 (oid 20) to string to preserve
+// precision. Every financial column in N-Pricing is declared NUMERIC, so the
+// browser-side mappers and components consistently received strings — `.toFixed`
+// then threw at runtime (e.g. BlotterTable rendering `deal.marginTarget`).
+// We coerce to number at the driver layer; precision is bounded by JS double
+// (15 decimal digits) which is well within pricing tolerances. If a future
+// column needs full precision keep the string and parse explicitly downstream.
+pgTypes.setTypeParser(pgTypes.builtins.NUMERIC, (val) => (val === null ? null : Number(val)));
+pgTypes.setTypeParser(pgTypes.builtins.INT8, (val) => (val === null ? null : Number(val)));
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required');

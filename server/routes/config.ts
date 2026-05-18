@@ -328,7 +328,12 @@ router.get('/users', async (req, res) => {
 router.post('/users', async (req, res) => {
   try {
     const u = req.body;
-    const id = u.id || `USR-${randomUUID().slice(0, 8)}`;
+    // `users.id` is uuid in the schema. The legacy seed/AuthContext sometimes
+    // sends prefixed ids like `USR-abc12345` or string slugs (`demo`). Coerce
+    // anything that is not a valid uuid to a fresh randomUUID() so the INSERT
+    // does not fail with `invalid input syntax for type uuid`.
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const id = typeof u.id === 'string' && UUID_RE.test(u.id) ? u.id : randomUUID();
     const scope = tenancyScope(req);
     const row = await queryOne(
       `INSERT INTO users (id, name, email, role, status, last_login, department, entity_id)
