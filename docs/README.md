@@ -15,15 +15,15 @@ queda obsoleto, se retira o se reemplaza por una entrada viva aquí.
 
 | Documento | Propósito | Owner |
 |---|---|---|
+| [`roadmap.md`](roadmap.md) | **Single source of truth del roadmap.** Estado por Ola/Phase, pendientes, gates externos. | Core team |
 | [`architecture.md`](architecture.md) | **Overview maestro post-roadmap.** Lectura obligatoria para onboarding. | Core team |
 | [`pricing-methodology.md`](pricing-methodology.md) | Metodología FTP completa (19 componentes). | Risk / ALM |
 | [`api-spec.yaml`](api-spec.yaml) | OpenAPI v2. Fuente única validada por `npm run check:api-spec`. | Core team |
 | [`integration-tests.md`](integration-tests.md) | Cómo correr los tests de integración opt-in. | Core team |
 | [`pricing-calculation-observability.md`](pricing-calculation-observability.md) | SLO + snapshots. | SRE |
 | [`pricing-plugin-architecture.md`](pricing-plugin-architecture.md) | Cómo extender el motor sin tocar core. | Core team |
-| [`methodology-first-evolution-plan.md`](methodology-first-evolution-plan.md) | Plan vivo de evolución metodológica. | Risk / ALM |
-| [`next-gen-application-spec.md`](next-gen-application-spec.md) | Especificación greenfield de la plataforma Bank Revenue Intelligence. | Core team |
-| [`next-gen-extraction-map.md`](next-gen-extraction-map.md) | Qué extraer, reescribir o descartar de N-Pricing para el greenfield. | Core team |
+| [`external-readiness-gates.md`](external-readiness-gates.md) | Gates bloqueados por input externo (credenciales, datasets, decisión ops). | Core team |
+| [`platform-restructure.md`](platform-restructure.md) | Estado del split `packages/*` (facades, no aislamiento físico). | Core team |
 
 ## 🟡 Phase design (design + rollout de cada Phase)
 
@@ -48,15 +48,16 @@ Cada Phase (0-6) tiene hasta 3 documentos: `-design.md` (concepción), `-technic
 
 ## 🔵 Olas (post-Phase 6)
 
-Capas de evolución posteriores al cierre del roadmap por Phases. Cada Ola es un PR-set mergeable agrupado por bloques A/B/C. El doc se mantiene vivo durante el plan; al cierre del rollout se migra a `📸 HISTÓRICO`.
+Estado consolidado en [`roadmap.md`](roadmap.md). Resumen ejecutivo:
 
-| Ola | Estado | Doc | Foco |
-|---|---|---|---|
-| 6 — Tenancy strict + Stress Pricing | ✅ MERGED en `main` (2026-04-23) | [`ola-6-tenancy-strict-stress-pricing.md`](ola-6-tenancy-strict-stress-pricing.md) | A: tenancy hardening · B: stress pricing 6 EBA presets · C: pricing snapshots hash chain |
-| 7 — UX colaborativa y copiloto contextual | ✅ MERGED en `main` | [`ola-7-collaborative-ux.md`](ola-7-collaborative-ux.md) | A: deal timeline · B: live presence · C: Cmd+K copilot · D: i18n namespaces · E: onboarding por rol |
-| 8 — Atribuciones jerárquicas + Approval Cockpit (cobertura Banca March) | ✅ MERGED en `main` (2026-04-30) | [`ola-8-atribuciones-banca-march.md`](ola-8-atribuciones-banca-march.md) | A: modelo dominio atribuciones · B: Approval Cockpit + Simulator · C: reporting de atribuciones. Apéndice con outline Olas 9 (integración BM) y 10 (AI + drift) |
-| 9 — Integración Banca March (PUZZLE + HOST + ALQUID) | ✅ MERGED en `main` (2026-04-30) | (incluida en `ola-8-atribuciones-banca-march.md` Apéndice B) | A: PUZZLE admission adapter · B: HOST mainframe SFTP file-drop + reconciliation matcher · C: ALQUID wrapper + BudgetReconciliationView |
-| 10 — AI grounding + drift recalibrator + mobile + Web Push | ✅ MERGED en `main` (2026-04-30) | (incluida en `ola-8-atribuciones-banca-march.md` Apéndice B) | A: copilot entiende atribuciones · B: drift recalibrator con governance · C: mobile cockpit + web-push real con VAPID |
+| Ola | Estado | Foco |
+|---|---|---|
+| 6 — Tenancy strict + Stress Pricing + Hash chain | ✅ MERGED en `main` (2026-04-23) | Tenancy hardening · stress pricing 6 EBA presets · pricing snapshots hash chain |
+| 7 — UX colaborativa y copiloto contextual | 🟡 PARCIAL — B/C live, A/D/E pendientes | Deal timeline · live presence · Cmd+K copilot · i18n namespaces · onboarding por rol |
+| 8 — Atribuciones jerárquicas + Approval Cockpit | ✅ MERGED en `main` (2026-04-30) | Modelo dominio atribuciones · Approval Cockpit + Simulator · reporting drill-down |
+| 9 — Integración Banca March (PUZZLE + HOST + ALQUID) | ✅ MERGED en `main` (2026-04-30) | PUZZLE admission adapter · HOST mainframe SFTP + reconciliation · ALQUID budget wrapper |
+| 10 — AI grounding + drift recalibrator + mobile + Web Push | ✅ MERGED en `main` (2026-04-30) | Copilot entiende atribuciones · drift recalibrator · mobile cockpit · web-push VAPID |
+| 11 — Security hardening | ✅ MERGED en `main` | Cross-tenant fixes · role guards · SSRF · worker overlap protection · CSP reporting |
 
 ## 🔴 Operational runbooks
 

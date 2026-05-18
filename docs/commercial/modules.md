@@ -501,5 +501,4 @@ clara entre los dos.
 - Sidebar actual: `appNavigation.ts:107-130` (taxonomía customer-centric)
 - Adapter framework: `integrations/types.ts` +
   `server/integrations/bootstrap.ts`
-- Roadmap general: `docs/roadmap-execution-summary.md`
-- Estado por ola: `docs/ola-{6,7,8}-*.md`
+- Roadmap general (single source of truth): `docs/roadmap.md`

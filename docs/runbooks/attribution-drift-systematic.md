@@ -92,7 +92,7 @@ patrón sistemático de aprobación al límite.
 
 ## Referencias
 
-- Plan: `docs/ola-8-atribuciones-banca-march.md` §3 Bloque C.
+- Roadmap: `docs/roadmap.md` (sección Ola 8 Bloque C — Reporting).
 - Detector puro: `utils/attributions/attributionReporter.ts`
   (`detectSystematicDrift`, `DEFAULT_ATTRIBUTION_DRIFT_THRESHOLDS`).
 - Worker runtime: `server/workers/attributionDriftDetector.ts`.

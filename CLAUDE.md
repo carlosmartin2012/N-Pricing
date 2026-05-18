@@ -1,15 +1,13 @@
 # CLAUDE.md — N-Pricing
 
 > Contexto esencial para agentes IA que trabajan en este repositorio.
-> Última actualización: 2026-05-13 (post platform restructure — packages/* facades introducidas; Olas 6-10 ya en `main`).
-> **Lectura obligatoria antes de tocar código:** [`docs/architecture.md`](docs/architecture.md)
-> para el estado vivo del producto, [`docs/platform-restructure.md`](docs/platform-restructure.md)
-> para el split en `packages/`, y [`docs/next-gen-application-spec.md`](docs/next-gen-application-spec.md)
-> para la dirección greenfield.
-> **Ola 6 completa (22 PRs merged, `#42–#63`):** estado por bloque en
-> [`docs/ola-6-tenancy-strict-stress-pricing.md`](docs/ola-6-tenancy-strict-stress-pricing.md);
-> resumen ejecutivo y follow-ups en
-> [`docs/roadmap-execution-summary.md`](docs/roadmap-execution-summary.md).
+> Última actualización: 2026-05-18 (doc consolidation — un único `docs/roadmap.md` reemplaza Olas 6/7/8 + methodology-first + next-gen + refactor-followups).
+> **Lectura obligatoria antes de tocar código:**
+> - [`docs/roadmap.md`](docs/roadmap.md) — single source of truth del estado de desarrollo.
+> - [`docs/architecture.md`](docs/architecture.md) — overview vivo del producto.
+> - [`docs/platform-restructure.md`](docs/platform-restructure.md) — split en `packages/*` (facades, no aislamiento físico).
+>
+> Decisión 2026-05-18: continuar en monorepo actual. Greenfield descartado (`next-gen-*` archivados en git history).
 
 ## Qué es N-Pricing
 
@@ -264,20 +262,18 @@ docs/                               # Doc operativa (ver índice abajo)
   api-spec.yaml                     # OpenAPI v2 (refresh tras Phase 0-5)
   pricing-methodology.md            # Metodología FTP (preexistente)
   supabase-setup.md                 # Setup local
+  roadmap.md                        # SINGLE SOURCE OF TRUTH del roadmap
+  architecture.md                   # Overview maestro vivo
   rls-audit-2026-04.md              # Auditoría RLS preexistente
   security-baseline-2026-04.md      # Baseline seguridad
   pricing-calculation-observability.md
   pricing-plugin-architecture.md
-  methodology-first-evolution-plan.md
-  phase-0-design.md                 # NUEVO — Phase 0 diseño conceptual
-  phase-0-technical-specs.md        # NUEVO — SQL + tipos + OpenAPI delta + ejemplos
-  phase-0-rollout.md                # NUEVO — env vars + secuencia rollout
-  roadmap-execution-summary.md      # Estado por fase tras roadmap
+  phase-0-design.md                 # Phase 0 diseño conceptual (operativo para flip strict)
+  phase-0-technical-specs.md        # SQL + tipos + OpenAPI delta + ejemplos
+  phase-0-rollout.md                # Env vars + secuencia rollout
+  external-readiness-gates.md       # Gates bloqueados por input externo
   integration-tests.md              # Cómo correr tests opt-in
-  architecture.md                   # Overview maestro post-roadmap
-  next-gen-application-spec.md      # Especificación greenfield
-  next-gen-extraction-map.md        # Mapa de extracción / descarte
-  ola-6-tenancy-strict-stress-pricing.md   # Siguiente ola en marcha
+  platform-restructure.md           # Estado split packages/*
   pivot/                            # Material exploratorio vivo
   runbooks/                         # 13 plantillas operativas
     README.md tenancy-violation.md tenancy-strict-flip.md
@@ -698,14 +694,10 @@ Demo deck comercial: `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
 | Archivo | Propósito |
 |---|---|
 | `README.md` | Overview ejecutivo del producto |
-| `docs/architecture.md` | **Overview maestro** post-roadmap (lectura recomendada) |
+| `docs/roadmap.md` | **Single source of truth** del roadmap (Olas, Phases, pendientes, gates) |
+| `docs/architecture.md` | **Overview maestro** vivo (lectura recomendada) |
 | `docs/api-spec.yaml` | OpenAPI v2 |
-| `docs/roadmap-execution-summary.md` | Estado fase por fase |
-| `docs/next-gen-application-spec.md` | Especificación greenfield Bank Revenue Intelligence |
-| `docs/next-gen-extraction-map.md` | Qué extraer, reescribir o descartar |
-| `docs/ola-6-tenancy-strict-stress-pricing.md` | **Ola 6 completa** · estado A/B/C con PR refs |
-| `docs/ola-7-collaborative-ux.md` | Ola 7 plan · UX colaborativa (cursors, copilot, i18n) |
-| `docs/ola-8-atribuciones-banca-march.md` | **Olas 8/9/10 completas** · cobertura Banca March (atribuciones jerárquicas, integraciones PUZZLE/HOST/ALQUID, AI insights, mobile cockpit) |
+| `docs/external-readiness-gates.md` | Gates externos para producción real |
 | `docs/phase-0-design.md` + `phase-0-technical-specs.md` + `phase-0-rollout.md` | Tenancy/snapshots/SLO completo |
 | `docs/integration-tests.md` | Cómo correr los tests integración opt-in |
 | `docs/runbooks/` | 13 plantillas operativas para on-call |

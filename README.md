@@ -368,10 +368,12 @@ Para despliegue interno del banco:
 - ✅ **Phase 5** — Tenant provisioning + ops metering (sin billing SaaS)
 - ✅ **Phase 6** — CLV 360 (ltvEngine + NBA + Pipeline) + FTP Reconciliation
 - ✅ **Unificación demo↔live** — MOCK_DEALS y Customer 360 viven en DB bajo `DEFAULT_ENTITY_ID`
-- ✅ **Ola 6** — Tenancy strict automation + Stress Pricing view + Hash chain writer ([detalle](./docs/ola-6-tenancy-strict-stress-pricing.md)) · Flip `TENANCY_STRICT=on` en prod queda como decisión operativa
+- ✅ **Ola 6** — Tenancy strict automation + Stress Pricing view + Hash chain writer · Flip `TENANCY_STRICT=on` en prod queda como decisión operativa
+- ✅ **Olas 8 + 9 + 10** — Atribuciones jerárquicas + integración Banca March (PUZZLE/HOST/ALQUID stubs) + AI grounding + mobile cockpit + Web Push VAPID
+- ✅ **Ola 11** — Hardening seguridad (cross-tenant, role guards, SSRF, worker overlap)
+- 🟡 **Ola 7** — UX colaborativa parcial: live presence + Cmd+K copilot done; Deal Timeline, i18n split, walkthroughs por rol pendientes
 
-Detalle fase por fase en
-[docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md).
+Estado consolidado en [docs/roadmap.md](./docs/roadmap.md).
 
 ## Documentación
 
@@ -380,8 +382,8 @@ Detalle fase por fase en
 | Onboarding técnico rápido           | [docs/architecture.md](./docs/architecture.md)                                                                       |
 | Contexto IA / agentes               | [CLAUDE.md](./CLAUDE.md)                                                                                             |
 | Demo en Replit (troubleshooting)    | [docs/runbooks/replit-demo.md](./docs/runbooks/replit-demo.md)                                                       |
-| Estado del roadmap                  | [docs/roadmap-execution-summary.md](./docs/roadmap-execution-summary.md)                                             |
-| Ola 6 — estado por bloque + PR refs | [docs/ola-6-tenancy-strict-stress-pricing.md](./docs/ola-6-tenancy-strict-stress-pricing.md)                         |
+| Estado del roadmap                  | [docs/roadmap.md](./docs/roadmap.md) (single source of truth)                                                        |
+| Gates externos para producción      | [docs/external-readiness-gates.md](./docs/external-readiness-gates.md)                                               |
 | Operación / on-call                 | [docs/runbooks/](./docs/runbooks/) (13 plantillas)                                                                   |
 | Tenancy strict flip playbook        | [docs/runbooks/tenancy-strict-flip.md](./docs/runbooks/tenancy-strict-flip.md)                                       |
 | Rollout de tenancy + flags          | [docs/phase-0-rollout.md](./docs/phase-0-rollout.md)                                                                 |
@@ -391,8 +393,6 @@ Detalle fase por fase en
 | Setup Supabase                      | [docs/supabase-setup.md](./docs/supabase-setup.md)                                                                   |
 | Tests integración                   | [docs/integration-tests.md](./docs/integration-tests.md)                                                             |
 | Seguridad baseline                  | [docs/security-baseline-2026-04.md](./docs/security-baseline-2026-04.md)                                             |
-| Nueva plataforma greenfield         | [docs/next-gen-application-spec.md](./docs/next-gen-application-spec.md)                                             |
-| Extracción hacia greenfield         | [docs/next-gen-extraction-map.md](./docs/next-gen-extraction-map.md)                                                 |
 
 ## Licencia
 

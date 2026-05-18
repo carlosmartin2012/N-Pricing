@@ -452,7 +452,7 @@ la evolución para bancos con organigrama complejo (Banca March, BBVA).
 
 ### Referencias
 
-- Plan Ola 8: `docs/ola-8-atribuciones-banca-march.md`
+- Roadmap consolidado: `docs/roadmap.md` (sección Ola 8)
 - Schema: `supabase/migrations/20260620000001_attributions.sql`
 - Módulos puros: `utils/attributions/`
 - API: `docs/api-spec.yaml#/paths/~1attributions~1*`

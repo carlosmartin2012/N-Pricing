@@ -174,5 +174,5 @@ curl -s -H "x-entity-id: $ENTITY" \
 
 - Schema: `supabase/migrations/20260620000001_attributions.sql`
 - Recalibrator: `utils/attributions/driftRecalibrator.ts`
-- Plan: `docs/ola-8-atribuciones-banca-march.md`
+- Roadmap: `docs/roadmap.md` (sección Ola 8)
 - Runbook drift: `docs/runbooks/attribution-drift-systematic.md`

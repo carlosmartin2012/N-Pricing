@@ -115,7 +115,7 @@ DELETE FROM push_subscriptions WHERE entity_id = :entity;
 
 ## Referencias
 
-- Plan: `docs/ola-8-atribuciones-banca-march.md` Apéndice B Bloque C.
+- Roadmap: `docs/roadmap.md` (sección Ola 10 Bloque C — Web Push).
 - Sender: `server/integrations/webPushSender.ts`.
 - Dispatcher: `server/integrations/escalationPushDispatcher.ts`.
 - Routes: `server/routes/notifications.ts`.

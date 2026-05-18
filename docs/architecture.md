@@ -15,7 +15,7 @@
 > - CI: build-and-test verde, integration-tests tras 7 compat fixes (supabase_realtime, roles, auth schema stubs, reserved word, type mismatches).
 > - Bundle: budget 520 KB + primer lazy-load (CommandPalette).
 >
-> Ver [`docs/ola-6-tenancy-strict-stress-pricing.md`](./ola-6-tenancy-strict-stress-pricing.md) para detalle por bloque.
+> Estado por bloque en [`roadmap.md`](./roadmap.md) (sección Ola 6).
 
 ---
 
@@ -624,9 +624,8 @@ in-memory que Salesforce/Bloomberg:
 
 ## Referencias rápidas
 
-- **Plan Olas 8/9/10 — Banca March**: [`docs/ola-8-atribuciones-banca-march.md`](./ola-8-atribuciones-banca-march.md)
-- Nueva plataforma greenfield: [`docs/next-gen-application-spec.md`](./next-gen-application-spec.md) y [`docs/next-gen-extraction-map.md`](./next-gen-extraction-map.md)
-- Roadmap fase a fase: [`docs/roadmap-execution-summary.md`](./roadmap-execution-summary.md)
+- **Roadmap consolidado (single source of truth)**: [`docs/roadmap.md`](./roadmap.md)
+- Gates externos para producción real: [`docs/external-readiness-gates.md`](./external-readiness-gates.md)
 - Diseño Phase 0 detallado: [`docs/phase-0-design.md`](./phase-0-design.md)
 - SQL + tipos + ejemplos Phase 0: [`docs/phase-0-technical-specs.md`](./phase-0-technical-specs.md)
 - Rollout de flags: [`docs/phase-0-rollout.md`](./phase-0-rollout.md)

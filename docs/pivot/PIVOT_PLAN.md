@@ -5,7 +5,7 @@
 > **Fecha:** 2026-04-13
 > **Estado:** Aprobado, arrancable inmediato
 > **Piloto:** Banco Tier-1 España (all-segment: Corporate + SME + Retail), arranque limpio (sin backfill)
-> **Referencias relacionadas:** [`roadmap-execution-summary.md`](../roadmap-execution-summary.md), [`pricing-methodology.md`](../pricing-methodology.md), [`ai-assistant-refocus.md`](./ai-assistant-refocus.md)
+> **Referencias relacionadas:** [`roadmap.md`](../roadmap.md), [`pricing-methodology.md`](../pricing-methodology.md), [`ai-assistant-refocus.md`](./ai-assistant-refocus.md)
 
 ---
 
