@@ -32,7 +32,8 @@ export async function sha256Hex(input: string): Promise<string> {
 function toHex(bytes: Uint8Array): string {
   let out = '';
   for (let i = 0; i < bytes.length; i++) {
-    out += bytes[i].toString(16).padStart(2, '0');
+    // `i < bytes.length` proves bounds; assertion safe under noUncheckedIndexedAccess.
+    out += bytes[i]!.toString(16).padStart(2, '0');
   }
   return out;
 }
@@ -102,8 +103,9 @@ export function verifySnapshotChain(
     return { valid: true, checked: links.length };
   }
   for (let i = 1; i < links.length; i++) {
-    const prev = links[i - 1];
-    const cur = links[i];
+    // Loop bound `1 <= i < links.length` proves both indices in range.
+    const prev = links[i - 1]!;
+    const cur = links[i]!;
     if (cur.prevOutputHash !== prev.outputHash) {
       return {
         valid: false,

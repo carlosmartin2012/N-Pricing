@@ -207,25 +207,30 @@ export function timeToDecisionStats(
   }
   const durations = pairs.map((p) => Date.parse(p.decidedAt) - Date.parse(p.openedAt));
   const sorted = [...durations].sort((a, b) => a - b);
-  const median = sorted[Math.floor(sorted.length / 2)];
+  // length>0 ⇒ Math.floor(length/2) and min(length-1, …) are valid indices.
+  const median = sorted[Math.floor(sorted.length / 2)]!;
   const p95Idx = Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95));
-  const p95 = sorted[p95Idx];
+  const p95 = sorted[p95Idx]!;
   const mean = durations.reduce((a, b) => a + b, 0) / durations.length;
 
   // Por nivel
   const byLevel: TimeToDecisionStats['byLevel'] = {};
   const groups = new Map<string, number[]>();
   for (let i = 0; i < pairs.length; i++) {
-    const arr = groups.get(pairs[i].levelId) ?? [];
-    arr.push(durations[i]);
-    groups.set(pairs[i].levelId, arr);
+    // Loop bound `0 <= i < pairs.length` proves indices in range.
+    const pair = pairs[i]!;
+    const duration = durations[i]!;
+    const arr = groups.get(pair.levelId) ?? [];
+    arr.push(duration);
+    groups.set(pair.levelId, arr);
   }
   for (const [levelId, ds] of groups) {
     const s = [...ds].sort((a, b) => a - b);
+    // Each group has at least one element (we only insert via push above).
     byLevel[levelId] = {
       count:    s.length,
-      medianMs: s[Math.floor(s.length / 2)],
-      p95Ms:    s[Math.min(s.length - 1, Math.floor(s.length * 0.95))],
+      medianMs: s[Math.floor(s.length / 2)]!,
+      p95Ms:    s[Math.min(s.length - 1, Math.floor(s.length * 0.95))]!,
     };
   }
 

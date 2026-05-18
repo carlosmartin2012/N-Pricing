@@ -225,12 +225,14 @@ export function interpolateShockShiftBps(
     .map((t) => ({ months: TENOR_MONTHS[t], bps: shifts[t] as number }))
     .sort((a, b) => a.months - b.months);
   if (ordered.length === 0) return 0;
-  if (targetMonths <= ordered[0].months) return ordered[0].bps;
-  const last = ordered[ordered.length - 1];
+  // length>0 already checked → index 0 and length-1 are valid.
+  if (targetMonths <= ordered[0]!.months) return ordered[0]!.bps;
+  const last = ordered[ordered.length - 1]!;
   if (targetMonths >= last.months) return last.bps;
   for (let i = 1; i < ordered.length; i++) {
-    const a = ordered[i - 1];
-    const b = ordered[i];
+    // Loop bound `1 <= i < length` proves both indices in range.
+    const a = ordered[i - 1]!;
+    const b = ordered[i]!;
     if (targetMonths <= b.months) {
       const t = (targetMonths - a.months) / (b.months - a.months);
       return a.bps + t * (b.bps - a.bps);

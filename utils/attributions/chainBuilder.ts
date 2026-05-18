@@ -29,7 +29,8 @@ export function sortLevelsAscending(levels: AttributionLevel[]): AttributionLeve
 export function findRoot(levels: AttributionLevel[]): AttributionLevel | null {
   const roots = levels.filter((l) => l.active && l.parentId === null);
   if (roots.length === 0) return null;
-  return [...roots].sort((a, b) => a.levelOrder - b.levelOrder)[0];
+  // length>0 already checked → index 0 is defined.
+  return [...roots].sort((a, b) => a.levelOrder - b.levelOrder)[0]!;
 }
 
 /**

@@ -261,7 +261,8 @@ export function buildLineageReport<T>(
     const matches = queryBitemporal(filtered, query);
     if (matches.length === 0) continue;
 
-    const match = matches[0];
+    // length>0 already checked above → matches[0] is defined.
+    const match = matches[0]!;
     entries.push({
       parameterId: pid,
       parameterName: nameLookup ? nameLookup(pid) : pid,

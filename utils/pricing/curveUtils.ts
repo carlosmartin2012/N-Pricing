@@ -29,13 +29,16 @@ export function bootstrapZeroRates(parCurve: YieldCurvePoint[]): YieldCurvePoint
   // inject phantom points at the short end of the curve and corrupt the bootstrap.
   const sorted = parCurve
     .filter(p => p.tenor in TENOR_MONTHS)
-    .map(p => ({ tenor: p.tenor, months: TENOR_MONTHS[p.tenor], rate: p.rate }))
+    // `p.tenor in TENOR_MONTHS` proves the lookup is defined; the assertion
+    // suppresses noUncheckedIndexedAccess without weakening the contract.
+    .map(p => ({ tenor: p.tenor, months: TENOR_MONTHS[p.tenor]!, rate: p.rate }))
     .sort((a, b) => a.months - b.months);
 
   const zeroRates: { tenor: string; months: number; rate: number }[] = [];
 
   for (let i = 0; i < sorted.length; i++) {
-    const { tenor, months, rate } = sorted[i];
+    // Loop bound `0 <= i < length` proves index in range.
+    const { tenor, months, rate } = sorted[i]!;
     if (months <= 12) {
       // Short-term: zero ≈ par
       zeroRates.push({ tenor, months, rate });

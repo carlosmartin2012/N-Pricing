@@ -30,7 +30,8 @@ const LEVEL_ORDER: EscalationLevel[] = ['L1', 'L2', 'Committee'];
 export function promoteLevel(level: EscalationLevel): EscalationLevel | null {
   const idx = LEVEL_ORDER.indexOf(level);
   if (idx < 0 || idx === LEVEL_ORDER.length - 1) return null;
-  return LEVEL_ORDER[idx + 1];
+  // idx in [0, length-2] ⇒ idx+1 in [1, length-1], valid index.
+  return LEVEL_ORDER[idx + 1]!;
 }
 
 export function computeDueAt(now: Date, timeoutHours: number): string {

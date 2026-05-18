@@ -204,7 +204,7 @@ function diagnoseFailure(
 }
 
 function highestLevel(sortedAsc: AttributionLevel[]): AttributionLevel | null {
-  return sortedAsc.length > 0 ? sortedAsc[sortedAsc.length - 1] : null;
+  return sortedAsc.length > 0 ? sortedAsc[sortedAsc.length - 1]! : null;
 }
 
 function toIsoDate(d: Date): string {

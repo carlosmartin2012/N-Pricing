@@ -17,10 +17,12 @@
   // Cuando todos los archivos prod estén auditados, mover el flag a
   // tsconfig.json (global) y borrar este file.
   //
-  // Estado: 4 archivos auditados (2026-05-14). 700+ errores TS restantes en
-  // ~115 archivos. Próximos candidatos por prioridad regulatoria:
-  // utils/pricing/shockPresets.ts, liquidityEngine.ts, snapshotHash.ts,
-  // creditRiskEngine.ts, bitemporal.ts, curveUtils.ts.
+  // Estado: 23 archivos auditados (2026-05-18, expansión de 4 → 23). Cubre
+  // todos los módulos puros del motor financiero — pricing helpers,
+  // attributions, governance, customer360 aggregator, dealTimeline
+  // aggregator, backtesting drift detector. Próximos candidatos por
+  // prioridad: server/* routes (donde el bound viene del SQL), componentes
+  // grandes (Calculator, Blotter), hooks.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noUncheckedIndexedAccess": true
@@ -28,7 +30,26 @@
   "include": [
     "utils/pricing/nelsonSiegelSvensson.ts",
     "utils/pricing/interpolation.ts",
+    "utils/pricing/shockPresets.ts",
+    "utils/pricing/curveUtils.ts",
+    "utils/pricing/bitemporal.ts",
+    "utils/pricing/pricingConstants.ts",
     "utils/ruleMatchingEngine.ts",
-    "utils/customer360/csvImport.ts"
+    "utils/snapshotHash.ts",
+    "utils/canonicalJson.ts",
+    "utils/liquidityEngine.ts",
+    "utils/creditRiskEngine.ts",
+    "utils/customer360/csvImport.ts",
+    "utils/customer360/relationshipAggregator.ts",
+    "utils/customer360/crossBonusFromRelationship.ts",
+    "utils/channels/tokenBucket.ts",
+    "utils/channels/campaignMatcher.ts",
+    "utils/governance/dossierSigning.ts",
+    "utils/governance/escalationEvaluator.ts",
+    "utils/attributions/attributionRouter.ts",
+    "utils/attributions/attributionReporter.ts",
+    "utils/attributions/chainBuilder.ts",
+    "utils/backtesting/driftDetector.ts",
+    "utils/dealTimeline/aggregator.ts"
   ]
 }
