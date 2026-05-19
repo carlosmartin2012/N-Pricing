@@ -1,5 +1,5 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { Bell, HelpCircle, Languages, LogOut, Menu, Monitor, Moon, Search, Sun, Upload } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Bell, BriefcaseBusiness, HelpCircle, Languages, LogOut, Menu, Monitor, Moon, Search, Settings2, ShieldCheck, Sun, Upload } from 'lucide-react';
 import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from '../../constants/walkthroughTours';
 import { ViewState, UserProfile } from '../../types';
@@ -14,10 +14,6 @@ import { OfflineBadge } from './OfflineBadge';
 import { PresenceAvatars } from './PresenceAvatars';
 import type { PresenceUser } from '../../hooks/usePresenceAwareness';
 import type { WorkspaceMode } from '../../contexts/UIContext';
-
-const PersonaModeSwitch = React.lazy(() =>
-  import('./PersonaModeSwitch').then((module) => ({ default: module.PersonaModeSwitch }))
-);
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -247,18 +243,9 @@ export const Header: React.FC<HeaderProps> = ({
           </>
         )}
 
-        <Suspense fallback={null}>
-          <PersonaModeSwitch
-            mode={workspaceMode}
-            onChange={onWorkspaceModeChange}
-            labels={{
-              mode: t.workspaceMode,
-              trader: t.workspaceModeTrader,
-              risk: t.workspaceModeRisk,
-              admin: t.workspaceModeAdmin,
-            }}
-          />
-        </Suspense>
+        {/* R3: Persona mode switcher moved into user-menu dropdown (avatar).
+            The 3-button cluster (Trader / Risk / Admin) used to live here
+            full-width; users now switch perspectives from the menu instead. */}
 
         {entityLabels && <EntitySwitcher labels={entityLabels} />}
 
@@ -380,6 +367,45 @@ export const Header: React.FC<HeaderProps> = ({
                     {t.walkthrough_replay ?? 'Replay product tour'}
                   </button>
                 )}
+              </div>
+
+              {/* Workspace mode (persona) — moved here from topbar so the
+                  3-button cluster does not consume permanent horizontal
+                  space. Current mode shown via active-state ring. */}
+              <div className="border-t border-[color:var(--nfq-border-ghost)] p-1">
+                <div className="px-3 pb-1 pt-2 text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">
+                  {t.workspaceMode}
+                </div>
+                {([
+                  { id: 'Trader' as const, icon: BriefcaseBusiness, label: t.workspaceModeTrader },
+                  { id: 'Risk' as const, icon: ShieldCheck, label: t.workspaceModeRisk },
+                  { id: 'Admin' as const, icon: Settings2, label: t.workspaceModeAdmin },
+                ]).map(({ id, icon: Icon, label }) => {
+                  const active = workspaceMode === id;
+                  return (
+                    <button
+                      key={id}
+                      role="menuitemradio"
+                      aria-checked={active}
+                      onClick={() => onWorkspaceModeChange(id)}
+                      className={`flex w-full items-center justify-between gap-2 rounded-[var(--nfq-radius-md)] px-3 py-2 text-left text-[13px] transition-colors ${
+                        active
+                          ? 'bg-[color:rgba(var(--nfq-accent-rgb),0.10)] text-[color:var(--nfq-accent)]'
+                          : 'text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-bg-bright)]'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icon size={14} className={active ? '' : 'text-[color:var(--nfq-text-muted)]'} />
+                        {label}
+                      </span>
+                      {active && (
+                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-accent)]">
+                          ●
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="border-t border-[color:var(--nfq-border-ghost)] p-1">
