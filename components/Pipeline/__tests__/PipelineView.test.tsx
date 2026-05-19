@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -61,6 +61,12 @@ function mount(rows: PipelineNbaRow[]) {
 }
 
 describe('PipelineView', () => {
+  beforeEach(() => {
+    // Pipeline persists status/product/confidence filters to localStorage
+    // (W4.2). Clear between tests so filter state doesn't leak.
+    window.localStorage.removeItem('n_pricing_pipeline_filters');
+  });
+
   it('renders the header and KPI tiles', async () => {
     mount([row()]);
     expect(await screen.findByText('Pipeline')).toBeInTheDocument();

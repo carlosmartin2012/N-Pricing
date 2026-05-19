@@ -67,17 +67,51 @@ function downloadBlobFile(filename: string, content: string, mime = 'text/csv;ch
   URL.revokeObjectURL(url);
 }
 
+/** localStorage key prefix for Pipeline filter persistence (W4.2). */
+const PIPELINE_PREFS_KEY = 'n_pricing_pipeline_filters';
+
+interface PipelinePrefs {
+  status: PipelineStatusFilter;
+  productFilter: string;
+  confidenceBand: ConfidenceBand;
+}
+
+function readPipelinePrefs(): Partial<PipelinePrefs> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(PIPELINE_PREFS_KEY);
+    return raw ? (JSON.parse(raw) as Partial<PipelinePrefs>) : {};
+  } catch {
+    return {};
+  }
+}
+
 const PipelineView: React.FC = () => {
   const navigate = useNavigate();
   const { activeEntity } = useEntity();
   const { language } = useUI();
   const t = clvTranslations(language);
-  const [status, setStatus] = useState<PipelineStatusFilter>('open');
-  const [productFilter, setProductFilter] = useState<string>('all');
-  const [confidenceBand, setConfidenceBand] = useState<ConfidenceBand>('all');
+  const prefs = useMemo(readPipelinePrefs, []);
+  const [status, setStatus] = useState<PipelineStatusFilter>(prefs.status ?? 'open');
+  const [productFilter, setProductFilter] = useState<string>(prefs.productFilter ?? 'all');
+  const [confidenceBand, setConfidenceBand] = useState<ConfidenceBand>(prefs.confidenceBand ?? 'all');
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const consume = useConsumeNbaPipeline();
+
+  // Persist filter prefs (W4.2). Auto-refresh deliberately NOT persisted —
+  // it should not surprise the user on next session.
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(
+        PIPELINE_PREFS_KEY,
+        JSON.stringify({ status, productFilter, confidenceBand }),
+      );
+    } catch {
+      // Best-effort — preference persistence is not critical.
+    }
+  }, [status, productFilter, confidenceBand]);
 
   const { data: rows = [], isLoading } = usePipelineNbaQuery(
     status,
