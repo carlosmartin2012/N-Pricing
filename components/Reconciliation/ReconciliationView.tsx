@@ -38,10 +38,10 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
 };
 
 const STATUS_TONE: Record<MatchStatus, string> = {
-  matched: 'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  matched: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   amount_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   rate_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
-  currency_mismatch: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
+  currency_mismatch: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
   bu_only: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
   treasury_only: 'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
   unknown: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',

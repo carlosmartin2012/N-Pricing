@@ -61,9 +61,9 @@ function deltaTone(bps: number): string {
 }
 
 function deltaBg(bps: number): string {
-  if (bps <= -5) return 'bg-emerald-500/10';
+  if (bps <= -5) return 'bg-[var(--nfq-success)]/10';
   if (bps <= 5) return 'bg-amber-500/10';
-  return 'bg-rose-500/10';
+  return 'bg-[var(--nfq-danger)]/10';
 }
 
 function gapTone(value: number): string {

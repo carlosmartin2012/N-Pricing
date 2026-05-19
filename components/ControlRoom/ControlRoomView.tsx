@@ -121,7 +121,7 @@ const ControlRoomView: React.FC = () => {
                 </div>
               </button>
             )) : (
-              <div className="rounded-lg border border-emerald-500/15 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+              <div className="rounded-lg border border-[color:var(--nfq-success)]/15 bg-[var(--nfq-success)]/10 p-4 text-sm text-emerald-200">
                 <CheckCircle2 className="mb-2" size={18} />
                 {t.controlRoomNoActions}
               </div>

@@ -138,7 +138,7 @@ interface DriftTabProps {
 const DriftTab: React.FC<DriftTabProps> = ({ drift, byUser, t }) => {
   if (drift.length === 0) {
     return (
-      <div className="rounded-md bg-emerald-500/10 p-3 text-xs text-emerald-200">{t.reportingDriftEmpty}</div>
+      <div className="rounded-md bg-[var(--nfq-success)]/10 p-3 text-xs text-emerald-200">{t.reportingDriftEmpty}</div>
     );
   }
   const usersById = new Map(byUser.map((u) => [u.userId, u]));
@@ -154,7 +154,7 @@ const DriftTab: React.FC<DriftTabProps> = ({ drift, byUser, t }) => {
               key={s.userId}
               className={`rounded-md border p-3 text-xs ${
                 tone === 'rose'
-                  ? 'border-[color:var(--nfq-danger)]/30 bg-rose-500/10'
+                  ? 'border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/10'
                   : 'border-[color:var(--nfq-warning)]/30 bg-amber-500/10'
               }`}
             >
@@ -206,7 +206,7 @@ const FunnelTab: React.FC<TabContentProps> = ({ summary, t }) => {
           </span>
           <div className="relative h-5 flex-1 overflow-hidden rounded bg-[var(--nfq-bg-root)]/40">
             <div
-              className="absolute inset-y-0 left-0 bg-emerald-500/40"
+              className="absolute inset-y-0 left-0 bg-[var(--nfq-success)]/40"
               style={{ width: `${Math.min(100, row.rate * 100)}%` }}
             />
             <span className="absolute inset-0 flex items-center justify-end pr-2 font-mono text-[11px] text-[color:var(--nfq-text-primary)]">
@@ -288,7 +288,7 @@ const TabButton: React.FC<TabButtonProps> = ({ active, icon: Icon, label, onClic
     onClick={onClick}
     className={`flex items-center gap-1 rounded-t-md px-3 py-1.5 text-xs ${
       active
-        ? 'border-b-2 border-emerald-400 text-[color:var(--nfq-success)]'
+        ? 'border-b-2 border-[color:var(--nfq-success)] text-[color:var(--nfq-success)]'
         : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
     }`}
   >
@@ -316,7 +316,7 @@ const WindowToggle: React.FC<WindowToggleProps> = ({ value, onChange, t }) => {
           type="button"
           onClick={() => onChange(o.value)}
           className={`px-3 py-1 text-xs font-mono ${
-            value === o.value ? 'bg-emerald-500/20 text-emerald-200' : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
+            value === o.value ? 'bg-[var(--nfq-success)]/20 text-emerald-200' : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
           }`}
         >
           {o.label}

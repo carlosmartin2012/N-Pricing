@@ -13,8 +13,8 @@ const fmtEur = (v: number | null) =>
 const fmtPct = (v: number | null) => (v === null ? '—' : `${(v * 100).toFixed(1)}%`);
 
 const STATUS_CLASSES: Record<BudgetVarianceStatus, string> = {
-  on_track:           'bg-emerald-500/10 text-[color:var(--nfq-success)] border-[color:var(--nfq-success)]/30',
-  over_budget_rate:   'bg-rose-500/10    text-[color:var(--nfq-danger)]    border-[color:var(--nfq-danger)]/30',
+  on_track:           'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)] border-[color:var(--nfq-success)]/30',
+  over_budget_rate:   'bg-[var(--nfq-danger)]/10    text-[color:var(--nfq-danger)]    border-[color:var(--nfq-danger)]/30',
   under_budget_rate:  'bg-amber-500/10   text-[color:var(--nfq-warning)]   border-[color:var(--nfq-warning)]/30',
   over_budget_volume: 'bg-sky-500/10     text-[color:var(--nfq-cat-a)]     border-[color:var(--nfq-cat-a)]/30',
   under_budget_volume:'bg-violet-500/10  text-[color:var(--nfq-cat-d)]  border-[color:var(--nfq-cat-d)]/30',

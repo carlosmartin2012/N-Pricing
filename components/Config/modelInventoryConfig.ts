@@ -110,8 +110,8 @@ export const CATEGORY_COLORS: Record<
   },
   PREPAYMENT: { bg: 'bg-nfq-steel/10', text: 'text-nfq-steel', label: 'CPR' },
   CROSS_BONUSES: {
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-400',
+    bg: 'bg-[var(--nfq-success)]/10',
+    text: 'text-[color:var(--nfq-success)]',
     label: 'Bonus',
   },
   BEHAVIORAL: {
@@ -132,7 +132,7 @@ export const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   DRAFT: { bg: 'bg-gray-500/10', text: 'text-gray-400' },
   INTERNAL_VALIDATION: { bg: 'bg-amber-500/10', text: 'text-amber-400' },
   APPROVED: { bg: 'bg-blue-500/10', text: 'text-blue-400' },
-  PRODUCTION: { bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
+  PRODUCTION: { bg: 'bg-[var(--nfq-success)]/10', text: 'text-[color:var(--nfq-success)]' },
   DEPRECATED: { bg: 'bg-orange-500/10', text: 'text-orange-400' },
   RETIRED: { bg: 'bg-red-500/10', text: 'text-red-400' },
 };

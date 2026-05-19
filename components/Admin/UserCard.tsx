@@ -49,14 +49,14 @@ export const UserCard: React.FC<Props> = React.memo(({
             {getUserInitials(user.name)}
           </div>
           {isOnline && (
-            <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-slate-950 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-slate-950 bg-[var(--nfq-success)] shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
           )}
         </div>
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-bold text-[color:var(--nfq-text-secondary)]">{user.name}</h4>
             {isOnline && (
-              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-medium text-[color:var(--nfq-success)]">
+              <span className="rounded-full border border-[color:var(--nfq-success)]/20 bg-[var(--nfq-success)]/10 px-1.5 py-0.5 text-[8px] font-medium text-[color:var(--nfq-success)]">
                 Online
               </span>
             )}

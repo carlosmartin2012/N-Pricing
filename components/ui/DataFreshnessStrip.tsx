@@ -63,7 +63,7 @@ export const DataFreshnessStrip: React.FC = () => {
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 font-mono uppercase tracking-[0.14em] ${
             stale || fallback
               ? 'bg-amber-500/10 text-[color:var(--nfq-warning)]'
-              : 'bg-emerald-500/10 text-[color:var(--nfq-success)]'
+              : 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]'
           }`}>
             {stale || fallback ? <AlertTriangle size={13} /> : <CheckCircle2 size={13} />}
             {fallback ? t.freshnessFallback : stale ? t.freshnessStale : t.freshnessReady}

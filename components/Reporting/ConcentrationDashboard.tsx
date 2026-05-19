@@ -82,7 +82,7 @@ const ConcentrationDashboard: React.FC<Props> = ({ deals }) => {
     <div className="space-y-4">
       {/* Alert banner for high concentration */}
       {highConcentration.length > 0 && (
-        <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-rose-500/20 bg-rose-500/5 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-danger)]/20 bg-[var(--nfq-danger)]/5 px-4 py-3">
           <AlertTriangle size={16} className="text-[color:var(--nfq-danger)] shrink-0" />
           <p className="text-xs text-[color:var(--nfq-danger)]">
             High concentration detected in: {highConcentration.map((m) => m.dimension).join(', ')}.

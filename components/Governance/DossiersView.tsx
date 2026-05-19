@@ -98,12 +98,12 @@ const DossierRow: React.FC<RowProps> = ({
             </button>
           )}
           {valid && (
-            <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-[color:var(--nfq-success)]">
+            <span className="inline-flex items-center gap-1 rounded bg-[var(--nfq-success)]/10 px-2 py-0.5 text-[11px] font-medium text-[color:var(--nfq-success)]">
               <ShieldCheck size={11} /> signature OK
             </span>
           )}
           {invalid && (
-            <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-[color:var(--nfq-danger)]">
+            <span className="inline-flex items-center gap-1 rounded bg-[var(--nfq-danger)]/10 px-2 py-0.5 text-[11px] font-medium text-[color:var(--nfq-danger)]">
               <ShieldAlert size={11} /> tampered
             </span>
           )}
@@ -262,7 +262,7 @@ const DossiersView: React.FC = () => {
       <TimelineDeprecationBanner surface="dossiers" />
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
+        <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}

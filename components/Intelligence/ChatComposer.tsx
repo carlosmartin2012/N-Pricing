@@ -32,7 +32,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
           <div>
             <h3 className="text-sm font-bold text-[color:var(--nfq-text-secondary)]">N Pricing Copilot</h3>
             <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--nfq-success)]" />
               <span className="font-mono text-[10px] text-[color:var(--nfq-success)]">ONLINE • GEMINI-2.0-FLASH</span>
             </div>
           </div>

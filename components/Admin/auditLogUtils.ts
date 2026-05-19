@@ -91,11 +91,11 @@ export function resolveAuditActionFamily(action: string): AuditActionFamily {
 export function getAuditActionTextClass(action: string) {
   switch (resolveAuditActionFamily(action)) {
     case 'CREATE':
-      return 'text-emerald-400';
+      return 'text-[color:var(--nfq-success)]';
     case 'UPDATE':
       return 'text-amber-400';
     case 'DELETE':
-      return 'text-rose-400';
+      return 'text-[color:var(--nfq-danger)]';
     case 'ACCESS':
       return 'text-[color:var(--nfq-accent)]';
     case 'TEST':

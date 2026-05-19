@@ -12,10 +12,10 @@ const log = createLogger('CampaignsView');
 const STATUS_COLOR: Record<CampaignStatus, string> = {
   draft: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
   approved: 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
-  active: 'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  active: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   exhausted: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   expired: 'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
-  cancelled: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
+  cancelled: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
 
 const fmtBps = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)} bps`;

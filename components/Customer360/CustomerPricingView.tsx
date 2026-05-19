@@ -87,7 +87,7 @@ const CustomerPricingView: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search clients..."
-              className="w-full rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] py-2 pl-8 pr-3 font-mono text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-emerald-400 focus:outline-none"
+              className="w-full rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] py-2 pl-8 pr-3 font-mono text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-[color:var(--nfq-success)] focus:outline-none"
             />
           </div>
           <ul className="max-h-[70vh] space-y-1 overflow-y-auto">
@@ -99,7 +99,7 @@ const CustomerPricingView: React.FC = () => {
                     onClick={() => setSelectedId(c.id)}
                     className={`block w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                       active
-                        ? 'border-emerald-400/50 bg-emerald-400/5'
+                        ? 'border-[color:var(--nfq-success)]/50 bg-[var(--nfq-success)]/5'
                         : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.02] hover:border-[color:var(--nfq-border-ghost)]'
                     }`}
                   >

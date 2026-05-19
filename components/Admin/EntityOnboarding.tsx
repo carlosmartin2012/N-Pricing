@@ -164,7 +164,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
     <div className="flex justify-end">
       <button
         onClick={handleClose}
-        className="rounded bg-emerald-600 px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-emerald-500"
+        className="rounded bg-emerald-600 px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)]"
       >
         {t.close}
       </button>

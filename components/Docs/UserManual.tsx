@@ -125,9 +125,9 @@ const UserManual: React.FC = () => {
             <TocItem targetId="architecture" label={L('Architecture', 'Arquitectura')} />
 
             <TocSectionLabel label={L('Relationships', 'Relaciones')} accent="text-[color:var(--nfq-success)]" />
-            <TocItem targetId="customers"   label={L('Clients (360°)', 'Clientes (360°)')} accent="bg-emerald-400" />
-            <TocItem targetId="campaigns"   label={L('Campaigns', 'Campañas')}              accent="bg-emerald-400" />
-            <TocItem targetId="target-grid" label={L('Targets', 'Targets')}                 accent="bg-emerald-400" />
+            <TocItem targetId="customers"   label={L('Clients (360°)', 'Clientes (360°)')} accent="bg-[var(--nfq-success)]" />
+            <TocItem targetId="campaigns"   label={L('Campaigns', 'Campañas')}              accent="bg-[var(--nfq-success)]" />
+            <TocItem targetId="target-grid" label={L('Targets', 'Targets')}                 accent="bg-[var(--nfq-success)]" />
 
             <TocSectionLabel label="Pricing" accent="text-[color:var(--nfq-accent)]" />
             <TocItem targetId="pricing-engine" label={L('Pricing Engine (4 tabs)', 'Motor de Pricing (4 tabs)')} accent="bg-[var(--nfq-accent)]" />
@@ -298,8 +298,8 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ COMMERCIAL ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-emerald-400 pl-4 text-2xl font-bold text-[color:var(--nfq-success)]">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-success)] pl-4 text-2xl font-bold text-[color:var(--nfq-success)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--nfq-success)]" />
               {L('Commercial — pre-deal', 'Comercial — pre-deal')}
             </h2>
 
@@ -616,7 +616,7 @@ const UserManual: React.FC = () => {
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <div className="rounded-lg border border-[color:var(--nfq-success)]/20 bg-[var(--nfq-success)]/5 p-4">
                   <h4 className="mb-2 text-sm font-bold text-[color:var(--nfq-success)]">{guide.dataModes.live.title}</h4>
                   <ul className="space-y-1.5 pl-1 text-xs text-[color:var(--nfq-text-muted)]">
                     {guide.dataModes.live.bullets.map((b) => (

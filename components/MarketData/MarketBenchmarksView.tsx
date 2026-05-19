@@ -334,7 +334,7 @@ const MarketBenchmarksView: React.FC = () => {
                 />
               </InputGroup>
               {validationError && (
-                <div className="mb-4 rounded-[var(--nfq-radius-card)] border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+                <div className="mb-4 rounded-[var(--nfq-radius-card)] border border-rose-400/30 bg-[var(--nfq-danger)]/10 px-3 py-2 text-xs text-rose-200">
                   {validationError}
                 </div>
               )}

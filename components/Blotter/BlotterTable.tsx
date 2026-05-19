@@ -92,7 +92,7 @@ const VarianceChip: React.FC<{ variance?: DealVariance }> = ({ variance }) => {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--nfq-success)]">
+    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-success)]/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--nfq-success)]">
       {label}
     </span>
   );

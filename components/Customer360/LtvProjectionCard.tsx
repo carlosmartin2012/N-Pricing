@@ -112,11 +112,11 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
             <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">Projection band</div>
             <div className="relative h-3 rounded bg-white/[0.04]">
               <div
-                className="absolute inset-y-0 rounded bg-emerald-500/20"
+                className="absolute inset-y-0 rounded bg-[var(--nfq-success)]/20"
                 style={{ left: 0, right: 0 }}
               />
               <div
-                className="absolute top-1/2 h-2 w-[2px] -translate-y-1/2 bg-emerald-400"
+                className="absolute top-1/2 h-2 w-[2px] -translate-y-1/2 bg-[var(--nfq-success)]"
                 style={{
                   left: `${((latest.clvPointEur - bandRange.p5) / bandRange.span) * 100}%`,
                 }}

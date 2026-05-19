@@ -13,7 +13,7 @@ const STAGE_STYLES: Record<
   { bg: string; text: string; label: string; description: string }
 > = {
   1: {
-    bg: 'bg-emerald-500/10',
+    bg: 'bg-[var(--nfq-success)]/10',
     text: 'text-[color:var(--nfq-success)]',
     label: 'Stage 1',
     description: 'Performing — EL 12m',

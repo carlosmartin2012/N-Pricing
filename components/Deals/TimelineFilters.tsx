@@ -34,7 +34,7 @@ const TimelineFilters: React.FC<Props> = ({ enabled, onToggle, onAll, onNone, co
       <button
         type="button"
         onClick={onNone}
-        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1 text-[10px] text-[color:var(--nfq-text-muted)] hover:border-rose-500/40 hover:text-[color:var(--nfq-danger)]"
+        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1 text-[10px] text-[color:var(--nfq-text-muted)] hover:border-[color:var(--nfq-danger)]/40 hover:text-[color:var(--nfq-danger)]"
       >
         None
       </button>

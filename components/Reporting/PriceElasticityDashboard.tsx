@@ -176,7 +176,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
                   <div
                     className={`h-full rounded-full transition-all ${
                       optimalPrice && Math.abs(point.rate - optimalPrice.rate) < 0.3
-                        ? 'bg-emerald-500'
+                        ? 'bg-[var(--nfq-success)]'
                         : 'bg-[var(--nfq-accent)] opacity-60'
                     }`}
                     style={{ width: `${Math.min(point.conversion * 100, 100)}%` }}

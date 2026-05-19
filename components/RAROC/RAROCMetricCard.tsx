@@ -37,7 +37,7 @@ export const RAROCMetricCard: React.FC<RarocMetricCardData> = React.memo(({
           </div>
         )}
       </div>
-      <div className="mt-1 nfq-label italic">
+      <div className="mt-1 nfq-label">
         {subtext}
       </div>
     </div>

@@ -16,7 +16,7 @@ export function TrafficLightDot({
 }) {
   const color =
     light === 'GREEN'
-      ? 'bg-emerald-400'
+      ? 'bg-[var(--nfq-success)]'
       : light === 'AMBER'
         ? 'bg-amber-400'
         : 'bg-red-400';

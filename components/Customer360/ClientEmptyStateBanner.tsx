@@ -47,7 +47,7 @@ interface Props {
 
 const VARIANT_STYLES: Record<BannerVariant, { icon: React.ComponentType<{ className?: string }>; accent: string; ring: string }> = {
   'no-data':     { icon: AlertCircle, accent: 'text-[color:var(--nfq-warning)]',   ring: 'border-amber-400/30 bg-amber-500/[0.03]' },
-  'no-snapshot': { icon: Sparkles,    accent: 'text-[color:var(--nfq-success)]', ring: 'border-emerald-400/30 bg-emerald-500/[0.03]' },
+  'no-snapshot': { icon: Sparkles,    accent: 'text-[color:var(--nfq-success)]', ring: 'border-[color:var(--nfq-success)]/30 bg-[var(--nfq-success)]/[0.03]' },
 };
 
 const ClientEmptyStateBanner: React.FC<Props> = ({

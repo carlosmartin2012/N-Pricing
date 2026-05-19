@@ -414,7 +414,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                     </td>
                     <td className="px-4 py-3">
                       {approved ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-success)]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-success)]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-success)]">
                           <Check className="h-3 w-3" />
                           {entry.approvedBy}
                         </span>
@@ -496,7 +496,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                             v{record.version}
                           </span>
                           {approved ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-success)]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-success)]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-success)]">
                               <Check className="h-3 w-3" />
                               Aprobado
                             </span>

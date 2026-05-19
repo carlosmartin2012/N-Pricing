@@ -37,7 +37,7 @@ export const RAROCBreakdownPanel: React.FC<Props> = ({
                 <div className="text-[11px] font-bold uppercase text-[color:var(--nfq-text-secondary)]">
                   {row.label}
                 </div>
-                <div className="text-[9px] italic text-[color:var(--nfq-text-muted)]">
+                <div className="text-[9px] text-[color:var(--nfq-text-faint)]">
                   {row.subtext}
                 </div>
               </div>

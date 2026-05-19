@@ -64,8 +64,8 @@ const iconMap: Record<ToastType, React.FC<{ className?: string }>> = {
 /* ── Color schemes (NFQ accent + semantic tones) ── */
 const colorMap: Record<ToastType, { bg: string; border: string; icon: string; text: string }> = {
   success: {
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/25',
+    bg: 'bg-[var(--nfq-success)]/10',
+    border: 'border-[color:var(--nfq-success)]/25',
     icon: 'text-[color:var(--nfq-success)]',
     text: 'text-[color:var(--nfq-text-primary)]',
   },

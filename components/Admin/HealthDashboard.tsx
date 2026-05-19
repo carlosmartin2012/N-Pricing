@@ -156,7 +156,7 @@ const HealthDashboard: React.FC = () => {
                     <td className="px-4 py-2">
                       <span
                         className={`inline-block h-2 w-2 rounded-full ${
-                          rule.isActive ? 'bg-emerald-400' : 'bg-[var(--nfq-bg-bright)]'
+                          rule.isActive ? 'bg-[var(--nfq-success)]' : 'bg-[var(--nfq-bg-bright)]'
                         }`}
                       />
                     </td>

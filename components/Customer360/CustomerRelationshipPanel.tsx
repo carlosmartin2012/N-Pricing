@@ -154,9 +154,9 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
                         <td className="px-3 py-2 text-xs">
                           <span
                             className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${
-                              p.status === 'Active' ? 'bg-emerald-500/10 text-[color:var(--nfq-success)]'
+                              p.status === 'Active' ? 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]'
                               : p.status === 'Matured' ? 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]'
-                              : 'bg-rose-500/10 text-[color:var(--nfq-danger)]'
+                              : 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]'
                             }`}
                           >
                             {p.status}

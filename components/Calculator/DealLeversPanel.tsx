@@ -146,7 +146,7 @@ export const DealLeversPanel: React.FC<Props> = ({
       <DealLeverCard
         label={t.targetMargin}
         tooltip={t.tooltip_calc_marginTarget}
-        accentClassName="bg-emerald-500/10 text-[color:var(--nfq-success)]"
+        accentClassName="bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]"
         displayValue={`+${Number(values.marginTarget || 0).toFixed(2)}%`}
         rangeMin={0}
         rangeMax={10}
@@ -212,7 +212,7 @@ export const DealLeversPanel: React.FC<Props> = ({
           </button>
           <button
             onClick={() => onFieldChange('marginTarget', Number((values.marginTarget + 0.25).toFixed(2)))}
-            className="rounded border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-[color:var(--nfq-success)] transition-colors hover:bg-emerald-500/10"
+            className="rounded border border-[color:var(--nfq-success)]/20 bg-[var(--nfq-success)]/5 px-3 py-2 text-xs text-[color:var(--nfq-success)] transition-colors hover:bg-[var(--nfq-success)]/10"
           >
             +25bps
           </button>

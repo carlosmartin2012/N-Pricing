@@ -246,7 +246,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
                     {status === 'importing' && (
                         <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                            <div className="w-12 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                            <div className="w-12 h-10 border-4 border-[color:var(--nfq-success)]/20 border-t-emerald-500 rounded-full animate-spin"></div>
                             <div className="text-center">
                                 <h3 className="text-lg font-bold text-[color:var(--nfq-text-primary)]">{t.importingData}</h3>
                                 <p className="text-sm text-[color:var(--nfq-text-faint)]">{t.updatingRecords}</p>

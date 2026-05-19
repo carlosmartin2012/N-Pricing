@@ -42,7 +42,7 @@ const KIND_LABEL: Record<ModelKind, string> = {
 
 const KIND_COLOR: Record<ModelKind, string> = {
   engine:      'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
-  ruleset:     'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  ruleset:     'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   elasticity:  'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
   shock_pack:  'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   behavioural: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
@@ -52,9 +52,9 @@ const KIND_COLOR: Record<ModelKind, string> = {
 
 const STATUS_COLOR: Record<ModelStatus, string> = {
   candidate: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
-  active:    'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  active:    'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   retired:   'bg-amber-500/10 text-[color:var(--nfq-warning)]',
-  rejected:  'bg-rose-500/10 text-[color:var(--nfq-danger)]',
+  rejected:  'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
 
 const STATUS_ICON: Record<ModelStatus, React.ComponentType<{ size?: number }>> = {
@@ -202,7 +202,7 @@ const ModelInventoryView: React.FC = () => {
       </header>
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
+        <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}

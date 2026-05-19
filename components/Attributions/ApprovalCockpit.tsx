@@ -297,7 +297,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending || belowFloor}
               onClick={() => setConfirming('approved')}
               title={belowFloor ? t.cockpitBelowFloorBlocked : t.cockpitApprove}
-              className="rounded border border-[color:var(--nfq-success)]/30 bg-emerald-500/10 p-1 text-[color:var(--nfq-success)] hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded border border-[color:var(--nfq-success)]/30 bg-[var(--nfq-success)]/10 p-1 text-[color:var(--nfq-success)] hover:bg-[var(--nfq-success)]/20 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={t.cockpitApprove}
             >
               <CheckCircle2 className="h-4 w-4" />
@@ -307,7 +307,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending}
               onClick={() => setConfirming('rejected')}
               title={t.cockpitReject}
-              className="rounded border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 p-1 text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
+              className="rounded border border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/10 p-1 text-[color:var(--nfq-danger)] hover:bg-[var(--nfq-danger)]/20 disabled:opacity-40"
               aria-label={t.cockpitReject}
             >
               <XCircle className="h-4 w-4" />
@@ -346,7 +346,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
                 type="button"
                 onClick={() => submit(confirming)}
                 disabled={pending || (belowFloor && confirming === 'approved')}
-                className="rounded bg-emerald-500/80 px-3 py-1 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
+                className="rounded bg-[var(--nfq-success)]/80 px-3 py-1 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
               >
                 {confirming === 'approved' && t.cockpitConfirmApprove}
                 {confirming === 'rejected' && t.cockpitConfirmReject}
@@ -433,7 +433,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending || belowFloor}
           onClick={() => setConfirming('approved')}
-          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-success)]/30 bg-emerald-500/10 px-2 py-2 text-xs text-[color:var(--nfq-success)] hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-success)]/30 bg-[var(--nfq-success)]/10 px-2 py-2 text-xs text-[color:var(--nfq-success)] hover:bg-[var(--nfq-success)]/20 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t.cockpitApprove}
         >
           <CheckCircle2 className="h-4 w-4" />
@@ -443,7 +443,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending}
           onClick={() => setConfirming('rejected')}
-          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 px-2 py-2 text-xs text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/10 px-2 py-2 text-xs text-[color:var(--nfq-danger)] hover:bg-[var(--nfq-danger)]/20 disabled:opacity-40"
           aria-label={t.cockpitReject}
         >
           <XCircle className="h-4 w-4" />
@@ -481,7 +481,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
               type="button"
               onClick={() => submit(confirming)}
               disabled={pending || (belowFloor && confirming === 'approved')}
-              className="flex-1 rounded bg-emerald-500/80 px-3 py-2 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
+              className="flex-1 rounded bg-[var(--nfq-success)]/80 px-3 py-2 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
             >
               {confirming === 'approved' && t.cockpitConfirmApprove}
               {confirming === 'rejected' && t.cockpitConfirmReject}

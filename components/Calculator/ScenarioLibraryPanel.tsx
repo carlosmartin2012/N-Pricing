@@ -107,7 +107,7 @@ export const ScenarioLibraryPanel: React.FC<Props> = ({ currentScenarios, onLoad
               </button>
               <button
                 onClick={() => deleteScenario(s.id)}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[var(--nfq-text-faint)] opacity-0 transition-all group-hover:opacity-100 hover:bg-rose-500/10 hover:text-[color:var(--nfq-danger)]"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[var(--nfq-text-faint)] opacity-0 transition-all group-hover:opacity-100 hover:bg-[var(--nfq-danger)]/10 hover:text-[color:var(--nfq-danger)]"
                 title="Delete scenario"
               >
                 <Trash2 size={12} />

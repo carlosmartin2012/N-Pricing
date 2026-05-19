@@ -222,7 +222,7 @@ const DiffCard: React.FC<{
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove(index); }}
-          className="shrink-0 rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-rose-500/10 hover:text-[color:var(--nfq-danger)] transition-colors"
+          className="shrink-0 rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-danger)]/10 hover:text-[color:var(--nfq-danger)] transition-colors"
           aria-label="Remove diff"
         >
           <Trash2 className="h-3.5 w-3.5" />

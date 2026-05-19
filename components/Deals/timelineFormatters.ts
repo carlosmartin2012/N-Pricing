@@ -59,8 +59,8 @@ const TONE_CLASS: Record<EventTone, string> = {
   neutral: 'text-slate-300',
   info:    'text-[color:var(--nfq-accent)]',
   warning: 'text-amber-300',
-  success: 'text-emerald-300',
-  danger:  'text-rose-300',
+  success: 'text-[color:var(--nfq-success)]',
+  danger:  'text-[color:var(--nfq-danger)]',
 };
 
 export function toneClass(kind: DealTimelineEventKind): string {

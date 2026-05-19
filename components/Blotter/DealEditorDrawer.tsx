@@ -35,7 +35,7 @@ const actionCopy = {
   create: {
     title: () => 'Create New Transaction',
     confirm: 'Create Deal',
-    tone: 'bg-emerald-600 hover:bg-emerald-500',
+    tone: 'bg-emerald-600 hover:bg-[var(--nfq-success)]',
   },
 } as const;
 

@@ -219,9 +219,9 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
                       c.esgProfile === 'Green'
-                        ? 'bg-emerald-500/20 text-[color:var(--nfq-success)]'
+                        ? 'bg-[var(--nfq-success)]/20 text-[color:var(--nfq-success)]'
                         : c.esgProfile === 'Brown'
-                          ? 'bg-rose-500/20 text-[color:var(--nfq-danger)]'
+                          ? 'bg-[var(--nfq-danger)]/20 text-[color:var(--nfq-danger)]'
                           : 'bg-slate-500/20 text-[color:var(--nfq-text-muted)]'
                     }`}
                   >

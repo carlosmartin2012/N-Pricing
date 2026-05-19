@@ -274,7 +274,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
             </div>
 
             {error && (
-              <div className="rounded-[var(--nfq-radius-card)] bg-rose-500/10 p-3 text-xs text-[color:var(--nfq-danger)]">
+              <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-danger)]/10 p-3 text-xs text-[color:var(--nfq-danger)]">
                 {error}
               </div>
             )}

@@ -38,7 +38,7 @@ export const PresenceAvatars: React.FC<PresenceAvatarsProps> = ({ users, maxVisi
             title={`${user.name} (${user.role}) — ${user.activeView}`}
           >
             {initials}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 border border-[var(--nfq-bg-root)]" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-[var(--nfq-success)] border border-[var(--nfq-bg-root)]" />
           </div>
         );
       })}

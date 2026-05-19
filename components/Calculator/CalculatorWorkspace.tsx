@@ -207,7 +207,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
 
         {/* Small floating indicator when other users have active cursors */}
         {cursorsActive && cursors.length > 0 && (
-          <div className="pointer-events-none absolute right-3 top-3 z-[70] rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-[10px] font-mono text-[color:var(--nfq-text-primary)] shadow">
+          <div className="pointer-events-none absolute right-3 top-3 z-[70] rounded-full bg-[var(--nfq-success)]/90 px-2.5 py-0.5 font-mono text-[10px] text-[color:var(--nfq-text-primary)] shadow-[var(--nfq-shadow-sm)]">
             {cursors.length} live
           </div>
         )}

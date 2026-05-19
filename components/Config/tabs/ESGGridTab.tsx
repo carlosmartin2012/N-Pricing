@@ -121,7 +121,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
       <div className="flex bg-[var(--nfq-bg-elevated)] border-b border-slate-700">
         <button
           onClick={() => setEsgSubTab('TRANSITION')}
-          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'TRANSITION' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-success)] border-b-2 border-emerald-500' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'TRANSITION' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-success)] border-b-2 border-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
         >
           Transition Risk (Carbon)
         </button>

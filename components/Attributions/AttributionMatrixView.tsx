@@ -81,7 +81,7 @@ const AttributionMatrixView: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowLevelForm((v) => !v)}
-          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-emerald-500/10 px-3 py-1.5 text-xs text-[color:var(--nfq-success)] hover:bg-emerald-500/20"
+          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-success)]/10 px-3 py-1.5 text-xs text-[color:var(--nfq-success)] hover:bg-[var(--nfq-success)]/20"
         >
           <Plus className="h-3 w-3" />
           {t.matrixAddLevel}
@@ -155,7 +155,7 @@ const AttributionMatrixView: React.FC = () => {
                       onClick={() => updateLevel.mutate({ id: level.id, input: { active: false } })}
                       disabled={updateLevel.isPending}
                       title={t.matrixLevelDeactivate}
-                      className="rounded-md border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 p-1 text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
+                      className="rounded-md border border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/10 p-1 text-[color:var(--nfq-danger)] hover:bg-[var(--nfq-danger)]/20 disabled:opacity-40"
                       aria-label={t.matrixLevelDeactivate}
                     >
                       <ShieldOff className="h-3 w-3" />
@@ -283,7 +283,7 @@ const LevelForm: React.FC<LevelFormProps> = ({ levels, onSubmit, onCancel, pendi
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
-          className="flex items-center gap-1 rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:bg-[var(--nfq-bg-bright)]">
+          className="flex items-center gap-1 rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:bg-[var(--nfq-bg-bright)]">
           <Save className="h-3 w-3" /> {t.matrixSave}
         </button>
       </div>
@@ -341,7 +341,7 @@ const ThresholdForm: React.FC<ThresholdFormProps> = ({ levelId, onSubmit, onCanc
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
-          className="flex items-center gap-1 rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:bg-[var(--nfq-bg-bright)]">
+          className="flex items-center gap-1 rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:bg-[var(--nfq-bg-bright)]">
           <Save className="h-3 w-3" /> {t.matrixSave}
         </button>
       </div>

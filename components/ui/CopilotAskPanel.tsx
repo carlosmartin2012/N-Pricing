@@ -167,7 +167,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
       )}
 
       {errorCopy && (
-        <p className="rounded border border-[color:var(--nfq-danger)]/30 bg-rose-500/5 px-3 py-2 text-xs text-[color:var(--nfq-danger)]" role="alert">
+        <p className="rounded border border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/5 px-3 py-2 text-xs text-[color:var(--nfq-danger)]" role="alert">
           {errorCopy}
         </p>
       )}

@@ -200,7 +200,7 @@ const ToleranceBandEditor: React.FC = () => {
                 onClick={() => updateField('active', !editingBand.active)}
                 className={`flex h-[38px] items-center justify-center rounded-lg border text-xs font-mono transition-colors ${
                   editingBand.active
-                    ? 'border-emerald-500/40 bg-emerald-950/30 text-[color:var(--nfq-success)]'
+                    ? 'border-[color:var(--nfq-success)]/40 bg-emerald-950/30 text-[color:var(--nfq-success)]'
                     : 'border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] text-[color:var(--nfq-text-muted)]'
                 }`}
               >

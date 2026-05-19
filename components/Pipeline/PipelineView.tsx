@@ -221,7 +221,7 @@ const PipelineView: React.FC = () => {
             aria-pressed={autoRefresh}
             data-testid="pipeline-auto-refresh"
             className={`nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] ${
-              autoRefresh ? 'ring-1 ring-emerald-400/40' : ''
+              autoRefresh ? 'ring-1 ring-[color:var(--nfq-success)]/40' : ''
             }`}
           >
             {autoRefresh ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
@@ -296,7 +296,7 @@ const PipelineView: React.FC = () => {
       {hasSelection && (
         <div
           data-testid="pipeline-bulk-bar"
-          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/[0.04] p-3"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[color:var(--nfq-success)]/30 bg-[var(--nfq-success)]/[0.04] p-3"
         >
           <span className="font-mono text-[11px] text-emerald-200">
             {selected.size} selected
@@ -397,7 +397,7 @@ const PipelineRow: React.FC<RowProps> = ({
       data-testid={`pipeline-row-${row.id}`}
       className={`rounded border p-3 space-y-2 transition-colors ${
         selected
-          ? 'border-emerald-400/40 bg-emerald-500/[0.04]'
+          ? 'border-[color:var(--nfq-success)]/40 bg-[var(--nfq-success)]/[0.04]'
           : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.03]'
       }`}
     >
