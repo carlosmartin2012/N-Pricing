@@ -190,7 +190,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
           <button
             onClick={() => void handleCreate()}
             disabled={isSubmitting}
-            className="rounded bg-amber-500 px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-amber-400 disabled:opacity-50"
+            className="rounded bg-[var(--nfq-warning)] px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-warning)] disabled:opacity-50"
           >
             {isSubmitting ? '...' : t.createEntity}
           </button>
@@ -224,7 +224,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
                       isDone
                         ? 'bg-emerald-600 text-[color:var(--nfq-text-primary)]'
                         : isActive
-                          ? 'bg-amber-500 text-[color:var(--nfq-text-primary)]'
+                          ? 'bg-[var(--nfq-warning)] text-[color:var(--nfq-text-primary)]'
                           : 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)]'
                     }`}
                   >
@@ -257,7 +257,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
 
       {/* Error banner */}
       {(validationError ?? submitError) && (
-        <div className="mb-5 flex items-start gap-2 rounded border border-red-500/25 bg-red-500/10 px-3 py-2.5 text-xs text-red-300">
+        <div className="mb-5 flex items-start gap-2 rounded border border-[color:var(--nfq-danger)]/25 bg-[var(--nfq-danger)]/10 px-3 py-2.5 text-xs text-[color:var(--nfq-danger)]">
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>{validationError ?? submitError}</span>
         </div>

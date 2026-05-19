@@ -108,7 +108,7 @@ const ControlRoomView: React.FC = () => {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs text-[color:var(--nfq-accent)]">{deal.id ?? t.commandDraftDeal}</span>
-                    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--nfq-warning)]">
+                    <span className="rounded-full bg-[var(--nfq-warning)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--nfq-warning)]">
                       {deal.status ?? 'Draft'}
                     </span>
                   </div>

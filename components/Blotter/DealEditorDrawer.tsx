@@ -72,12 +72,12 @@ const DealEditorDrawer: React.FC<DealEditorDrawerProps> = ({
       }
     >
       {validationErrors.length > 0 && (
-        <div className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
-          <div className="mb-1 text-xs font-medium text-red-400">Validation Errors</div>
+        <div className="mb-4 rounded-lg border border-[color:var(--nfq-danger)]/25 bg-[var(--nfq-danger)]/10 p-3">
+          <div className="mb-1 text-xs font-medium text-[color:var(--nfq-danger)]">Validation Errors</div>
           <ul className="space-y-0.5">
             {validationErrors.map((err) => (
-              <li key={err.field} className="text-[11px] text-red-300">
-                <span className="font-mono text-red-400">{err.field}</span>: {err.message}
+              <li key={err.field} className="text-[11px] text-[color:var(--nfq-danger)]">
+                <span className="font-mono text-[color:var(--nfq-danger)]">{err.field}</span>: {err.message}
               </li>
             ))}
           </ul>

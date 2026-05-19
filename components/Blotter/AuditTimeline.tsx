@@ -10,13 +10,13 @@ interface Props {
 
 const ACTION_CONFIG: Record<string, { icon: LucideIcon; color: string }> = {
   CREATE_DEAL: { icon: FileText, color: 'text-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15' },
-  EDIT_DEAL: { icon: Edit, color: 'text-[color:var(--nfq-warning)] bg-amber-500/15' },
-  SUBMIT_APPROVAL: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-violet-500/15' },
+  EDIT_DEAL: { icon: Edit, color: 'text-[color:var(--nfq-warning)] bg-[var(--nfq-warning)]/15' },
+  SUBMIT_APPROVAL: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-[var(--nfq-cat-d)]/15' },
   APPROVE_DEAL: { icon: CheckCircle2, color: 'text-[color:var(--nfq-success)] bg-[var(--nfq-success)]/15' },
   REJECT_DEAL: { icon: XCircle, color: 'text-[color:var(--nfq-danger)] bg-[var(--nfq-danger)]/15' },
   BOOK_DEAL: { icon: ShieldCheck, color: 'text-[color:var(--nfq-success)] bg-[var(--nfq-success)]/15' },
   REPRICE_DEAL: { icon: RotateCcw, color: 'text-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15' },
-  WORKFLOW_ACTION: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-violet-500/15' },
+  WORKFLOW_ACTION: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-[var(--nfq-cat-d)]/15' },
 };
 
 const DEFAULT_CONFIG = { icon: Clock, color: 'text-[color:var(--nfq-text-muted)] bg-slate-500/15' };

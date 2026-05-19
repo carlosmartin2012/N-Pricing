@@ -187,7 +187,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
                     </td>
                     <td
                       className={`px-3 py-3 font-mono text-xs ${
-                        overdue ? 'font-semibold text-red-400' : 'text-neutral-300'
+                        overdue ? 'font-semibold text-[color:var(--nfq-danger)]' : 'text-neutral-300'
                       }`}
                     >
                       {formatDateES(model.nextValidationDate)}

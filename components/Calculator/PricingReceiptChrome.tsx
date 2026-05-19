@@ -42,7 +42,7 @@ export function PricingReceiptSummary({
                 ? 'text-emerald-600 dark:text-[color:var(--nfq-success)]'
                 : result.raroc > 0
                   ? 'text-[color:var(--nfq-warning)] dark:text-[color:var(--nfq-warning)]'
-                  : 'text-red-500'
+                  : 'text-[color:var(--nfq-danger)]'
             }`}
           >
             {result.raroc.toFixed(2)}%
@@ -71,7 +71,7 @@ export function PricingReceiptSummary({
               ? 'border-amber-900 bg-amber-950/30 text-[color:var(--nfq-warning)]'
               : result.approvalLevel === 'L2_Committee'
                 ? 'border-orange-900 bg-orange-950/30 text-orange-400'
-                : 'border-red-900 bg-red-950/30 text-red-400'
+                : 'border-red-900 bg-red-950/30 text-[color:var(--nfq-danger)]'
         }`}
       >
         {result.approvalLevel === 'Auto' && <CheckCircle2 size={16} />}

@@ -141,7 +141,7 @@ const ApprovalCockpit: React.FC = () => {
           className={`rounded-md border px-3 py-2 text-xs ${
             focusedItem
               ? 'border-[color:var(--nfq-accent)]/30 bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]'
-              : 'border-amber-400/30 bg-amber-500/10 text-amber-100'
+              : 'border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-warning)]/10 text-amber-100'
           }`}
           role="status"
         >

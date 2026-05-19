@@ -37,7 +37,7 @@ const TimelineDeprecationBanner: React.FC<Props> = ({ surface }) => {
       role="note"
       aria-label="Deal Timeline deprecation notice"
       data-testid="timeline-deprecation-banner"
-      className="flex items-start gap-3 rounded-lg border border-[color:var(--nfq-warning)]/30 bg-amber-500/5 px-4 py-3 text-xs"
+      className="flex items-start gap-3 rounded-lg border border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-warning)]/5 px-4 py-3 text-xs"
     >
       <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[color:var(--nfq-warning)]" aria-hidden="true" />
       <div className="flex-1 text-amber-100/90">

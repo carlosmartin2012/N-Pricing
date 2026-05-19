@@ -14,7 +14,7 @@ export const OfflineBadge: React.FC<OfflineBadgeProps> = ({ pendingCount, isSync
     <button
       data-testid="offline-badge"
       onClick={onSync}
-      className="flex items-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs text-[color:var(--nfq-warning)] transition-colors hover:bg-amber-500/20"
+      className="flex items-center gap-1.5 rounded-lg bg-[var(--nfq-warning)]/10 border border-[color:var(--nfq-warning)]/20 px-2.5 py-1 text-xs text-[color:var(--nfq-warning)] transition-colors hover:bg-[var(--nfq-warning)]/20"
       title={`${pendingCount} pending changes — click to sync`}
     >
       {isSyncing ? (

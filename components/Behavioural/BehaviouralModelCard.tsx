@@ -18,13 +18,13 @@ const BehaviouralModelCard: React.FC<Props> = React.memo(({
       <button onClick={() => onEdit(model)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
         <Edit size={14} />
       </button>
-      <button onClick={() => onDelete(model.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400">
+      <button onClick={() => onDelete(model.id)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]">
         <Trash2 size={14} />
       </button>
     </div>
 
     <div className="mb-2 flex items-center gap-2">
-      <div className={`h-8 w-2 rounded-sm ${model.type === 'Prepayment_CPR' ? 'bg-amber-500' : 'bg-purple-500'}`} />
+      <div className={`h-8 w-2 rounded-sm ${model.type === 'Prepayment_CPR' ? 'bg-[var(--nfq-warning)]' : 'bg-[var(--nfq-cat-d)]'}`} />
       <div>
         <h4 className="text-sm font-bold text-[color:var(--nfq-text-secondary)]">{model.name}</h4>
         <span className="font-mono text-[10px] text-[color:var(--nfq-accent)]">{model.id}</span>
@@ -61,9 +61,9 @@ const BehaviouralModelCard: React.FC<Props> = React.memo(({
                   <span className="text-[color:var(--nfq-text-secondary)]">{tranche.term}</span>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-12 overflow-hidden rounded-full bg-[var(--nfq-bg-highest)]">
-                      <div className="h-full bg-purple-500" style={{ width: `${tranche.weight}%` }} />
+                      <div className="h-full bg-[var(--nfq-cat-d)]" style={{ width: `${tranche.weight}%` }} />
                     </div>
-                    <span className="w-6 text-right text-purple-400">{tranche.weight}%</span>
+                    <span className="w-6 text-right text-[color:var(--nfq-cat-d)]">{tranche.weight}%</span>
                   </div>
                 </div>
               ))}
@@ -91,7 +91,7 @@ const BehaviouralModelCard: React.FC<Props> = React.memo(({
               {[2, 3, 4, 5, 5, 5, 5, 4, 3, 2].map((height, index) => (
                 <div
                   key={`${model.id}-curve-${index}`}
-                  className="flex-1 border-t border-amber-500 bg-amber-500/30"
+                  className="flex-1 border-t border-[color:var(--nfq-warning)] bg-[var(--nfq-warning)]/30"
                   style={{ height: `${height * 20}%` }}
                 />
               ))}

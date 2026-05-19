@@ -106,13 +106,13 @@ const PnlAttribution: React.FC<Props> = React.memo(({ deals, products, businessU
         {[
           { label: 'Gross NII', value: totals.nii, color: 'text-[color:var(--nfq-success)]' },
           { label: 'FTP Cost', value: -totals.ftpCost, color: 'text-[color:var(--nfq-warning)]' },
-          { label: 'Credit Cost', value: -totals.creditCost, color: 'text-red-400' },
-          { label: 'Op. Cost', value: -totals.opCost, color: 'text-red-400' },
-          { label: 'Capital Cost', value: -totals.capitalCost, color: 'text-red-400' },
+          { label: 'Credit Cost', value: -totals.creditCost, color: 'text-[color:var(--nfq-danger)]' },
+          { label: 'Op. Cost', value: -totals.opCost, color: 'text-[color:var(--nfq-danger)]' },
+          { label: 'Capital Cost', value: -totals.capitalCost, color: 'text-[color:var(--nfq-danger)]' },
           {
             label: 'Net Margin',
             value: totals.netMargin,
-            color: totals.netMargin >= 0 ? 'text-[color:var(--nfq-accent)]' : 'text-red-400',
+            color: totals.netMargin >= 0 ? 'text-[color:var(--nfq-accent)]' : 'text-[color:var(--nfq-danger)]',
           },
         ].map((kpi) => (
           <div key={kpi.label} className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">

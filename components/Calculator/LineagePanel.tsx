@@ -419,7 +419,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                           {entry.approvedBy}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-warning)]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-warning)]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-warning)]">
                           <Clock className="h-3 w-3" />
                           Pendiente
                         </span>
@@ -501,7 +501,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                               Aprobado
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-warning)]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-warning)]/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-warning)]">
                               <Clock className="h-3 w-3" />
                               Pendiente
                             </span>

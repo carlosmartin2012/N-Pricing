@@ -19,14 +19,14 @@ const STAGE_STYLES: Record<
     description: 'Performing — EL 12m',
   },
   2: {
-    bg: 'bg-amber-500/10',
+    bg: 'bg-[var(--nfq-warning)]/10',
     text: 'text-[color:var(--nfq-warning)]',
     label: 'Stage 2',
     description: 'SICR — EL lifetime',
   },
   3: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-400',
+    bg: 'bg-[var(--nfq-danger)]/10',
+    text: 'text-[color:var(--nfq-danger)]',
     label: 'Stage 3',
     description: 'Default — LGD × EAD',
   },
@@ -267,7 +267,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               {sicrResult.reasons.map((reason, idx) => (
                 <span
                   key={`${idx}-${reason}`}
-                  className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-[color:var(--nfq-warning)] uppercase tracking-wide"
+                  className="text-[10px] px-2 py-0.5 rounded bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)] uppercase tracking-wide"
                 >
                   {reason}
                 </span>
@@ -281,7 +281,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
         )}
 
         {isOverridden ? (
-          <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
+          <div className="mt-4 flex items-start gap-2 rounded-lg bg-[var(--nfq-warning)]/10 p-3 ring-1 ring-[color:var(--nfq-warning)]/30">
             <AlertTriangle
               className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--nfq-warning)]"
               aria-hidden="true"

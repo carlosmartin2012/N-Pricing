@@ -15,14 +15,14 @@ const log = createLogger('EscalationsView');
 
 const LEVEL_COLOR: Record<EscalationLevel, string> = {
   L1: 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
-  L2: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  L2: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   Committee: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
 
 const STATUS_COLOR: Record<EscalationStatus, string> = {
   open: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   resolved: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
-  escalated: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  escalated: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   expired: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
 

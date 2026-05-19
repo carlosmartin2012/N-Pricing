@@ -83,10 +83,10 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
 
         <div className="flex items-center gap-4 p-4 bg-red-950/20 border border-red-900/50 rounded-md">
           <div className="p-2 bg-red-900/50 rounded-full">
-            <TrendingUp size={24} className="text-red-400" />
+            <TrendingUp size={24} className="text-[color:var(--nfq-danger)]" />
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-bold text-red-400 uppercase">Pricing Committee (L2)</h4>
+            <h4 className="text-sm font-bold text-[color:var(--nfq-danger)] uppercase">Pricing Committee (L2)</h4>
             <p className="text-[10px] text-[color:var(--nfq-text-faint)]">Mandatory escalation to ALCO/Pricing Committee.</p>
           </div>
           <div className="w-32">
@@ -95,7 +95,7 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
                 type="number"
                 value={approvalMatrixDraft?.l2Threshold}
                 onChange={(e) => onDraftChange('l2Threshold', e.target.value)}
-                className="text-right font-bold text-red-400"
+                className="text-right font-bold text-[color:var(--nfq-danger)]"
               />
             </InputGroup>
           </div>

@@ -126,7 +126,7 @@ const AttributionSimulator: React.FC<Props> = ({
       )}
 
       {!isLoading && matrixEmpty && (
-        <div className="rounded-md border border-[color:var(--nfq-warning)]/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+        <div className="rounded-md border border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-warning)]/10 p-3 text-xs text-amber-200">
           {t.matrixEmpty}
         </div>
       )}

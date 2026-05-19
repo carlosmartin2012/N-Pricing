@@ -87,7 +87,7 @@ const RateCardEditor: React.FC<Props> = ({
               </div>
               <button
                 onClick={() => onChange({ points: points.filter((_, pointIndex) => pointIndex !== index) })}
-                className="text-[color:var(--nfq-text-faint)] hover:text-red-400"
+                className="text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-danger)]"
               >
                 <X size={14} />
               </button>

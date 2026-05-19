@@ -19,7 +19,7 @@ const RateCardCard: React.FC<Props> = ({
       <button onClick={() => onEdit(card)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
         <Edit size={14} />
       </button>
-      <button onClick={() => onDelete(card.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400">
+      <button onClick={() => onDelete(card.id)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]">
         <Trash2 size={14} />
       </button>
     </div>

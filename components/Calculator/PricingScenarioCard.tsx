@@ -59,7 +59,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
           {scenario.id !== 'base' && (
             <button
               onClick={() => onRemove(scenario.id)}
-              className="p-1 text-[color:var(--nfq-text-faint)] transition-colors hover:text-red-400"
+              className="p-1 text-[color:var(--nfq-text-faint)] transition-colors hover:text-[color:var(--nfq-danger)]"
               title={t.remove}
             >
               <Trash2 size={13} />

@@ -26,7 +26,7 @@ function getDeltaClassName(
   const state = getMetricDeltaState(row, value, baseValue);
 
   if (state === 'positive') return 'text-[color:var(--nfq-success)]';
-  if (state === 'negative') return 'text-red-400';
+  if (state === 'negative') return 'text-[color:var(--nfq-danger)]';
   return 'text-[color:var(--nfq-text-muted)]';
 }
 

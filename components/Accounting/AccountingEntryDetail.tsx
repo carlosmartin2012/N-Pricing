@@ -56,7 +56,7 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                       ? 'border-emerald-900/50 bg-emerald-900/20 text-[color:var(--nfq-success)]'
                       : entry.type === 'DEPOSIT'
                         ? 'border-amber-900/50 bg-amber-900/20 text-[color:var(--nfq-warning)]'
-                        : 'border-indigo-900/50 bg-indigo-900/20 text-indigo-400'
+                        : 'border-indigo-900/50 bg-indigo-900/20 text-[color:var(--nfq-cat-d)]'
                   }`}
                 >
                   <div className="font-bold">{labels.unitDebit}</div>
@@ -106,14 +106,14 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
           </div>
           <div className="flex items-center justify-between border-b border-slate-800 px-4 py-1 text-xs">
             <span className="text-[color:var(--nfq-text-muted)]">Strategic</span>
-            <span className="font-mono text-blue-400">
+            <span className="font-mono text-[color:var(--nfq-info)]">
               {entry.ftpComponents.strategicAdj >= 0 ? '+' : ''}
               {formatRate(entry.ftpComponents.strategicAdj)}
             </span>
           </div>
           <div className="flex items-center justify-between px-4 py-1 text-xs font-bold">
             <span className="text-[color:var(--nfq-text-secondary)]">Net Margin</span>
-            <span className={entry.margin >= 0 ? 'font-mono text-[color:var(--nfq-accent)]' : 'font-mono text-red-400'}>
+            <span className={entry.margin >= 0 ? 'font-mono text-[color:var(--nfq-accent)]' : 'font-mono text-[color:var(--nfq-danger)]'}>
               {formatRate(entry.margin)}
             </span>
           </div>

@@ -38,7 +38,7 @@ const KpiCard: React.FC<{
         <div
           className={`font-mono-nums flex items-center text-sm font-bold ${
             tone === 'negative'
-              ? 'text-red-500'
+              ? 'text-[color:var(--nfq-danger)]'
               : tone === 'positive'
                 ? 'text-[color:var(--nfq-success)]'
                 : 'text-[color:var(--nfq-text-faint)]'

@@ -25,16 +25,16 @@ interface DelegationCheckResponse {
 
 const TIER_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   AUTO: { bg: 'bg-[var(--nfq-success)]/10', text: 'text-[color:var(--nfq-success)]', label: 'Auto' },
-  MANAGER_L1: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Director L1' },
-  MANAGER_L2: { bg: 'bg-amber-500/10', text: 'text-[color:var(--nfq-warning)]', label: 'Director L2' },
+  MANAGER_L1: { bg: 'bg-[var(--nfq-info)]/10', text: 'text-[color:var(--nfq-info)]', label: 'Director L1' },
+  MANAGER_L2: { bg: 'bg-[var(--nfq-warning)]/10', text: 'text-[color:var(--nfq-warning)]', label: 'Director L2' },
   RISK_COMMITTEE: {
     bg: 'bg-[var(--nfq-coral)]/10',
     text: 'text-[var(--nfq-coral)]',
     label: 'Comité riesgos',
   },
   EXECUTIVE_COMMITTEE: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-400',
+    bg: 'bg-[var(--nfq-danger)]/10',
+    text: 'text-[color:var(--nfq-danger)]',
     label: 'Comité ejecutivo',
   },
 };
@@ -205,7 +205,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
       </div>
 
       {error ? (
-        <div className="mb-4 rounded-[8px] bg-red-500/10 p-3 text-xs text-red-400">
+        <div className="mb-4 rounded-[8px] bg-[var(--nfq-danger)]/10 p-3 text-xs text-[color:var(--nfq-danger)]">
           {error}
         </div>
       ) : null}
@@ -252,7 +252,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
                         <Check className="h-2.5 w-2.5" aria-hidden="true" />
                       </span>
                     ) : (
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-400">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--nfq-danger)]/15 text-[color:var(--nfq-danger)]">
                         <X className="h-2.5 w-2.5" aria-hidden="true" />
                       </span>
                     )}
@@ -265,7 +265,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
                       {rule.failedConstraints.map((c) => (
                         <span
                           key={c}
-                          className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 uppercase tracking-wide"
+                          className="text-[10px] px-2 py-0.5 rounded bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)] uppercase tracking-wide"
                         >
                           {formatConstraintLabel(c)}
                         </span>

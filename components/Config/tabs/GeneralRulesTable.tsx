@@ -54,7 +54,7 @@ const GeneralRulesTable: React.FC<Props> = ({
             <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2 text-[color:var(--nfq-text-tertiary)]">{rule.liquidityReference || '-'}</td>
             <td className="border-b border-[color:var(--nfq-border-ghost)] px-4 py-2">
               {rule.formulaSpec ? (
-                <span className="rounded bg-indigo-950/30 px-1.5 py-0.5 font-mono text-[10px] text-indigo-400">
+                <span className="rounded bg-indigo-950/30 px-1.5 py-0.5 font-mono text-[10px] text-[color:var(--nfq-cat-d)]">
                   {rule.formulaSpec.baseRateKey}|{rule.formulaSpec.lpFormula}
                 </span>
               ) : (

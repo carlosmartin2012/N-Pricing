@@ -127,13 +127,13 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
         </button>
         <button
           onClick={() => setEsgSubTab('PHYSICAL')}
-          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'PHYSICAL' ? 'bg-[var(--nfq-bg-highest)] text-blue-400 border-b-2 border-blue-500' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'PHYSICAL' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-info)] border-b-2 border-[color:var(--nfq-info)]' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
         >
           Physical Risk (Climate)
         </button>
         <button
           onClick={() => setEsgSubTab('GREENIUM')}
-          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'GREENIUM' ? 'bg-[var(--nfq-bg-highest)] text-teal-400 border-b-2 border-teal-500' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'GREENIUM' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-cat-h)] border-b-2 border-[color:var(--nfq-cat-h)]' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
         >
           Greenium / Movilización
         </button>

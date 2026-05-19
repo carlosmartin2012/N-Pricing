@@ -114,7 +114,7 @@ const MasterDataEditor: React.FC<Props> = ({
   return (
     <div className="space-y-4">
       <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
-        <Building2 size={16} className="text-purple-500" />
+        <Building2 size={16} className="text-[color:var(--nfq-cat-d)]" />
         <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Business Unit</span>
       </div>
       <InputGroup label="Unit ID">

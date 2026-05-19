@@ -105,7 +105,7 @@ const AccountingLedger: React.FC = () => {
             title={t.commitments}
             emptyLabel={t.noOffBalanceExposure}
             breakdown={ledgerSummary.commitments}
-            accentClassName="text-indigo-400"
+            accentClassName="text-[color:var(--nfq-cat-d)]"
           />
           <AccountingSummaryCard
             title={t.annFtpIncome}

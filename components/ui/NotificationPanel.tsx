@@ -9,7 +9,7 @@ interface Props {
 }
 
 const TYPE_COLORS: Record<Notification['type'], string> = {
-  APPROVAL_REQUEST: 'bg-amber-500/20 text-[color:var(--nfq-warning)]',
+  APPROVAL_REQUEST: 'bg-[var(--nfq-warning)]/20 text-[color:var(--nfq-warning)]',
   APPROVED: 'bg-[var(--nfq-success)]/20 text-[color:var(--nfq-success)]',
   REJECTED: 'bg-[var(--nfq-danger)]/20 text-[color:var(--nfq-danger)]',
   COMMENT: 'bg-[var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]',

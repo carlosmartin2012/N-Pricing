@@ -135,21 +135,21 @@ const UserManual: React.FC = () => {
             <TocItem targetId="accounting" label={L('Accounting Ledger', 'Libro Contable')} accent="bg-[var(--nfq-accent)]" />
 
             <TocSectionLabel label="Insights" accent="text-[color:var(--nfq-warning)]" />
-            <TocItem targetId="analytics" label="Analytics" accent="bg-amber-400" />
-            <TocItem targetId="market-data" label={L('Yield Curves', 'Curvas de Tipos')} accent="bg-amber-400" />
-            <TocItem targetId="behavioural" label={L('Behavioural Models', 'Modelos Comportamentales')} accent="bg-amber-400" />
+            <TocItem targetId="analytics" label="Analytics" accent="bg-[var(--nfq-warning)]" />
+            <TocItem targetId="market-data" label={L('Yield Curves', 'Curvas de Tipos')} accent="bg-[var(--nfq-warning)]" />
+            <TocItem targetId="behavioural" label={L('Behavioural Models', 'Modelos Comportamentales')} accent="bg-[var(--nfq-warning)]" />
 
             <TocSectionLabel label="Governance" accent="text-[color:var(--nfq-cat-d)]" />
-            <TocItem targetId="methodology" label={L('Methodology', 'Metodología')} accent="bg-violet-400" />
-            <TocItem targetId="model-inventory" label="Model Inventory" accent="bg-violet-400" />
-            <TocItem targetId="dossiers" label={L('Signed Dossiers', 'Dossiers Firmados')} accent="bg-violet-400" />
-            <TocItem targetId="escalations" label="Escalations" accent="bg-violet-400" />
-            <TocItem targetId="snapshots" label="Snapshot Replay" accent="bg-violet-400" />
+            <TocItem targetId="methodology" label={L('Methodology', 'Metodología')} accent="bg-[var(--nfq-cat-d)]" />
+            <TocItem targetId="model-inventory" label="Model Inventory" accent="bg-[var(--nfq-cat-d)]" />
+            <TocItem targetId="dossiers" label={L('Signed Dossiers', 'Dossiers Firmados')} accent="bg-[var(--nfq-cat-d)]" />
+            <TocItem targetId="escalations" label="Escalations" accent="bg-[var(--nfq-cat-d)]" />
+            <TocItem targetId="snapshots" label="Snapshot Replay" accent="bg-[var(--nfq-cat-d)]" />
 
             <TocSectionLabel label={L('Power user', 'Power user')} accent="text-[color:var(--nfq-cat-g)]" />
-            <TocItem targetId="command-palette" label="Command Palette (⌘K)" accent="bg-fuchsia-400" />
-            <TocItem targetId="customer-drawer" label="Customer 360 Drawer" accent="bg-fuchsia-400" />
-            <TocItem targetId="shortcuts" label={L('Keyboard shortcuts', 'Atajos de teclado')} accent="bg-fuchsia-400" />
+            <TocItem targetId="command-palette" label="Command Palette (⌘K)" accent="bg-[var(--nfq-cat-g)]" />
+            <TocItem targetId="customer-drawer" label="Customer 360 Drawer" accent="bg-[var(--nfq-cat-g)]" />
+            <TocItem targetId="shortcuts" label={L('Keyboard shortcuts', 'Atajos de teclado')} accent="bg-[var(--nfq-cat-g)]" />
 
             <TocSectionLabel label={L('Operational guide', 'Guía operativa')} accent="text-[color:var(--nfq-accent)]" />
             <TocItem targetId="quickstart" label={L('Quick start', 'Puesta en marcha')} accent="bg-[var(--nfq-accent)]" />
@@ -415,8 +415,8 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ INSIGHTS ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-amber-400 pl-4 text-2xl font-bold text-[color:var(--nfq-warning)]">
-              <span className="h-2 w-2 rounded-full bg-amber-400" />
+            <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-warning)] pl-4 text-2xl font-bold text-[color:var(--nfq-warning)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--nfq-warning)]" />
               {L('Insights — understand the portfolio', 'Insights — entender la cartera')}
             </h2>
 
@@ -458,8 +458,8 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ GOVERNANCE ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-violet-400 pl-4 text-2xl font-bold text-[color:var(--nfq-cat-d)]">
-              <span className="h-2 w-2 rounded-full bg-violet-400" />
+            <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-cat-d)] pl-4 text-2xl font-bold text-[color:var(--nfq-cat-d)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--nfq-cat-d)]" />
               {L('Governance — control + reproducibility', 'Gobierno — control + reproducibilidad')}
             </h2>
 
@@ -520,8 +520,8 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ POWER USER ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-fuchsia-400 pl-4 text-2xl font-bold text-[color:var(--nfq-cat-g)]">
-              <span className="h-2 w-2 rounded-full bg-fuchsia-400" />
+            <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-cat-g)] pl-4 text-2xl font-bold text-[color:var(--nfq-cat-g)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--nfq-cat-g)]" />
               {L('Power user features', 'Features para usuario avanzado')}
             </h2>
 
@@ -608,7 +608,7 @@ const UserManual: React.FC = () => {
             <section id="data-modes" className="space-y-4 pt-4">
               <SectionHeader icon={DatabaseZap} title={L('Data modes', 'Modos de datos')} color="text-[color:var(--nfq-accent)]" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                <div className="rounded-lg border border-[color:var(--nfq-warning)]/20 bg-[var(--nfq-warning)]/5 p-4">
                   <h4 className="mb-2 text-sm font-bold text-[color:var(--nfq-warning)]">{guide.dataModes.demo.title}</h4>
                   <ul className="space-y-1.5 pl-1 text-xs text-[color:var(--nfq-text-muted)]">
                     {guide.dataModes.demo.bullets.map((b) => (
@@ -698,7 +698,7 @@ const UserManual: React.FC = () => {
 
             {/* Glossary */}
             <section id="glossary" className="space-y-4 pt-4">
-              <SectionHeader icon={BookA} title={t.manual_glossaryTitle} color="text-purple-400" />
+              <SectionHeader icon={BookA} title={t.manual_glossaryTitle} color="text-[color:var(--nfq-cat-d)]" />
               <p className="text-[color:var(--nfq-text-muted)]">{t.manual_glossaryIntro}</p>
               <div className="space-y-3">
                 {(

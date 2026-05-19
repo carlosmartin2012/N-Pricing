@@ -39,7 +39,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
         </div>
         <button
           onClick={onResetSession}
-          className="p-2 text-[color:var(--nfq-text-faint)] transition-colors hover:text-red-400"
+          className="p-2 text-[color:var(--nfq-text-faint)] transition-colors hover:text-[color:var(--nfq-danger)]"
           title="Clear Context"
         >
           <Trash2 size={16} />

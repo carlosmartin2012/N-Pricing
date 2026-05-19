@@ -13,10 +13,10 @@ interface Props {
 
 function getAvatarClassName(role: UserProfile['role']) {
   if (role === 'Admin') {
-    return 'border-purple-800 bg-purple-900/20 text-purple-400';
+    return 'border-purple-800 bg-purple-900/20 text-[color:var(--nfq-cat-d)]';
   }
   if (role === 'Risk_Manager') {
-    return 'border-red-800 bg-red-900/20 text-red-400';
+    return 'border-red-800 bg-red-900/20 text-[color:var(--nfq-danger)]';
   }
   if (role === 'Auditor') {
     return 'border-amber-800 bg-amber-900/20 text-[color:var(--nfq-warning)]';
@@ -36,7 +36,7 @@ export const UserCard: React.FC<Props> = React.memo(({
         <button onClick={onEdit} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
           <Edit size={14} />
         </button>
-        <button onClick={onDelete} className="text-[color:var(--nfq-text-muted)] hover:text-red-400">
+        <button onClick={onDelete} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]">
           <Trash2 size={14} />
         </button>
       </div>
@@ -82,9 +82,9 @@ export const UserCard: React.FC<Props> = React.memo(({
             {user.status === 'Active' ? (
               <Unlock size={10} className="text-[color:var(--nfq-success)]" />
             ) : (
-              <Lock size={10} className="text-red-500" />
+              <Lock size={10} className="text-[color:var(--nfq-danger)]" />
             )}
-            <span className={user.status === 'Active' ? 'text-[color:var(--nfq-success)]' : 'text-red-400'}>
+            <span className={user.status === 'Active' ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}>
               {user.status}
             </span>
           </div>

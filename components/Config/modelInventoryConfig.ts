@@ -119,10 +119,10 @@ export const CATEGORY_COLORS: Record<
     text: 'text-nfq-violet',
     label: 'Behav',
   },
-  FTP_CURVE: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Curve' },
+  FTP_CURVE: { bg: 'bg-[var(--nfq-info)]/10', text: 'text-[color:var(--nfq-info)]', label: 'Curve' },
   STRESS_SCENARIO: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-400',
+    bg: 'bg-[var(--nfq-danger)]/10',
+    text: 'text-[color:var(--nfq-danger)]',
     label: 'Stress',
   },
   OTHER: { bg: 'bg-gray-500/10', text: 'text-gray-400', label: 'Other' },
@@ -130,11 +130,11 @@ export const CATEGORY_COLORS: Record<
 
 export const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   DRAFT: { bg: 'bg-gray-500/10', text: 'text-gray-400' },
-  INTERNAL_VALIDATION: { bg: 'bg-amber-500/10', text: 'text-amber-400' },
-  APPROVED: { bg: 'bg-blue-500/10', text: 'text-blue-400' },
+  INTERNAL_VALIDATION: { bg: 'bg-[var(--nfq-warning)]/10', text: 'text-[color:var(--nfq-warning)]' },
+  APPROVED: { bg: 'bg-[var(--nfq-info)]/10', text: 'text-[color:var(--nfq-info)]' },
   PRODUCTION: { bg: 'bg-[var(--nfq-success)]/10', text: 'text-[color:var(--nfq-success)]' },
   DEPRECATED: { bg: 'bg-orange-500/10', text: 'text-orange-400' },
-  RETIRED: { bg: 'bg-red-500/10', text: 'text-red-400' },
+  RETIRED: { bg: 'bg-[var(--nfq-danger)]/10', text: 'text-[color:var(--nfq-danger)]' },
 };
 
 export const STATUS_LABELS: Record<ModelStatus, string> = {

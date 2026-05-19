@@ -247,7 +247,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
                 ? 'text-[color:var(--nfq-success)]'
                 : summaryKpis.avgRaroc >= 5
                   ? 'text-[color:var(--nfq-warning)]'
-                  : 'text-red-400',
+                  : 'text-[color:var(--nfq-danger)]',
           },
           {
             label: 'Portfolio Volume',

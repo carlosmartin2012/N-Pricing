@@ -146,13 +146,13 @@ const AuditLog: React.FC = () => {
                         {status === 'live' ? (
                             <Wifi size={13} className="text-[color:var(--nfq-success)]" />
                         ) : status === 'error' ? (
-                            <WifiOff size={13} className="text-red-400" />
+                            <WifiOff size={13} className="text-[color:var(--nfq-danger)]" />
                         ) : (
                             <Activity size={13} className="text-[color:var(--nfq-warning)] animate-pulse" />
                         )}
                         <span className={
                             status === 'live' ? 'text-[color:var(--nfq-success)]' :
-                                status === 'error' ? 'text-red-400' : 'text-[color:var(--nfq-warning)]'
+                                status === 'error' ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-warning)]'
                         }>
                             {statusMsg}
                         </span>

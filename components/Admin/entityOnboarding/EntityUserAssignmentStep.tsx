@@ -42,7 +42,7 @@ export const EntityUserAssignmentStep: React.FC<Props> = ({
             key={user.id}
             className={`flex items-center gap-3 rounded border p-3 transition-colors ${
               assigned
-                ? 'border-amber-500/40 bg-amber-500/5'
+                ? 'border-[color:var(--nfq-warning)]/40 bg-[var(--nfq-warning)]/5'
                 : 'border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]'
             }`}
           >

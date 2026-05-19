@@ -66,7 +66,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
               <h4 className="text-sm font-bold uppercase text-[color:var(--nfq-text-primary)]">{model.name}</h4>
               <Badge
                 variant="outline"
-                className={`mt-1 text-[8px] ${model.type === 'NMD_Replication' ? 'border-purple-500 text-purple-400' : 'border-amber-500 text-[color:var(--nfq-warning)]'}`}
+                className={`mt-1 text-[8px] ${model.type === 'NMD_Replication' ? 'border-[color:var(--nfq-cat-d)] text-[color:var(--nfq-cat-d)]' : 'border-[color:var(--nfq-warning)] text-[color:var(--nfq-warning)]'}`}
               >
                 {model.type === 'NMD_Replication' ? 'NMD REPLICATION' : 'PREPAYMENT CPR'}
               </Badge>

@@ -85,7 +85,7 @@ const VarianceChip: React.FC<{ variance?: DealVariance }> = ({ variance }) => {
 
   if (variance.outOfBand) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--nfq-danger)]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--nfq-danger)]/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--nfq-danger)]">
         <AlertTriangle size={10} aria-hidden="true" />
         {label}
       </span>

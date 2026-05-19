@@ -203,7 +203,7 @@ const StressPricingView: React.FC = () => {
         </section>
       )}
 
-      <footer className="flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-200/80">
+      <footer className="flex items-start gap-2 rounded-md border border-[color:var(--nfq-warning)]/20 bg-[var(--nfq-warning)]/5 px-4 py-3 text-xs text-amber-200/80">
         <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
         <p>
           Stress Pricing shows how FTP, margin and RAROC move under EBA GL 2018/02 curve shocks for price-testing

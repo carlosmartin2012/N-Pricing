@@ -66,7 +66,7 @@ function deltaColor(value: number): string {
 function deltaBgColor(value: number): string {
   if (value > 0) return 'bg-[var(--nfq-success)]/10';
   if (value < 0) return 'bg-[var(--nfq-danger)]/10';
-  return 'bg-amber-500/10';
+  return 'bg-[var(--nfq-warning)]/10';
 }
 
 // ---------------------------------------------------------------------------

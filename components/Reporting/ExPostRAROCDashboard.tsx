@@ -87,7 +87,7 @@ const ExPostRAROCDashboard: React.FC<Props> = ({ deals }) => {
     <div className="space-y-4">
       {/* Underpricing alert */}
       {underpriced.length > 0 && (
-        <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+        <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-warning)]/20 bg-[var(--nfq-warning)]/5 px-4 py-3">
           <AlertTriangle size={16} className="text-[color:var(--nfq-warning)] shrink-0" />
           <p className="text-xs text-[color:var(--nfq-warning)]">
             {underpriced.length} deal(s) show systematic underpricing (realized RAROC &gt; expected by 200+bp).

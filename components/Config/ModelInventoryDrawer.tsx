@@ -102,7 +102,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
               <span
                 className={
                   isOverdue(model.nextValidationDate)
-                    ? 'font-semibold text-red-400'
+                    ? 'font-semibold text-[color:var(--nfq-danger)]'
                     : 'text-neutral-200'
                 }
               >
@@ -167,7 +167,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
             </div>
 
             {error && (
-              <div className="mb-3 flex items-start gap-2 rounded-md bg-red-500/10 p-2 text-xs text-red-300">
+              <div className="mb-3 flex items-start gap-2 rounded-md bg-[var(--nfq-danger)]/10 p-2 text-xs text-[color:var(--nfq-danger)]">
                 <XCircle size={14} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>

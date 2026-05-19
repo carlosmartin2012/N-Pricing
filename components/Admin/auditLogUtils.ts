@@ -93,15 +93,15 @@ export function getAuditActionTextClass(action: string) {
     case 'CREATE':
       return 'text-[color:var(--nfq-success)]';
     case 'UPDATE':
-      return 'text-amber-400';
+      return 'text-[color:var(--nfq-warning)]';
     case 'DELETE':
       return 'text-[color:var(--nfq-danger)]';
     case 'ACCESS':
       return 'text-[color:var(--nfq-accent)]';
     case 'TEST':
-      return 'text-violet-400';
+      return 'text-[color:var(--nfq-cat-d)]';
     case 'EXPORT':
-      return 'text-indigo-400';
+      return 'text-[color:var(--nfq-cat-d)]';
     default:
       return 'text-slate-300';
   }

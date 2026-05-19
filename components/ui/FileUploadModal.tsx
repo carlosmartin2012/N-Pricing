@@ -216,7 +216,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                     ) : (
                         <div className="text-center py-8">
                             <div className="w-16 h-16 bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <AlertCircle size={32} className="text-red-500" />
+                                <AlertCircle size={32} className="text-[color:var(--nfq-danger)]" />
                             </div>
                             <h4 className="text-lg font-bold text-[color:var(--nfq-text-primary)] mb-2">{t.importFailed}</h4>
                             <p className="text-sm text-[color:var(--nfq-text-muted)] mb-8">{errorMessage}</p>

@@ -21,9 +21,9 @@ interface Props {
 
 const MODULES = [
     { id: 'YIELD_CURVES', label: 'Yield Curves', icon: LineChart, color: 'text-[color:var(--nfq-accent)]' },
-    { id: 'METHODOLOGY', label: 'Pricing Rules', icon: FileText, color: 'text-purple-400' },
+    { id: 'METHODOLOGY', label: 'Pricing Rules', icon: FileText, color: 'text-[color:var(--nfq-cat-d)]' },
     { id: 'BEHAVIOURAL', label: 'Behavioural Models', icon: GitBranch, color: 'text-[color:var(--nfq-warning)]' },
-    { id: 'SHOCKS', label: 'Scenario Shocks', icon: TrendingUp, color: 'text-red-400' },
+    { id: 'SHOCKS', label: 'Scenario Shocks', icon: TrendingUp, color: 'text-[color:var(--nfq-danger)]' },
     { id: 'DEALS', label: 'Deal Blotter', icon: Database, color: 'text-[color:var(--nfq-success)]' },
 ];
 
@@ -269,9 +269,9 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
                     {status === 'error' && (
                         <div className="py-12 text-center px-8">
-                            <AlertCircle size={64} className="text-red-500 mx-auto mb-4" />
+                            <AlertCircle size={64} className="text-[color:var(--nfq-danger)] mx-auto mb-4" />
                             <h3 className="text-xl font-bold text-[color:var(--nfq-text-primary)]">{t.validationError}</h3>
-                            <p className="text-sm text-red-400 mt-2 leading-relaxed">{errorMessage}</p>
+                            <p className="text-sm text-[color:var(--nfq-danger)] mt-2 leading-relaxed">{errorMessage}</p>
                             <div className="mt-8 flex justify-center gap-3">
                                 <button onClick={reset} className="px-6 py-2 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-primary)] rounded-lg text-xs hover:bg-[var(--nfq-bg-highest)]">{t.backToSelection}</button>
                                 {selectedModule && (

@@ -42,8 +42,8 @@ const DealLockBadge: React.FC<Props> = ({ dealId, variant = 'inline' }) => {
       title={title}
       className={
         isChip
-          ? 'inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] text-amber-200'
-          : 'ml-2 inline-flex items-center gap-0.5 rounded border border-[color:var(--nfq-warning)]/30 bg-amber-500/5 px-1 py-0 text-[9px] font-mono uppercase tracking-[0.08em] text-amber-200'
+          ? 'inline-flex items-center gap-1 rounded-full border border-[color:var(--nfq-warning)]/40 bg-[var(--nfq-warning)]/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.12em] text-amber-200'
+          : 'ml-2 inline-flex items-center gap-0.5 rounded border border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-warning)]/5 px-1 py-0 text-[9px] font-mono uppercase tracking-[0.08em] text-amber-200'
       }
     >
       <Users className="h-2.5 w-2.5" aria-hidden="true" />

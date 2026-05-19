@@ -26,7 +26,7 @@ interface Props {
 
 function toneClasses(relative: 'BELOW' | 'ON_MARKET' | 'ABOVE'): { bg: string; text: string; ring: string } {
   if (relative === 'BELOW')   return { bg: 'bg-[var(--nfq-success)]/10', text: 'text-[color:var(--nfq-success)]', ring: 'ring-[color:var(--nfq-success)]/30' };
-  if (relative === 'ON_MARKET') return { bg: 'bg-amber-500/10',  text: 'text-[color:var(--nfq-warning)]',  ring: 'ring-amber-500/30'  };
+  if (relative === 'ON_MARKET') return { bg: 'bg-[var(--nfq-warning)]/10',  text: 'text-[color:var(--nfq-warning)]',  ring: 'ring-[color:var(--nfq-warning)]/30'  };
   return { bg: 'bg-[var(--nfq-danger)]/10',   text: 'text-[color:var(--nfq-danger)]',   ring: 'ring-[color:var(--nfq-danger)]/30'   };
 }
 

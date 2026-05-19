@@ -359,7 +359,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Calendar className="w-5 h-5 text-purple-400" />
+        <Calendar className="w-5 h-5 text-[color:var(--nfq-cat-d)]" />
         <h2 className="text-sm font-bold tracking-tight text-[color:var(--nfq-text-primary)] uppercase font-mono">Vintage Analysis</h2>
         <span className="nfq-label ml-2">
           {vintageCohorts.length} cohorts / {pricingResults.length} deals

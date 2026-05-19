@@ -92,7 +92,7 @@ const CurrencyGap: React.FC<Props> = React.memo(({ deals }) => {
                 <div className="text-[10px] text-[color:var(--nfq-text-faint)]">{row.count} deals</div>
               </div>
               <div className="text-right">
-                <div className={`text-xs font-mono font-bold ${row.netPosition >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-red-400'}`}>
+                <div className={`text-xs font-mono font-bold ${row.netPosition >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
                   {row.netPosition >= 0 ? '+' : ''}{fmtM(row.netPosition)}
                 </div>
                 <div className="text-[10px] text-[color:var(--nfq-text-faint)]">{row.pctOfTotal.toFixed(1)}% vol</div>

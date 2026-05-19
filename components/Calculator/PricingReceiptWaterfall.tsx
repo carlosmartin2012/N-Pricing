@@ -37,7 +37,7 @@ export function PricingReceiptWaterfall({
         <div
           className={`mx-4 mt-4 flex items-center justify-between rounded-lg border p-3 transition-colors ${
             applyShocks
-              ? 'border-amber-500/25 bg-amber-500/10'
+              ? 'border-[color:var(--nfq-warning)]/25 bg-[var(--nfq-warning)]/10'
               : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]'
           }`}
         >
@@ -59,7 +59,7 @@ export function PricingReceiptWaterfall({
           <button
             onClick={onToggleShocks}
             className={`rounded-full px-3 py-1 text-[10px] font-bold transition-colors ${
-              applyShocks ? 'bg-amber-500 text-[color:var(--nfq-text-primary)] shadow-md' : 'bg-slate-200 text-[color:var(--nfq-text-faint)] dark:bg-[var(--nfq-bg-highest)]'
+              applyShocks ? 'bg-[var(--nfq-warning)] text-[color:var(--nfq-text-primary)] shadow-md' : 'bg-slate-200 text-[color:var(--nfq-text-faint)] dark:bg-[var(--nfq-bg-highest)]'
             }`}
           >
             {applyShocks ? 'ON' : 'OFF'}
@@ -68,15 +68,15 @@ export function PricingReceiptWaterfall({
       )}
 
       {validationErrors.length > 0 && (
-        <div className="mx-4 mt-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
+        <div className="mx-4 mt-4 rounded-lg border border-[color:var(--nfq-danger)]/25 bg-[var(--nfq-danger)]/10 p-3">
           <div className="mb-1 flex items-center gap-2">
-            <XCircle size={14} className="shrink-0 text-red-400" />
-            <span className="text-xs font-medium text-red-400">Validation Errors</span>
+            <XCircle size={14} className="shrink-0 text-[color:var(--nfq-danger)]" />
+            <span className="text-xs font-medium text-[color:var(--nfq-danger)]">Validation Errors</span>
           </div>
           <ul className="space-y-0.5 pl-6">
             {validationErrors.map((error) => (
-              <li key={error.field} className="text-[11px] text-red-300">
-                <span className="font-mono text-red-400">{error.field}</span>: {error.message}
+              <li key={error.field} className="text-[11px] text-[color:var(--nfq-danger)]">
+                <span className="font-mono text-[color:var(--nfq-danger)]">{error.field}</span>: {error.message}
               </li>
             ))}
           </ul>
@@ -86,12 +86,12 @@ export function PricingReceiptWaterfall({
       <div className="flex-1 space-y-1 overflow-auto bg-[var(--nfq-bg-surface)] p-4">
         {result.formulaUsed && (
           <div className="mb-3 rounded-lg border border-indigo-800/50 bg-indigo-950/30 p-2">
-            <div className="mb-1 text-[11px] font-medium text-indigo-400">Applied Formula</div>
-            <div className="font-mono text-xs text-indigo-300">{result.formulaUsed}</div>
+            <div className="mb-1 text-[11px] font-medium text-[color:var(--nfq-cat-d)]">Applied Formula</div>
+            <div className="font-mono text-xs text-[color:var(--nfq-cat-d)]">{result.formulaUsed}</div>
             {result.behavioralMaturityUsed != null &&
               deal.durationMonths != null &&
               result.behavioralMaturityUsed !== deal.durationMonths && (
-                <div className="mt-1 text-[10px] text-indigo-500">
+                <div className="mt-1 text-[10px] text-[color:var(--nfq-cat-d)]">
                   BM={Math.round(result.behavioralMaturityUsed)}M vs DTM={deal.durationMonths}M
                 </div>
               )}
@@ -133,7 +133,7 @@ export function PricingReceiptWaterfall({
               </MiniMetric>
             )}
             {result.liquidityRecharge != null && result.liquidityRecharge !== 0 && (
-              <MiniMetric label="Liquidity Recharge (LR)" tone="text-purple-400">
+              <MiniMetric label="Liquidity Recharge (LR)" tone="text-[color:var(--nfq-cat-d)]">
                 +{result.liquidityRecharge.toFixed(3)}%
               </MiniMetric>
             )}
@@ -144,7 +144,7 @@ export function PricingReceiptWaterfall({
           label="Strategic Spread"
           value={result.strategicSpread}
           isAdd
-          color="text-blue-600 dark:text-blue-400"
+          color="text-blue-600 dark:text-[color:var(--nfq-info)]"
           formula={t.tooltip_formula_strategicSpread}
         />
 

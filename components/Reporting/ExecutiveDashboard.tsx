@@ -62,8 +62,8 @@ const ExecutiveDashboard: React.FC<Props> = ({
         {[
           { label: 'Total Portfolio', value: fmtM(totalVolume), sub: `${bookedDeals.length} deals`, color: 'text-[color:var(--nfq-text-primary)]' },
           { label: 'Avg Margin', value: `${avgMargin.toFixed(2)}%`, sub: 'target spread', color: 'text-[color:var(--nfq-success)]' },
-          { label: 'LCR Ratio', value: `${portfolioMetrics.lcr.toFixed(1)}%`, sub: portfolioMetrics.lcr > 100 ? 'COMPLIANT' : 'AT RISK', color: portfolioMetrics.lcr > 100 ? 'text-[color:var(--nfq-success)]' : 'text-red-400' },
-          { label: 'NSFR Ratio', value: `${portfolioMetrics.nsfr.toFixed(1)}%`, sub: portfolioMetrics.nsfr > 100 ? 'COMPLIANT' : 'AT RISK', color: portfolioMetrics.nsfr > 100 ? 'text-[color:var(--nfq-success)]' : 'text-red-400' },
+          { label: 'LCR Ratio', value: `${portfolioMetrics.lcr.toFixed(1)}%`, sub: portfolioMetrics.lcr > 100 ? 'COMPLIANT' : 'AT RISK', color: portfolioMetrics.lcr > 100 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]' },
+          { label: 'NSFR Ratio', value: `${portfolioMetrics.nsfr.toFixed(1)}%`, sub: portfolioMetrics.nsfr > 100 ? 'COMPLIANT' : 'AT RISK', color: portfolioMetrics.nsfr > 100 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]' },
           { label: 'Currencies', value: `${byCurrency.length}`, sub: byCurrency.map(currency => currency[0]).join(', '), color: 'text-[color:var(--nfq-accent)]' },
         ].map(kpi => (
           <div key={kpi.label} className="nfq-kpi-card">

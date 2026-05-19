@@ -143,7 +143,7 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
         </div>
         <button
           onClick={handleAddRateCard}
-          className="flex items-center gap-1 px-3 py-1.5 bg-purple-900/30 text-purple-400 rounded border border-purple-800 text-xs hover:bg-purple-900/50 font-medium"
+          className="flex items-center gap-1 px-3 py-1.5 bg-purple-900/30 text-[color:var(--nfq-cat-d)] rounded border border-purple-800 text-xs hover:bg-purple-900/50 font-medium"
         >
           <Plus size={12} /> New Curve / Grid
         </button>

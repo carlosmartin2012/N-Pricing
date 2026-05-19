@@ -44,7 +44,7 @@ const KIND_COLOR: Record<ModelKind, string> = {
   engine:      'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   ruleset:     'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   elasticity:  'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
-  shock_pack:  'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  shock_pack:  'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   behavioural: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
   rate_card:   'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
   other:       'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
@@ -53,7 +53,7 @@ const KIND_COLOR: Record<ModelKind, string> = {
 const STATUS_COLOR: Record<ModelStatus, string> = {
   candidate: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
   active:    'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
-  retired:   'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  retired:   'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   rejected:  'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
 

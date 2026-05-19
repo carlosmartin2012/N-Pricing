@@ -200,7 +200,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
                            <Badge variant="default">{c.type}</Badge>
                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ml-2">
                               <button onClick={() => handleEditClient(c)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]"><Edit size={14} /></button>
-                              <button onClick={() => handleDeleteClient(c.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400"><Trash2 size={14} /></button>
+                              <button onClick={() => handleDeleteClient(c.id)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]"><Trash2 size={14} /></button>
                            </div>
                         </div>
                      </div>
@@ -227,7 +227,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
                            <Badge variant="default">{p.category}</Badge>
                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                               <button onClick={() => handleEditProduct(p)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]"><Edit size={12} /></button>
-                              <button onClick={() => handleDeleteProduct(p.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400"><Trash2 size={12} /></button>
+                              <button onClick={() => handleDeleteProduct(p.id)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]"><Trash2 size={12} /></button>
                            </div>
                         </div>
                      </div>
@@ -238,7 +238,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             {/* Business Units */}
             <MasterDataSection
                title="Business Units"
-               icon={<Building2 size={16} className="text-purple-500" />}
+               icon={<Building2 size={16} className="text-[color:var(--nfq-cat-d)]" />}
                addLabel={<><Plus size={10} /> Add</>}
                compactAddButton
                onAdd={handleAddBU}
@@ -252,7 +252,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                            <button onClick={() => handleEditBU(b)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]"><Edit size={12} /></button>
-                           <button onClick={() => handleDeleteBU(b.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400"><Trash2 size={12} /></button>
+                           <button onClick={() => handleDeleteBU(b.id)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]"><Trash2 size={12} /></button>
                         </div>
                      </div>
                   ))}

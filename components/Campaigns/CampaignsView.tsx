@@ -13,7 +13,7 @@ const STATUS_COLOR: Record<CampaignStatus, string> = {
   draft: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
   approved: 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   active: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
-  exhausted: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  exhausted: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   expired: 'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
   cancelled: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
@@ -359,6 +359,6 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
   </label>
 );
 const inputCls =
-  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)] focus:border-amber-400 focus:outline-none';
+  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-warning)] focus:outline-none';
 
 export default CampaignsView;

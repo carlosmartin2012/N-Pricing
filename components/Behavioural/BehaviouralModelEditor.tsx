@@ -95,7 +95,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
 
           <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3">
             <div className="mb-3 flex items-center justify-between">
-              <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-purple-400">
+              <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-[color:var(--nfq-cat-d)]">
                 <Split size={12} /> Replication Profile (Caterpillar)
               </h5>
               <button
@@ -134,7 +134,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                       type="number"
                       value={tranche.weight}
                       onChange={(event) => onTrancheChange(index, 'weight', Number(event.target.value) || 0)}
-                      className="w-full py-1 text-xs font-bold text-purple-400"
+                      className="w-full py-1 text-xs font-bold text-[color:var(--nfq-cat-d)]"
                     />
                   </div>
                   <div className="flex-1">
@@ -146,7 +146,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                       className="w-full py-1 text-xs"
                     />
                   </div>
-                  <button onClick={() => onRemoveTranche(index)} className="mt-3 p-1 text-[color:var(--nfq-text-faint)] hover:text-red-400">
+                  <button onClick={() => onRemoveTranche(index)} className="mt-3 p-1 text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-danger)]">
                     <X size={14} />
                   </button>
                 </div>
@@ -159,7 +159,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
               )}
             </div>
 
-            <div className={`mt-3 rounded border p-2 text-center text-xs font-bold ${totalWeight === 100 ? 'border-emerald-900 bg-emerald-950/30 text-[color:var(--nfq-success)]' : 'border-red-900 bg-red-950/30 text-red-400'}`}>
+            <div className={`mt-3 rounded border p-2 text-center text-xs font-bold ${totalWeight === 100 ? 'border-emerald-900 bg-emerald-950/30 text-[color:var(--nfq-success)]' : 'border-red-900 bg-red-950/30 text-[color:var(--nfq-danger)]'}`}>
               Total Weight: {totalWeight}%
             </div>
           </div>

@@ -52,7 +52,7 @@ const BlotterFooter: React.FC<Props> = ({ deals, committeeSummary }) => {
             READY TO BOOK: <span className="text-[color:var(--nfq-accent)]">{committeeSummary.readyToBook}</span>
           </div>
           <div>
-            AI DOSSIERS: <span className="text-indigo-400">{committeeSummary.aiSupported}</span>
+            AI DOSSIERS: <span className="text-[color:var(--nfq-cat-d)]">{committeeSummary.aiSupported}</span>
           </div>
           <div>
             OPEN TASKS: <span className="text-[color:var(--nfq-text-secondary)]">{committeeSummary.openTasks}</span>

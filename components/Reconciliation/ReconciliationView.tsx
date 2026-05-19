@@ -39,8 +39,8 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
 
 const STATUS_TONE: Record<MatchStatus, string> = {
   matched: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
-  amount_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
-  rate_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  amount_mismatch: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
+  rate_mismatch: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   currency_mismatch: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
   bu_only: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
   treasury_only: 'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
@@ -188,7 +188,7 @@ const ReconciliationView: React.FC = () => {
               data-testid={`reconciliation-filter-${s}`}
               className={`rounded-md px-2 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                 active
-                  ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)] ring-1 ring-violet-400/40'
+                  ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)] ring-1 ring-[color:var(--nfq-cat-d)]/40'
                   : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
               }`}
             >
