@@ -32,7 +32,7 @@ export const navigationEs: NavigationTranslationKeys = {
   navAiAssistant: 'Asistente IA',
 
   // Section headers
-  navSectionToday: 'Hoy',
+  navSectionToday: 'Resumen',
   navSectionRelationships: 'Relaciones',
   navSectionPricing: 'Pricing',
   navSectionMarketData: 'Datos de mercado',

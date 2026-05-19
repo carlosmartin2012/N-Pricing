@@ -37,7 +37,7 @@ export const navigationEn: NavigationPack = {
   navAiAssistant: 'AI Assistant',
 
   // Section headers (groups of sidebar entries)
-  navSectionToday: 'Today',
+  navSectionToday: 'Dashboard',
   navSectionRelationships: 'Relationships',
   navSectionPricing: 'Pricing',
   navSectionMarketData: 'Market Data',

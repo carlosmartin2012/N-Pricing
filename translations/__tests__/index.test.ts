@@ -105,7 +105,7 @@ describe('monolith hygiene', () => {
     const es = getTranslations('es');
     expect(en.navClients).toBe('Clients');
     expect(es.navClients).toBe('Clientes');
-    expect(en.navSectionToday).toBe('Today');
-    expect(es.navSectionToday).toBe('Hoy');
+    expect(en.navSectionToday).toBe('Dashboard');
+    expect(es.navSectionToday).toBe('Resumen');
   });
 });
