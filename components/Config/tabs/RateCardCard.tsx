@@ -14,7 +14,7 @@ const RateCardCard: React.FC<Props> = ({
   onEdit,
   onDelete,
 }) => (
-  <div className="group relative rounded border border-slate-800 bg-[var(--nfq-bg-root)] p-4 transition-colors hover:border-slate-600">
+  <div className="group relative rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-4 transition-colors hover:border-[color:var(--nfq-border)]">
     <div className="absolute right-4 top-4 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
       <button onClick={() => onEdit(card)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
         <Edit size={14} />

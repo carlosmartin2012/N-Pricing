@@ -196,7 +196,7 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
       )}
 
       {/* General Toolbar */}
-      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]">
+      <div className="p-4 border-b border-[color:var(--nfq-border-ghost)] flex justify-between items-center bg-[var(--nfq-bg-elevated)]">
         <div className="flex gap-2">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--nfq-text-faint)]" />
@@ -205,19 +205,19 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
               placeholder="Search rules..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-[var(--nfq-bg-root)] border border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)] w-full sm:w-64"
+              className="bg-[var(--nfq-bg-root)] border border-[color:var(--nfq-border-ghost)] rounded pl-9 pr-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)] w-full sm:w-64"
             />
           </div>
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleDownloadRulesTemplate}
-            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-warning)] rounded border border-slate-700 text-xs hover:bg-[var(--nfq-bg-highest)]"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-warning)] rounded border border-[color:var(--nfq-border-ghost)] text-xs hover:bg-[var(--nfq-bg-highest)]"
             title="Download Template"
           >
             <FileSpreadsheet size={12} /> Template
           </button>
-          <label className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] rounded border border-slate-700 text-xs hover:bg-[var(--nfq-bg-highest)] cursor-pointer">
+          <label className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] rounded border border-[color:var(--nfq-border-ghost)] text-xs hover:bg-[var(--nfq-bg-highest)] cursor-pointer">
             <Upload size={12} /> Import
             <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleImportRules} />
           </label>

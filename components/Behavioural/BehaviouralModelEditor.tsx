@@ -58,12 +58,12 @@ const BehaviouralModelEditor: React.FC<Props> = ({
       />
     </InputGroup>
 
-    <div className="border-t border-slate-800 pt-4">
+    <div className="border-t border-[color:var(--nfq-border-ghost)] pt-4">
       <h4 className="mb-4 text-xs font-bold uppercase text-[color:var(--nfq-accent)]">Parameters</h4>
 
       {editingModel.type === 'NMD_Replication' ? (
         <div className="space-y-6">
-          <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3">
+          <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/50 p-3">
             <h5 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase text-[color:var(--nfq-success)]">
               <Activity size={12} /> Core & Sensitivity
             </h5>
@@ -93,7 +93,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3">
+          <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/50 p-3">
             <div className="mb-3 flex items-center justify-between">
               <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-[color:var(--nfq-cat-d)]">
                 <Split size={12} /> Replication Profile (Caterpillar)
@@ -108,7 +108,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
 
             <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
               {editingModel.replicationProfile?.map((tranche, index) => (
-                <div key={index} className="flex items-center gap-2 rounded border border-slate-800 bg-[var(--nfq-bg-root)] p-1.5">
+                <div key={index} className="flex items-center gap-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-1.5">
                   <div className="w-20 shrink-0">
                     <label className="mb-0.5 block text-[9px] text-[color:var(--nfq-text-faint)]">Term</label>
                     <SelectInput
@@ -153,7 +153,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
               ))}
 
               {(!editingModel.replicationProfile || editingModel.replicationProfile.length === 0) && (
-                <div className="rounded border border-dashed border-slate-700 p-4 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
+                <div className="rounded border border-dashed border-[color:var(--nfq-border-ghost)] p-4 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   No replication tranches defined.
                 </div>
               )}

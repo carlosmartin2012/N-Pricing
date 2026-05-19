@@ -118,7 +118,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
       )}
 
       {/* ESG Sub-Tabs */}
-      <div className="flex bg-[var(--nfq-bg-elevated)] border-b border-slate-700">
+      <div className="flex bg-[var(--nfq-bg-elevated)] border-b border-[color:var(--nfq-border-ghost)]">
         <button
           onClick={() => setEsgSubTab('TRANSITION')}
           className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'TRANSITION' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-success)] border-b-2 border-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
@@ -140,7 +140,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
       </div>
 
       {/* ESG Toolbar */}
-      <div className="p-3 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
+      <div className="p-3 border-b border-[color:var(--nfq-border-ghost)] flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
         <div className="text-[10px] text-[color:var(--nfq-text-faint)]">
           {esgSubTab === 'TRANSITION'
             ? 'Penalties for high-carbon, incentives for green. Changes now flow through governance.'

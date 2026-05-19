@@ -34,7 +34,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="bg-[var(--nfq-bg-elevated)] border border-slate-700 rounded-lg p-4">
+      <div className="bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-border-ghost)] rounded-lg p-4">
         <div className="flex items-start justify-between gap-4 mb-5">
           <div>
             <h3 className="text-lg font-bold text-[color:var(--nfq-text-primary)]">Methodology Governance Queue</h3>
@@ -55,7 +55,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
 
         <div className="space-y-3">
           {requests.length === 0 && (
-            <div className="rounded-lg border border-dashed border-slate-700 p-4 text-center text-sm text-[color:var(--nfq-text-faint)]">
+            <div className="rounded-lg border border-dashed border-[color:var(--nfq-border-ghost)] p-4 text-center text-sm text-[color:var(--nfq-text-faint)]">
               No methodology requests yet.
             </div>
           )}
@@ -85,7 +85,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
       </div>
 
       <div className="space-y-6">
-        <div className="bg-[var(--nfq-bg-elevated)] border border-slate-700 rounded-lg p-4">
+        <div className="bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-border-ghost)] rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
             <History size={16} className="text-[color:var(--nfq-accent)]" />
             <h3 className="text-base font-bold text-[color:var(--nfq-text-primary)]">Methodology Version Log</h3>
@@ -93,14 +93,14 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
 
           <div className="space-y-3">
             {methodologyVersions.length === 0 && (
-              <div className="rounded border border-dashed border-slate-700 p-4 text-xs text-[color:var(--nfq-text-faint)]">
+              <div className="rounded border border-dashed border-[color:var(--nfq-border-ghost)] p-4 text-xs text-[color:var(--nfq-text-faint)]">
                 The live rule set is still on the baseline fingerprint. The first applied governance change will
                 stamp version history here.
               </div>
             )}
 
             {methodologyVersions.slice(0, 5).map((version) => (
-              <div key={version.id} className="rounded border border-slate-800 bg-[var(--nfq-bg-root)]/60 p-3">
+              <div key={version.id} className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/60 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-[color:var(--nfq-accent)]">{version.label}</div>
@@ -117,7 +117,7 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
           </div>
         </div>
 
-        <div className="bg-[var(--nfq-bg-elevated)] border border-slate-700 rounded-lg p-4">
+        <div className="bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-border-ghost)] rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
             <ClipboardList size={16} className="text-[color:var(--nfq-warning)]" />
             <h3 className="text-base font-bold text-[color:var(--nfq-text-primary)]">Open Approval Tasks</h3>
@@ -125,13 +125,13 @@ const ChangeRequestDetail: React.FC<ChangeRequestDetailProps> = ({
 
           <div className="space-y-3">
             {openTasks.length === 0 && (
-              <div className="rounded border border-dashed border-slate-700 p-4 text-xs text-[color:var(--nfq-text-faint)]">
+              <div className="rounded border border-dashed border-[color:var(--nfq-border-ghost)] p-4 text-xs text-[color:var(--nfq-text-faint)]">
                 No open approval tasks right now.
               </div>
             )}
 
             {openTasks.slice(0, 8).map((task) => (
-              <div key={task.id} className="rounded border border-slate-800 bg-[var(--nfq-bg-root)]/60 p-3">
+              <div key={task.id} className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/60 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs font-semibold text-[color:var(--nfq-text-primary)]">{task.title}</div>

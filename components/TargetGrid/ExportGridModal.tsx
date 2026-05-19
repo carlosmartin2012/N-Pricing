@@ -152,7 +152,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
               type="checkbox"
               checked={includeBreakdown}
               onChange={(e) => setIncludeBreakdown(e.target.checked)}
-              className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
+              className="rounded border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
             />
             <span className="text-xs text-[color:var(--nfq-text-secondary)]">
               Include FTP component breakdown

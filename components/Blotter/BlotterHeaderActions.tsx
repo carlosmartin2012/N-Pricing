@@ -24,7 +24,7 @@ const BlotterHeaderActions: React.FC<Props> = ({
     <button
       onClick={onDownloadTemplate}
       disabled={!canMutate}
-      className="px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-warning)] rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+      className="px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-warning)] rounded border border-[color:var(--nfq-border-ghost)] text-xs flex items-center gap-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       title="Download ID Modification Template"
     >
       <FileUp size={14} /> <span className="hidden sm:inline">ID Template</span>
@@ -32,7 +32,7 @@ const BlotterHeaderActions: React.FC<Props> = ({
     <button
       onClick={onOpenImport}
       disabled={!canMutate}
-      className="px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] rounded border border-slate-700 text-xs flex items-center gap-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+      className="px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] rounded border border-[color:var(--nfq-border-ghost)] text-xs flex items-center gap-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
     >
       <Upload size={14} /> <span className="hidden sm:inline">Import Excel</span>
     </button>
@@ -42,7 +42,7 @@ const BlotterHeaderActions: React.FC<Props> = ({
       className={`px-3 py-1.5 rounded border text-xs flex items-center gap-1 transition-colors font-bold ${
         repriceCount > 0
           ? 'bg-[var(--nfq-success)]/30 border-emerald-700 text-[color:var(--nfq-success)]'
-          : 'bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] border-slate-700 text-[color:var(--nfq-warning)]'
+          : 'bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] border-[color:var(--nfq-border-ghost)] text-[color:var(--nfq-warning)]'
       } disabled:cursor-not-allowed disabled:opacity-40`}
     >
       <RefreshCw size={14} className={isRepricing ? 'animate-spin' : ''} />

@@ -67,7 +67,7 @@ const AccountingLedger: React.FC = () => {
   return (
     <div className="flex h-full flex-col gap-4">
       <div className="flex h-32 flex-col gap-4 md:h-24 md:flex-row">
-        <div className="flex w-full flex-col justify-center rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4 shadow md:w-1/4">
+        <div className="flex w-full flex-col justify-center rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 shadow md:w-1/4">
           <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">
             <Building2 size={12} /> {t.businessUnitView}
           </div>
@@ -88,7 +88,7 @@ const AccountingLedger: React.FC = () => {
           </SelectInput>
         </div>
 
-        <div className="grid w-full grid-cols-2 rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4 shadow md:w-3/4 md:grid-cols-4 md:divide-x md:divide-slate-800">
+        <div className="grid w-full grid-cols-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 shadow md:w-3/4 md:grid-cols-4 md:divide-x md:divide-slate-800">
           <AccountingSummaryCard
             title={t.assetsLoans}
             emptyLabel={t.noLoanExposure}

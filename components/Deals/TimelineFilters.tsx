@@ -38,7 +38,7 @@ const TimelineFilters: React.FC<Props> = ({ enabled, onToggle, onAll, onNone, co
       >
         None
       </button>
-      <span className="text-slate-700">·</span>
+      <span className="text-[color:var(--nfq-text-primary)]">·</span>
       {ORDER.map((kind) => {
         const isOn = enabled.has(kind);
         const count = counts[kind] ?? 0;

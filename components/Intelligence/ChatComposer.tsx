@@ -24,7 +24,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
 
   return (
     <>
-      <div className="flex h-11 items-center justify-between border-b border-slate-800 bg-[var(--nfq-bg-elevated)]/50 px-6 backdrop-blur">
+      <div className="flex h-11 items-center justify-between border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/50 px-6 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded border border-[color:var(--nfq-accent)]/30 bg-[var(--nfq-accent)]/10">
             <Terminal size={16} className="text-[color:var(--nfq-accent)]" />
@@ -46,7 +46,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
         </button>
       </div>
 
-      <div className="border-t border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+      <div className="border-t border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
         <div className="mx-auto max-w-4xl">
           <div className="mb-3 flex flex-wrap gap-2">
             {QUICK_ACTIONS.map((action) => (
@@ -68,7 +68,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
               onChange={(event) => onChangeInput(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && onSendMessage()}
               placeholder="Ask about pricing, RAROC, credit risk, or specific deal IDs..."
-              className="w-full rounded-[var(--nfq-radius-card)] border border-slate-700 bg-[var(--nfq-bg-root)] py-4 pl-12 pr-12 font-mono text-sm text-[color:var(--nfq-text-secondary)] placeholder-slate-600 shadow-inner transition-all focus:border-[color:var(--nfq-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--nfq-accent)]/20"
+              className="w-full rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] py-4 pl-12 pr-12 font-mono text-sm text-[color:var(--nfq-text-secondary)] placeholder-slate-600 shadow-inner transition-all focus:border-[color:var(--nfq-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--nfq-accent)]/20"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--nfq-text-faint)]">
               <Terminal size={18} />

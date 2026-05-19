@@ -191,7 +191,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             >
                <div className="max-h-96 overflow-y-auto pr-1 space-y-2">
                   {clients.map(c => (
-                     <div key={c.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-slate-800 text-xs group hover:border-slate-600">
+                     <div key={c.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-[color:var(--nfq-border-ghost)] text-xs group hover:border-[color:var(--nfq-border)]">
                         <div>
                            <span className="text-[color:var(--nfq-accent)] font-mono font-bold mr-3">{c.id}</span>
                            <span className="text-[color:var(--nfq-text-secondary)]">{c.name}</span>
@@ -218,7 +218,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             >
                <div className="space-y-2 mb-4">
                   {products.map(p => (
-                     <div key={p.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-slate-800 text-xs group hover:border-slate-600">
+                     <div key={p.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-[color:var(--nfq-border-ghost)] text-xs group hover:border-[color:var(--nfq-border)]">
                         <div>
                            <span className="text-[color:var(--nfq-text-secondary)]">{p.name}</span>
                            <div className="text-[9px] text-[color:var(--nfq-text-faint)] font-mono">{p.id}</div>
@@ -245,7 +245,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             >
                <div className="space-y-2 mb-4">
                   {businessUnits.map(b => (
-                     <div key={b.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-slate-800 text-xs group hover:border-slate-600">
+                     <div key={b.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-[color:var(--nfq-border-ghost)] text-xs group hover:border-[color:var(--nfq-border)]">
                         <div>
                            <span className="text-[color:var(--nfq-text-secondary)]">{b.name}</span>
                            <div className="text-[9px] text-[color:var(--nfq-text-faint)] font-mono">{b.code} ({b.id})</div>

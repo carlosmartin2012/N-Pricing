@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </p>
           <button
             onClick={this.handleReset}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] rounded border border-slate-700 text-xs hover:bg-[var(--nfq-bg-highest)]"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] rounded border border-[color:var(--nfq-border-ghost)] text-xs hover:bg-[var(--nfq-bg-highest)]"
           >
             <RefreshCw size={14} /> Try Again
           </button>

@@ -10,11 +10,11 @@ import { createLogger } from '../../utils/logger';
 const log = createLogger('CampaignsView');
 
 const STATUS_COLOR: Record<CampaignStatus, string> = {
-  draft: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  draft: 'bg-[var(--nfq-bg-elevated)]/10 text-[color:var(--nfq-text-secondary)]',
   approved: 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   active: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
   exhausted: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
-  expired: 'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
+  expired: 'bg-[var(--nfq-bg-elevated)]/10 text-[color:var(--nfq-text-muted)]',
   cancelled: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };
 

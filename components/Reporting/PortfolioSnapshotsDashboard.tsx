@@ -266,7 +266,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
 
               <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-input)] p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Recent Snapshots</h4>
@@ -306,7 +306,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                   </div>
                 </div>
 
-                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-input)] p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Selected Snapshot Detail</h4>

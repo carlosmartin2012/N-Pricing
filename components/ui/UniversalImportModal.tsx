@@ -129,9 +129,9 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--nfq-bg-root)]/80 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="universal-import-modal-title">
-            <div className="bg-[var(--nfq-bg-elevated)] border border-slate-700 rounded-[var(--nfq-radius-card)] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-border-ghost)] rounded-[var(--nfq-radius-card)] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
+                <div className="px-6 py-4 border-b border-[color:var(--nfq-border-ghost)] flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-[var(--nfq-accent)]/10 rounded-lg flex items-center justify-center border border-[color:var(--nfq-accent)]/20">
                             <Upload className="text-[color:var(--nfq-accent)]" size={20} />
@@ -160,7 +160,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                         <button
                                             key={mod.id}
                                             onClick={() => setSelectedModule(mod.id)}
-                                            className={`flex flex-col items-center p-4 rounded-lg border transition-all ${isSelected ? 'bg-[var(--nfq-accent)]/10 border-[color:var(--nfq-accent)] ring-1 ring-[color:var(--nfq-accent)]' : 'bg-[var(--nfq-bg-highest)]/30 border-slate-700 hover:border-slate-500'}`}
+                                            className={`flex flex-col items-center p-4 rounded-lg border transition-all ${isSelected ? 'bg-[var(--nfq-accent)]/10 border-[color:var(--nfq-accent)] ring-1 ring-[color:var(--nfq-accent)]' : 'bg-[var(--nfq-bg-highest)]/30 border-[color:var(--nfq-border-ghost)] hover:border-[color:var(--nfq-border)]'}`}
                                         >
                                             <Icon className={`${mod.color} mb-2`} size={24} />
                                             <span className="text-xs font-bold text-[color:var(--nfq-text-secondary)]">{mod.label}</span>
@@ -205,7 +205,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                     {/* STEP 3: READY / PREVIEW */}
                     {status === 'ready' && (
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between p-3 bg-[var(--nfq-bg-highest)]/50 rounded-lg border border-slate-700">
+                            <div className="flex items-center justify-between p-3 bg-[var(--nfq-bg-highest)]/50 rounded-lg border border-[color:var(--nfq-border-ghost)]">
                                 <div className="flex items-center gap-3">
                                     <CheckCircle2 className="text-[color:var(--nfq-success)]" size={18} />
                                     <div>
@@ -216,14 +216,14 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                 <button onClick={reset} className="text-xs text-[color:var(--nfq-accent)] hover:underline">{t.changeDestination}</button>
                             </div>
 
-                            <div className="bg-[var(--nfq-bg-root)] p-4 rounded-lg border border-slate-800">
+                            <div className="bg-[var(--nfq-bg-root)] p-4 rounded-lg border border-[color:var(--nfq-border-ghost)]">
                                 <h4 className="text-[10px] font-bold text-[color:var(--nfq-text-faint)] tracking-normal mb-3">{t.dataPreview}</h4>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-[10px] text-[color:var(--nfq-text-muted)]">
                                         <thead>
                                             <tr>
                                                 {Object.keys(parsedData[0] || {}).filter(k => !k.startsWith('_')).slice(0, 5).map(k => (
-                                                    <th key={k} className="text-left py-2 px-2 border-b border-slate-800">{k}</th>
+                                                    <th key={k} className="text-left py-2 px-2 border-b border-[color:var(--nfq-border-ghost)]">{k}</th>
                                                 ))}
                                             </tr>
                                         </thead>
@@ -231,7 +231,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                             {parsedData.slice(0, 3).map((row, i) => (
                                                 <tr key={i}>
                                                     {Object.keys(row).filter(k => !k.startsWith('_')).slice(0, 5).map(k => (
-                                                        <td key={k} className="py-2 px-2 border-b border-slate-900 truncate max-w-[100px]">
+                                                        <td key={k} className="py-2 px-2 border-b border-[color:var(--nfq-border-ghost)] truncate max-w-[100px]">
                                                             {row[k] == null ? '' : String(row[k])}
                                                         </td>
                                                     ))}
@@ -289,7 +289,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
 
                 {/* Footer */}
                 {(status === 'ready' || status === 'importing') && (
-                    <div className="px-6 py-4 border-t border-slate-800 flex justify-end gap-3 bg-[var(--nfq-bg-elevated)]/50">
+                    <div className="px-6 py-4 border-t border-[color:var(--nfq-border-ghost)] flex justify-end gap-3 bg-[var(--nfq-bg-elevated)]/50">
                         <button onClick={onClose} className="px-5 py-2 text-sm text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)] transition-colors">{t.cancel}</button>
                         <button
                             onClick={handleConfirmImport}

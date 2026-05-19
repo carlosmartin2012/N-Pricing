@@ -150,7 +150,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               value={deal.pdMultiplier ?? ''}
               onChange={(e) => handleNumberChange('pdMultiplier', e.target.value)}
               placeholder="1.0"
-              className="w-full rounded-md bg-black/30 px-2 py-1.5 font-mono text-sm text-[color:var(--nfq-text-primary)] outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-md bg-[var(--nfq-bg-input)] px-2 py-1.5 font-mono text-sm text-[color:var(--nfq-text-primary)] outline-none ring-1 ring-white/10 focus:ring-white/30"
             />
             <p className="mt-1 text-[10px] text-[color:var(--nfq-text-primary)]/40">× respecto a originación</p>
           </div>
@@ -171,7 +171,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               value={deal.daysPastDue ?? ''}
               onChange={(e) => handleNumberChange('daysPastDue', e.target.value)}
               placeholder="0"
-              className="w-full rounded-md bg-black/30 px-2 py-1.5 font-mono text-sm text-[color:var(--nfq-text-primary)] outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-md bg-[var(--nfq-bg-input)] px-2 py-1.5 font-mono text-sm text-[color:var(--nfq-text-primary)] outline-none ring-1 ring-white/10 focus:ring-white/30"
             />
             <p className="mt-1 text-[10px] text-[color:var(--nfq-text-primary)]/40">&gt;30 SICR · &gt;90 default</p>
           </div>
@@ -182,7 +182,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               type="checkbox"
               checked={deal.isRefinanced ?? false}
               onChange={(e) => handleCheckboxChange('isRefinanced', e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-black/30"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-[var(--nfq-bg-input)]"
             />
             <div>
               <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
@@ -200,7 +200,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               type="checkbox"
               checked={deal.isWatchlist ?? false}
               onChange={(e) => handleCheckboxChange('isWatchlist', e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-black/30"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-[var(--nfq-bg-input)]"
             />
             <div>
               <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
@@ -218,7 +218,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               type="checkbox"
               checked={deal.isForborne ?? false}
               onChange={(e) => handleCheckboxChange('isForborne', e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-black/30"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-[var(--nfq-bg-input)]"
             />
             <div>
               <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
@@ -233,7 +233,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
       </div>
 
       {/* Bottom: Live SICR result */}
-      <div className="rounded-[var(--nfq-radius-card)] bg-black/20 p-4 ring-1 ring-white/5">
+      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-input)] p-4 ring-1 ring-white/5">
         <div className="mb-3 flex items-center justify-between">
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
             Detección SICR en vivo

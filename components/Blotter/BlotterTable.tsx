@@ -132,7 +132,7 @@ const DealRow: React.FC<{
             type="checkbox"
             checked={isSelected}
             onChange={onToggleSelect}
-            className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
+            className="rounded border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
           />
         </td>
       )}
@@ -278,7 +278,7 @@ const TableHeader: React.FC<{ hasSelection?: boolean; allSelected?: boolean; onT
             type="checkbox"
             checked={allSelected}
             onChange={onToggleAll}
-            className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
+            className="rounded border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
           />
         </th>
       )}

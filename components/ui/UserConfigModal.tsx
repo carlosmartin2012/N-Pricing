@@ -75,7 +75,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                         <div className="grid grid-cols-2 gap-3">
                             {([
                                 { id: 'dark', label: t.dark, icon: Moon, tone: 'bg-[var(--nfq-bg-root)] text-[color:var(--nfq-text-primary)]' },
-                                { id: 'light', label: t.light, icon: Sun, tone: 'bg-white text-slate-900' },
+                                { id: 'light', label: t.light, icon: Sun, tone: 'bg-white text-[color:var(--nfq-text-primary)]' },
                             ] as const).map(({ id, label, icon: Icon, tone }) => (
                                 <button
                                     key={id}

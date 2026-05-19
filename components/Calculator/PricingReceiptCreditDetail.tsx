@@ -15,7 +15,7 @@ export function PricingReceiptCreditDetail({
   t,
 }: PricingReceiptCreditDetailProps) {
   return (
-    <div className="animate-in slide-in-from-top-2 mt-1.5 space-y-3 rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3 fade-in">
+    <div className="animate-in slide-in-from-top-2 mt-1.5 space-y-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/50 p-3 fade-in">
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
         <Metric label={t.anejo_segment || 'Segment'}>
           {creditDetail.anejoSegment.replace(/_/g, ' ')}
@@ -35,7 +35,7 @@ export function PricingReceiptCreditDetail({
         </Metric>
       </div>
 
-      <div className="space-y-1 border-t border-slate-800 pt-2">
+      <div className="space-y-1 border-t border-[color:var(--nfq-border-ghost)] pt-2">
         <MoneyMetric
           currency={currency}
           label={t.creditDay1Provision || 'Day 1 Provision'}
@@ -60,7 +60,7 @@ export function PricingReceiptCreditDetail({
       </div>
 
       {creditDetail.capitalParams && (
-        <div className="border-t border-slate-800 pt-2">
+        <div className="border-t border-[color:var(--nfq-border-ghost)] pt-2">
           <div className="mb-1 text-[10px] tracking-normal text-[color:var(--nfq-text-faint)]">
             {t.creditCapitalParams || 'Capital Params'}
           </div>

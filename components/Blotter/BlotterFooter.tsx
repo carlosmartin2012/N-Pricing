@@ -30,7 +30,7 @@ const BlotterFooter: React.FC<Props> = ({ deals, committeeSummary }) => {
   }, [deals]);
 
   return (
-    <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 border-t border-slate-800 bg-[var(--nfq-bg-root)] p-2 font-mono-nums text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">
+    <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 border-t border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-2 font-mono-nums text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">
       <div>
         TOTAL VOL: <span className="text-[color:var(--nfq-text-secondary)]">{formatCompactVolume(stats.totalVolume)}</span>
       </div>

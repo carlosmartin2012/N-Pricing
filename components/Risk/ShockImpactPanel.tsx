@@ -26,11 +26,11 @@ const KpiCard: React.FC<{
   const tone = getDeltaTone(delta, inverse);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-black">
+    <div className="rounded-lg border border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] p-3 dark:border-[color:var(--nfq-border-ghost)] dark:bg-black">
       <div className="nfq-label mb-1">{label}</div>
       <div className="flex items-end justify-between">
         <div>
-          <div className="font-mono-nums text-2xl font-bold text-slate-900 dark:text-[color:var(--nfq-text-primary)]">
+          <div className="font-mono-nums text-2xl font-bold text-[color:var(--nfq-text-primary)] dark:text-[color:var(--nfq-text-primary)]">
             {safeFixed(shocked, 2)}%
           </div>
           <div className="font-mono text-xs text-[color:var(--nfq-text-muted)]">Base: {safeFixed(base, 2)}%</div>
@@ -100,7 +100,7 @@ export const ShockImpactPanel: React.FC<Props> = React.memo(({
 
   return (
     <Panel title={t.impactAnalysis || 'Impact Analysis'} className="h-full bg-white dark:bg-[#0a0a0a]">
-      <div className="grid grid-cols-1 gap-4 border-b border-slate-200 p-4 md:grid-cols-3 dark:border-slate-800">
+      <div className="grid grid-cols-1 gap-4 border-b border-[color:var(--nfq-border)] p-4 md:grid-cols-3 dark:border-[color:var(--nfq-border-ghost)]">
         <KpiCard
           label="Total FTP"
           base={baseResult.totalFTP}

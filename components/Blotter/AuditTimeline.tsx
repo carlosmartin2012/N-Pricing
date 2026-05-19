@@ -19,7 +19,7 @@ const ACTION_CONFIG: Record<string, { icon: LucideIcon; color: string }> = {
   WORKFLOW_ACTION: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-[var(--nfq-cat-d)]/15' },
 };
 
-const DEFAULT_CONFIG = { icon: Clock, color: 'text-[color:var(--nfq-text-muted)] bg-slate-500/15' };
+const DEFAULT_CONFIG = { icon: Clock, color: 'text-[color:var(--nfq-text-muted)] bg-[var(--nfq-bg-elevated)]/15' };
 
 function formatTimestamp(ts: string): { date: string; time: string } {
   const d = new Date(ts);

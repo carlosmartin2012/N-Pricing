@@ -79,12 +79,12 @@ const DealForm: React.FC<Props> = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-3">
+      <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-3">
         <div className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">{t.dealId}</div>
         <div className="font-mono text-sm text-[color:var(--nfq-accent)]">{selectedDeal.id}</div>
       </div>
 
-      <div className="space-y-4 border-b border-slate-800 pb-4">
+      <div className="space-y-4 border-b border-[color:var(--nfq-border-ghost)] pb-4">
         <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.counterparty}</h4>
         <InputGroup label="Client ID">
           <Controller
@@ -152,7 +152,7 @@ const DealForm: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="space-y-4 border-b border-slate-800 pb-4">
+      <div className="space-y-4 border-b border-[color:var(--nfq-border-ghost)] pb-4">
         <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.productStructure}</h4>
         <InputGroup label={t.productDefinition}>
           <Controller
@@ -265,7 +265,7 @@ const DealForm: React.FC<Props> = ({
         </InputGroup>
       </div>
 
-      <div className="space-y-4 border-b border-slate-800 pb-4">
+      <div className="space-y-4 border-b border-[color:var(--nfq-border-ghost)] pb-4">
         <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.riskAndCapital}</h4>
         <div className="grid grid-cols-2 gap-4">
           <InputGroup label="Risk Weight (%)">

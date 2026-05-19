@@ -18,7 +18,7 @@ const STATUS_CLASSES: Record<BudgetVarianceStatus, string> = {
   under_budget_rate:  'bg-[var(--nfq-warning)]/10   text-[color:var(--nfq-warning)]   border-[color:var(--nfq-warning)]/30',
   over_budget_volume: 'bg-[var(--nfq-info)]/10     text-[color:var(--nfq-cat-a)]     border-[color:var(--nfq-cat-a)]/30',
   under_budget_volume:'bg-[var(--nfq-cat-d)]/10  text-[color:var(--nfq-cat-d)]  border-[color:var(--nfq-cat-d)]/30',
-  budget_only:        'bg-slate-500/10   text-[color:var(--nfq-text-secondary)]   border-[color:var(--nfq-border-ghost)]',
+  budget_only:        'bg-[var(--nfq-bg-elevated)]/10   text-[color:var(--nfq-text-secondary)]   border-[color:var(--nfq-border-ghost)]',
   realized_only:      'bg-[var(--nfq-cat-g-subtle)] text-[color:var(--nfq-cat-g)] border-[color:var(--nfq-cat-g)]/30',
 };
 

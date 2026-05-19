@@ -54,7 +54,7 @@ export function PricingReceiptSummary({
           <h4 className="nfq-label">{customerRateLabel}</h4>
           <div
             data-testid="receipt-final-rate"
-            className="font-mono-nums text-2xl font-bold text-slate-900 dark:text-[color:var(--nfq-text-primary)]"
+            className="font-mono-nums text-2xl font-bold text-[color:var(--nfq-text-primary)] dark:text-[color:var(--nfq-text-primary)]"
           >
             {result.finalClientRate.toFixed(2)}%
           </div>
@@ -108,7 +108,7 @@ export function PricingReceiptFooter({
   return (
     <div
       data-tour="save-deal"
-      className="flex items-center gap-2 border-t border-slate-700 bg-[var(--nfq-bg-elevated)] p-3"
+      className="flex items-center gap-2 border-t border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-3"
     >
       <button
         data-testid="save-deal-btn"
@@ -165,7 +165,7 @@ export function PricingReceiptAccountingPanel({
   showAccounting,
 }: PricingReceiptAccountingPanelProps) {
   return (
-    <div className="border-t border-slate-700 bg-[var(--nfq-bg-elevated)] p-2">
+    <div className="border-t border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-2">
       <button
         onClick={onToggle}
         className="flex w-full items-center justify-between rounded p-2 text-xs text-[color:var(--nfq-text-muted)] transition-colors hover:bg-[var(--nfq-bg-highest)]"
@@ -178,7 +178,7 @@ export function PricingReceiptAccountingPanel({
       </button>
 
       {showAccounting && (
-        <div className="animate-in slide-in-from-top-2 mt-2 space-y-2 rounded border border-slate-800 bg-[var(--nfq-bg-root)] p-3 font-mono text-[10px] fade-in">
+        <div className="animate-in slide-in-from-top-2 mt-2 space-y-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-3 font-mono text-[10px] fade-in">
           <div className="grid grid-cols-12 gap-2 text-[color:var(--nfq-text-secondary)]">
             <div className="col-span-1 text-[color:var(--nfq-text-faint)]">DR</div>
             <div className="col-span-5">{accountingEntry.source}</div>

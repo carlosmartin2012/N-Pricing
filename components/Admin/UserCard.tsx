@@ -21,7 +21,7 @@ function getAvatarClassName(role: UserProfile['role']) {
   if (role === 'Auditor') {
     return 'border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-warning)]/20 text-[color:var(--nfq-warning)]';
   }
-  return 'border-slate-700 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)]';
+  return 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)]';
 }
 
 export const UserCard: React.FC<Props> = React.memo(({
@@ -31,7 +31,7 @@ export const UserCard: React.FC<Props> = React.memo(({
   onDelete,
 }) => {
   return (
-    <div className="group relative rounded-lg border border-slate-800 bg-[var(--nfq-bg-root)] p-4 transition-colors hover:border-slate-600">
+    <div className="group relative rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-4 transition-colors hover:border-[color:var(--nfq-border)]">
       <div className="absolute right-4 top-4 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
         <button onClick={onEdit} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
           <Edit size={14} />
@@ -67,7 +67,7 @@ export const UserCard: React.FC<Props> = React.memo(({
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-slate-900 pt-3">
+      <div className="space-y-2 border-t border-[color:var(--nfq-border-ghost)] pt-3">
         <div className="flex items-center justify-between text-xs">
           <span className="text-[color:var(--nfq-text-faint)]">Role</span>
           <Badge variant="default">{user.role.replace('_', ' ')}</Badge>

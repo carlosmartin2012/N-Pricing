@@ -49,7 +49,7 @@ const DealLeverCard: React.FC<DealLeverCardProps> = ({
       value={rangeValue}
       onChange={onRangeChange}
       aria-label={label}
-      className="mb-3 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 transition-all dark:bg-[var(--nfq-bg-highest)]"
+      className="mb-3 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-[var(--nfq-bg-elevated)] transition-all dark:bg-[var(--nfq-bg-highest)]"
     />
     {children}
   </div>

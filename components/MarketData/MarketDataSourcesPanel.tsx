@@ -117,7 +117,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
             </div>
           </div>
 
-          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-input)] p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
@@ -198,7 +198,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
           </div>
         </div>
 
-        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-input)] p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Registered Sources</h4>

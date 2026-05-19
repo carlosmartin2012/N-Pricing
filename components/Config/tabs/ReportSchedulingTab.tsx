@@ -116,7 +116,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
   return (
     <>
       {/* Toolbar */}
-      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]">
+      <div className="p-4 border-b border-[color:var(--nfq-border-ghost)] flex justify-between items-center bg-[var(--nfq-bg-elevated)]">
         <div className="flex items-center gap-2">
           <Clock size={14} className="text-[color:var(--nfq-accent)]" />
           <span className="text-xs text-[color:var(--nfq-text-muted)] font-mono tracking-normal">
@@ -142,7 +142,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
         ) : (
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-slate-700 bg-[var(--nfq-bg-elevated)]/60">
+              <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60">
                 {['NAME', t.reportType.toUpperCase(), t.frequency.toUpperCase(), 'FORMAT', t.recipients.toUpperCase(), t.lastRun.toUpperCase(), 'ACTIVE', ''].map((h, i) => (
                   <th
                     key={i}
@@ -157,7 +157,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
               {schedules.map((s) => (
                 <tr
                   key={s.id}
-                  className="border-b border-slate-800 hover:bg-[var(--nfq-bg-highest)]/40 cursor-pointer"
+                  className="border-b border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-highest)]/40 cursor-pointer"
                   onClick={() => openEdit(s)}
                 >
                   <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)] font-medium">{s.name}</td>
@@ -204,9 +204,9 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
           <div className="flex-1 bg-black/60" onClick={closeDrawer} />
 
           {/* Panel */}
-          <div className="w-full max-w-md bg-[var(--nfq-bg-elevated)] border-l border-slate-700 flex flex-col shadow-2xl">
+          <div className="w-full max-w-md bg-[var(--nfq-bg-elevated)] border-l border-[color:var(--nfq-border-ghost)] flex flex-col shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[color:var(--nfq-border-ghost)]">
               <h2 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
                 {draft.id ? 'Edit Schedule' : t.newSchedule}
               </h2>
@@ -227,7 +227,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                   value={draft.name ?? ''}
                   onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
                   placeholder="e.g. Monthly Portfolio Summary"
-                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)]"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-[color:var(--nfq-border-ghost)] rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)]"
                 />
               </div>
 
@@ -239,7 +239,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                 <select
                   value={draft.reportType ?? 'portfolio_summary'}
                   onChange={(e) => setDraft((d) => ({ ...d, reportType: e.target.value as ReportType }))}
-                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)]"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-[color:var(--nfq-border-ghost)] rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)]"
                 >
                   {(Object.entries(REPORT_TYPE_LABELS) as [ReportType, string][]).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
@@ -260,7 +260,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.frequency === f
                           ? 'bg-[var(--nfq-accent)]/50 border-[color:var(--nfq-accent)] text-[color:var(--nfq-accent)]'
-                          : 'border-slate-700 text-[color:var(--nfq-text-faint)] hover:border-slate-500'
+                          : 'border-[color:var(--nfq-border-ghost)] text-[color:var(--nfq-text-faint)] hover:border-[color:var(--nfq-border)]'
                       }`}
                     >
                       {f}
@@ -282,7 +282,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.format === f
                           ? 'bg-[var(--nfq-warning)]/40 border-amber-700 text-[color:var(--nfq-warning)]'
-                          : 'border-slate-700 text-[color:var(--nfq-text-faint)] hover:border-slate-500'
+                          : 'border-[color:var(--nfq-border-ghost)] text-[color:var(--nfq-text-faint)] hover:border-[color:var(--nfq-border)]'
                       }`}
                     >
                       {f}
@@ -301,7 +301,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                   onChange={(e) => setRecipientsRaw(e.target.value)}
                   placeholder="analyst@bank.com, manager@bank.com"
                   rows={3}
-                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)] resize-none font-mono"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-[color:var(--nfq-border-ghost)] rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)] resize-none font-mono"
                 />
               </div>
 
@@ -322,7 +322,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-4 border-t border-slate-700 flex justify-end gap-2">
+            <div className="px-5 py-4 border-t border-[color:var(--nfq-border-ghost)] flex justify-end gap-2">
               <button
                 onClick={closeDrawer}
                 className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)] transition-colors"

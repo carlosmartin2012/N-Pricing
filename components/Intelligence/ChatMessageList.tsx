@@ -23,8 +23,8 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
             <div
               className={`rounded-lg px-4 py-3 text-sm leading-relaxed shadow-sm ${
                 message.role === 'user'
-                  ? 'border border-slate-700 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)]'
-                  : 'border border-slate-800 bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)]'
+                  ? 'border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)]'
+                  : 'border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)]'
               }`}
             >
               <span className="whitespace-pre-wrap font-sans">{message.content}</span>
@@ -57,7 +57,7 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
           </div>
 
           {message.role === 'user' && (
-            <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-[var(--nfq-bg-highest)]">
+            <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]">
               <User size={16} className="text-[color:var(--nfq-text-muted)]" />
             </div>
           )}
@@ -69,7 +69,7 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/20">
             <Bot size={16} className="text-[color:var(--nfq-accent)]" />
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] px-4 py-3">
+          <div className="flex items-center gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-4 py-3">
             <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--nfq-accent)]" />
             <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--nfq-accent)] delay-75" />
             <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--nfq-accent)] delay-150" />

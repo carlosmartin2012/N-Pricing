@@ -15,7 +15,7 @@ export const UserManagementToolbar: React.FC<Props> = ({
   onAddUser,
 }) => {
   return (
-    <div className="flex items-center justify-between border-b border-slate-700 bg-[var(--nfq-bg-elevated)] p-4">
+    <div className="flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
       <div className="flex items-center gap-4">
         <div className="relative">
           <Search
@@ -27,7 +27,7 @@ export const UserManagementToolbar: React.FC<Props> = ({
             placeholder="Search users..."
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
-            className="w-64 rounded border border-slate-700 bg-[var(--nfq-bg-root)] py-1.5 pl-9 pr-3 text-xs text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
+            className="w-64 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] py-1.5 pl-9 pr-3 text-xs text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
           />
         </div>
         <div className="text-xs text-[color:var(--nfq-text-faint)]">

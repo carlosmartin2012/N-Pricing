@@ -152,8 +152,8 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
-            <div className="w-full max-w-lg bg-[var(--nfq-bg-elevated)] border border-slate-800 rounded-[var(--nfq-radius-card)] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[var(--nfq-bg-root)]">
+            <div className="w-full max-w-lg bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-border-ghost)] rounded-[var(--nfq-radius-card)] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div className="p-4 border-b border-[color:var(--nfq-border-ghost)] flex justify-between items-center bg-[var(--nfq-bg-root)]">
                     <div className="flex items-center gap-3">
                         <Upload size={18} className="text-[color:var(--nfq-accent)]" />
                         <h3 id="file-upload-modal-title" className="text-sm font-bold text-[color:var(--nfq-text-primary)] tracking-normal">{title}</h3>
@@ -171,7 +171,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/10' : 'border-slate-700 hover:border-slate-600 hover:bg-[var(--nfq-bg-highest)]/50'
+                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/10' : 'border-[color:var(--nfq-border-ghost)] hover:border-[color:var(--nfq-border)] hover:bg-[var(--nfq-bg-highest)]/50'
                                 }`}
                         >
                             <input
@@ -230,7 +230,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                     )}
 
                     {status === 'idle' && (
-                        <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-between">
+                        <div className="mt-8 pt-6 border-t border-[color:var(--nfq-border-ghost)] flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-[var(--nfq-bg-highest)] rounded-lg">
                                     <FileText size={18} className="text-[color:var(--nfq-text-muted)]" />
@@ -242,7 +242,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             </div>
                             <button
                                 onClick={downloadTemplate}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] rounded-lg border border-slate-700 text-[10px] font-bold transition-colors uppercase"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] rounded-lg border border-[color:var(--nfq-border-ghost)] text-[10px] font-bold transition-colors uppercase"
                             >
                                 <Download size={12} /> Template
                             </button>

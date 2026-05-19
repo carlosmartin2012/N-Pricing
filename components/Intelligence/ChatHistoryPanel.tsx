@@ -16,8 +16,8 @@ export const ChatHistoryPanel: React.FC<Props> = ({
   onSelectSession,
 }) => {
   return (
-    <div className="hidden w-64 flex-col border-r border-slate-800 bg-[var(--nfq-bg-elevated)] md:flex">
-      <div className="border-b border-slate-800 p-4">
+    <div className="hidden w-64 flex-col border-r border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] md:flex">
+      <div className="border-b border-[color:var(--nfq-border-ghost)] p-4">
         <button
           onClick={onCreateSession}
           className="flex w-full items-center justify-center gap-2 rounded border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/20 py-2 text-xs font-bold text-[color:var(--nfq-accent)] transition-colors hover:bg-[var(--nfq-accent)]/40"
@@ -51,7 +51,7 @@ export const ChatHistoryPanel: React.FC<Props> = ({
           </button>
         ))}
       </div>
-      <div className="border-t border-slate-800 p-4 text-center font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
+      <div className="border-t border-[color:var(--nfq-border-ghost)] p-4 text-center font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
         N Pricing v2.5.1
       </div>
     </div>

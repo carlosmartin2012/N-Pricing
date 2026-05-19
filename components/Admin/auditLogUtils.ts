@@ -103,7 +103,7 @@ export function getAuditActionTextClass(action: string) {
     case 'EXPORT':
       return 'text-[color:var(--nfq-cat-d)]';
     default:
-      return 'text-slate-300';
+      return 'text-[color:var(--nfq-text-muted)]';
   }
 }
 

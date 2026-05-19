@@ -38,7 +38,7 @@ const SECTION_ACCENTS: Record<string, { dot: string; label: string }> = {
   'Data & Ops Hub': { dot: 'bg-[var(--nfq-cat-a)]',    label: 'text-[color:var(--nfq-cat-a)]'    },
   'Governance Hub': { dot: 'bg-[var(--nfq-cat-d)]',    label: 'text-[color:var(--nfq-cat-d)]'    },
   Assistant:     { dot: 'bg-[var(--nfq-cat-g)]',    label: 'text-[color:var(--nfq-cat-g)]'    },
-  System:        { dot: 'bg-slate-400',             label: 'text-[color:var(--nfq-text-muted)]'                   },
+  System:        { dot: 'bg-[var(--nfq-text-faint)]',             label: 'text-[color:var(--nfq-text-muted)]'                   },
 };
 
 /**

@@ -222,7 +222,7 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
                         ? 'bg-[var(--nfq-success)]/20 text-[color:var(--nfq-success)]'
                         : c.esgProfile === 'Brown'
                           ? 'bg-[var(--nfq-danger)]/20 text-[color:var(--nfq-danger)]'
-                          : 'bg-slate-500/20 text-[color:var(--nfq-text-muted)]'
+                          : 'bg-[var(--nfq-bg-elevated)]/20 text-[color:var(--nfq-text-muted)]'
                     }`}
                   >
                     {c.esgProfile}

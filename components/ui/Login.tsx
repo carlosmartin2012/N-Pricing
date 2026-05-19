@@ -249,9 +249,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                       data-testid="google-login-btn"
                       onClick={handleGoogleClick}
                       disabled={googleLoading}
-                      className="flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] bg-white px-4 py-3.5 text-black transition-colors hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] bg-white px-4 py-3.5 text-black transition-colors hover:bg-[var(--nfq-bg-surface)] disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--nfq-bg-surface)]">
                         {googleLoading
                           ? <Loader2 size={18} className="animate-spin text-[color:var(--nfq-text-faint)]" />
                           : <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />

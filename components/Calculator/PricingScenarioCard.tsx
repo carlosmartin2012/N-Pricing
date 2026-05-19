@@ -44,7 +44,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
           type="text"
           value={scenario.name}
           onChange={(event) => onUpdateScenario(scenario.id, { name: event.target.value })}
-          className="mr-2 w-full border-b border-slate-600 bg-transparent px-0 py-0.5 text-sm font-medium text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
+          className="mr-2 w-full border-b border-[color:var(--nfq-border)] bg-transparent px-0 py-0.5 text-sm font-medium text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
         />
         <div className="flex shrink-0 items-center gap-1">
           {scenariosLength < maxScenarios && (

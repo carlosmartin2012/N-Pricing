@@ -23,7 +23,7 @@ const MasterDataEditor: React.FC<Props> = ({
   if (editorState.kind === 'client') {
     return (
       <div className="space-y-4">
-        <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
+        <div className="mb-2 flex items-center gap-2 border-b border-[color:var(--nfq-border-ghost)] pb-2">
           <Users size={16} className="text-[color:var(--nfq-success)]" />
           <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Client Details</span>
         </div>
@@ -79,7 +79,7 @@ const MasterDataEditor: React.FC<Props> = ({
   if (editorState.kind === 'product') {
     return (
       <div className="space-y-4">
-        <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
+        <div className="mb-2 flex items-center gap-2 border-b border-[color:var(--nfq-border-ghost)] pb-2">
           <Briefcase size={16} className="text-[color:var(--nfq-accent)]" />
           <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Product Definition</span>
         </div>
@@ -113,7 +113,7 @@ const MasterDataEditor: React.FC<Props> = ({
 
   return (
     <div className="space-y-4">
-      <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
+      <div className="mb-2 flex items-center gap-2 border-b border-[color:var(--nfq-border-ghost)] pb-2">
         <Building2 size={16} className="text-[color:var(--nfq-cat-d)]" />
         <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Business Unit</span>
       </div>

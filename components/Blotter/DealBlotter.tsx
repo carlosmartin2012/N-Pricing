@@ -318,7 +318,7 @@ const DealBlotter: React.FC = () => {
         />
       }
     >
-      <div className="flex h-full flex-col bg-slate-50 dark:bg-black">
+      <div className="flex h-full flex-col bg-[var(--nfq-bg-surface)] dark:bg-black">
         <BlotterToolbar
           searchTerm={searchTerm}
           filterStatus={filterStatus}

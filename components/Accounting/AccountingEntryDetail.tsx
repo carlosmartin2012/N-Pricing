@@ -41,13 +41,13 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
     <div className="grid min-h-64 grid-cols-1 gap-4 lg:grid-cols-3">
       <Panel title={`${entry.unit} Ledger`} className="border-l-4 border-l-emerald-500">
         <div className="flex h-full flex-col p-4">
-          <div className="relative flex-1 rounded-lg border border-slate-800 bg-[var(--nfq-bg-root)] p-4">
+          <div className="relative flex-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-4">
             <div className="absolute -top-3 left-4 bg-[var(--nfq-bg-elevated)] px-2 text-xs font-bold uppercase text-[color:var(--nfq-success)]">
               {entry.unit}
             </div>
             <div className="flex h-full text-xs font-mono">
-              <div className="flex flex-1 flex-col border-r-2 border-slate-700 pr-4">
-                <div className="mb-2 border-b border-slate-700 pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
+              <div className="flex flex-1 flex-col border-r-2 border-[color:var(--nfq-border-ghost)] pr-4">
+                <div className="mb-2 border-b border-[color:var(--nfq-border-ghost)] pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   DEBIT
                 </div>
                 <div
@@ -64,7 +64,7 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                 </div>
               </div>
               <div className="flex flex-1 flex-col pl-4">
-                <div className="mb-2 border-b border-slate-700 pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
+                <div className="mb-2 border-b border-[color:var(--nfq-border-ghost)] pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   CREDIT
                 </div>
                 <div
@@ -93,18 +93,18 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
             </div>
             <div className="nfq-label">Transfer Rate</div>
           </div>
-          <div className="flex items-center justify-between border-b border-slate-800 px-4 py-1 text-xs">
+          <div className="flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] px-4 py-1 text-xs">
             <span className="text-[color:var(--nfq-text-muted)]">IRRBB Base</span>
             <span className="font-mono text-[color:var(--nfq-text-secondary)]">{formatRate(entry.ftpComponents.baseRate)}</span>
           </div>
-          <div className="flex items-center justify-between border-b border-slate-800 px-4 py-1 text-xs">
+          <div className="flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] px-4 py-1 text-xs">
             <span className="text-[color:var(--nfq-text-muted)]">Liquidity</span>
             <span className="font-mono text-[color:var(--nfq-warning)]">
               {entry.ftpComponents.liquidityPrem >= 0 ? '+' : ''}
               {formatRate(entry.ftpComponents.liquidityPrem)}
             </span>
           </div>
-          <div className="flex items-center justify-between border-b border-slate-800 px-4 py-1 text-xs">
+          <div className="flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] px-4 py-1 text-xs">
             <span className="text-[color:var(--nfq-text-muted)]">Strategic</span>
             <span className="font-mono text-[color:var(--nfq-info)]">
               {entry.ftpComponents.strategicAdj >= 0 ? '+' : ''}
@@ -122,13 +122,13 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
 
       <Panel title={`Central Treasury (ALM) — ${entry.currency}`} className="border-l-4 border-l-[color:var(--nfq-accent)]">
         <div className="flex h-full flex-col p-4">
-          <div className="relative flex-1 rounded-lg border border-slate-800 bg-[var(--nfq-bg-root)] p-4">
+          <div className="relative flex-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] p-4">
             <div className="absolute -top-3 left-4 bg-[var(--nfq-bg-elevated)] px-2 text-xs font-bold text-[color:var(--nfq-accent)]">
               ALM MIRROR
             </div>
             <div className="flex h-full text-xs font-mono">
-              <div className="flex flex-1 flex-col border-r-2 border-slate-700 pr-4">
-                <div className="mb-2 border-b border-slate-700 pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
+              <div className="flex flex-1 flex-col border-r-2 border-[color:var(--nfq-border-ghost)] pr-4">
+                <div className="mb-2 border-b border-[color:var(--nfq-border-ghost)] pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   DEBIT
                 </div>
                 <div className="mb-2 rounded border border-[color:var(--nfq-warning)]/50 bg-[var(--nfq-warning)]/20 p-2 text-[color:var(--nfq-warning)]">
@@ -136,10 +136,10 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                 </div>
               </div>
               <div className="flex flex-1 flex-col pl-4">
-                <div className="mb-2 border-b border-slate-700 pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
+                <div className="mb-2 border-b border-[color:var(--nfq-border-ghost)] pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   CREDIT
                 </div>
-                <div className="mb-2 rounded border border-slate-600 bg-[var(--nfq-bg-highest)] p-2 text-[color:var(--nfq-text-secondary)]">
+                <div className="mb-2 rounded border border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)] p-2 text-[color:var(--nfq-text-secondary)]">
                   <div className="font-bold">{labels.treasuryCredit}</div>
                 </div>
               </div>

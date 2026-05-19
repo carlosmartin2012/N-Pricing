@@ -137,7 +137,7 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
         </div>
       )}
 
-      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
+      <div className="p-4 border-b border-[color:var(--nfq-border-ghost)] flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
         <div className="text-[10px] text-[color:var(--nfq-text-faint)]">
           Manage FTP components, liquidity add-ons, and commercial pricing grids through controlled change requests.
         </div>

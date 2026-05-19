@@ -62,7 +62,7 @@ export const ESGSection: React.FC<Props> = ({ values, t, onFieldInputChange, onB
           type="checkbox"
           checked={values.dnshCompliant || false}
           onChange={(e) => onBooleanChange('dnshCompliant', e.target.checked)}
-          className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
+          className="rounded border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
         />
         {t.dnshCompliant}
       </label>
@@ -71,7 +71,7 @@ export const ESGSection: React.FC<Props> = ({ values, t, onFieldInputChange, onB
           type="checkbox"
           checked={values.isfEligible || false}
           onChange={(e) => onBooleanChange('isfEligible', e.target.checked)}
-          className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
+          className="rounded border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-[color:var(--nfq-accent)]/30"
         />
         {t.isfEligible}
       </label>

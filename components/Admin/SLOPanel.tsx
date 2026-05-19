@@ -176,7 +176,7 @@ const SLOPanel: React.FC = () => {
               {violations.topEndpoints.map((row, idx) => (
                 <li
                   key={`${row.endpoint}-${row.errorCode}-${idx}`}
-                  className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-black/20 px-3 py-1.5 text-xs"
+                  className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-input)] px-3 py-1.5 text-xs"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <code className="truncate font-mono text-[color:var(--nfq-text-secondary)]">{row.endpoint}</code>
@@ -204,7 +204,7 @@ const SLOPanel: React.FC = () => {
             {summary.activeAlerts.map((a) => (
               <li
                 key={a.ruleId}
-                className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-black/20 px-3 py-2 text-xs"
+                className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-input)] px-3 py-2 text-xs"
               >
                 <div className="flex items-center gap-3">
                   <span

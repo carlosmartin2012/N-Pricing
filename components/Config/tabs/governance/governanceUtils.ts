@@ -11,7 +11,7 @@ export const statusTone: Record<MethodologyChangeStatus, string> = {
   Approved: 'border-[color:var(--nfq-success)]/50 bg-emerald-950/20 text-emerald-200',
   Applied: 'border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   Rejected: 'border-[color:var(--nfq-danger)]/50 bg-rose-950/20 text-rose-200',
-  Rolled_Back: 'border-slate-700 bg-slate-900 text-slate-300',
+  Rolled_Back: 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)]',
 };
 
 export function operationSnapshotToRule(

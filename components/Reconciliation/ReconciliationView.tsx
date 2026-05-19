@@ -44,7 +44,7 @@ const STATUS_TONE: Record<MatchStatus, string> = {
   currency_mismatch: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
   bu_only: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
   treasury_only: 'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
-  unknown: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  unknown: 'bg-[var(--nfq-bg-elevated)]/10 text-[color:var(--nfq-text-secondary)]',
 };
 
 type StatusFilter = 'all' | 'matched' | 'unmatched' | MatchStatus;

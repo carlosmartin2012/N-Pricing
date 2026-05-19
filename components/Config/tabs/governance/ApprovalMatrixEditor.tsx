@@ -29,7 +29,7 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
     approvalMatrixDraft && JSON.stringify(approvalMatrixDraft) !== JSON.stringify(approvalMatrix);
 
   return (
-    <div className="bg-[var(--nfq-bg-elevated)] border border-slate-700 rounded-lg p-4 relative overflow-hidden">
+    <div className="bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-border-ghost)] rounded-lg p-4 relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-10">
         <ShieldCheck size={120} className="text-[color:var(--nfq-warning)]" />
       </div>
@@ -101,7 +101,7 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
           </div>
         </div>
 
-        <div className="text-center p-4 border border-dashed border-slate-700 rounded text-[color:var(--nfq-text-faint)] text-xs">
+        <div className="text-center p-4 border border-dashed border-[color:var(--nfq-border-ghost)] rounded text-[color:var(--nfq-text-faint)] text-xs">
           <XCircle size={16} className="mx-auto mb-1 text-[color:var(--nfq-text-faint)]" />
           Deals below L2 threshold are automatically rejected.
         </div>

@@ -21,7 +21,7 @@ const LEVEL_COLOR: Record<EscalationLevel, string> = {
 
 const STATUS_COLOR: Record<EscalationStatus, string> = {
   open: 'bg-[var(--nfq-success)]/10 text-[color:var(--nfq-success)]',
-  resolved: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  resolved: 'bg-[var(--nfq-bg-elevated)]/10 text-[color:var(--nfq-text-secondary)]',
   escalated: 'bg-[var(--nfq-warning)]/10 text-[color:var(--nfq-warning)]',
   expired: 'bg-[var(--nfq-danger)]/10 text-[color:var(--nfq-danger)]',
 };

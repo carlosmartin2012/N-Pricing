@@ -121,7 +121,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                   isAttached
                     ? 'border-[var(--nfq-accent)] bg-[var(--nfq-accent)]/20 text-[var(--nfq-accent)]'
-                    : 'border-slate-600 bg-[var(--nfq-bg-highest)]/60 text-transparent hover:border-slate-400'
+                    : 'border-[color:var(--nfq-border)] bg-[var(--nfq-bg-highest)]/60 text-transparent hover:border-[color:var(--nfq-border)]'
                 }`}
               >
                 {isAttached && <Check className="h-3 w-3" strokeWidth={3} />}
@@ -163,7 +163,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                       )
                     }
                     aria-label="Reducir probabilidad"
-                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-[color:var(--nfq-text-muted)] hover:border-slate-500 hover:text-[color:var(--nfq-text-secondary)]"
+                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-[color:var(--nfq-text-muted)] hover:border-[color:var(--nfq-border)] hover:text-[color:var(--nfq-text-secondary)]"
                   >
                     <Minus className="h-3 w-3" />
                   </button>
@@ -192,7 +192,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                       )
                     }
                     aria-label="Aumentar probabilidad"
-                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-[color:var(--nfq-text-muted)] hover:border-slate-500 hover:text-[color:var(--nfq-text-secondary)]"
+                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-[color:var(--nfq-text-muted)] hover:border-[color:var(--nfq-border)] hover:text-[color:var(--nfq-text-secondary)]"
                   >
                     <Plus className="h-3 w-3" />
                   </button>

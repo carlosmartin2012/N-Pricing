@@ -19,7 +19,7 @@ const MasterDataSection: React.FC<Props> = ({
   onAdd,
   children,
 }) => (
-  <div className={`rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4 ${className}`}>
+  <div className={`rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 ${className}`}>
     <div className="mb-4 flex items-center justify-between">
       <h3 className="flex items-center gap-2 text-sm font-bold text-[color:var(--nfq-text-secondary)]">
         {icon}
@@ -27,7 +27,7 @@ const MasterDataSection: React.FC<Props> = ({
       </h3>
       <button
         onClick={onAdd}
-        className={`flex items-center gap-1 rounded border border-slate-700 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-highest)] ${compactAddButton ? 'px-2 py-1 text-[10px]' : 'px-3 py-1 text-xs'}`}
+        className={`flex items-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-highest)] ${compactAddButton ? 'px-2 py-1 text-[10px]' : 'px-3 py-1 text-xs'}`}
       >
         {addLabel}
       </button>

@@ -116,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
     'Governance Hub': 'bg-[var(--nfq-cat-d)]',
     Today: 'bg-[var(--nfq-success)]',
     Assistant:  'bg-[var(--nfq-cat-g)]',
-    System:     'bg-slate-400',
+    System:     'bg-[var(--nfq-text-faint)]',
   };
   const ThemeIcon = themeMode === 'system' ? Monitor : theme === 'dark' ? Moon : Sun;
   const nextTheme = (): ThemeMode => {
@@ -165,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
             {currentSection ? (
               <>
                 <span
-                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${sectionDot[currentSection] ?? 'bg-slate-400'}`}
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${sectionDot[currentSection] ?? 'bg-[var(--nfq-text-faint)]'}`}
                   aria-hidden="true"
                 />
                 <span className={sectionAccent[currentSection] ?? 'text-[color:var(--nfq-text-tertiary)]'}>

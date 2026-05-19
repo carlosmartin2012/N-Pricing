@@ -50,7 +50,7 @@ export const UserEditorDrawer: React.FC<Props> = ({
     >
       {draft && (
         <div className="space-y-6">
-          <div className="flex items-center gap-3 rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="flex items-center gap-3 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <Shield size={24} className="text-[color:var(--nfq-text-faint)]" />
             <div>
               <h4 className="text-xs font-bold text-[color:var(--nfq-text-secondary)]">Security Credentials</h4>

@@ -78,8 +78,8 @@ const YieldCurveWorkspace: React.FC<Props> = ({
       className="flex flex-1 flex-col overflow-hidden bg-white/50 dark:bg-[var(--nfq-bg-root)]/50"
     >
       <div className="flex h-full min-h-0 flex-col xl:flex-row">
-        <div className="relative flex min-h-[300px] flex-1 flex-col border-b border-slate-200 dark:border-slate-800 xl:border-b-0 xl:border-r">
-          <div className="flex h-10 shrink-0 items-center justify-between border-b border-slate-200 bg-slate-100 px-4 dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
+        <div className="relative flex min-h-[300px] flex-1 flex-col border-b border-[color:var(--nfq-border)] dark:border-[color:var(--nfq-border-ghost)] xl:border-b-0 xl:border-r">
+          <div className="flex h-10 shrink-0 items-center justify-between border-b border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] px-4 dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-root)]">
             <div className="scrollbar-none flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
               <div className="flex shrink-0 items-center gap-1.5 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 dark:border-[color:var(--nfq-warning)]/50 dark:bg-amber-950/30">
                 <Zap size={12} className="text-[color:var(--nfq-warning)]" />
@@ -92,26 +92,26 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                 <span className="text-[9px] font-bold uppercase text-[color:var(--nfq-warning)]">bps</span>
               </div>
               <div className="mx-1 h-4 w-px shrink-0 bg-slate-300 dark:bg-[var(--nfq-bg-highest)]" />
-              <div className="flex shrink-0 items-center gap-1.5 rounded border border-slate-200 bg-white px-2 py-0.5 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]">
+              <div className="flex shrink-0 items-center gap-1.5 rounded border border-[color:var(--nfq-border)] bg-white px-2 py-0.5 dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-elevated)]">
                 <Calendar size={12} className="text-[color:var(--nfq-text-muted)]" />
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(event) => onDateChange(event.target.value)}
-                  className="w-24 border-none bg-transparent font-mono text-[10px] text-slate-700 focus:ring-0 dark:text-[color:var(--nfq-text-secondary)]"
+                  className="w-24 border-none bg-transparent font-mono text-[10px] text-[color:var(--nfq-text-primary)] focus:ring-0 dark:text-[color:var(--nfq-text-secondary)]"
                 />
               </div>
             </div>
 
             <div className="ml-2 flex shrink-0 items-center gap-2">
-              <div className="flex rounded bg-slate-200 p-0.5 dark:bg-[var(--nfq-bg-highest)]">
+              <div className="flex rounded bg-[var(--nfq-bg-elevated)] p-0.5 dark:bg-[var(--nfq-bg-highest)]">
                 {CURVE_PANEL_CURRENCIES.map(item => (
                   <button
                     key={item}
                     onClick={() => onCurrencyChange(item)}
                     className={`rounded px-2 py-0.5 text-[9px] font-bold transition-all ${currency === item
                       ? 'bg-white text-[color:var(--nfq-accent)] shadow-sm dark:bg-[var(--nfq-bg-bright)] dark:text-[color:var(--nfq-accent)]'
-                      : 'text-[color:var(--nfq-text-faint)] hover:text-slate-700 dark:hover:text-[color:var(--nfq-text-secondary)]'}`}
+                      : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-primary)] dark:hover:text-[color:var(--nfq-text-secondary)]'}`}
                   >
                     {item}
                   </button>
@@ -129,7 +129,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="flex flex-1 items-center justify-center overflow-hidden bg-white p-4 dark:bg-black/20">
+          <div className="flex flex-1 items-center justify-center overflow-hidden bg-white p-4 dark:bg-[var(--nfq-bg-input)]">
             <svg viewBox={`0 0 ${width} ${height}`} className="h-full max-h-[300px] w-full overflow-visible">
               {[0, 0.25, 0.5, 0.75, 1].map(tick => {
                 const y = padding + tick * (height - 2 * padding);
@@ -143,7 +143,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                       x2={width - padding}
                       y2={y}
                       stroke="currentColor"
-                      className="text-[color:var(--nfq-text-secondary)] dark:text-slate-800"
+                      className="text-[color:var(--nfq-text-secondary)] dark:text-[color:var(--nfq-text-primary)]"
                       strokeWidth="1"
                       strokeDasharray="4 4"
                     />
@@ -207,14 +207,14 @@ const YieldCurveWorkspace: React.FC<Props> = ({
             </svg>
           </div>
 
-          <div className="flex h-8 shrink-0 items-center justify-between border-t border-slate-200 bg-slate-100 px-4 font-mono text-[10px] text-[color:var(--nfq-text-faint)] dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
+          <div className="flex h-8 shrink-0 items-center justify-between border-t border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] px-4 font-mono text-[10px] text-[color:var(--nfq-text-faint)] dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-root)]">
             <div className="flex gap-4">
               <span className="flex items-center gap-1.5">
                 <div className={`h-0.5 w-3 rounded-full ${isPersisted ? 'bg-[var(--nfq-accent)]' : 'bg-[var(--nfq-warning)]'}`} />
                 {isPersisted ? 'PERSISTED' : 'REALTIME'}
               </span>
               <span className="flex items-center gap-1.5">
-                <div className="w-3 border border-dashed border-slate-400" />
+                <div className="w-3 border border-dashed border-[color:var(--nfq-border)]" />
                 PREV CLOSE
               </span>
             </div>
@@ -222,8 +222,8 @@ const YieldCurveWorkspace: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col bg-white dark:bg-black/30 xl:w-64">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]/50">
+        <div className="flex w-full shrink-0 flex-col bg-white dark:bg-[var(--nfq-bg-input)] xl:w-64">
+          <div className="flex items-center justify-between border-b border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] p-3 dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-elevated)]/50">
             <span className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] dark:text-[color:var(--nfq-text-muted)]">Saved Snapshots</span>
             <History size={14} className="text-[color:var(--nfq-text-muted)]" />
           </div>
@@ -237,7 +237,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                   <div
                     key={key}
                     onClick={() => onDateChange(date)}
-                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-[var(--nfq-accent)]/5 dark:bg-[var(--nfq-accent)]/20' : ''}`}
+                    className={`flex cursor-pointer items-center justify-between border-b border-[color:var(--nfq-border)] p-3 transition-colors hover:bg-[var(--nfq-bg-surface)] dark:border-[color:var(--nfq-border-ghost)] dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-[var(--nfq-accent)]/5 dark:bg-[var(--nfq-accent)]/20' : ''}`}
                   >
                     <div className="flex items-center gap-2">
                       <FileCheck size={14} className="text-[color:var(--nfq-success)]" />

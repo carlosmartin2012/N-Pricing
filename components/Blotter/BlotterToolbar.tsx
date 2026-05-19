@@ -54,7 +54,7 @@ const BlotterToolbar: React.FC<Props> = ({
 
       <button
         onClick={onExportCsv}
-        className="flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] transition-colors hover:text-slate-900 dark:hover:text-[color:var(--nfq-text-secondary)]"
+        className="flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] transition-colors hover:text-[color:var(--nfq-text-primary)] dark:hover:text-[color:var(--nfq-text-secondary)]"
       >
         <Download size={14} /> CSV
       </button>

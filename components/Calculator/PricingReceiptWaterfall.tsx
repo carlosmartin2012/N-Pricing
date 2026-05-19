@@ -59,7 +59,7 @@ export function PricingReceiptWaterfall({
           <button
             onClick={onToggleShocks}
             className={`rounded-full px-3 py-1 text-[10px] font-bold transition-colors ${
-              applyShocks ? 'bg-[var(--nfq-warning)] text-[color:var(--nfq-text-primary)] shadow-md' : 'bg-slate-200 text-[color:var(--nfq-text-faint)] dark:bg-[var(--nfq-bg-highest)]'
+              applyShocks ? 'bg-[var(--nfq-warning)] text-[color:var(--nfq-text-primary)] shadow-md' : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-faint)] dark:bg-[var(--nfq-bg-highest)]'
             }`}
           >
             {applyShocks ? 'ON' : 'OFF'}
@@ -120,7 +120,7 @@ export function PricingReceiptWaterfall({
             formula={t.tooltip_formula_liquidityPremium}
           />
 
-          <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-800 pl-3">
+          <div className="ml-5 mt-1 space-y-0.5 border-l border-[color:var(--nfq-border-ghost)] pl-3">
             <MiniMetric label="Liquidity Premium (LP)">
               {result._liquidityPremiumDetails >= 0 ? '+' : ''}
               {result._liquidityPremiumDetails.toFixed(3)}%
@@ -157,13 +157,13 @@ export function PricingReceiptWaterfall({
           />
         )}
 
-        <div className="my-2 border-t border-dotted border-slate-200 opacity-60 dark:border-slate-800" />
+        <div className="my-2 border-t border-dotted border-[color:var(--nfq-border)] opacity-60 dark:border-[color:var(--nfq-border-ghost)]" />
 
         <div data-testid="receipt-total-ftp">
           <WaterfallItem label={t.ftpRate || 'FTP Rate'} value={result.totalFTP} highlight />
         </div>
 
-        <div className="ml-1 mt-2 space-y-1 border-l-2 border-slate-800 pl-2">
+        <div className="ml-1 mt-2 space-y-1 border-l-2 border-[color:var(--nfq-border-ghost)] pl-2">
           <WaterfallItem
             label={`${t.anejo_creditProvision || 'Credit Provision'}${
               result.anejoSegment ? ` · ${result.anejoSegment.replace(/_/g, ' ')}` : ''
@@ -221,7 +221,7 @@ export function PricingReceiptWaterfall({
           )}
         </div>
 
-        <div className="my-2 rounded border border-slate-700 bg-[var(--nfq-bg-highest)]/50 p-2">
+        <div className="my-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/50 p-2">
           <WaterfallItem
             label="Floor Price (Break-even)"
             value={result.floorPrice}

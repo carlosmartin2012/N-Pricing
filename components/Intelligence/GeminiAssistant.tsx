@@ -165,7 +165,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
             <span className="font-bold text-sm tracking-wider uppercase">Gemini Intelligence</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--nfq-bg-elevated)] rounded border border-slate-800">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--nfq-bg-elevated)] rounded border border-[color:var(--nfq-border-ghost)]">
               <Cpu size={10} className="text-[color:var(--nfq-success)]" />
               <span className="text-[9px] font-mono text-[color:var(--nfq-success)]">CONNECTED</span>
             </div>
@@ -183,7 +183,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
           </div>
         </div>
 
-        <div className="border-b border-slate-800 bg-[var(--nfq-bg-root)]/70 px-4 py-2">
+        <div className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/70 px-4 py-2">
           <div className="flex flex-wrap gap-2">
             {grounding.groundedContext.dossierId && (
               <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-[var(--nfq-accent)]/10/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
@@ -216,7 +216,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${
                   msg.role === 'model'
                     ? 'bg-[var(--nfq-bg-elevated)] border-[color:var(--nfq-accent)]/30 text-[color:var(--nfq-accent)]'
-                    : 'bg-[var(--nfq-bg-highest)] border-slate-700 text-[color:var(--nfq-text-secondary)]'
+                    : 'bg-[var(--nfq-bg-highest)] border-[color:var(--nfq-border-ghost)] text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
                 {msg.role === 'model' ? <Bot size={16} /> : <User size={16} />}
@@ -224,7 +224,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               <div
                 className={`p-3 rounded-lg text-xs leading-relaxed max-w-[80%] ${
                   msg.role === 'model'
-                    ? 'bg-[var(--nfq-bg-elevated)]/50 border border-slate-800 text-[color:var(--nfq-text-secondary)]'
+                    ? 'bg-[var(--nfq-bg-elevated)]/50 border border-[color:var(--nfq-border-ghost)] text-[color:var(--nfq-text-secondary)]'
                     : 'bg-[var(--nfq-accent)]/15 border border-[color:var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]'
                 }`}
               >
@@ -237,7 +237,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               <div className="w-8 h-8 rounded-full bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-accent)]/30 flex items-center justify-center shrink-0">
                 <Bot size={16} className="text-[color:var(--nfq-accent)]" />
               </div>
-              <div className="p-3 rounded-lg bg-[var(--nfq-bg-elevated)]/50 border border-slate-800">
+              <div className="p-3 rounded-lg bg-[var(--nfq-bg-elevated)]/50 border border-[color:var(--nfq-border-ghost)]">
                 <div className="flex gap-1">
                   <div
                     className="w-1.5 h-1.5 bg-[var(--nfq-accent)] rounded-full animate-bounce"
@@ -258,7 +258,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-slate-800 bg-[var(--nfq-bg-elevated)]/50 shrink-0">
+        <div className="p-4 border-t border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/50 shrink-0">
           <div className="relative">
             <input
               type="text"
@@ -266,7 +266,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Ask Nexus AI about this deal..."
-              className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded-lg pl-4 pr-10 py-3 text-xs text-[color:var(--nfq-text-primary)] placeholder-slate-600 focus:outline-none focus:border-[color:var(--nfq-accent)] focus:ring-1 focus:ring-[color:var(--nfq-accent)]/20 transition-all font-mono"
+              className="w-full bg-[var(--nfq-bg-root)] border border-[color:var(--nfq-border-ghost)] rounded-lg pl-4 pr-10 py-3 text-xs text-[color:var(--nfq-text-primary)] placeholder-slate-600 focus:outline-none focus:border-[color:var(--nfq-accent)] focus:ring-1 focus:ring-[color:var(--nfq-accent)]/20 transition-all font-mono"
             />
             <button
               onClick={handleSend}

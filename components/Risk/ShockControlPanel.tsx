@@ -27,7 +27,7 @@ const ShockSlider: React.FC<{
 }> = ({ label, accentClassName, icon, value, onChange }) => (
   <div className="space-y-4">
     <div className="flex items-center justify-between">
-      <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-[color:var(--nfq-text-secondary)]">
+      <label className="flex items-center gap-2 text-sm font-medium text-[color:var(--nfq-text-primary)] dark:text-[color:var(--nfq-text-secondary)]">
         {icon}
         {label}
       </label>
@@ -43,7 +43,7 @@ const ShockSlider: React.FC<{
       step="10"
       value={value}
       onChange={(event) => onChange(Number(event.target.value))}
-      className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 dark:bg-[var(--nfq-bg-highest)]"
+      className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[var(--nfq-bg-elevated)] dark:bg-[var(--nfq-bg-highest)]"
     />
     <div className="flex justify-between font-mono text-xs text-[color:var(--nfq-text-muted)]">
       <span>-500 bps</span>
@@ -68,13 +68,13 @@ export const ShockControlPanel: React.FC<Props> = ({
   return (
     <Panel title={t.shocksConfig || 'Shocks Configuration'} className="h-full bg-white dark:bg-[#0a0a0a]">
       <div className="space-y-8 p-4">
-        <div className="rounded-lg border border-slate-200 bg-slate-100 p-3 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]">
+        <div className="rounded-lg border border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] p-3 dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-elevated)]">
           <div className="mb-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">{t.targetTransaction}</div>
           <div className="mb-1 flex items-center justify-between">
             <span className="font-mono font-bold text-[color:var(--nfq-accent)] dark:text-[color:var(--nfq-accent)]">{deal.id || 'NEW-DEAL'}</span>
             <Badge variant="outline">{deal.productType || t.noProduct}</Badge>
           </div>
-          <div className="truncate text-xs font-medium text-slate-700 dark:text-[color:var(--nfq-text-secondary)]">
+          <div className="truncate text-xs font-medium text-[color:var(--nfq-text-primary)] dark:text-[color:var(--nfq-text-secondary)]">
             {deal.clientId || t.noClientSelected}
           </div>
         </div>
@@ -107,7 +107,7 @@ export const ShockControlPanel: React.FC<Props> = ({
                     liquiditySpread: scenario.liquiditySpread,
                   })
                 }
-                className="rounded border border-slate-200 px-2 py-1.5 text-left text-[10px] font-mono text-[color:var(--nfq-text-muted)] transition-colors hover:bg-slate-100 hover:text-[color:var(--nfq-text-primary)] dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]"
+                className="rounded border border-[color:var(--nfq-border)] px-2 py-1.5 text-left text-[10px] font-mono text-[color:var(--nfq-text-muted)] transition-colors hover:bg-[var(--nfq-bg-surface)] hover:text-[color:var(--nfq-text-primary)] dark:border-[color:var(--nfq-border-ghost)] dark:hover:bg-[var(--nfq-bg-highest)]"
               >
                 {scenario.label}
               </button>
@@ -118,7 +118,7 @@ export const ShockControlPanel: React.FC<Props> = ({
         <div className="flex gap-2">
           <button
             onClick={onReset}
-            className="flex flex-1 items-center justify-center gap-2 rounded border border-slate-200 py-2 text-sm text-[color:var(--nfq-text-faint)] transition-colors hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)] dark:hover:text-[color:var(--nfq-text-primary)]"
+            className="flex flex-1 items-center justify-center gap-2 rounded border border-[color:var(--nfq-border)] py-2 text-sm text-[color:var(--nfq-text-faint)] transition-colors hover:bg-[var(--nfq-bg-surface)] hover:text-[color:var(--nfq-text-primary)] dark:border-[color:var(--nfq-border-ghost)] dark:hover:bg-[var(--nfq-bg-highest)] dark:hover:text-[color:var(--nfq-text-primary)]"
           >
             <RefreshCcw size={14} />
             {t.reset}

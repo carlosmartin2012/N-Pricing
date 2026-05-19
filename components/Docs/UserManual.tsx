@@ -76,14 +76,14 @@ const SectionHeader: React.FC<{ icon: LucideIcon; title: string; color: string }
   title,
   color,
 }) => (
-  <div className="flex items-center gap-3 border-b border-slate-800 pb-2">
+  <div className="flex items-center gap-3 border-b border-[color:var(--nfq-border-ghost)] pb-2">
     <Icon size={22} className={color} />
     <h3 className={`text-xl font-bold ${color}`}>{title}</h3>
   </div>
 );
 
 const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc }) => (
-  <div className="rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+  <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
     <h4 className="mb-1 text-sm font-bold text-[color:var(--nfq-text-secondary)]">{title}</h4>
     <p className="text-xs leading-snug text-[color:var(--nfq-text-faint)]">{desc}</p>
   </div>
@@ -92,7 +92,7 @@ const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc })
 const Shortcut: React.FC<{ keys: string; desc: string }> = ({ keys, desc }) => (
   <div className="flex items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-4 py-2.5">
     <span className="text-sm text-[color:var(--nfq-text-secondary)]">{desc}</span>
-    <kbd className="rounded border border-slate-700 bg-[var(--nfq-bg-highest)] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]">
+    <kbd className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]">
       {keys}
     </kbd>
   </div>
@@ -115,7 +115,7 @@ const UserManual: React.FC = () => {
     <Panel title={`N Pricing — ${t.manual}`} className="h-full">
       <div className="flex h-full">
         {/* Table of Contents */}
-        <div className="hidden w-72 space-y-1 overflow-y-auto border-r border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]/50 lg:block">
+        <div className="hidden w-72 space-y-1 overflow-y-auto border-r border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] p-4 dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-elevated)]/50 lg:block">
           <h4 className="mb-3 text-xs font-medium text-[color:var(--nfq-text-faint)]">
             {L('Contents', 'Contenidos')}
           </h4>
@@ -295,7 +295,7 @@ const UserManual: React.FC = () => {
               </p>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* ═══════════════ COMMERCIAL ═══════════════ */}
             <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-success)] pl-4 text-2xl font-bold text-[color:var(--nfq-success)]">
@@ -341,7 +341,7 @@ const UserManual: React.FC = () => {
               </p>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* ═══════════════ PRICING ═══════════════ */}
             <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-accent)] pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
@@ -412,7 +412,7 @@ const UserManual: React.FC = () => {
               </p>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* ═══════════════ INSIGHTS ═══════════════ */}
             <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-warning)] pl-4 text-2xl font-bold text-[color:var(--nfq-warning)]">
@@ -455,7 +455,7 @@ const UserManual: React.FC = () => {
               </p>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* ═══════════════ GOVERNANCE ═══════════════ */}
             <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-cat-d)] pl-4 text-2xl font-bold text-[color:var(--nfq-cat-d)]">
@@ -517,7 +517,7 @@ const UserManual: React.FC = () => {
               </p>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* ═══════════════ POWER USER ═══════════════ */}
             <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-cat-g)] pl-4 text-2xl font-bold text-[color:var(--nfq-cat-g)]">
@@ -562,7 +562,7 @@ const UserManual: React.FC = () => {
               </div>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* ═══════════════ OPERATIONAL GUIDE ═══════════════ */}
             <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-accent)] pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
@@ -592,7 +592,7 @@ const UserManual: React.FC = () => {
               <SectionHeader icon={Compass} title={L('Operational workflows', 'Flujos operativos')} color="text-[color:var(--nfq-accent)]" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {guide.workflows.map((wf) => (
-                  <div key={wf.title} className="space-y-3 rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+                  <div key={wf.title} className="space-y-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
                     <div>
                       <h4 className="text-sm font-bold text-[color:var(--nfq-text-primary)]">{wf.title}</h4>
                       <p className="mt-1 text-[11px] tracking-normal text-[color:var(--nfq-accent)]">{wf.audience}</p>
@@ -631,13 +631,13 @@ const UserManual: React.FC = () => {
               <SectionHeader icon={LifeBuoy} title={L('Troubleshooting', 'Resolución de problemas')} color="text-[color:var(--nfq-accent)]" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {guide.troubleshooting.map((item) => (
-                  <div key={item.title} className="rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+                  <div key={item.title} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
                     <h4 className="mb-1 text-sm font-bold text-[color:var(--nfq-text-secondary)]">{item.title}</h4>
                     <p className="text-xs leading-relaxed text-[color:var(--nfq-text-faint)]">{item.description}</p>
                   </div>
                 ))}
               </div>
-              <div className="rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)]/60 p-4">
+              <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 p-4">
                 <h4 className="mb-3 text-xs font-medium text-[color:var(--nfq-text-secondary)]">
                   {L('Support checklist', 'Checklist de soporte')}
                 </h4>
@@ -649,16 +649,16 @@ const UserManual: React.FC = () => {
               </div>
             </section>
 
-            <hr className="border-slate-800" />
+            <hr className="border-[color:var(--nfq-border-ghost)]" />
 
             {/* Pricing Formulas */}
             <section id="formulas" className="space-y-4 pt-4">
               <SectionHeader icon={Calculator} title={t.manual_formulasTitle} color="text-[color:var(--nfq-warning)]" />
               <p className="text-[color:var(--nfq-text-muted)]">{t.manual_formulasIntro}</p>
-              <div className="overflow-x-auto rounded-lg border border-slate-800">
+              <div className="overflow-x-auto rounded-lg border border-[color:var(--nfq-border-ghost)]">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-800 bg-[var(--nfq-bg-elevated)]/80">
+                    <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/80">
                       <th className="px-4 py-3 text-left font-mono text-[11px] text-[color:var(--nfq-text-faint)]">
                         {L('Component', 'Componente')}
                       </th>
