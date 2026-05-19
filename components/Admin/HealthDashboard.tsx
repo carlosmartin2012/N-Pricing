@@ -5,6 +5,7 @@ import { useUI } from '../../contexts/UIContext';
 import * as observability from '../../api/observability';
 import type { AlertRule } from '../../types/alertRule';
 import { createLogger } from '../../utils/logger';
+import { useChartTokens } from '../../hooks/useChartTokens';
 import SLOPanel from './SLOPanel';
 import AdapterHealthPanel from './AdapterHealthPanel';
 
@@ -13,6 +14,7 @@ const log = createLogger('HealthDashboard');
 const HealthDashboard: React.FC = () => {
   const { activeEntity } = useEntity();
   const { t } = useUI();
+  const tokens = useChartTokens();
   const [alertRules, setAlertRules] = useState<AlertRule[]>([]);
   const [summary, setSummary] = useState<observability.HealthSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,10 +49,10 @@ const HealthDashboard: React.FC = () => {
       icon: Zap,
       color:
         summary?.pricingLatencyP50Ms == null
-          ? '#94a3b8'
+          ? tokens.axis
           : summary.pricingLatencyP50Ms <= 75
-            ? '#10b981'
-            : '#f59e0b',
+            ? tokens.success
+            : tokens.warning,
     },
     {
       label: t.pricingLatencyP95,
@@ -58,24 +60,24 @@ const HealthDashboard: React.FC = () => {
       icon: Clock,
       color:
         summary?.pricingLatencyP95Ms == null
-          ? '#94a3b8'
+          ? tokens.axis
           : summary.pricingLatencyP95Ms <= 250
-            ? '#06b6d4'
-            : '#f59e0b',
+            ? tokens.accent
+            : tokens.warning,
     },
     {
       label: t.errorEvents24h,
       value: String(summary?.errorEvents24h ?? 0),
       icon: AlertTriangle,
-      color: (summary?.errorEvents24h ?? 0) === 0 ? '#10b981' : '#f59e0b',
+      color: (summary?.errorEvents24h ?? 0) === 0 ? tokens.success : tokens.warning,
     },
     {
       label: t.activeDeals,
       value: String(summary?.dealCount ?? 0),
       icon: BarChart4,
-      color: '#F48B4A',
+      color: tokens.catB, // amber category — NFQ amber-ish, replaces hardcoded #F48B4A
     },
-  ], [summary, t.activeDeals, t.errorEvents24h, t.pricingLatencyP50, t.pricingLatencyP95]);
+  ], [summary, t.activeDeals, t.errorEvents24h, t.pricingLatencyP50, t.pricingLatencyP95, tokens]);
 
   return (
     <div className="space-y-6 p-4 md:p-6">

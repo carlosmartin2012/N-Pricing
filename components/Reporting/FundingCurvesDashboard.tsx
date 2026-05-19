@@ -14,6 +14,7 @@ import type {
   FundingCollateralType,
   FundingCurveDatum,
 } from './reportingTypes';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 interface Props {
   selectedCurrency: string;
@@ -26,6 +27,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
   collateralType,
   fundingCurveData,
 }) => {
+  const tokens = useChartTokens();
   const summaryItems = useMemo(() => {
     if (fundingCurveData.length <= 4) {
       return [{ label: 'No curve data', base: 0, sim: 0 }];
@@ -85,12 +87,12 @@ const FundingCurvesDashboard: React.FC<Props> = ({
                 dataKey="tenor"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontWeight: 700 }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                tick={{ fill: tokens.axis, fontSize: 10 }}
                 orientation="right"
               />
               <Tooltip

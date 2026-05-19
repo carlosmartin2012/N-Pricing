@@ -15,6 +15,7 @@ import { calculatePricing } from '@npricing/pricing-core';
 import { buildPricingContext } from '../../utils/pricingContext';
 import { useData } from '../../contexts/DataContext';
 import { Calendar, TrendingDown, AlertTriangle } from 'lucide-react';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 interface Props {
   deals: Transaction[];
@@ -93,6 +94,7 @@ function formatVolume(v: number): string {
 }
 
 const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clients }) => {
+  const tokens = useChartTokens();
   const contextData = useData();
   const [sortField, setSortField] = useState<SortField>('cohort');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -454,7 +456,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                 dataKey="cohort"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
               />
               <YAxis
                 yAxisId="left"

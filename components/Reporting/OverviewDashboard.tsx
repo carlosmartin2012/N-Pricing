@@ -19,6 +19,7 @@ import { calculatePricing } from '@npricing/pricing-core';
 import { buildPricingContext } from '../../utils/pricingContext';
 import FtpLedgerSummaryCard, { type FtpLedgerSummary } from './FtpLedgerSummaryCard';
 import type { LcrHistoryPoint, PortfolioBusinessUnitSummary, ScenarioMetrics } from './reportingTypes';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 interface Props {
   metrics: ScenarioMetrics;
@@ -59,6 +60,7 @@ const OverviewDashboard: React.FC<Props> = ({
   businessUnits = [],
   clients = [],
 }) => {
+  const tokens = useChartTokens();
   const { activeEntity, isGroupScope } = useEntity();
   const contextData = useData();
 
@@ -286,7 +288,7 @@ const OverviewDashboard: React.FC<Props> = ({
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                    tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                     interval={0}
                     angle={-25}
                     textAnchor="end"

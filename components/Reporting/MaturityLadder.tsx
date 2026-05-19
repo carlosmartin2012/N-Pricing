@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Transaction } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from '../ui/charts/lazyRecharts';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 interface Props {
   deals: Transaction[];
@@ -28,6 +29,7 @@ function getBucket(months: number): string {
 }
 
 const MaturityLadder: React.FC<Props> = React.memo(({ deals }) => {
+  const tokens = useChartTokens();
   const data = useMemo(() => {
     const bucketMap: Record<string, { assets: number; liabilities: number }> = {};
     BUCKETS.forEach(b => { bucketMap[b.label] = { assets: 0, liabilities: 0 }; });
@@ -66,9 +68,9 @@ const MaturityLadder: React.FC<Props> = React.memo(({ deals }) => {
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey="bucket" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-            <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => `${v}M`} />
+            <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} />
+            <XAxis dataKey="bucket" tick={{ fill: tokens.axis, fontSize: 10 }} />
+            <YAxis tick={{ fill: tokens.axis, fontSize: 10 }} tickFormatter={(v) => `${v}M`} />
             <Tooltip
               contentStyle={{ backgroundColor: 'var(--nfq-bg-elevated)', border: '1px solid var(--nfq-border-ghost)', borderRadius: 'var(--nfq-radius-lg)', padding: '8px 12px', fontFamily: 'var(--nfq-font-mono)', fontSize: 12 }}
               formatter={(val) => fmtM(Number(Array.isArray(val) ? val[0] : val ?? 0))}
