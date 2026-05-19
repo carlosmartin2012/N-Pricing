@@ -5,7 +5,7 @@ const toneClasses: Record<RarocMetricCardData['tone'], string> = {
   cyan: 'text-[color:var(--nfq-accent)]',
   emerald: 'text-[color:var(--nfq-success)]',
   amber: 'text-[color:var(--nfq-warning)]',
-  violet: 'text-violet-400',
+  violet: 'text-[color:var(--nfq-cat-d)]',
 };
 
 export const RAROCMetricCard: React.FC<RarocMetricCardData> = React.memo(({

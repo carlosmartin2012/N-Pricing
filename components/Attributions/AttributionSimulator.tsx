@@ -126,7 +126,7 @@ const AttributionSimulator: React.FC<Props> = ({
       )}
 
       {!isLoading && matrixEmpty && (
-        <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+        <div className="rounded-md border border-[color:var(--nfq-warning)]/30 bg-amber-500/10 p-3 text-xs text-amber-200">
           {t.matrixEmpty}
         </div>
       )}
@@ -247,7 +247,7 @@ const AttributionSimulator: React.FC<Props> = ({
             )}
 
             {result.newRouting.belowHardFloor && (
-              <div className="mt-3 rounded border border-rose-500/30 bg-rose-500/10 p-2 text-xs text-rose-200">
+              <div className="mt-3 rounded border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 p-2 text-xs text-rose-200">
                 {t.simulatorBelowFloor}
               </div>
             )}

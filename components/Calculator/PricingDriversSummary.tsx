@@ -22,7 +22,7 @@ export const PricingDriversSummary: React.FC<Props> = ({ result, labels }) => {
     { label: labels.liquidity, value: result.liquiditySpread, tone: 'text-[color:var(--nfq-warning)]' },
     { label: labels.credit, value: result.regulatoryCost, tone: 'text-[color:var(--nfq-danger)]' },
     { label: labels.capital, value: result.capitalCharge, tone: 'text-[color:var(--nfq-accent)]' },
-    { label: labels.operational, value: result.operationalCost, tone: 'text-violet-300' },
+    { label: labels.operational, value: result.operationalCost, tone: 'text-[color:var(--nfq-cat-d)]' },
     {
       label: labels.esg,
       value: (result.esgTransitionCharge ?? 0) + (result.esgPhysicalCharge ?? 0) + (result.esgGreeniumAdj ?? 0),

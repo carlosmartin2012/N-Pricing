@@ -167,7 +167,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
       )}
 
       {errorCopy && (
-        <p className="rounded border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-[color:var(--nfq-danger)]" role="alert">
+        <p className="rounded border border-[color:var(--nfq-danger)]/30 bg-rose-500/5 px-3 py-2 text-xs text-[color:var(--nfq-danger)]" role="alert">
           {errorCopy}
         </p>
       )}
@@ -210,7 +210,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                 {ask.data.citations.map((c) => (
                   <li
                     key={c.label}
-                    className="rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 font-mono text-[10px] text-cyan-200"
+                    className="rounded border border-[color:var(--nfq-accent)]/30 bg-cyan-500/10 px-2 py-0.5 font-mono text-[10px] text-cyan-200"
                   >
                     {c.label}
                   </li>

@@ -155,7 +155,7 @@ const AttributionMatrixView: React.FC = () => {
                       onClick={() => updateLevel.mutate({ id: level.id, input: { active: false } })}
                       disabled={updateLevel.isPending}
                       title={t.matrixLevelDeactivate}
-                      className="rounded-md border border-rose-500/30 bg-rose-500/10 p-1 text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
+                      className="rounded-md border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 p-1 text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
                       aria-label={t.matrixLevelDeactivate}
                     >
                       <ShieldOff className="h-3 w-3" />

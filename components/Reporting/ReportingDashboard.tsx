@@ -295,10 +295,10 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
           <div className="flex flex-col items-end">
             <span className="nfq-label">Market State</span>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] font-mono border-emerald-500/30 text-[color:var(--nfq-success)]">
+              <Badge variant="outline" className="text-[10px] font-mono border-[color:var(--nfq-success)]/30 text-[color:var(--nfq-success)]">
                 SOFR: 5.32
               </Badge>
-              <Badge variant="outline" className="text-[10px] font-mono border-amber-500/30 text-[color:var(--nfq-warning)]">
+              <Badge variant="outline" className="text-[10px] font-mono border-[color:var(--nfq-warning)]/30 text-[color:var(--nfq-warning)]">
                 BI-3: OK
               </Badge>
             </div>

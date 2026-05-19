@@ -192,7 +192,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
 
           {/* Error state */}
           {error && (
-            <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-[color:var(--nfq-danger)]">
+            <div className="mb-4 rounded-lg border border-[color:var(--nfq-danger)]/30 bg-rose-950/20 px-4 py-2 text-xs text-[color:var(--nfq-danger)]">
               {error}
             </div>
           )}

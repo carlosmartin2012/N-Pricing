@@ -151,7 +151,7 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
         </div>
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">FTP Income</div>
-          <div className="font-mono text-2xl font-bold text-violet-400 mt-2">
+          <div className="font-mono text-2xl font-bold text-[color:var(--nfq-cat-d)] mt-2">
             {fmtAmount(clientMetrics.reduce((s, c) => s + c.totalFtpIncome, 0))}
           </div>
         </div>
@@ -214,7 +214,7 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
                 >
                   {c.weightedAvgRaroc.toFixed(1)}%
                 </td>
-                <td className="px-3 py-2.5 text-right font-mono text-violet-400">{fmtAmount(c.totalFtpIncome)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[color:var(--nfq-cat-d)]">{fmtAmount(c.totalFtpIncome)}</td>
                 <td className="px-3 py-2.5 text-center">
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${

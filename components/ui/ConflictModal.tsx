@@ -44,7 +44,7 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-[var(--nfq-radius-card)] border border-amber-500/30 bg-[var(--nfq-bg-surface)] p-4 shadow-2xl">
+      <div className="w-full max-w-lg rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-bg-surface)] p-4 shadow-2xl">
         <div className="flex items-center gap-3 mb-4">
           <AlertTriangle className="h-6 w-6 text-[color:var(--nfq-warning)]" />
           <h3 className="text-lg font-bold text-[color:var(--nfq-text-primary)]">Conflict Detected</h3>
@@ -81,7 +81,7 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
             <X className="h-4 w-4 mr-1 inline" />
             Cancel
           </button>
-          <button onClick={onAcceptServer} className="nfq-button nfq-button-ghost px-4 py-2 text-sm text-[color:var(--nfq-warning)] border-amber-500/30">
+          <button onClick={onAcceptServer} className="nfq-button nfq-button-ghost px-4 py-2 text-sm text-[color:var(--nfq-warning)] border-[color:var(--nfq-warning)]/30">
             <Check className="h-4 w-4 mr-1 inline" />
             Use Server Version
           </button>

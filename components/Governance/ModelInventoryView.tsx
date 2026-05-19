@@ -43,9 +43,9 @@ const KIND_LABEL: Record<ModelKind, string> = {
 const KIND_COLOR: Record<ModelKind, string> = {
   engine:      'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
   ruleset:     'bg-emerald-500/10 text-[color:var(--nfq-success)]',
-  elasticity:  'bg-violet-500/10 text-violet-300',
+  elasticity:  'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
   shock_pack:  'bg-amber-500/10 text-[color:var(--nfq-warning)]',
-  behavioural: 'bg-sky-500/10 text-sky-300',
+  behavioural: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
   rate_card:   'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
   other:       'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
 };
@@ -202,7 +202,7 @@ const ModelInventoryView: React.FC = () => {
       </header>
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
+        <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}

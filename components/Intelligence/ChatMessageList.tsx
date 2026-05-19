@@ -48,7 +48,7 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
                   </span>
                 )}
                 {!!message.trace.groundedContext.marketDataSourceIds?.length && (
-                  <span className="rounded-full border border-violet-800/60 bg-violet-950/30 px-2 py-1 font-mono text-[10px] text-violet-300">
+                  <span className="rounded-full border border-violet-800/60 bg-violet-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-cat-d)]">
                     SOURCES {message.trace.groundedContext.marketDataSourceIds.length}
                   </span>
                 )}

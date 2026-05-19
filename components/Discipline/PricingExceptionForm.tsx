@@ -103,7 +103,7 @@ const PricingExceptionForm: React.FC<Props> = ({ dealId, onSubmit, onCancel }) =
 
         {/* Error state */}
         {createMutation.isError && (
-          <div className="rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-[color:var(--nfq-danger)]">
+          <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-rose-950/20 px-4 py-2 text-xs text-[color:var(--nfq-danger)]">
             Failed to create exception. Please try again.
           </div>
         )}

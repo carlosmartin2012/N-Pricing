@@ -78,7 +78,7 @@ describe('RAROCMetricCard', () => {
   it('applies violet tone class to the value', () => {
     renderCard({ tone: 'violet', value: '€12,500' });
     const valueElement = screen.getByText('€12,500');
-    expect(valueElement.className).toContain('text-violet-400');
+    expect(valueElement.className).toContain('text-[color:var(--nfq-cat-d)]');
   });
 
   it('applies emerald status class for positive trend', () => {

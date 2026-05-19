@@ -262,7 +262,7 @@ const DossiersView: React.FC = () => {
       <TimelineDeprecationBanner surface="dossiers" />
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
+        <div className="rounded-lg border border-[color:var(--nfq-danger)]/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}

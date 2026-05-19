@@ -17,7 +17,7 @@ import { clvTranslations } from '../../translations/index';
 import type { ClientEvent, ClientEventType } from '../../types/clv';
 
 const EVENT_META: Record<ClientEventType, { icon: React.ComponentType<{ className?: string }>; tone: string; label: string }> = {
-  onboarding:        { icon: Sparkles,           tone: 'text-sky-300',     label: 'Onboarding' },
+  onboarding:        { icon: Sparkles,           tone: 'text-[color:var(--nfq-cat-a)]',     label: 'Onboarding' },
   deal_booked:       { icon: CircleDollarSign,   tone: 'text-[color:var(--nfq-success)]', label: 'Deal booked' },
   deal_cancelled:    { icon: XCircle,            tone: 'text-[color:var(--nfq-danger)]',    label: 'Deal cancelled' },
   crosssell_attempt: { icon: Handshake,          tone: 'text-[color:var(--nfq-warning)]',   label: 'Crosssell attempt' },
@@ -25,9 +25,9 @@ const EVENT_META: Record<ClientEventType, { icon: React.ComponentType<{ classNam
   claim:             { icon: AlertTriangle,      tone: 'text-[color:var(--nfq-danger)]',    label: 'Claim' },
   churn_signal:      { icon: MessageSquareWarning, tone: 'text-[color:var(--nfq-danger)]',  label: 'Churn signal' },
   contact:           { icon: Phone,              tone: 'text-[color:var(--nfq-text-secondary)]',   label: 'Contact' },
-  price_review:      { icon: RefreshCw,          tone: 'text-violet-300',  label: 'Price review' },
-  committee_review:  { icon: Gavel,              tone: 'text-violet-300',  label: 'Committee review' },
-  nba_generated:     { icon: Sparkles,           tone: 'text-sky-300',     label: 'NBA generated' },
+  price_review:      { icon: RefreshCw,          tone: 'text-[color:var(--nfq-cat-d)]',  label: 'Price review' },
+  committee_review:  { icon: Gavel,              tone: 'text-[color:var(--nfq-cat-d)]',  label: 'Committee review' },
+  nba_generated:     { icon: Sparkles,           tone: 'text-[color:var(--nfq-cat-a)]',     label: 'NBA generated' },
   nba_consumed:      { icon: Handshake,          tone: 'text-[color:var(--nfq-success)]', label: 'NBA consumed' },
 };
 
@@ -55,7 +55,7 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
     <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <History className="h-4 w-4 text-sky-400" />
+          <History className="h-4 w-4 text-[color:var(--nfq-cat-a)]" />
           <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvTimelineTitle}</span>
         </div>
         <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{events.length} events</span>

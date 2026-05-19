@@ -331,10 +331,10 @@ const PipelineView: React.FC = () => {
 
 const KpiTile: React.FC<{ label: string; value: string; tone: 'sky' | 'amber' | 'emerald' | 'violet' }> = ({ label, value, tone }) => {
   const toneClass = {
-    sky:      'text-sky-300',
+    sky:      'text-[color:var(--nfq-cat-a)]',
     amber:    'text-[color:var(--nfq-warning)]',
     emerald:  'text-[color:var(--nfq-success)]',
-    violet:   'text-violet-300',
+    violet:   'text-[color:var(--nfq-cat-d)]',
   }[tone];
   return (
     <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
@@ -379,7 +379,7 @@ const PipelineRow: React.FC<RowProps> = ({
         <div className="flex-1 flex items-start justify-between gap-3 min-w-0">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <Tag className="h-3 w-3 text-violet-300 shrink-0" />
+              <Tag className="h-3 w-3 text-[color:var(--nfq-cat-d)] shrink-0" />
               <span className="font-mono text-sm font-bold text-[color:var(--nfq-text-primary)] truncate">
                 {row.clientName}
               </span>

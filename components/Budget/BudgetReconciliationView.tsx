@@ -13,13 +13,13 @@ const fmtEur = (v: number | null) =>
 const fmtPct = (v: number | null) => (v === null ? '—' : `${(v * 100).toFixed(1)}%`);
 
 const STATUS_CLASSES: Record<BudgetVarianceStatus, string> = {
-  on_track:           'bg-emerald-500/10 text-[color:var(--nfq-success)] border-emerald-500/30',
-  over_budget_rate:   'bg-rose-500/10    text-[color:var(--nfq-danger)]    border-rose-500/30',
-  under_budget_rate:  'bg-amber-500/10   text-[color:var(--nfq-warning)]   border-amber-500/30',
-  over_budget_volume: 'bg-sky-500/10     text-sky-300     border-sky-500/30',
-  under_budget_volume:'bg-violet-500/10  text-violet-300  border-violet-500/30',
+  on_track:           'bg-emerald-500/10 text-[color:var(--nfq-success)] border-[color:var(--nfq-success)]/30',
+  over_budget_rate:   'bg-rose-500/10    text-[color:var(--nfq-danger)]    border-[color:var(--nfq-danger)]/30',
+  under_budget_rate:  'bg-amber-500/10   text-[color:var(--nfq-warning)]   border-[color:var(--nfq-warning)]/30',
+  over_budget_volume: 'bg-sky-500/10     text-[color:var(--nfq-cat-a)]     border-[color:var(--nfq-cat-a)]/30',
+  under_budget_volume:'bg-violet-500/10  text-[color:var(--nfq-cat-d)]  border-[color:var(--nfq-cat-d)]/30',
   budget_only:        'bg-slate-500/10   text-[color:var(--nfq-text-secondary)]   border-[color:var(--nfq-border-ghost)]',
-  realized_only:      'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/30',
+  realized_only:      'bg-[var(--nfq-cat-g-subtle)] text-[color:var(--nfq-cat-g)] border-fuchsia-500/30',
 };
 
 function statusLabel(status: BudgetVarianceStatus, t: ReturnType<typeof budgetTranslations>): string {

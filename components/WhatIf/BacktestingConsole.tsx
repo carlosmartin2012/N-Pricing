@@ -202,7 +202,7 @@ const BacktestingConsole: React.FC = () => {
           <div className="p-2">
             {loadingRuns ? (
               <div className="flex items-center justify-center py-8">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-500" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
               </div>
             ) : sortedRuns.length === 0 ? (
               <div className="py-8 text-center text-xs text-[color:var(--nfq-text-secondary)]">
@@ -217,7 +217,7 @@ const BacktestingConsole: React.FC = () => {
                     onClick={() => setSelectedRunId(run.id)}
                     className={`w-full text-left rounded-[var(--nfq-radius-card)] px-3 py-2.5 transition-colors ${
                       run.id === selectedRunId
-                        ? 'bg-cyan-500/10 border border-cyan-500/30'
+                        ? 'bg-cyan-500/10 border border-[color:var(--nfq-accent)]/30'
                         : 'hover:bg-[var(--nfq-bg-elevated)] border border-transparent'
                     }`}
                   >
@@ -250,7 +250,7 @@ const BacktestingConsole: React.FC = () => {
           </div>
         ) : loadingResult ? (
           <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-500" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
           </div>
         ) : !result ? (
           <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">

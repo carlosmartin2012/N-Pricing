@@ -157,7 +157,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
 
   return (
     <div className="fixed bottom-20 right-6 w-96 h-[600px] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right-10 fade-in duration-300">
-      <div className="absolute inset-0 bg-[var(--nfq-bg-root)]/95 backdrop-blur-xl border border-cyan-500/30 rounded-lg shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
+      <div className="absolute inset-0 bg-[var(--nfq-bg-root)]/95 backdrop-blur-xl border border-[color:var(--nfq-accent)]/30 rounded-lg shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="h-10 border-b border-cyan-900/50 bg-cyan-950/20 flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-2 text-[color:var(--nfq-accent)]">
@@ -201,7 +201,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               </span>
             )}
             {!!grounding.groundedContext.marketDataSourceIds?.length && (
-              <span className="rounded-full border border-violet-800/60 bg-violet-950/30 px-2 py-1 font-mono text-[10px] text-violet-300">
+              <span className="rounded-full border border-violet-800/60 bg-violet-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-cat-d)]">
                 SRC {grounding.groundedContext.marketDataSourceIds.length}
               </span>
             )}

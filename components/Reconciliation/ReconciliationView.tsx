@@ -42,8 +42,8 @@ const STATUS_TONE: Record<MatchStatus, string> = {
   amount_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   rate_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   currency_mismatch: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
-  bu_only: 'bg-sky-500/10 text-sky-300',
-  treasury_only: 'bg-violet-500/10 text-violet-300',
+  bu_only: 'bg-[var(--nfq-cat-a-subtle)] text-[color:var(--nfq-cat-a)]',
+  treasury_only: 'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
   unknown: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
 };
 
@@ -247,7 +247,7 @@ const KpiTile: React.FC<KpiTileProps> = ({ icon: Icon, label, value, sub, tone }
     emerald: 'text-[color:var(--nfq-success)]',
     amber: 'text-[color:var(--nfq-warning)]',
     rose: 'text-[color:var(--nfq-danger)]',
-    sky: 'text-sky-300',
+    sky: 'text-[color:var(--nfq-cat-a)]',
   }[tone];
   return (
     <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">

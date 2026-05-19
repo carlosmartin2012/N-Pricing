@@ -278,7 +278,7 @@ const ElasticityCalibration: React.FC = () => {
         {/* --- Table --- */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-500" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
           </div>
         ) : models.length === 0 ? (
           <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] py-10 text-center text-xs text-[color:var(--nfq-text-secondary)]">

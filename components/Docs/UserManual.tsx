@@ -139,14 +139,14 @@ const UserManual: React.FC = () => {
             <TocItem targetId="market-data" label={L('Yield Curves', 'Curvas de Tipos')} accent="bg-amber-400" />
             <TocItem targetId="behavioural" label={L('Behavioural Models', 'Modelos Comportamentales')} accent="bg-amber-400" />
 
-            <TocSectionLabel label="Governance" accent="text-violet-300" />
+            <TocSectionLabel label="Governance" accent="text-[color:var(--nfq-cat-d)]" />
             <TocItem targetId="methodology" label={L('Methodology', 'Metodología')} accent="bg-violet-400" />
             <TocItem targetId="model-inventory" label="Model Inventory" accent="bg-violet-400" />
             <TocItem targetId="dossiers" label={L('Signed Dossiers', 'Dossiers Firmados')} accent="bg-violet-400" />
             <TocItem targetId="escalations" label="Escalations" accent="bg-violet-400" />
             <TocItem targetId="snapshots" label="Snapshot Replay" accent="bg-violet-400" />
 
-            <TocSectionLabel label={L('Power user', 'Power user')} accent="text-fuchsia-300" />
+            <TocSectionLabel label={L('Power user', 'Power user')} accent="text-[color:var(--nfq-cat-g)]" />
             <TocItem targetId="command-palette" label="Command Palette (⌘K)" accent="bg-fuchsia-400" />
             <TocItem targetId="customer-drawer" label="Customer 360 Drawer" accent="bg-fuchsia-400" />
             <TocItem targetId="shortcuts" label={L('Keyboard shortcuts', 'Atajos de teclado')} accent="bg-fuchsia-400" />
@@ -230,7 +230,7 @@ const UserManual: React.FC = () => {
               <SectionHeader
                 icon={Sparkles}
                 title={L("What's new — Nav restructure (Q2 2026)", 'Novedades — Reestructuración de nav (Q2 2026)')}
-                color="text-fuchsia-300"
+                color="text-[color:var(--nfq-cat-g)]"
               />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
@@ -458,13 +458,13 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ GOVERNANCE ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-violet-400 pl-4 text-2xl font-bold text-violet-300">
+            <h2 className="flex items-center gap-3 border-l-4 border-violet-400 pl-4 text-2xl font-bold text-[color:var(--nfq-cat-d)]">
               <span className="h-2 w-2 rounded-full bg-violet-400" />
               {L('Governance — control + reproducibility', 'Gobierno — control + reproducibilidad')}
             </h2>
 
             <section id="methodology" className="space-y-4 pt-2">
-              <SectionHeader icon={GitBranch} title={L('Methodology', 'Metodología')} color="text-violet-300" />
+              <SectionHeader icon={GitBranch} title={L('Methodology', 'Metodología')} color="text-[color:var(--nfq-cat-d)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The source of truth for pricing rules. Rate Cards (liquidity premia, credit spreads), ESG Grid (transition, physical, greenium), General Rules (priority-based logic per business unit), Master Data (clients, business units, products), Governance thresholds (RAROC for auto-approval vs committee), and Report Scheduling. Every change versions a new methodology snapshot.',
@@ -474,7 +474,7 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="model-inventory" className="space-y-4 pt-4">
-              <SectionHeader icon={BookOpenCheck} title={L('Model Inventory', 'Model Inventory')} color="text-violet-300" />
+              <SectionHeader icon={BookOpenCheck} title={L('Model Inventory', 'Model Inventory')} color="text-[color:var(--nfq-cat-d)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The SR 11-7 / EBA model inventory. Every behavioural model, pricing rule, elasticity model, or AI model is catalogued with kind, version, status, owner and validation-doc URL. Auditor-facing view; populated automatically from the rules and behavioural models modules.',
@@ -484,7 +484,7 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="dossiers" className="space-y-4 pt-4">
-              <SectionHeader icon={FileSignature} title={L('Signed Dossiers', 'Dossiers Firmados')} color="text-violet-300" />
+              <SectionHeader icon={FileSignature} title={L('Signed Dossiers', 'Dossiers Firmados')} color="text-[color:var(--nfq-cat-d)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Committee-grade pricing dossiers signed with HMAC-SHA256 over canonical JSON. Any tampering breaks the signature; the regulator can verify independently. Each dossier bundles the deal, the pricing result, the methodology snapshot, and the approval trail.',
@@ -494,7 +494,7 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="escalations" className="space-y-4 pt-4">
-              <SectionHeader icon={ShieldAlert} title="Escalations" color="text-violet-300" />
+              <SectionHeader icon={ShieldAlert} title="Escalations" color="text-[color:var(--nfq-cat-d)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Temporal approval escalation workflow: L1 → L2 → Committee with per-entity timeouts. A server-side sweeper promotes stale pending approvals so nothing gets stuck. UI shows the queue state and the aging of each item.',
@@ -504,7 +504,7 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="snapshots" className="space-y-4 pt-4">
-              <SectionHeader icon={History} title="Snapshot Replay" color="text-violet-300" />
+              <SectionHeader icon={History} title="Snapshot Replay" color="text-[color:var(--nfq-cat-d)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Every pricing calculation writes an immutable snapshot (input + context + output + sha256 hashes + engine version). The Snapshot Replay UI lets you re-run any recorded snapshot against the current engine and see field-level diffs (deltaAbs / deltaBps). If the output hash matches byte-for-byte, reproducibility is guaranteed. If it drifts, the diff shows exactly which fields and by how much.',
@@ -513,20 +513,20 @@ const UserManual: React.FC = () => {
               </p>
               <p className="text-xs text-[color:var(--nfq-text-faint)]">
                 {L('Access via ⌘K → "Snapshot Replay" or ', 'Acceso vía ⌘K → «Snapshot Replay» o ')}
-                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-violet-300">/snapshots</code>
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-cat-d)]">/snapshots</code>
               </p>
             </section>
 
             <hr className="border-slate-800" />
 
             {/* ═══════════════ POWER USER ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-fuchsia-400 pl-4 text-2xl font-bold text-fuchsia-300">
+            <h2 className="flex items-center gap-3 border-l-4 border-fuchsia-400 pl-4 text-2xl font-bold text-[color:var(--nfq-cat-g)]">
               <span className="h-2 w-2 rounded-full bg-fuchsia-400" />
               {L('Power user features', 'Features para usuario avanzado')}
             </h2>
 
             <section id="command-palette" className="space-y-4 pt-2">
-              <SectionHeader icon={Search} title="Command Palette (⌘K)" color="text-fuchsia-300" />
+              <SectionHeader icon={Search} title="Command Palette (⌘K)" color="text-[color:var(--nfq-cat-g)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The keyboard-first way to navigate. Press ⌘K (Mac) or Ctrl+K (Windows/Linux) from anywhere, or click the "Search…" pill in the header. Searches fuzzy over:',
@@ -543,7 +543,7 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="customer-drawer" className="space-y-4 pt-4">
-              <SectionHeader icon={LayoutPanelLeft} title={L('Customer 360 Drawer', 'Drawer Customer 360')} color="text-fuchsia-300" />
+              <SectionHeader icon={LayoutPanelLeft} title={L('Customer 360 Drawer', 'Drawer Customer 360')} color="text-[color:var(--nfq-cat-g)]" />
               <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Customer context should never force you to leave what you are doing. The drawer opens on the right (640px wide) with the full relationship panel — KPIs, positions, applicable targets, latest metrics — over any view. ESC or backdrop click dismisses. A "Full page" button jumps to /customers?id=X when you need the standalone workspace (e.g. to import CSV positions).',
@@ -553,7 +553,7 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="shortcuts" className="space-y-4 pt-4">
-              <SectionHeader icon={BookOpen} title={L('Keyboard shortcuts', 'Atajos de teclado')} color="text-fuchsia-300" />
+              <SectionHeader icon={BookOpen} title={L('Keyboard shortcuts', 'Atajos de teclado')} color="text-[color:var(--nfq-cat-g)]" />
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 <Shortcut keys="⌘K / Ctrl+K" desc={L('Open Command Palette', 'Abrir Command Palette')} />
                 <Shortcut keys="Esc" desc={L('Close drawer / modal / palette', 'Cerrar drawer / modal / palette')} />

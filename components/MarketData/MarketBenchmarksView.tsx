@@ -175,7 +175,7 @@ const MarketBenchmarksView: React.FC = () => {
 
       <Panel
         title="Market Benchmarks"
-        icon={<DatabaseZap className="h-5 w-5 text-sky-300" />}
+        icon={<DatabaseZap className="h-5 w-5 text-[color:var(--nfq-cat-a)]" />}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={isAdmin ? 'success' : 'warning'}>{isAdmin ? 'Admin write' : 'Read only'}</Badge>
@@ -348,7 +348,7 @@ const MarketBenchmarksView: React.FC = () => {
                   <div className="nfq-label">CSV import</div>
                   <div className="mt-1 text-sm font-semibold text-[color:var(--nfq-text-primary)]">Bulk benchmark feed</div>
                 </div>
-                <FileUp className="h-5 w-5 text-sky-300" />
+                <FileUp className="h-5 w-5 text-[color:var(--nfq-cat-a)]" />
               </div>
               <textarea
                 value={csvText}

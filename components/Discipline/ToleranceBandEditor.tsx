@@ -250,7 +250,7 @@ const ToleranceBandEditor: React.FC = () => {
       {/* Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-500" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
         </div>
       ) : (
         <div className="overflow-auto">
@@ -297,7 +297,7 @@ const ToleranceBandEditor: React.FC = () => {
                       <td className={`${tdClass} [font-variant-numeric:tabular-nums] text-[color:var(--nfq-warning)]`}>
                         +/-{band.ftpBpsTolerance}
                       </td>
-                      <td className={`${tdClass} [font-variant-numeric:tabular-nums] text-violet-400`}>
+                      <td className={`${tdClass} [font-variant-numeric:tabular-nums] text-[color:var(--nfq-cat-d)]`}>
                         +/-{band.rarocPpTolerance.toFixed(2)}
                       </td>
                       <td className={tdClass}>

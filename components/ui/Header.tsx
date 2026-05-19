@@ -85,10 +85,10 @@ export const Header: React.FC<HeaderProps> = ({
   const sectionAccent: Record<string, string> = {
     'Relationship Cockpit': 'text-[color:var(--nfq-success)]',
     'Pricing Cockpit': 'text-[color:var(--nfq-accent)]',
-    'Data & Ops Hub': 'text-sky-300',
-    'Governance Hub': 'text-violet-300',
+    'Data & Ops Hub': 'text-[color:var(--nfq-cat-a)]',
+    'Governance Hub': 'text-[color:var(--nfq-cat-d)]',
     Today: 'text-[color:var(--nfq-success)]',
-    Assistant:  'text-fuchsia-300',
+    Assistant:  'text-[color:var(--nfq-cat-g)]',
     System:     'text-[color:var(--nfq-text-muted)]',
   };
   const sectionDot: Record<string, string> = {

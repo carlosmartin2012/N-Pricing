@@ -154,8 +154,8 @@ const DriftTab: React.FC<DriftTabProps> = ({ drift, byUser, t }) => {
               key={s.userId}
               className={`rounded-md border p-3 text-xs ${
                 tone === 'rose'
-                  ? 'border-rose-500/30 bg-rose-500/10'
-                  : 'border-amber-500/30 bg-amber-500/10'
+                  ? 'border-[color:var(--nfq-danger)]/30 bg-rose-500/10'
+                  : 'border-[color:var(--nfq-warning)]/30 bg-amber-500/10'
               }`}
             >
               <div className="flex items-center justify-between">

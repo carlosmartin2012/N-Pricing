@@ -93,7 +93,7 @@ const VarianceDistributionChart: React.FC<Props> = ({ variances, toleranceBps = 
   return (
     <div className="nfq-kpi-card">
       <div className="mb-4 flex items-center gap-2">
-        <BarChart3 size={16} className="text-violet-400" />
+        <BarChart3 size={16} className="text-[color:var(--nfq-cat-d)]" />
         <span className="nfq-kpi-label">FTP Variance Distribution</span>
         <span className="ml-auto text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
           Tolerance: +/-{toleranceBps} bps

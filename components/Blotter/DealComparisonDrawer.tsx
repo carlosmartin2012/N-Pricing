@@ -95,7 +95,7 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
               </div>
             </div>
             <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3 text-center">
-              <div className="font-mono text-xs font-bold text-violet-400">{dealB.id || 'Deal B'}</div>
+              <div className="font-mono text-xs font-bold text-[color:var(--nfq-cat-d)]">{dealB.id || 'Deal B'}</div>
               <div className="mt-0.5 text-[10px] text-[var(--nfq-text-muted)]">
                 {dealB.clientId} · {dealB.productType}
               </div>

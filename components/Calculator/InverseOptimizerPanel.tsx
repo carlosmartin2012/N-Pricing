@@ -245,7 +245,7 @@ export const InverseOptimizerPanel: React.FC<InverseOptimizerPanelProps> = ({
                 <button
                   type="button"
                   onClick={handleApply}
-                  className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-success)] transition-colors hover:bg-emerald-500/20"
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[color:var(--nfq-success)]/30 bg-emerald-500/10 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-success)] transition-colors hover:bg-emerald-500/20"
                 >
                   <Check size={14} aria-hidden="true" />
                   <span>Aplicar margen</span>

@@ -161,7 +161,7 @@ interface MetricProps {
 }
 const accentClass: Record<MetricProps['accent'], string> = {
   emerald: 'text-[color:var(--nfq-success)]',
-  sky: 'text-sky-300',
+  sky: 'text-[color:var(--nfq-cat-a)]',
   amber: 'text-[color:var(--nfq-warning)]',
 };
 
@@ -180,8 +180,8 @@ interface BreakdownProps {
 }
 const toneClass: Record<BreakdownProps['tone'], string> = {
   emerald: 'text-[color:var(--nfq-success)]',
-  sky: 'text-sky-300',
-  violet: 'text-violet-300',
+  sky: 'text-[color:var(--nfq-cat-a)]',
+  violet: 'text-[color:var(--nfq-cat-d)]',
   rose: 'text-[color:var(--nfq-danger)]',
 };
 const Breakdown: React.FC<BreakdownProps> = ({ label, value, icon: Icon, tone }) => (

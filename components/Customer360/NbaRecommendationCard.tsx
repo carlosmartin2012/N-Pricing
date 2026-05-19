@@ -46,7 +46,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
     <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-violet-400" />
+          <Sparkles className="h-4 w-4 text-[color:var(--nfq-cat-d)]" />
           <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvNbaTitle}</span>
         </div>
         <button
@@ -75,7 +75,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <Tag className="h-3 w-3 text-violet-300" />
+                  <Tag className="h-3 w-3 text-[color:var(--nfq-cat-d)]" />
                   <span className="font-mono text-sm font-bold text-[color:var(--nfq-text-primary)]">{r.recommendedProduct}</span>
                   <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
                     · {fmtEur(r.recommendedVolumeEur)} · {fmtBps(r.recommendedRateBps)}
