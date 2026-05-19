@@ -440,6 +440,9 @@ export const translations = {
         createModel: 'Create Model',
         saveModel: 'Save Model',
         cancel: 'Cancel',
+        confirm: 'Confirm',
+        deleteAction: 'Delete',
+        confirmDeleteTitle: 'Confirm deletion',
         confirmDeleteModel: 'Are you sure you want to delete this model?',
 
         // RAROC
@@ -796,6 +799,11 @@ export const translations = {
         // ── Pricing Discipline (Ola 2) ─────────────────────────────
         pricingDiscipline: 'Pricing Discipline',
         pricingDisciplineDesc: 'Portfolio variance analysis, margin leakage and originator scorecards',
+        datePresetToday: 'Today',
+        datePresetWeek: 'Last 7d',
+        datePresetMonth: 'Last 30d',
+        datePresetQuarter: 'Quarter',
+        datePresetCustom: 'Custom',
         inBand: 'In Band',
         outOfBand: 'Out of Band',
         totalLeakage: 'Total Leakage',
@@ -1282,6 +1290,9 @@ export const translations = {
         createModel: 'Crear Modelo',
         saveModel: 'Guardar Modelo',
         cancel: 'Cancelar',
+        confirm: 'Confirmar',
+        deleteAction: 'Eliminar',
+        confirmDeleteTitle: 'Confirmar eliminación',
         confirmDeleteModel: '¿Estás seguro de que quieres eliminar este modelo?',
 
         // RAROC
@@ -1638,6 +1649,11 @@ export const translations = {
         // ── Pricing Discipline (Ola 2) ─────────────────────────────
         pricingDiscipline: 'Disciplina de Pricing',
         pricingDisciplineDesc: 'Análisis de varianza de cartera, fuga de margen y scorecards de originadores',
+        datePresetToday: 'Hoy',
+        datePresetWeek: 'Últimos 7d',
+        datePresetMonth: 'Últimos 30d',
+        datePresetQuarter: 'Trimestre',
+        datePresetCustom: 'Personalizado',
         inBand: 'En Banda',
         outOfBand: 'Fuera de Banda',
         totalLeakage: 'Fuga Total',

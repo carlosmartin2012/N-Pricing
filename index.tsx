@@ -11,6 +11,7 @@ import { MarketDataProvider } from './contexts/MarketDataContext';
 import { GovernanceProvider } from './contexts/GovernanceContext';
 import { DataProvider } from './contexts/DataContext';
 import { UIProvider } from './contexts/UIContext';
+import { ConfirmProvider } from './contexts/ConfirmContext';
 import { WalkthroughProvider } from './contexts/WalkthroughContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ProviderErrorBoundary } from './components/ProviderErrorBoundary';
@@ -121,11 +122,13 @@ root.render(
                               <DataProvider>
                                 <ProviderErrorBoundary name="UI">
                                   <UIProvider>
-                                    <ProviderErrorBoundary name="Walkthrough">
-                                      <WalkthroughProvider>
-                                        <App />
-                                      </WalkthroughProvider>
-                                    </ProviderErrorBoundary>
+                                    <ConfirmProvider>
+                                      <ProviderErrorBoundary name="Walkthrough">
+                                        <WalkthroughProvider>
+                                          <App />
+                                        </WalkthroughProvider>
+                                      </ProviderErrorBoundary>
+                                    </ConfirmProvider>
                                   </UIProvider>
                                 </ProviderErrorBoundary>
                               </DataProvider>

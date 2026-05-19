@@ -10,6 +10,7 @@ import { downloadTemplate, parseExcel } from '../../utils/excelUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
+import { useConfirm } from '../../contexts/ConfirmContext';
 import { createLogger } from '../../utils/logger';
 import { useToast } from '../ui/Toast';
 import BehaviouralModelCard from './BehaviouralModelCard';
@@ -30,6 +31,7 @@ const BehaviouralModels: React.FC = () => {
    const { behaviouralModels: models, setBehaviouralModels: setModels } = useData();
    const { t } = useUI();
    const { addToast } = useToast();
+   const confirm = useConfirm();
    const [activeTab, setActiveTab] = useState<'NMD_Replication' | 'Prepayment_CPR'>('NMD_Replication');
    const [searchTerm, setSearchTerm] = useState('');
 
@@ -109,7 +111,13 @@ const BehaviouralModels: React.FC = () => {
    };
 
    const handleDelete = async (id: string) => {
-      if (window.confirm(t.confirmDeleteModel)) {
+      const ok = await confirm({
+         title: t.confirmDeleteTitle,
+         message: t.confirmDeleteModel,
+         confirmLabel: t.deleteAction,
+         tone: 'danger',
+      });
+      if (ok) {
          // Optimistic Update
          const modelToDelete = models.find(m => m.id === id);
          setModels(prev => prev.filter(m => m.id !== id));

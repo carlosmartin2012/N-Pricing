@@ -3,6 +3,8 @@ import * as configApi from '../../../../api/config';
 import type { ApprovalMatrixConfig, GreeniumRateCard, MethodologyChangeRequest } from '../../../../types';
 import { useAudit } from '../../../../hooks/useAudit';
 import { useData } from '../../../../contexts/DataContext';
+import { useConfirm } from '../../../../contexts/ConfirmContext';
+import { useUI } from '../../../../contexts/UIContext';
 import { ruleService } from '../../../../utils/supabase/rules';
 import { saveSystemConfigValue } from '../../../../utils/supabase/systemConfig';
 import {
@@ -41,6 +43,8 @@ export function useGovernanceActions({
 }: UseGovernanceActionsParams) {
   const data = useData();
   const logAudit = useAudit(user);
+  const confirm = useConfirm();
+  const { t } = useUI();
   const persistGreeniumGrid = useCallback(
     (grid: GreeniumRateCard[]) => saveSystemConfigValue('greenium_grid', grid, 'saveEsgGrid:greenium'),
     []
@@ -265,7 +269,13 @@ export function useGovernanceActions({
     async (request: MethodologyChangeRequest) => {
       if (!canGovern || !user?.email || !user?.name) return;
       if (request.status !== 'Approved') return;
-      if (!window.confirm(`Apply ${request.title}?`)) return;
+      const ok = await confirm({
+        title: t.confirm,
+        message: `Apply ${request.title}?`,
+        confirmLabel: t.confirm,
+        tone: 'warning',
+      });
+      if (!ok) return;
 
       let nextRules = data.rules;
       let nextRateCards = data.ftpRateCards;
@@ -318,14 +328,20 @@ export function useGovernanceActions({
         rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, greeniumGrid: nextGreeniumGrid, approvalMatrix: nextApprovalMatrix,
       });
     },
-    [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistGreeniumGrid, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
+    [approvalMatrix, approvalMatrixDraft, canGovern, confirm, data, finalizeGovernanceChange, persistGreeniumGrid, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, t.confirm, user]
   );
 
   const handleRollback = useCallback(
     async (request: MethodologyChangeRequest) => {
       if (!canGovern || !user?.email || !user?.name) return;
       if (request.status !== 'Applied') return;
-      if (!window.confirm(`Rollback ${request.title} and restore the previous live configuration?`)) return;
+      const ok = await confirm({
+        title: t.confirm,
+        message: `Rollback ${request.title} and restore the previous live configuration?`,
+        confirmLabel: t.confirm,
+        tone: 'warning',
+      });
+      if (!ok) return;
 
       let nextRules = data.rules;
       let nextRateCards = data.ftpRateCards;
@@ -378,7 +394,7 @@ export function useGovernanceActions({
         rules: nextRules, rateCards: nextRateCards, transitionGrid: nextTransitionGrid, physicalGrid: nextPhysicalGrid, greeniumGrid: nextGreeniumGrid, approvalMatrix: nextApprovalMatrix,
       });
     },
-    [approvalMatrix, approvalMatrixDraft, canGovern, data, finalizeGovernanceChange, persistGreeniumGrid, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, user]
+    [approvalMatrix, approvalMatrixDraft, canGovern, confirm, data, finalizeGovernanceChange, persistGreeniumGrid, persistRuleOperations, setApprovalMatrix, setApprovalMatrixDraft, t.confirm, user]
   );
 
   return { handleSubmitApprovalMatrixChange, handleReview, handleApply, handleRollback };

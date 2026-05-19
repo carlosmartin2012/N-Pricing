@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MarketBenchmarksView from '../MarketBenchmarksView';
+import { translations } from '../../../translations';
 
 const mocks = vi.hoisted(() => ({
   useMarketBenchmarksQuery: vi.fn(),
@@ -22,6 +23,14 @@ vi.mock('../../../contexts/AuthContext', () => ({
 
 vi.mock('../../../components/ui/Toast', () => ({
   useToast: () => ({ addToast: mocks.addToast }),
+}));
+
+vi.mock('../../../contexts/ConfirmContext', () => ({
+  useConfirm: () => async () => true,
+}));
+
+vi.mock('../../../contexts/UIContext', () => ({
+  useUI: () => ({ t: translations.en }),
 }));
 
 vi.mock('../../../hooks/queries/useMarketBenchmarksQuery', () => ({

@@ -3,6 +3,7 @@ import { deleteUser, upsertUser } from '../../api/config';
 import { Panel } from '../ui/LayoutComponents';
 import type { UserProfile } from '../../types';
 import { useUI } from '../../contexts/UIContext';
+import { useConfirm } from '../../contexts/ConfirmContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useToast } from '../ui/Toast';
@@ -27,6 +28,7 @@ const UserManagement: React.FC = () => {
   const { t } = useUI();
   const { currentUser } = useAuth();
   const { addToast } = useToast();
+  const confirm = useConfirm();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -138,7 +140,13 @@ const UserManagement: React.FC = () => {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      if (!window.confirm(t.confirmDeleteUser)) {
+      const ok = await confirm({
+        title: t.confirmDeleteTitle,
+        message: t.confirmDeleteUser,
+        confirmLabel: t.deleteAction,
+        tone: 'danger',
+      });
+      if (!ok) {
         return;
       }
 
@@ -153,7 +161,7 @@ const UserManagement: React.FC = () => {
         }
       }
     },
-    [setUsers, t.confirmDeleteUser, addToast],
+    [setUsers, t.confirmDeleteTitle, t.confirmDeleteUser, t.deleteAction, addToast, confirm],
   );
 
   const isAdmin = currentUser?.role === 'Admin';

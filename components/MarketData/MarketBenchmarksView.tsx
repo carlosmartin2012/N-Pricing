@@ -10,6 +10,8 @@ import {
 import type { MarketBenchmarkFilters, MarketBenchmarkWithId } from '../../api/marketBenchmarks';
 import { Badge, Button, InputGroup, Panel, SelectInput, TextInput } from '../ui/LayoutComponents';
 import { useToast } from '../ui/Toast';
+import { useConfirm } from '../../contexts/ConfirmContext';
+import { useUI } from '../../contexts/UIContext';
 
 type TenorBucket = MarketBenchmarkWithId['tenorBucket'];
 
@@ -71,6 +73,8 @@ function formatRate(rate: number): string {
 const MarketBenchmarksView: React.FC = () => {
   const { currentUser } = useAuth();
   const { addToast } = useToast();
+  const confirm = useConfirm();
+  const { t } = useUI();
   const isAdmin = currentUser?.role === 'Admin';
   const [filters, setFilters] = useState({ products: '', currencies: '', clients: '' });
   const [draft, setDraft] = useState<BenchmarkDraft>(EMPTY_DRAFT);
@@ -134,9 +138,15 @@ const MarketBenchmarksView: React.FC = () => {
 
   const handleDelete = async (row: MarketBenchmarkWithId) => {
     if (!isAdmin) return;
-    if (!window.confirm(`Delete ${row.productType} ${row.tenorBucket} ${row.currency} benchmark?`)) return;
-    const ok = await deleteMutation.mutateAsync(row.id);
-    addToast(ok ? 'success' : 'error', ok ? 'Benchmark deleted.' : 'Benchmark could not be deleted.');
+    const ok = await confirm({
+      title: t.confirmDeleteTitle,
+      message: `Delete ${row.productType} ${row.tenorBucket} ${row.currency} benchmark?`,
+      confirmLabel: t.deleteAction,
+      tone: 'danger',
+    });
+    if (!ok) return;
+    const deleted = await deleteMutation.mutateAsync(row.id);
+    addToast(deleted ? 'success' : 'error', deleted ? 'Benchmark deleted.' : 'Benchmark could not be deleted.');
   };
 
   const handleImport = async () => {

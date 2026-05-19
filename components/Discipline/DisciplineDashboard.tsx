@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Filter, BarChart3, AlertTriangle, User, Shield, FileWarning } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
+import { useUI } from '../../contexts/UIContext';
 import {
   useDisciplineKpisQuery,
   useVariancesQuery,
@@ -52,13 +53,7 @@ function computeDateRange(preset: DatePreset, custom: DateRange): DateRange {
   }
 }
 
-const PRESET_LABELS: { value: DatePreset; label: string }[] = [
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'Last 7d' },
-  { value: 'month', label: 'Last 30d' },
-  { value: 'quarter', label: 'Quarter' },
-  { value: 'custom', label: 'Custom' },
-];
+const PRESET_VALUES: DatePreset[] = ['today', 'week', 'month', 'quarter', 'custom'];
 
 // ---------------------------------------------------------------------------
 // Tab definitions
@@ -81,6 +76,15 @@ const TABS: { value: Tab; label: string; icon: React.FC<{ size?: number; classNa
 
 const DisciplineDashboard: React.FC = () => {
   const { activeEntity } = useEntity();
+  const { t } = useUI();
+
+  const presetLabels: Record<DatePreset, string> = {
+    today: t.datePresetToday,
+    week: t.datePresetWeek,
+    month: t.datePresetMonth,
+    quarter: t.datePresetQuarter,
+    custom: t.datePresetCustom,
+  };
 
   // Filters
   const [preset, setPreset] = useState<DatePreset>('month');
@@ -176,17 +180,17 @@ const DisciplineDashboard: React.FC = () => {
         <div className="flex flex-wrap items-end gap-3">
           {/* Date range presets */}
           <div className="flex items-center gap-1 rounded-lg border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-0.5">
-            {PRESET_LABELS.map((p) => (
+            {PRESET_VALUES.map((value) => (
               <button
-                key={p.value}
-                onClick={() => setPreset(p.value)}
+                key={value}
+                onClick={() => setPreset(value)}
                 className={`rounded-md px-2.5 py-1.5 text-[10px] font-mono tracking-normal transition-colors ${
-                  preset === p.value
+                  preset === value
                     ? 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-primary)]'
                     : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
-                {p.label}
+                {presetLabels[value]}
               </button>
             ))}
           </div>
