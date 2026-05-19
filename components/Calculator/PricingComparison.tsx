@@ -138,7 +138,7 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
             {scenarios.length < MAX_COMPARISON_SCENARIOS && (
               <button
                 onClick={addScenario}
-                className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/30 p-3 transition-colors hover:border-cyan-600/50 hover:bg-[var(--nfq-bg-highest)]/50"
+                className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/30 p-3 transition-colors hover:border-[color:var(--nfq-accent)]/50 hover:bg-[var(--nfq-bg-highest)]/50"
               >
                 <Plus size={20} className="text-[color:var(--nfq-text-faint)]" />
                 <span className="text-xs text-[color:var(--nfq-text-faint)]">{t.addScenario || 'Add Scenario'}</span>

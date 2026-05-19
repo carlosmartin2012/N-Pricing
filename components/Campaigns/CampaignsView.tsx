@@ -11,7 +11,7 @@ const log = createLogger('CampaignsView');
 
 const STATUS_COLOR: Record<CampaignStatus, string> = {
   draft: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
-  approved: 'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
+  approved: 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   active: 'bg-emerald-500/10 text-[color:var(--nfq-success)]',
   exhausted: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   expired: 'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',

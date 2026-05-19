@@ -72,7 +72,7 @@ describe('DealTimelineRoute', () => {
     // Focus is wired by id="tl-<eventId>" + a cyan ring class on the focused card.
     const card = document.getElementById('tl-snapshot:S-7');
     expect(card).not.toBeNull();
-    expect(card?.className).toContain('ring-cyan');
+    expect(card?.className).toContain('ring-[color:var(--nfq-accent)]');
   });
 
   it('navigates to /snapshots?focus=<id> when Replay is clicked', async () => {

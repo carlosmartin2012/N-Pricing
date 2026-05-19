@@ -78,7 +78,7 @@ export const DealLeversPanel: React.FC<Props> = ({
       <DealLeverCard
         label={t.principalAmount}
         tooltip={t.tooltip_calc_amount}
-        accentClassName="bg-cyan-500/10 text-[color:var(--nfq-accent)]"
+        accentClassName="bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]"
         displayValue={formatDealAmount(values.amount, values.currency)}
         rangeMin={0}
         rangeMax={100000000}
@@ -200,13 +200,13 @@ export const DealLeversPanel: React.FC<Props> = ({
           </button>
           <button
             onClick={() => onFieldChange('amount', (values.amount || 0) + 1000000)}
-            className="rounded border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-500/10"
+            className="rounded border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/5 px-3 py-2 text-xs text-[color:var(--nfq-accent)] transition-colors hover:bg-[var(--nfq-accent)]/10"
           >
             +1M
           </button>
           <button
             onClick={() => onFieldChange('durationMonths', (values.durationMonths || 0) + 12)}
-            className="rounded border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-500/10"
+            className="rounded border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/5 px-3 py-2 text-xs text-[color:var(--nfq-accent)] transition-colors hover:bg-[var(--nfq-accent)]/10"
           >
             +12M
           </button>

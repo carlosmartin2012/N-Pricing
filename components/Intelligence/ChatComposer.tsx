@@ -54,7 +54,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
                 key={action.label}
                 onClick={() => handleQuickAction(action.prompt)}
                 disabled={isThinking}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/60 px-3 py-1.5 font-mono text-[11px] text-[color:var(--nfq-text-muted)] transition-all hover:border-cyan-700/50 hover:bg-[var(--nfq-bg-highest)] hover:text-[color:var(--nfq-accent)] disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/60 px-3 py-1.5 font-mono text-[11px] text-[color:var(--nfq-text-muted)] transition-all hover:border-[color:var(--nfq-accent)]/50 hover:bg-[var(--nfq-bg-highest)] hover:text-[color:var(--nfq-accent)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <action.icon size={12} />
                 {action.label}
@@ -68,7 +68,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
               onChange={(event) => onChangeInput(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && onSendMessage()}
               placeholder="Ask about pricing, RAROC, credit risk, or specific deal IDs..."
-              className="w-full rounded-[var(--nfq-radius-card)] border border-slate-700 bg-[var(--nfq-bg-root)] py-4 pl-12 pr-12 font-mono text-sm text-[color:var(--nfq-text-secondary)] placeholder-slate-600 shadow-inner transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
+              className="w-full rounded-[var(--nfq-radius-card)] border border-slate-700 bg-[var(--nfq-bg-root)] py-4 pl-12 pr-12 font-mono text-sm text-[color:var(--nfq-text-secondary)] placeholder-slate-600 shadow-inner transition-all focus:border-[color:var(--nfq-accent)] focus:outline-none focus:ring-1 focus:ring-[color:var(--nfq-accent)]/20"
             />
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--nfq-text-faint)]">
               <Terminal size={18} />
@@ -76,7 +76,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
             <button
               onClick={() => onSendMessage()}
               disabled={!input.trim() || isThinking}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-cyan-600 p-2 text-[color:var(--nfq-text-primary)] transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-[var(--nfq-accent)] p-2 text-[color:var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-accent)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send size={16} />
             </button>

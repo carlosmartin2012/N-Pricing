@@ -140,7 +140,7 @@ const ApprovalCockpit: React.FC = () => {
           data-testid="approval-focus-status"
           className={`rounded-md border px-3 py-2 text-xs ${
             focusedItem
-              ? 'border-cyan-400/30 bg-cyan-500/10 text-cyan-100'
+              ? 'border-[color:var(--nfq-accent)]/30 bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]'
               : 'border-amber-400/30 bg-amber-500/10 text-amber-100'
           }`}
           role="status"
@@ -278,7 +278,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
         data-approval-focus-target={item.decision.id}
         tabIndex={focused ? -1 : undefined}
         className={`scroll-mt-24 border-b border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] ${
-          focused ? 'bg-cyan-500/10 outline outline-1 outline-cyan-400/50' : ''
+          focused ? 'bg-[var(--nfq-accent)]/10 outline outline-1 outline-cyan-400/50' : ''
         }`}
       >
         <td className="px-4 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{item.decision.dealId}</td>
@@ -398,7 +398,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
       data-approval-focus-target={item.decision.id}
       tabIndex={focused ? -1 : undefined}
       className={`scroll-mt-24 rounded-xl border bg-[var(--nfq-bg-elevated)]/40 p-3 text-sm ${
-        focused ? 'border-cyan-400/50 bg-cyan-500/10 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]' : 'border-[color:var(--nfq-border-ghost)]'
+        focused ? 'border-[color:var(--nfq-accent)]/50 bg-[var(--nfq-accent)]/10 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]' : 'border-[color:var(--nfq-border-ghost)]'
       }`}
     >
       <header className="flex items-center justify-between">

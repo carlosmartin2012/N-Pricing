@@ -217,7 +217,7 @@ const BacktestingConsole: React.FC = () => {
                     onClick={() => setSelectedRunId(run.id)}
                     className={`w-full text-left rounded-[var(--nfq-radius-card)] px-3 py-2.5 transition-colors ${
                       run.id === selectedRunId
-                        ? 'bg-cyan-500/10 border border-[color:var(--nfq-accent)]/30'
+                        ? 'bg-[var(--nfq-accent)]/10 border border-[color:var(--nfq-accent)]/30'
                         : 'hover:bg-[var(--nfq-bg-elevated)] border border-transparent'
                     }`}
                   >

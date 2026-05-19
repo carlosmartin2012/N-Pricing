@@ -20,7 +20,7 @@ export const ChatHistoryPanel: React.FC<Props> = ({
       <div className="border-b border-slate-800 p-4">
         <button
           onClick={onCreateSession}
-          className="flex w-full items-center justify-center gap-2 rounded border border-cyan-800 bg-cyan-900/20 py-2 text-xs font-bold text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-900/40"
+          className="flex w-full items-center justify-center gap-2 rounded border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/20 py-2 text-xs font-bold text-[color:var(--nfq-accent)] transition-colors hover:bg-[var(--nfq-accent)]/40"
         >
           <Bot size={14} /> New Session
         </button>

@@ -186,7 +186,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
         <div className="border-b border-slate-800 bg-[var(--nfq-bg-root)]/70 px-4 py-2">
           <div className="flex flex-wrap gap-2">
             {grounding.groundedContext.dossierId && (
-              <span className="rounded-full border border-cyan-800/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
+              <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
                 DOS {grounding.groundedContext.dossierId}
               </span>
             )}
@@ -225,7 +225,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
                 className={`p-3 rounded-lg text-xs leading-relaxed max-w-[80%] ${
                   msg.role === 'model'
                     ? 'bg-[var(--nfq-bg-elevated)]/50 border border-slate-800 text-[color:var(--nfq-text-secondary)]'
-                    : 'bg-cyan-950/30 border border-cyan-900/50 text-cyan-100'
+                    : 'bg-cyan-950/30 border border-cyan-900/50 text-[color:var(--nfq-accent)]'
                 }`}
               >
                 {msg.text}
@@ -240,15 +240,15 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               <div className="p-3 rounded-lg bg-[var(--nfq-bg-elevated)]/50 border border-slate-800">
                 <div className="flex gap-1">
                   <div
-                    className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"
+                    className="w-1.5 h-1.5 bg-[var(--nfq-accent)] rounded-full animate-bounce"
                     style={{ animationDelay: '0ms' }}
                   ></div>
                   <div
-                    className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"
+                    className="w-1.5 h-1.5 bg-[var(--nfq-accent)] rounded-full animate-bounce"
                     style={{ animationDelay: '150ms' }}
                   ></div>
                   <div
-                    className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"
+                    className="w-1.5 h-1.5 bg-[var(--nfq-accent)] rounded-full animate-bounce"
                     style={{ animationDelay: '300ms' }}
                   ></div>
                 </div>
@@ -266,12 +266,12 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Ask Nexus AI about this deal..."
-              className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded-lg pl-4 pr-10 py-3 text-xs text-[color:var(--nfq-text-primary)] placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 transition-all font-mono"
+              className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded-lg pl-4 pr-10 py-3 text-xs text-[color:var(--nfq-text-primary)] placeholder-slate-600 focus:outline-none focus:border-[color:var(--nfq-accent)] focus:ring-1 focus:ring-[color:var(--nfq-accent)]/20 transition-all font-mono"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isThinking}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-cyan-900/30 text-[color:var(--nfq-accent)] rounded hover:bg-cyan-500 hover:text-[color:var(--nfq-text-primary)] transition-colors disabled:opacity-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[var(--nfq-accent)]/30 text-[color:var(--nfq-accent)] rounded hover:bg-[var(--nfq-accent)] hover:text-[color:var(--nfq-text-primary)] transition-colors disabled:opacity-50"
             >
               <Send size={14} />
             </button>

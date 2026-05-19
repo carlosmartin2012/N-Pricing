@@ -86,7 +86,7 @@ const SandboxListItem: React.FC<{
     onClick={() => onSelect(sandbox.id)}
     className={`w-full text-left px-4 py-3 rounded-[var(--nfq-radius-card)] transition-colors ${
       isSelected
-        ? 'bg-cyan-500/10 border border-[color:var(--nfq-accent)]/30'
+        ? 'bg-[var(--nfq-accent)]/10 border border-[color:var(--nfq-accent)]/30'
         : 'hover:bg-[var(--nfq-bg-elevated)] border border-transparent'
     }`}
   >
@@ -138,7 +138,7 @@ const DiffCard: React.FC<{
 
   if (editing) {
     return (
-      <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
+      <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">Label</label>
@@ -181,7 +181,7 @@ const DiffCard: React.FC<{
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-cyan-500/20 px-3 py-1.5 text-[11px] font-medium text-[color:var(--nfq-accent)] hover:bg-cyan-500/30 transition-colors"
+            className="rounded-lg bg-[var(--nfq-accent)]/20 px-3 py-1.5 text-[11px] font-medium text-[color:var(--nfq-accent)] hover:bg-[var(--nfq-accent)]/30 transition-colors"
           >
             Save
           </button>
@@ -199,7 +199,7 @@ const DiffCard: React.FC<{
 
   return (
     <div
-      className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 cursor-pointer hover:border-cyan-500/20 transition-colors"
+      className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 cursor-pointer hover:border-[color:var(--nfq-accent)]/20 transition-colors"
       onClick={() => setEditing(true)}
     >
       <div className="flex items-start justify-between gap-3">
@@ -377,8 +377,8 @@ const WhatIfWorkspace: React.FC = () => {
                 aria-pressed={selected}
                 className={`flex items-center gap-3 rounded-[var(--nfq-radius-card)] px-3 py-2.5 text-left transition-colors ${
                   selected
-                    ? 'bg-cyan-500/10 text-[color:var(--nfq-text-primary)] ring-1 ring-cyan-500/30'
-                    : 'text-[color:var(--nfq-text-secondary)] hover:bg-white/[0.03] hover:text-[color:var(--nfq-text-primary)]'
+                    ? 'bg-[var(--nfq-accent-subtle)] text-[color:var(--nfq-text-primary)] ring-1 ring-[color:var(--nfq-accent)]/30'
+                    : 'text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-bright)] hover:text-[color:var(--nfq-text-primary)]'
                 }`}
               >
                 <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-[color:var(--nfq-accent)]' : ''}`} />

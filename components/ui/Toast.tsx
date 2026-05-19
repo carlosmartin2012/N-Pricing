@@ -82,8 +82,8 @@ const colorMap: Record<ToastType, { bg: string; border: string; icon: string; te
     text: 'text-[color:var(--nfq-text-primary)]',
   },
   info: {
-    bg: 'bg-cyan-500/10',
-    border: 'border-cyan-500/25',
+    bg: 'bg-[var(--nfq-accent)]/10',
+    border: 'border-[color:var(--nfq-accent)]/25',
     icon: 'text-[color:var(--nfq-accent)]',
     text: 'text-[color:var(--nfq-text-primary)]',
   },

@@ -138,7 +138,7 @@ const StressPricingView: React.FC = () => {
         ) : (
           <select
             id="stress-deal-select"
-            className="w-full max-w-md rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)] focus:border-cyan-500 focus:outline-none"
+            className="w-full max-w-md rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
             value={selectedDeal?.id ?? ''}
             onChange={(e) => setSelectedId(e.target.value)}
           >

@@ -41,7 +41,7 @@ export const UserEditorDrawer: React.FC<Props> = ({
           </button>
           <button
             onClick={onSave}
-            className="rounded bg-cyan-600 px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-cyan-500"
+            className="rounded bg-[var(--nfq-accent)] px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)]"
           >
             Save Profile
           </button>

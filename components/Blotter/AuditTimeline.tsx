@@ -9,13 +9,13 @@ interface Props {
 }
 
 const ACTION_CONFIG: Record<string, { icon: LucideIcon; color: string }> = {
-  CREATE_DEAL: { icon: FileText, color: 'text-[color:var(--nfq-accent)] bg-cyan-500/15' },
+  CREATE_DEAL: { icon: FileText, color: 'text-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15' },
   EDIT_DEAL: { icon: Edit, color: 'text-[color:var(--nfq-warning)] bg-amber-500/15' },
   SUBMIT_APPROVAL: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-violet-500/15' },
   APPROVE_DEAL: { icon: CheckCircle2, color: 'text-[color:var(--nfq-success)] bg-emerald-500/15' },
   REJECT_DEAL: { icon: XCircle, color: 'text-[color:var(--nfq-danger)] bg-rose-500/15' },
   BOOK_DEAL: { icon: ShieldCheck, color: 'text-[color:var(--nfq-success)] bg-emerald-500/15' },
-  REPRICE_DEAL: { icon: RotateCcw, color: 'text-[color:var(--nfq-accent)] bg-cyan-500/15' },
+  REPRICE_DEAL: { icon: RotateCcw, color: 'text-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15' },
   WORKFLOW_ACTION: { icon: Send, color: 'text-[color:var(--nfq-cat-d)] bg-violet-500/15' },
 };
 

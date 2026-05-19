@@ -53,7 +53,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] px-6 py-6">
                     <h2 id="user-config-modal-title" className="flex items-center gap-2 text-xl font-semibold tracking-[-0.02em] text-[color:var(--nfq-text-primary)]">
-                        <span className="h-2 w-2 rounded-full bg-cyan-500"></span>
+                        <span className="h-2 w-2 rounded-full bg-[var(--nfq-accent)]"></span>
                         {t.userConfig}
                     </h2>
                     <button
@@ -81,8 +81,8 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                                     key={id}
                                     onClick={() => setTheme(id)}
                                     className={`rounded-[var(--nfq-radius-card)] border p-4 text-left transition-all ${theme === id
-                                        ? 'border-cyan-500/40 bg-cyan-500/10 shadow-[0_16px_28px_rgba(6,182,212,0.08)]'
-                                        : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] hover:border-cyan-500/20'
+                                        ? 'border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10 shadow-[0_16px_28px_rgba(6,182,212,0.08)]'
+                                        : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] hover:border-[color:var(--nfq-accent)]/20'
                                         }`}
                                 >
                                     <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-[var(--nfq-radius-card)] ${tone}`}>
@@ -109,8 +109,8 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                                     key={lang}
                                     onClick={() => setLanguage(lang)}
                                     className={`flex items-center justify-between rounded-[var(--nfq-radius-card)] border p-4 transition-all ${language === lang
-                                        ? 'border-cyan-500/40 bg-cyan-500/10 text-[color:var(--nfq-text-primary)]'
-                                        : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] hover:border-cyan-500/20'
+                                        ? 'border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-text-primary)]'
+                                        : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] hover:border-[color:var(--nfq-accent)]/20'
                                         }`}
                                 >
                                     <span className="text-sm font-semibold uppercase tracking-[0.14em]">{lang}</span>

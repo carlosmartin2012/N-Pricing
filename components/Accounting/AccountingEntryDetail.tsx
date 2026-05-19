@@ -73,7 +73,7 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                       ? 'border-amber-900/50 bg-amber-900/20 text-[color:var(--nfq-warning)]'
                       : entry.type === 'DEPOSIT'
                         ? 'border-rose-900/50 bg-rose-900/20 text-[color:var(--nfq-danger)]'
-                        : 'border-cyan-900/50 bg-cyan-900/20 text-[color:var(--nfq-accent)]'
+                        : 'border-cyan-900/50 bg-[var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]'
                   }`}
                 >
                   <div className="font-bold">{labels.unitCredit}</div>

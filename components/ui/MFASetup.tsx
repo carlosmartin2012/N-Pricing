@@ -105,7 +105,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="Enter 6-digit code"
-              className="flex-1 text-center font-mono text-lg tracking-[0.3em] rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-cyan-500/40 focus:outline-none"
+              className="flex-1 text-center font-mono text-lg tracking-[0.3em] rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-[color:var(--nfq-accent)]/40 focus:outline-none"
               maxLength={6}
               inputMode="numeric"
               autoComplete="one-time-code"

@@ -68,10 +68,10 @@ const FundingCurvesDashboard: React.FC<Props> = ({
           </div>
           <div className="flex items-center gap-4 text-[10px] font-bold uppercase">
             <div className="flex items-center gap-2">
-              <div className="h-0.5 w-3 bg-cyan-500" /> LP (Base)
+              <div className="h-0.5 w-3 bg-[var(--nfq-accent)]" /> LP (Base)
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 border-t-2 border-dashed border-cyan-400" /> LP (Sim)
+              <div className="w-3 border-t-2 border-dashed border-[color:var(--nfq-accent)]" /> LP (Sim)
             </div>
             <div className="flex items-center gap-2">
               <div className="h-0.5 w-3 bg-[var(--nfq-bg-bright)]" /> Whl. (Base)
@@ -142,7 +142,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-cyan-900/10 p-5">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/10 p-5">
           <h5 className="mb-3 text-[10px] font-bold uppercase text-[color:var(--nfq-accent)]">Portfolio Alignment</h5>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -150,7 +150,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
               <span className="font-mono text-[11px] font-bold">+4.2 bps</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
-              <div className="h-full w-[72%] bg-cyan-500 shadow-[0_0_10px_#06b6d4]" />
+              <div className="h-full w-[72%] bg-[var(--nfq-accent)] shadow-[0_0_10px_#06b6d4]" />
             </div>
             <p className="mt-2 text-[9px] italic text-[color:var(--nfq-text-faint)]">
               * Analysis relative to 100% of the active portfolio notional.

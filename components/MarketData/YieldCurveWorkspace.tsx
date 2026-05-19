@@ -210,7 +210,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
           <div className="flex h-8 shrink-0 items-center justify-between border-t border-slate-200 bg-slate-100 px-4 font-mono text-[10px] text-[color:var(--nfq-text-faint)] dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
             <div className="flex gap-4">
               <span className="flex items-center gap-1.5">
-                <div className={`h-0.5 w-3 rounded-full ${isPersisted ? 'bg-cyan-500' : 'bg-amber-400'}`} />
+                <div className={`h-0.5 w-3 rounded-full ${isPersisted ? 'bg-[var(--nfq-accent)]' : 'bg-amber-400'}`} />
                 {isPersisted ? 'PERSISTED' : 'REALTIME'}
               </span>
               <span className="flex items-center gap-1.5">
@@ -237,7 +237,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                   <div
                     key={key}
                     onClick={() => onDateChange(date)}
-                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}`}
+                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-cyan-50 dark:bg-[var(--nfq-accent)]/20' : ''}`}
                   >
                     <div className="flex items-center gap-2">
                       <FileCheck size={14} className="text-[color:var(--nfq-success)]" />

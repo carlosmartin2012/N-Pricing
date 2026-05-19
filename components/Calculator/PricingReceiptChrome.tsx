@@ -119,7 +119,7 @@ export function PricingReceiptFooter({
             ? 'cursor-not-allowed bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)]'
             : dealSaveStatus === 'saved'
               ? 'bg-emerald-600 text-[color:var(--nfq-text-primary)]'
-              : 'bg-cyan-600 text-[color:var(--nfq-text-primary)] hover:bg-cyan-500'
+              : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)]'
         }`}
       >
         {dealSaveStatus === 'saved' ? (

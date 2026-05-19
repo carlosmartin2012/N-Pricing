@@ -145,7 +145,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
           placeholder={t.placeholder}
           rows={3}
           aria-label="Copilot question"
-          className="w-full resize-none rounded-md border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 pr-10 text-sm text-[var(--nfq-text-primary)] outline-none placeholder:text-[var(--nfq-text-faint)] focus:border-cyan-500/40"
+          className="w-full resize-none rounded-md border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 pr-10 text-sm text-[var(--nfq-text-primary)] outline-none placeholder:text-[var(--nfq-text-faint)] focus:border-[color:var(--nfq-accent)]/40"
         />
         <button
           type="button"
@@ -153,7 +153,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
           disabled={ask.isPending || question.trim().length < 3}
           aria-label={t.submit}
           data-testid="copilot-submit"
-          className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--nfq-accent)]/20 text-[color:var(--nfq-accent)] transition-colors hover:bg-[var(--nfq-accent)]/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {ask.isPending ? <Sparkles size={14} className="animate-pulse" /> : <ArrowUp size={14} />}
         </button>
@@ -174,7 +174,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
 
       {ask.isSuccess && ask.data && (
         <article
-          className="max-h-[280px] overflow-auto rounded-md border border-cyan-500/20 bg-cyan-500/5 px-3 py-3 text-xs text-[var(--nfq-text-primary)]"
+          className="max-h-[280px] overflow-auto rounded-md border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/5 px-3 py-3 text-xs text-[var(--nfq-text-primary)]"
           data-testid="copilot-answer"
         >
           <div className="flex justify-end mb-1 gap-2">
@@ -184,7 +184,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                 // Simple feedback (could be improved with a toast in the future)
               }}
               aria-label="Copy explanation to clipboard"
-              className="text-[10px] text-[color:var(--nfq-accent)] hover:text-cyan-200 flex items-center gap-1 active:text-[color:var(--nfq-success)]"
+              className="text-[10px] text-[color:var(--nfq-accent)] hover:text-[color:var(--nfq-accent)] flex items-center gap-1 active:text-[color:var(--nfq-success)]"
             >
               Copy
             </button>
@@ -194,14 +194,14 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
               }}
               disabled={ask.isPending}
               aria-label="Regenerate explanation"
-              className="text-[10px] text-[color:var(--nfq-accent)] hover:text-cyan-200 flex items-center gap-1 disabled:opacity-50"
+              className="text-[10px] text-[color:var(--nfq-accent)] hover:text-[color:var(--nfq-accent)] flex items-center gap-1 disabled:opacity-50"
             >
               Regenerate
             </button>
           </div>
           <p className="whitespace-pre-wrap leading-relaxed">{ask.data.answer}</p>
           {ask.data.citations.length > 0 && (
-            <div className="mt-3 border-t border-cyan-500/10 pt-2">
+            <div className="mt-3 border-t border-[color:var(--nfq-accent)]/10 pt-2">
               <div className="nfq-label flex items-center gap-1 text-[10px] text-[color:var(--nfq-accent)]">
                 <BookOpen size={10} />
                 {t.citations}
@@ -210,7 +210,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                 {ask.data.citations.map((c) => (
                   <li
                     key={c.label}
-                    className="rounded border border-[color:var(--nfq-accent)]/30 bg-cyan-500/10 px-2 py-0.5 font-mono text-[10px] text-cyan-200"
+                    className="rounded border border-[color:var(--nfq-accent)]/30 bg-[var(--nfq-accent)]/10 px-2 py-0.5 font-mono text-[10px] text-[color:var(--nfq-accent)]"
                   >
                     {c.label}
                   </li>
@@ -219,7 +219,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
             </div>
           )}
           {ask.data.suggestedActions.length > 0 && (
-            <div className="mt-3 border-t border-cyan-500/10 pt-2" data-testid="copilot-suggested-actions">
+            <div className="mt-3 border-t border-[color:var(--nfq-accent)]/10 pt-2" data-testid="copilot-suggested-actions">
               <div className="nfq-label flex items-center gap-1 text-[10px] text-[color:var(--nfq-accent)]">
                 <ArrowRight size={10} />
                 {t.suggestedActions}
@@ -231,7 +231,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                       type="button"
                       onClick={() => handleApplyAction(action)}
                       data-testid={`copilot-action-${action.id}`}
-                      className="flex w-full items-center justify-between gap-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1.5 text-left text-[11px] text-[color:var(--nfq-text-secondary)] transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
+                      className="flex w-full items-center justify-between gap-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1.5 text-left text-[11px] text-[color:var(--nfq-text-secondary)] transition-colors hover:border-[color:var(--nfq-accent)]/40 hover:bg-[var(--nfq-accent)]/10 hover:text-[color:var(--nfq-accent)]"
                     >
                       <span>{action.label}</span>
                       <ArrowRight size={11} className="shrink-0" />

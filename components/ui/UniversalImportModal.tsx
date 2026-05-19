@@ -133,7 +133,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-cyan-500/10 rounded-lg flex items-center justify-center border border-cyan-500/20">
+                        <div className="w-10 h-10 bg-[var(--nfq-accent)]/10 rounded-lg flex items-center justify-center border border-[color:var(--nfq-accent)]/20">
                             <Upload className="text-[color:var(--nfq-accent)]" size={20} />
                         </div>
                         <div>
@@ -160,7 +160,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                         <button
                                             key={mod.id}
                                             onClick={() => setSelectedModule(mod.id)}
-                                            className={`flex flex-col items-center p-4 rounded-lg border transition-all ${isSelected ? 'bg-cyan-500/10 border-cyan-500 ring-1 ring-cyan-500' : 'bg-[var(--nfq-bg-highest)]/30 border-slate-700 hover:border-slate-500'}`}
+                                            className={`flex flex-col items-center p-4 rounded-lg border transition-all ${isSelected ? 'bg-[var(--nfq-accent)]/10 border-[color:var(--nfq-accent)] ring-1 ring-[color:var(--nfq-accent)]' : 'bg-[var(--nfq-bg-highest)]/30 border-slate-700 hover:border-slate-500'}`}
                                         >
                                             <Icon className={`${mod.color} mb-2`} size={24} />
                                             <span className="text-xs font-bold text-[color:var(--nfq-text-secondary)]">{mod.label}</span>
@@ -170,7 +170,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                             </div>
 
                             {selectedModule && (
-                                <div className="mt-6 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-lg flex items-center justify-between">
+                                <div className="mt-6 p-4 bg-[var(--nfq-accent)]/5 border border-[color:var(--nfq-accent)]/20 rounded-lg flex items-center justify-between">
                                     <div className="flex items-center gap-3 text-[color:var(--nfq-accent)]">
                                         <ArrowRight size={18} />
                                         <span className="text-sm font-medium">{t.readyToUpload} <strong>{MODULES.find(m => m.id === selectedModule)?.label}</strong></span>
@@ -180,7 +180,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                             const input = document.getElementById('universal-upload');
                                             input?.click();
                                         }}
-                                        className="px-4 py-2 bg-cyan-600 text-[color:var(--nfq-text-primary)] rounded text-xs font-bold hover:bg-cyan-500 transition-colors"
+                                        className="px-4 py-2 bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded text-xs font-bold hover:bg-[var(--nfq-accent)] transition-colors"
                                     >
                                         {t.browseFile}
                                     </button>
@@ -194,7 +194,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                     {/* STEP 2: PARSING */}
                     {status === 'parsing' && (
                         <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                            <div className="w-12 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
+                            <div className="w-12 h-10 border-4 border-[color:var(--nfq-accent)]/20 border-t-cyan-500 rounded-full animate-spin"></div>
                             <div className="text-center">
                                 <h3 className="text-lg font-bold text-[color:var(--nfq-text-primary)]">{t.analyzingFile}</h3>
                                 <p className="text-sm text-[color:var(--nfq-text-faint)]">{t.validatingFormat}</p>
@@ -277,7 +277,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                 {selectedModule && (
                                     <button
                                         onClick={() => document.getElementById('universal-upload')?.click()}
-                                        className="px-6 py-2 bg-cyan-600 text-[color:var(--nfq-text-primary)] rounded-lg text-xs hover:bg-cyan-500"
+                                        className="px-6 py-2 bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded-lg text-xs hover:bg-[var(--nfq-accent)]"
                                     >
                                         {t.tryAnotherFile}
                                     </button>
@@ -294,7 +294,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                         <button
                             onClick={handleConfirmImport}
                             disabled={status === 'importing'}
-                            className={`px-8 py-2 rounded-lg text-sm font-bold flex items-center gap-2 ${status === 'importing' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)] cursor-not-allowed' : 'bg-cyan-600 text-[color:var(--nfq-text-primary)] hover:bg-cyan-500 shadow-lg shadow-cyan-500/20'}`}
+                            className={`px-8 py-2 rounded-lg text-sm font-bold flex items-center gap-2 ${status === 'importing' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)] cursor-not-allowed' : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)] shadow-lg shadow-cyan-500/20'}`}
                         >
                             {status === 'importing' ? t.importing : t.completeImport}
                             {status !== 'importing' && <CheckCircle2 size={16} />}

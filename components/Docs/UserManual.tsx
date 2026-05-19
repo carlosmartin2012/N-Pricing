@@ -130,9 +130,9 @@ const UserManual: React.FC = () => {
             <TocItem targetId="target-grid" label={L('Targets', 'Targets')}                 accent="bg-emerald-400" />
 
             <TocSectionLabel label="Pricing" accent="text-[color:var(--nfq-accent)]" />
-            <TocItem targetId="pricing-engine" label={L('Pricing Engine (4 tabs)', 'Motor de Pricing (4 tabs)')} accent="bg-cyan-400" />
-            <TocItem targetId="blotter" label={L('Deal Blotter', 'Deal Blotter')} accent="bg-cyan-400" />
-            <TocItem targetId="accounting" label={L('Accounting Ledger', 'Libro Contable')} accent="bg-cyan-400" />
+            <TocItem targetId="pricing-engine" label={L('Pricing Engine (4 tabs)', 'Motor de Pricing (4 tabs)')} accent="bg-[var(--nfq-accent)]" />
+            <TocItem targetId="blotter" label={L('Deal Blotter', 'Deal Blotter')} accent="bg-[var(--nfq-accent)]" />
+            <TocItem targetId="accounting" label={L('Accounting Ledger', 'Libro Contable')} accent="bg-[var(--nfq-accent)]" />
 
             <TocSectionLabel label="Insights" accent="text-[color:var(--nfq-warning)]" />
             <TocItem targetId="analytics" label="Analytics" accent="bg-amber-400" />
@@ -152,10 +152,10 @@ const UserManual: React.FC = () => {
             <TocItem targetId="shortcuts" label={L('Keyboard shortcuts', 'Atajos de teclado')} accent="bg-fuchsia-400" />
 
             <TocSectionLabel label={L('Operational guide', 'Guía operativa')} accent="text-[color:var(--nfq-accent)]" />
-            <TocItem targetId="quickstart" label={L('Quick start', 'Puesta en marcha')} accent="bg-cyan-400" />
-            <TocItem targetId="workflows" label={L('Workflows', 'Flujos operativos')} accent="bg-cyan-400" />
-            <TocItem targetId="data-modes" label={L('Data modes', 'Modos de datos')} accent="bg-cyan-400" />
-            <TocItem targetId="troubleshooting" label={L('Troubleshooting', 'Resolución problemas')} accent="bg-cyan-400" />
+            <TocItem targetId="quickstart" label={L('Quick start', 'Puesta en marcha')} accent="bg-[var(--nfq-accent)]" />
+            <TocItem targetId="workflows" label={L('Workflows', 'Flujos operativos')} accent="bg-[var(--nfq-accent)]" />
+            <TocItem targetId="data-modes" label={L('Data modes', 'Modos de datos')} accent="bg-[var(--nfq-accent)]" />
+            <TocItem targetId="troubleshooting" label={L('Troubleshooting', 'Resolución problemas')} accent="bg-[var(--nfq-accent)]" />
 
             <TocSectionLabel label={L('Reference', 'Referencia')} accent="text-[color:var(--nfq-text-muted)]" />
             <TocItem targetId="formulas" label={t.manual_formulasTitle} />
@@ -204,7 +204,7 @@ const UserManual: React.FC = () => {
                 <button
                   onClick={() => startTour(roleTourId)}
                   data-testid="replay-role-tour"
-                  className="mt-2 flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-left transition-colors hover:bg-cyan-500/10"
+                  className="mt-2 flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/5 px-4 py-3 text-left transition-colors hover:bg-[var(--nfq-accent)]/10"
                 >
                   <Compass size={20} className="shrink-0 text-[color:var(--nfq-accent)]" />
                   <div>
@@ -344,8 +344,8 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ PRICING ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
-              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+            <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-accent)] pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--nfq-accent)]" />
               {L('Pricing — calculate + execute', 'Pricing — calcular + ejecutar')}
             </h2>
 
@@ -565,8 +565,8 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ OPERATIONAL GUIDE ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
-              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+            <h2 className="flex items-center gap-3 border-l-4 border-[color:var(--nfq-accent)] pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
+              <span className="h-2 w-2 rounded-full bg-[var(--nfq-accent)]" />
               {L('Operational guide', 'Guía operativa')}
             </h2>
 
@@ -576,7 +576,7 @@ const UserManual: React.FC = () => {
               <ol className="space-y-3 pl-1">
                 {guide.quickStart.map((step, idx) => (
                   <li key={step.title} className="flex gap-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 font-mono text-xs font-bold text-[color:var(--nfq-accent)]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--nfq-accent)]/10 font-mono text-xs font-bold text-[color:var(--nfq-accent)]">
                       {idx + 1}
                     </span>
                     <div>

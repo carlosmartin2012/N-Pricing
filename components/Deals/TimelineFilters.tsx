@@ -27,7 +27,7 @@ const TimelineFilters: React.FC<Props> = ({ enabled, onToggle, onAll, onNone, co
       <button
         type="button"
         onClick={onAll}
-        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:border-cyan-500/40 hover:text-[color:var(--nfq-accent)]"
+        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:border-[color:var(--nfq-accent)]/40 hover:text-[color:var(--nfq-accent)]"
       >
         All
       </button>
@@ -50,7 +50,7 @@ const TimelineFilters: React.FC<Props> = ({ enabled, onToggle, onAll, onNone, co
             onClick={() => onToggle(kind)}
             className={`nfq-label flex items-center gap-1 rounded px-2 py-1 text-[10px] transition-colors ${
               isOn
-                ? 'border border-cyan-500/40 bg-cyan-500/10 text-cyan-200'
+                ? 'border border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]'
                 : 'border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/30 text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'
             }`}
           >

@@ -225,7 +225,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
                     onClick={() => onSelectedSourceChange(source.id)}
                     className={`w-full rounded-[var(--nfq-radius-card)] border p-4 text-left transition ${
                       isSelected
-                        ? 'border-cyan-500/40 bg-cyan-500/10'
+                        ? 'border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10'
                         : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
                     }`}
                   >

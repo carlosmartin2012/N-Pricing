@@ -205,7 +205,7 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
               placeholder="Search rules..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-[var(--nfq-bg-root)] border border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500 w-full sm:w-64"
+              className="bg-[var(--nfq-bg-root)] border border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)] w-full sm:w-64"
             />
           </div>
         </div>
@@ -223,7 +223,7 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
           </label>
           <button
             onClick={handleAddNewRule}
-            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-[color:var(--nfq-accent)] rounded border border-cyan-800 text-xs hover:bg-cyan-900/60 font-bold"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-accent)]/40 text-[color:var(--nfq-accent)] rounded border border-[color:var(--nfq-accent)] text-xs hover:bg-[var(--nfq-accent)]/60 font-bold"
           >
             <Plus size={12} /> Add Rule
           </button>
@@ -244,7 +244,7 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
             </button>
             <button
               onClick={handleSaveRule}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
+              className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
             >
               Submit Change
             </button>

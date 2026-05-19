@@ -27,7 +27,7 @@ export const UserManagementToolbar: React.FC<Props> = ({
             placeholder="Search users..."
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
-            className="w-64 rounded border border-slate-700 bg-[var(--nfq-bg-root)] py-1.5 pl-9 pr-3 text-xs text-[color:var(--nfq-text-primary)] focus:border-cyan-500 focus:outline-none"
+            className="w-64 rounded border border-slate-700 bg-[var(--nfq-bg-root)] py-1.5 pl-9 pr-3 text-xs text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
           />
         </div>
         <div className="text-xs text-[color:var(--nfq-text-faint)]">
@@ -37,7 +37,7 @@ export const UserManagementToolbar: React.FC<Props> = ({
 
       <button
         onClick={onAddUser}
-        className="flex items-center gap-1 rounded border border-cyan-500 bg-cyan-600 px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] shadow-lg shadow-cyan-900/20 transition-colors hover:bg-cyan-500"
+        className="flex items-center gap-1 rounded border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)] px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] shadow-lg shadow-cyan-900/20 transition-colors hover:bg-[var(--nfq-accent)]"
       >
         <Plus size={12} /> Add User
       </button>

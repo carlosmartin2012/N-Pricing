@@ -59,7 +59,7 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
             <button
               onClick={() => { setGroupScope(true); setIsOpen(false); }}
               className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/5 ${
-                isGroupScope ? 'bg-cyan-500/10 text-[color:var(--nfq-accent)]' : ''
+                isGroupScope ? 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]' : ''
               }`}
             >
               <Globe className="h-4 w-4 text-[color:var(--nfq-accent)]" />

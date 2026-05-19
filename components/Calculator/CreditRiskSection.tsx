@@ -74,7 +74,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                 }}
                 className={`flex-1 rounded-l-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   !isMirror
-                    ? 'bg-cyan-500/20 border-cyan-500/40 text-[color:var(--nfq-accent)]'
+                    ? 'bg-[var(--nfq-accent)]/20 border-[color:var(--nfq-accent)]/40 text-[color:var(--nfq-accent)]'
                     : 'border-[var(--nfq-border-ghost)] text-[var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
@@ -90,7 +90,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                 }}
                 className={`flex-1 rounded-r-lg border border-l-0 px-3 py-1.5 text-xs font-semibold transition-colors ${
                   isMirror
-                    ? 'bg-cyan-500/20 border-cyan-500/40 text-[color:var(--nfq-accent)]'
+                    ? 'bg-[var(--nfq-accent)]/20 border-[color:var(--nfq-accent)]/40 text-[color:var(--nfq-accent)]'
                     : 'border-[var(--nfq-border-ghost)] text-[var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >

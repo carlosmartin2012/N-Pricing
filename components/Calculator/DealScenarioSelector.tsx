@@ -38,7 +38,7 @@ export const DealScenarioSelector: React.FC<Props> = ({
           <SelectInput
             value={hasCurrentDeal ? values.id : 'NEW'}
             onChange={onTransactionSelect}
-            className="border-cyan-500/25 bg-[var(--nfq-bg-input)] pl-9 font-bold text-[color:var(--nfq-accent)] focus:border-cyan-400"
+            className="border-[color:var(--nfq-accent)]/25 bg-[var(--nfq-bg-input)] pl-9 font-bold text-[color:var(--nfq-accent)] focus:border-[color:var(--nfq-accent)]"
           >
             <option value="NEW">{t.newDeal}</option>
             {deals.map((deal) => (

@@ -61,7 +61,7 @@ describe('TimelineEventCard', () => {
   it('marks focused events with a visible ring class', () => {
     const { container } = render(<TimelineEventCard event={baseEvent} focused />);
     const article = container.querySelector('article');
-    expect(article?.className).toContain('ring-cyan');
+    expect(article?.className).toContain('ring-[color:var(--nfq-accent)]');
   });
 
   it('encodes occurredAt as ISO in the time element', () => {

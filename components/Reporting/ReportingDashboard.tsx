@@ -206,7 +206,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
   return (
     <div className="flex flex-col h-full bg-[var(--nfq-bg-root)] text-[color:var(--nfq-text-secondary)] overflow-hidden font-sans">
       {isGroupScope && (
-        <div className="flex items-center gap-2 bg-cyan-500/10 border-b border-cyan-500/20 px-4 md:px-6 py-2">
+        <div className="flex items-center gap-2 bg-[var(--nfq-accent)]/10 border-b border-[color:var(--nfq-accent)]/20 px-4 md:px-6 py-2">
           <Globe className="h-4 w-4 text-[color:var(--nfq-accent)]" />
           <span className="text-xs font-mono font-medium text-[color:var(--nfq-accent)]">Group Consolidated View</span>
           <span className="text-xs text-[color:var(--nfq-text-muted)] ml-2">Aggregated data across all entities</span>

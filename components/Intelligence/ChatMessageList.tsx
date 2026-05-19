@@ -14,7 +14,7 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
       {messages.map((message) => (
         <div key={message.id} className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
           {message.role === 'model' && (
-            <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-800 bg-cyan-900/20">
+            <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/20">
               <Bot size={16} className="text-[color:var(--nfq-accent)]" />
             </div>
           )}
@@ -33,7 +33,7 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
             {message.role === 'model' && message.trace && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {message.trace.groundedContext.dossierId && (
-                  <span className="rounded-full border border-cyan-800/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
+                  <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
                     DOS {message.trace.groundedContext.dossierId}
                   </span>
                 )}
@@ -66,13 +66,13 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
 
       {isThinking && (
         <div className="flex animate-pulse justify-start gap-4">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-800 bg-cyan-900/20">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/20">
             <Bot size={16} className="text-[color:var(--nfq-accent)]" />
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] px-4 py-3">
-            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500" />
-            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500 delay-75" />
-            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500 delay-150" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--nfq-accent)]" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--nfq-accent)] delay-75" />
+            <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--nfq-accent)] delay-150" />
           </div>
         </div>
       )}

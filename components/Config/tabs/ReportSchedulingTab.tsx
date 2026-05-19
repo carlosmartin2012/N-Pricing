@@ -125,7 +125,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
         </div>
         <button
           onClick={openNew}
-          className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-[color:var(--nfq-accent)] rounded border border-cyan-800 text-xs hover:bg-cyan-900/60 font-bold"
+          className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-accent)]/40 text-[color:var(--nfq-accent)] rounded border border-[color:var(--nfq-accent)] text-xs hover:bg-[var(--nfq-accent)]/60 font-bold"
         >
           <Plus size={12} /> {t.newSchedule}
         </button>
@@ -227,7 +227,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                   value={draft.name ?? ''}
                   onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
                   placeholder="e.g. Monthly Portfolio Summary"
-                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)]"
                 />
               </div>
 
@@ -239,7 +239,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                 <select
                   value={draft.reportType ?? 'portfolio_summary'}
                   onChange={(e) => setDraft((d) => ({ ...d, reportType: e.target.value as ReportType }))}
-                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)]"
                 >
                   {(Object.entries(REPORT_TYPE_LABELS) as [ReportType, string][]).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
@@ -259,7 +259,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       onClick={() => setDraft((d) => ({ ...d, frequency: f }))}
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.frequency === f
-                          ? 'bg-cyan-900/50 border-cyan-700 text-[color:var(--nfq-accent)]'
+                          ? 'bg-[var(--nfq-accent)]/50 border-[color:var(--nfq-accent)] text-[color:var(--nfq-accent)]'
                           : 'border-slate-700 text-[color:var(--nfq-text-faint)] hover:border-slate-500'
                       }`}
                     >
@@ -301,7 +301,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                   onChange={(e) => setRecipientsRaw(e.target.value)}
                   placeholder="analyst@bank.com, manager@bank.com"
                   rows={3}
-                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500 resize-none font-mono"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-[color:var(--nfq-accent)] resize-none font-mono"
                 />
               </div>
 
@@ -332,7 +332,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
               <button
                 onClick={() => void handleSave()}
                 disabled={saving || !draft.name?.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--nfq-text-primary)] text-xs font-bold rounded transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--nfq-text-primary)] text-xs font-bold rounded transition-colors"
               >
                 <Check size={12} /> {saving ? 'Saving…' : 'Save Schedule'}
               </button>

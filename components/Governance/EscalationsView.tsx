@@ -14,7 +14,7 @@ import TimelineDeprecationBanner from '../Deals/TimelineDeprecationBanner';
 const log = createLogger('EscalationsView');
 
 const LEVEL_COLOR: Record<EscalationLevel, string> = {
-  L1: 'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
+  L1: 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   L2: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   Committee: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
 };

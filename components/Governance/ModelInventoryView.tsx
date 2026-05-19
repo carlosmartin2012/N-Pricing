@@ -41,7 +41,7 @@ const KIND_LABEL: Record<ModelKind, string> = {
 };
 
 const KIND_COLOR: Record<ModelKind, string> = {
-  engine:      'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
+  engine:      'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   ruleset:     'bg-emerald-500/10 text-[color:var(--nfq-success)]',
   elasticity:  'bg-[var(--nfq-cat-d-subtle)] text-[color:var(--nfq-cat-d)]',
   shock_pack:  'bg-amber-500/10 text-[color:var(--nfq-warning)]',
@@ -418,7 +418,7 @@ const ModelInventoryView: React.FC = () => {
                   <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{m.version}</td>
                   <td className="px-3 py-2">
                     {m.entityId === null ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] tracking-normal text-[color:var(--nfq-accent)]">
+                      <span className="inline-flex items-center gap-1 rounded bg-[var(--nfq-accent)]/10 px-2 py-0.5 text-[10px] tracking-normal text-[color:var(--nfq-accent)]">
                         <Globe size={10} /> global
                       </span>
                     ) : (

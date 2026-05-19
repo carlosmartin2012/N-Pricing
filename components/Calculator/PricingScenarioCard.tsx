@@ -36,7 +36,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
   return (
     <div
       className={`flex-1 min-w-[220px] max-w-[320px] rounded-lg border bg-[var(--nfq-bg-highest)]/60 p-3 space-y-3 ${
-        scenarioIndex === 0 ? 'border-cyan-600/50' : 'border-[color:var(--nfq-border-ghost)]'
+        scenarioIndex === 0 ? 'border-[color:var(--nfq-accent)]/50' : 'border-[color:var(--nfq-border-ghost)]'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -44,7 +44,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
           type="text"
           value={scenario.name}
           onChange={(event) => onUpdateScenario(scenario.id, { name: event.target.value })}
-          className="mr-2 w-full border-b border-slate-600 bg-transparent px-0 py-0.5 text-sm font-medium text-[color:var(--nfq-text-primary)] focus:border-cyan-500 focus:outline-none"
+          className="mr-2 w-full border-b border-slate-600 bg-transparent px-0 py-0.5 text-sm font-medium text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
         />
         <div className="flex shrink-0 items-center gap-1">
           {scenariosLength < maxScenarios && (
@@ -74,7 +74,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
           type="number"
           value={scenario.shocks.interestRate}
           onChange={(event) => onUpdateShock(scenario.id, 'interestRate', Number(event.target.value))}
-          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
         />
       </div>
 
@@ -84,7 +84,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
           type="number"
           value={scenario.shocks.liquiditySpread}
           onChange={(event) => onUpdateShock(scenario.id, 'liquiditySpread', Number(event.target.value))}
-          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
         />
       </div>
 
@@ -95,7 +95,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
           step="0.01"
           value={scenario.overrides.marginTarget ?? baseDeal.marginTarget}
           onChange={(event) => onUpdateOverride(scenario.id, 'marginTarget', Number(event.target.value))}
-          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
         />
       </div>
 
@@ -104,7 +104,7 @@ export const PricingScenarioCard: React.FC<Props> = ({
         <select
           value={scenario.overrides.collateralType ?? baseDeal.collateralType ?? 'None'}
           onChange={(event) => onUpdateOverride(scenario.id, 'collateralType', event.target.value)}
-          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-cyan-500 focus:outline-none"
+          className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs font-mono text-[color:var(--nfq-text-secondary)] focus:border-[color:var(--nfq-accent)] focus:outline-none"
         >
           {collateralOptions.map((option) => (
             <option key={option} value={option}>
