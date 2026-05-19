@@ -1,4 +1,5 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Check, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { calculatePricing } from '@npricing/pricing-core';
 import type { Transaction } from '../../types';
@@ -308,26 +309,26 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             type="button"
             onClick={() => setDisclosure((prev) => ({ ...prev, context: !prev.context }))}
             aria-pressed={disclosure.context}
-            className={`rounded-full px-3 py-1 font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium transition-colors ${
               disclosure.context
                 ? 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.35)]'
                 : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
             }`}
           >
-            {disclosure.context ? '✓ ' : '+ '}
+            {disclosure.context ? <Check size={12} /> : <Plus size={12} />}
             {t.calcGroupContext}
           </button>
           <button
             type="button"
             onClick={() => setDisclosure((prev) => ({ ...prev, optimization: !prev.optimization }))}
             aria-pressed={disclosure.optimization}
-            className={`rounded-full px-3 py-1 font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-medium transition-colors ${
               disclosure.optimization
                 ? 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.35)]'
                 : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
             }`}
           >
-            {disclosure.optimization ? '✓ ' : '+ '}
+            {disclosure.optimization ? <Check size={12} /> : <Plus size={12} />}
             {t.calcGroupOptimization}
           </button>
         </div>

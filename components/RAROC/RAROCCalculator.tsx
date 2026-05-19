@@ -76,19 +76,11 @@ const RAROCCalculator: React.FC = () => {
 
     return (
         <div className="flex flex-col gap-4 p-2 animate-in fade-in duration-500">
-            {/* Compact metadata strip — replaces the older in-page header block.
-                The view title ('RAROC') lives in the App.tsx compact hero now,
-                so this strip carries only the model + transaction context. */}
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/30 px-4 py-2 text-xs">
-                <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">MODEL_v4.2.X</span>
-                    <Badge variant="outline" className="text-[9px] border-cyan-500/30 text-[color:var(--nfq-accent)]">BASEL III COMPLIANT</Badge>
-                    <Badge variant="secondary" className="text-[9px]">ENGINE SYNCED</Badge>
-                </div>
-                <div className="flex items-baseline gap-2 font-mono">
-                    <span className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">Tx</span>
-                    <span className="text-sm font-bold text-[color:var(--nfq-accent)]">{inputs.transactionId}</span>
-                </div>
+            {/* Discrete eyebrow — model + transaction context without the
+                meta-status posturing. Detail moved out of permanent strip. */}
+            <div className="nfq-eyebrow text-[color:var(--nfq-text-tertiary)]">
+                <span>Basel III · Model v4.2 · Tx&nbsp;</span>
+                <span className="font-mono text-[color:var(--nfq-text-secondary)]">{inputs.transactionId}</span>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 xl:items-start">
@@ -104,7 +96,7 @@ const RAROCCalculator: React.FC = () => {
                                 />
                             ))}
 
-                            <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/15 bg-cyan-500/6 p-4">
+                            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-accent)]/15 bg-[var(--nfq-accent-subtle)] p-4">
                                 <div className="flex items-center gap-2 text-[color:var(--nfq-accent)]">
                                     <Info size={14} />
                                     <span className="text-[10px] font-bold uppercase tracking-[0.22em]">
@@ -144,11 +136,11 @@ const RAROCCalculator: React.FC = () => {
 
                         <RAROCBreakdownPanel
                             title="Capital Structure"
-                            icon={<PieChart size={16} className="text-violet-500" />}
+                            icon={<PieChart size={16} className="text-[color:var(--nfq-cat-d)]" />}
                             rows={capitalRows}
                             totalLabel="Total Regulatory Capital"
                             totalValue={formatRarocCurrency(results.totalRegCapital)}
-                            totalToneClass="text-violet-400"
+                            totalToneClass="text-[color:var(--nfq-cat-d)]"
                         />
                     </div>
 
@@ -162,13 +154,13 @@ const RAROCCalculator: React.FC = () => {
                             totalToneClass={results.eva >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}
                         />
 
-                        <div className="bg-cyan-900/10 border border-cyan-500/20 rounded-[var(--nfq-radius-card)] p-4 flex flex-col gap-3">
+                        <div className="bg-[var(--nfq-accent-subtle)] border border-[color:var(--nfq-accent)]/20 rounded-[var(--nfq-radius-card)] p-4 flex flex-col gap-3">
                             <div className="flex items-center gap-2 text-[color:var(--nfq-accent)]">
                                 <Info size={16} />
                                 <h5 className="text-xs font-medium">Methodology Note</h5>
                             </div>
-                            <p className="text-xs text-[color:var(--nfq-text-muted)] font-mono italic leading-relaxed">
-                                RAROC = (Spread Revenue + Fees - FTP - ECL - OpCost + Capital Income) / Total Regulatory Capital
+                            <p className="text-xs text-[color:var(--nfq-text-muted)] font-mono leading-relaxed">
+                                RAROC = (Spread Revenue + Fees − FTP − ECL − OpCost + Capital Income) / Total Regulatory Capital
                             </p>
                             <p className="text-xs leading-relaxed text-[color:var(--nfq-text-muted)]">
                                 Capital income is now computed from the same engine used by pricing, and spread revenue is
