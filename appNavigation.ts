@@ -152,20 +152,30 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     { id: 'TARGET_GRID',  label: t.navTargets,  icon: Grid3X3,             section: 'Relationship Cockpit', sectionLabel: sectionLabels.relationships, path: '/target-grid' },
 
     // ─────────────── PRICING COCKPIT ───────────────
+    // Calculator is the single entry point for the per-deal pricing workflow.
+    // The Deal/RAROC/Stress/What-If tabs live INSIDE the workflow so the user
+    // navigates between them without leaving the deal context. SHOCKS, RAROC,
+    // and WHAT_IF are reachable via Cmd+K (aux destinations) for power-user
+    // deep-links and demo navigation.
+    // STRESS_PRICING stays in the sidebar because it operates at portfolio
+    // level (EBA scenarios across all priceable deals), not per-deal.
     { id: 'CALCULATOR',     label: t.navCalculator,    icon: Calculator, section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/pricing' },
     { id: 'BLOTTER',        label: t.dealBlotter,      icon: FileText,   section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/blotter' },
-    { id: 'SHOCKS',         label: t.navStressTest,    icon: Zap,        section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/stress-testing' },
     { id: 'STRESS_PRICING', label: t.navStressPricing, icon: LineChart,  section: 'Pricing Cockpit', sectionLabel: sectionLabels.pricing, path: '/stress-pricing' },
 
     // ─────────────── DATA & OPS HUB ───────────────
+    // Reserved for INPUTS to the pricing engine (market data + behavioural
+    // models + methodology configuration). FTP Reconciliation moved to
+    // Governance Hub because it's a controller workflow over recorded
+    // pricing outputs — not an input to the engine.
     { id: 'MARKET_DATA',    label: t.yieldCurves,          icon: TrendingUp, section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/market-data' },
     { id: 'METHODOLOGY',    label: t.navMethodology,       icon: GitBranch,  section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/methodology' },
-    { id: 'RECONCILIATION', label: t.navFtpReconciliation, icon: Scale,      section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/reconciliation' },
 
     // ─────────────── GOVERNANCE HUB ───────────────
-    { id: 'REPORTING',  label: t.navAnalytics,      icon: BarChart4,   section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/analytics' },
-    { id: 'DISCIPLINE', label: t.pricingDiscipline, icon: Sparkles,    section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/discipline' },
-    { id: 'APPROVALS',  label: t.navApprovals,      icon: ShieldCheck, section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/approvals' },
+    { id: 'REPORTING',      label: t.navAnalytics,         icon: BarChart4,   section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/analytics' },
+    { id: 'DISCIPLINE',     label: t.pricingDiscipline,    icon: Sparkles,    section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/discipline' },
+    { id: 'APPROVALS',      label: t.navApprovals,         icon: ShieldCheck, section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/approvals' },
+    { id: 'RECONCILIATION', label: t.navFtpReconciliation, icon: Scale,       section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/reconciliation' },
 
     // ─────────────── ASSISTANT ───────────────
     { id: 'AI_LAB', label: t.navAiAssistant, icon: BrainCircuit, section: 'Assistant', sectionLabel: sectionLabels.assistant, path: '/ai' },
@@ -188,6 +198,7 @@ export function getViewNavigationMeta(
 ): { label: string; section?: string } | undefined {
   const auxMeta: Partial<Record<ViewState, { label: string; section?: string }>> = {
     RAROC: { label: t.navRaroc, section: 'Pricing Cockpit' },
+    SHOCKS: { label: t.navStressTest, section: 'Pricing Cockpit' },
     WHAT_IF: { label: t.navWhatIf, section: 'Pricing Cockpit' },
     ACCOUNTING: { label: t.auxAccountingLedger, section: 'Pricing Cockpit' },
     BEHAVIOURAL: { label: t.behaviouralModels, section: 'Data & Ops Hub' },
@@ -224,6 +235,7 @@ export function buildAuxDestinations(t: NavigationLabels): AuxDestination[] {
   return [
     { id: 'CAMPAIGNS',             label: t.navCampaigns,              sublabel: t.commandNavigateSublabel,        icon: Target,          path: '/campaigns',              section: 'Relationship Cockpit' },
     { id: 'RAROC',                 label: t.navRaroc,                  sublabel: t.commandNavigateSublabel,        icon: Percent,         path: '/raroc',                  section: 'Pricing Cockpit' },
+    { id: 'SHOCKS',                label: t.navStressTest,             sublabel: t.commandNavigateSublabel,        icon: Zap,             path: '/stress-testing',         section: 'Pricing Cockpit' },
     { id: 'WHAT_IF',               label: t.navWhatIf,                 sublabel: t.commandNavigateSublabel,        icon: FlaskConical,    path: '/what-if',                section: 'Pricing Cockpit' },
     { id: 'ACCOUNTING',            label: t.auxAccountingLedger,        sublabel: t.auxAccountingLedgerDesc,        icon: LayoutDashboard, path: '/accounting',             section: 'Pricing Cockpit' },
     { id: 'BEHAVIOURAL',           label: t.behaviouralModels,          sublabel: t.commandNavigateSublabel,        icon: Activity,        path: '/behavioural',            section: 'Data & Ops Hub' },

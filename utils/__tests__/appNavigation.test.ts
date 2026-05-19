@@ -92,12 +92,18 @@ describe('appNavigation routing helpers', () => {
       ]);
     });
 
-    it('keeps daily pricing surfaces in the sidebar and specialist labs in AUX', () => {
+    it('keeps Calculator as the per-deal entry point and routes specialist tabs to AUX', () => {
       const pricingIds = items.filter((i) => i.section === 'Pricing Cockpit').map((i) => i.id);
+      // Calculator is the single per-deal workflow entry (Deal / RAROC /
+      // Stress / What-If live as tabs INSIDE it). BLOTTER lists deals.
+      // STRESS_PRICING stays because it operates at portfolio level (EBA
+      // scenarios across all priceable deals), not per-deal.
       expect(pricingIds).toContain('CALCULATOR');
-      expect(pricingIds).toContain('SHOCKS');
-      expect(pricingIds).toContain('STRESS_PRICING');
       expect(pricingIds).toContain('BLOTTER');
+      expect(pricingIds).toContain('STRESS_PRICING');
+      // SHOCKS / RAROC / WHAT_IF are reachable via Cmd+K (aux) and via
+      // the in-Calculator tab bar — not as first-class sidebar items.
+      expect(pricingIds).not.toContain('SHOCKS');
       expect(pricingIds).not.toContain('RAROC');
       expect(pricingIds).not.toContain('WHAT_IF');
     });
@@ -134,9 +140,9 @@ describe('appNavigation routing helpers', () => {
       expect(pipeline?.path).toBe('/pipeline');
     });
 
-    it('includes RECONCILIATION under Data & Ops Hub (Phase 6.9)', () => {
+    it('routes RECONCILIATION under Governance Hub (controller workflow, not data input)', () => {
       const recon = items.find((i) => i.id === 'RECONCILIATION');
-      expect(recon?.section).toBe('Data & Ops Hub');
+      expect(recon?.section).toBe('Governance Hub');
       expect(recon?.path).toBe('/reconciliation');
       expect(recon?.label).toBe('FTP Reconciliation');
     });
@@ -172,22 +178,22 @@ describe('appNavigation routing helpers', () => {
       expect(items.find((i) => i.id === 'ATTRIBUTION_REPORTING')).toBeUndefined();
     });
 
-    it('Governance Hub keeps 3 daily entries', () => {
+    it('Governance Hub keeps 4 daily entries (incl. controller-grade FTP Reconciliation)', () => {
       const governance = items.filter((i) => i.section === 'Governance Hub');
-      expect(governance).toHaveLength(3);
+      expect(governance).toHaveLength(4);
       expect(governance.map((i) => i.id).sort()).toEqual([
         'APPROVALS',
         'DISCIPLINE',
+        'RECONCILIATION',
         'REPORTING',
       ]);
     });
 
-    it('Data & Ops Hub keeps 3 operational entries', () => {
+    it('Data & Ops Hub keeps 2 input-only entries (Methodology + Market Data)', () => {
       const dataOps = items.filter((i) => i.section === 'Data & Ops Hub');
       expect(dataOps.map((i) => i.id).sort()).toEqual([
         'MARKET_DATA',
         'METHODOLOGY',
-        'RECONCILIATION',
       ]);
     });
 
