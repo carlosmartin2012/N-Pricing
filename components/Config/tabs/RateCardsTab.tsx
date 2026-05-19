@@ -132,7 +132,7 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
   return (
     <>
       {pendingRequests > 0 && (
-        <div className="mx-4 mt-4 rounded-lg border border-amber-900/50 bg-amber-950/20 px-4 py-3 text-xs text-amber-200">
+        <div className="mx-4 mt-4 rounded-lg border border-[color:var(--nfq-warning)]/50 bg-amber-950/20 px-4 py-3 text-xs text-amber-200">
           {pendingRequests} rate card request{pendingRequests === 1 ? '' : 's'} waiting in governance.
         </div>
       )}
@@ -143,7 +143,7 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
         </div>
         <button
           onClick={handleAddRateCard}
-          className="flex items-center gap-1 px-3 py-1.5 bg-purple-900/30 text-[color:var(--nfq-cat-d)] rounded border border-purple-800 text-xs hover:bg-purple-900/50 font-medium"
+          className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-cat-d)]/30 text-[color:var(--nfq-cat-d)] rounded border border-[color:var(--nfq-cat-d)]/30 text-xs hover:bg-[var(--nfq-cat-d)]/50 font-medium"
         >
           <Plus size={12} /> New Curve / Grid
         </button>

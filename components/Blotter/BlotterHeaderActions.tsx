@@ -41,7 +41,7 @@ const BlotterHeaderActions: React.FC<Props> = ({
       disabled={isRepricing || !canMutate}
       className={`px-3 py-1.5 rounded border text-xs flex items-center gap-1 transition-colors font-bold ${
         repriceCount > 0
-          ? 'bg-emerald-900/30 border-emerald-700 text-[color:var(--nfq-success)]'
+          ? 'bg-[var(--nfq-success)]/30 border-emerald-700 text-[color:var(--nfq-success)]'
           : 'bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] border-slate-700 text-[color:var(--nfq-warning)]'
       } disabled:cursor-not-allowed disabled:opacity-40`}
     >

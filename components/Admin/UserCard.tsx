@@ -13,13 +13,13 @@ interface Props {
 
 function getAvatarClassName(role: UserProfile['role']) {
   if (role === 'Admin') {
-    return 'border-purple-800 bg-purple-900/20 text-[color:var(--nfq-cat-d)]';
+    return 'border-[color:var(--nfq-cat-d)]/30 bg-[var(--nfq-cat-d)]/20 text-[color:var(--nfq-cat-d)]';
   }
   if (role === 'Risk_Manager') {
-    return 'border-red-800 bg-red-900/20 text-[color:var(--nfq-danger)]';
+    return 'border-[color:var(--nfq-danger)]/30 bg-[var(--nfq-danger)]/20 text-[color:var(--nfq-danger)]';
   }
   if (role === 'Auditor') {
-    return 'border-amber-800 bg-amber-900/20 text-[color:var(--nfq-warning)]';
+    return 'border-[color:var(--nfq-warning)]/30 bg-[var(--nfq-warning)]/20 text-[color:var(--nfq-warning)]';
   }
   return 'border-slate-700 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)]';
 }

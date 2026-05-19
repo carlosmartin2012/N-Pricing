@@ -125,7 +125,7 @@ export const ShockControlPanel: React.FC<Props> = ({
           </button>
           <button
             onClick={onDownloadTemplate}
-            className="flex flex-1 items-center justify-center gap-2 rounded border border-amber-200 bg-amber-50/10 py-2 text-sm text-[color:var(--nfq-warning)] transition-colors hover:text-amber-600 dark:border-amber-900/50 dark:bg-amber-950/20"
+            className="flex flex-1 items-center justify-center gap-2 rounded border border-amber-200 bg-amber-50/10 py-2 text-sm text-[color:var(--nfq-warning)] transition-colors hover:text-amber-600 dark:border-[color:var(--nfq-warning)]/50 dark:bg-amber-950/20"
             title="Download Template"
           >
             <FileSpreadsheet size={14} />

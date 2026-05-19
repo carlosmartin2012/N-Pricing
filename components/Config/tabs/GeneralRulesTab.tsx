@@ -190,7 +190,7 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
   return (
     <>
       {pendingRequests > 0 && (
-        <div className="mx-4 mt-4 rounded-lg border border-amber-900/50 bg-amber-950/20 px-4 py-3 text-xs text-amber-200">
+        <div className="mx-4 mt-4 rounded-lg border border-[color:var(--nfq-warning)]/50 bg-amber-950/20 px-4 py-3 text-xs text-amber-200">
           {pendingRequests} methodology request{pendingRequests === 1 ? '' : 's'} waiting in the governance queue.
         </div>
       )}

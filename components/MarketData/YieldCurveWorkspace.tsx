@@ -81,7 +81,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
         <div className="relative flex min-h-[300px] flex-1 flex-col border-b border-slate-200 dark:border-slate-800 xl:border-b-0 xl:border-r">
           <div className="flex h-10 shrink-0 items-center justify-between border-b border-slate-200 bg-slate-100 px-4 dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
             <div className="scrollbar-none flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-              <div className="flex shrink-0 items-center gap-1.5 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 dark:border-amber-900/50 dark:bg-amber-950/30">
+              <div className="flex shrink-0 items-center gap-1.5 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 dark:border-[color:var(--nfq-warning)]/50 dark:bg-amber-950/30">
                 <Zap size={12} className="text-[color:var(--nfq-warning)]" />
                 <input
                   type="number"

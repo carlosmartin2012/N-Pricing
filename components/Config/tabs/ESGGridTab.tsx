@@ -112,7 +112,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
   return (
     <>
       {pendingRequests > 0 && (
-        <div className="mx-4 mt-4 rounded-lg border border-amber-900/50 bg-amber-950/20 px-4 py-3 text-xs text-amber-200">
+        <div className="mx-4 mt-4 rounded-lg border border-[color:var(--nfq-warning)]/50 bg-amber-950/20 px-4 py-3 text-xs text-amber-200">
           {pendingRequests} ESG request{pendingRequests === 1 ? '' : 's'} waiting in governance for this grid.
         </div>
       )}
@@ -150,7 +150,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
         </div>
         <button
           onClick={handleAddEsg}
-          className="flex items-center gap-1 px-3 py-1.5 bg-emerald-900/30 text-[color:var(--nfq-success)] rounded border border-emerald-800 text-xs hover:bg-emerald-900/50"
+          className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-success)]/30 text-[color:var(--nfq-success)] rounded border border-[color:var(--nfq-success)]/30 text-xs hover:bg-[var(--nfq-success)]/50"
         >
           <Plus size={12} /> Add Entry
         </button>

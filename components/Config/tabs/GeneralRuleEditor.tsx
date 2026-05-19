@@ -176,7 +176,7 @@ const GeneralRuleEditor: React.FC<Props> = ({
         </InputGroup>
       </div>
 
-      <div className="my-4 rounded border border-indigo-800/50 bg-indigo-950/30 p-3">
+      <div className="my-4 rounded border border-[color:var(--nfq-cat-d)]/50 bg-indigo-950/30 p-3">
         <h5 className="mb-2 text-[11px] font-medium text-[color:var(--nfq-cat-d)]">Product Formula (V5.0)</h5>
         <div className="space-y-3">
           <InputGroup label="Base Rate Key">

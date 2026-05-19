@@ -191,17 +191,17 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               </span>
             )}
             {grounding.groundedContext.methodologyVersionId && (
-              <span className="rounded-full border border-emerald-800/60 bg-emerald-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-success)]">
+              <span className="rounded-full border border-[color:var(--nfq-success)]/60 bg-emerald-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-success)]">
                 METH {grounding.groundedContext.methodologyVersionId}
               </span>
             )}
             {grounding.groundedContext.portfolioSnapshotId && (
-              <span className="rounded-full border border-amber-800/60 bg-amber-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-warning)]">
+              <span className="rounded-full border border-[color:var(--nfq-warning)]/60 bg-amber-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-warning)]">
                 SNAP {grounding.groundedContext.portfolioSnapshotId}
               </span>
             )}
             {!!grounding.groundedContext.marketDataSourceIds?.length && (
-              <span className="rounded-full border border-violet-800/60 bg-violet-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-cat-d)]">
+              <span className="rounded-full border border-[color:var(--nfq-cat-d)]/60 bg-violet-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-cat-d)]">
                 SRC {grounding.groundedContext.marketDataSourceIds.length}
               </span>
             )}

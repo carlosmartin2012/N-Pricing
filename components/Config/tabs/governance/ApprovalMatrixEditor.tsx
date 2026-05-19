@@ -41,8 +41,8 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
       </p>
 
       <div className="space-y-6">
-        <div className="flex items-center gap-4 p-4 bg-emerald-950/20 border border-emerald-900/50 rounded-md">
-          <div className="p-2 bg-emerald-900/50 rounded-full">
+        <div className="flex items-center gap-4 p-4 bg-emerald-950/20 border border-[color:var(--nfq-success)]/50 rounded-md">
+          <div className="p-2 bg-[var(--nfq-success)]/50 rounded-full">
             <CheckCircle2 size={24} className="text-[color:var(--nfq-success)]" />
           </div>
           <div className="flex-1">
@@ -61,8 +61,8 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-4 bg-amber-950/20 border border-amber-900/50 rounded-md">
-          <div className="p-2 bg-amber-900/50 rounded-full">
+        <div className="flex items-center gap-4 p-4 bg-amber-950/20 border border-[color:var(--nfq-warning)]/50 rounded-md">
+          <div className="p-2 bg-[var(--nfq-warning)]/50 rounded-full">
             <AlertTriangle size={24} className="text-[color:var(--nfq-warning)]" />
           </div>
           <div className="flex-1">
@@ -81,8 +81,8 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-4 bg-red-950/20 border border-red-900/50 rounded-md">
-          <div className="p-2 bg-red-900/50 rounded-full">
+        <div className="flex items-center gap-4 p-4 bg-red-950/20 border border-[color:var(--nfq-danger)]/50 rounded-md">
+          <div className="p-2 bg-[var(--nfq-danger)]/50 rounded-full">
             <TrendingUp size={24} className="text-[color:var(--nfq-danger)]" />
           </div>
           <div className="flex-1">

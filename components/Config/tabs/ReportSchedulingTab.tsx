@@ -281,7 +281,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       onClick={() => setDraft((d) => ({ ...d, format: f }))}
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.format === f
-                          ? 'bg-amber-900/40 border-amber-700 text-[color:var(--nfq-warning)]'
+                          ? 'bg-[var(--nfq-warning)]/40 border-amber-700 text-[color:var(--nfq-warning)]'
                           : 'border-slate-700 text-[color:var(--nfq-text-faint)] hover:border-slate-500'
                       }`}
                     >

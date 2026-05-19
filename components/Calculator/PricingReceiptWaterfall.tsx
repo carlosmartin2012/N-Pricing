@@ -85,7 +85,7 @@ export function PricingReceiptWaterfall({
 
       <div className="flex-1 space-y-1 overflow-auto bg-[var(--nfq-bg-surface)] p-4">
         {result.formulaUsed && (
-          <div className="mb-3 rounded-lg border border-indigo-800/50 bg-indigo-950/30 p-2">
+          <div className="mb-3 rounded-lg border border-[color:var(--nfq-cat-d)]/50 bg-indigo-950/30 p-2">
             <div className="mb-1 text-[11px] font-medium text-[color:var(--nfq-cat-d)]">Applied Formula</div>
             <div className="font-mono text-xs text-[color:var(--nfq-cat-d)]">{result.formulaUsed}</div>
             {result.behavioralMaturityUsed != null &&

@@ -66,12 +66,12 @@ export function PricingReceiptSummary({
         data-testid="receipt-approval"
         className={`flex items-center gap-2 rounded border p-2 ${
           result.approvalLevel === 'Auto'
-            ? 'border-emerald-900 bg-emerald-950/30 text-[color:var(--nfq-success)]'
+            ? 'border-[color:var(--nfq-success)]/30 bg-emerald-950/30 text-[color:var(--nfq-success)]'
             : result.approvalLevel === 'L1_Manager'
-              ? 'border-amber-900 bg-amber-950/30 text-[color:var(--nfq-warning)]'
+              ? 'border-[color:var(--nfq-warning)]/30 bg-amber-950/30 text-[color:var(--nfq-warning)]'
               : result.approvalLevel === 'L2_Committee'
-                ? 'border-orange-900 bg-orange-950/30 text-orange-400'
-                : 'border-red-900 bg-red-950/30 text-[color:var(--nfq-danger)]'
+                ? 'border-[color:var(--nfq-warning)]/30 bg-orange-950/30 text-orange-400'
+                : 'border-[color:var(--nfq-danger)]/30 bg-red-950/30 text-[color:var(--nfq-danger)]'
         }`}
       >
         {result.approvalLevel === 'Auto' && <CheckCircle2 size={16} />}

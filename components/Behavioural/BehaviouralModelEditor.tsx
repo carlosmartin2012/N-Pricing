@@ -159,7 +159,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
               )}
             </div>
 
-            <div className={`mt-3 rounded border p-2 text-center text-xs font-bold ${totalWeight === 100 ? 'border-emerald-900 bg-emerald-950/30 text-[color:var(--nfq-success)]' : 'border-red-900 bg-red-950/30 text-[color:var(--nfq-danger)]'}`}>
+            <div className={`mt-3 rounded border p-2 text-center text-xs font-bold ${totalWeight === 100 ? 'border-[color:var(--nfq-success)]/30 bg-emerald-950/30 text-[color:var(--nfq-success)]' : 'border-[color:var(--nfq-danger)]/30 bg-red-950/30 text-[color:var(--nfq-danger)]'}`}>
               Total Weight: {totalWeight}%
             </div>
           </div>

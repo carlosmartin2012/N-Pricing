@@ -53,10 +53,10 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                 <div
                   className={`mb-2 rounded border p-2 ${
                     entry.type === 'LOAN'
-                      ? 'border-emerald-900/50 bg-emerald-900/20 text-[color:var(--nfq-success)]'
+                      ? 'border-[color:var(--nfq-success)]/50 bg-[var(--nfq-success)]/20 text-[color:var(--nfq-success)]'
                       : entry.type === 'DEPOSIT'
-                        ? 'border-amber-900/50 bg-amber-900/20 text-[color:var(--nfq-warning)]'
-                        : 'border-indigo-900/50 bg-indigo-900/20 text-[color:var(--nfq-cat-d)]'
+                        ? 'border-[color:var(--nfq-warning)]/50 bg-[var(--nfq-warning)]/20 text-[color:var(--nfq-warning)]'
+                        : 'border-[color:var(--nfq-cat-d)]/50 bg-[var(--nfq-cat-d)]/20 text-[color:var(--nfq-cat-d)]'
                   }`}
                 >
                   <div className="font-bold">{labels.unitDebit}</div>
@@ -70,9 +70,9 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                 <div
                   className={`mb-2 rounded border p-2 ${
                     entry.type === 'LOAN'
-                      ? 'border-amber-900/50 bg-amber-900/20 text-[color:var(--nfq-warning)]'
+                      ? 'border-[color:var(--nfq-warning)]/50 bg-[var(--nfq-warning)]/20 text-[color:var(--nfq-warning)]'
                       : entry.type === 'DEPOSIT'
-                        ? 'border-rose-900/50 bg-rose-900/20 text-[color:var(--nfq-danger)]'
+                        ? 'border-[color:var(--nfq-danger)]/50 bg-[var(--nfq-danger)]/20 text-[color:var(--nfq-danger)]'
                         : 'border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]'
                   }`}
                 >
@@ -131,7 +131,7 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                 <div className="mb-2 border-b border-slate-700 pb-1 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   DEBIT
                 </div>
-                <div className="mb-2 rounded border border-amber-900/50 bg-amber-900/20 p-2 text-[color:var(--nfq-warning)]">
+                <div className="mb-2 rounded border border-[color:var(--nfq-warning)]/50 bg-[var(--nfq-warning)]/20 p-2 text-[color:var(--nfq-warning)]">
                   <div className="font-bold">{labels.treasuryDebit}</div>
                 </div>
               </div>
