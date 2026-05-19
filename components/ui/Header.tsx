@@ -1,5 +1,5 @@
-import React, { Suspense, useState } from 'react';
-import { Bell, HelpCircle, Languages, Menu, Monitor, Moon, Search, Sun, Upload } from 'lucide-react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+import { Bell, HelpCircle, Languages, LogOut, Menu, Monitor, Moon, Search, Sun, Upload } from 'lucide-react';
 import { useWalkthroughOptional } from '../../contexts/WalkthroughContext';
 import { FIRST_LOGIN_TOUR_ID } from '../../constants/walkthroughTours';
 import { ViewState, UserProfile } from '../../types';
@@ -74,8 +74,30 @@ export const Header: React.FC<HeaderProps> = ({
   onWorkspaceModeChange,
 }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
   const t = getTranslations(language);
   const walkthrough = useWalkthroughOptional();
+
+  // Close user menu on outside click or Escape. Keeps the menu anchored
+  // to the avatar without locking it behind aria-hidden boilerplate.
+  useEffect(() => {
+    if (!isUserMenuOpen) return;
+    const handlePointer = (event: MouseEvent) => {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsUserMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [isUserMenuOpen]);
   const currentItem =
     mainNavItems.find((item) => item.id === currentView) ||
     bottomNavItems.find((item) => item.id === currentView) ||
@@ -208,17 +230,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        {/* R2: Language toggle pushed to min-[1600px] (XXL screens). On
-            smaller screens, the User Config modal carries the language
-            switch (Settings > Language). Most users set this once. */}
-        <button
-          onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-          className="hidden h-10 items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] min-[1600px]:inline-flex"
-          title={t.language}
-        >
-          <Languages size={14} />
-          {language}
-        </button>
+        {/* R2/R3: Language toggle moved into the user-menu dropdown
+            (avatar > Language). Most users set this once per workspace. */}
 
         <OfflineBadge
           pendingCount={offlinePendingCount}
@@ -249,30 +262,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {entityLabels && <EntitySwitcher labels={entityLabels} />}
 
-        <button
-          onClick={() => setTheme(nextTheme())}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)]"
-          title={`${t.theme}: ${themeLabel}`}
-        >
-          <ThemeIcon size={16} />
-        </button>
-
-        {/* R2: Help / walkthrough-replay button pushed to min-[1536px]
-            (was 1280px). The tour is one-time onboarding for most users;
-            keeping it persistent on common screens added permanent ?
-            chrome with no daily value. Power users can re-trigger via
-            Cmd+K → 'tour' (Command Palette query). */}
-        {walkthrough && (
-          <button
-            data-testid="header-tour-btn"
-            onClick={() => walkthrough.startTour(FIRST_LOGIN_TOUR_ID)}
-            aria-label={t.walkthrough_replay ?? 'Replay product tour'}
-            title={t.walkthrough_replay ?? 'Replay product tour'}
-            className="hidden h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-accent)] min-[1536px]:flex"
-          >
-            <HelpCircle size={17} />
-          </button>
-        )}
+        {/* R3: Theme + Help moved into user-menu dropdown (avatar). */}
 
         <div className="relative">
           <button
@@ -299,22 +289,114 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden min-[1440px]:inline">{t.headerImportData}</span>
         </button>
 
-        <div className="ml-1 flex items-center gap-3 rounded-full bg-[var(--nfq-bg-elevated)] px-2 py-1.5 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)]">
-          <div className="hidden max-w-[160px] text-right md:block">
-            <div className="truncate text-xs font-semibold text-[color:var(--nfq-text-primary)]">
-              {user?.name || 'Guest User'}
-            </div>
-            <div className="truncate text-[10px] text-[color:var(--nfq-text-muted)]">
-              {user?.role || 'Visitor'} / {user?.department || 'External'}
-            </div>
-          </div>
+        {/* R3: User menu — avatar now triggers a dropdown that holds the
+            settings that were previously rendered as standalone topbar
+            chips (Theme, Language, Replay Tour). Logout sits at the
+            bottom. Click-outside + Escape close the menu. */}
+        <div ref={userMenuRef} className="relative">
           <button
-            onClick={onLogout}
-            className="flex h-7 w-9 items-center justify-center rounded-full bg-[color:rgba(var(--nfq-accent-rgb),0.14)] text-xs font-bold text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)] transition-transform hover:scale-[1.03]"
-            title="Logout"
+            data-testid="user-menu-trigger"
+            onClick={() => setIsUserMenuOpen((prev) => !prev)}
+            aria-haspopup="menu"
+            aria-expanded={isUserMenuOpen}
+            className="flex items-center gap-3 rounded-full bg-[var(--nfq-bg-elevated)] px-2 py-1.5 shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:bg-[var(--nfq-bg-bright)]"
           >
-            {userInitials}
+            <span className="hidden max-w-[160px] text-right md:block">
+              <span className="block truncate text-xs font-semibold text-[color:var(--nfq-text-primary)]">
+                {user?.name || 'Guest User'}
+              </span>
+              <span className="block truncate text-[10px] text-[color:var(--nfq-text-muted)]">
+                {user?.role || 'Visitor'} / {user?.department || 'External'}
+              </span>
+            </span>
+            <span
+              className="flex h-7 w-9 items-center justify-center rounded-full bg-[color:rgba(var(--nfq-accent-rgb),0.14)] text-xs font-bold text-[color:var(--nfq-accent)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)]"
+              aria-hidden="true"
+            >
+              {userInitials}
+            </span>
           </button>
+          {isUserMenuOpen && (
+            <div
+              role="menu"
+              aria-label={user?.name || 'User menu'}
+              className="absolute right-0 top-[calc(100%+8px)] z-[60] w-64 overflow-hidden rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] shadow-[var(--nfq-shadow-dialog)] ring-1 ring-[color:var(--nfq-border-ghost)]"
+            >
+              <div className="border-b border-[color:var(--nfq-border-ghost)] px-3 py-3">
+                <div className="truncate text-sm font-semibold text-[color:var(--nfq-text-primary)]">
+                  {user?.name || 'Guest User'}
+                </div>
+                <div className="truncate text-[11px] text-[color:var(--nfq-text-muted)]">
+                  {user?.email || ''}
+                </div>
+                <div className="mt-1 truncate text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">
+                  {user?.role || 'Visitor'} · {user?.department || 'External'}
+                </div>
+              </div>
+
+              <div className="p-1">
+                {/* Theme cycle */}
+                <button
+                  role="menuitem"
+                  onClick={() => setTheme(nextTheme())}
+                  className="flex w-full items-center justify-between gap-2 rounded-[var(--nfq-radius-md)] px-3 py-2 text-left text-[13px] text-[color:var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-bg-bright)]"
+                >
+                  <span className="flex items-center gap-2">
+                    <ThemeIcon size={14} className="text-[color:var(--nfq-text-muted)]" />
+                    {t.theme}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-text-muted)]">
+                    {themeLabel}
+                  </span>
+                </button>
+
+                {/* Language toggle */}
+                <button
+                  role="menuitem"
+                  onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+                  className="flex w-full items-center justify-between gap-2 rounded-[var(--nfq-radius-md)] px-3 py-2 text-left text-[13px] text-[color:var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-bg-bright)]"
+                >
+                  <span className="flex items-center gap-2">
+                    <Languages size={14} className="text-[color:var(--nfq-text-muted)]" />
+                    {t.language}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-text-muted)]">
+                    {language}
+                  </span>
+                </button>
+
+                {/* Replay tour */}
+                {walkthrough && (
+                  <button
+                    data-testid="header-tour-btn"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      walkthrough.startTour(FIRST_LOGIN_TOUR_ID);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-[var(--nfq-radius-md)] px-3 py-2 text-left text-[13px] text-[color:var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-bg-bright)]"
+                  >
+                    <HelpCircle size={14} className="text-[color:var(--nfq-text-muted)]" />
+                    {t.walkthrough_replay ?? 'Replay product tour'}
+                  </button>
+                )}
+              </div>
+
+              <div className="border-t border-[color:var(--nfq-border-ghost)] p-1">
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="flex w-full items-center gap-2 rounded-[var(--nfq-radius-md)] px-3 py-2 text-left text-[13px] text-[color:var(--nfq-danger)] transition-colors hover:bg-[var(--nfq-danger-subtle)]"
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
