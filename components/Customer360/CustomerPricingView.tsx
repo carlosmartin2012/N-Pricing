@@ -72,7 +72,7 @@ const CustomerPricingView: React.FC = () => {
           href="/api/customer360/import/positions"
           onClick={(e) => e.preventDefault()}
           title="POST a CSV body to /api/customer360/import/positions"
-          className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-xs"
+          className="nfq-button nfq-button-ghost flex items-center gap-2 px-3 py-1.5 text-xs"
         >
           <Upload className="h-3 w-3" />
           Import positions (CSV)

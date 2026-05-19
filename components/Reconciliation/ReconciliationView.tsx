@@ -135,7 +135,7 @@ const ReconciliationView: React.FC = () => {
             onClick={exportCsv}
             disabled={filtered.length === 0}
             data-testid="reconciliation-export-csv"
-            className="nfq-btn-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
+            className="nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
           >
             <Download className="h-3 w-3" />
             Export CSV
@@ -294,7 +294,7 @@ const RowEntry: React.FC<{ pair: EntryPair }> = ({ pair }) => {
           <Link
             to={`/blotter?dealId=${encodeURIComponent(pair.dealId)}`}
             data-testid={`reconciliation-row-open-${pair.dealId}`}
-            className="nfq-btn-ghost flex items-center gap-1 px-2 py-1 text-[10px]"
+            className="nfq-button nfq-button-ghost flex items-center gap-1 px-2 py-1 text-[10px]"
           >
             Open <ArrowUpRight className="h-3 w-3" />
           </Link>

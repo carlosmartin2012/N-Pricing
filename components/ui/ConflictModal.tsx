@@ -77,15 +77,15 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
         )}
 
         <div className="flex gap-3 justify-end">
-          <button onClick={onCancel} className="nfq-btn-ghost px-4 py-2 text-sm">
+          <button onClick={onCancel} className="nfq-button nfq-button-ghost px-4 py-2 text-sm">
             <X className="h-4 w-4 mr-1 inline" />
             Cancel
           </button>
-          <button onClick={onAcceptServer} className="nfq-btn-ghost px-4 py-2 text-sm text-amber-400 border-amber-500/30">
+          <button onClick={onAcceptServer} className="nfq-button nfq-button-ghost px-4 py-2 text-sm text-amber-400 border-amber-500/30">
             <Check className="h-4 w-4 mr-1 inline" />
             Use Server Version
           </button>
-          <button onClick={onAcceptMine} className="nfq-btn-primary px-4 py-2 text-sm">
+          <button onClick={onAcceptMine} className="nfq-button nfq-button-primary px-4 py-2 text-sm">
             <Check className="h-4 w-4 mr-1 inline" />
             Use My Version
           </button>

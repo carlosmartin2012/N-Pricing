@@ -53,7 +53,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
           type="button"
           onClick={generate}
           disabled={busy === 'generate'}
-          className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
+          className="nfq-button nfq-button-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
         >
           <RefreshCw className={`h-3 w-3 ${busy === 'generate' ? 'animate-spin' : ''}`} />
           {busy === 'generate' ? t.clvNbaGenerating : t.clvNbaGenerate}
@@ -113,7 +113,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
                 type="button"
                 onClick={() => onConsume(r.id)}
                 disabled={busy === r.id}
-                className="nfq-btn-ghost flex items-center gap-2 px-3 py-1 text-[10px] disabled:opacity-60"
+                className="nfq-button nfq-button-ghost flex items-center gap-2 px-3 py-1 text-[10px] disabled:opacity-60"
               >
                 <Check className="h-3 w-3" />
                 {t.clvNbaConsume}

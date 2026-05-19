@@ -186,7 +186,7 @@ const PipelineView: React.FC = () => {
             onClick={() => setAutoRefresh((x) => !x)}
             aria-pressed={autoRefresh}
             data-testid="pipeline-auto-refresh"
-            className={`nfq-btn-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] ${
+            className={`nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] ${
               autoRefresh ? 'ring-1 ring-emerald-400/40' : ''
             }`}
           >
@@ -198,7 +198,7 @@ const PipelineView: React.FC = () => {
             onClick={exportCsv}
             disabled={sorted.length === 0}
             data-testid="pipeline-export-csv"
-            className="nfq-btn-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
+            className="nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
           >
             <Download className="h-3 w-3" />
             Export CSV
@@ -272,7 +272,7 @@ const PipelineView: React.FC = () => {
               type="button"
               onClick={clearSelection}
               data-testid="pipeline-bulk-clear"
-              className="nfq-btn-ghost px-3 py-1 text-[10px]"
+              className="nfq-button nfq-button-ghost px-3 py-1 text-[10px]"
             >
               Clear
             </button>
@@ -282,7 +282,7 @@ const PipelineView: React.FC = () => {
                 onClick={bulkConsume}
                 disabled={consume.isPending}
                 data-testid="pipeline-bulk-consume"
-                className="nfq-btn-primary flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
+                className="nfq-button nfq-button-primary flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
               >
                 <Check className="h-3 w-3" />
                 Mark {selected.size} consumed
@@ -424,7 +424,7 @@ const PipelineRow: React.FC<RowProps> = ({
           type="button"
           onClick={onOpenClient}
           data-testid={`pipeline-row-open-${row.id}`}
-          className="nfq-btn-ghost flex items-center gap-1.5 px-3 py-1 text-[10px]"
+          className="nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px]"
         >
           Open client <ArrowUpRight className="h-3 w-3" />
         </button>
@@ -434,7 +434,7 @@ const PipelineRow: React.FC<RowProps> = ({
             onClick={onConsume}
             disabled={consumeBusy}
             data-testid={`pipeline-row-consume-${row.id}`}
-            className="nfq-btn-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
+            className="nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px] disabled:opacity-60"
           >
             <Check className="h-3 w-3" />
             Mark consumed

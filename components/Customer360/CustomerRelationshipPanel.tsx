@@ -71,7 +71,7 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
             </span>
           )}
         </div>
-        <button onClick={() => void refetch()} disabled={isFetching} className="nfq-btn-ghost px-3 py-1.5 text-xs">
+        <button onClick={() => void refetch()} disabled={isFetching} className="nfq-button nfq-button-ghost px-3 py-1.5 text-xs">
           <RefreshCw className={`mr-1 inline h-3 w-3 ${isFetching ? 'animate-spin' : ''}`} />
           Refresh
         </button>

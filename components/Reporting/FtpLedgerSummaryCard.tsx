@@ -82,7 +82,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
         <Link
           to={linkTo}
           data-testid="ftp-ledger-summary-link"
-          className="nfq-btn-ghost flex items-center gap-1.5 px-3 py-1 text-[10px]"
+          className="nfq-button nfq-button-ghost flex items-center gap-1.5 px-3 py-1 text-[10px]"
         >
           {linkLabel}
           <ArrowUpRight className="h-3 w-3" />

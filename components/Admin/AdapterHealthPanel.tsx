@@ -94,7 +94,7 @@ export const AdapterHealthPanel: React.FC = () => {
           type="button"
           onClick={() => void load()}
           disabled={isLoading}
-          className="nfq-btn-ghost px-3 py-1.5 text-xs"
+          className="nfq-button nfq-button-ghost px-3 py-1.5 text-xs"
         >
           <RefreshCw className={`h-3 w-3 mr-1 inline ${isLoading ? 'animate-spin' : ''}`} />
           Refresh

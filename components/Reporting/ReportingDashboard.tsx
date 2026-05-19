@@ -261,7 +261,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setExportMenuOpen((prev) => !prev)}
-              className="nfq-btn-ghost flex items-center gap-1.5 text-xs font-mono tracking-normal"
+              className="nfq-button nfq-button-ghost flex items-center gap-1.5 text-xs font-mono tracking-normal"
               title={t.regulatoryExport}
             >
               <Download className="w-3.5 h-3.5" />

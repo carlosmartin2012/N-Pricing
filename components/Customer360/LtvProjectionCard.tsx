@@ -64,7 +64,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
             type="button"
             onClick={recompute}
             disabled={recomputing}
-            className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
+            className="nfq-button nfq-button-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
           >
             <RefreshCw className={`h-3 w-3 ${recomputing ? 'animate-spin' : ''}`} />
             {recomputing ? t.clvComputing : t.clvCompute}
@@ -93,7 +93,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
           type="button"
           onClick={recompute}
           disabled={recomputing}
-          className="nfq-btn-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
+          className="nfq-button nfq-button-ghost flex items-center gap-2 px-3 py-1.5 text-[11px] disabled:opacity-60"
         >
           <RefreshCw className={`h-3 w-3 ${recomputing ? 'animate-spin' : ''}`} />
           {t.clvRecompute}

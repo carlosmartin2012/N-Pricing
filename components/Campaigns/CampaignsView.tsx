@@ -130,13 +130,13 @@ const CampaignsView: React.FC = () => {
           {activeEntity && <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => void load()} disabled={loading} className="nfq-btn-ghost px-3 py-1.5 text-xs">
+          <button onClick={() => void load()} disabled={loading} className="nfq-button nfq-button-ghost px-3 py-1.5 text-xs">
             <RefreshCw className={`mr-1 inline h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="nfq-btn-primary flex items-center gap-1 px-3 py-1.5 text-xs"
+            className="nfq-button nfq-button-primary flex items-center gap-1 px-3 py-1.5 text-xs"
           >
             <Plus className="h-3 w-3" />
             {t.commercialCampaignNew}
@@ -244,10 +244,10 @@ const CampaignsView: React.FC = () => {
           </div>
           {error && <div className="text-xs text-rose-400">{error}</div>}
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowForm(false)} className="nfq-btn-ghost px-3 py-1.5 text-xs">
+            <button type="button" onClick={() => setShowForm(false)} className="nfq-button nfq-button-ghost px-3 py-1.5 text-xs">
               Cancel
             </button>
-            <button type="submit" disabled={submitting} className="nfq-btn-primary px-3 py-1.5 text-xs">
+            <button type="submit" disabled={submitting} className="nfq-button nfq-button-primary px-3 py-1.5 text-xs">
               {submitting ? 'Creating…' : 'Create as draft'}
             </button>
           </div>
@@ -313,7 +313,7 @@ const CampaignsView: React.FC = () => {
                             {c.status === 'draft' && (
                               <button
                                 onClick={() => void transition(c.id, 'approved')}
-                                className="ml-1 nfq-btn-ghost px-2 py-0.5 text-[10px]"
+                                className="ml-1 nfq-button nfq-button-ghost px-2 py-0.5 text-[10px]"
                                 title="Approve"
                               >
                                 <CheckCircle2 className="h-3 w-3 inline text-cyan-400" />
@@ -322,7 +322,7 @@ const CampaignsView: React.FC = () => {
                             {c.status === 'approved' && (
                               <button
                                 onClick={() => void transition(c.id, 'active')}
-                                className="ml-1 nfq-btn-ghost px-2 py-0.5 text-[10px]"
+                                className="ml-1 nfq-button nfq-button-ghost px-2 py-0.5 text-[10px]"
                                 title="Activate"
                               >
                                 <CheckCircle2 className="h-3 w-3 inline text-emerald-400" />
@@ -331,7 +331,7 @@ const CampaignsView: React.FC = () => {
                             {(c.status === 'draft' || c.status === 'approved' || c.status === 'active') && (
                               <button
                                 onClick={() => void transition(c.id, 'cancelled')}
-                                className="ml-1 nfq-btn-ghost px-2 py-0.5 text-[10px]"
+                                className="ml-1 nfq-button nfq-button-ghost px-2 py-0.5 text-[10px]"
                                 title="Cancel"
                               >
                                 <XCircle className="h-3 w-3 inline text-rose-400" />
