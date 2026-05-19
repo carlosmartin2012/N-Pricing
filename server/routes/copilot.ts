@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import Anthropic from '@anthropic-ai/sdk';
 import { queryOne } from '../db';
 import { safeError } from '../middleware/errorHandler';
 import { buildCopilotPrompt, scrubClientPii, type PricingSnapshotForPrompt } from '../../utils/copilot/promptBuilder';
@@ -13,15 +14,9 @@ import type {
  * POST /api/copilot/ask — Ola 7 Bloque C.2.
  *
  * Cmd+K Ask flow. Tenancy-scoped, builds prompt via the pure
- * promptBuilder (with PII redaction by default), calls Gemini, and
- * returns a structured response with validated citations.
- *
- * Storage of ai_response_traces is deferred until the migration in C.4
- * lands a per-tenant traces table — for now the route returns a
- * synthetic traceId derived from request fingerprint.
- *
- * Gemini integration is injected via `geminiCaller` so the route is
- * unit-testable without a real API key.
+ * promptBuilder (with PII redaction by default), calls Claude via
+ * Replit AI Integrations, and returns a structured response with
+ * validated citations.
  */
 
 export interface GeminiCaller {
@@ -41,7 +36,7 @@ interface SnapshotRow {
   raroc: number | null;
 }
 
-const COPILOT_RATE_LIMIT_PER_USER = 5; // requests per minute
+const COPILOT_RATE_LIMIT_PER_USER = 5;
 const rateLimitBuckets = new Map<string, { count: number; windowStart: number }>();
 
 function isRateLimited(userKey: string): boolean {
@@ -57,51 +52,39 @@ function isRateLimited(userKey: string): boolean {
 }
 
 function shouldRedact(): boolean {
-  // Default true (failing closed). Per-tenant override would arrive
-  // via tenant_feature_flags later — this MVP reads the env-level
-  // global toggle decided in plan §7.
   return process.env.COPILOT_REDACT_CLIENT_PII !== 'false';
 }
 
-function defaultGeminiCaller(): GeminiCaller {
+function defaultClaudeCaller(): GeminiCaller {
   return async (prompt, lang) => {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('Gemini API key not configured');
+    if (!process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL) {
+      throw new Error('Anthropic AI integration not configured');
     }
-    const model = process.env.COPILOT_MODEL || 'gemini-2.0-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30_000);
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3 },
-        }),
-        signal: controller.signal,
-      });
-      const data: unknown = await response.json();
-      if (!response.ok) {
-        const msg = (data as { error?: { message?: string } })?.error?.message ?? `HTTP ${response.status}`;
-        throw new Error(`Gemini error: ${msg}`);
-      }
-      const candidates = (data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }).candidates;
-      const text = candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
-      return text || (lang === 'es'
+    const client = new Anthropic({
+      apiKey: process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY ?? 'replit-managed',
+      baseURL: process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+    });
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const text = response.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('');
+    return (
+      text ||
+      (lang === 'es'
         ? 'No se pudo obtener respuesta del modelo.'
-        : 'Could not retrieve a response from the model.');
-    } finally {
-      clearTimeout(timeout);
-    }
+        : 'Could not retrieve a response from the model.')
+    );
   };
 }
 
 export function createCopilotRouter(geminiCaller?: GeminiCaller): Router {
   const router = Router();
-  const callGemini = geminiCaller ?? defaultGeminiCaller();
+  const callClaude = geminiCaller ?? defaultClaudeCaller();
 
   router.post('/ask', async (req, res) => {
     try {
@@ -125,9 +108,6 @@ export function createCopilotRouter(geminiCaller?: GeminiCaller): Router {
       const context = body?.context ?? {};
       const request: CopilotAskRequest = { question, context, lang };
 
-      // Optional snapshot resolution. We tolerate a missing snapshot
-      // (the question is then treated as "general") so users can ask
-      // before any deal is loaded.
       let snapshot: PricingSnapshotForPrompt | undefined;
       if (typeof context.snapshotId === 'string' && context.snapshotId) {
         const row = await queryOne<SnapshotRow>(
@@ -164,8 +144,7 @@ export function createCopilotRouter(geminiCaller?: GeminiCaller): Router {
         redactPii: shouldRedact(),
       });
 
-      const rawAnswer = await callGemini(prompt, lang);
-      // Defensive: scrub any PII Gemini may have echoed.
+      const rawAnswer = await callClaude(prompt, lang);
       const answer = redactedPii ? scrubClientPii(rawAnswer, snapshot) : rawAnswer;
       const citations = extractValidatedCitations(answer);
 
@@ -178,7 +157,7 @@ export function createCopilotRouter(geminiCaller?: GeminiCaller): Router {
       };
       res.json(response);
     } catch (err) {
-      const code = (err as Error)?.message?.includes('Gemini API key not configured')
+      const code = (err as Error)?.message?.includes('not configured')
         ? 'service_unavailable'
         : 'internal_error';
       res.status(code === 'service_unavailable' ? 503 : 500).json({
@@ -191,10 +170,8 @@ export function createCopilotRouter(geminiCaller?: GeminiCaller): Router {
   return router;
 }
 
-// Default export for the production wiring.
 export default createCopilotRouter();
 
-// Test helper — clears the in-memory rate limit between specs.
 export function __resetCopilotRateLimits(): void {
   rateLimitBuckets.clear();
 }
