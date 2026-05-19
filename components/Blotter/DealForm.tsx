@@ -79,13 +79,13 @@ const DealForm: React.FC<Props> = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded border border-slate-800 bg-slate-900 p-3">
-        <div className="text-[10px] font-bold uppercase text-slate-500">{t.dealId}</div>
-        <div className="font-mono text-sm text-cyan-400">{selectedDeal.id}</div>
+      <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-3">
+        <div className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">{t.dealId}</div>
+        <div className="font-mono text-sm text-[color:var(--nfq-accent)]">{selectedDeal.id}</div>
       </div>
 
       <div className="space-y-4 border-b border-slate-800 pb-4">
-        <h4 className="text-xs font-bold uppercase text-slate-400">{t.counterparty}</h4>
+        <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.counterparty}</h4>
         <InputGroup label="Client ID">
           <Controller
             control={control}
@@ -153,7 +153,7 @@ const DealForm: React.FC<Props> = ({
       </div>
 
       <div className="space-y-4 border-b border-slate-800 pb-4">
-        <h4 className="text-xs font-bold uppercase text-slate-400">{t.productStructure}</h4>
+        <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.productStructure}</h4>
         <InputGroup label={t.productDefinition}>
           <Controller
             control={control}
@@ -266,7 +266,7 @@ const DealForm: React.FC<Props> = ({
       </div>
 
       <div className="space-y-4 border-b border-slate-800 pb-4">
-        <h4 className="text-xs font-bold uppercase text-slate-400">{t.riskAndCapital}</h4>
+        <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.riskAndCapital}</h4>
         <div className="grid grid-cols-2 gap-4">
           <InputGroup label="Risk Weight (%)">
             <TextInput
@@ -303,7 +303,7 @@ const DealForm: React.FC<Props> = ({
       </div>
 
       <div className="space-y-4">
-        <h4 className="text-xs font-bold uppercase text-slate-400">{t.behaviouralAndEsg}</h4>
+        <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.behaviouralAndEsg}</h4>
         <InputGroup label="Behavioural Model">
           <Controller
             control={control}
@@ -362,11 +362,11 @@ const DealForm: React.FC<Props> = ({
       </div>
 
       <div className="space-y-2">
-        <h4 className="text-xs font-bold uppercase text-slate-400">{t.workflowStatus}</h4>
+        <h4 className="text-xs font-bold uppercase text-[color:var(--nfq-text-muted)]">{t.workflowStatus}</h4>
         <div className={`rounded border p-3 text-center text-xs font-medium ${getStatusColor(selectedDeal.status || 'Draft')}`}>
           {formatStatus(selectedDeal.status || 'Draft')}
         </div>
-        <p className="text-[10px] text-slate-600">
+        <p className="text-[10px] text-[color:var(--nfq-text-faint)]">
           {t.statusManagedViaWorkflow}
         </p>
       </div>

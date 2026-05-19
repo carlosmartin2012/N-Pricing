@@ -256,7 +256,7 @@ const MarketBenchmarksView: React.FC = () => {
                             </Button>
                             {isAdmin && (
                               <Button size="sm" variant="ghost" onClick={() => void handleDelete(row)}>
-                                <Trash2 className="h-4 w-4 text-rose-300" />
+                                <Trash2 className="h-4 w-4 text-[color:var(--nfq-danger)]" />
                               </Button>
                             )}
                           </div>

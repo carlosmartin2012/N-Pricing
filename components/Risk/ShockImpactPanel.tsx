@@ -30,18 +30,18 @@ const KpiCard: React.FC<{
       <div className="nfq-label mb-1">{label}</div>
       <div className="flex items-end justify-between">
         <div>
-          <div className="font-mono-nums text-2xl font-bold text-slate-900 dark:text-white">
+          <div className="font-mono-nums text-2xl font-bold text-slate-900 dark:text-[color:var(--nfq-text-primary)]">
             {safeFixed(shocked, 2)}%
           </div>
-          <div className="font-mono text-xs text-slate-400">Base: {safeFixed(base, 2)}%</div>
+          <div className="font-mono text-xs text-[color:var(--nfq-text-muted)]">Base: {safeFixed(base, 2)}%</div>
         </div>
         <div
           className={`font-mono-nums flex items-center text-sm font-bold ${
             tone === 'negative'
               ? 'text-red-500'
               : tone === 'positive'
-                ? 'text-emerald-500'
-                : 'text-slate-500'
+                ? 'text-[color:var(--nfq-success)]'
+                : 'text-[color:var(--nfq-text-faint)]'
           }`}
         >
           {delta > 0 ? '+' : ''}

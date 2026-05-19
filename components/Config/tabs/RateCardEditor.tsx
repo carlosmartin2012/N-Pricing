@@ -60,10 +60,10 @@ const RateCardEditor: React.FC<Props> = ({
 
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between">
-          <label className="text-[10px] font-bold uppercase text-slate-500">Curve Points (Tenor / Rate)</label>
+          <label className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">Curve Points (Tenor / Rate)</label>
           <button
             onClick={() => onChange({ points: [...points, { tenor: '1Y', rate: 0 }] })}
-            className="flex items-center gap-1 text-xs text-cyan-400 hover:text-white"
+            className="flex items-center gap-1 text-xs text-[color:var(--nfq-accent)] hover:text-[color:var(--nfq-text-primary)]"
           >
             <Plus size={10} /> Add
           </button>
@@ -83,11 +83,11 @@ const RateCardEditor: React.FC<Props> = ({
                   onChange={(event) => updatePoint(index, { rate: Number(event.target.value) || 0 })}
                   className="w-full pr-8 text-right"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500">%</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[color:var(--nfq-text-faint)]">%</span>
               </div>
               <button
                 onClick={() => onChange({ points: points.filter((_, pointIndex) => pointIndex !== index) })}
-                className="text-slate-600 hover:text-red-400"
+                className="text-[color:var(--nfq-text-faint)] hover:text-red-400"
               >
                 <X size={14} />
               </button>

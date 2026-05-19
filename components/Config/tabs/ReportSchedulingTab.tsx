@@ -116,16 +116,16 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
   return (
     <>
       {/* Toolbar */}
-      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900">
+      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]">
         <div className="flex items-center gap-2">
-          <Clock size={14} className="text-cyan-400" />
-          <span className="text-xs text-slate-400 font-mono tracking-normal">
+          <Clock size={14} className="text-[color:var(--nfq-accent)]" />
+          <span className="text-xs text-[color:var(--nfq-text-muted)] font-mono tracking-normal">
             {schedules.length} {t.reportSchedules}
           </span>
         </div>
         <button
           onClick={openNew}
-          className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-cyan-400 rounded border border-cyan-800 text-xs hover:bg-cyan-900/60 font-bold"
+          className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-[color:var(--nfq-accent)] rounded border border-cyan-800 text-xs hover:bg-cyan-900/60 font-bold"
         >
           <Plus size={12} /> {t.newSchedule}
         </button>
@@ -134,19 +134,19 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
       {/* Table */}
       <div className="overflow-auto flex-1">
         {loading ? (
-          <div className="p-4 text-center text-xs text-slate-500 font-mono">Loading…</div>
+          <div className="p-4 text-center text-xs text-[color:var(--nfq-text-faint)] font-mono">Loading…</div>
         ) : schedules.length === 0 ? (
-          <div className="p-4 text-center text-xs text-slate-500 font-mono">
+          <div className="p-4 text-center text-xs text-[color:var(--nfq-text-faint)] font-mono">
             No schedules configured. Click «{t.newSchedule}» to create one.
           </div>
         ) : (
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-slate-700 bg-slate-900/60">
+              <tr className="border-b border-slate-700 bg-[var(--nfq-bg-elevated)]/60">
                 {['NAME', t.reportType.toUpperCase(), t.frequency.toUpperCase(), 'FORMAT', t.recipients.toUpperCase(), t.lastRun.toUpperCase(), 'ACTIVE', ''].map((h, i) => (
                   <th
                     key={i}
-                    className="px-4 py-2 text-left font-mono text-slate-500 tracking-normal text-[10px]"
+                    className="px-4 py-2 text-left font-mono text-[color:var(--nfq-text-faint)] tracking-normal text-[10px]"
                   >
                     {h}
                   </th>
@@ -157,17 +157,17 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
               {schedules.map((s) => (
                 <tr
                   key={s.id}
-                  className="border-b border-slate-800 hover:bg-slate-800/40 cursor-pointer"
+                  className="border-b border-slate-800 hover:bg-[var(--nfq-bg-highest)]/40 cursor-pointer"
                   onClick={() => openEdit(s)}
                 >
-                  <td className="px-4 py-2.5 text-white font-medium">{s.name}</td>
-                  <td className="px-4 py-2.5 text-slate-300 font-mono">
+                  <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)] font-medium">{s.name}</td>
+                  <td className="px-4 py-2.5 text-[color:var(--nfq-text-secondary)] font-mono">
                     {REPORT_TYPE_LABELS[s.reportType] ?? s.reportType}
                   </td>
-                  <td className="px-4 py-2.5 text-slate-300 font-mono capitalize">{s.frequency}</td>
-                  <td className="px-4 py-2.5 text-slate-300 font-mono uppercase">{s.format}</td>
-                  <td className="px-4 py-2.5 text-slate-400 font-mono text-right">{s.recipients.length}</td>
-                  <td className="px-4 py-2.5 text-slate-400 font-mono">{formatRelativeTime(s.lastRunAt)}</td>
+                  <td className="px-4 py-2.5 text-[color:var(--nfq-text-secondary)] font-mono capitalize">{s.frequency}</td>
+                  <td className="px-4 py-2.5 text-[color:var(--nfq-text-secondary)] font-mono uppercase">{s.format}</td>
+                  <td className="px-4 py-2.5 text-[color:var(--nfq-text-muted)] font-mono text-right">{s.recipients.length}</td>
+                  <td className="px-4 py-2.5 text-[color:var(--nfq-text-muted)] font-mono">{formatRelativeTime(s.lastRunAt)}</td>
                   <td
                     className="px-4 py-2.5"
                     onClick={(e) => {
@@ -176,9 +176,9 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                     }}
                   >
                     {s.isActive ? (
-                      <ToggleRight size={18} className="text-cyan-400" />
+                      <ToggleRight size={18} className="text-[color:var(--nfq-accent)]" />
                     ) : (
-                      <ToggleLeft size={18} className="text-slate-600" />
+                      <ToggleLeft size={18} className="text-[color:var(--nfq-text-faint)]" />
                     )}
                   </td>
                   <td
@@ -188,7 +188,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       void handleDelete(s.id);
                     }}
                   >
-                    <Trash2 size={13} className="text-slate-600 hover:text-rose-400 transition-colors" />
+                    <Trash2 size={13} className="text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-danger)] transition-colors" />
                   </td>
                 </tr>
               ))}
@@ -204,13 +204,13 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
           <div className="flex-1 bg-black/60" onClick={closeDrawer} />
 
           {/* Panel */}
-          <div className="w-full max-w-md bg-slate-900 border-l border-slate-700 flex flex-col shadow-2xl">
+          <div className="w-full max-w-md bg-[var(--nfq-bg-elevated)] border-l border-slate-700 flex flex-col shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
-              <h2 className="text-sm font-semibold text-white">
+              <h2 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
                 {draft.id ? 'Edit Schedule' : t.newSchedule}
               </h2>
-              <button onClick={closeDrawer} className="text-slate-400 hover:text-white">
+              <button onClick={closeDrawer} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
                 <X size={16} />
               </button>
             </div>
@@ -219,7 +219,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)] mb-1">
                   Name
                 </label>
                 <input
@@ -227,19 +227,19 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                   value={draft.name ?? ''}
                   onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
                   placeholder="e.g. Monthly Portfolio Summary"
-                  className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
               {/* Report Type */}
               <div>
-                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)] mb-1">
                   {t.reportType}
                 </label>
                 <select
                   value={draft.reportType ?? 'portfolio_summary'}
                   onChange={(e) => setDraft((d) => ({ ...d, reportType: e.target.value as ReportType }))}
-                  className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500"
                 >
                   {(Object.entries(REPORT_TYPE_LABELS) as [ReportType, string][]).map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
@@ -249,7 +249,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Frequency */}
               <div>
-                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)] mb-1">
                   {t.frequency}
                 </label>
                 <div className="flex gap-2">
@@ -259,8 +259,8 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       onClick={() => setDraft((d) => ({ ...d, frequency: f }))}
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.frequency === f
-                          ? 'bg-cyan-900/50 border-cyan-700 text-cyan-300'
-                          : 'border-slate-700 text-slate-500 hover:border-slate-500'
+                          ? 'bg-cyan-900/50 border-cyan-700 text-[color:var(--nfq-accent)]'
+                          : 'border-slate-700 text-[color:var(--nfq-text-faint)] hover:border-slate-500'
                       }`}
                     >
                       {f}
@@ -271,7 +271,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Format */}
               <div>
-                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
+                <label className="block text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)] mb-1">
                   Format
                 </label>
                 <div className="flex gap-2">
@@ -281,8 +281,8 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
                       onClick={() => setDraft((d) => ({ ...d, format: f }))}
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono tracking-normal border transition-colors ${
                         draft.format === f
-                          ? 'bg-amber-900/40 border-amber-700 text-amber-300'
-                          : 'border-slate-700 text-slate-500 hover:border-slate-500'
+                          ? 'bg-amber-900/40 border-amber-700 text-[color:var(--nfq-warning)]'
+                          : 'border-slate-700 text-[color:var(--nfq-text-faint)] hover:border-slate-500'
                       }`}
                     >
                       {f}
@@ -293,29 +293,29 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
 
               {/* Recipients */}
               <div>
-                <label className="block text-[10px] font-mono tracking-normal text-slate-500 mb-1">
-                  {t.recipients} <span className="text-slate-600">(comma-separated emails)</span>
+                <label className="block text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)] mb-1">
+                  {t.recipients} <span className="text-[color:var(--nfq-text-faint)]">(comma-separated emails)</span>
                 </label>
                 <textarea
                   value={recipientsRaw}
                   onChange={(e) => setRecipientsRaw(e.target.value)}
                   placeholder="analyst@bank.com, manager@bank.com"
                   rows={3}
-                  className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 resize-none font-mono"
+                  className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded px-3 py-2 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500 resize-none font-mono"
                 />
               </div>
 
               {/* Active toggle */}
               <div className="flex items-center gap-3">
-                <label className="text-[10px] font-mono tracking-normal text-slate-500">Active</label>
+                <label className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-faint)]">Active</label>
                 <button
                   onClick={() => setDraft((d) => ({ ...d, isActive: !d.isActive }))}
                   className="focus:outline-none"
                 >
                   {draft.isActive ? (
-                    <ToggleRight size={22} className="text-cyan-400" />
+                    <ToggleRight size={22} className="text-[color:var(--nfq-accent)]" />
                   ) : (
-                    <ToggleLeft size={22} className="text-slate-600" />
+                    <ToggleLeft size={22} className="text-[color:var(--nfq-text-faint)]" />
                   )}
                 </button>
               </div>
@@ -325,14 +325,14 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
             <div className="px-5 py-4 border-t border-slate-700 flex justify-end gap-2">
               <button
                 onClick={closeDrawer}
-                className="px-4 py-2 text-xs text-slate-400 hover:text-white transition-colors"
+                className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => void handleSave()}
                 disabled={saving || !draft.name?.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--nfq-text-primary)] text-xs font-bold rounded transition-colors"
               >
                 <Check size={12} /> {saving ? 'Saving…' : 'Save Schedule'}
               </button>

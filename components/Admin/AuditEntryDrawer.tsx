@@ -70,7 +70,7 @@ export const AuditEntryDrawer: React.FC<Props> = ({ entry, isOpen, onClose }) =>
             <div className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--nfq-text-muted)]">
               Payload
             </div>
-            <pre className="mt-3 overflow-auto rounded-[var(--nfq-radius-card)] bg-slate-950/70 p-4 text-xs leading-relaxed text-[color:var(--nfq-text-secondary)]">
+            <pre className="mt-3 overflow-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-root)]/70 p-4 text-xs leading-relaxed text-[color:var(--nfq-text-secondary)]">
               {formatAuditDetails(entry.details)}
             </pre>
           </div>

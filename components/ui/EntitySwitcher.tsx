@@ -39,7 +39,7 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
         aria-label={labels.entitySwitcher}
       >
         {isGroupScope ? (
-          <Globe className="h-4 w-4 text-cyan-400" />
+          <Globe className="h-4 w-4 text-[color:var(--nfq-accent)]" />
         ) : (
           <Building2 className="h-4 w-4" style={{ color: entityColors[0] }} />
         )}
@@ -59,10 +59,10 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
             <button
               onClick={() => { setGroupScope(true); setIsOpen(false); }}
               className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/5 ${
-                isGroupScope ? 'bg-cyan-500/10 text-cyan-400' : ''
+                isGroupScope ? 'bg-cyan-500/10 text-[color:var(--nfq-accent)]' : ''
               }`}
             >
-              <Globe className="h-4 w-4 text-cyan-400" />
+              <Globe className="h-4 w-4 text-[color:var(--nfq-accent)]" />
               {labels.groupScope}
             </button>
           )}
@@ -83,7 +83,7 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
               </div>
               <span>{entity.name}</span>
               {!isGroupScope && activeEntity?.id === entity.id && (
-                <span className="ml-auto text-xs text-emerald-400">●</span>
+                <span className="ml-auto text-xs text-[color:var(--nfq-success)]">●</span>
               )}
             </button>
           ))}

@@ -67,7 +67,7 @@ export const DealConfigurationPanel: React.FC<Props> = ({
               data-testid="input-client"
               value={values.clientId}
               onChange={onClientSelect}
-              className="font-bold text-slate-200"
+              className="font-bold text-[color:var(--nfq-text-secondary)]"
             >
               <option value="">{t.selectClient}</option>
               {clients.map((client) => (

@@ -25,9 +25,9 @@ function fmtR2(value: number | null): string {
 
 function r2Tone(value: number | null): string {
   if (value === null) return 'text-[color:var(--nfq-text-secondary)]';
-  if (value >= 0.8) return 'text-emerald-400';
-  if (value >= 0.5) return 'text-amber-400';
-  return 'text-rose-400';
+  if (value >= 0.8) return 'text-[color:var(--nfq-success)]';
+  if (value >= 0.5) return 'text-[color:var(--nfq-warning)]';
+  return 'text-[color:var(--nfq-danger)]';
 }
 
 function r2BadgeVariant(value: number | null): 'success' | 'warning' | 'danger' | 'muted' {
@@ -179,7 +179,7 @@ const ElasticityCalibration: React.FC = () => {
   return (
     <Panel
       title="Elasticity Models"
-      icon={<TrendingUp className="h-5 w-5 text-cyan-400" />}
+      icon={<TrendingUp className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
       actions={
         <div className="flex items-center gap-2">
           <Button size="sm" variant="ghost" onClick={handleOpenAdd}>
@@ -327,7 +327,7 @@ const ElasticityCalibration: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(model)}
-                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-cyan-400 transition-colors"
+                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-[color:var(--nfq-accent)] transition-colors"
                           aria-label={`Edit ${model.product} model`}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ const ElasticityCalibration: React.FC = () => {
                           type="button"
                           onClick={() => handleCalibrate(model.id, model.product, model.segment)}
                           disabled={calibratingId === model.id}
-                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-amber-400 transition-colors disabled:opacity-40"
+                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-[color:var(--nfq-warning)] transition-colors disabled:opacity-40"
                           aria-label={`Calibrate ${model.product} model`}
                         >
                           <RefreshCw className={`h-3.5 w-3.5 ${calibratingId === model.id ? 'animate-spin' : ''}`} />

@@ -237,8 +237,8 @@ const BehaviouralModels: React.FC = () => {
                title={editingModel?.id ? `Edit Model: ${editingModel.id}` : 'New Model Config'}
                footer={
                   <div className="flex justify-end gap-2">
-                     <button onClick={() => setDrawerOpen(false)} className="px-4 py-2 text-xs text-slate-400 hover:text-white">{t.cancel}</button>
-                     <button onClick={handleSave} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded">{t.saveModel}</button>
+                     <button onClick={() => setDrawerOpen(false)} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">{t.cancel}</button>
+                     <button onClick={handleSave} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded">{t.saveModel}</button>
                   </div>
                }
             >

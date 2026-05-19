@@ -196,34 +196,34 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
       )}
 
       {/* General Toolbar */}
-      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900">
+      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]">
         <div className="flex gap-2">
           <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--nfq-text-faint)]" />
             <input
               type="text"
               placeholder="Search rules..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 w-full sm:w-64"
+              className="bg-[var(--nfq-bg-root)] border border-slate-700 rounded pl-9 pr-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] focus:outline-none focus:border-cyan-500 w-full sm:w-64"
             />
           </div>
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleDownloadRulesTemplate}
-            className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-amber-400 rounded border border-slate-700 text-xs hover:bg-slate-700"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-warning)] rounded border border-slate-700 text-xs hover:bg-[var(--nfq-bg-highest)]"
             title="Download Template"
           >
             <FileSpreadsheet size={12} /> Template
           </button>
-          <label className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 text-cyan-400 rounded border border-slate-700 text-xs hover:bg-slate-700 cursor-pointer">
+          <label className="flex items-center gap-1 px-3 py-1.5 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] rounded border border-slate-700 text-xs hover:bg-[var(--nfq-bg-highest)] cursor-pointer">
             <Upload size={12} /> Import
             <input type="file" className="hidden" accept=".xlsx,.xls,.csv" onChange={handleImportRules} />
           </label>
           <button
             onClick={handleAddNewRule}
-            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-cyan-400 rounded border border-cyan-800 text-xs hover:bg-cyan-900/60 font-bold"
+            className="flex items-center gap-1 px-3 py-1.5 bg-cyan-900/40 text-[color:var(--nfq-accent)] rounded border border-cyan-800 text-xs hover:bg-cyan-900/60 font-bold"
           >
             <Plus size={12} /> Add Rule
           </button>
@@ -239,12 +239,12 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
         title={editingRule.id ? 'Edit Rule' : 'New Rule'}
         footer={
           <div className="flex justify-end gap-2">
-            <button onClick={closeDrawer} className="px-4 py-2 text-xs text-slate-400 hover:text-white">
+            <button onClick={closeDrawer} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
               Cancel
             </button>
             <button
               onClick={handleSaveRule}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded"
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
             >
               Submit Change
             </button>

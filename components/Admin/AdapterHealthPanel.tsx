@@ -75,17 +75,17 @@ export const AdapterHealthPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {status === 'ok' ? (
-            <ShieldCheck className="h-5 w-5 text-emerald-400" />
+            <ShieldCheck className="h-5 w-5 text-[color:var(--nfq-success)]" />
           ) : status === 'degraded' ? (
-            <ShieldAlert className="h-5 w-5 text-rose-400" />
+            <ShieldAlert className="h-5 w-5 text-[color:var(--nfq-danger)]" />
           ) : (
-            <Plug className="h-5 w-5 text-slate-500" />
+            <Plug className="h-5 w-5 text-[color:var(--nfq-text-faint)]" />
           )}
-          <h3 className="font-mono text-xs font-medium text-white">
+          <h3 className="font-mono text-xs font-medium text-[color:var(--nfq-text-primary)]">
             Integration Adapters
           </h3>
           {data?.generatedAt && (
-            <span className="nfq-label text-[10px] text-slate-400">
+            <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">
               {formatCheckedAt(data.generatedAt)}
             </span>
           )}
@@ -103,13 +103,13 @@ export const AdapterHealthPanel: React.FC = () => {
 
       {adapters.length === 0 ? (
         <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-6 py-8 text-center">
-          <Plug className="h-8 w-8 text-slate-600 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">
+          <Plug className="h-8 w-8 text-[color:var(--nfq-text-faint)] mx-auto mb-2" />
+          <p className="text-sm text-[color:var(--nfq-text-muted)]">
             {data === null
               ? 'Adapter registry is unavailable.'
               : 'No adapters registered for this deployment.'}
           </p>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-[color:var(--nfq-text-faint)] mt-1">
             Configure <code className="font-mono">ADAPTER_CRM</code> and{' '}
             <code className="font-mono">ADAPTER_MARKET_DATA</code> to wire real integrations.
           </p>
@@ -133,28 +133,28 @@ export const AdapterHealthPanel: React.FC = () => {
                 const FlagIcon = a.ok ? PlugZap : PlugZap2;
                 return (
                   <tr key={`${a.kind}:${a.name}`} className="border-b border-[color:var(--nfq-border-ghost)]">
-                    <td className="px-4 py-2 text-slate-300">
+                    <td className="px-4 py-2 text-[color:var(--nfq-text-secondary)]">
                       <div className="flex items-center gap-2">
-                        <Icon className="h-3.5 w-3.5 text-slate-500" />
+                        <Icon className="h-3.5 w-3.5 text-[color:var(--nfq-text-faint)]" />
                         <span className="font-mono text-xs">{KIND_LABEL[a.kind]}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-2 font-mono text-xs text-white">{a.name}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-[color:var(--nfq-text-primary)]">{a.name}</td>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <FlagIcon className={`h-3.5 w-3.5 ${a.ok ? 'text-emerald-400' : 'text-rose-400'}`} />
-                        <span className={`font-mono text-xs ${a.ok ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <FlagIcon className={`h-3.5 w-3.5 ${a.ok ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`} />
+                        <span className={`font-mono text-xs ${a.ok ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
                           {a.ok ? 'Online' : 'Down'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-right font-mono text-xs text-slate-300 tabular-nums">
+                    <td className="px-4 py-2 text-right font-mono text-xs text-[color:var(--nfq-text-secondary)] tabular-nums">
                       {formatLatency(a.latencyMs)}
                     </td>
-                    <td className="px-4 py-2 font-mono text-xs text-slate-400">
+                    <td className="px-4 py-2 font-mono text-xs text-[color:var(--nfq-text-muted)]">
                       {formatCheckedAt(a.checkedAt)}
                     </td>
-                    <td className="px-4 py-2 text-xs text-slate-400 max-w-md truncate" title={a.message ?? ''}>
+                    <td className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] max-w-md truncate" title={a.message ?? ''}>
                       {a.message ?? ''}
                     </td>
                   </tr>

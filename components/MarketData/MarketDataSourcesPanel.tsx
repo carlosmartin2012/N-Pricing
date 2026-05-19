@@ -86,18 +86,18 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
     <Panel
       className="min-h-[320px]"
       title="Market Data Sources"
-      icon={<SatelliteDish className="h-4 w-4 text-cyan-400" />}
+      icon={<SatelliteDish className="h-4 w-4 text-[color:var(--nfq-accent)]" />}
       actions={<Badge variant="outline">{yieldCurveSources.length} governed sources</Badge>}
     >
       <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
-              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                <DatabaseZap className="h-4 w-4 text-cyan-400" />
+              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">
+                <DatabaseZap className="h-4 w-4 text-[color:var(--nfq-accent)]" />
                 Active Capture Context
               </div>
-              <div className="text-sm text-white">{currentCurrency} curve snapshot</div>
+              <div className="text-sm text-[color:var(--nfq-text-primary)]">{currentCurrency} curve snapshot</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Badge variant="outline">{selectedDate}</Badge>
                 <Badge variant={selectedSource ? 'success' : 'warning'}>
@@ -107,11 +107,11 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
             </div>
 
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
-              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                <Sparkles className="h-4 w-4 text-emerald-400" />
+              <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">
+                <Sparkles className="h-4 w-4 text-[color:var(--nfq-success)]" />
                 Governance Intent
               </div>
-              <p className="text-sm leading-relaxed text-slate-300">
+              <p className="text-sm leading-relaxed text-[color:var(--nfq-text-secondary)]">
                 Register the provider once and reuse it on each curve save/import so reporting can cite provenance.
               </p>
             </div>
@@ -120,10 +120,10 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
           <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
-                <h4 className="text-sm font-semibold text-white">
+                <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">
                   {selectedSource ? `Editing ${selectedSource.name}` : 'Register Yield Curve Source'}
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[color:var(--nfq-text-muted)]">
                   This registry is used by curve snapshots and future market-data adapters.
                 </p>
               </div>
@@ -201,15 +201,15 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
         <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h4 className="text-sm font-semibold text-white">Registered Sources</h4>
-              <p className="text-xs text-slate-400">Choose one before saving/importing a governed curve snapshot.</p>
+              <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Registered Sources</h4>
+              <p className="text-xs text-[color:var(--nfq-text-muted)]">Choose one before saving/importing a governed curve snapshot.</p>
             </div>
             <Badge variant="secondary">{currentCurrency}</Badge>
           </div>
 
           <div className="space-y-3">
             {yieldCurveSources.length === 0 ? (
-              <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-sm text-slate-400">
+              <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-sm text-[color:var(--nfq-text-muted)]">
                 No governed source yet. You can still save a curve, but provenance will be weaker until a source is
                 registered.
               </div>
@@ -231,8 +231,8 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-white">{source.name}</div>
-                        <div className="mt-1 text-xs text-slate-400">{source.provider}</div>
+                        <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">{source.name}</div>
+                        <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">{source.provider}</div>
                       </div>
                       <Badge variant={source.status === 'Active' ? 'success' : 'warning'}>{source.status}</Badge>
                     </div>
@@ -251,7 +251,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
                       </Badge>
                     </div>
 
-                    <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500">
+                    <div className="mt-3 flex items-center gap-2 text-[11px] text-[color:var(--nfq-text-faint)]">
                       <Activity className="h-3.5 w-3.5" />
                       Last sync:{' '}
                       {source.lastSyncAt ? new Date(source.lastSyncAt).toLocaleString() : 'Pending first capture'}

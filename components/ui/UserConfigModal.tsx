@@ -74,7 +74,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             {([
-                                { id: 'dark', label: t.dark, icon: Moon, tone: 'bg-[var(--nfq-bg-root)] text-white' },
+                                { id: 'dark', label: t.dark, icon: Moon, tone: 'bg-[var(--nfq-bg-root)] text-[color:var(--nfq-text-primary)]' },
                                 { id: 'light', label: t.light, icon: Sun, tone: 'bg-white text-slate-900' },
                             ] as const).map(({ id, label, icon: Icon, tone }) => (
                                 <button
@@ -114,7 +114,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
                                         }`}
                                 >
                                     <span className="text-sm font-semibold uppercase tracking-[0.14em]">{lang}</span>
-                                    {language === lang && <Check size={16} className="text-cyan-500" />}
+                                    {language === lang && <Check size={16} className="text-[color:var(--nfq-accent)]" />}
                                 </button>
                             ))}
                         </div>

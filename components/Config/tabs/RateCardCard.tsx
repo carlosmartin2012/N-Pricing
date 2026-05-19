@@ -14,12 +14,12 @@ const RateCardCard: React.FC<Props> = ({
   onEdit,
   onDelete,
 }) => (
-  <div className="group relative rounded border border-slate-800 bg-slate-950 p-4 transition-colors hover:border-slate-600">
+  <div className="group relative rounded border border-slate-800 bg-[var(--nfq-bg-root)] p-4 transition-colors hover:border-slate-600">
     <div className="absolute right-4 top-4 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-      <button onClick={() => onEdit(card)} className="text-slate-400 hover:text-cyan-400">
+      <button onClick={() => onEdit(card)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
         <Edit size={14} />
       </button>
-      <button onClick={() => onDelete(card.id)} className="text-slate-400 hover:text-red-400">
+      <button onClick={() => onDelete(card.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400">
         <Trash2 size={14} />
       </button>
     </div>
@@ -30,15 +30,15 @@ const RateCardCard: React.FC<Props> = ({
       </Badge>
       <Badge variant="default">{card.currency}</Badge>
     </div>
-    <h4 className="mb-1 text-sm font-bold text-slate-200">{card.name}</h4>
-    <div className="mb-4 font-mono text-[10px] text-slate-500">{card.id}</div>
+    <h4 className="mb-1 text-sm font-bold text-[color:var(--nfq-text-secondary)]">{card.name}</h4>
+    <div className="mb-4 font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{card.id}</div>
 
-    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/50 p-2">
+    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/50 p-2">
       <div className="flex gap-2 overflow-x-auto pb-1">
         {(card.points || []).map((point, index) => (
-          <div key={`${card.id}-${index}`} className="min-w-[50px] flex-shrink-0 rounded bg-slate-800 px-2 py-1 text-center">
-            <div className="text-[9px] font-bold text-slate-400">{point.tenor}</div>
-            <div className={`font-mono text-xs font-bold ${point.rate >= 0 ? 'text-cyan-400' : 'text-emerald-400'}`}>
+          <div key={`${card.id}-${index}`} className="min-w-[50px] flex-shrink-0 rounded bg-[var(--nfq-bg-highest)] px-2 py-1 text-center">
+            <div className="text-[9px] font-bold text-[color:var(--nfq-text-muted)]">{point.tenor}</div>
+            <div className={`font-mono text-xs font-bold ${point.rate >= 0 ? 'text-[color:var(--nfq-accent)]' : 'text-[color:var(--nfq-success)]'}`}>
               {point.rate}
             </div>
           </div>

@@ -199,10 +199,10 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
 
   if (bookedDeals.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+      <div className="flex flex-col items-center justify-center py-20 text-[color:var(--nfq-text-faint)]">
         <Activity size={40} className="mb-4 opacity-30" />
         <div className="text-sm font-medium">No Booked Deals</div>
-        <div className="text-xs mt-1 text-slate-600">Book deals to populate pricing analytics</div>
+        <div className="text-xs mt-1 text-[color:var(--nfq-text-faint)]">Book deals to populate pricing analytics</div>
       </div>
     );
   }
@@ -216,13 +216,13 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
             label: 'Total Deals',
             value: `${summaryKpis.count}`,
             icon: <BarChart4 size={14} />,
-            color: 'text-cyan-400',
+            color: 'text-[color:var(--nfq-accent)]',
           },
           {
             label: 'Avg FTP Rate',
             value: `${summaryKpis.avgFtp.toFixed(2)}%`,
             icon: <TrendingUp size={14} />,
-            color: 'text-emerald-400',
+            color: 'text-[color:var(--nfq-success)]',
           },
           {
             label: 'Avg RAROC',
@@ -230,16 +230,16 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
             icon: <Activity size={14} />,
             color:
               summaryKpis.avgRaroc >= 10
-                ? 'text-emerald-400'
+                ? 'text-[color:var(--nfq-success)]'
                 : summaryKpis.avgRaroc >= 5
-                  ? 'text-amber-400'
+                  ? 'text-[color:var(--nfq-warning)]'
                   : 'text-red-400',
           },
           {
             label: 'Portfolio Volume',
             value: fmtM(summaryKpis.totalVolume),
             icon: <PieIcon size={14} />,
-            color: 'text-white',
+            color: 'text-[color:var(--nfq-text-primary)]',
           },
         ].map((kpi) => (
           <div key={kpi.label} className="nfq-kpi-card">
@@ -337,7 +337,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
                 />
                 <Legend
                   wrapperStyle={{ fontSize: '10px' }}
-                  formatter={(value) => <span className="text-slate-400">{value}</span>}
+                  formatter={(value) => <span className="text-[color:var(--nfq-text-muted)]">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>

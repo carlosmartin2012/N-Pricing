@@ -266,7 +266,7 @@ export const CommandPalette: React.FC<Props> = ({ isOpen, onClose }) => {
             onClick={() => setMode('ask')}
             className={`flex items-center gap-1.5 rounded px-3 py-1 text-[11px] font-medium transition-colors ${
               mode === 'ask'
-                ? 'bg-[var(--nfq-bg-elevated)] text-cyan-300'
+                ? 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-accent)]'
                 : 'text-[var(--nfq-text-muted)] hover:text-[var(--nfq-text-secondary)]'
             }`}
           >

@@ -164,7 +164,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
     <div className="flex justify-end">
       <button
         onClick={handleClose}
-        className="rounded bg-emerald-600 px-5 py-2 text-xs font-bold text-white hover:bg-emerald-500"
+        className="rounded bg-emerald-600 px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-emerald-500"
       >
         {t.close}
       </button>
@@ -181,7 +181,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
         {currentStep < LAST_STEP && (
           <button
             onClick={handleNext}
-            className="rounded bg-[var(--nfq-accent)] px-5 py-2 text-xs font-bold text-white hover:opacity-90"
+            className="rounded bg-[var(--nfq-accent)] px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:opacity-90"
           >
             {t.next}
           </button>
@@ -190,7 +190,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
           <button
             onClick={() => void handleCreate()}
             disabled={isSubmitting}
-            className="rounded bg-amber-500 px-5 py-2 text-xs font-bold text-white hover:bg-amber-400 disabled:opacity-50"
+            className="rounded bg-amber-500 px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-amber-400 disabled:opacity-50"
           >
             {isSubmitting ? '...' : t.createEntity}
           </button>
@@ -222,9 +222,9 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
                       isDone
-                        ? 'bg-emerald-600 text-white'
+                        ? 'bg-emerald-600 text-[color:var(--nfq-text-primary)]'
                         : isActive
-                          ? 'bg-amber-500 text-white'
+                          ? 'bg-amber-500 text-[color:var(--nfq-text-primary)]'
                           : 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)]'
                     }`}
                   >
@@ -233,9 +233,9 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
                   <span
                     className={`hidden text-[9px] font-mono tracking-normal sm:block ${
                       isActive
-                        ? 'text-amber-400'
+                        ? 'text-[color:var(--nfq-warning)]'
                         : isDone
-                          ? 'text-emerald-400'
+                          ? 'text-[color:var(--nfq-success)]'
                           : 'text-[color:var(--nfq-text-faint)]'
                     }`}
                   >
@@ -266,7 +266,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
       {/* Success */}
       {submitSuccess && (
         <div className="flex flex-col items-center gap-4 py-12 text-center">
-          <CheckCircle2 size={48} className="text-emerald-400" />
+          <CheckCircle2 size={48} className="text-[color:var(--nfq-success)]" />
           <p className="text-base font-semibold text-[color:var(--nfq-text-primary)]">
             {t.entityCreated}
           </p>

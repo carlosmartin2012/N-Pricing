@@ -57,7 +57,7 @@ const LeakageByDimensionChart: React.FC<Props> = ({ variances, isLoading }) => {
     <div className="nfq-kpi-card">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers size={16} className="text-cyan-400" />
+          <Layers size={16} className="text-[color:var(--nfq-accent)]" />
           <span className="nfq-kpi-label">Leakage by Dimension</span>
         </div>
         <select

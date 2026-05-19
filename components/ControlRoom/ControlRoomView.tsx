@@ -108,7 +108,7 @@ const ControlRoomView: React.FC = () => {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-xs text-[color:var(--nfq-accent)]">{deal.id ?? t.commandDraftDeal}</span>
-                    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-300">
+                    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--nfq-warning)]">
                       {deal.status ?? 'Draft'}
                     </span>
                   </div>
@@ -180,10 +180,10 @@ const ControlRoomView: React.FC = () => {
 
 function Kpi({ label, value, sublabel, tone }: { label: string; value: React.ReactNode; sublabel: string; tone: 'amber' | 'cyan' | 'emerald' | 'rose' }) {
   const toneClass = {
-    amber: 'text-amber-300',
+    amber: 'text-[color:var(--nfq-warning)]',
     cyan: 'text-[color:var(--nfq-accent)]',
-    emerald: 'text-emerald-300',
-    rose: 'text-rose-300',
+    emerald: 'text-[color:var(--nfq-success)]',
+    rose: 'text-[color:var(--nfq-danger)]',
   }[tone];
   return (
     <div className="rounded-lg bg-[var(--nfq-bg-surface)] p-4 shadow-[var(--nfq-shadow-soft)]">
@@ -199,11 +199,11 @@ function ReadinessRow({ ok, label, value, icon: IconOverride }: { ok: boolean; l
     <div className="flex items-center justify-between rounded-lg bg-[var(--nfq-bg-elevated)] px-3 py-2">
       <span className="inline-flex min-w-0 items-center gap-2 text-[color:var(--nfq-text-secondary)]">
         {IconOverride ? (
-          <IconOverride size={15} className={ok ? 'text-emerald-300' : 'text-amber-300'} />
+          <IconOverride size={15} className={ok ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-warning)]'} />
         ) : ok ? (
-          <CheckCircle2 size={15} className="text-emerald-300" />
+          <CheckCircle2 size={15} className="text-[color:var(--nfq-success)]" />
         ) : (
-          <AlertTriangle size={15} className="text-amber-300" />
+          <AlertTriangle size={15} className="text-[color:var(--nfq-warning)]" />
         )}
         {label}
       </span>

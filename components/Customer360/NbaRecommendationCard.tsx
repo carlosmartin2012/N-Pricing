@@ -47,7 +47,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-violet-400" />
-          <span className="nfq-label text-[10px] text-slate-300">{t.clvNbaTitle}</span>
+          <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvNbaTitle}</span>
         </div>
         <button
           type="button"
@@ -61,7 +61,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
       </header>
 
       {!loading && recs.length === 0 && (
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.clvNbaEmpty}
         </p>
       )}
@@ -76,20 +76,20 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
               <div>
                 <div className="flex items-center gap-2">
                   <Tag className="h-3 w-3 text-violet-300" />
-                  <span className="font-mono text-sm font-bold text-white">{r.recommendedProduct}</span>
-                  <span className="font-mono text-[10px] text-slate-500">
+                  <span className="font-mono text-sm font-bold text-[color:var(--nfq-text-primary)]">{r.recommendedProduct}</span>
+                  <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
                     · {fmtEur(r.recommendedVolumeEur)} · {fmtBps(r.recommendedRateBps)}
                   </span>
                 </div>
                 {r.rationale && (
-                  <p className="mt-1 text-[11px] text-slate-400">{r.rationale}</p>
+                  <p className="mt-1 text-[11px] text-[color:var(--nfq-text-muted)]">{r.rationale}</p>
                 )}
               </div>
               <div className="text-right">
-                <div className="font-mono text-sm font-bold text-emerald-300">
+                <div className="font-mono text-sm font-bold text-[color:var(--nfq-success)]">
                   +{fmtEur(r.expectedClvDeltaEur)}
                 </div>
-                <div className="font-mono text-[10px] text-slate-500">
+                <div className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
                   {t.clvNbaConfidence} {fmtPct(r.confidence)}
                 </div>
               </div>
@@ -100,7 +100,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
                 {r.reasonCodes.map((code) => (
                   <span
                     key={code}
-                    className="rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-slate-300"
+                    className="rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-[color:var(--nfq-text-secondary)]"
                   >
                     {REASON_LABEL[code] ?? code}
                   </span>

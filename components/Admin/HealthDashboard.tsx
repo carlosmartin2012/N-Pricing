@@ -81,12 +81,12 @@ const HealthDashboard: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Activity className="h-5 w-5 text-cyan-400" />
-          <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">
+          <Activity className="h-5 w-5 text-[color:var(--nfq-accent)]" />
+          <h2 className="text-sm font-bold tracking-tight text-[color:var(--nfq-text-primary)] uppercase font-mono">
             {t.systemHealth}
           </h2>
           {activeEntity && (
-            <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>
+            <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">{activeEntity.shortCode}</span>
           )}
         </div>
         <button
@@ -99,7 +99,7 @@ const HealthDashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">
         {summary?.latencySampleCount24h
           ? `${t.healthMetricsWindow} ${summary.latencySampleCount24h} ${t.healthLatencySamples}.`
           : t.noHealthMetrics}
@@ -126,9 +126,9 @@ const HealthDashboard: React.FC = () => {
         </h3>
         {alertRules.length === 0 ? (
           <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-6 py-8 text-center">
-            <AlertTriangle className="h-8 w-8 text-slate-600 mx-auto mb-2" />
-            <p className="text-sm text-slate-400">{t.noAlertRules}</p>
-            <p className="text-xs text-slate-500 mt-1">
+            <AlertTriangle className="h-8 w-8 text-[color:var(--nfq-text-faint)] mx-auto mb-2" />
+            <p className="text-sm text-[color:var(--nfq-text-muted)]">{t.noAlertRules}</p>
+            <p className="text-xs text-[color:var(--nfq-text-faint)] mt-1">
               {t.alertRulesHint}
             </p>
           </div>
@@ -146,15 +146,15 @@ const HealthDashboard: React.FC = () => {
               <tbody>
                 {alertRules.map((rule) => (
                   <tr key={rule.id} className="border-b border-[color:var(--nfq-border-ghost)]">
-                    <td className="px-4 py-2 text-white">{rule.name}</td>
-                    <td className="px-4 py-2 font-mono text-xs text-slate-300">{rule.metricName}</td>
-                    <td className="px-4 py-2 font-mono text-xs text-amber-400">
+                    <td className="px-4 py-2 text-[color:var(--nfq-text-primary)]">{rule.name}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{rule.metricName}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-[color:var(--nfq-warning)]">
                       {rule.operator} {rule.threshold}
                     </td>
                     <td className="px-4 py-2">
                       <span
                         className={`inline-block h-2 w-2 rounded-full ${
-                          rule.isActive ? 'bg-emerald-400' : 'bg-slate-600'
+                          rule.isActive ? 'bg-emerald-400' : 'bg-[var(--nfq-bg-bright)]'
                         }`}
                       />
                     </td>

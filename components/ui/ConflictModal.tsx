@@ -46,10 +46,10 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-[var(--nfq-radius-card)] border border-amber-500/30 bg-[var(--nfq-bg-surface)] p-4 shadow-2xl">
         <div className="flex items-center gap-3 mb-4">
-          <AlertTriangle className="h-6 w-6 text-amber-400" />
-          <h3 className="text-lg font-bold text-white">Conflict Detected</h3>
+          <AlertTriangle className="h-6 w-6 text-[color:var(--nfq-warning)]" />
+          <h3 className="text-lg font-bold text-[color:var(--nfq-text-primary)]">Conflict Detected</h3>
         </div>
-        <p className="text-sm text-slate-400 mb-4">
+        <p className="text-sm text-[color:var(--nfq-text-muted)] mb-4">
           This deal was modified by another user while you were editing. Review the differences below.
         </p>
 
@@ -57,23 +57,23 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
           <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] overflow-hidden mb-6">
             <div className="grid grid-cols-3 gap-0 bg-white/5 px-4 py-2">
               <span className="nfq-label text-[10px]">Field</span>
-              <span className="nfq-label text-[10px] text-cyan-400">Your Version</span>
-              <span className="nfq-label text-[10px] text-amber-400">Server Version</span>
+              <span className="nfq-label text-[10px] text-[color:var(--nfq-accent)]">Your Version</span>
+              <span className="nfq-label text-[10px] text-[color:var(--nfq-warning)]">Server Version</span>
             </div>
             {diffs.map((diff) => (
               <div key={diff.key} className="grid grid-cols-3 gap-0 px-4 py-2 border-t border-[color:var(--nfq-border-ghost)]">
-                <span className="text-xs text-slate-300">{diff.label}</span>
-                <span className="text-xs font-mono text-cyan-400">
+                <span className="text-xs text-[color:var(--nfq-text-secondary)]">{diff.label}</span>
+                <span className="text-xs font-mono text-[color:var(--nfq-accent)]">
                   {String(myVersion[diff.key] ?? '—')}
                 </span>
-                <span className="text-xs font-mono text-amber-400">
+                <span className="text-xs font-mono text-[color:var(--nfq-warning)]">
                   {String(serverVersion[diff.key] ?? '—')}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-slate-500 mb-6">No visible field differences (internal version conflict).</p>
+          <p className="text-xs text-[color:var(--nfq-text-faint)] mb-6">No visible field differences (internal version conflict).</p>
         )}
 
         <div className="flex gap-3 justify-end">
@@ -81,7 +81,7 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
             <X className="h-4 w-4 mr-1 inline" />
             Cancel
           </button>
-          <button onClick={onAcceptServer} className="nfq-button nfq-button-ghost px-4 py-2 text-sm text-amber-400 border-amber-500/30">
+          <button onClick={onAcceptServer} className="nfq-button nfq-button-ghost px-4 py-2 text-sm text-[color:var(--nfq-warning)] border-amber-500/30">
             <Check className="h-4 w-4 mr-1 inline" />
             Use Server Version
           </button>

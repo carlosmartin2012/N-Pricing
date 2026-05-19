@@ -9,10 +9,10 @@ interface Props {
 }
 
 const TYPE_COLORS: Record<Notification['type'], string> = {
-  APPROVAL_REQUEST: 'bg-amber-500/20 text-amber-400',
-  APPROVED: 'bg-emerald-500/20 text-emerald-400',
-  REJECTED: 'bg-rose-500/20 text-rose-400',
-  COMMENT: 'bg-cyan-500/20 text-cyan-400',
+  APPROVAL_REQUEST: 'bg-amber-500/20 text-[color:var(--nfq-warning)]',
+  APPROVED: 'bg-emerald-500/20 text-[color:var(--nfq-success)]',
+  REJECTED: 'bg-rose-500/20 text-[color:var(--nfq-danger)]',
+  COMMENT: 'bg-cyan-500/20 text-[color:var(--nfq-accent)]',
 };
 
 const TYPE_LABELS: Record<Notification['type'], string> = {
@@ -69,7 +69,7 @@ export const NotificationPanel: React.FC<Props> = ({ isOpen, onClose }) => {
           <Bell size={14} className="text-[var(--nfq-accent)]" />
           <span className="text-sm font-semibold text-[var(--nfq-text-primary)]">Notifications</span>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-[var(--nfq-danger)] px-1.5 py-0.5 text-[10px] font-bold text-white">
+            <span className="rounded-full bg-[var(--nfq-danger)] px-1.5 py-0.5 text-[10px] font-bold text-[color:var(--nfq-text-primary)]">
               {unreadCount}
             </span>
           )}

@@ -38,35 +38,35 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
 
                   {/* Active Rules Flow */}
                   <div className="flex flex-col space-y-2">
-                     <div className="text-[10px] uppercase text-slate-500 font-bold tracking-widest flex items-center gap-2">
+                     <div className="text-[10px] uppercase text-[color:var(--nfq-text-faint)] font-bold tracking-widest flex items-center gap-2">
                         <GitBranch size={12} /> {t.decisionTree}
                      </div>
 
                      {/* Step 1: Product */}
                      <div className="flex items-center gap-3 text-sm">
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('LOAN') ? 'border-cyan-500 bg-cyan-950/30 text-cyan-400' : 'border-slate-600 text-slate-600'}`}>
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('LOAN') ? 'border-cyan-500 bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            L
                         </div>
-                        <ArrowRight size={14} className="text-slate-600" />
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('DEP') ? 'border-cyan-500 bg-cyan-950/30 text-cyan-400' : 'border-slate-600 text-slate-600'}`}>
+                        <ArrowRight size={14} className="text-[color:var(--nfq-text-faint)]" />
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('DEP') ? 'border-cyan-500 bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            D
                         </div>
-                        <div className="ml-auto text-xs font-mono text-slate-400">
-                           Product: <span className="text-slate-200">{deal.productType}</span>
+                        <div className="ml-auto text-xs font-mono text-[color:var(--nfq-text-muted)]">
+                           Product: <span className="text-[color:var(--nfq-text-secondary)]">{deal.productType}</span>
                         </div>
                      </div>
 
                      {/* Step 2: Tenor */}
                      <div className="flex items-center gap-3 text-sm mt-2">
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${!isShortTerm ? 'border-cyan-500 bg-cyan-950/30 text-cyan-400' : 'border-slate-600 text-slate-600'}`}>
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${!isShortTerm ? 'border-cyan-500 bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            &gt;1Y
                         </div>
-                        <ArrowRight size={14} className="text-slate-600" />
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${isShortTerm ? 'border-cyan-500 bg-cyan-950/30 text-cyan-400' : 'border-slate-600 text-slate-600'}`}>
+                        <ArrowRight size={14} className="text-[color:var(--nfq-text-faint)]" />
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${isShortTerm ? 'border-cyan-500 bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            &lt;1Y
                         </div>
-                        <div className="ml-auto text-xs font-mono text-slate-400">
-                           Duration: <span className="text-slate-200">{deal.durationMonths}m</span>
+                        <div className="ml-auto text-xs font-mono text-[color:var(--nfq-text-muted)]">
+                           Duration: <span className="text-[color:var(--nfq-text-secondary)]">{deal.durationMonths}m</span>
                         </div>
                      </div>
                   </div>
@@ -75,7 +75,7 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
                   <div className="space-y-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-3">
                      <div className="flex items-center justify-between border-b border-[color:var(--nfq-border-ghost)] pb-2">
                         <div className="flex items-center gap-2">
-                           <Settings size={12} className="text-cyan-500" />
+                           <Settings size={12} className="text-[color:var(--nfq-accent)]" />
                            <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">{t.configurationDetected}</span>
                         </div>
                         <Badge variant="outline" className="text-[10px]">{deal.businessLine || 'N/A'}</Badge>
@@ -117,10 +117,10 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
 
                   <div className="mt-auto pt-4">
                      <div className="flex items-center gap-2 mb-2">
-                        <Layers size={14} className="text-slate-500" />
-                        <span className="text-[10px] font-bold uppercase text-slate-500">{t.activeYieldCurveSource}</span>
+                        <Layers size={14} className="text-[color:var(--nfq-text-faint)]" />
+                        <span className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">{t.activeYieldCurveSource}</span>
                      </div>
-                     <div className="flex items-center justify-between rounded border border-cyan-500/20 bg-cyan-500/10 p-2 font-mono text-xs text-cyan-400">
+                     <div className="flex items-center justify-between rounded border border-cyan-500/20 bg-cyan-500/10 p-2 font-mono text-xs text-[color:var(--nfq-accent)]">
                         <span>USD.SOFR.OIS</span>
                         <span className="text-[10px] opacity-70">Live (14ms)</span>
                      </div>

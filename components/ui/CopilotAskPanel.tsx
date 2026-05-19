@@ -153,7 +153,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
           disabled={ask.isPending || question.trim().length < 3}
           aria-label={t.submit}
           data-testid="copilot-submit"
-          className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-300 transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {ask.isPending ? <Sparkles size={14} className="animate-pulse" /> : <ArrowUp size={14} />}
         </button>
@@ -167,7 +167,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
       )}
 
       {errorCopy && (
-        <p className="rounded border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-rose-300" role="alert">
+        <p className="rounded border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-[color:var(--nfq-danger)]" role="alert">
           {errorCopy}
         </p>
       )}
@@ -184,7 +184,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                 // Simple feedback (could be improved with a toast in the future)
               }}
               aria-label="Copy explanation to clipboard"
-              className="text-[10px] text-cyan-300 hover:text-cyan-200 flex items-center gap-1 active:text-emerald-400"
+              className="text-[10px] text-[color:var(--nfq-accent)] hover:text-cyan-200 flex items-center gap-1 active:text-[color:var(--nfq-success)]"
             >
               Copy
             </button>
@@ -194,7 +194,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
               }}
               disabled={ask.isPending}
               aria-label="Regenerate explanation"
-              className="text-[10px] text-cyan-300 hover:text-cyan-200 flex items-center gap-1 disabled:opacity-50"
+              className="text-[10px] text-[color:var(--nfq-accent)] hover:text-cyan-200 flex items-center gap-1 disabled:opacity-50"
             >
               Regenerate
             </button>
@@ -202,7 +202,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
           <p className="whitespace-pre-wrap leading-relaxed">{ask.data.answer}</p>
           {ask.data.citations.length > 0 && (
             <div className="mt-3 border-t border-cyan-500/10 pt-2">
-              <div className="nfq-label flex items-center gap-1 text-[10px] text-cyan-300">
+              <div className="nfq-label flex items-center gap-1 text-[10px] text-[color:var(--nfq-accent)]">
                 <BookOpen size={10} />
                 {t.citations}
               </div>
@@ -220,7 +220,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
           )}
           {ask.data.suggestedActions.length > 0 && (
             <div className="mt-3 border-t border-cyan-500/10 pt-2" data-testid="copilot-suggested-actions">
-              <div className="nfq-label flex items-center gap-1 text-[10px] text-cyan-300">
+              <div className="nfq-label flex items-center gap-1 text-[10px] text-[color:var(--nfq-accent)]">
                 <ArrowRight size={10} />
                 {t.suggestedActions}
               </div>
@@ -231,7 +231,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                       type="button"
                       onClick={() => handleApplyAction(action)}
                       data-testid={`copilot-action-${action.id}`}
-                      className="flex w-full items-center justify-between gap-2 rounded border border-[color:var(--nfq-border-ghost)] bg-slate-800/40 px-2 py-1.5 text-left text-[11px] text-slate-200 transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
+                      className="flex w-full items-center justify-between gap-2 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1.5 text-left text-[11px] text-[color:var(--nfq-text-secondary)] transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
                     >
                       <span>{action.label}</span>
                       <ArrowRight size={11} className="shrink-0" />

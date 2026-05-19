@@ -152,7 +152,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
               type="checkbox"
               checked={includeBreakdown}
               onChange={(e) => setIncludeBreakdown(e.target.checked)}
-              className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30"
+              className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-cyan-500/30"
             />
             <span className="text-xs text-[color:var(--nfq-text-secondary)]">
               Include FTP component breakdown
@@ -192,7 +192,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
 
           {/* Error state */}
           {error && (
-            <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-rose-400">
+            <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-[color:var(--nfq-danger)]">
               {error}
             </div>
           )}

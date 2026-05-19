@@ -25,9 +25,9 @@ function getDeltaClassName(
 ): string {
   const state = getMetricDeltaState(row, value, baseValue);
 
-  if (state === 'positive') return 'text-emerald-400';
+  if (state === 'positive') return 'text-[color:var(--nfq-success)]';
   if (state === 'negative') return 'text-red-400';
-  return 'text-slate-400';
+  return 'text-[color:var(--nfq-text-muted)]';
 }
 
 function renderDeltaIcon(
@@ -38,7 +38,7 @@ function renderDeltaIcon(
   const state = getMetricDeltaState(row, value, baseValue);
 
   if (state === 'neutral') {
-    return <Minus size={12} className="text-slate-500" />;
+    return <Minus size={12} className="text-[color:var(--nfq-text-faint)]" />;
   }
 
   if (typeof value !== 'number' || typeof baseValue !== 'number') {

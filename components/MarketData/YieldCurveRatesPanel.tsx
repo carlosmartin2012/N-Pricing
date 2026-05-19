@@ -15,8 +15,8 @@ const YieldCurveRatesPanel: React.FC<Props> = ({
   versions,
 }) => (
   <Panel title="Market Rates Breakdown" className="flex flex-1 flex-col overflow-hidden">
-    <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 p-2 dark:border-slate-800 dark:bg-slate-950">
-      <span className="text-[10px] font-bold uppercase text-slate-500">Tenor Spot Rates</span>
+    <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 p-2 dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
+      <span className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">Tenor Spot Rates</span>
       <Badge variant="outline" className="text-[9px]">
         {currency}
       </Badge>
@@ -53,13 +53,13 @@ const YieldCurveRatesPanel: React.FC<Props> = ({
       </table>
     </div>
 
-    <div className="mt-auto border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
-      <div className="mb-2 text-[9px] font-bold uppercase text-slate-400">Version Audit Trail</div>
+    <div className="mt-auto border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]">
+      <div className="mb-2 text-[9px] font-bold uppercase text-[color:var(--nfq-text-muted)]">Version Audit Trail</div>
       <div className="space-y-2">
         {versions.slice(0, 3).map(version => (
           <div key={version.id} className="flex items-center justify-between text-[10px]">
-            <span className="text-slate-600 dark:text-slate-400">{version.date}</span>
-            <span className="font-bold text-slate-700 dark:text-slate-300">{version.id}</span>
+            <span className="text-[color:var(--nfq-text-faint)] dark:text-[color:var(--nfq-text-muted)]">{version.date}</span>
+            <span className="font-bold text-slate-700 dark:text-[color:var(--nfq-text-secondary)]">{version.id}</span>
           </div>
         ))}
       </div>

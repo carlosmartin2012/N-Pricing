@@ -83,8 +83,8 @@ const ConcentrationDashboard: React.FC<Props> = ({ deals }) => {
       {/* Alert banner for high concentration */}
       {highConcentration.length > 0 && (
         <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-rose-500/20 bg-rose-500/5 px-4 py-3">
-          <AlertTriangle size={16} className="text-rose-400 shrink-0" />
-          <p className="text-xs text-rose-300">
+          <AlertTriangle size={16} className="text-[color:var(--nfq-danger)] shrink-0" />
+          <p className="text-xs text-[color:var(--nfq-danger)]">
             High concentration detected in: {highConcentration.map((m) => m.dimension).join(', ')}.
             Review large exposure limits (CRR Art. 395).
           </p>

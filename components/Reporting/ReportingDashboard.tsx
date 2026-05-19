@@ -207,18 +207,18 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
     <div className="flex flex-col h-full bg-[var(--nfq-bg-root)] text-[color:var(--nfq-text-secondary)] overflow-hidden font-sans">
       {isGroupScope && (
         <div className="flex items-center gap-2 bg-cyan-500/10 border-b border-cyan-500/20 px-4 md:px-6 py-2">
-          <Globe className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs font-mono font-medium text-cyan-400">Group Consolidated View</span>
-          <span className="text-xs text-slate-400 ml-2">Aggregated data across all entities</span>
+          <Globe className="h-4 w-4 text-[color:var(--nfq-accent)]" />
+          <span className="text-xs font-mono font-medium text-[color:var(--nfq-accent)]">Group Consolidated View</span>
+          <span className="text-xs text-[color:var(--nfq-text-muted)] ml-2">Aggregated data across all entities</span>
         </div>
       )}
       {/* Top Bar */}
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between border-b border-[var(--nfq-border-ghost)] px-4 md:px-6 py-3 bg-[var(--nfq-bg-surface)] gap-3">
         <div className="flex flex-col xl:flex-row xl:items-center gap-3 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
-            <BarChart4 className="text-cyan-400 w-5 h-5" />
-            <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">
-              FTP Analytics <span className="text-slate-500 font-normal">v4.6</span>
+            <BarChart4 className="text-[color:var(--nfq-accent)] w-5 h-5" />
+            <h2 className="text-sm font-bold tracking-tight text-[color:var(--nfq-text-primary)] uppercase font-mono">
+              FTP Analytics <span className="text-[color:var(--nfq-text-faint)] font-normal">v4.6</span>
             </h2>
           </div>
           <div className="hidden xl:block h-4 w-[1px] bg-white/10" />
@@ -255,7 +255,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                 </option>
               ))}
             </select>
-            {isGroupScope && <span className="nfq-label text-cyan-400 text-[10px]">ALL ENTITIES</span>}
+            {isGroupScope && <span className="nfq-label text-[color:var(--nfq-accent)] text-[10px]">ALL ENTITIES</span>}
           </div>
           {/* Regulatory Export dropdown */}
           <div className="relative" ref={exportMenuRef}>
@@ -272,19 +272,19 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
               <div className="absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-lg bg-[var(--nfq-bg-surface)] border border-[var(--nfq-border-ghost)] shadow-xl py-1">
                 <button
                   onClick={handleExportLCR}
-                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-white transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
                 >
                   {t.exportLCR}
                 </button>
                 <button
                   onClick={handleExportNSFR}
-                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-white transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
                 >
                   {t.exportNSFR}
                 </button>
                 <button
                   onClick={handleExportIRRBB}
-                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-white transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
                 >
                   {t.exportIRRBB}
                 </button>
@@ -295,10 +295,10 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
           <div className="flex flex-col items-end">
             <span className="nfq-label">Market State</span>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] font-mono border-emerald-500/30 text-emerald-400">
+              <Badge variant="outline" className="text-[10px] font-mono border-emerald-500/30 text-[color:var(--nfq-success)]">
                 SOFR: 5.32
               </Badge>
-              <Badge variant="outline" className="text-[10px] font-mono border-amber-500/30 text-amber-400">
+              <Badge variant="outline" className="text-[10px] font-mono border-amber-500/30 text-[color:var(--nfq-warning)]">
                 BI-3: OK
               </Badge>
             </div>
@@ -327,7 +327,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                           setScenarioDeal(INITIAL_DEAL);
                         }
                       }}
-                      className="text-[10px] text-rose-400 hover:text-rose-300 flex items-center gap-1 font-bold"
+                      className="text-[10px] text-[color:var(--nfq-danger)] hover:text-[color:var(--nfq-danger)] flex items-center gap-1 font-bold"
                     >
                       <RefreshCw className="w-3 h-3" /> RESET
                     </button>
@@ -431,7 +431,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
                     <div className="flex justify-between items-center mb-1">
                       <label className="nfq-label">Curve Shock (bps)</label>
                       <span
-                        className={`text-[11px] font-mono ${curveShift >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}
+                        className={`text-[11px] font-mono ${curveShift >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}
                       >
                         {curveShift > 0 && '+'}
                         {curveShift} bps

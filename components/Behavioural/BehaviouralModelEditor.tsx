@@ -40,7 +40,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
         <option value="NMD_Replication">NMD (Core & Caterpillar)</option>
         <option value="Prepayment_CPR">Prepayment (CPR)</option>
       </SelectInput>
-      <p className="mt-1 text-[9px] text-slate-500">Select the behavioural methodology</p>
+      <p className="mt-1 text-[9px] text-[color:var(--nfq-text-faint)]">Select the behavioural methodology</p>
     </InputGroup>
 
     <InputGroup label="Model Name">
@@ -59,12 +59,12 @@ const BehaviouralModelEditor: React.FC<Props> = ({
     </InputGroup>
 
     <div className="border-t border-slate-800 pt-4">
-      <h4 className="mb-4 text-xs font-bold uppercase text-cyan-400">Parameters</h4>
+      <h4 className="mb-4 text-xs font-bold uppercase text-[color:var(--nfq-accent)]">Parameters</h4>
 
       {editingModel.type === 'NMD_Replication' ? (
         <div className="space-y-6">
-          <div className="rounded border border-slate-800 bg-slate-900/50 p-3">
-            <h5 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase text-emerald-400">
+          <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3">
+            <h5 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase text-[color:var(--nfq-success)]">
               <Activity size={12} /> Core & Sensitivity
             </h5>
             <div className="grid grid-cols-2 gap-4">
@@ -74,11 +74,11 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                     type="number"
                     value={editingModel.coreRatio}
                     onChange={(event) => onChange({ coreRatio: Number(event.target.value) || 0 })}
-                    className="font-bold text-emerald-400"
+                    className="font-bold text-[color:var(--nfq-success)]"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">%</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[color:var(--nfq-text-faint)]">%</span>
                 </div>
-                <p className="mt-1 text-[9px] text-slate-500">Stable volume portion</p>
+                <p className="mt-1 text-[9px] text-[color:var(--nfq-text-faint)]">Stable volume portion</p>
               </InputGroup>
               <InputGroup label="Beta Factor (0-1)" tooltip={t.tooltip_behav_betaFactor}>
                 <TextInput
@@ -86,21 +86,21 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                   step="0.05"
                   value={editingModel.betaFactor}
                   onChange={(event) => onChange({ betaFactor: Number(event.target.value) || 0 })}
-                  className="font-bold text-cyan-400"
+                  className="font-bold text-[color:var(--nfq-accent)]"
                 />
-                <p className="mt-1 text-[9px] text-slate-500">Rate sensitivity</p>
+                <p className="mt-1 text-[9px] text-[color:var(--nfq-text-faint)]">Rate sensitivity</p>
               </InputGroup>
             </div>
           </div>
 
-          <div className="rounded border border-slate-800 bg-slate-900/50 p-3">
+          <div className="rounded border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3">
             <div className="mb-3 flex items-center justify-between">
               <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-purple-400">
                 <Split size={12} /> Replication Profile (Caterpillar)
               </h5>
               <button
                 onClick={onAddTranche}
-                className="flex items-center gap-1 rounded border border-cyan-900/50 bg-cyan-950/30 px-2 py-1 text-[10px] font-bold text-cyan-400 hover:text-cyan-300"
+                className="flex items-center gap-1 rounded border border-cyan-900/50 bg-cyan-950/30 px-2 py-1 text-[10px] font-bold text-[color:var(--nfq-accent)] hover:text-[color:var(--nfq-accent)]"
               >
                 <Plus size={10} /> Add Tranche
               </button>
@@ -108,9 +108,9 @@ const BehaviouralModelEditor: React.FC<Props> = ({
 
             <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
               {editingModel.replicationProfile?.map((tranche, index) => (
-                <div key={index} className="flex items-center gap-2 rounded border border-slate-800 bg-slate-950 p-1.5">
+                <div key={index} className="flex items-center gap-2 rounded border border-slate-800 bg-[var(--nfq-bg-root)] p-1.5">
                   <div className="w-20 shrink-0">
-                    <label className="mb-0.5 block text-[9px] text-slate-500">Term</label>
+                    <label className="mb-0.5 block text-[9px] text-[color:var(--nfq-text-faint)]">Term</label>
                     <SelectInput
                       value={tranche.term}
                       onChange={(event) => onTrancheChange(index, 'term', event.target.value)}
@@ -129,7 +129,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                     </SelectInput>
                   </div>
                   <div className="flex-1">
-                    <label className="mb-0.5 block text-[9px] text-slate-500">Weight (%)</label>
+                    <label className="mb-0.5 block text-[9px] text-[color:var(--nfq-text-faint)]">Weight (%)</label>
                     <TextInput
                       type="number"
                       value={tranche.weight}
@@ -138,7 +138,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="mb-0.5 block text-[9px] text-slate-500">Spread (bps)</label>
+                    <label className="mb-0.5 block text-[9px] text-[color:var(--nfq-text-faint)]">Spread (bps)</label>
                     <TextInput
                       type="number"
                       value={tranche.spread}
@@ -146,20 +146,20 @@ const BehaviouralModelEditor: React.FC<Props> = ({
                       className="w-full py-1 text-xs"
                     />
                   </div>
-                  <button onClick={() => onRemoveTranche(index)} className="mt-3 p-1 text-slate-600 hover:text-red-400">
+                  <button onClick={() => onRemoveTranche(index)} className="mt-3 p-1 text-[color:var(--nfq-text-faint)] hover:text-red-400">
                     <X size={14} />
                   </button>
                 </div>
               ))}
 
               {(!editingModel.replicationProfile || editingModel.replicationProfile.length === 0) && (
-                <div className="rounded border border-dashed border-slate-700 p-4 text-center text-[10px] text-slate-500">
+                <div className="rounded border border-dashed border-slate-700 p-4 text-center text-[10px] text-[color:var(--nfq-text-faint)]">
                   No replication tranches defined.
                 </div>
               )}
             </div>
 
-            <div className={`mt-3 rounded border p-2 text-center text-xs font-bold ${totalWeight === 100 ? 'border-emerald-900 bg-emerald-950/30 text-emerald-400' : 'border-red-900 bg-red-950/30 text-red-400'}`}>
+            <div className={`mt-3 rounded border p-2 text-center text-xs font-bold ${totalWeight === 100 ? 'border-emerald-900 bg-emerald-950/30 text-[color:var(--nfq-success)]' : 'border-red-900 bg-red-950/30 text-red-400'}`}>
               Total Weight: {totalWeight}%
             </div>
           </div>

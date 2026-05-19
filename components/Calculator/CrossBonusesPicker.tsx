@@ -84,7 +84,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
     <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <div className="mb-5">
-        <h3 className="text-sm font-semibold text-slate-200">
+        <h3 className="text-sm font-semibold text-[color:var(--nfq-text-secondary)]">
           {t.calcTitleCrossBonuses}
         </h3>
         <p className="mt-1 text-[11px] text-[var(--nfq-text-muted)]">
@@ -121,7 +121,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                   isAttached
                     ? 'border-[var(--nfq-accent)] bg-[var(--nfq-accent)]/20 text-[var(--nfq-accent)]'
-                    : 'border-slate-600 bg-slate-800/60 text-transparent hover:border-slate-400'
+                    : 'border-slate-600 bg-[var(--nfq-bg-highest)]/60 text-transparent hover:border-slate-400'
                 }`}
               >
                 {isAttached && <Check className="h-3 w-3" strokeWidth={3} />}
@@ -129,12 +129,12 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
 
               {/* Label */}
               <div className="min-w-0 flex-1">
-                <div className="truncate text-xs font-medium text-slate-200">
+                <div className="truncate text-xs font-medium text-[color:var(--nfq-text-secondary)]">
                   {rule.label}
                 </div>
                 <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[var(--nfq-text-muted)] font-mono">
                   <span>{`€${rule.annualMarginEur}/año`}</span>
-                  <span className="text-slate-600">·</span>
+                  <span className="text-[color:var(--nfq-text-faint)]">·</span>
                   <span>
                     {`${Math.round(effectiveProb * 100)}%`}
                     {hasOverride && (
@@ -163,7 +163,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                       )
                     }
                     aria-label="Reducir probabilidad"
-                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-[color:var(--nfq-text-muted)] hover:border-slate-500 hover:text-[color:var(--nfq-text-secondary)]"
                   >
                     <Minus className="h-3 w-3" />
                   </button>
@@ -181,7 +181,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                     }}
                     onDoubleClick={() => resetProbability(rule.id)}
                     title="Doble click para restablecer"
-                    className="h-6 w-12 rounded border border-[var(--nfq-border-ghost)] bg-slate-900/60 px-1 text-center font-mono text-[11px] text-slate-200 focus:border-[var(--nfq-accent)] focus:outline-none"
+                    className="h-6 w-12 rounded border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-1 text-center font-mono text-[11px] text-[color:var(--nfq-text-secondary)] focus:border-[var(--nfq-accent)] focus:outline-none"
                   />
                   <button
                     type="button"
@@ -192,7 +192,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
                       )
                     }
                     aria-label="Aumentar probabilidad"
-                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                    className="flex h-6 w-6 items-center justify-center rounded border border-[var(--nfq-border-ghost)] text-[color:var(--nfq-text-muted)] hover:border-slate-500 hover:text-[color:var(--nfq-text-secondary)]"
                   >
                     <Plus className="h-3 w-3" />
                   </button>
@@ -208,7 +208,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
         <span className="text-[10px] font-mono tracking-normal text-[var(--nfq-text-muted)]">
           Total esperado
         </span>
-        <span className="font-mono text-xs font-bold text-slate-100">
+        <span className="font-mono text-xs font-bold text-[color:var(--nfq-text-primary)]">
           {`${attachedCount} ${
             attachedCount === 1 ? 'bonificación' : 'bonificaciones'
           } · −${totalExpectedBps.toFixed(1)} bps total esperado`}

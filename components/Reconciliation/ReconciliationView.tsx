@@ -38,13 +38,13 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
 };
 
 const STATUS_TONE: Record<MatchStatus, string> = {
-  matched: 'bg-emerald-500/10 text-emerald-300',
-  amount_mismatch: 'bg-amber-500/10 text-amber-300',
-  rate_mismatch: 'bg-amber-500/10 text-amber-300',
-  currency_mismatch: 'bg-rose-500/10 text-rose-300',
+  matched: 'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  amount_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  rate_mismatch: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  currency_mismatch: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
   bu_only: 'bg-sky-500/10 text-sky-300',
   treasury_only: 'bg-violet-500/10 text-violet-300',
-  unknown: 'bg-slate-500/10 text-slate-300',
+  unknown: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
 };
 
 type StatusFilter = 'all' | 'matched' | 'unmatched' | MatchStatus;
@@ -108,27 +108,27 @@ const ReconciliationView: React.FC = () => {
         <div className="flex items-center gap-3">
           <Scale className="h-5 w-5 text-violet-400" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               FTP Reconciliation
             </h2>
-            <p className="font-mono text-[10px] text-slate-400">
+            <p className="font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
               Controller view · BU ↔ Treasury journal matching
             </p>
           </div>
           {activeEntity && (
-            <span className="nfq-label text-[10px] text-slate-400">
+            <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">
               {activeEntity.shortCode}
             </span>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="font-mono text-[10px] uppercase text-slate-400">Period</label>
+          <label className="font-mono text-[10px] uppercase text-[color:var(--nfq-text-muted)]">Period</label>
           <input
             type="month"
             value={period}
             onChange={(e) => setPeriod(e.target.value || currentPeriod())}
             data-testid="reconciliation-period"
-            className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
+            className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
           />
           <button
             type="button"
@@ -175,8 +175,8 @@ const ReconciliationView: React.FC = () => {
       </section>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Filter className="h-3 w-3 text-slate-400" />
-        <span className="nfq-label text-[10px] text-slate-400">Status</span>
+        <Filter className="h-3 w-3 text-[color:var(--nfq-text-muted)]" />
+        <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">Status</span>
         {(['all', 'matched', 'unmatched', 'amount_mismatch', 'rate_mismatch', 'currency_mismatch', 'bu_only', 'treasury_only'] as StatusFilter[]).map((s) => {
           const active = statusFilter === s;
           return (
@@ -188,8 +188,8 @@ const ReconciliationView: React.FC = () => {
               data-testid={`reconciliation-filter-${s}`}
               className={`rounded-md px-2 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                 active
-                  ? 'bg-white/[0.08] text-white ring-1 ring-violet-400/40'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)] ring-1 ring-violet-400/40'
+                  : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
               }`}
             >
               {s === 'all' ? 'All' : s === 'matched' ? 'Matched' : s === 'unmatched' ? 'Unmatched' : STATUS_LABEL[s as MatchStatus]}
@@ -201,7 +201,7 @@ const ReconciliationView: React.FC = () => {
       {!isLoading && filtered.length === 0 && (
         <div
           data-testid="reconciliation-empty"
-          className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400"
+          className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]"
         >
           No entries for the current filter. Try a different period or widen the status filter.
         </div>
@@ -244,19 +244,19 @@ interface KpiTileProps {
 
 const KpiTile: React.FC<KpiTileProps> = ({ icon: Icon, label, value, sub, tone }) => {
   const toneClass = {
-    emerald: 'text-emerald-300',
-    amber: 'text-amber-300',
-    rose: 'text-rose-300',
+    emerald: 'text-[color:var(--nfq-success)]',
+    amber: 'text-[color:var(--nfq-warning)]',
+    rose: 'text-[color:var(--nfq-danger)]',
     sky: 'text-sky-300',
   }[tone];
   return (
     <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-      <div className="nfq-label flex items-center gap-1.5 text-[9px] text-slate-400">
+      <div className="nfq-label flex items-center gap-1.5 text-[9px] text-[color:var(--nfq-text-muted)]">
         <Icon className={`h-3 w-3 ${toneClass}`} />
         {label}
       </div>
       <div className={`mt-1 font-mono text-sm font-bold tabular-nums ${toneClass}`}>{value}</div>
-      <p className="font-mono text-[10px] text-slate-500">{sub}</p>
+      <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{sub}</p>
     </div>
   );
 };
@@ -271,10 +271,10 @@ const RowEntry: React.FC<{ pair: EntryPair }> = ({ pair }) => {
       data-testid={`reconciliation-row-${pair.dealId}`}
       className="border-b border-[color:var(--nfq-border-ghost)]"
     >
-      <td className="px-3 py-2 font-mono text-xs text-slate-200">{pair.dealId.slice(0, 12)}…</td>
-      <td className="px-3 py-2 text-xs text-slate-300">{pair.clientName ?? '—'}</td>
-      <td className="px-3 py-2 font-mono text-[10px] text-slate-400">{pair.businessUnit}</td>
-      <td className="px-3 py-2 font-mono text-[10px] text-slate-400">{pair.productType}</td>
+      <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{pair.dealId.slice(0, 12)}…</td>
+      <td className="px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)]">{pair.clientName ?? '—'}</td>
+      <td className="px-3 py-2 font-mono text-[10px] text-[color:var(--nfq-text-muted)]">{pair.businessUnit}</td>
+      <td className="px-3 py-2 font-mono text-[10px] text-[color:var(--nfq-text-muted)]">{pair.productType}</td>
       <td className="px-3 py-2 text-xs">
         <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${STATUS_TONE[pair.matchStatus]}`}>
           {STATUS_LABEL[pair.matchStatus]}
@@ -289,7 +289,7 @@ const RowEntry: React.FC<{ pair: EntryPair }> = ({ pair }) => {
       <td className="px-3 py-2 text-right text-[11px]">
         <div className="flex items-center justify-end gap-2">
           {pair.hint && (
-            <span className="text-slate-400 max-w-[260px] truncate" title={pair.hint}>{pair.hint}</span>
+            <span className="text-[color:var(--nfq-text-muted)] max-w-[260px] truncate" title={pair.hint}>{pair.hint}</span>
           )}
           <Link
             to={`/blotter?dealId=${encodeURIComponent(pair.dealId)}`}

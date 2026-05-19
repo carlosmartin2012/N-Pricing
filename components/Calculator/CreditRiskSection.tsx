@@ -53,7 +53,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs font-semibold tracking-normal text-slate-400 hover:bg-slate-800/40 hover:text-slate-300"
+        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs font-semibold tracking-normal text-[color:var(--nfq-text-muted)] hover:bg-[var(--nfq-bg-highest)]/40 hover:text-[color:var(--nfq-text-secondary)]"
       >
         {t.creditRiskGuarantees}
         <span className="ml-2 text-[10px]">{open ? '▲' : '▼'}</span>
@@ -74,8 +74,8 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                 }}
                 className={`flex-1 rounded-l-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   !isMirror
-                    ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'
-                    : 'border-[var(--nfq-border-ghost)] text-[var(--nfq-text-muted)] hover:text-slate-300'
+                    ? 'bg-cyan-500/20 border-cyan-500/40 text-[color:var(--nfq-accent)]'
+                    : 'border-[var(--nfq-border-ghost)] text-[var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
                 {t.modeNative}
@@ -90,8 +90,8 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                 }}
                 className={`flex-1 rounded-r-lg border border-l-0 px-3 py-1.5 text-xs font-semibold transition-colors ${
                   isMirror
-                    ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'
-                    : 'border-[var(--nfq-border-ghost)] text-[var(--nfq-text-muted)] hover:text-slate-300'
+                    ? 'bg-cyan-500/20 border-cyan-500/40 text-[color:var(--nfq-accent)]'
+                    : 'border-[var(--nfq-border-ghost)] text-[var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
                 {t.modeMirror}
@@ -245,13 +245,13 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                   {DEFAULT_MACRO_SCENARIOS.map((scenario, idx) => (
                     <tr
                       key={scenario.id}
-                      className={idx % 2 === 1 ? 'bg-slate-800/20' : ''}
+                      className={idx % 2 === 1 ? 'bg-[var(--nfq-bg-highest)]/20' : ''}
                     >
-                      <td className="px-3 py-1.5 text-slate-300">{scenario.label}</td>
-                      <td className="px-3 py-1.5 text-right text-slate-400">
+                      <td className="px-3 py-1.5 text-[color:var(--nfq-text-secondary)]">{scenario.label}</td>
+                      <td className="px-3 py-1.5 text-right text-[color:var(--nfq-text-muted)]">
                         {(scenario.weight * 100).toFixed(0)}%
                       </td>
-                      <td className="px-3 py-1.5 text-right text-slate-400">
+                      <td className="px-3 py-1.5 text-right text-[color:var(--nfq-text-muted)]">
                         &times;{scenario.coverageAdjustmentFactor.toFixed(2)}
                       </td>
                     </tr>
@@ -262,8 +262,8 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                     <td className="px-3 py-1.5 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-muted)]">
                       Weighted
                     </td>
-                    <td className="px-3 py-1.5 text-right text-slate-300 font-semibold">100%</td>
-                    <td className="px-3 py-1.5 text-right text-cyan-400 font-semibold">
+                    <td className="px-3 py-1.5 text-right text-[color:var(--nfq-text-secondary)] font-semibold">100%</td>
+                    <td className="px-3 py-1.5 text-right text-[color:var(--nfq-accent)] font-semibold">
                       &times;{weightedFactor.toFixed(3)}
                     </td>
                   </tr>

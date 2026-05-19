@@ -43,7 +43,7 @@ export const PresenceAvatars: React.FC<PresenceAvatarsProps> = ({ users, maxVisi
         );
       })}
       {overflow > 0 && (
-        <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--nfq-bg-root)] bg-white/10 text-[10px] font-mono text-slate-400">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--nfq-bg-root)] bg-white/10 text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
           +{overflow}
         </div>
       )}

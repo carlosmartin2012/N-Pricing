@@ -86,7 +86,7 @@ const ToleranceBandEditor: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-2">
-          <Shield size={16} className="text-amber-400" />
+          <Shield size={16} className="text-[color:var(--nfq-warning)]" />
           <span className="nfq-kpi-label">Tolerance Bands</span>
           <span className="text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
             ({bands.length})
@@ -200,7 +200,7 @@ const ToleranceBandEditor: React.FC = () => {
                 onClick={() => updateField('active', !editingBand.active)}
                 className={`flex h-[38px] items-center justify-center rounded-lg border text-xs font-mono transition-colors ${
                   editingBand.active
-                    ? 'border-emerald-500/40 bg-emerald-950/30 text-emerald-400'
+                    ? 'border-emerald-500/40 bg-emerald-950/30 text-[color:var(--nfq-success)]'
                     : 'border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] text-[color:var(--nfq-text-muted)]'
                 }`}
               >
@@ -294,7 +294,7 @@ const ToleranceBandEditor: React.FC = () => {
                       </td>
                       <td className={tdClass}>{band.tenorBucket || 'All'}</td>
                       <td className={tdClass}>{band.currency || 'All'}</td>
-                      <td className={`${tdClass} [font-variant-numeric:tabular-nums] text-amber-400`}>
+                      <td className={`${tdClass} [font-variant-numeric:tabular-nums] text-[color:var(--nfq-warning)]`}>
                         +/-{band.ftpBpsTolerance}
                       </td>
                       <td className={`${tdClass} [font-variant-numeric:tabular-nums] text-violet-400`}>
@@ -303,7 +303,7 @@ const ToleranceBandEditor: React.FC = () => {
                       <td className={tdClass}>
                         <span className={`inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${
                           band.active
-                            ? 'bg-emerald-950/30 text-emerald-400'
+                            ? 'bg-emerald-950/30 text-[color:var(--nfq-success)]'
                             : 'bg-[var(--nfq-bg-elevated)] text-[color:var(--nfq-text-muted)]'
                         }`}>
                           {band.active ? 'Active' : 'Inactive'}
@@ -321,7 +321,7 @@ const ToleranceBandEditor: React.FC = () => {
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={() => handleDelete(band.id)}
-                                className="text-rose-400 hover:text-rose-300"
+                                className="text-[color:var(--nfq-danger)] hover:text-[color:var(--nfq-danger)]"
                                 disabled={deleteMutation.isPending}
                               >
                                 <Check size={14} />

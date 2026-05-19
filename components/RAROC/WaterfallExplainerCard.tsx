@@ -173,7 +173,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-emerald-400" />
+              <Check className="h-3.5 w-3.5 text-[color:var(--nfq-success)]" />
               Copiado
             </>
           ) : (
@@ -220,7 +220,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
           <button
             type="button"
             onClick={() => setCopilotOpen(true)}
-            className="inline-flex items-center gap-2 rounded-[var(--nfq-radius-card)] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-[var(--nfq-radius-card)] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)] transition hover:opacity-90"
           >
             <Sparkles className="h-4 w-4" />
             Preguntar al copiloto
@@ -244,7 +244,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
                 type="button"
                 onClick={handleAsk}
                 disabled={loading || question.trim().length === 0}
-                className="inline-flex items-center gap-2 rounded-[var(--nfq-radius-card)] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-[var(--nfq-radius-card)] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {loading ? (
                   <>
@@ -274,7 +274,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
             </div>
 
             {error && (
-              <div className="rounded-[var(--nfq-radius-card)] bg-rose-500/10 p-3 text-xs text-rose-300">
+              <div className="rounded-[var(--nfq-radius-card)] bg-rose-500/10 p-3 text-xs text-[color:var(--nfq-danger)]">
                 {error}
               </div>
             )}

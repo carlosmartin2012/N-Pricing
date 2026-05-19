@@ -51,13 +51,13 @@ function buildDiffRows(a: FTPResult, b: FTPResult): DiffRow[] {
 }
 
 const DeltaIndicator: React.FC<{ delta: number; higherIsBetter?: boolean }> = ({ delta, higherIsBetter }) => {
-  if (Math.abs(delta) < 0.0001) return <Equal size={12} className="text-slate-500" />;
+  if (Math.abs(delta) < 0.0001) return <Equal size={12} className="text-[color:var(--nfq-text-faint)]" />;
   const isPositive = delta > 0;
   const isGood = higherIsBetter ? isPositive : !isPositive;
   const Icon = isPositive ? ArrowUp : ArrowDown;
   return (
     <span
-      className={`flex items-center gap-0.5 font-mono text-[11px] ${isGood ? 'text-emerald-400' : 'text-rose-400'}`}
+      className={`flex items-center gap-0.5 font-mono text-[11px] ${isGood ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}
     >
       <Icon size={10} />
       {Math.abs(delta).toFixed(2)}bp
@@ -127,7 +127,7 @@ export const DealComparisonDrawer: React.FC<Props> = ({ isOpen, onClose, dealA, 
                       <td className="px-3 py-2 text-[var(--nfq-text-muted)] w-1/3">{row.label}</td>
                       <td className="px-3 py-2 text-center font-mono text-[var(--nfq-text-primary)]">{row.a}</td>
                       <td
-                        className={`px-3 py-2 text-center font-mono ${row.a !== row.b ? 'text-amber-400 font-semibold' : 'text-[var(--nfq-text-primary)]'}`}
+                        className={`px-3 py-2 text-center font-mono ${row.a !== row.b ? 'text-[color:var(--nfq-warning)] font-semibold' : 'text-[var(--nfq-text-primary)]'}`}
                       >
                         {row.b}
                       </td>

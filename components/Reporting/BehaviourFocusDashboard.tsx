@@ -63,16 +63,16 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
         <div key={model.id} className="flex flex-col gap-4 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">
           <div className="flex items-start justify-between">
             <div>
-              <h4 className="text-sm font-bold uppercase text-white">{model.name}</h4>
+              <h4 className="text-sm font-bold uppercase text-[color:var(--nfq-text-primary)]">{model.name}</h4>
               <Badge
                 variant="outline"
-                className={`mt-1 text-[8px] ${model.type === 'NMD_Replication' ? 'border-purple-500 text-purple-400' : 'border-amber-500 text-amber-400'}`}
+                className={`mt-1 text-[8px] ${model.type === 'NMD_Replication' ? 'border-purple-500 text-purple-400' : 'border-amber-500 text-[color:var(--nfq-warning)]'}`}
               >
                 {model.type === 'NMD_Replication' ? 'NMD REPLICATION' : 'PREPAYMENT CPR'}
               </Badge>
             </div>
             <div className="text-right">
-              <div className="font-mono text-[9px] italic text-slate-500">ID: {model.id}</div>
+              <div className="font-mono text-[9px] italic text-[color:var(--nfq-text-faint)]">ID: {model.id}</div>
             </div>
           </div>
 
@@ -119,31 +119,31 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
             {model.type === 'NMD_Replication' ? (
               <>
                 <div className="text-center">
-                  <div className="text-[8px] uppercase text-slate-500">Core</div>
-                  <div className="text-xs font-bold text-white font-mono">{model.coreRatio}%</div>
+                  <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">Core</div>
+                  <div className="text-xs font-bold text-[color:var(--nfq-text-primary)] font-mono">{model.coreRatio}%</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[8px] uppercase text-slate-500">Beta</div>
-                  <div className="text-xs font-bold text-white font-mono">{model.betaFactor}</div>
+                  <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">Beta</div>
+                  <div className="text-xs font-bold text-[color:var(--nfq-text-primary)] font-mono">{model.betaFactor}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[8px] uppercase text-slate-500">Tranches</div>
-                  <div className="text-xs font-bold text-white font-mono">{model.replicationProfile?.length || 0}</div>
+                  <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">Tranches</div>
+                  <div className="text-xs font-bold text-[color:var(--nfq-text-primary)] font-mono">{model.replicationProfile?.length || 0}</div>
                 </div>
               </>
             ) : (
               <>
                 <div className="text-center">
-                  <div className="text-[8px] uppercase text-slate-500">CPR</div>
-                  <div className="text-xs font-bold text-white font-mono">{model.cpr}%</div>
+                  <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">CPR</div>
+                  <div className="text-xs font-bold text-[color:var(--nfq-text-primary)] font-mono">{model.cpr}%</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[8px] uppercase text-slate-500">Exempt</div>
-                  <div className="text-xs font-bold text-white font-mono">{model.penaltyExempt}%</div>
+                  <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">Exempt</div>
+                  <div className="text-xs font-bold text-[color:var(--nfq-text-primary)] font-mono">{model.penaltyExempt}%</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[8px] uppercase text-slate-500">Method</div>
-                  <div className="text-xs font-bold uppercase italic text-white font-mono">Standard</div>
+                  <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">Method</div>
+                  <div className="text-xs font-bold uppercase italic text-[color:var(--nfq-text-primary)] font-mono">Standard</div>
                 </div>
               </>
             )}

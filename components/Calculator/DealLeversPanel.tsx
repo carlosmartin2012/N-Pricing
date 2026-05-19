@@ -49,7 +49,7 @@ const DealLeverCard: React.FC<DealLeverCardProps> = ({
       value={rangeValue}
       onChange={onRangeChange}
       aria-label={label}
-      className="mb-3 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 transition-all dark:bg-slate-700"
+      className="mb-3 h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 transition-all dark:bg-[var(--nfq-bg-highest)]"
     />
     {children}
   </div>
@@ -78,7 +78,7 @@ export const DealLeversPanel: React.FC<Props> = ({
       <DealLeverCard
         label={t.principalAmount}
         tooltip={t.tooltip_calc_amount}
-        accentClassName="bg-cyan-500/10 text-cyan-400"
+        accentClassName="bg-cyan-500/10 text-[color:var(--nfq-accent)]"
         displayValue={formatDealAmount(values.amount, values.currency)}
         rangeMin={0}
         rangeMax={100000000}
@@ -146,7 +146,7 @@ export const DealLeversPanel: React.FC<Props> = ({
       <DealLeverCard
         label={t.targetMargin}
         tooltip={t.tooltip_calc_marginTarget}
-        accentClassName="bg-emerald-500/10 text-emerald-400"
+        accentClassName="bg-emerald-500/10 text-[color:var(--nfq-success)]"
         displayValue={`+${Number(values.marginTarget || 0).toFixed(2)}%`}
         rangeMin={0}
         rangeMax={10}
@@ -200,19 +200,19 @@ export const DealLeversPanel: React.FC<Props> = ({
           </button>
           <button
             onClick={() => onFieldChange('amount', (values.amount || 0) + 1000000)}
-            className="rounded border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-cyan-400 transition-colors hover:bg-cyan-500/10"
+            className="rounded border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-500/10"
           >
             +1M
           </button>
           <button
             onClick={() => onFieldChange('durationMonths', (values.durationMonths || 0) + 12)}
-            className="rounded border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-cyan-400 transition-colors hover:bg-cyan-500/10"
+            className="rounded border border-cyan-500/20 bg-cyan-500/5 px-3 py-2 text-xs text-[color:var(--nfq-accent)] transition-colors hover:bg-cyan-500/10"
           >
             +12M
           </button>
           <button
             onClick={() => onFieldChange('marginTarget', Number((values.marginTarget + 0.25).toFixed(2)))}
-            className="rounded border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-400 transition-colors hover:bg-emerald-500/10"
+            className="rounded border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-[color:var(--nfq-success)] transition-colors hover:bg-emerald-500/10"
           >
             +25bps
           </button>

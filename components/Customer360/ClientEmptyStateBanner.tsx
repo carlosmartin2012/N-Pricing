@@ -46,8 +46,8 @@ interface Props {
 }
 
 const VARIANT_STYLES: Record<BannerVariant, { icon: React.ComponentType<{ className?: string }>; accent: string; ring: string }> = {
-  'no-data':     { icon: AlertCircle, accent: 'text-amber-300',   ring: 'border-amber-400/30 bg-amber-500/[0.03]' },
-  'no-snapshot': { icon: Sparkles,    accent: 'text-emerald-300', ring: 'border-emerald-400/30 bg-emerald-500/[0.03]' },
+  'no-data':     { icon: AlertCircle, accent: 'text-[color:var(--nfq-warning)]',   ring: 'border-amber-400/30 bg-amber-500/[0.03]' },
+  'no-snapshot': { icon: Sparkles,    accent: 'text-[color:var(--nfq-success)]', ring: 'border-emerald-400/30 bg-emerald-500/[0.03]' },
 };
 
 const ClientEmptyStateBanner: React.FC<Props> = ({
@@ -68,10 +68,10 @@ const ClientEmptyStateBanner: React.FC<Props> = ({
       <div className="flex items-start gap-3">
         <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${accent}`} />
         <div className="min-w-0 space-y-1">
-          <h3 className="font-mono text-xs font-medium text-white">{title}</h3>
-          <p className="text-xs leading-relaxed text-slate-300">{body}</p>
+          <h3 className="font-mono text-xs font-medium text-[color:var(--nfq-text-primary)]">{title}</h3>
+          <p className="text-xs leading-relaxed text-[color:var(--nfq-text-secondary)]">{body}</p>
           {hint && (
-            <p className="font-mono text-[10px] text-slate-500">{hint}</p>
+            <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{hint}</p>
           )}
         </div>
       </div>
@@ -117,7 +117,7 @@ const ClientEmptyStateBanner: React.FC<Props> = ({
       )}
 
       {errorMessage && (
-        <p className="pl-8 font-mono text-[10px] text-rose-300">{errorMessage}</p>
+        <p className="pl-8 font-mono text-[10px] text-[color:var(--nfq-danger)]">{errorMessage}</p>
       )}
     </section>
   );

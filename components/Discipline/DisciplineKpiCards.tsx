@@ -19,8 +19,8 @@ function fmtPct(value: number): string {
 
 function trendColor(value: number, invert = false): string {
   const positive = invert ? value < 0 : value > 0;
-  if (Math.abs(value) < 0.5) return 'text-amber-400';
-  return positive ? 'text-emerald-400' : 'text-rose-400';
+  if (Math.abs(value) < 0.5) return 'text-[color:var(--nfq-warning)]';
+  return positive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]';
 }
 
 const Skeleton: React.FC = () => (
@@ -47,21 +47,21 @@ const DisciplineKpiCards: React.FC<Props> = ({ kpis, isLoading }) => {
       label: 'In-Band Rate',
       value: fmtPct(kpis.inBandPct),
       icon: CheckCircle,
-      tone: kpis.inBandPct >= 90 ? 'text-emerald-400' : kpis.inBandPct >= 75 ? 'text-amber-400' : 'text-rose-400',
+      tone: kpis.inBandPct >= 90 ? 'text-[color:var(--nfq-success)]' : kpis.inBandPct >= 75 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-danger)]',
       sub: `${kpis.inBandCount} / ${kpis.totalDeals} deals`,
     },
     {
       label: 'Total Leakage',
       value: `EUR ${fmtEur(kpis.totalLeakageEur)}`,
       icon: DollarSign,
-      tone: kpis.totalLeakageEur <= 0 ? 'text-emerald-400' : 'text-rose-400',
+      tone: kpis.totalLeakageEur <= 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]',
       sub: 'margin leakage',
     },
     {
       label: 'Outlier Count',
       value: `${kpis.outOfBandCount}`,
       icon: AlertTriangle,
-      tone: kpis.outOfBandCount === 0 ? 'text-emerald-400' : kpis.outOfBandCount <= 5 ? 'text-amber-400' : 'text-rose-400',
+      tone: kpis.outOfBandCount === 0 ? 'text-[color:var(--nfq-success)]' : kpis.outOfBandCount <= 5 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-danger)]',
       sub: 'out of tolerance',
     },
     {

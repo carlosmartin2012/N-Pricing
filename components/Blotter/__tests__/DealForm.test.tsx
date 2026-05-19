@@ -29,7 +29,7 @@ vi.mock('../../../contexts/UIContext', () => ({
 
 vi.mock('../../../utils/dealWorkflow', () => ({
   formatStatus: (s: string) => s.replace(/_/g, ' '),
-  getStatusColor: () => 'bg-slate-500/20 text-slate-400 border-[color:var(--nfq-border-ghost)]',
+  getStatusColor: () => 'bg-slate-500/20 text-[color:var(--nfq-text-muted)] border-[color:var(--nfq-border-ghost)]',
 }));
 
 vi.mock('../../../utils/dealFormResolver', () => ({

@@ -157,46 +157,46 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
 
   return (
     <div className="fixed bottom-20 right-6 w-96 h-[600px] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right-10 fade-in duration-300">
-      <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl border border-cyan-500/30 rounded-lg shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
+      <div className="absolute inset-0 bg-[var(--nfq-bg-root)]/95 backdrop-blur-xl border border-cyan-500/30 rounded-lg shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="h-10 border-b border-cyan-900/50 bg-cyan-950/20 flex items-center justify-between px-4 shrink-0">
-          <div className="flex items-center gap-2 text-cyan-400">
+          <div className="flex items-center gap-2 text-[color:var(--nfq-accent)]">
             <Sparkles size={16} className="animate-pulse" />
             <span className="font-bold text-sm tracking-wider uppercase">Gemini Intelligence</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 rounded border border-slate-800">
-              <Cpu size={10} className="text-emerald-500" />
-              <span className="text-[9px] font-mono text-emerald-500">CONNECTED</span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[var(--nfq-bg-elevated)] rounded border border-slate-800">
+              <Cpu size={10} className="text-[color:var(--nfq-success)]" />
+              <span className="text-[9px] font-mono text-[color:var(--nfq-success)]">CONNECTED</span>
             </div>
             {/* Open Full Lab Button */}
             <button
               onClick={onOpenFullChat}
-              className="text-slate-500 hover:text-cyan-400 transition-colors"
+              className="text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-accent)] transition-colors"
               title="Launch Nexus Prime Lab"
             >
               <Maximize2 size={16} />
             </button>
-            <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors ml-1">
+            <button onClick={onClose} className="text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-primary)] transition-colors ml-1">
               <X size={18} />
             </button>
           </div>
         </div>
 
-        <div className="border-b border-slate-800 bg-slate-950/70 px-4 py-2">
+        <div className="border-b border-slate-800 bg-[var(--nfq-bg-root)]/70 px-4 py-2">
           <div className="flex flex-wrap gap-2">
             {grounding.groundedContext.dossierId && (
-              <span className="rounded-full border border-cyan-800/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-cyan-300">
+              <span className="rounded-full border border-cyan-800/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
                 DOS {grounding.groundedContext.dossierId}
               </span>
             )}
             {grounding.groundedContext.methodologyVersionId && (
-              <span className="rounded-full border border-emerald-800/60 bg-emerald-950/30 px-2 py-1 font-mono text-[10px] text-emerald-300">
+              <span className="rounded-full border border-emerald-800/60 bg-emerald-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-success)]">
                 METH {grounding.groundedContext.methodologyVersionId}
               </span>
             )}
             {grounding.groundedContext.portfolioSnapshotId && (
-              <span className="rounded-full border border-amber-800/60 bg-amber-950/30 px-2 py-1 font-mono text-[10px] text-amber-300">
+              <span className="rounded-full border border-amber-800/60 bg-amber-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-warning)]">
                 SNAP {grounding.groundedContext.portfolioSnapshotId}
               </span>
             )}
@@ -215,8 +215,8 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${
                   msg.role === 'model'
-                    ? 'bg-slate-900 border-cyan-900 text-cyan-400'
-                    : 'bg-slate-800 border-slate-700 text-slate-300'
+                    ? 'bg-[var(--nfq-bg-elevated)] border-cyan-900 text-[color:var(--nfq-accent)]'
+                    : 'bg-[var(--nfq-bg-highest)] border-slate-700 text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
                 {msg.role === 'model' ? <Bot size={16} /> : <User size={16} />}
@@ -224,7 +224,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               <div
                 className={`p-3 rounded-lg text-xs leading-relaxed max-w-[80%] ${
                   msg.role === 'model'
-                    ? 'bg-slate-900/50 border border-slate-800 text-slate-200'
+                    ? 'bg-[var(--nfq-bg-elevated)]/50 border border-slate-800 text-[color:var(--nfq-text-secondary)]'
                     : 'bg-cyan-950/30 border border-cyan-900/50 text-cyan-100'
                 }`}
               >
@@ -234,10 +234,10 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
           ))}
           {isThinking && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-900 border border-cyan-900 flex items-center justify-center shrink-0">
-                <Bot size={16} className="text-cyan-400" />
+              <div className="w-8 h-8 rounded-full bg-[var(--nfq-bg-elevated)] border border-cyan-900 flex items-center justify-center shrink-0">
+                <Bot size={16} className="text-[color:var(--nfq-accent)]" />
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+              <div className="p-3 rounded-lg bg-[var(--nfq-bg-elevated)]/50 border border-slate-800">
                 <div className="flex gap-1">
                   <div
                     className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"
@@ -258,7 +258,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/50 shrink-0">
+        <div className="p-4 border-t border-slate-800 bg-[var(--nfq-bg-elevated)]/50 shrink-0">
           <div className="relative">
             <input
               type="text"
@@ -266,17 +266,17 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Ask Nexus AI about this deal..."
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg pl-4 pr-10 py-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 transition-all font-mono"
+              className="w-full bg-[var(--nfq-bg-root)] border border-slate-700 rounded-lg pl-4 pr-10 py-3 text-xs text-[color:var(--nfq-text-primary)] placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 transition-all font-mono"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isThinking}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-cyan-900/30 text-cyan-400 rounded hover:bg-cyan-500 hover:text-white transition-colors disabled:opacity-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-cyan-900/30 text-[color:var(--nfq-accent)] rounded hover:bg-cyan-500 hover:text-[color:var(--nfq-text-primary)] transition-colors disabled:opacity-50"
             >
               <Send size={14} />
             </button>
           </div>
-          <div className="text-[9px] text-slate-600 mt-2 text-center font-mono">
+          <div className="text-[9px] text-[color:var(--nfq-text-faint)] mt-2 text-center font-mono">
             Powered by Gemini 2.0 Flash • Context: Active Deal {activeDeal.id || 'NEW'}
           </div>
         </div>

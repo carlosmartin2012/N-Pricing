@@ -18,15 +18,15 @@ interface Props {
 
 export const PricingDriversSummary: React.FC<Props> = ({ result, labels }) => {
   const drivers = useMemo(() => [
-    { label: labels.baseRate, value: result.baseRate, tone: 'text-slate-200' },
-    { label: labels.liquidity, value: result.liquiditySpread, tone: 'text-amber-300' },
-    { label: labels.credit, value: result.regulatoryCost, tone: 'text-rose-300' },
-    { label: labels.capital, value: result.capitalCharge, tone: 'text-cyan-300' },
+    { label: labels.baseRate, value: result.baseRate, tone: 'text-[color:var(--nfq-text-secondary)]' },
+    { label: labels.liquidity, value: result.liquiditySpread, tone: 'text-[color:var(--nfq-warning)]' },
+    { label: labels.credit, value: result.regulatoryCost, tone: 'text-[color:var(--nfq-danger)]' },
+    { label: labels.capital, value: result.capitalCharge, tone: 'text-[color:var(--nfq-accent)]' },
     { label: labels.operational, value: result.operationalCost, tone: 'text-violet-300' },
     {
       label: labels.esg,
       value: (result.esgTransitionCharge ?? 0) + (result.esgPhysicalCharge ?? 0) + (result.esgGreeniumAdj ?? 0),
-      tone: 'text-emerald-300',
+      tone: 'text-[color:var(--nfq-success)]',
     },
   ]
     .filter((driver) => Number.isFinite(driver.value))

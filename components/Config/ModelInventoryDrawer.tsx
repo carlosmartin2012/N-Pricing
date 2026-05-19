@@ -65,7 +65,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
               <CategoryBadge category={model.category} />
               <StatusBadge status={model.status} />
             </div>
-            <h3 className="truncate text-lg font-semibold text-white">{model.name}</h3>
+            <h3 className="truncate text-lg font-semibold text-[color:var(--nfq-text-primary)]">{model.name}</h3>
             <p className="mt-1 font-mono text-[11px] tracking-normal text-neutral-400">
               {model.id} · v{model.version}
             </p>
@@ -73,7 +73,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 transition hover:bg-white/5 hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 transition hover:bg-white/5 hover:text-[color:var(--nfq-text-primary)]"
             aria-label="Cerrar panel de detalles"
           >
             <X size={18} />
@@ -137,7 +137,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
             title="Limitaciones declaradas"
             items={model.limitations}
             icon={<AlertCircle size={12} />}
-            titleClassName="text-amber-400"
+            titleClassName="text-[color:var(--nfq-warning)]"
           />
 
           <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]/60 p-4">
@@ -211,7 +211,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
                         >
                           <CheckCircle2
                             size={12}
-                            className="mt-0.5 shrink-0 text-emerald-400"
+                            className="mt-0.5 shrink-0 text-[color:var(--nfq-success)]"
                           />
                           {finding}
                         </li>

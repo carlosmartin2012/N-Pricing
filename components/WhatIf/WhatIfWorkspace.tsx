@@ -180,7 +180,7 @@ const DiffCard: React.FC<{
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-cyan-500/20 px-3 py-1.5 text-[11px] font-medium text-cyan-400 hover:bg-cyan-500/30 transition-colors"
+            className="rounded-lg bg-cyan-500/20 px-3 py-1.5 text-[11px] font-medium text-[color:var(--nfq-accent)] hover:bg-cyan-500/30 transition-colors"
           >
             Save
           </button>
@@ -213,15 +213,15 @@ const DiffCard: React.FC<{
             {diff.parameterPath}
           </div>
           <div className="mt-2 flex items-center gap-3 text-xs">
-            <span className="text-rose-400 line-through">{formatChangeValue(diff.currentValue)}</span>
+            <span className="text-[color:var(--nfq-danger)] line-through">{formatChangeValue(diff.currentValue)}</span>
             <span className="text-[color:var(--nfq-text-secondary)]">&rarr;</span>
-            <span className="text-emerald-400">{formatChangeValue(diff.proposedValue)}</span>
+            <span className="text-[color:var(--nfq-success)]">{formatChangeValue(diff.proposedValue)}</span>
           </div>
         </div>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove(index); }}
-          className="shrink-0 rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
+          className="shrink-0 rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-rose-500/10 hover:text-[color:var(--nfq-danger)] transition-colors"
           aria-label="Remove diff"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -380,7 +380,7 @@ const WhatIfWorkspace: React.FC = () => {
                     : 'text-[color:var(--nfq-text-secondary)] hover:bg-white/[0.03] hover:text-[color:var(--nfq-text-primary)]'
                 }`}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-cyan-300' : ''}`} />
+                <Icon className={`h-4 w-4 shrink-0 ${selected ? 'text-[color:var(--nfq-accent)]' : ''}`} />
                 <span className="truncate text-sm font-semibold">{tab.label}</span>
               </button>
             );
@@ -394,7 +394,7 @@ const WhatIfWorkspace: React.FC = () => {
       <aside className="flex w-72 shrink-0 flex-col self-start rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)] overflow-hidden lg:sticky lg:top-2 lg:max-h-[calc(100vh-6rem)]">
         <div className="flex items-center justify-between gap-2 border-b border-[color:var(--nfq-border-ghost)] px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--nfq-text-primary)]">
-            <FlaskConical className="h-4 w-4 text-cyan-400" />
+            <FlaskConical className="h-4 w-4 text-[color:var(--nfq-accent)]" />
             Sandboxes
           </div>
           <Button
@@ -469,7 +469,7 @@ const WhatIfWorkspace: React.FC = () => {
         ) : (
           <Panel
             title={sandbox.name}
-            icon={<GitBranch className="h-5 w-5 text-cyan-400" />}
+            icon={<GitBranch className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
             actions={
               <div className="flex items-center gap-2">
                 <Badge variant={STATUS_BADGE_VARIANT[sandbox.status]}>{sandbox.status}</Badge>
@@ -601,7 +601,7 @@ const WhatIfWorkspace: React.FC = () => {
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <Panel
             title="Snapshot Comparison"
-            icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+            icon={<BarChart3 className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
             className="h-auto shrink-0"
             actions={
               sandbox?.baseSnapshotId ? (

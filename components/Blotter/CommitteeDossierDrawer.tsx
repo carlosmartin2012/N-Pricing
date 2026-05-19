@@ -129,7 +129,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
             <div className="space-y-6">
               <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <FileSearch className="h-4 w-4 text-cyan-400" />
+                  <FileSearch className="h-4 w-4 text-[color:var(--nfq-accent)]" />
                   <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Pricing Narrative</h3>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -170,7 +170,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
 
               <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <ShieldCheck className="h-4 w-4 text-[color:var(--nfq-success)]" />
                   <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Approval Context</h3>
                 </div>
                 {approvalTask ? (
@@ -218,7 +218,7 @@ const CommitteeDossierDrawer: React.FC<Props> = ({
 
               <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-amber-400" />
+                  <Sparkles className="h-4 w-4 text-[color:var(--nfq-warning)]" />
                   <h3 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">AI Support</h3>
                 </div>
                 {dossier.aiResponseTraces?.length ? (

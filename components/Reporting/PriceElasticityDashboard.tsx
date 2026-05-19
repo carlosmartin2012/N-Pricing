@@ -144,7 +144,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
         {/* Optimal price */}
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="flex items-center gap-1.5 nfq-label"><Target size={12} /> Optimal Rate</div>
-          <div className="mt-2 font-mono text-lg font-bold text-emerald-400">
+          <div className="mt-2 font-mono text-lg font-bold text-[color:var(--nfq-success)]">
             {optimalPrice ? fmtPct(optimalPrice.rate) : '—'}
           </div>
           <div className="text-[10px] text-[var(--nfq-text-faint)]">
@@ -155,7 +155,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
         {/* Model parameters */}
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="flex items-center gap-1.5 nfq-label"><Zap size={12} /> Elasticity</div>
-          <div className="mt-2 font-mono text-lg font-bold text-amber-400">
+          <div className="mt-2 font-mono text-lg font-bold text-[color:var(--nfq-warning)]">
             {activeModel ? activeModel.elasticity.toFixed(3) : '—'}
           </div>
           <div className="text-[10px] text-[var(--nfq-text-faint)]">

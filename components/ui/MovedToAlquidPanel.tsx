@@ -41,7 +41,7 @@ const MovedToAlquidPanel: React.FC<Props> = ({ feature }) => {
           href={deepLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded bg-[var(--nfq-accent)] px-4 py-2 text-xs font-bold text-white hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded bg-[var(--nfq-accent)] px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:opacity-90"
         >
           Open in Alquid
           <ExternalLink size={12} aria-hidden="true" />

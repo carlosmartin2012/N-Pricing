@@ -33,12 +33,12 @@ export const DealScenarioSelector: React.FC<Props> = ({
         <div className="relative">
           <FileSearch
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-600 dark:text-cyan-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--nfq-accent)] dark:text-[color:var(--nfq-accent)]"
           />
           <SelectInput
             value={hasCurrentDeal ? values.id : 'NEW'}
             onChange={onTransactionSelect}
-            className="border-cyan-500/25 bg-[var(--nfq-bg-input)] pl-9 font-bold text-cyan-400 focus:border-cyan-400"
+            className="border-cyan-500/25 bg-[var(--nfq-bg-input)] pl-9 font-bold text-[color:var(--nfq-accent)] focus:border-cyan-400"
           >
             <option value="NEW">{t.newDeal}</option>
             {deals.map((deal) => (

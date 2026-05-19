@@ -118,30 +118,30 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
       )}
 
       {/* ESG Sub-Tabs */}
-      <div className="flex bg-slate-900 border-b border-slate-700">
+      <div className="flex bg-[var(--nfq-bg-elevated)] border-b border-slate-700">
         <button
           onClick={() => setEsgSubTab('TRANSITION')}
-          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'TRANSITION' ? 'bg-slate-800 text-emerald-400 border-b-2 border-emerald-500' : 'text-slate-500 hover:text-slate-300'}`}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'TRANSITION' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-success)] border-b-2 border-emerald-500' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
         >
           Transition Risk (Carbon)
         </button>
         <button
           onClick={() => setEsgSubTab('PHYSICAL')}
-          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'PHYSICAL' ? 'bg-slate-800 text-blue-400 border-b-2 border-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'PHYSICAL' ? 'bg-[var(--nfq-bg-highest)] text-blue-400 border-b-2 border-blue-500' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
         >
           Physical Risk (Climate)
         </button>
         <button
           onClick={() => setEsgSubTab('GREENIUM')}
-          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'GREENIUM' ? 'bg-slate-800 text-teal-400 border-b-2 border-teal-500' : 'text-slate-500 hover:text-slate-300'}`}
+          className={`flex-1 py-2 text-[10px] uppercase font-bold tracking-wider ${esgSubTab === 'GREENIUM' ? 'bg-[var(--nfq-bg-highest)] text-teal-400 border-b-2 border-teal-500' : 'text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'}`}
         >
           Greenium / Movilización
         </button>
       </div>
 
       {/* ESG Toolbar */}
-      <div className="p-3 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
-        <div className="text-[10px] text-slate-500">
+      <div className="p-3 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
+        <div className="text-[10px] text-[color:var(--nfq-text-faint)]">
           {esgSubTab === 'TRANSITION'
             ? 'Penalties for high-carbon, incentives for green. Changes now flow through governance.'
             : esgSubTab === 'GREENIUM'
@@ -150,7 +150,7 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
         </div>
         <button
           onClick={handleAddEsg}
-          className="flex items-center gap-1 px-3 py-1.5 bg-emerald-900/30 text-emerald-400 rounded border border-emerald-800 text-xs hover:bg-emerald-900/50"
+          className="flex items-center gap-1 px-3 py-1.5 bg-emerald-900/30 text-[color:var(--nfq-success)] rounded border border-emerald-800 text-xs hover:bg-emerald-900/50"
         >
           <Plus size={12} /> Add Entry
         </button>
@@ -170,12 +170,12 @@ const ESGGridTab: React.FC<Props> = ({ transitionGrid, physicalGrid, greeniumGri
         title="Configuration Editor"
         footer={
           <div className="flex justify-end gap-2">
-            <button onClick={closeDrawer} className="px-4 py-2 text-xs text-slate-400 hover:text-white">
+            <button onClick={closeDrawer} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
               Cancel
             </button>
             <button
               onClick={handleSaveEsg}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded"
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
             >
               Submit Change
             </button>

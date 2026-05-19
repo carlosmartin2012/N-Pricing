@@ -55,9 +55,9 @@ function fmtPct(value: number): string {
  * Positive delta = above market = potentially uncompetitive (red).
  */
 function deltaTone(bps: number): string {
-  if (bps <= -5) return 'text-emerald-400';
-  if (bps <= 5) return 'text-amber-400';
-  return 'text-rose-400';
+  if (bps <= -5) return 'text-[color:var(--nfq-success)]';
+  if (bps <= 5) return 'text-[color:var(--nfq-warning)]';
+  return 'text-[color:var(--nfq-danger)]';
 }
 
 function deltaBg(bps: number): string {
@@ -67,9 +67,9 @@ function deltaBg(bps: number): string {
 }
 
 function gapTone(value: number): string {
-  if (value > 0) return 'text-emerald-400';
-  if (value < 0) return 'text-rose-400';
-  return 'text-amber-400';
+  if (value > 0) return 'text-[color:var(--nfq-success)]';
+  if (value < 0) return 'text-[color:var(--nfq-danger)]';
+  return 'text-[color:var(--nfq-warning)]';
 }
 
 // ---------------------------------------------------------------------------
@@ -214,7 +214,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
   return (
     <Panel
       title="Benchmark Comparison"
-      icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+      icon={<BarChart3 className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
       actions={
         stats && (
           <div className="flex items-center gap-2">
@@ -242,8 +242,8 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
                 Competitive
               </div>
               <div className="mt-1 flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-emerald-400" />
-                <span className="text-lg font-mono font-bold text-emerald-400">{stats.competitive}</span>
+                <TrendingDown className="h-4 w-4 text-[color:var(--nfq-success)]" />
+                <span className="text-lg font-mono font-bold text-[color:var(--nfq-success)]">{stats.competitive}</span>
               </div>
             </div>
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
@@ -251,8 +251,8 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
                 Above Market
               </div>
               <div className="mt-1 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-rose-400" />
-                <span className="text-lg font-mono font-bold text-rose-400">{stats.above}</span>
+                <TrendingUp className="h-4 w-4 text-[color:var(--nfq-danger)]" />
+                <span className="text-lg font-mono font-bold text-[color:var(--nfq-danger)]">{stats.above}</span>
               </div>
             </div>
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">

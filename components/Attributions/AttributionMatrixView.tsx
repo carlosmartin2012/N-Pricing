@@ -70,18 +70,18 @@ const AttributionMatrixView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Network className="h-5 w-5 text-emerald-400" />
+          <Network className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               {t.matrixTitle}
             </h2>
-            <p className="text-xs text-slate-400">{t.matrixSubtitle}</p>
+            <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.matrixSubtitle}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowLevelForm((v) => !v)}
-          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 hover:bg-emerald-500/20"
+          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-emerald-500/10 px-3 py-1.5 text-xs text-[color:var(--nfq-success)] hover:bg-emerald-500/20"
         >
           <Plus className="h-3 w-3" />
           {t.matrixAddLevel}
@@ -102,13 +102,13 @@ const AttributionMatrixView: React.FC = () => {
       )}
 
       {matrixQuery.isLoading && (
-        <div className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-6 text-center text-xs text-slate-400">
+        <div className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.loading}
         </div>
       )}
 
       {!matrixQuery.isLoading && sortedLevels.length === 0 && (
-        <div className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-6 text-center text-xs text-slate-400">
+        <div className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.matrixEmpty}
         </div>
       )}
@@ -121,21 +121,21 @@ const AttributionMatrixView: React.FC = () => {
               : null;
             const thresholds = thresholdsByLevel.get(level.id) ?? [];
             return (
-              <li key={level.id} className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
+              <li key={level.id} className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-300">
+                      <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-secondary)]">
                         L{level.levelOrder}
                       </span>
-                      <h3 className="text-base font-semibold text-white">{level.name}</h3>
-                      <span className="font-mono text-[10px] uppercase text-slate-400">
+                      <h3 className="text-base font-semibold text-[color:var(--nfq-text-primary)]">{level.name}</h3>
+                      <span className="font-mono text-[10px] uppercase text-[color:var(--nfq-text-muted)]">
                         {level.rbacRole}
                       </span>
                     </div>
                     {parent && (
-                      <p className="mt-1 text-xs text-slate-500">
-                        {t.matrixLevelParent}: <span className="text-slate-300">{parent.name}</span>
+                      <p className="mt-1 text-xs text-[color:var(--nfq-text-faint)]">
+                        {t.matrixLevelParent}: <span className="text-[color:var(--nfq-text-secondary)]">{parent.name}</span>
                       </p>
                     )}
                   </div>
@@ -145,7 +145,7 @@ const AttributionMatrixView: React.FC = () => {
                       onClick={() =>
                         setShowThresholdForm((current) => (current === level.id ? null : level.id))
                       }
-                      className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-1 text-xs text-slate-200 hover:bg-white/10"
+                      className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/10"
                     >
                       <Plus className="h-3 w-3" />
                       {t.matrixAddThreshold}
@@ -155,7 +155,7 @@ const AttributionMatrixView: React.FC = () => {
                       onClick={() => updateLevel.mutate({ id: level.id, input: { active: false } })}
                       disabled={updateLevel.isPending}
                       title={t.matrixLevelDeactivate}
-                      className="rounded-md border border-rose-500/30 bg-rose-500/10 p-1 text-rose-300 hover:bg-rose-500/20 disabled:opacity-40"
+                      className="rounded-md border border-rose-500/30 bg-rose-500/10 p-1 text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
                       aria-label={t.matrixLevelDeactivate}
                     >
                       <ShieldOff className="h-3 w-3" />
@@ -181,7 +181,7 @@ const AttributionMatrixView: React.FC = () => {
                 {thresholds.length > 0 && (
                   <div className="mt-3 overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="text-[10px] uppercase tracking-wide text-slate-400">
+                      <thead className="text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
                         <tr>
                           <th className="px-2 py-1">{t.matrixThresholdScope}</th>
                           <th className="px-2 py-1 text-right">{t.matrixThresholdDeviation}</th>
@@ -194,19 +194,19 @@ const AttributionMatrixView: React.FC = () => {
                       <tbody>
                         {thresholds.map((thr) => (
                           <tr key={thr.id} className="border-t border-[color:var(--nfq-border-ghost)]">
-                            <td className="px-2 py-1 font-mono text-[11px] text-slate-300">
+                            <td className="px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]">
                               {scopeSummary(thr.scope)}
                             </td>
-                            <td className="px-2 py-1 text-right font-mono text-slate-200">
+                            <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">
                               {fmtBpsOrDash(thr.deviationBpsMax)}
                             </td>
-                            <td className="px-2 py-1 text-right font-mono text-slate-200">
+                            <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">
                               {fmtPpOrDash(thr.rarocPpMin)}
                             </td>
-                            <td className="px-2 py-1 text-right font-mono text-slate-200">
+                            <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">
                               {fmtEurOrDash(thr.volumeEurMax)}
                             </td>
-                            <td className="px-2 py-1 font-mono text-[10px] text-slate-400">
+                            <td className="px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
                               {thr.activeFrom}{thr.activeTo ? ` → ${thr.activeTo}` : ''}
                             </td>
                             <td className="px-2 py-1 text-right">
@@ -215,7 +215,7 @@ const AttributionMatrixView: React.FC = () => {
                                 onClick={() => updateThreshold.mutate({ id: thr.id, input: { isActive: false } })}
                                 disabled={updateThreshold.isPending}
                                 aria-label={t.matrixLevelDeactivate}
-                                className="rounded p-1 text-slate-400 hover:text-rose-300"
+                                className="rounded p-1 text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-danger)]"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </button>
@@ -265,7 +265,7 @@ const LevelForm: React.FC<LevelFormProps> = ({ levels, onSubmit, onCancel, pendi
   };
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
+    <form onSubmit={submit} className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
       <div className="grid gap-3 md:grid-cols-4">
         <FieldText label={t.matrixLevelName} value={name} onChange={setName} required />
         <FieldNumber label={t.matrixLevelOrder} value={levelOrder} min={1} onChange={setLevelOrder} />
@@ -279,11 +279,11 @@ const LevelForm: React.FC<LevelFormProps> = ({ levels, onSubmit, onCancel, pendi
       </div>
       <div className="mt-3 flex items-center justify-end gap-2">
         <button type="button" onClick={onCancel}
-          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5">
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5">
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
-          className="flex items-center gap-1 rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500 disabled:bg-slate-600">
+          className="flex items-center gap-1 rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:bg-[var(--nfq-bg-bright)]">
           <Save className="h-3 w-3" /> {t.matrixSave}
         </button>
       </div>
@@ -326,7 +326,7 @@ const ThresholdForm: React.FC<ThresholdFormProps> = ({ levelId, onSubmit, onCanc
   };
 
   return (
-    <form onSubmit={submit} className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-950/40 p-3">
+    <form onSubmit={submit} className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/40 p-3">
       <div className="grid gap-3 md:grid-cols-3">
         <FieldText label="product (csv)" value={productCsv} onChange={setProductCsv} placeholder="loan, mortgage" />
         <FieldText label="segment (csv)" value={segmentCsv} onChange={setSegmentCsv} placeholder="SME, Retail" />
@@ -337,11 +337,11 @@ const ThresholdForm: React.FC<ThresholdFormProps> = ({ levelId, onSubmit, onCanc
       </div>
       <div className="mt-3 flex items-center justify-end gap-2">
         <button type="button" onClick={onCancel}
-          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5">
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5">
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
-          className="flex items-center gap-1 rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500 disabled:bg-slate-600">
+          className="flex items-center gap-1 rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:bg-[var(--nfq-bg-bright)]">
           <Save className="h-3 w-3" /> {t.matrixSave}
         </button>
       </div>
@@ -362,14 +362,14 @@ interface FieldTextProps {
 }
 const FieldText: React.FC<FieldTextProps> = ({ label, value, onChange, required, placeholder }) => (
   <label className="block">
-    <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</span>
+    <span className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</span>
     <input
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       required={required}
       placeholder={placeholder}
-      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500"
+      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)]"
     />
   </label>
 );
@@ -383,14 +383,14 @@ interface FieldNumberProps {
 }
 const FieldNumber: React.FC<FieldNumberProps> = ({ label, value, min, step, onChange }) => (
   <label className="block">
-    <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</span>
+    <span className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</span>
     <input
       type="number"
       value={value}
       min={min}
       step={step ?? 0.1}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs text-[color:var(--nfq-text-primary)]"
     />
   </label>
 );
@@ -403,11 +403,11 @@ interface FieldSelectProps {
 }
 const FieldSelect: React.FC<FieldSelectProps> = ({ label, value, onChange, options }) => (
   <label className="block">
-    <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</span>
+    <span className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</span>
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs text-[color:var(--nfq-text-primary)]"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>

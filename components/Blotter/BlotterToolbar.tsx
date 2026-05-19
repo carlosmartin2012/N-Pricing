@@ -54,13 +54,13 @@ const BlotterToolbar: React.FC<Props> = ({
 
       <button
         onClick={onExportCsv}
-        className="flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase text-slate-500 transition-colors hover:text-slate-900 dark:hover:text-slate-300"
+        className="flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] transition-colors hover:text-slate-900 dark:hover:text-[color:var(--nfq-text-secondary)]"
       >
         <Download size={14} /> CSV
       </button>
       <button
         onClick={onExportExcel}
-        className="flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase text-slate-500 transition-colors hover:text-emerald-500 dark:hover:text-emerald-400"
+        className="flex shrink-0 items-center gap-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] transition-colors hover:text-[color:var(--nfq-success)] dark:hover:text-[color:var(--nfq-success)]"
       >
         <Download size={14} /> Excel
       </button>

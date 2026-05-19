@@ -42,14 +42,14 @@ export function PricingReceiptWaterfall({
           }`}
         >
           <div className="flex items-center gap-2">
-            <Zap size={16} className={applyShocks ? 'text-amber-500' : 'text-slate-400'} />
+            <Zap size={16} className={applyShocks ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-text-muted)]'} />
             <div className="text-xs">
               <span
-                className={`block font-bold ${applyShocks ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500'}`}
+                className={`block font-bold ${applyShocks ? 'text-amber-700 dark:text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-text-faint)]'}`}
               >
                 {t.shockedScenario || 'Shocked Scenario'}
               </span>
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-[color:var(--nfq-text-muted)]">
                 {shocks.interestRate > 0 ? '+' : ''}
                 {shocks.interestRate}bps IR, {shocks.liquiditySpread > 0 ? '+' : ''}
                 {shocks.liquiditySpread}bps Liq.
@@ -59,7 +59,7 @@ export function PricingReceiptWaterfall({
           <button
             onClick={onToggleShocks}
             className={`rounded-full px-3 py-1 text-[10px] font-bold transition-colors ${
-              applyShocks ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-200 text-slate-500 dark:bg-slate-700'
+              applyShocks ? 'bg-amber-500 text-[color:var(--nfq-text-primary)] shadow-md' : 'bg-slate-200 text-[color:var(--nfq-text-faint)] dark:bg-[var(--nfq-bg-highest)]'
             }`}
           >
             {applyShocks ? 'ON' : 'OFF'}
@@ -98,13 +98,13 @@ export function PricingReceiptWaterfall({
           </div>
         )}
 
-        <div className="mb-2 text-[11px] font-medium text-slate-500">Pricing Construction Flow</div>
+        <div className="mb-2 text-[11px] font-medium text-[color:var(--nfq-text-faint)]">Pricing Construction Flow</div>
 
         <div data-testid="receipt-base-rate">
           <WaterfallItem
             label="IRRBB — Base Rate"
             value={result.baseRate}
-            color="text-slate-300"
+            color="text-[color:var(--nfq-text-secondary)]"
             formula={t.tooltip_formula_baseRate}
           />
         </div>
@@ -114,7 +114,7 @@ export function PricingReceiptWaterfall({
             label={t.liquidityCost || 'Total Liquidity Spread'}
             value={result.liquiditySpread}
             isAdd
-            color="text-amber-400"
+            color="text-[color:var(--nfq-warning)]"
             weight="font-mono font-bold"
             icon={<Droplets size={12} className="mr-2 inline text-amber-600" />}
             formula={t.tooltip_formula_liquidityPremium}
@@ -153,7 +153,7 @@ export function PricingReceiptWaterfall({
             label="Incentivisation Adj."
             value={result.incentivisationAdj}
             isAdd
-            color={result.incentivisationAdj < 0 ? 'text-emerald-400' : 'text-rose-400'}
+            color={result.incentivisationAdj < 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}
           />
         )}
 
@@ -170,7 +170,7 @@ export function PricingReceiptWaterfall({
             }`}
             value={result.regulatoryCost}
             isAdd
-            color="text-rose-400"
+            color="text-[color:var(--nfq-danger)]"
             formula={t.tooltip_formula_anejoCreditCost}
           />
 
@@ -178,7 +178,7 @@ export function PricingReceiptWaterfall({
             <div className="ml-2 mt-1">
               <button
                 onClick={onToggleCreditDetail}
-                className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 transition-colors hover:text-slate-300"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-[color:var(--nfq-text-faint)] transition-colors hover:text-[color:var(--nfq-text-secondary)]"
               >
                 {showCreditDetail ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 {t.creditRiskDetail || 'Credit Risk Detail'}
@@ -195,19 +195,19 @@ export function PricingReceiptWaterfall({
             </div>
           )}
 
-          <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-rose-400" />
+          <WaterfallItem label="Operational Cost" value={result.operationalCost} isAdd color="text-[color:var(--nfq-danger)]" />
           <WaterfallItem
             label="ESG Transition"
             value={result.esgTransitionCharge}
             isAdd
-            color={result.esgTransitionCharge > 0 ? 'text-rose-400' : 'text-emerald-400'}
+            color={result.esgTransitionCharge > 0 ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-success)]'}
             formula={t.tooltip_formula_esgTransition}
           />
           <WaterfallItem
             label="ESG Physical"
             value={result.esgPhysicalCharge}
             isAdd
-            color="text-rose-400"
+            color="text-[color:var(--nfq-danger)]"
             formula={t.tooltip_formula_esgPhysical}
           />
           {result.esgGreeniumAdj != null && result.esgGreeniumAdj !== 0 && (
@@ -215,33 +215,33 @@ export function PricingReceiptWaterfall({
               label="Greenium / Movilización"
               value={result.esgGreeniumAdj}
               isAdd
-              color="text-emerald-400"
+              color="text-[color:var(--nfq-success)]"
               formula={t.tooltip_formula_esgGreenium}
             />
           )}
         </div>
 
-        <div className="my-2 rounded border border-slate-700 bg-slate-800/50 p-2">
+        <div className="my-2 rounded border border-slate-700 bg-[var(--nfq-bg-highest)]/50 p-2">
           <WaterfallItem
             label="Floor Price (Break-even)"
             value={result.floorPrice}
             highlight
-            color="text-slate-300"
+            color="text-[color:var(--nfq-text-secondary)]"
             formula={t.tooltip_formula_floorPrice}
           />
           <BottomMetric label="+ Cost of Capital (Hurdle)">+{result.capitalCharge.toFixed(2)}%</BottomMetric>
           {result.capitalIncome != null && result.capitalIncome > 0 && (
-            <BottomMetric label="- Capital Income (Risk-Free)" valueClassName="font-mono text-emerald-500">
+            <BottomMetric label="- Capital Income (Risk-Free)" valueClassName="font-mono text-[color:var(--nfq-success)]">
               -{result.capitalIncome.toFixed(3)}%
             </BottomMetric>
           )}
           {result.esgDnshCapitalAdj != null && result.esgDnshCapitalAdj > 0 && (
-            <BottomMetric label="- DNSH Capital Discount" valueClassName="font-mono text-emerald-500">
+            <BottomMetric label="- DNSH Capital Discount" valueClassName="font-mono text-[color:var(--nfq-success)]">
               -{result.esgDnshCapitalAdj.toFixed(3)}%
             </BottomMetric>
           )}
           {result.esgPillar1Adj != null && result.esgPillar1Adj > 0 && (
-            <BottomMetric label="- ISF Pillar I (Art. 501a)" valueClassName="font-mono text-emerald-500">
+            <BottomMetric label="- ISF Pillar I (Art. 501a)" valueClassName="font-mono text-[color:var(--nfq-success)]">
               -{result.esgPillar1Adj.toFixed(3)}%
             </BottomMetric>
           )}
@@ -249,14 +249,14 @@ export function PricingReceiptWaterfall({
             label={`Technical Price (ROE ${deal.targetROE}%)`}
             value={result.technicalPrice}
             highlight
-            color="text-cyan-300"
+            color="text-[color:var(--nfq-accent)]"
             formula={t.tooltip_formula_technicalPrice}
           />
         </div>
 
         <div className="flex items-center justify-between pt-2">
-          <div className="text-xs text-slate-400">Net Economic Profit</div>
-          <div className={`font-mono font-bold ${result.economicProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className="text-xs text-[color:var(--nfq-text-muted)]">Net Economic Profit</div>
+          <div className={`font-mono font-bold ${result.economicProfit >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
             {result.economicProfit >= 0 ? '+' : ''}
             {new Intl.NumberFormat('en-US', {
               style: 'currency',
@@ -276,7 +276,7 @@ function WaterfallItem({
   subtext,
   isAdd,
   highlight,
-  color = 'text-slate-200',
+  color = 'text-[color:var(--nfq-text-secondary)]',
   weight,
   compact,
   icon,
@@ -299,13 +299,13 @@ function WaterfallItem({
     >
       <div>
         <div
-          className={`flex items-center text-xs ${highlight ? 'font-bold text-white' : 'font-medium text-slate-400'}`}
+          className={`flex items-center text-xs ${highlight ? 'font-bold text-[color:var(--nfq-text-primary)]' : 'font-medium text-[color:var(--nfq-text-muted)]'}`}
         >
           {icon && icon}
           {label}
           {formula && <TooltipTrigger content={formula} variant="formula" placement="right" size={11} />}
         </div>
-        {subtext && <div className="font-mono text-[10px] text-slate-600">{subtext}</div>}
+        {subtext && <div className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{subtext}</div>}
       </div>
       <div className={`${weight || 'font-mono'} ${color} font-bold ${highlight ? 'text-sm' : 'text-xs'}`}>
         {isAdd && value > 0 ? '+' : ''}
@@ -318,7 +318,7 @@ function WaterfallItem({
 function MiniMetric({
   children,
   label,
-  tone = 'text-slate-500',
+  tone = 'text-[color:var(--nfq-text-faint)]',
 }: {
   children: React.ReactNode;
   label: string;
@@ -343,8 +343,8 @@ function BottomMetric({
 }) {
   return (
     <div className="flex items-center justify-between pl-2 text-[10px]">
-      <span className="text-slate-500">{label}</span>
-      <span className={valueClassName || 'text-slate-500'}>{children}</span>
+      <span className="text-[color:var(--nfq-text-faint)]">{label}</span>
+      <span className={valueClassName || 'text-[color:var(--nfq-text-faint)]'}>{children}</span>
     </div>
   );
 }

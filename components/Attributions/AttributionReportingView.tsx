@@ -35,12 +35,12 @@ const AttributionReportingView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BarChart4 className="h-5 w-5 text-emerald-400" />
+          <BarChart4 className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               {t.reportingView}
             </h2>
-            <p className="text-xs text-slate-400">{t.reportingSubtitle}</p>
+            <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.reportingSubtitle}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ const AttributionReportingView: React.FC = () => {
           <button
             type="button"
             onClick={() => refetch()}
-            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
+            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
           >
             <RefreshCw className={`h-3 w-3 ${isFetching ? 'animate-spin' : ''}`} />
             <span>{t.retry}</span>
@@ -73,9 +73,9 @@ const AttributionReportingView: React.FC = () => {
       </nav>
 
       {/* Body */}
-      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
-        {isLoading && <div className="py-6 text-center text-xs text-slate-400">{t.loading}</div>}
-        {isError && <div className="py-6 text-center text-xs text-rose-300">{t.cockpitErrorLoading}</div>}
+      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
+        {isLoading && <div className="py-6 text-center text-xs text-[color:var(--nfq-text-muted)]">{t.loading}</div>}
+        {isError && <div className="py-6 text-center text-xs text-[color:var(--nfq-danger)]">{t.cockpitErrorLoading}</div>}
         {data && tab === 'volume' && <VolumeTab summary={data} t={t} />}
         {data && tab === 'drift'  && <DriftTab  drift={data.drift}  byUser={data.byUser} t={t} />}
         {data && tab === 'funnel' && <FunnelTab summary={data} t={t} />}
@@ -96,10 +96,10 @@ interface TabContentProps {
 
 const VolumeTab: React.FC<TabContentProps> = ({ summary, t }) => (
   <div className="space-y-4">
-    <h3 className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{t.reportingByLevelTitle}</h3>
+    <h3 className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{t.reportingByLevelTitle}</h3>
     <div className="overflow-x-auto">
       <table className="w-full text-left text-xs">
-        <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
+        <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
           <tr>
             <th className="px-2 py-1">Nivel</th>
             <th className="px-2 py-1 text-right">N</th>
@@ -112,16 +112,16 @@ const VolumeTab: React.FC<TabContentProps> = ({ summary, t }) => (
         <tbody>
           {summary.byLevel.map((entry) => (
             <tr key={entry.levelId} className="border-b border-[color:var(--nfq-border-ghost)]">
-              <td className="px-2 py-1 text-slate-200">{entry.level?.name ?? entry.levelId}</td>
-              <td className="px-2 py-1 text-right font-mono text-slate-200">{entry.stats.count}</td>
-              <td className="px-2 py-1 text-right font-mono text-slate-200">{fmtEur(entry.stats.totalEur)}</td>
-              <td className="px-2 py-1 text-right font-mono text-slate-300">{fmtEur(entry.stats.meanEur)}</td>
-              <td className="px-2 py-1 text-right font-mono text-slate-300">{fmtPp(entry.stats.meanRarocPp)}</td>
-              <td className="px-2 py-1 text-right font-mono text-slate-300">{fmtBps(entry.stats.meanDeviationBps)}</td>
+              <td className="px-2 py-1 text-[color:var(--nfq-text-secondary)]">{entry.level?.name ?? entry.levelId}</td>
+              <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{entry.stats.count}</td>
+              <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtEur(entry.stats.totalEur)}</td>
+              <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtEur(entry.stats.meanEur)}</td>
+              <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtPp(entry.stats.meanRarocPp)}</td>
+              <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtBps(entry.stats.meanDeviationBps)}</td>
             </tr>
           ))}
           {summary.byLevel.length === 0 && (
-            <tr><td colSpan={6} className="px-2 py-3 text-center text-slate-500">—</td></tr>
+            <tr><td colSpan={6} className="px-2 py-3 text-center text-[color:var(--nfq-text-faint)]">—</td></tr>
           )}
         </tbody>
       </table>
@@ -144,7 +144,7 @@ const DriftTab: React.FC<DriftTabProps> = ({ drift, byUser, t }) => {
   const usersById = new Map(byUser.map((u) => [u.userId, u]));
   return (
     <div className="space-y-3">
-      <h3 className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{t.reportingByUserTitle}</h3>
+      <h3 className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{t.reportingByUserTitle}</h3>
       <div className="space-y-2">
         {drift.map((s) => {
           const user = usersById.get(s.userId);
@@ -159,21 +159,21 @@ const DriftTab: React.FC<DriftTabProps> = ({ drift, byUser, t }) => {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-slate-100">{s.userId}</span>
-                <span className={`font-mono uppercase ${tone === 'rose' ? 'text-rose-300' : 'text-amber-300'}`}>
+                <span className="font-mono text-[color:var(--nfq-text-primary)]">{s.userId}</span>
+                <span className={`font-mono uppercase ${tone === 'rose' ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-warning)]'}`}>
                   {tone === 'rose' ? t.reportingDriftSeverityBreached : t.reportingDriftSeverityWarning}
                 </span>
               </div>
-              <div className="mt-1 grid gap-1 text-[11px] text-slate-300 md:grid-cols-3">
+              <div className="mt-1 grid gap-1 text-[11px] text-[color:var(--nfq-text-secondary)] md:grid-cols-3">
                 <div>n = {s.count}</div>
                 <div>Δbps medio = {fmtBps(s.meanDeviationBps)}</div>
                 <div>% al límite = {fmtPct(s.pctAtLimit)}</div>
               </div>
-              <ul className="mt-2 list-disc pl-4 text-[11px] text-slate-400">
+              <ul className="mt-2 list-disc pl-4 text-[11px] text-[color:var(--nfq-text-muted)]">
                 {s.reasons.map((r) => <li key={r}>{r}</li>)}
               </ul>
               {user && (
-                <div className="mt-2 text-[10px] text-slate-500">
+                <div className="mt-2 text-[10px] text-[color:var(--nfq-text-faint)]">
                   Approved rate: {fmtPct(user.approvedRate)}
                 </div>
               )}
@@ -188,7 +188,7 @@ const DriftTab: React.FC<DriftTabProps> = ({ drift, byUser, t }) => {
 const FunnelTab: React.FC<TabContentProps> = ({ summary, t }) => {
   const { funnel } = summary;
   if (funnel.total === 0) {
-    return <div className="text-xs text-slate-400">{t.reportingFunnelEmpty}</div>;
+    return <div className="text-xs text-[color:var(--nfq-text-muted)]">{t.reportingFunnelEmpty}</div>;
   }
   const rows: Array<{ label: string; value: number; rate: number }> = [
     { label: t.reportingFunnelApproved,  value: funnel.approved,  rate: funnel.approvedRate },
@@ -201,15 +201,15 @@ const FunnelTab: React.FC<TabContentProps> = ({ summary, t }) => {
     <div className="space-y-2">
       {rows.map((row) => (
         <div key={row.label} className="flex items-center gap-3">
-          <span className="w-32 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+          <span className="w-32 font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
             {row.label}
           </span>
-          <div className="relative h-5 flex-1 overflow-hidden rounded bg-slate-950/40">
+          <div className="relative h-5 flex-1 overflow-hidden rounded bg-[var(--nfq-bg-root)]/40">
             <div
               className="absolute inset-y-0 left-0 bg-emerald-500/40"
               style={{ width: `${Math.min(100, row.rate * 100)}%` }}
             />
-            <span className="absolute inset-0 flex items-center justify-end pr-2 font-mono text-[11px] text-slate-100">
+            <span className="absolute inset-0 flex items-center justify-end pr-2 font-mono text-[11px] text-[color:var(--nfq-text-primary)]">
               {row.value} · {fmtPct(row.rate)}
             </span>
           </div>
@@ -221,7 +221,7 @@ const FunnelTab: React.FC<TabContentProps> = ({ summary, t }) => {
 
 const TimeTab: React.FC<TabContentProps> = ({ summary, t }) => {
   if (!summary.timeToDecision) {
-    return <div className="text-xs text-slate-400">{t.reportingTimeNotAvailable}</div>;
+    return <div className="text-xs text-[color:var(--nfq-text-muted)]">{t.reportingTimeNotAvailable}</div>;
   }
   const { meanMs, medianMs, p95Ms, count, byLevel } = summary.timeToDecision;
   return (
@@ -234,7 +234,7 @@ const TimeTab: React.FC<TabContentProps> = ({ summary, t }) => {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
+          <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
             <tr>
               <th className="px-2 py-1">Nivel</th>
               <th className="px-2 py-1 text-right">N</th>
@@ -245,10 +245,10 @@ const TimeTab: React.FC<TabContentProps> = ({ summary, t }) => {
           <tbody>
             {Object.entries(byLevel).map(([levelId, entry]) => (
               <tr key={levelId} className="border-b border-[color:var(--nfq-border-ghost)]">
-                <td className="px-2 py-1 text-slate-200">{levelId}</td>
-                <td className="px-2 py-1 text-right font-mono text-slate-200">{entry.count}</td>
-                <td className="px-2 py-1 text-right font-mono text-slate-300">{fmtMs(entry.medianMs)}</td>
-                <td className="px-2 py-1 text-right font-mono text-slate-300">{fmtMs(entry.p95Ms)}</td>
+                <td className="px-2 py-1 text-[color:var(--nfq-text-secondary)]">{levelId}</td>
+                <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{entry.count}</td>
+                <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtMs(entry.medianMs)}</td>
+                <td className="px-2 py-1 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtMs(entry.p95Ms)}</td>
               </tr>
             ))}
           </tbody>
@@ -275,9 +275,9 @@ function fmtMs(ms: number): string {
 
 interface StatProps { label: string; value: string }
 const Stat: React.FC<StatProps> = ({ label, value }) => (
-  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 px-4 py-3">
-    <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
-    <div className="font-mono text-lg font-semibold text-white">{value}</div>
+  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-4 py-3">
+    <div className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</div>
+    <div className="font-mono text-lg font-semibold text-[color:var(--nfq-text-primary)]">{value}</div>
   </div>
 );
 
@@ -288,8 +288,8 @@ const TabButton: React.FC<TabButtonProps> = ({ active, icon: Icon, label, onClic
     onClick={onClick}
     className={`flex items-center gap-1 rounded-t-md px-3 py-1.5 text-xs ${
       active
-        ? 'border-b-2 border-emerald-400 text-emerald-300'
-        : 'text-slate-400 hover:text-slate-200'
+        ? 'border-b-2 border-emerald-400 text-[color:var(--nfq-success)]'
+        : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
     }`}
   >
     <Icon className="h-3 w-3" />
@@ -316,7 +316,7 @@ const WindowToggle: React.FC<WindowToggleProps> = ({ value, onChange, t }) => {
           type="button"
           onClick={() => onChange(o.value)}
           className={`px-3 py-1 text-xs font-mono ${
-            value === o.value ? 'bg-emerald-500/20 text-emerald-200' : 'text-slate-400 hover:text-slate-200'
+            value === o.value ? 'bg-emerald-500/20 text-emerald-200' : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
           }`}
         >
           {o.label}

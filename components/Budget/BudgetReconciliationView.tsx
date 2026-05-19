@@ -13,12 +13,12 @@ const fmtEur = (v: number | null) =>
 const fmtPct = (v: number | null) => (v === null ? '—' : `${(v * 100).toFixed(1)}%`);
 
 const STATUS_CLASSES: Record<BudgetVarianceStatus, string> = {
-  on_track:           'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  over_budget_rate:   'bg-rose-500/10    text-rose-300    border-rose-500/30',
-  under_budget_rate:  'bg-amber-500/10   text-amber-300   border-amber-500/30',
+  on_track:           'bg-emerald-500/10 text-[color:var(--nfq-success)] border-emerald-500/30',
+  over_budget_rate:   'bg-rose-500/10    text-[color:var(--nfq-danger)]    border-rose-500/30',
+  under_budget_rate:  'bg-amber-500/10   text-[color:var(--nfq-warning)]   border-amber-500/30',
   over_budget_volume: 'bg-sky-500/10     text-sky-300     border-sky-500/30',
   under_budget_volume:'bg-violet-500/10  text-violet-300  border-violet-500/30',
-  budget_only:        'bg-slate-500/10   text-slate-300   border-[color:var(--nfq-border-ghost)]',
+  budget_only:        'bg-slate-500/10   text-[color:var(--nfq-text-secondary)]   border-[color:var(--nfq-border-ghost)]',
   realized_only:      'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/30',
 };
 
@@ -58,12 +58,12 @@ const BudgetReconciliationView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Scale className="h-5 w-5 text-emerald-400" />
+          <Scale className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               {t.view}
             </h2>
-            <p className="text-xs text-slate-400">{t.subtitle}</p>
+            <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.subtitle}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ const BudgetReconciliationView: React.FC = () => {
           <button
             type="button"
             onClick={() => query.refetch()}
-            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
+            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
           >
             <RefreshCw className={`h-3 w-3 ${query.isFetching ? 'animate-spin' : ''}`} />
             <span>{t.retry}</span>
@@ -107,20 +107,20 @@ const BudgetReconciliationView: React.FC = () => {
       </section>
 
       {/* Table */}
-      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40">
+      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
         {query.isLoading && (
-          <div className="p-6 text-center text-xs text-slate-400">{t.loading}</div>
+          <div className="p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">{t.loading}</div>
         )}
         {query.isError && (
-          <div className="p-6 text-center text-xs text-rose-300">{t.errorLoading}</div>
+          <div className="p-6 text-center text-xs text-[color:var(--nfq-danger)]">{t.errorLoading}</div>
         )}
         {query.data && query.data.items.length === 0 && (
-          <div className="p-6 text-center text-xs text-slate-400">{t.emptyState}</div>
+          <div className="p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">{t.emptyState}</div>
         )}
         {query.data && query.data.items.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
+              <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
                 <tr>
                   <th className="px-3 py-2">{t.tableSegment}</th>
                   <th className="px-3 py-2">{t.tableProduct}</th>
@@ -154,15 +154,15 @@ interface RowProps {
 
 const Row: React.FC<RowProps> = ({ row, t }) => (
   <tr className="border-b border-[color:var(--nfq-border-ghost)]">
-    <td className="px-3 py-2 text-slate-200">{row.segment}</td>
-    <td className="px-3 py-2 text-slate-200">{row.productType}</td>
-    <td className="px-3 py-2 font-mono text-[11px] text-slate-300">{row.currency}</td>
-    <td className="px-3 py-2 text-right font-mono text-slate-200">{fmtBps(row.budgetedRateBps)}</td>
-    <td className="px-3 py-2 text-right font-mono text-slate-200">{fmtBps(row.realizedRateBps)}</td>
-    <td className="px-3 py-2 text-right font-mono text-slate-300">{fmtBps(row.diffRateBps)}</td>
-    <td className="px-3 py-2 text-right font-mono text-slate-300">{fmtEur(row.budgetedVolumeEur)}</td>
-    <td className="px-3 py-2 text-right font-mono text-slate-300">{fmtEur(row.realizedVolumeEur)}</td>
-    <td className="px-3 py-2 text-right font-mono text-slate-300">{fmtPct(row.diffVolumePct)}</td>
+    <td className="px-3 py-2 text-[color:var(--nfq-text-secondary)]">{row.segment}</td>
+    <td className="px-3 py-2 text-[color:var(--nfq-text-secondary)]">{row.productType}</td>
+    <td className="px-3 py-2 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]">{row.currency}</td>
+    <td className="px-3 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtBps(row.budgetedRateBps)}</td>
+    <td className="px-3 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtBps(row.realizedRateBps)}</td>
+    <td className="px-3 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtBps(row.diffRateBps)}</td>
+    <td className="px-3 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtEur(row.budgetedVolumeEur)}</td>
+    <td className="px-3 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtEur(row.realizedVolumeEur)}</td>
+    <td className="px-3 py-2 text-right font-mono text-[color:var(--nfq-text-secondary)]">{fmtPct(row.diffVolumePct)}</td>
     <td className="px-3 py-2">
       <span className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wide ${STATUS_CLASSES[row.status]}`}>
         {statusLabel(row.status, t)}
@@ -173,9 +173,9 @@ const Row: React.FC<RowProps> = ({ row, t }) => (
 
 interface StatProps { label: string; value: string }
 const Stat: React.FC<StatProps> = ({ label, value }) => (
-  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 px-4 py-3">
-    <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
-    <div className="font-mono text-lg font-semibold text-white">{value}</div>
+  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-4 py-3">
+    <div className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</div>
+    <div className="font-mono text-lg font-semibold text-[color:var(--nfq-text-primary)]">{value}</div>
   </div>
 );
 
@@ -190,14 +190,14 @@ interface NumberFieldProps {
 
 const NumberField: React.FC<NumberFieldProps> = ({ label, value, type = 'number', min, step, onChange }) => (
   <label className="block">
-    <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</span>
+    <span className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</span>
     <input
       type={type}
       value={value}
       min={min}
       step={step}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-1 w-32 rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+      className="mt-1 w-32 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs text-[color:var(--nfq-text-primary)]"
     />
   </label>
 );

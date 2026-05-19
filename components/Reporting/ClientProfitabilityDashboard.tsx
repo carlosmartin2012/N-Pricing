@@ -145,7 +145,7 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
         </div>
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Avg RAROC</div>
-          <div className="font-mono text-2xl font-bold text-emerald-400 mt-2">
+          <div className="font-mono text-2xl font-bold text-[color:var(--nfq-success)] mt-2">
             {(clientMetrics.reduce((s, c) => s + c.weightedAvgRaroc, 0) / clientMetrics.length).toFixed(1)}%
           </div>
         </div>
@@ -210,7 +210,7 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
                   {c.avgMargin.toFixed(2)}%
                 </td>
                 <td
-                  className={`px-3 py-2.5 text-right font-mono font-semibold ${c.weightedAvgRaroc >= 12 ? 'text-emerald-400' : c.weightedAvgRaroc >= 8 ? 'text-amber-400' : 'text-rose-400'}`}
+                  className={`px-3 py-2.5 text-right font-mono font-semibold ${c.weightedAvgRaroc >= 12 ? 'text-[color:var(--nfq-success)]' : c.weightedAvgRaroc >= 8 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-danger)]'}`}
                 >
                   {c.weightedAvgRaroc.toFixed(1)}%
                 </td>
@@ -219,10 +219,10 @@ const ClientProfitabilityDashboard: React.FC<Props> = ({ deals, clients }) => {
                   <span
                     className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
                       c.esgProfile === 'Green'
-                        ? 'bg-emerald-500/20 text-emerald-400'
+                        ? 'bg-emerald-500/20 text-[color:var(--nfq-success)]'
                         : c.esgProfile === 'Brown'
-                          ? 'bg-rose-500/20 text-rose-400'
-                          : 'bg-slate-500/20 text-slate-400'
+                          ? 'bg-rose-500/20 text-[color:var(--nfq-danger)]'
+                          : 'bg-slate-500/20 text-[color:var(--nfq-text-muted)]'
                     }`}
                   >
                     {c.esgProfile}

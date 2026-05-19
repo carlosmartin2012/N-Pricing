@@ -26,7 +26,7 @@ export const AccountingSummaryCard: React.FC<Props> = React.memo(({
           <div className={`font-mono-nums text-xl font-bold ${accentClassName}`}>
             {formatCurrencyAmount(primaryAmount.amount, primaryAmount.currency)}
           </div>
-          <div className="mt-1 space-y-1 text-[10px] font-mono text-slate-500">
+          <div className="mt-1 space-y-1 text-[10px] font-mono text-[color:var(--nfq-text-faint)]">
             <div>{primaryAmount.currency}</div>
             {hasMultipleCurrencies &&
               breakdown.slice(1, 3).map((entry) => (
@@ -38,7 +38,7 @@ export const AccountingSummaryCard: React.FC<Props> = React.memo(({
           </div>
         </>
       ) : (
-        <div className="text-sm text-slate-500">{emptyLabel}</div>
+        <div className="text-sm text-[color:var(--nfq-text-faint)]">{emptyLabel}</div>
       )}
     </div>
   );

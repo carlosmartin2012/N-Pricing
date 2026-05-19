@@ -24,29 +24,29 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
 
   return (
     <>
-      <div className="flex h-11 items-center justify-between border-b border-slate-800 bg-slate-900/50 px-6 backdrop-blur">
+      <div className="flex h-11 items-center justify-between border-b border-slate-800 bg-[var(--nfq-bg-elevated)]/50 px-6 backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded border border-cyan-900 bg-cyan-950">
-            <Terminal size={16} className="text-cyan-400" />
+            <Terminal size={16} className="text-[color:var(--nfq-accent)]" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-200">N Pricing Copilot</h3>
+            <h3 className="text-sm font-bold text-[color:var(--nfq-text-secondary)]">N Pricing Copilot</h3>
             <div className="flex items-center gap-1.5">
               <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-              <span className="font-mono text-[10px] text-emerald-500">ONLINE • GEMINI-2.0-FLASH</span>
+              <span className="font-mono text-[10px] text-[color:var(--nfq-success)]">ONLINE • GEMINI-2.0-FLASH</span>
             </div>
           </div>
         </div>
         <button
           onClick={onResetSession}
-          className="p-2 text-slate-500 transition-colors hover:text-red-400"
+          className="p-2 text-[color:var(--nfq-text-faint)] transition-colors hover:text-red-400"
           title="Clear Context"
         >
           <Trash2 size={16} />
         </button>
       </div>
 
-      <div className="border-t border-slate-800 bg-slate-900 p-4">
+      <div className="border-t border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
         <div className="mx-auto max-w-4xl">
           <div className="mb-3 flex flex-wrap gap-2">
             {QUICK_ACTIONS.map((action) => (
@@ -54,7 +54,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
                 key={action.label}
                 onClick={() => handleQuickAction(action.prompt)}
                 disabled={isThinking}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--nfq-border-ghost)] bg-slate-800/60 px-3 py-1.5 font-mono text-[11px] text-slate-400 transition-all hover:border-cyan-700/50 hover:bg-slate-800 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/60 px-3 py-1.5 font-mono text-[11px] text-[color:var(--nfq-text-muted)] transition-all hover:border-cyan-700/50 hover:bg-[var(--nfq-bg-highest)] hover:text-[color:var(--nfq-accent)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <action.icon size={12} />
                 {action.label}
@@ -68,22 +68,22 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
               onChange={(event) => onChangeInput(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && onSendMessage()}
               placeholder="Ask about pricing, RAROC, credit risk, or specific deal IDs..."
-              className="w-full rounded-[var(--nfq-radius-card)] border border-slate-700 bg-slate-950 py-4 pl-12 pr-12 font-mono text-sm text-slate-200 placeholder-slate-600 shadow-inner transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
+              className="w-full rounded-[var(--nfq-radius-card)] border border-slate-700 bg-[var(--nfq-bg-root)] py-4 pl-12 pr-12 font-mono text-sm text-[color:var(--nfq-text-secondary)] placeholder-slate-600 shadow-inner transition-all focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
             />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--nfq-text-faint)]">
               <Terminal size={18} />
             </div>
             <button
               onClick={() => onSendMessage()}
               disabled={!input.trim() || isThinking}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-cyan-600 p-2 text-white transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-cyan-600 p-2 text-[color:var(--nfq-text-primary)] transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send size={16} />
             </button>
           </div>
           <div className="mt-2 text-center">
-            <p className="font-mono text-[10px] text-slate-600">
-              <Zap size={10} className="mr-1 inline text-amber-500" />
+            <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
+              <Zap size={10} className="mr-1 inline text-[color:var(--nfq-warning)]" />
               AI processing may produce variable results. Validate financial data manually.
             </p>
           </div>

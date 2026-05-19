@@ -14,16 +14,16 @@ import TimelineDeprecationBanner from '../Deals/TimelineDeprecationBanner';
 const log = createLogger('EscalationsView');
 
 const LEVEL_COLOR: Record<EscalationLevel, string> = {
-  L1: 'bg-cyan-500/10 text-cyan-300',
-  L2: 'bg-amber-500/10 text-amber-300',
-  Committee: 'bg-rose-500/10 text-rose-300',
+  L1: 'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
+  L2: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  Committee: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
 };
 
 const STATUS_COLOR: Record<EscalationStatus, string> = {
-  open: 'bg-emerald-500/10 text-emerald-300',
-  resolved: 'bg-slate-500/10 text-slate-300',
-  escalated: 'bg-amber-500/10 text-amber-300',
-  expired: 'bg-rose-500/10 text-rose-300',
+  open: 'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  resolved: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  escalated: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  expired: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
 };
 
 function fmtDateTime(iso: string): string {
@@ -152,7 +152,7 @@ const EscalationsView: React.FC = () => {
       <TimelineDeprecationBanner surface="escalations" />
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}
@@ -160,11 +160,11 @@ const EscalationsView: React.FC = () => {
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {([
-          ['Open',      counts.open,      'text-emerald-300'],
-          ['Overdue',   counts.overdue,   'text-rose-300'],
-          ['Escalated', counts.escalated, 'text-amber-300'],
-          ['Resolved',  counts.resolved,  'text-slate-300'],
-          ['Expired',   counts.expired,   'text-rose-400'],
+          ['Open',      counts.open,      'text-[color:var(--nfq-success)]'],
+          ['Overdue',   counts.overdue,   'text-[color:var(--nfq-danger)]'],
+          ['Escalated', counts.escalated, 'text-[color:var(--nfq-warning)]'],
+          ['Resolved',  counts.resolved,  'text-[color:var(--nfq-text-secondary)]'],
+          ['Expired',   counts.expired,   'text-[color:var(--nfq-danger)]'],
         ] as const).map(([label, value, color]) => (
           <div
             key={label}
@@ -289,7 +289,7 @@ const EscalationsView: React.FC = () => {
                         {e.status}
                       </span>
                       {overdue && (
-                        <span className="ml-2 inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] tracking-normal text-rose-300">
+                        <span className="ml-2 inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] tracking-normal text-[color:var(--nfq-danger)]">
                           <Clock size={10} /> overdue
                         </span>
                       )}

@@ -133,7 +133,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
     <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
       <Panel
         title="Snapshot Factory"
-        icon={<Archive className="h-4 w-4 text-cyan-400" />}
+        icon={<Archive className="h-4 w-4 text-[color:var(--nfq-accent)]" />}
         actions={<Badge variant="outline">{eligibleDeals.length} eligible deals</Badge>}
       >
         <div className="space-y-5">
@@ -164,36 +164,36 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                <ShieldCheck className="h-4 w-4 text-[color:var(--nfq-success)]" />
                 Approval Lens
               </div>
-              <div className="font-mono-nums text-2xl font-semibold text-white">
+              <div className="font-mono-nums text-2xl font-semibold text-[color:var(--nfq-text-primary)]">
                 {percentageFormatter.format(approvalMatrix.autoApprovalThreshold)}%
               </div>
-              <div className="mt-1 text-xs text-slate-400">Auto-approval threshold currently enforced.</div>
+              <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">Auto-approval threshold currently enforced.</div>
             </div>
 
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
-                <Layers3 className="h-4 w-4 text-cyan-400" />
+                <Layers3 className="h-4 w-4 text-[color:var(--nfq-accent)]" />
                 Scenario Definition
               </div>
-              <div className="text-sm font-semibold text-white">{PORTFOLIO_SCENARIO_PRESETS[selectedPreset].label}</div>
-              <div className="mt-1 text-xs text-slate-400">
+              <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">{PORTFOLIO_SCENARIO_PRESETS[selectedPreset].label}</div>
+              <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
                 {PORTFOLIO_SCENARIO_PRESETS[selectedPreset].description}
               </div>
             </div>
 
             <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-amber-400" />
+                <Sparkles className="h-4 w-4 text-[color:var(--nfq-warning)]" />
                 Shock Pack
               </div>
-              <div className="font-mono text-sm font-semibold text-white">
+              <div className="font-mono text-sm font-semibold text-[color:var(--nfq-text-primary)]">
                 IR {PORTFOLIO_SCENARIO_PRESETS[selectedPreset].shocks.interestRate >= 0 ? '+' : ''}
                 {PORTFOLIO_SCENARIO_PRESETS[selectedPreset].shocks.interestRate} bps
               </div>
-              <div className="mt-1 font-mono text-xs text-slate-400">
+              <div className="mt-1 font-mono text-xs text-[color:var(--nfq-text-muted)]">
                 Liquidity {PORTFOLIO_SCENARIO_PRESETS[selectedPreset].shocks.liquiditySpread >= 0 ? '+' : ''}
                 {PORTFOLIO_SCENARIO_PRESETS[selectedPreset].shocks.liquiditySpread} bps
               </div>
@@ -226,7 +226,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
 
       <Panel
         title="Snapshot Intelligence"
-        icon={<TrendingUp className="h-4 w-4 text-cyan-400" />}
+        icon={<TrendingUp className="h-4 w-4 text-[color:var(--nfq-accent)]" />}
         actions={<Badge variant="secondary">{snapshots.length} snapshots</Badge>}
       >
         <div className="space-y-5">
@@ -234,31 +234,31 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
             <>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Exposure</div>
-                  <div className="mt-2 text-xl font-semibold text-white">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">Exposure</div>
+                  <div className="mt-2 text-xl font-semibold text-[color:var(--nfq-text-primary)]">
                     {formatNominal(selectedSnapshot.totals.exposure)}
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
+                  <div className="mt-1 text-xs text-[color:var(--nfq-text-faint)]">
                     Delta vs previous {delta.exposureDelta >= 0 ? '+' : ''}
                     {formatNominal(delta.exposureDelta)}
                   </div>
                 </div>
                 <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Average RAROC</div>
-                  <div className="mt-2 text-xl font-semibold text-white">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">Average RAROC</div>
+                  <div className="mt-2 text-xl font-semibold text-[color:var(--nfq-text-primary)]">
                     {percentageFormatter.format(selectedSnapshot.totals.averageRaroc)}%
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
+                  <div className="mt-1 text-xs text-[color:var(--nfq-text-faint)]">
                     Delta vs previous {delta.rarocDelta >= 0 ? '+' : ''}
                     {percentageFormatter.format(delta.rarocDelta)}%
                   </div>
                 </div>
                 <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Average Client Rate</div>
-                  <div className="mt-2 text-xl font-semibold text-white">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">Average Client Rate</div>
+                  <div className="mt-2 text-xl font-semibold text-[color:var(--nfq-text-primary)]">
                     {percentageFormatter.format(selectedSnapshot.totals.averageFinalRate)}%
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
+                  <div className="mt-1 text-xs text-[color:var(--nfq-text-faint)]">
                     Delta vs previous {delta.finalRateDelta >= 0 ? '+' : ''}
                     {percentageFormatter.format(delta.finalRateDelta)}%
                   </div>
@@ -269,8 +269,8 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                 <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <h4 className="text-sm font-semibold text-white">Recent Snapshots</h4>
-                      <p className="text-xs text-slate-400">Reusable portfolio states for committee and reporting.</p>
+                      <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Recent Snapshots</h4>
+                      <p className="text-xs text-[color:var(--nfq-text-muted)]">Reusable portfolio states for committee and reporting.</p>
                     </div>
                     <Badge variant="outline">{selectedSnapshot.scenario.name}</Badge>
                   </div>
@@ -289,8 +289,8 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <div className="text-sm font-semibold text-white">{snapshot.name}</div>
-                            <div className="mt-1 text-xs text-slate-400">
+                            <div className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">{snapshot.name}</div>
+                            <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
                               {new Date(snapshot.createdAt).toLocaleString()} by {snapshot.createdByName}
                             </div>
                           </div>
@@ -309,8 +309,8 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                 <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-black/20 p-4">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <h4 className="text-sm font-semibold text-white">Selected Snapshot Detail</h4>
-                      <p className="text-xs text-slate-400">
+                      <h4 className="text-sm font-semibold text-[color:var(--nfq-text-primary)]">Selected Snapshot Detail</h4>
+                      <p className="text-xs text-[color:var(--nfq-text-muted)]">
                         Scenario {selectedSnapshot.scenario.name} with {selectedSnapshot.results.length} priced deals.
                       </p>
                     </div>
@@ -329,13 +329,13 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                         className="grid grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-3 py-2 text-sm"
                       >
                         <div>
-                          <div className="truncate font-medium text-white">{result.dealId}</div>
-                          <div className="text-xs text-slate-500">{result.currency}</div>
+                          <div className="truncate font-medium text-[color:var(--nfq-text-primary)]">{result.dealId}</div>
+                          <div className="text-xs text-[color:var(--nfq-text-faint)]">{result.currency}</div>
                         </div>
-                        <div className="text-right text-slate-200">
+                        <div className="text-right text-[color:var(--nfq-text-secondary)]">
                           {result.currency} {formatNominal(result.amount)}
                         </div>
-                        <div className="text-right text-slate-200">{percentageFormatter.format(result.raroc)}%</div>
+                        <div className="text-right text-[color:var(--nfq-text-secondary)]">{percentageFormatter.format(result.raroc)}%</div>
                         <div className="text-right">
                           <Badge
                             variant={
@@ -356,7 +356,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
             </>
           ) : (
-            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-sm text-slate-400">
+            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-sm text-[color:var(--nfq-text-muted)]">
               No portfolio snapshot yet. Create one to freeze a governed pricing state for reporting and committee.
             </div>
           )}

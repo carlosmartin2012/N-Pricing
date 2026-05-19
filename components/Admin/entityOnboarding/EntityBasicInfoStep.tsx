@@ -16,7 +16,7 @@ interface Props {
 export const EntityBasicInfoStep: React.FC<Props> = ({ value, onChange }) => (
   <div className="space-y-1">
     <div className="mb-6 flex items-center gap-3 rounded border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] p-4">
-      <Building2 size={20} className="text-amber-400" />
+      <Building2 size={20} className="text-[color:var(--nfq-warning)]" />
       <div>
         <p className="text-xs font-semibold text-[color:var(--nfq-text-primary)]">Basic Info</p>
         <p className="text-[10px] text-[color:var(--nfq-text-muted)]">

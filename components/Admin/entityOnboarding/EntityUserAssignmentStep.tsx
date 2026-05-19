@@ -20,7 +20,7 @@ export const EntityUserAssignmentStep: React.FC<Props> = ({
 }) => (
   <div className="space-y-3">
     <div className="flex items-center gap-3 rounded border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)] p-4">
-      <Users size={20} className="text-amber-400" />
+      <Users size={20} className="text-[color:var(--nfq-warning)]" />
       <div>
         <p className="text-xs font-semibold text-[color:var(--nfq-text-primary)]">Assign Users</p>
         <p className="text-[10px] text-[color:var(--nfq-text-muted)]">

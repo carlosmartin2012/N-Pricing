@@ -107,22 +107,22 @@ const AttributionSimulator: React.FC<Props> = ({
   return (
     <section
       data-testid="attribution-simulator"
-      className={`rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 ${compact ? 'p-4' : 'p-6'}`}
+      className={`rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 ${compact ? 'p-4' : 'p-6'}`}
     >
       {!compact && (
         <header className="mb-4 flex items-center gap-3">
-          <Sliders className="h-5 w-5 text-emerald-400" />
+          <Sliders className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               {t.simulatorTitle}
             </h2>
-            <p className="text-xs text-slate-400">{t.simulatorSubtitle}</p>
+            <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.simulatorSubtitle}</p>
           </div>
         </header>
       )}
 
       {isLoading && (
-        <div className="py-6 text-center text-xs text-slate-400">{t.loading}</div>
+        <div className="py-6 text-center text-xs text-[color:var(--nfq-text-muted)]">{t.loading}</div>
       )}
 
       {!isLoading && matrixEmpty && (
@@ -176,7 +176,7 @@ const AttributionSimulator: React.FC<Props> = ({
           </div>
 
           {/* Resultado */}
-          <div className="grid gap-3 rounded-md bg-slate-950/40 p-4 md:grid-cols-3">
+          <div className="grid gap-3 rounded-md bg-[var(--nfq-bg-root)]/40 p-4 md:grid-cols-3">
             <Stat
               label={t.simulatorBaselinePrice}
               value={fmtPct(quote.finalClientRateBps)}
@@ -199,37 +199,37 @@ const AttributionSimulator: React.FC<Props> = ({
           </div>
 
           {/* Routing */}
-          <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 p-4">
+          <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 p-4">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {result.newRouting.belowHardFloor ? (
-                  <AlertTriangle className="h-4 w-4 text-rose-400" />
+                  <AlertTriangle className="h-4 w-4 text-[color:var(--nfq-danger)]" />
                 ) : (
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <ShieldCheck className="h-4 w-4 text-[color:var(--nfq-success)]" />
                 )}
-                <span className="font-mono text-xs uppercase tracking-tight text-slate-200">
+                <span className="font-mono text-xs uppercase tracking-tight text-[color:var(--nfq-text-secondary)]">
                   {t.simulatorRequiredLevel}
                 </span>
               </div>
-              <span className="rounded-full border border-[color:var(--nfq-border-ghost)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+              <span className="rounded-full border border-[color:var(--nfq-border-ghost)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-secondary)]">
                 {t[reasonKey(result.newRouting.reason)]}
               </span>
             </div>
 
-            <div className="mb-3 text-base font-semibold text-white">
+            <div className="mb-3 text-base font-semibold text-[color:var(--nfq-text-primary)]">
               {result.newRouting.requiredLevel.name}
-              <span className="ml-2 text-xs text-slate-400">
+              <span className="ml-2 text-xs text-[color:var(--nfq-text-muted)]">
                 ({result.newRouting.requiredLevel.rbacRole})
               </span>
             </div>
 
-            <div className="mb-3 flex items-center gap-1 text-xs text-slate-400">
+            <div className="mb-3 flex items-center gap-1 text-xs text-[color:var(--nfq-text-muted)]">
               <Layers className="h-3 w-3" />
               <span>{t.simulatorChainShort}:</span>
               {result.newRouting.approvalChain.map((l, i) => (
                 <span key={l.id} className="font-mono">
                   {i > 0 ? ' → ' : ''}
-                  <span className={l.id === result.newRouting.requiredLevel.id ? 'text-emerald-400' : ''}>
+                  <span className={l.id === result.newRouting.requiredLevel.id ? 'text-[color:var(--nfq-success)]' : ''}>
                     {l.name}
                   </span>
                 </span>
@@ -237,7 +237,7 @@ const AttributionSimulator: React.FC<Props> = ({
             </div>
 
             {result.diffVsOriginal.levelsAvoided.length > 0 && (
-              <div className="flex items-center gap-2 text-xs text-emerald-300">
+              <div className="flex items-center gap-2 text-xs text-[color:var(--nfq-success)]">
                 <ArrowDownToLine className="h-3 w-3" />
                 <span>
                   {t.simulatorTimeAvoided}:{' '}
@@ -258,7 +258,7 @@ const AttributionSimulator: React.FC<Props> = ({
             <button
               type="button"
               onClick={reset}
-              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
             >
               {t.simulatorReset}
             </button>
@@ -266,7 +266,7 @@ const AttributionSimulator: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => onApply({ quote: result.adjustedQuote, proposedAdjustments })}
-                className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-3 py-1.5 text-xs text-slate-100 hover:bg-white/10"
+                className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] hover:bg-white/10"
               >
                 {t.simulatorApply}
               </button>
@@ -276,7 +276,7 @@ const AttributionSimulator: React.FC<Props> = ({
                 type="button"
                 disabled={result.newRouting.belowHardFloor}
                 onClick={() => onRequestApproval({ quote: result.adjustedQuote, proposedAdjustments })}
-                className="rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-400"
+                className="rounded-md bg-emerald-500/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)] disabled:text-[color:var(--nfq-text-muted)]"
               >
                 {t.simulatorRequest}
               </button>
@@ -307,11 +307,11 @@ const SliderRow: React.FC<SliderRowProps> = ({
   return (
     <label className="block">
       <div className="mb-1 flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">
+        <span className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
           {label}
         </span>
-        <span className="font-mono text-xs text-slate-200">
-          {showOverrideHint ? <span className="text-slate-500">— {display}</span> : display}
+        <span className="font-mono text-xs text-[color:var(--nfq-text-secondary)]">
+          {showOverrideHint ? <span className="text-[color:var(--nfq-text-faint)]">— {display}</span> : display}
         </span>
       </div>
       <input
@@ -336,11 +336,11 @@ interface StatProps {
 
 const Stat: React.FC<StatProps> = ({ label, value, sub, highlighted }) => (
   <div>
-    <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
-    <div className={`font-mono text-lg font-semibold ${highlighted ? 'text-emerald-300' : 'text-white'}`}>
+    <div className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</div>
+    <div className={`font-mono text-lg font-semibold ${highlighted ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-text-primary)]'}`}>
       {value}
     </div>
-    {sub && <div className="font-mono text-[10px] text-slate-400">{sub}</div>}
+    {sub && <div className="font-mono text-[10px] text-[color:var(--nfq-text-muted)]">{sub}</div>}
   </div>
 );
 

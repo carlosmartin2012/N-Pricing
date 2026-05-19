@@ -2,9 +2,9 @@ import React from 'react';
 import type { RarocMetricCardData } from './rarocCalculatorUtils';
 
 const toneClasses: Record<RarocMetricCardData['tone'], string> = {
-  cyan: 'text-cyan-400',
-  emerald: 'text-emerald-400',
-  amber: 'text-amber-400',
+  cyan: 'text-[color:var(--nfq-accent)]',
+  emerald: 'text-[color:var(--nfq-success)]',
+  amber: 'text-[color:var(--nfq-warning)]',
   violet: 'text-violet-400',
 };
 
@@ -18,9 +18,9 @@ export const RAROCMetricCard: React.FC<RarocMetricCardData> = React.memo(({
 }) => {
   const statusClass =
     trend === 'positive'
-      ? 'text-emerald-500'
+      ? 'text-[color:var(--nfq-success)]'
       : trend === 'negative'
-        ? 'text-rose-500'
+        ? 'text-[color:var(--nfq-danger)]'
         : 'text-[color:var(--nfq-text-muted)]';
 
   return (

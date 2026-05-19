@@ -14,13 +14,13 @@ const STAGE_STYLES: Record<
 > = {
   1: {
     bg: 'bg-emerald-500/10',
-    text: 'text-emerald-400',
+    text: 'text-[color:var(--nfq-success)]',
     label: 'Stage 1',
     description: 'Performing — EL 12m',
   },
   2: {
     bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
+    text: 'text-[color:var(--nfq-warning)]',
     label: 'Stage 2',
     description: 'SICR — EL lifetime',
   },
@@ -84,19 +84,19 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
       {/* Header */}
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-base font-semibold text-white">
+          <h3 className="text-base font-semibold text-[color:var(--nfq-text-primary)]">
             IFRS 9 / Anejo IX — Stage &amp; SICR
           </h3>
-          <p className="mt-1 text-xs text-white/60">
+          <p className="mt-1 text-xs text-[color:var(--nfq-text-primary)]/60">
             Clasificación de ciclo de vida del crédito
           </p>
         </div>
-        <Info className="h-4 w-4 shrink-0 text-white/40" aria-hidden="true" />
+        <Info className="h-4 w-4 shrink-0 text-[color:var(--nfq-text-primary)]/40" aria-hidden="true" />
       </header>
 
       {/* Row 1: Stage pills */}
       <div className="mb-6">
-        <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+        <label className="mb-2 block font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
           Stage explícito
         </label>
         <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
 
       {/* Row 2: SICR trigger fields (grid 2x3) */}
       <div className="mb-6">
-        <label className="mb-3 block font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+        <label className="mb-3 block font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
           Triggers SICR
         </label>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -138,7 +138,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
           <div className="rounded-lg bg-white/5 p-3">
             <label
               htmlFor="ifrs9-pd-multiplier"
-              className="mb-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-white/50"
+              className="mb-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50"
             >
               PD multiplier
             </label>
@@ -150,16 +150,16 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               value={deal.pdMultiplier ?? ''}
               onChange={(e) => handleNumberChange('pdMultiplier', e.target.value)}
               placeholder="1.0"
-              className="w-full rounded-md bg-black/30 px-2 py-1.5 font-mono text-sm text-white outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-md bg-black/30 px-2 py-1.5 font-mono text-sm text-[color:var(--nfq-text-primary)] outline-none ring-1 ring-white/10 focus:ring-white/30"
             />
-            <p className="mt-1 text-[10px] text-white/40">× respecto a originación</p>
+            <p className="mt-1 text-[10px] text-[color:var(--nfq-text-primary)]/40">× respecto a originación</p>
           </div>
 
           {/* Days past due */}
           <div className="rounded-lg bg-white/5 p-3">
             <label
               htmlFor="ifrs9-days-past-due"
-              className="mb-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-white/50"
+              className="mb-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50"
             >
               Días de mora (DPD)
             </label>
@@ -171,9 +171,9 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               value={deal.daysPastDue ?? ''}
               onChange={(e) => handleNumberChange('daysPastDue', e.target.value)}
               placeholder="0"
-              className="w-full rounded-md bg-black/30 px-2 py-1.5 font-mono text-sm text-white outline-none ring-1 ring-white/10 focus:ring-white/30"
+              className="w-full rounded-md bg-black/30 px-2 py-1.5 font-mono text-sm text-[color:var(--nfq-text-primary)] outline-none ring-1 ring-white/10 focus:ring-white/30"
             />
-            <p className="mt-1 text-[10px] text-white/40">&gt;30 SICR · &gt;90 default</p>
+            <p className="mt-1 text-[10px] text-[color:var(--nfq-text-primary)]/40">&gt;30 SICR · &gt;90 default</p>
           </div>
 
           {/* Refinanced */}
@@ -185,10 +185,10 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-black/30"
             />
             <div>
-              <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-white/50">
+              <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Refinanciado
               </span>
-              <span className="mt-0.5 block text-[11px] text-white/70">
+              <span className="mt-0.5 block text-[11px] text-[color:var(--nfq-text-primary)]/70">
                 Bajo dificultades financieras
               </span>
             </div>
@@ -203,10 +203,10 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-black/30"
             />
             <div>
-              <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-white/50">
+              <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Watchlist
               </span>
-              <span className="mt-0.5 block text-[11px] text-white/70">
+              <span className="mt-0.5 block text-[11px] text-[color:var(--nfq-text-primary)]/70">
                 Seguimiento interno
               </span>
             </div>
@@ -221,10 +221,10 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-black/30"
             />
             <div>
-              <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-white/50">
+              <span className="block font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Forborne
               </span>
-              <span className="mt-0.5 block text-[11px] text-white/70">
+              <span className="mt-0.5 block text-[11px] text-[color:var(--nfq-text-primary)]/70">
                 Exposición en forbearance
               </span>
             </div>
@@ -235,13 +235,13 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
       {/* Bottom: Live SICR result */}
       <div className="rounded-[var(--nfq-radius-card)] bg-black/20 p-4 ring-1 ring-white/5">
         <div className="mb-3 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
             Detección SICR en vivo
           </span>
           {sicrResult.triggered ? (
-            <AlertTriangle className="h-4 w-4 text-amber-400" aria-hidden="true" />
+            <AlertTriangle className="h-4 w-4 text-[color:var(--nfq-warning)]" aria-hidden="true" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+            <CheckCircle2 className="h-4 w-4 text-[color:var(--nfq-success)]" aria-hidden="true" />
           )}
         </div>
 
@@ -255,19 +255,19 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
           >
             {detectedStyle.label}
           </span>
-          <span className="text-xs text-white/70">{detectedStyle.description}</span>
+          <span className="text-xs text-[color:var(--nfq-text-primary)]/70">{detectedStyle.description}</span>
         </div>
 
         {sicrResult.reasons.length > 0 ? (
           <div className="mt-3">
-            <p className="mb-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-white/40">
+            <p className="mb-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/40">
               Motivos detectados
             </p>
             <div className="flex flex-wrap gap-1.5">
               {sicrResult.reasons.map((reason, idx) => (
                 <span
                   key={`${idx}-${reason}`}
-                  className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 uppercase tracking-wide"
+                  className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-[color:var(--nfq-warning)] uppercase tracking-wide"
                 >
                   {reason}
                 </span>
@@ -275,7 +275,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
             </div>
           </div>
         ) : (
-          <p className="mt-3 text-[11px] text-white/50">
+          <p className="mt-3 text-[11px] text-[color:var(--nfq-text-primary)]/50">
             Sin triggers activos — exposición performing.
           </p>
         )}
@@ -283,7 +283,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
         {isOverridden ? (
           <div className="mt-4 flex items-start gap-2 rounded-lg bg-amber-500/10 p-3 ring-1 ring-amber-500/30">
             <AlertTriangle
-              className="mt-0.5 h-4 w-4 shrink-0 text-amber-400"
+              className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--nfq-warning)]"
               aria-hidden="true"
             />
             <p className="text-[11px] text-amber-200">

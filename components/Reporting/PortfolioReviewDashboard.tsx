@@ -166,7 +166,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
               type="button"
               onClick={analyzePortfolio}
               disabled={isAnalyzing || portfolio.length === 0}
-              className="inline-flex h-7 items-center gap-2 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-accent)] px-4 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-2 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-accent)] px-4 text-sm font-medium text-[color:var(--nfq-text-primary)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isAnalyzing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

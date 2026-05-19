@@ -36,12 +36,12 @@ export const UserEditorDrawer: React.FC<Props> = ({
       title={mode === 'create' ? 'Create New User' : 'Edit User Profile'}
       footer={
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-xs text-slate-400 hover:text-white">
+          <button onClick={onClose} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
             Cancel
           </button>
           <button
             onClick={onSave}
-            className="rounded bg-cyan-600 px-4 py-2 text-xs font-bold text-white hover:bg-cyan-500"
+            className="rounded bg-cyan-600 px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-cyan-500"
           >
             Save Profile
           </button>
@@ -50,11 +50,11 @@ export const UserEditorDrawer: React.FC<Props> = ({
     >
       {draft && (
         <div className="space-y-6">
-          <div className="flex items-center gap-3 rounded border border-slate-800 bg-slate-900 p-4">
-            <Shield size={24} className="text-slate-500" />
+          <div className="flex items-center gap-3 rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+            <Shield size={24} className="text-[color:var(--nfq-text-faint)]" />
             <div>
-              <h4 className="text-xs font-bold text-slate-300">Security Credentials</h4>
-              <p className="text-[10px] text-slate-500">
+              <h4 className="text-xs font-bold text-[color:var(--nfq-text-secondary)]">Security Credentials</h4>
+              <p className="text-[10px] text-[color:var(--nfq-text-faint)]">
                 Manage access level and profile details.
               </p>
             </div>

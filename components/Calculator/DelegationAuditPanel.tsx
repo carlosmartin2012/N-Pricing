@@ -24,9 +24,9 @@ interface DelegationCheckResponse {
 }
 
 const TIER_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  AUTO: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Auto' },
+  AUTO: { bg: 'bg-emerald-500/10', text: 'text-[color:var(--nfq-success)]', label: 'Auto' },
   MANAGER_L1: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Director L1' },
-  MANAGER_L2: { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'Director L2' },
+  MANAGER_L2: { bg: 'bg-amber-500/10', text: 'text-[color:var(--nfq-warning)]', label: 'Director L2' },
   RISK_COMMITTEE: {
     bg: 'bg-[var(--nfq-coral)]/10',
     text: 'text-[var(--nfq-coral)]',
@@ -248,7 +248,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     {rule.matched ? (
-                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[color:var(--nfq-success)]">
                         <Check className="h-2.5 w-2.5" aria-hidden="true" />
                       </span>
                     ) : (

@@ -76,10 +76,10 @@ const SLOPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Gauge className="h-5 w-5" style={{ color: STATUS_COLOR[overallStatus] }} />
-          <h3 className="font-mono text-xs font-medium text-white">
+          <h3 className="font-mono text-xs font-medium text-[color:var(--nfq-text-primary)]">
             SLO Summary
           </h3>
-          <span className="nfq-label text-[10px] text-slate-400">
+          <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">
             window {summary?.window ?? '—'}
           </span>
         </div>
@@ -94,7 +94,7 @@ const SLOPanel: React.FC = () => {
       </div>
 
       {!summary && !isLoading && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">
           SLO endpoint not available yet — apply migration <code className="font-mono">20260602000005_slo_metrics</code> and emit at least one metric.
         </div>
       )}
@@ -112,7 +112,7 @@ const SLOPanel: React.FC = () => {
               >
                 <header className="mb-3 flex items-center gap-2">
                   <Icon className="h-4 w-4" style={{ color }} />
-                  <span className="font-mono text-[11px] tracking-normal text-slate-300">
+                  <span className="font-mono text-[11px] tracking-normal text-[color:var(--nfq-text-secondary)]">
                     {slo.name}
                   </span>
                 </header>
@@ -120,7 +120,7 @@ const SLOPanel: React.FC = () => {
                   <span className="font-mono text-2xl font-semibold tabular-nums" style={{ color }}>
                     {formatValue(slo.name, slo.current)}
                   </span>
-                  <span className="font-mono text-[10px] tracking-normal text-slate-500">
+                  <span className="font-mono text-[10px] tracking-normal text-[color:var(--nfq-text-faint)]">
                     target {formatTarget(slo.name, slo.target)}
                   </span>
                 </div>
@@ -128,8 +128,8 @@ const SLOPanel: React.FC = () => {
                   <dl className="mt-3 grid grid-cols-3 gap-2 text-[10px]">
                     {(['p50', 'p95', 'p99'] as const).map((p) => (
                       <div key={p}>
-                        <dt className="font-mono tracking-normal text-slate-500">{p}</dt>
-                        <dd className="font-mono tabular-nums text-slate-200">
+                        <dt className="font-mono tracking-normal text-[color:var(--nfq-text-faint)]">{p}</dt>
+                        <dd className="font-mono tabular-nums text-[color:var(--nfq-text-secondary)]">
                           {formatValue(slo.name, slo.percentiles![p])}
                         </dd>
                       </div>
@@ -137,7 +137,7 @@ const SLOPanel: React.FC = () => {
                   </dl>
                 )}
                 {slo.sampleCount !== undefined && (
-                  <p className="mt-2 font-mono text-[10px] text-slate-500">
+                  <p className="mt-2 font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
                     samples: {slo.sampleCount}
                   </p>
                 )}
@@ -155,7 +155,7 @@ const SLOPanel: React.FC = () => {
                 className="h-4 w-4"
                 style={{ color: violations.total === 0 ? STATUS_COLOR.ok : STATUS_COLOR.breached }}
               />
-              <h4 className="font-mono text-[11px] tracking-normal text-slate-300">
+              <h4 className="font-mono text-[11px] tracking-normal text-[color:var(--nfq-text-secondary)]">
                 Tenancy violations · last {violations.windowMinutes}m
               </h4>
             </div>
@@ -168,7 +168,7 @@ const SLOPanel: React.FC = () => {
             </span>
           </header>
           {violations.total === 0 ? (
-            <p className="font-mono text-[10px] text-slate-500">
+            <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
               Clean window. Safe to hold TENANCY_STRICT flip observation.
             </p>
           ) : (
@@ -179,15 +179,15 @@ const SLOPanel: React.FC = () => {
                   className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-black/20 px-3 py-1.5 text-xs"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <code className="truncate font-mono text-slate-200">{row.endpoint}</code>
+                    <code className="truncate font-mono text-[color:var(--nfq-text-secondary)]">{row.endpoint}</code>
                     <span
-                      className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-normal text-rose-300"
+                      className="rounded-full px-2 py-0.5 font-mono text-[10px] tracking-normal text-[color:var(--nfq-danger)]"
                       style={{ background: 'rgba(244,63,94,0.08)' }}
                     >
                       {row.errorCode}
                     </span>
                   </div>
-                  <span className="font-mono tabular-nums text-slate-200">{row.count}</span>
+                  <span className="font-mono tabular-nums text-[color:var(--nfq-text-secondary)]">{row.count}</span>
                 </li>
               ))}
             </ul>
@@ -197,7 +197,7 @@ const SLOPanel: React.FC = () => {
 
       {summary && summary.activeAlerts.length > 0 && (
         <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
-          <h4 className="mb-3 font-mono text-[11px] tracking-normal text-slate-300">
+          <h4 className="mb-3 font-mono text-[11px] tracking-normal text-[color:var(--nfq-text-secondary)]">
             Active alerts
           </h4>
           <ul className="space-y-2">
@@ -216,10 +216,10 @@ const SLOPanel: React.FC = () => {
                   >
                     {a.severity}
                   </span>
-                  <span className="text-slate-200">{a.name}</span>
-                  <code className="font-mono text-[10px] text-slate-500">{a.sli}</code>
+                  <span className="text-[color:var(--nfq-text-secondary)]">{a.name}</span>
+                  <code className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{a.sli}</code>
                 </div>
-                <span className="font-mono text-[10px] text-slate-500">
+                <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
                   {a.lastTriggeredAt ? new Date(a.lastTriggeredAt).toLocaleString() : 'never triggered'}
                 </span>
               </li>

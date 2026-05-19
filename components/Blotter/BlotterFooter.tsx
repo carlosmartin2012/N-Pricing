@@ -30,32 +30,32 @@ const BlotterFooter: React.FC<Props> = ({ deals, committeeSummary }) => {
   }, [deals]);
 
   return (
-    <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 border-t border-slate-800 bg-slate-950 p-2 font-mono-nums text-[10px] uppercase tracking-[0.16em] text-slate-500">
+    <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 border-t border-slate-800 bg-[var(--nfq-bg-root)] p-2 font-mono-nums text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">
       <div>
-        TOTAL VOL: <span className="text-slate-300">{formatCompactVolume(stats.totalVolume)}</span>
+        TOTAL VOL: <span className="text-[color:var(--nfq-text-secondary)]">{formatCompactVolume(stats.totalVolume)}</span>
       </div>
       <div>
-        AVG MARGIN: <span className="text-slate-300">{stats.avgMargin.toFixed(2)}%</span>
+        AVG MARGIN: <span className="text-[color:var(--nfq-text-secondary)]">{stats.avgMargin.toFixed(2)}%</span>
       </div>
       <div>
-        BOOKED: <span className="text-emerald-400">{stats.bookedCount}</span>
+        BOOKED: <span className="text-[color:var(--nfq-success)]">{stats.bookedCount}</span>
       </div>
       <div>
-        ROWS: <span className="text-slate-300">{deals.length}</span>
+        ROWS: <span className="text-[color:var(--nfq-text-secondary)]">{deals.length}</span>
       </div>
       {committeeSummary && (
         <>
           <div>
-            COMMITTEE PENDING: <span className="text-amber-400">{committeeSummary.pendingReview}</span>
+            COMMITTEE PENDING: <span className="text-[color:var(--nfq-warning)]">{committeeSummary.pendingReview}</span>
           </div>
           <div>
-            READY TO BOOK: <span className="text-cyan-400">{committeeSummary.readyToBook}</span>
+            READY TO BOOK: <span className="text-[color:var(--nfq-accent)]">{committeeSummary.readyToBook}</span>
           </div>
           <div>
             AI DOSSIERS: <span className="text-indigo-400">{committeeSummary.aiSupported}</span>
           </div>
           <div>
-            OPEN TASKS: <span className="text-slate-300">{committeeSummary.openTasks}</span>
+            OPEN TASKS: <span className="text-[color:var(--nfq-text-secondary)]">{committeeSummary.openTasks}</span>
           </div>
         </>
       )}

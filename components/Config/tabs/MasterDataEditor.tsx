@@ -24,8 +24,8 @@ const MasterDataEditor: React.FC<Props> = ({
     return (
       <div className="space-y-4">
         <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
-          <Users size={16} className="text-emerald-500" />
-          <span className="text-xs font-bold uppercase text-slate-300">Client Details</span>
+          <Users size={16} className="text-[color:var(--nfq-success)]" />
+          <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Client Details</span>
         </div>
         <InputGroup label="Client ID (Unique)">
           <TextInput
@@ -80,8 +80,8 @@ const MasterDataEditor: React.FC<Props> = ({
     return (
       <div className="space-y-4">
         <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
-          <Briefcase size={16} className="text-cyan-500" />
-          <span className="text-xs font-bold uppercase text-slate-300">Product Definition</span>
+          <Briefcase size={16} className="text-[color:var(--nfq-accent)]" />
+          <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Product Definition</span>
         </div>
         <InputGroup label="Product ID">
           <TextInput
@@ -115,7 +115,7 @@ const MasterDataEditor: React.FC<Props> = ({
     <div className="space-y-4">
       <div className="mb-2 flex items-center gap-2 border-b border-slate-800 pb-2">
         <Building2 size={16} className="text-purple-500" />
-        <span className="text-xs font-bold uppercase text-slate-300">Business Unit</span>
+        <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-secondary)]">Business Unit</span>
       </div>
       <InputGroup label="Unit ID">
         <TextInput

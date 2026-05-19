@@ -58,7 +58,7 @@ const CohortDrilldownModal: React.FC<Props> = ({ isOpen, onClose, cohort, dateRa
           <div className="min-w-0">
             <div className="nfq-eyebrow">Cohort Drilldown</div>
             <h2 className="mt-3 flex items-center gap-2 text-lg font-semibold tracking-[var(--nfq-tracking-snug)] text-[color:var(--nfq-text-primary)]">
-              <Layers size={18} className="shrink-0 text-cyan-400" />
+              <Layers size={18} className="shrink-0 text-[color:var(--nfq-accent)]" />
               <span className="truncate">{cohortLabel}</span>
             </h2>
           </div>
@@ -86,11 +86,11 @@ const CohortDrilldownModal: React.FC<Props> = ({ isOpen, onClose, cohort, dateRa
               <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
                 <div className="nfq-kpi-card">
                   <div className="nfq-kpi-label mb-1">Deals</div>
-                  <div className="nfq-kpi-value text-xl text-cyan-400">{breakdown.dealCount}</div>
+                  <div className="nfq-kpi-value text-xl text-[color:var(--nfq-accent)]">{breakdown.dealCount}</div>
                 </div>
                 <div className="nfq-kpi-card">
                   <div className="nfq-kpi-label mb-1">In-Band</div>
-                  <div className={`nfq-kpi-value text-xl ${breakdown.inBandPct >= 90 ? 'text-emerald-400' : breakdown.inBandPct >= 75 ? 'text-amber-400' : 'text-rose-400'}`}>
+                  <div className={`nfq-kpi-value text-xl ${breakdown.inBandPct >= 90 ? 'text-[color:var(--nfq-success)]' : breakdown.inBandPct >= 75 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-danger)]'}`}>
                     {fmtPct(breakdown.inBandPct)}
                   </div>
                 </div>
@@ -102,7 +102,7 @@ const CohortDrilldownModal: React.FC<Props> = ({ isOpen, onClose, cohort, dateRa
                 </div>
                 <div className="nfq-kpi-card">
                   <div className="nfq-kpi-label mb-1">Total Leakage</div>
-                  <div className={`nfq-kpi-value text-xl ${breakdown.totalLeakageEur > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                  <div className={`nfq-kpi-value text-xl ${breakdown.totalLeakageEur > 0 ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-success)]'}`}>
                     {fmtEur(breakdown.totalLeakageEur)}
                   </div>
                 </div>
@@ -116,7 +116,7 @@ const CohortDrilldownModal: React.FC<Props> = ({ isOpen, onClose, cohort, dateRa
                     {breakdown.topOutlierDealIds.map((id) => (
                       <span
                         key={id}
-                        className="rounded bg-rose-950/30 px-2 py-1 font-mono text-[10px] text-rose-400"
+                        className="rounded bg-rose-950/30 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-danger)]"
                       >
                         {id.slice(0, 12)}...
                       </span>

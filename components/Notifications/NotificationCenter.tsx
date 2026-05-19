@@ -9,10 +9,10 @@ import { systemTranslations } from '../../translations/index';
 type FilterType = 'all' | Notification['type'];
 
 const TYPE_COLORS: Record<Notification['type'], string> = {
-  APPROVAL_REQUEST: 'bg-amber-500/20 text-amber-400',
-  APPROVED: 'bg-emerald-500/20 text-emerald-400',
-  REJECTED: 'bg-rose-500/20 text-rose-400',
-  COMMENT: 'bg-cyan-500/20 text-cyan-400',
+  APPROVAL_REQUEST: 'bg-amber-500/20 text-[color:var(--nfq-warning)]',
+  APPROVED: 'bg-emerald-500/20 text-[color:var(--nfq-success)]',
+  REJECTED: 'bg-rose-500/20 text-[color:var(--nfq-danger)]',
+  COMMENT: 'bg-cyan-500/20 text-[color:var(--nfq-accent)]',
 };
 
 const TYPE_LABELS: Record<Notification['type'], string> = {
@@ -96,7 +96,7 @@ const NotificationCenter: React.FC = () => {
               type="checkbox"
               checked={showUnreadOnly}
               onChange={(e) => setShowUnreadOnly(e.target.checked)}
-              className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30"
+              className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-cyan-500/30"
             />
             Unread only
           </label>

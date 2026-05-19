@@ -247,7 +247,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
         className={`px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-[0.16em] transition-colors ${
           active
             ? 'bg-[var(--nfq-accent,#F48B4A)] text-black'
-            : 'bg-white/5 text-white/70 hover:bg-white/10'
+            : 'bg-white/5 text-[color:var(--nfq-text-primary)]/70 hover:bg-white/10'
         }`}
       >
         {label}
@@ -256,7 +256,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
   };
 
   return (
-    <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface,#171717)] p-4 text-white/90">
+    <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface,#171717)] p-4 text-[color:var(--nfq-text-primary)]/90">
       {/* Heading */}
       <header className="mb-5 flex items-start justify-between gap-4">
         <div>
@@ -264,7 +264,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
             <History className="h-5 w-5 text-[var(--nfq-accent,#F48B4A)]" />
             <h3 className="text-lg font-semibold tracking-tight">{t.calcTitleLineage}</h3>
           </div>
-          <p className="mt-1 text-xs text-white/55">
+          <p className="mt-1 text-xs text-[color:var(--nfq-text-primary)]/55">
             Trazabilidad bitemporal del waterfall de pricing
           </p>
         </div>
@@ -273,12 +273,12 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
       {/* Reconciliation banner */}
       <div className="mb-5 rounded-[var(--nfq-radius-card)] bg-white/[0.04] p-4">
         <div className="flex items-center gap-3">
-          <ShieldCheck className="h-4 w-4 text-emerald-400" />
-          <p className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
+          <ShieldCheck className="h-4 w-4 text-[color:var(--nfq-success)]" />
+          <p className="font-mono text-xs uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/70">
             Pricing calculado con{' '}
-            <span className="text-white">{totals.total}</span> parámetros ·{' '}
-            <span className="text-emerald-400">{totals.approved}</span> con aprobación ·{' '}
-            <span className={totals.pending > 0 ? 'text-amber-400' : 'text-white/40'}>
+            <span className="text-[color:var(--nfq-text-primary)]">{totals.total}</span> parámetros ·{' '}
+            <span className="text-[color:var(--nfq-success)]">{totals.approved}</span> con aprobación ·{' '}
+            <span className={totals.pending > 0 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-text-primary)]/40'}>
               {totals.pending}
             </span>{' '}
             pendientes
@@ -288,7 +288,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
 
       {/* Mode selector */}
       <div className="mb-5 flex flex-wrap items-center gap-2">
-        <span className="mr-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+        <span className="mr-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
           Modo
         </span>
         {modePill('CURRENT', 'Estado actual')}
@@ -300,26 +300,26 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
       {queryMode !== 'CURRENT' && (
         <div className="mb-5 flex flex-wrap gap-4 rounded-[var(--nfq-radius-card)] bg-white/[0.03] p-4">
           <label className="flex flex-col gap-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
               Valid at
             </span>
             <input
               type="date"
               value={validAt}
               onChange={(e) => setValidAt(e.target.value)}
-              className="rounded-md bg-white/5 px-3 py-1.5 font-mono text-xs text-white/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
+              className="rounded-md bg-white/5 px-3 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)]/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
             />
           </label>
           {queryMode === 'BITEMPORAL' && (
             <label className="flex flex-col gap-1">
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 System at
               </span>
               <input
                 type="date"
                 value={systemAt}
                 onChange={(e) => setSystemAt(e.target.value)}
-                className="rounded-md bg-white/5 px-3 py-1.5 font-mono text-xs text-white/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
+                className="rounded-md bg-white/5 px-3 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)]/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
               />
             </label>
           )}
@@ -331,31 +331,31 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[color:var(--nfq-border-ghost)] text-left">
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Parámetro
               </th>
-              <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Valor
               </th>
-              <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 text-right font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Versión
               </th>
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Valid from
               </th>
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Valid to
               </th>
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Recorded by
               </th>
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Approved by
               </th>
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Motivo
               </th>
-              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                 Acciones
               </th>
             </tr>
@@ -365,7 +365,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
               <tr>
                 <td
                   colSpan={9}
-                  className="px-4 py-8 text-center font-mono text-xs text-white/40"
+                  className="px-4 py-8 text-center font-mono text-xs text-[color:var(--nfq-text-primary)]/40"
                 >
                   Sin registros para el criterio seleccionado
                 </td>
@@ -383,56 +383,56 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {approved ? (
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <Check className="h-3.5 w-3.5 text-[color:var(--nfq-success)]" />
                         ) : (
-                          <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
+                          <AlertCircle className="h-3.5 w-3.5 text-[color:var(--nfq-warning)]" />
                         )}
                         <div>
-                          <div className="text-xs font-medium text-white/90">
+                          <div className="text-xs font-medium text-[color:var(--nfq-text-primary)]/90">
                             {entry.parameterName}
                           </div>
-                          <div className="font-mono text-[10px] text-white/40">
+                          <div className="font-mono text-[10px] text-[color:var(--nfq-text-primary)]/40">
                             {entry.parameterId}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-white/90">
+                    <td className="px-4 py-3 text-right font-mono text-xs text-[color:var(--nfq-text-primary)]/90">
                       {String(entry.value)}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-white/70">
+                    <td className="px-4 py-3 text-right font-mono text-xs text-[color:var(--nfq-text-primary)]/70">
                       v{entry.version}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-white/70">
+                    <td className="px-4 py-3 font-mono text-xs text-[color:var(--nfq-text-primary)]/70">
                       {formatDate(entry.validFrom)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-white/70">
+                    <td className="px-4 py-3 font-mono text-xs text-[color:var(--nfq-text-primary)]/70">
                       {formatDate(entry.validTo)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-[11px] text-white/60">
+                    <td className="px-4 py-3 font-mono text-[11px] text-[color:var(--nfq-text-primary)]/60">
                       {entry.recordedBy}
                     </td>
                     <td className="px-4 py-3">
                       {approved ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-300">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-success)]">
                           <Check className="h-3 w-3" />
                           {entry.approvedBy}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-amber-300">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-warning)]">
                           <Clock className="h-3 w-3" />
                           Pendiente
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-white/60">
+                    <td className="px-4 py-3 text-xs text-[color:var(--nfq-text-primary)]/60">
                       {entry.changeReason ?? '—'}
                     </td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
                         onClick={() => openDrawer(entry.parameterId)}
-                        className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-white/80 transition-colors hover:bg-white/10"
+                        className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/80 transition-colors hover:bg-white/10"
                       >
                         Ver historial
                         <ChevronRight className="h-3 w-3" />
@@ -461,20 +461,20 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
           >
             <div className="flex items-start justify-between border-b border-[color:var(--nfq-border-ghost)] p-5">
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+                <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
                   Historial completo
                 </div>
-                <h3 className="mt-1 text-base font-semibold text-white/95">
+                <h3 className="mt-1 text-base font-semibold text-[color:var(--nfq-text-primary)]/95">
                   {PARAMETER_NAMES[drawerParamId] ?? drawerParamId}
                 </h3>
-                <div className="mt-0.5 font-mono text-[11px] text-white/40">
+                <div className="mt-0.5 font-mono text-[11px] text-[color:var(--nfq-text-primary)]/40">
                   {drawerParamId}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="rounded-md p-1.5 text-white/60 transition-colors hover:bg-white/5 hover:text-white/90"
+                className="rounded-md p-1.5 text-[color:var(--nfq-text-primary)]/60 transition-colors hover:bg-white/5 hover:text-[color:var(--nfq-text-primary)]/90"
                 aria-label="Cerrar"
               >
                 <X className="h-4 w-4" />
@@ -496,75 +496,75 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                             v{record.version}
                           </span>
                           {approved ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-emerald-300">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-success)]">
                               <Check className="h-3 w-3" />
                               Aprobado
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-amber-300">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-warning)]">
                               <Clock className="h-3 w-3" />
                               Pendiente
                             </span>
                           )}
                         </div>
-                        <span className="font-mono text-xs text-white/90">
+                        <span className="font-mono text-xs text-[color:var(--nfq-text-primary)]/90">
                           {String(record.value)}
                         </span>
                       </div>
 
                       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px]">
                         <div>
-                          <dt className="font-mono uppercase tracking-[0.14em] text-white/40">
+                          <dt className="font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                             Valid from
                           </dt>
-                          <dd className="font-mono text-white/80">
+                          <dd className="font-mono text-[color:var(--nfq-text-primary)]/80">
                             {formatDate(record.validFrom)}
                           </dd>
                         </div>
                         <div>
-                          <dt className="font-mono uppercase tracking-[0.14em] text-white/40">
+                          <dt className="font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                             Valid to
                           </dt>
-                          <dd className="font-mono text-white/80">
+                          <dd className="font-mono text-[color:var(--nfq-text-primary)]/80">
                             {formatDate(record.validTo)}
                           </dd>
                         </div>
                         <div>
-                          <dt className="font-mono uppercase tracking-[0.14em] text-white/40">
+                          <dt className="font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                             Tx from
                           </dt>
-                          <dd className="font-mono text-white/80">
+                          <dd className="font-mono text-[color:var(--nfq-text-primary)]/80">
                             {formatDateTime(record.txFrom)}
                           </dd>
                         </div>
                         <div>
-                          <dt className="font-mono uppercase tracking-[0.14em] text-white/40">
+                          <dt className="font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                             Tx to
                           </dt>
-                          <dd className="font-mono text-white/80">
+                          <dd className="font-mono text-[color:var(--nfq-text-primary)]/80">
                             {formatDateTime(record.txTo)}
                           </dd>
                         </div>
                         <div className="col-span-2">
-                          <dt className="flex items-center gap-1 font-mono uppercase tracking-[0.14em] text-white/40">
+                          <dt className="flex items-center gap-1 font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                             <User className="h-3 w-3" /> Recorded by
                           </dt>
-                          <dd className="font-mono text-white/80">{record.recordedBy}</dd>
+                          <dd className="font-mono text-[color:var(--nfq-text-primary)]/80">{record.recordedBy}</dd>
                         </div>
                         <div className="col-span-2">
-                          <dt className="flex items-center gap-1 font-mono uppercase tracking-[0.14em] text-white/40">
+                          <dt className="flex items-center gap-1 font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                             <ShieldCheck className="h-3 w-3" /> Approved by
                           </dt>
-                          <dd className="font-mono text-white/80">
+                          <dd className="font-mono text-[color:var(--nfq-text-primary)]/80">
                             {record.approvedBy ?? '—'}
                           </dd>
                         </div>
                         {record.changeReason && (
                           <div className="col-span-2">
-                            <dt className="flex items-center gap-1 font-mono uppercase tracking-[0.14em] text-white/40">
+                            <dt className="flex items-center gap-1 font-mono uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/40">
                               <FileText className="h-3 w-3" /> Motivo
                             </dt>
-                            <dd className="text-white/75">{record.changeReason}</dd>
+                            <dd className="text-[color:var(--nfq-text-primary)]/75">{record.changeReason}</dd>
                           </div>
                         )}
                       </dl>

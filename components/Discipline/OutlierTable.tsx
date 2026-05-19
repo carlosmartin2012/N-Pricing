@@ -32,8 +32,8 @@ function fmtEur(value: number | null): string {
 function varianceColor(bps: number | null, threshold: number): string {
   if (bps == null) return 'text-[color:var(--nfq-text-muted)]';
   const abs = Math.abs(bps);
-  if (abs > threshold * 2) return 'text-rose-400';
-  if (abs > threshold) return 'text-amber-400';
+  if (abs > threshold * 2) return 'text-[color:var(--nfq-danger)]';
+  if (abs > threshold) return 'text-[color:var(--nfq-warning)]';
   return 'text-[color:var(--nfq-text-secondary)]';
 }
 
@@ -89,7 +89,7 @@ const OutlierTable: React.FC<Props> = ({ variances, onDealClick }) => {
   return (
     <div className="nfq-kpi-card p-0 overflow-hidden">
       <div className="flex items-center gap-2 px-5 py-4">
-        <AlertTriangle size={16} className="text-rose-400" />
+        <AlertTriangle size={16} className="text-[color:var(--nfq-danger)]" />
         <span className="nfq-kpi-label">Outlier Deals</span>
         <span className="ml-auto text-[10px] font-mono text-[color:var(--nfq-text-muted)]">
           Top {Math.min(outliers.length, DEFAULT_TOP_N)} of {variances.filter((v) => v.outOfBand).length}
@@ -138,7 +138,7 @@ const OutlierTable: React.FC<Props> = ({ variances, onDealClick }) => {
                   onClick={() => onDealClick?.(v.dealId)}
                   className="group cursor-pointer transition-colors even:bg-[var(--nfq-bg-surface)] odd:bg-[var(--nfq-bg-root)] hover:bg-[var(--nfq-bg-elevated)]"
                 >
-                  <td className={`${tdClass} text-cyan-400`}>
+                  <td className={`${tdClass} text-[color:var(--nfq-accent)]`}>
                     {v.dealId.slice(0, 8)}...
                   </td>
                   <td className={tdClass}>{v.cohort.product}</td>
@@ -155,7 +155,7 @@ const OutlierTable: React.FC<Props> = ({ variances, onDealClick }) => {
                   <td className={`${tdClass} [font-variant-numeric:tabular-nums] ${varianceColor((v.rarocVariancePp ?? 0) * 100, 10)}`}>
                     {fmtPp(v.rarocVariancePp)}
                   </td>
-                  <td className={`${tdClass} [font-variant-numeric:tabular-nums] ${(v.leakageEur ?? 0) > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                  <td className={`${tdClass} [font-variant-numeric:tabular-nums] ${(v.leakageEur ?? 0) > 0 ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-success)]'}`}>
                     {fmtEur(v.leakageEur)}
                   </td>
                 </tr>

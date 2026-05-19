@@ -57,10 +57,10 @@ const FundingCurvesDashboard: React.FC<Props> = ({
       <div className="relative rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/30 p-4 lg:col-span-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h4 className="flex items-center gap-3 text-lg font-bold uppercase tracking-tight text-white">
-              <TrendingUp className="text-cyan-400" /> {selectedCurrency} Term Liquidity Structure
+            <h4 className="flex items-center gap-3 text-lg font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
+              <TrendingUp className="text-[color:var(--nfq-accent)]" /> {selectedCurrency} Term Liquidity Structure
             </h4>
-            <p className="font-mono text-xs text-slate-500">
+            <p className="font-mono text-xs text-[color:var(--nfq-text-faint)]">
               Reference Structure: {collateralType} Collateralization
             </p>
           </div>
@@ -72,7 +72,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
               <div className="w-3 border-t-2 border-dashed border-cyan-400" /> LP (Sim)
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-0.5 w-3 bg-slate-600" /> Whl. (Base)
+              <div className="h-0.5 w-3 bg-[var(--nfq-bg-bright)]" /> Whl. (Base)
             </div>
           </div>
         </div>
@@ -121,17 +121,17 @@ const FundingCurvesDashboard: React.FC<Props> = ({
               <div key={item.label} className="flex flex-col gap-1">
                 <div className="nfq-label text-[10px]">{item.label}</div>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono-nums text-lg font-bold text-white">
-                    {item.base.toFixed(1)} <span className="text-[10px] text-slate-600">bps</span>
+                  <span className="font-mono-nums text-lg font-bold text-[color:var(--nfq-text-primary)]">
+                    {item.base.toFixed(1)} <span className="text-[10px] text-[color:var(--nfq-text-faint)]">bps</span>
                   </span>
                   <div className="flex items-center gap-1">
-                    <span className={`font-mono text-xs font-bold ${item.sim >= item.base ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <span className={`font-mono text-xs font-bold ${item.sim >= item.base ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
                       {item.sim.toFixed(1)}
                     </span>
                     {item.sim > item.base ? (
-                      <ArrowUpRight size={14} className="text-emerald-400" />
+                      <ArrowUpRight size={14} className="text-[color:var(--nfq-success)]" />
                     ) : (
-                      <ArrowDownRight size={14} className="text-rose-400" />
+                      <ArrowDownRight size={14} className="text-[color:var(--nfq-danger)]" />
                     )}
                   </div>
                 </div>
@@ -141,16 +141,16 @@ const FundingCurvesDashboard: React.FC<Props> = ({
         </div>
 
         <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-cyan-900/10 p-5">
-          <h5 className="mb-3 text-[10px] font-bold uppercase text-cyan-500">Portfolio Alignment</h5>
+          <h5 className="mb-3 text-[10px] font-bold uppercase text-[color:var(--nfq-accent)]">Portfolio Alignment</h5>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase text-slate-400">Wtd. LP Gap</span>
+              <span className="text-[10px] uppercase text-[color:var(--nfq-text-muted)]">Wtd. LP Gap</span>
               <span className="font-mono text-[11px] font-bold">+4.2 bps</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
               <div className="h-full w-[72%] bg-cyan-500 shadow-[0_0_10px_#06b6d4]" />
             </div>
-            <p className="mt-2 text-[9px] italic text-slate-500">
+            <p className="mt-2 text-[9px] italic text-[color:var(--nfq-text-faint)]">
               * Analysis relative to 100% of the active portfolio notional.
             </p>
           </div>

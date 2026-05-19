@@ -75,55 +75,55 @@ const YieldCurveWorkspace: React.FC<Props> = ({
   return (
     <Panel
       title={`${title} (${currency})`}
-      className="flex flex-1 flex-col overflow-hidden bg-white/50 dark:bg-slate-950/50"
+      className="flex flex-1 flex-col overflow-hidden bg-white/50 dark:bg-[var(--nfq-bg-root)]/50"
     >
       <div className="flex h-full min-h-0 flex-col xl:flex-row">
         <div className="relative flex min-h-[300px] flex-1 flex-col border-b border-slate-200 dark:border-slate-800 xl:border-b-0 xl:border-r">
-          <div className="flex h-10 shrink-0 items-center justify-between border-b border-slate-200 bg-slate-100 px-4 dark:border-slate-800 dark:bg-slate-950">
+          <div className="flex h-10 shrink-0 items-center justify-between border-b border-slate-200 bg-slate-100 px-4 dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
             <div className="scrollbar-none flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
               <div className="flex shrink-0 items-center gap-1.5 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 dark:border-amber-900/50 dark:bg-amber-950/30">
-                <Zap size={12} className="text-amber-500" />
+                <Zap size={12} className="text-[color:var(--nfq-warning)]" />
                 <input
                   type="number"
                   value={shockBps}
                   onChange={(event) => onShockChange(Number(event.target.value) || 0)}
-                  className="w-8 border-none bg-transparent text-center text-[10px] font-bold text-amber-600 focus:ring-0 dark:text-amber-400"
+                  className="w-8 border-none bg-transparent text-center text-[10px] font-bold text-amber-600 focus:ring-0 dark:text-[color:var(--nfq-warning)]"
                 />
-                <span className="text-[9px] font-bold uppercase text-amber-500">bps</span>
+                <span className="text-[9px] font-bold uppercase text-[color:var(--nfq-warning)]">bps</span>
               </div>
-              <div className="mx-1 h-4 w-px shrink-0 bg-slate-300 dark:bg-slate-700" />
-              <div className="flex shrink-0 items-center gap-1.5 rounded border border-slate-200 bg-white px-2 py-0.5 dark:border-slate-800 dark:bg-slate-900">
-                <Calendar size={12} className="text-slate-400" />
+              <div className="mx-1 h-4 w-px shrink-0 bg-slate-300 dark:bg-[var(--nfq-bg-highest)]" />
+              <div className="flex shrink-0 items-center gap-1.5 rounded border border-slate-200 bg-white px-2 py-0.5 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]">
+                <Calendar size={12} className="text-[color:var(--nfq-text-muted)]" />
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(event) => onDateChange(event.target.value)}
-                  className="w-24 border-none bg-transparent font-mono text-[10px] text-slate-700 focus:ring-0 dark:text-slate-300"
+                  className="w-24 border-none bg-transparent font-mono text-[10px] text-slate-700 focus:ring-0 dark:text-[color:var(--nfq-text-secondary)]"
                 />
               </div>
             </div>
 
             <div className="ml-2 flex shrink-0 items-center gap-2">
-              <div className="flex rounded bg-slate-200 p-0.5 dark:bg-slate-800">
+              <div className="flex rounded bg-slate-200 p-0.5 dark:bg-[var(--nfq-bg-highest)]">
                 {CURVE_PANEL_CURRENCIES.map(item => (
                   <button
                     key={item}
                     onClick={() => onCurrencyChange(item)}
                     className={`rounded px-2 py-0.5 text-[9px] font-bold transition-all ${currency === item
-                      ? 'bg-white text-cyan-600 shadow-sm dark:bg-slate-600 dark:text-cyan-400'
-                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                      ? 'bg-white text-[color:var(--nfq-accent)] shadow-sm dark:bg-[var(--nfq-bg-bright)] dark:text-[color:var(--nfq-accent)]'
+                      : 'text-[color:var(--nfq-text-faint)] hover:text-slate-700 dark:hover:text-[color:var(--nfq-text-secondary)]'}`}
                   >
                     {item}
                   </button>
                 ))}
               </div>
-              <button onClick={onDownloadTemplate} className="p-1 text-slate-400 transition-colors hover:text-amber-500" title="Download Template">
+              <button onClick={onDownloadTemplate} className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-warning)]" title="Download Template">
                 <FileSpreadsheet size={14} />
               </button>
-              <button onClick={onSaveSnapshot} className="p-1 text-slate-400 transition-colors hover:text-emerald-500" title="Save Snapshot">
+              <button onClick={onSaveSnapshot} className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-success)]" title="Save Snapshot">
                 <Save size={14} />
               </button>
-              <button onClick={onOpenImport} className="p-1 text-slate-400 transition-colors hover:text-cyan-500" title="Import Data">
+              <button onClick={onOpenImport} className="p-1 text-[color:var(--nfq-text-muted)] transition-colors hover:text-[color:var(--nfq-accent)]" title="Import Data">
                 <Upload size={14} />
               </button>
             </div>
@@ -143,7 +143,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                       x2={width - padding}
                       y2={y}
                       stroke="currentColor"
-                      className="text-slate-200 dark:text-slate-800"
+                      className="text-[color:var(--nfq-text-secondary)] dark:text-slate-800"
                       strokeWidth="1"
                       strokeDasharray="4 4"
                     />
@@ -207,7 +207,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
             </svg>
           </div>
 
-          <div className="flex h-8 shrink-0 items-center justify-between border-t border-slate-200 bg-slate-100 px-4 font-mono text-[10px] text-slate-500 dark:border-slate-800 dark:bg-slate-950">
+          <div className="flex h-8 shrink-0 items-center justify-between border-t border-slate-200 bg-slate-100 px-4 font-mono text-[10px] text-[color:var(--nfq-text-faint)] dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
             <div className="flex gap-4">
               <span className="flex items-center gap-1.5">
                 <div className={`h-0.5 w-3 rounded-full ${isPersisted ? 'bg-cyan-500' : 'bg-amber-400'}`} />
@@ -223,9 +223,9 @@ const YieldCurveWorkspace: React.FC<Props> = ({
         </div>
 
         <div className="flex w-full shrink-0 flex-col bg-white dark:bg-black/30 xl:w-64">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/50">
-            <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Saved Snapshots</span>
-            <History size={14} className="text-slate-400" />
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]/50">
+            <span className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] dark:text-[color:var(--nfq-text-muted)]">Saved Snapshots</span>
+            <History size={14} className="text-[color:var(--nfq-text-muted)]" />
           </div>
           <div className="custom-scrollbar max-h-[150px] overflow-auto xl:max-h-none xl:flex-1">
             {snapshotKeys.length === 0 ? (
@@ -237,13 +237,13 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                   <div
                     key={key}
                     onClick={() => onDateChange(date)}
-                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800/50 ${selectedDate === date ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}`}
+                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-cyan-50 dark:bg-cyan-900/20' : ''}`}
                   >
                     <div className="flex items-center gap-2">
-                      <FileCheck size={14} className="text-emerald-500" />
-                      <span className="font-mono text-xs dark:text-slate-300">{date}</span>
+                      <FileCheck size={14} className="text-[color:var(--nfq-success)]" />
+                      <span className="font-mono text-xs dark:text-[color:var(--nfq-text-secondary)]">{date}</span>
                     </div>
-                    <ChevronDown size={12} className="-rotate-90 text-slate-400" />
+                    <ChevronDown size={12} className="-rotate-90 text-[color:var(--nfq-text-muted)]" />
                   </div>
                 );
               })

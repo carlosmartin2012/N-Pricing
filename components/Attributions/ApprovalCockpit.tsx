@@ -109,18 +109,18 @@ const ApprovalCockpit: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Inbox className="h-5 w-5 text-emerald-400" />
+          <Inbox className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               {t.cockpitTitle}
             </h2>
-            <p className="text-xs text-slate-400">{t.cockpitSubtitle}</p>
+            <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.cockpitSubtitle}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => decisionsQuery.refetch()}
-          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
+          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
         >
           <RefreshCw className={`h-3 w-3 ${decisionsQuery.isFetching ? 'animate-spin' : ''}`} />
           <span>{t.retry}</span>
@@ -153,24 +153,24 @@ const ApprovalCockpit: React.FC = () => {
       )}
 
       {/* Bandeja */}
-      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40">
+      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
         {isLoading && (
-          <div className="p-6 text-center text-xs text-slate-400">{t.loading}</div>
+          <div className="p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">{t.loading}</div>
         )}
         {error && (
-          <div className="p-6 text-center text-xs text-rose-300">{t.cockpitErrorLoading}</div>
+          <div className="p-6 text-center text-xs text-[color:var(--nfq-danger)]">{t.cockpitErrorLoading}</div>
         )}
         {!isLoading && !error && pending.length === 0 && (
           <div className="flex flex-col items-center gap-2 p-10 text-center">
-            <ShieldCheck className="h-6 w-6 text-emerald-400" />
-            <p className="text-sm text-slate-300">{t.cockpitEmpty}</p>
+            <ShieldCheck className="h-6 w-6 text-[color:var(--nfq-success)]" />
+            <p className="text-sm text-[color:var(--nfq-text-secondary)]">{t.cockpitEmpty}</p>
           </div>
         )}
         {!isLoading && !error && pending.length > 0 && (
           <>
             {/* Desktop: tabla. Mobile: oculta — cards debajo. */}
             <table className="hidden w-full text-left text-sm md:table" role="table">
-              <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
+              <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">
                 <tr>
                   <th className="px-4 py-2">{t.cockpitDeal}</th>
                   <th className="px-4 py-2 text-right">{t.cockpitDeviation}</th>
@@ -244,9 +244,9 @@ const ApprovalCockpit: React.FC = () => {
 
 interface KpiProps { label: string; value: string }
 const Kpi: React.FC<KpiProps> = ({ label, value }) => (
-  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 px-4 py-3">
-    <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
-    <div className="font-mono text-lg font-semibold text-white">{value}</div>
+  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-4 py-3">
+    <div className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{label}</div>
+    <div className="font-mono text-lg font-semibold text-[color:var(--nfq-text-primary)]">{value}</div>
   </div>
 );
 
@@ -281,14 +281,14 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
           focused ? 'bg-cyan-500/10 outline outline-1 outline-cyan-400/50' : ''
         }`}
       >
-        <td className="px-4 py-2 font-mono text-xs text-slate-200">{item.decision.dealId}</td>
-        <td className={`px-4 py-2 text-right font-mono text-xs ${meta.deviationBps < 0 ? 'text-amber-300' : 'text-slate-200'}`}>
+        <td className="px-4 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{item.decision.dealId}</td>
+        <td className={`px-4 py-2 text-right font-mono text-xs ${meta.deviationBps < 0 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-text-secondary)]'}`}>
           {fmtBps(meta.deviationBps)}
         </td>
-        <td className="px-4 py-2 text-right font-mono text-xs text-slate-200">{fmtPp(meta.rarocPp)}</td>
-        <td className="px-4 py-2 text-right font-mono text-xs text-slate-200">{fmtEur(meta.volumeEur)}</td>
-        <td className="px-4 py-2 text-xs text-slate-300">
-          {item.requiredLevel?.name ?? <span className="text-slate-500">—</span>}
+        <td className="px-4 py-2 text-right font-mono text-xs text-[color:var(--nfq-text-secondary)]">{fmtPp(meta.rarocPp)}</td>
+        <td className="px-4 py-2 text-right font-mono text-xs text-[color:var(--nfq-text-secondary)]">{fmtEur(meta.volumeEur)}</td>
+        <td className="px-4 py-2 text-xs text-[color:var(--nfq-text-secondary)]">
+          {item.requiredLevel?.name ?? <span className="text-[color:var(--nfq-text-faint)]">—</span>}
         </td>
         <td className="px-4 py-2 text-right">
           <div className="inline-flex items-center gap-1">
@@ -297,7 +297,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending || belowFloor}
               onClick={() => setConfirming('approved')}
               title={belowFloor ? t.cockpitBelowFloorBlocked : t.cockpitApprove}
-              className="rounded border border-emerald-500/30 bg-emerald-500/10 p-1 text-emerald-300 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded border border-emerald-500/30 bg-emerald-500/10 p-1 text-[color:var(--nfq-success)] hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label={t.cockpitApprove}
             >
               <CheckCircle2 className="h-4 w-4" />
@@ -307,7 +307,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending}
               onClick={() => setConfirming('rejected')}
               title={t.cockpitReject}
-              className="rounded border border-rose-500/30 bg-rose-500/10 p-1 text-rose-300 hover:bg-rose-500/20 disabled:opacity-40"
+              className="rounded border border-rose-500/30 bg-rose-500/10 p-1 text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
               aria-label={t.cockpitReject}
             >
               <XCircle className="h-4 w-4" />
@@ -317,7 +317,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending}
               onClick={() => setConfirming('escalated')}
               title={t.cockpitEscalate}
-              className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 p-1 text-slate-200 hover:bg-white/10 disabled:opacity-40"
+              className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 p-1 text-[color:var(--nfq-text-secondary)] hover:bg-white/10 disabled:opacity-40"
               aria-label={t.cockpitEscalate}
             >
               <ArrowUpRight className="h-4 w-4" />
@@ -326,11 +326,11 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
         </td>
       </tr>
       {confirming && (
-        <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-slate-950/40">
+        <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/40">
           <td colSpan={6} className="px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">
               {belowFloor && confirming === 'approved' && (
-                <span className="flex items-center gap-1 text-xs text-rose-300">
+                <span className="flex items-center gap-1 text-xs text-[color:var(--nfq-danger)]">
                   <AlertTriangle className="h-3 w-3" />
                   {t.cockpitBelowFloorBlocked}
                 </span>
@@ -340,13 +340,13 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={t.cockpitDecisionReason}
-                className="flex-1 min-w-[220px] rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500"
+                className="flex-1 min-w-[220px] rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-1 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)]"
               />
               <button
                 type="button"
                 onClick={() => submit(confirming)}
                 disabled={pending || (belowFloor && confirming === 'approved')}
-                className="rounded bg-emerald-500/80 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-600"
+                className="rounded bg-emerald-500/80 px-3 py-1 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
               >
                 {confirming === 'approved' && t.cockpitConfirmApprove}
                 {confirming === 'rejected' && t.cockpitConfirmReject}
@@ -355,7 +355,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               <button
                 type="button"
                 onClick={() => { setConfirming(null); setReason(''); }}
-                className="rounded border border-[color:var(--nfq-border-ghost)] px-3 py-1 text-xs text-slate-300 hover:bg-white/5"
+                className="rounded border border-[color:var(--nfq-border-ghost)] px-3 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
               >
                 {t.matrixCancel}
               </button>
@@ -397,14 +397,14 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
       data-focused={focused ? 'true' : undefined}
       data-approval-focus-target={item.decision.id}
       tabIndex={focused ? -1 : undefined}
-      className={`scroll-mt-24 rounded-xl border bg-slate-900/40 p-3 text-sm ${
+      className={`scroll-mt-24 rounded-xl border bg-[var(--nfq-bg-elevated)]/40 p-3 text-sm ${
         focused ? 'border-cyan-400/50 bg-cyan-500/10 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]' : 'border-[color:var(--nfq-border-ghost)]'
       }`}
     >
       <header className="flex items-center justify-between">
-        <span className="font-mono text-xs text-slate-200">{item.decision.dealId}</span>
+        <span className="font-mono text-xs text-[color:var(--nfq-text-secondary)]">{item.decision.dealId}</span>
         {item.requiredLevel && (
-          <span className="rounded-full border border-[color:var(--nfq-border-ghost)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+          <span className="rounded-full border border-[color:var(--nfq-border-ghost)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-[color:var(--nfq-text-secondary)]">
             {item.requiredLevel.name}
           </span>
         )}
@@ -412,18 +412,18 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
 
       <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
         <div>
-          <dt className="font-mono text-[9px] uppercase tracking-wide text-slate-400">{t.cockpitDeviation}</dt>
-          <dd className={`font-mono ${meta.deviationBps < 0 ? 'text-amber-300' : 'text-slate-200'}`}>
+          <dt className="font-mono text-[9px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{t.cockpitDeviation}</dt>
+          <dd className={`font-mono ${meta.deviationBps < 0 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-text-secondary)]'}`}>
             {fmtBps(meta.deviationBps)}
           </dd>
         </div>
         <div>
-          <dt className="font-mono text-[9px] uppercase tracking-wide text-slate-400">{t.cockpitRaroc}</dt>
-          <dd className="font-mono text-slate-200">{fmtPp(meta.rarocPp)}</dd>
+          <dt className="font-mono text-[9px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{t.cockpitRaroc}</dt>
+          <dd className="font-mono text-[color:var(--nfq-text-secondary)]">{fmtPp(meta.rarocPp)}</dd>
         </div>
         <div>
-          <dt className="font-mono text-[9px] uppercase tracking-wide text-slate-400">{t.cockpitVolume}</dt>
-          <dd className="font-mono text-slate-200">{fmtEur(meta.volumeEur)}</dd>
+          <dt className="font-mono text-[9px] uppercase tracking-wide text-[color:var(--nfq-text-muted)]">{t.cockpitVolume}</dt>
+          <dd className="font-mono text-[color:var(--nfq-text-secondary)]">{fmtEur(meta.volumeEur)}</dd>
         </div>
       </dl>
 
@@ -433,7 +433,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending || belowFloor}
           onClick={() => setConfirming('approved')}
-          className="flex items-center justify-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-2 text-xs text-emerald-300 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-2 text-xs text-[color:var(--nfq-success)] hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t.cockpitApprove}
         >
           <CheckCircle2 className="h-4 w-4" />
@@ -443,7 +443,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending}
           onClick={() => setConfirming('rejected')}
-          className="flex items-center justify-center gap-1 rounded border border-rose-500/30 bg-rose-500/10 px-2 py-2 text-xs text-rose-300 hover:bg-rose-500/20 disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-rose-500/30 bg-rose-500/10 px-2 py-2 text-xs text-[color:var(--nfq-danger)] hover:bg-rose-500/20 disabled:opacity-40"
           aria-label={t.cockpitReject}
         >
           <XCircle className="h-4 w-4" />
@@ -453,7 +453,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending}
           onClick={() => setConfirming('escalated')}
-          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-2 text-xs text-slate-200 hover:bg-white/10 disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-2 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/10 disabled:opacity-40"
           aria-label={t.cockpitEscalate}
         >
           <ArrowUpRight className="h-4 w-4" />
@@ -462,9 +462,9 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
       </div>
 
       {confirming && (
-        <div className="mt-3 space-y-2 rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-950/40 p-3">
+        <div className="mt-3 space-y-2 rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)]/40 p-3">
           {belowFloor && confirming === 'approved' && (
-            <span className="flex items-center gap-1 text-xs text-rose-300">
+            <span className="flex items-center gap-1 text-xs text-[color:var(--nfq-danger)]">
               <AlertTriangle className="h-3 w-3" />
               {t.cockpitBelowFloorBlocked}
             </span>
@@ -474,14 +474,14 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={t.cockpitDecisionReason}
-            className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-2 text-xs text-slate-100 placeholder:text-slate-500"
+            className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-2 py-2 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)]"
           />
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => submit(confirming)}
               disabled={pending || (belowFloor && confirming === 'approved')}
-              className="flex-1 rounded bg-emerald-500/80 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-600"
+              className="flex-1 rounded bg-emerald-500/80 px-3 py-2 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
             >
               {confirming === 'approved' && t.cockpitConfirmApprove}
               {confirming === 'rejected' && t.cockpitConfirmReject}
@@ -490,7 +490,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
             <button
               type="button"
               onClick={() => { setConfirming(null); setReason(''); }}
-              className="flex-1 rounded border border-[color:var(--nfq-border-ghost)] px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
+              className="flex-1 rounded border border-[color:var(--nfq-border-ghost)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
             >
               {t.matrixCancel}
             </button>

@@ -52,9 +52,9 @@ const fmtEur = (v: number): string =>
 const fmtPct = (v: number, digits = 1): string => `${v.toFixed(digits)}%`;
 
 const STATUS_CONFIG: Record<ReconciliationStatus, { icon: React.ComponentType<{ className?: string }>; tone: string; label: string }> = {
-  ok:         { icon: CheckCircle2, tone: 'text-emerald-300', label: 'Reconciled' },
-  mismatches: { icon: AlertCircle,  tone: 'text-amber-300',   label: 'Mismatches' },
-  unknown:    { icon: AlertCircle,  tone: 'text-slate-400',   label: 'Unknown' },
+  ok:         { icon: CheckCircle2, tone: 'text-[color:var(--nfq-success)]', label: 'Reconciled' },
+  mismatches: { icon: AlertCircle,  tone: 'text-[color:var(--nfq-warning)]',   label: 'Mismatches' },
+  unknown:    { icon: AlertCircle,  tone: 'text-[color:var(--nfq-text-muted)]',   label: 'Unknown' },
 };
 
 const FtpLedgerSummaryCard: React.FC<Props> = ({
@@ -74,8 +74,8 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
     >
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <LayoutDashboard className="h-4 w-4 text-amber-400" />
-          <h3 className="font-mono text-xs font-medium text-white">
+          <LayoutDashboard className="h-4 w-4 text-[color:var(--nfq-warning)]" />
+          <h3 className="font-mono text-xs font-medium text-[color:var(--nfq-text-primary)]">
             {title}
           </h3>
         </div>
@@ -91,38 +91,38 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
 
       <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-          <dt className="nfq-label text-[9px] text-slate-400">FTP income (MTD)</dt>
-          <dd className="mt-1 font-mono text-base font-bold tabular-nums text-emerald-300">
+          <dt className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">FTP income (MTD)</dt>
+          <dd className="mt-1 font-mono text-base font-bold tabular-nums text-[color:var(--nfq-success)]">
             {fmtEur(summary.ftpIncomeMtdEur)}
           </dd>
-          <p className={`font-mono text-[10px] ${growthPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <p className={`font-mono text-[10px] ${growthPositive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
             {growthPositive ? '+' : ''}{fmtPct(summary.mtdGrowthPct)} vs last month
           </p>
         </div>
 
         <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-          <dt className="nfq-label text-[9px] text-slate-400">Deals ledgerized</dt>
-          <dd className="mt-1 font-mono text-base font-bold tabular-nums text-slate-100">
+          <dt className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">Deals ledgerized</dt>
+          <dd className="mt-1 font-mono text-base font-bold tabular-nums text-[color:var(--nfq-text-primary)]">
             {summary.dealsLedgerizedMtd}
           </dd>
-          <p className="font-mono text-[10px] text-slate-500">entries posted</p>
+          <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">entries posted</p>
         </div>
 
         <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-          <dt className="nfq-label text-[9px] text-slate-400">Avg transfer rate</dt>
-          <dd className="mt-1 font-mono text-base font-bold tabular-nums text-amber-300">
+          <dt className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">Avg transfer rate</dt>
+          <dd className="mt-1 font-mono text-base font-bold tabular-nums text-[color:var(--nfq-warning)]">
             {fmtPct(summary.avgTransferRatePct, 2)}
           </dd>
-          <p className="font-mono text-[10px] text-slate-500">portfolio weighted</p>
+          <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">portfolio weighted</p>
         </div>
 
         <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-          <dt className="nfq-label text-[9px] text-slate-400">Reconciliation</dt>
+          <dt className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">Reconciliation</dt>
           <dd className={`mt-1 flex items-center gap-1.5 font-mono text-sm font-bold ${statusCfg.tone}`}>
             <StatusIcon className="h-4 w-4" />
             {statusCfg.label}
           </dd>
-          <p className="font-mono text-[10px] text-slate-500">
+          <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
             {summary.reconciliationStatus === 'mismatches' && summary.unmatchedCount !== undefined
               ? `${summary.unmatchedCount} unmatched`
               : 'BU ↔ Treasury'}
@@ -130,7 +130,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
         </div>
       </dl>
 
-      <p className="font-mono text-[10px] text-slate-500">
+      <p className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
         {summary.reconciliationStatus === 'ok'
           ? 'All BU journal entries match their Treasury mirror. No intervention needed.'
           : summary.reconciliationStatus === 'mismatches'

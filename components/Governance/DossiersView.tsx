@@ -98,12 +98,12 @@ const DossierRow: React.FC<RowProps> = ({
             </button>
           )}
           {valid && (
-            <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
+            <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-[color:var(--nfq-success)]">
               <ShieldCheck size={11} /> signature OK
             </span>
           )}
           {invalid && (
-            <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-300">
+            <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-[color:var(--nfq-danger)]">
               <ShieldAlert size={11} /> tampered
             </span>
           )}
@@ -138,13 +138,13 @@ const DossierRow: React.FC<RowProps> = ({
                 {verification && (
                   <div className="mt-3 space-y-1 font-mono text-[11px]">
                     <div className="flex items-center gap-2">
-                      <span className={verification.payloadHashMatches ? 'text-emerald-300' : 'text-rose-300'}>
+                      <span className={verification.payloadHashMatches ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}>
                         {verification.payloadHashMatches ? '✓' : '✗'}
                       </span>
                       <span className="text-[color:var(--nfq-text-secondary)]">payload hash matches</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={verification.signatureMatches ? 'text-emerald-300' : 'text-rose-300'}>
+                      <span className={verification.signatureMatches ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}>
                         {verification.signatureMatches ? '✓' : '✗'}
                       </span>
                       <span className="text-[color:var(--nfq-text-secondary)]">HMAC signature matches</span>
@@ -262,7 +262,7 @@ const DossiersView: React.FC = () => {
       <TimelineDeprecationBanner surface="dossiers" />
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}
@@ -275,11 +275,11 @@ const DossiersView: React.FC = () => {
         </div>
         <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Verified OK</div>
-          <div className="mt-1 font-mono text-2xl font-semibold text-emerald-300">{counts.verified}</div>
+          <div className="mt-1 font-mono text-2xl font-semibold text-[color:var(--nfq-success)]">{counts.verified}</div>
         </div>
         <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Tampered</div>
-          <div className="mt-1 font-mono text-2xl font-semibold text-rose-300">{counts.tampered}</div>
+          <div className="mt-1 font-mono text-2xl font-semibold text-[color:var(--nfq-danger)]">{counts.tampered}</div>
         </div>
       </div>
 

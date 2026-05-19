@@ -19,9 +19,9 @@ function getAvatarClassName(role: UserProfile['role']) {
     return 'border-red-800 bg-red-900/20 text-red-400';
   }
   if (role === 'Auditor') {
-    return 'border-amber-800 bg-amber-900/20 text-amber-400';
+    return 'border-amber-800 bg-amber-900/20 text-[color:var(--nfq-warning)]';
   }
-  return 'border-slate-700 bg-slate-800 text-cyan-400';
+  return 'border-slate-700 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)]';
 }
 
 export const UserCard: React.FC<Props> = React.memo(({
@@ -31,12 +31,12 @@ export const UserCard: React.FC<Props> = React.memo(({
   onDelete,
 }) => {
   return (
-    <div className="group relative rounded-lg border border-slate-800 bg-slate-950 p-4 transition-colors hover:border-slate-600">
+    <div className="group relative rounded-lg border border-slate-800 bg-[var(--nfq-bg-root)] p-4 transition-colors hover:border-slate-600">
       <div className="absolute right-4 top-4 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-        <button onClick={onEdit} className="text-slate-400 hover:text-cyan-400">
+        <button onClick={onEdit} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]">
           <Edit size={14} />
         </button>
-        <button onClick={onDelete} className="text-slate-400 hover:text-red-400">
+        <button onClick={onDelete} className="text-[color:var(--nfq-text-muted)] hover:text-red-400">
           <Trash2 size={14} />
         </button>
       </div>
@@ -54,14 +54,14 @@ export const UserCard: React.FC<Props> = React.memo(({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-bold text-slate-200">{user.name}</h4>
+            <h4 className="text-sm font-bold text-[color:var(--nfq-text-secondary)]">{user.name}</h4>
             {isOnline && (
-              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-medium text-emerald-500">
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-medium text-[color:var(--nfq-success)]">
                 Online
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1 text-[10px] text-slate-500 min-w-0">
+          <div className="flex items-center gap-1 text-[10px] text-[color:var(--nfq-text-faint)] min-w-0">
             <Mail size={10} className="shrink-0" /> <span className="truncate">{user.email}</span>
           </div>
         </div>
@@ -69,29 +69,29 @@ export const UserCard: React.FC<Props> = React.memo(({
 
       <div className="space-y-2 border-t border-slate-900 pt-3">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-500">Role</span>
+          <span className="text-[color:var(--nfq-text-faint)]">Role</span>
           <Badge variant="default">{user.role.replace('_', ' ')}</Badge>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-500">Department</span>
-          <span className="text-slate-300">{user.department}</span>
+          <span className="text-[color:var(--nfq-text-faint)]">Department</span>
+          <span className="text-[color:var(--nfq-text-secondary)]">{user.department}</span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-500">Status</span>
+          <span className="text-[color:var(--nfq-text-faint)]">Status</span>
           <div className="flex items-center gap-1">
             {user.status === 'Active' ? (
-              <Unlock size={10} className="text-emerald-500" />
+              <Unlock size={10} className="text-[color:var(--nfq-success)]" />
             ) : (
               <Lock size={10} className="text-red-500" />
             )}
-            <span className={user.status === 'Active' ? 'text-emerald-400' : 'text-red-400'}>
+            <span className={user.status === 'Active' ? 'text-[color:var(--nfq-success)]' : 'text-red-400'}>
               {user.status}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-1 pt-2 font-mono text-[9px] text-slate-600">
+      <div className="mt-3 flex items-center gap-1 pt-2 font-mono text-[9px] text-[color:var(--nfq-text-faint)]">
         <Calendar size={10} /> Last Login: {formatLastLogin(user.lastLogin)}
       </div>
     </div>

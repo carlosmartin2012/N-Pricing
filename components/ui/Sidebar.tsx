@@ -38,7 +38,7 @@ const SECTION_ACCENTS: Record<string, { dot: string; label: string }> = {
   'Data & Ops Hub': { dot: 'bg-sky-400',               label: 'text-sky-300'                     },
   'Governance Hub': { dot: 'bg-violet-400',            label: 'text-violet-300'                  },
   Assistant:     { dot: 'bg-fuchsia-400',           label: 'text-fuchsia-300'                 },
-  System:        { dot: 'bg-slate-400',             label: 'text-slate-400'                   },
+  System:        { dot: 'bg-slate-400',             label: 'text-[color:var(--nfq-text-muted)]'                   },
 };
 
 /**

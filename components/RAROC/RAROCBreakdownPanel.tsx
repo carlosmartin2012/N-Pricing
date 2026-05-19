@@ -26,9 +26,9 @@ export const RAROCBreakdownPanel: React.FC<Props> = ({
         {rows.map((row) => {
           const toneClass =
             row.tone === 'positive'
-              ? 'text-emerald-400'
+              ? 'text-[color:var(--nfq-success)]'
               : row.tone === 'negative'
-                ? 'text-rose-400'
+                ? 'text-[color:var(--nfq-danger)]'
                 : 'text-[color:var(--nfq-text-secondary)]';
 
           return (

@@ -40,15 +40,15 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="p-4 bg-red-950/30 rounded-full mb-4">
             <AlertTriangle size={32} className="text-red-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-200 mb-2">
+          <h3 className="text-lg font-bold text-[color:var(--nfq-text-secondary)] mb-2">
             {this.props.fallbackMessage || 'Something went wrong'}
           </h3>
-          <p className="text-xs text-slate-500 mb-4 max-w-md font-mono">
+          <p className="text-xs text-[color:var(--nfq-text-faint)] mb-4 max-w-md font-mono">
             {this.state.error?.message}
           </p>
           <button
             onClick={this.handleReset}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-300 rounded border border-slate-700 text-xs hover:bg-slate-700"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] rounded border border-slate-700 text-xs hover:bg-[var(--nfq-bg-highest)]"
           >
             <RefreshCw size={14} /> Try Again
           </button>

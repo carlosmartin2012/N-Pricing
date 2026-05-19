@@ -61,12 +61,12 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <User2 className="h-5 w-5 text-emerald-400" />
-          <h3 className="font-mono text-xs font-medium text-white">
+          <User2 className="h-5 w-5 text-[color:var(--nfq-success)]" />
+          <h3 className="font-mono text-xs font-medium text-[color:var(--nfq-text-primary)]">
             Customer 360
           </h3>
           {data?.client && (
-            <span className="font-mono text-[10px] text-slate-400">
+            <span className="font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
               {data.client.name} · {data.client.segment} · {data.client.rating}
             </span>
           )}
@@ -129,7 +129,7 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
               Positions ({data.positions.length})
             </h4>
             {data.positions.length === 0 ? (
-              <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-xs text-slate-400">
+              <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-xs text-[color:var(--nfq-text-muted)]">
                 No positions on file.
               </div>
             ) : (
@@ -147,16 +147,16 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
                   <tbody>
                     {data.positions.map((p) => (
                       <tr key={p.id} className="border-b border-[color:var(--nfq-border-ghost)]">
-                        <td className="px-3 py-2 font-mono text-xs text-slate-200">{p.productType}</td>
-                        <td className="px-3 py-2 text-xs text-slate-400">{p.category}</td>
+                        <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{p.productType}</td>
+                        <td className="px-3 py-2 text-xs text-[color:var(--nfq-text-muted)]">{p.category}</td>
                         <td className="px-3 py-2 text-right font-mono tabular-nums text-xs">{fmtEur(p.amount)}</td>
                         <td className="px-3 py-2 text-right font-mono tabular-nums text-xs">{fmtBps(p.marginBps)}</td>
                         <td className="px-3 py-2 text-xs">
                           <span
                             className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${
-                              p.status === 'Active' ? 'bg-emerald-500/10 text-emerald-300'
-                              : p.status === 'Matured' ? 'bg-slate-500/10 text-slate-300'
-                              : 'bg-rose-500/10 text-rose-300'
+                              p.status === 'Active' ? 'bg-emerald-500/10 text-[color:var(--nfq-success)]'
+                              : p.status === 'Matured' ? 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]'
+                              : 'bg-rose-500/10 text-[color:var(--nfq-danger)]'
                             }`}
                           >
                             {p.status}
@@ -173,7 +173,7 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
           {/* Targets — render a compact inline hint when empty to avoid
               taking ~120px for "0 results" in the Calculator's tall layout. */}
           {data.applicableTargets.length === 0 ? (
-            <section className="nfq-label flex items-center gap-2 text-[10px] text-slate-500">
+            <section className="nfq-label flex items-center gap-2 text-[10px] text-[color:var(--nfq-text-faint)]">
               <Target className="h-3 w-3" />
               <span>Applicable targets — none cover this client today</span>
             </section>
@@ -186,22 +186,22 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
               <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {data.applicableTargets.map((tgt) => (
                   <li key={tgt.id} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-                    <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase text-slate-400">
+                    <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase text-[color:var(--nfq-text-muted)]">
                       <span>{tgt.segment} · {tgt.productType} · {tgt.currency}</span>
                       <span>{tgt.period}</span>
                     </div>
                     <dl className="grid grid-cols-3 gap-2 text-[11px]">
                       <div>
-                        <dt className="text-slate-500">Margin</dt>
-                        <dd className="font-mono tabular-nums text-slate-200">{fmtBps(tgt.targetMarginBps)}</dd>
+                        <dt className="text-[color:var(--nfq-text-faint)]">Margin</dt>
+                        <dd className="font-mono tabular-nums text-[color:var(--nfq-text-secondary)]">{fmtBps(tgt.targetMarginBps)}</dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Pre-approved</dt>
-                        <dd className="font-mono tabular-nums text-emerald-400">{fmtBps(tgt.preApprovedRateBps)}</dd>
+                        <dt className="text-[color:var(--nfq-text-faint)]">Pre-approved</dt>
+                        <dd className="font-mono tabular-nums text-[color:var(--nfq-success)]">{fmtBps(tgt.preApprovedRateBps)}</dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Hard floor</dt>
-                        <dd className="font-mono tabular-nums text-rose-400">{fmtBps(tgt.hardFloorRateBps)}</dd>
+                        <dt className="text-[color:var(--nfq-text-faint)]">Hard floor</dt>
+                        <dd className="font-mono tabular-nums text-[color:var(--nfq-danger)]">{fmtBps(tgt.hardFloorRateBps)}</dd>
                       </div>
                     </dl>
                   </li>
@@ -220,19 +220,19 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
               <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
                   <dt className="nfq-label text-[10px]">NIM</dt>
-                  <dd className="font-mono tabular-nums text-base text-slate-100">{fmtBps(data.metrics.latest.nimBps)}</dd>
+                  <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">{fmtBps(data.metrics.latest.nimBps)}</dd>
                 </div>
                 <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
                   <dt className="nfq-label text-[10px]">Fees</dt>
-                  <dd className="font-mono tabular-nums text-base text-slate-100">{fmtEur(data.metrics.latest.feesEur)}</dd>
+                  <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">{fmtEur(data.metrics.latest.feesEur)}</dd>
                 </div>
                 <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
                   <dt className="nfq-label text-[10px]">EVA</dt>
-                  <dd className="font-mono tabular-nums text-base text-slate-100">{fmtEur(data.metrics.latest.evaEur)}</dd>
+                  <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">{fmtEur(data.metrics.latest.evaEur)}</dd>
                 </div>
                 <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
                   <dt className="nfq-label text-[10px]">NPS</dt>
-                  <dd className="font-mono tabular-nums text-base text-slate-100">
+                  <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">
                     {data.metrics.latest.npsScore ?? '—'}
                   </dd>
                 </div>

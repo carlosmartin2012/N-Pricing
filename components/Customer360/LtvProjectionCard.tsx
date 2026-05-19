@@ -42,12 +42,12 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
       <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-emerald-400" />
-            <span className="nfq-label text-[10px] text-slate-300">{t.clvProjectionTitle}</span>
+            <TrendingUp className="h-4 w-4 text-[color:var(--nfq-success)]" />
+            <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvProjectionTitle}</span>
           </div>
-          <RefreshCw className="h-3 w-3 animate-spin text-slate-400" />
+          <RefreshCw className="h-3 w-3 animate-spin text-[color:var(--nfq-text-muted)]" />
         </div>
-        <p className="mt-4 text-center text-xs text-slate-500">Loading projection…</p>
+        <p className="mt-4 text-center text-xs text-[color:var(--nfq-text-faint)]">Loading projection…</p>
       </div>
     );
   }
@@ -57,8 +57,8 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
       <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-emerald-400" />
-            <span className="nfq-label text-[10px] text-slate-300">{t.clvProjectionTitle}</span>
+            <TrendingUp className="h-4 w-4 text-[color:var(--nfq-success)]" />
+            <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvProjectionTitle}</span>
           </div>
           <button
             type="button"
@@ -70,7 +70,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
             {recomputing ? t.clvComputing : t.clvCompute}
           </button>
         </div>
-        <p className="mt-4 text-center text-xs text-slate-400">
+        <p className="mt-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
           No CLV snapshot yet — trigger a compute to project value for the next horizon.
         </p>
       </div>
@@ -81,10 +81,10 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
     <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 space-y-5">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-emerald-400" />
-          <span className="nfq-label text-[10px] text-slate-300">Customer Lifetime Value</span>
+          <TrendingUp className="h-4 w-4 text-[color:var(--nfq-success)]" />
+          <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">Customer Lifetime Value</span>
           {latest && (
-            <span className="text-[10px] text-slate-500 font-mono">
+            <span className="text-[10px] text-[color:var(--nfq-text-faint)] font-mono">
               as of {latest.asOfDate} · {latest.horizonYears}y · r={(latest.discountRate * 100).toFixed(1)}%
             </span>
           )}
@@ -109,7 +109,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
           </section>
 
           <section className="space-y-2">
-            <div className="nfq-label text-[9px] text-slate-400">Projection band</div>
+            <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">Projection band</div>
             <div className="relative h-3 rounded bg-white/[0.04]">
               <div
                 className="absolute inset-y-0 rounded bg-emerald-500/20"
@@ -122,7 +122,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
                 }}
               />
             </div>
-            <div className="flex justify-between font-mono text-[10px] text-slate-500">
+            <div className="flex justify-between font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
               <span>{fmtEur(bandRange.p5)}</span>
               <span>{fmtEur(bandRange.p95)}</span>
             </div>
@@ -136,14 +136,14 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
           </section>
 
           <section className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-            <div className="nfq-label text-[9px] text-slate-400 mb-2 flex items-center gap-2">
+            <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)] mb-2 flex items-center gap-2">
               <Gauge className="h-3 w-3" /> {t.clvHazardRenewal}
             </div>
-            <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-200 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-[color:var(--nfq-text-secondary)] sm:grid-cols-4">
               <span>Churn λ {fmtPct(latest.churnHazardAnnual ?? undefined)}</span>
               <span>Renewal {fmtPct(latest.renewalProb ?? undefined)}</span>
               <span>SoW est. {fmtPct(latest.shareOfWalletEst ?? undefined)}</span>
-              <span className="text-slate-500 text-[9px] truncate">
+              <span className="text-[color:var(--nfq-text-faint)] text-[9px] truncate">
                 engine {latest.engineVersion} · #{latest.assumptionsHash}
               </span>
             </div>
@@ -160,14 +160,14 @@ interface MetricProps {
   accent: 'emerald' | 'sky' | 'amber';
 }
 const accentClass: Record<MetricProps['accent'], string> = {
-  emerald: 'text-emerald-300',
+  emerald: 'text-[color:var(--nfq-success)]',
   sky: 'text-sky-300',
-  amber: 'text-amber-300',
+  amber: 'text-[color:var(--nfq-warning)]',
 };
 
 const Metric: React.FC<MetricProps> = ({ label, value, accent }) => (
   <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-    <div className="nfq-label text-[9px] text-slate-400">{label}</div>
+    <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{label}</div>
     <div className={`mt-1 font-mono text-sm font-bold ${accentClass[accent]}`}>{value}</div>
   </div>
 );
@@ -179,14 +179,14 @@ interface BreakdownProps {
   tone: 'emerald' | 'sky' | 'violet' | 'rose';
 }
 const toneClass: Record<BreakdownProps['tone'], string> = {
-  emerald: 'text-emerald-300',
+  emerald: 'text-[color:var(--nfq-success)]',
   sky: 'text-sky-300',
   violet: 'text-violet-300',
-  rose: 'text-rose-300',
+  rose: 'text-[color:var(--nfq-danger)]',
 };
 const Breakdown: React.FC<BreakdownProps> = ({ label, value, icon: Icon, tone }) => (
   <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-2">
-    <div className="nfq-label flex items-center gap-1 text-[9px] text-slate-400">
+    <div className="nfq-label flex items-center gap-1 text-[9px] text-[color:var(--nfq-text-muted)]">
       <Icon className="h-3 w-3" />
       {label}
     </div>

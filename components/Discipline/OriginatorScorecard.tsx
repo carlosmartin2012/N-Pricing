@@ -76,7 +76,7 @@ const OriginatorScorecardComponent: React.FC<Props> = ({ scorecard, isLoading })
       {/* Header: originator info */}
       <div className="mb-5 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-950/40">
-          <User size={18} className="text-cyan-400" />
+          <User size={18} className="text-[color:var(--nfq-accent)]" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-[color:var(--nfq-text-primary)]">
@@ -93,16 +93,16 @@ const OriginatorScorecardComponent: React.FC<Props> = ({ scorecard, isLoading })
       <div className="mb-5 grid grid-cols-3 gap-4">
         <div>
           <div className="nfq-kpi-label mb-1">Total Deals</div>
-          <div className="nfq-kpi-value text-lg text-cyan-400">{scorecard.totalDeals}</div>
+          <div className="nfq-kpi-value text-lg text-[color:var(--nfq-accent)]">{scorecard.totalDeals}</div>
         </div>
         <div>
           <div className="nfq-kpi-label mb-1">In-Band %</div>
           <div className="flex items-baseline gap-1.5">
-            <span className={`nfq-kpi-value text-lg ${scorecard.inBandPct >= 90 ? 'text-emerald-400' : scorecard.inBandPct >= 75 ? 'text-amber-400' : 'text-rose-400'}`}>
+            <span className={`nfq-kpi-value text-lg ${scorecard.inBandPct >= 90 ? 'text-[color:var(--nfq-success)]' : scorecard.inBandPct >= 75 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-danger)]'}`}>
               {fmtPct(scorecard.inBandPct)}
             </span>
             {latestTrend !== 0 && (
-              <span className={`flex items-center text-[10px] font-mono ${latestTrend > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <span className={`flex items-center text-[10px] font-mono ${latestTrend > 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
                 {latestTrend > 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                 {Math.abs(latestTrend).toFixed(1)}pp
               </span>
@@ -111,7 +111,7 @@ const OriginatorScorecardComponent: React.FC<Props> = ({ scorecard, isLoading })
         </div>
         <div>
           <div className="nfq-kpi-label mb-1">Leakage</div>
-          <div className={`nfq-kpi-value text-lg ${scorecard.totalLeakageEur > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+          <div className={`nfq-kpi-value text-lg ${scorecard.totalLeakageEur > 0 ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-success)]'}`}>
             {fmtEur(scorecard.totalLeakageEur)}
           </div>
         </div>

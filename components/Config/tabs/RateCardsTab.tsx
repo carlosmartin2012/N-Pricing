@@ -137,8 +137,8 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
         </div>
       )}
 
-      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
-        <div className="text-[10px] text-slate-500">
+      <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-[var(--nfq-bg-elevated)]/50">
+        <div className="text-[10px] text-[color:var(--nfq-text-faint)]">
           Manage FTP components, liquidity add-ons, and commercial pricing grids through controlled change requests.
         </div>
         <button
@@ -164,12 +164,12 @@ const RateCardsTab: React.FC<Props> = ({ ftpRateCards, user }) => {
         title="Configuration Editor"
         footer={
           <div className="flex justify-end gap-2">
-            <button onClick={closeDrawer} className="px-4 py-2 text-xs text-slate-400 hover:text-white">
+            <button onClick={closeDrawer} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
               Cancel
             </button>
             <button
               onClick={handleSaveRateCard}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded"
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
             >
               Submit Change
             </button>

@@ -99,24 +99,24 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
     <div className="mt-4">
       <button
         onClick={() => setIsExpanded((currentValue) => !currentValue)}
-        className="group flex w-full items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-4 py-3 transition-colors hover:bg-slate-800/60"
+        className="group flex w-full items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-4 py-3 transition-colors hover:bg-[var(--nfq-bg-highest)]/60"
       >
         <div className="flex items-center gap-2">
-          <GitCompare size={16} className="text-cyan-400" />
-          <span className="text-sm font-medium text-slate-200">{t.compareScenarios || 'Compare Scenarios'}</span>
-          <span className="font-mono text-xs text-slate-500">
+          <GitCompare size={16} className="text-[color:var(--nfq-accent)]" />
+          <span className="text-sm font-medium text-[color:var(--nfq-text-secondary)]">{t.compareScenarios || 'Compare Scenarios'}</span>
+          <span className="font-mono text-xs text-[color:var(--nfq-text-faint)]">
             ({scenarios.length}/{MAX_COMPARISON_SCENARIOS})
           </span>
         </div>
         {isExpanded ? (
-          <ChevronUp size={16} className="text-slate-400 group-hover:text-slate-200" />
+          <ChevronUp size={16} className="text-[color:var(--nfq-text-muted)] group-hover:text-[color:var(--nfq-text-secondary)]" />
         ) : (
-          <ChevronDown size={16} className="text-slate-400 group-hover:text-slate-200" />
+          <ChevronDown size={16} className="text-[color:var(--nfq-text-muted)] group-hover:text-[color:var(--nfq-text-secondary)]" />
         )}
       </button>
 
       {isExpanded && (
-        <div className="mt-3 space-y-4 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
+        <div className="mt-3 space-y-4 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
           <div className="flex flex-wrap gap-3">
             {scenarios.map((scenario, index) => (
               <PricingScenarioCard
@@ -138,10 +138,10 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
             {scenarios.length < MAX_COMPARISON_SCENARIOS && (
               <button
                 onClick={addScenario}
-                className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--nfq-border-ghost)] bg-slate-800/30 p-3 transition-colors hover:border-cyan-600/50 hover:bg-slate-800/50"
+                className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/30 p-3 transition-colors hover:border-cyan-600/50 hover:bg-[var(--nfq-bg-highest)]/50"
               >
-                <Plus size={20} className="text-slate-500" />
-                <span className="text-xs text-slate-500">{t.addScenario || 'Add Scenario'}</span>
+                <Plus size={20} className="text-[color:var(--nfq-text-faint)]" />
+                <span className="text-xs text-[color:var(--nfq-text-faint)]">{t.addScenario || 'Add Scenario'}</span>
               </button>
             )}
           </div>

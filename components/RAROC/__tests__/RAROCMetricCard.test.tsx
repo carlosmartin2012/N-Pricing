@@ -60,19 +60,19 @@ describe('RAROCMetricCard', () => {
   it('applies emerald tone class to the value', () => {
     renderCard({ tone: 'emerald', value: '14.25%' });
     const valueElement = screen.getByText('14.25%');
-    expect(valueElement.className).toContain('text-emerald-400');
+    expect(valueElement.className).toContain('text-[color:var(--nfq-success)]');
   });
 
   it('applies cyan tone class to the value', () => {
     renderCard({ tone: 'cyan', value: '3.50%' });
     const valueElement = screen.getByText('3.50%');
-    expect(valueElement.className).toContain('text-cyan-400');
+    expect(valueElement.className).toContain('text-[color:var(--nfq-accent)]');
   });
 
   it('applies amber tone class to the value', () => {
     renderCard({ tone: 'amber', value: '45 bps' });
     const valueElement = screen.getByText('45 bps');
-    expect(valueElement.className).toContain('text-amber-400');
+    expect(valueElement.className).toContain('text-[color:var(--nfq-warning)]');
   });
 
   it('applies violet tone class to the value', () => {
@@ -84,13 +84,13 @@ describe('RAROCMetricCard', () => {
   it('applies emerald status class for positive trend', () => {
     renderCard({ trend: 'positive' });
     const passLabel = screen.getByText('Pass');
-    expect(passLabel.className).toContain('text-emerald-500');
+    expect(passLabel.className).toContain('text-[color:var(--nfq-success)]');
   });
 
   it('applies rose status class for negative trend', () => {
     renderCard({ trend: 'negative' });
     const failLabel = screen.getByText('Fail');
-    expect(failLabel.className).toContain('text-rose-500');
+    expect(failLabel.className).toContain('text-[color:var(--nfq-danger)]');
   });
 
   it('renders correctly with different icons', () => {

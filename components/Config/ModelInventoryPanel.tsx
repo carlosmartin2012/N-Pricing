@@ -92,7 +92,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
     <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-[color:var(--nfq-text-primary)]">
             <ShieldCheck size={18} className="text-nfq-amber" />
             Model Inventory &amp; MRM
           </h2>
@@ -104,7 +104,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
           <p className="font-mono text-[10px] tracking-normal text-neutral-500">
             Modelos registrados
           </p>
-          <p className="font-mono text-xl text-white">{models.length}</p>
+          <p className="font-mono text-xl text-[color:var(--nfq-text-primary)]">{models.length}</p>
         </div>
       </div>
 

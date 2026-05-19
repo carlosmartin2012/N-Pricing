@@ -23,8 +23,8 @@ const fmtPp = (v: number) => {
 };
 
 const deltaColor = (delta: number) => {
-  if (Math.abs(delta) < 1e-9) return 'text-slate-400';
-  return delta > 0 ? 'text-rose-300' : 'text-emerald-300';
+  if (Math.abs(delta) < 1e-9) return 'text-[color:var(--nfq-text-muted)]';
+  return delta > 0 ? 'text-[color:var(--nfq-danger)]' : 'text-[color:var(--nfq-success)]';
 };
 
 const curveShiftFlagOn = (): boolean =>
@@ -106,11 +106,11 @@ const StressPricingView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <LineChartIcon className="h-5 w-5 text-cyan-400" />
-          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">Stress Pricing</h2>
-          {activeEntity && <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>}
+          <LineChartIcon className="h-5 w-5 text-[color:var(--nfq-accent)]" />
+          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">Stress Pricing</h2>
+          {activeEntity && <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">{activeEntity.shortCode}</span>}
           <span
-            className={`nfq-label text-[10px] ${flagOn ? 'text-emerald-300' : 'text-amber-300'}`}
+            className={`nfq-label text-[10px] ${flagOn ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-warning)]'}`}
             title="VITE_PRICING_APPLY_CURVE_SHIFT"
           >
             {flagOn ? 'CURVE SHIFT · ON' : 'CURVE SHIFT · OFF (uniform)'}
@@ -128,17 +128,17 @@ const StressPricingView: React.FC = () => {
       </header>
 
       <section className="flex flex-col gap-2">
-        <label className="nfq-label text-[10px] text-slate-400" htmlFor="stress-deal-select">
+        <label className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]" htmlFor="stress-deal-select">
           Deal
         </label>
         {priceable.length === 0 ? (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[color:var(--nfq-text-muted)]">
             No priceable deals in the current blotter. Create one in Calculator first.
           </p>
         ) : (
           <select
             id="stress-deal-select"
-            className="w-full max-w-md rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-3 py-2 font-mono text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"
+            className="w-full max-w-md rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)] focus:border-cyan-500 focus:outline-none"
             value={selectedDeal?.id ?? ''}
             onChange={(e) => setSelectedId(e.target.value)}
           >
@@ -152,17 +152,17 @@ const StressPricingView: React.FC = () => {
       </section>
 
       {selectedDeal && rows.length > 0 && (
-        <section className="overflow-x-auto rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/40">
+        <section className="overflow-x-auto rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
           <table className="w-full min-w-[780px] text-xs">
             <thead>
               <tr className="border-b border-[color:var(--nfq-border-ghost)] text-left">
-                <th className="nfq-label px-4 py-3 text-[10px] text-slate-400">Scenario</th>
-                <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">FTP</th>
-                <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">Δ FTP</th>
-                <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">Margin</th>
-                <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">Δ Margin</th>
-                <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">RAROC</th>
-                <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">Δ RAROC</th>
+                <th className="nfq-label px-4 py-3 text-[10px] text-[color:var(--nfq-text-muted)]">Scenario</th>
+                <th className="nfq-label px-4 py-3 text-right text-[10px] text-[color:var(--nfq-text-muted)]">FTP</th>
+                <th className="nfq-label px-4 py-3 text-right text-[10px] text-[color:var(--nfq-text-muted)]">Δ FTP</th>
+                <th className="nfq-label px-4 py-3 text-right text-[10px] text-[color:var(--nfq-text-muted)]">Margin</th>
+                <th className="nfq-label px-4 py-3 text-right text-[10px] text-[color:var(--nfq-text-muted)]">Δ Margin</th>
+                <th className="nfq-label px-4 py-3 text-right text-[10px] text-[color:var(--nfq-text-muted)]">RAROC</th>
+                <th className="nfq-label px-4 py-3 text-right text-[10px] text-[color:var(--nfq-text-muted)]">Δ RAROC</th>
               </tr>
             </thead>
             <tbody>
@@ -171,27 +171,27 @@ const StressPricingView: React.FC = () => {
                 return (
                   <tr
                     key={row.scenario.id}
-                    className={`border-b border-[color:var(--nfq-border-ghost)] ${isBase ? 'bg-slate-800/30' : ''}`}
+                    className={`border-b border-[color:var(--nfq-border-ghost)] ${isBase ? 'bg-[var(--nfq-bg-highest)]/30' : ''}`}
                   >
-                    <td className="px-4 py-3 text-slate-200">
+                    <td className="px-4 py-3 text-[color:var(--nfq-text-secondary)]">
                       {row.scenario.label}
-                      {isBase && <span className="ml-2 text-[10px] uppercase text-slate-500">base</span>}
+                      {isBase && <span className="ml-2 text-[10px] uppercase text-[color:var(--nfq-text-faint)]">base</span>}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-100">{fmtPct(row.result.totalFTP)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-[color:var(--nfq-text-primary)]">{fmtPct(row.result.totalFTP)}</td>
                     <td
-                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(row.deltaFtpPct)}`}
+                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-[color:var(--nfq-text-faint)]' : deltaColor(row.deltaFtpPct)}`}
                     >
                       {isBase ? '—' : fmtBps(row.deltaFtpPct)}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-100">{fmtPct(row.margin)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-[color:var(--nfq-text-primary)]">{fmtPct(row.margin)}</td>
                     <td
-                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(-row.deltaMarginPct)}`}
+                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-[color:var(--nfq-text-faint)]' : deltaColor(-row.deltaMarginPct)}`}
                     >
                       {isBase ? '—' : fmtBps(row.deltaMarginPct)}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-100">{fmtPct(row.result.raroc)}</td>
+                    <td className="px-4 py-3 text-right font-mono text-[color:var(--nfq-text-primary)]">{fmtPct(row.result.raroc)}</td>
                     <td
-                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-slate-500' : deltaColor(-row.deltaRarocPp)}`}
+                      className={`px-4 py-3 text-right font-mono ${isBase ? 'text-[color:var(--nfq-text-faint)]' : deltaColor(-row.deltaRarocPp)}`}
                     >
                       {isBase ? '—' : fmtPp(row.deltaRarocPp)}
                     </td>

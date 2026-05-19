@@ -15,7 +15,7 @@ export function PricingReceiptCreditDetail({
   t,
 }: PricingReceiptCreditDetailProps) {
   return (
-    <div className="animate-in slide-in-from-top-2 mt-1.5 space-y-3 rounded-lg border border-slate-800 bg-slate-900/50 p-3 fade-in">
+    <div className="animate-in slide-in-from-top-2 mt-1.5 space-y-3 rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)]/50 p-3 fade-in">
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
         <Metric label={t.anejo_segment || 'Segment'}>
           {creditDetail.anejoSegment.replace(/_/g, ' ')}
@@ -61,14 +61,14 @@ export function PricingReceiptCreditDetail({
 
       {creditDetail.capitalParams && (
         <div className="border-t border-slate-800 pt-2">
-          <div className="mb-1 text-[10px] tracking-normal text-slate-500">
+          <div className="mb-1 text-[10px] tracking-normal text-[color:var(--nfq-text-faint)]">
             {t.creditCapitalParams || 'Capital Params'}
           </div>
-          <div className="font-mono text-[11px] leading-relaxed text-slate-400">
+          <div className="font-mono text-[11px] leading-relaxed text-[color:var(--nfq-text-muted)]">
             <span>PD: {(creditDetail.capitalParams.pd * 100).toFixed(2)}%</span>
-            <span className="mx-2 text-slate-600">|</span>
+            <span className="mx-2 text-[color:var(--nfq-text-faint)]">|</span>
             <span>LGD: {(creditDetail.capitalParams.lgd * 100).toFixed(0)}%</span>
-            <span className="mx-2 text-slate-600">|</span>
+            <span className="mx-2 text-[color:var(--nfq-text-faint)]">|</span>
             <span>
               EAD:{' '}
               {new Intl.NumberFormat('en-US', {
@@ -78,9 +78,9 @@ export function PricingReceiptCreditDetail({
               }).format(creditDetail.capitalParams.ead)}
             </span>
           </div>
-          <div className="mt-0.5 font-mono text-[11px] text-slate-400">
+          <div className="mt-0.5 font-mono text-[11px] text-[color:var(--nfq-text-muted)]">
             <span>Exposure Class: {creditDetail.capitalParams.exposureClass}</span>
-            <span className="mx-2 text-slate-600">|</span>
+            <span className="mx-2 text-[color:var(--nfq-text-faint)]">|</span>
             <span>Maturity: {creditDetail.capitalParams.maturityYears.toFixed(1)}yr</span>
           </div>
         </div>
@@ -92,8 +92,8 @@ export function PricingReceiptCreditDetail({
 function Metric({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <div>
-      <div className="text-[10px] tracking-normal text-slate-500">{label}</div>
-      <div className="font-mono text-xs text-slate-300">{children}</div>
+      <div className="text-[10px] tracking-normal text-[color:var(--nfq-text-faint)]">{label}</div>
+      <div className="font-mono text-xs text-[color:var(--nfq-text-secondary)]">{children}</div>
     </div>
   );
 }
@@ -131,8 +131,8 @@ function PlainMetric({
 }) {
   return (
     <div className="flex items-center justify-between pl-2 text-[10px]">
-      <span className="tracking-normal text-slate-500">{label}</span>
-      <span className={valueClassName || 'font-mono text-xs text-slate-300'}>{children}</span>
+      <span className="tracking-normal text-[color:var(--nfq-text-faint)]">{label}</span>
+      <span className={valueClassName || 'font-mono text-xs text-[color:var(--nfq-text-secondary)]'}>{children}</span>
     </div>
   );
 }

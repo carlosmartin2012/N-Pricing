@@ -104,19 +104,19 @@ const PnlAttribution: React.FC<Props> = React.memo(({ deals, products, businessU
     <div className="space-y-6">
       <div className="grid grid-cols-3 gap-4 md:grid-cols-6">
         {[
-          { label: 'Gross NII', value: totals.nii, color: 'text-emerald-400' },
-          { label: 'FTP Cost', value: -totals.ftpCost, color: 'text-amber-400' },
+          { label: 'Gross NII', value: totals.nii, color: 'text-[color:var(--nfq-success)]' },
+          { label: 'FTP Cost', value: -totals.ftpCost, color: 'text-[color:var(--nfq-warning)]' },
           { label: 'Credit Cost', value: -totals.creditCost, color: 'text-red-400' },
           { label: 'Op. Cost', value: -totals.opCost, color: 'text-red-400' },
           { label: 'Capital Cost', value: -totals.capitalCost, color: 'text-red-400' },
           {
             label: 'Net Margin',
             value: totals.netMargin,
-            color: totals.netMargin >= 0 ? 'text-cyan-400' : 'text-red-400',
+            color: totals.netMargin >= 0 ? 'text-[color:var(--nfq-accent)]' : 'text-red-400',
           },
         ].map((kpi) => (
           <div key={kpi.label} className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">
-            <div className="mb-1 text-[10px] font-bold uppercase text-slate-500">{kpi.label}</div>
+            <div className="mb-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">{kpi.label}</div>
             <div className={`text-lg font-mono font-bold ${kpi.color}`}>{fmtM(kpi.value)}</div>
           </div>
         ))}

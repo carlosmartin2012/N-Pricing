@@ -253,14 +253,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
                         {googleLoading
-                          ? <Loader2 size={18} className="animate-spin text-slate-500" />
+                          ? <Loader2 size={18} className="animate-spin text-[color:var(--nfq-text-faint)]" />
                           : <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />
                         }
                       </div>
                       <span className="flex-1 text-left text-sm font-semibold">
                         {gisReady ? 'Continuar con Google' : 'Cargando Google…'}
                       </span>
-                      <ArrowRight size={16} className="text-slate-400" />
+                      <ArrowRight size={16} className="text-[color:var(--nfq-text-muted)]" />
                     </button>
                   )}
 

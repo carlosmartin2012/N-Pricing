@@ -54,9 +54,9 @@ function fmtRaroc(value: number): string {
 }
 
 function deltaColor(value: number): string {
-  if (value > 0) return 'text-emerald-400';
-  if (value < 0) return 'text-rose-400';
-  return 'text-amber-400';
+  if (value > 0) return 'text-[color:var(--nfq-success)]';
+  if (value < 0) return 'text-[color:var(--nfq-danger)]';
+  return 'text-[color:var(--nfq-warning)]';
 }
 
 function fmtDuration(ms: number | undefined): string {
@@ -143,7 +143,7 @@ const BacktestingConsole: React.FC = () => {
         {/* New backtest form */}
         <Panel
           title="New Backtest"
-          icon={<Play className="h-5 w-5 text-cyan-400" />}
+          icon={<Play className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
         >
           <div className="space-y-3 p-4">
             <InputGroup label="Name">
@@ -197,7 +197,7 @@ const BacktestingConsole: React.FC = () => {
         {/* Past runs list */}
         <Panel
           title="Past Runs"
-          icon={<FlaskConical className="h-5 w-5 text-cyan-400" />}
+          icon={<FlaskConical className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
         >
           <div className="p-2">
             {loadingRuns ? (
@@ -277,7 +277,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
   return (
     <Panel
       title="Backtest Results"
-      icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+      icon={<BarChart3 className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
     >
       <div className="space-y-6 p-4">
         {/* --- P&L comparison cards --- */}

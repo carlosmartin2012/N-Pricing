@@ -152,13 +152,13 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="file-upload-modal-title">
-            <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-[var(--nfq-radius-card)] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+            <div className="w-full max-w-lg bg-[var(--nfq-bg-elevated)] border border-slate-800 rounded-[var(--nfq-radius-card)] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[var(--nfq-bg-root)]">
                     <div className="flex items-center gap-3">
-                        <Upload size={18} className="text-cyan-500" />
-                        <h3 id="file-upload-modal-title" className="text-sm font-bold text-white tracking-normal">{title}</h3>
+                        <Upload size={18} className="text-[color:var(--nfq-accent)]" />
+                        <h3 id="file-upload-modal-title" className="text-sm font-bold text-[color:var(--nfq-text-primary)] tracking-normal">{title}</h3>
                     </div>
-                    <button onClick={onClose} aria-label="Close upload dialog" className="text-slate-500 hover:text-white transition-colors">
+                    <button onClick={onClose} aria-label="Close upload dialog" className="text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-primary)] transition-colors">
                         <X size={20} />
                     </button>
                 </div>
@@ -171,7 +171,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-cyan-500 bg-cyan-950/20' : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/50'
+                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-cyan-500 bg-cyan-950/20' : 'border-slate-700 hover:border-slate-600 hover:bg-[var(--nfq-bg-highest)]/50'
                                 }`}
                         >
                             <input
@@ -185,30 +185,30 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             {status === 'parsing' ? (
                                 <div className="flex flex-col items-center">
                                     <div className="w-12 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
-                                    <p className="text-sm text-cyan-400 font-medium">{t.parsingValidating}</p>
+                                    <p className="text-sm text-[color:var(--nfq-accent)] font-medium">{t.parsingValidating}</p>
                                 </div>
                             ) : (
                                 <>
-                                    <FileUp size={48} className={`mb-4 transition-colors ${isDragging ? 'text-cyan-400' : 'text-slate-600'}`} />
-                                    <p className="text-sm text-slate-300 font-medium text-center">
-                                        {t.dragDropCsv} <span className="text-cyan-500">{t.csvFile}</span> {t.here}
+                                    <FileUp size={48} className={`mb-4 transition-colors ${isDragging ? 'text-[color:var(--nfq-accent)]' : 'text-[color:var(--nfq-text-faint)]'}`} />
+                                    <p className="text-sm text-[color:var(--nfq-text-secondary)] font-medium text-center">
+                                        {t.dragDropCsv} <span className="text-[color:var(--nfq-accent)]">{t.csvFile}</span> {t.here}
                                     </p>
-                                    <p className="text-xs text-slate-500 mt-2 text-center">{t.orClickToBrowse}</p>
+                                    <p className="text-xs text-[color:var(--nfq-text-faint)] mt-2 text-center">{t.orClickToBrowse}</p>
                                 </>
                             )}
                         </div>
                     ) : status === 'success' ? (
                         <div className="text-center py-8">
                             <div className="w-16 h-16 bg-emerald-950/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <CheckCircle2 size={32} className="text-emerald-500" />
+                                <CheckCircle2 size={32} className="text-[color:var(--nfq-success)]" />
                             </div>
-                            <h4 className="text-lg font-bold text-white mb-2">{t.importSuccessful}</h4>
-                            <p className="text-sm text-slate-400 mb-8">
+                            <h4 className="text-lg font-bold text-[color:var(--nfq-text-primary)] mb-2">{t.importSuccessful}</h4>
+                            <p className="text-sm text-[color:var(--nfq-text-muted)] mb-8">
                                 {file?.name} {t.fileProcessedMessage}
                             </p>
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors"
+                                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded-lg transition-colors"
                             >
                                 {t.closeAndRefresh}
                             </button>
@@ -218,11 +218,11 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             <div className="w-16 h-16 bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <AlertCircle size={32} className="text-red-500" />
                             </div>
-                            <h4 className="text-lg font-bold text-white mb-2">{t.importFailed}</h4>
-                            <p className="text-sm text-slate-400 mb-8">{errorMessage}</p>
+                            <h4 className="text-lg font-bold text-[color:var(--nfq-text-primary)] mb-2">{t.importFailed}</h4>
+                            <p className="text-sm text-[color:var(--nfq-text-muted)] mb-8">{errorMessage}</p>
                             <button
                                 onClick={() => setStatus('idle')}
-                                className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-colors"
+                                className="px-6 py-2 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded-lg transition-colors"
                             >
                                 {t.tryAgain}
                             </button>
@@ -232,17 +232,17 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                     {status === 'idle' && (
                         <div className="mt-8 pt-6 border-t border-slate-800 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-slate-800 rounded-lg">
-                                    <FileText size={18} className="text-slate-400" />
+                                <div className="p-2 bg-[var(--nfq-bg-highest)] rounded-lg">
+                                    <FileText size={18} className="text-[color:var(--nfq-text-muted)]" />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-slate-300 uppercase tracking-tight">{t.needTemplate}</p>
-                                    <p className="text-[10px] text-slate-500">{t.downloadCsvFormat}</p>
+                                    <p className="text-xs font-bold text-[color:var(--nfq-text-secondary)] uppercase tracking-tight">{t.needTemplate}</p>
+                                    <p className="text-[10px] text-[color:var(--nfq-text-faint)]">{t.downloadCsvFormat}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={downloadTemplate}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 text-[10px] font-bold transition-colors uppercase"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--nfq-bg-highest)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)] rounded-lg border border-slate-700 text-[10px] font-bold transition-colors uppercase"
                             >
                                 <Download size={12} /> Template
                             </button>

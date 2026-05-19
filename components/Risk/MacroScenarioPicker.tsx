@@ -31,13 +31,13 @@ function getScenarioIcon(id: string): React.ReactNode {
       return <Activity size={16} className="text-[var(--nfq-text-muted)]" />;
     case 'ADVERSE_MILD':
     case 'ADVERSE_SEVERE':
-      return <AlertTriangle size={16} className="text-amber-500" />;
+      return <AlertTriangle size={16} className="text-[color:var(--nfq-warning)]" />;
     case 'LIQUIDITY_STRESS':
-      return <Activity size={16} className="text-cyan-500" />;
+      return <Activity size={16} className="text-[color:var(--nfq-accent)]" />;
     case 'RATE_SHOCK_UP':
-      return <TrendingUp size={16} className="text-rose-500" />;
+      return <TrendingUp size={16} className="text-[color:var(--nfq-danger)]" />;
     case 'RATE_SHOCK_DOWN':
-      return <TrendingDown size={16} className="text-emerald-500" />;
+      return <TrendingDown size={16} className="text-[color:var(--nfq-success)]" />;
     default:
       return <Activity size={16} className="text-[var(--nfq-text-muted)]" />;
   }

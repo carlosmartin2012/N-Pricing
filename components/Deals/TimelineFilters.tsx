@@ -27,14 +27,14 @@ const TimelineFilters: React.FC<Props> = ({ enabled, onToggle, onAll, onNone, co
       <button
         type="button"
         onClick={onAll}
-        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-slate-800/40 px-2 py-1 text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
+        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:border-cyan-500/40 hover:text-[color:var(--nfq-accent)]"
       >
         All
       </button>
       <button
         type="button"
         onClick={onNone}
-        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-slate-800/40 px-2 py-1 text-[10px] text-slate-400 hover:border-rose-500/40 hover:text-rose-300"
+        className="nfq-label rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/40 px-2 py-1 text-[10px] text-[color:var(--nfq-text-muted)] hover:border-rose-500/40 hover:text-[color:var(--nfq-danger)]"
       >
         None
       </button>
@@ -51,11 +51,11 @@ const TimelineFilters: React.FC<Props> = ({ enabled, onToggle, onAll, onNone, co
             className={`nfq-label flex items-center gap-1 rounded px-2 py-1 text-[10px] transition-colors ${
               isOn
                 ? 'border border-cyan-500/40 bg-cyan-500/10 text-cyan-200'
-                : 'border border-[color:var(--nfq-border-ghost)] bg-slate-800/30 text-slate-500 hover:text-slate-300'
+                : 'border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/30 text-[color:var(--nfq-text-faint)] hover:text-[color:var(--nfq-text-secondary)]'
             }`}
           >
             <span>{EVENT_LABEL[kind]}</span>
-            <span className="font-mono-nums text-[9px] text-slate-400">{count}</span>
+            <span className="font-mono-nums text-[9px] text-[color:var(--nfq-text-muted)]">{count}</span>
           </button>
         );
       })}

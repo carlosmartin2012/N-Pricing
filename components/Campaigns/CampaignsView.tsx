@@ -10,12 +10,12 @@ import { createLogger } from '../../utils/logger';
 const log = createLogger('CampaignsView');
 
 const STATUS_COLOR: Record<CampaignStatus, string> = {
-  draft: 'bg-slate-500/10 text-slate-300',
-  approved: 'bg-cyan-500/10 text-cyan-300',
-  active: 'bg-emerald-500/10 text-emerald-300',
-  exhausted: 'bg-amber-500/10 text-amber-300',
-  expired: 'bg-slate-500/10 text-slate-400',
-  cancelled: 'bg-rose-500/10 text-rose-300',
+  draft: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  approved: 'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
+  active: 'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  exhausted: 'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  expired: 'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
+  cancelled: 'bg-rose-500/10 text-[color:var(--nfq-danger)]',
 };
 
 const fmtBps = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(0)} bps`;
@@ -123,11 +123,11 @@ const CampaignsView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Target className="h-5 w-5 text-amber-400" />
-          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+          <Target className="h-5 w-5 text-[color:var(--nfq-warning)]" />
+          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
             {t.commercialCampaignsHeader}
           </h2>
-          {activeEntity && <span className="nfq-label text-[10px] text-slate-400">{activeEntity.shortCode}</span>}
+          {activeEntity && <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">{activeEntity.shortCode}</span>}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => void load()} disabled={loading} className="nfq-button nfq-button-ghost px-3 py-1.5 text-xs">
@@ -242,7 +242,7 @@ const CampaignsView: React.FC = () => {
               />
             </Field>
           </div>
-          {error && <div className="text-xs text-rose-400">{error}</div>}
+          {error && <div className="text-xs text-[color:var(--nfq-danger)]">{error}</div>}
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => setShowForm(false)} className="nfq-button nfq-button-ghost px-3 py-1.5 text-xs">
               Cancel
@@ -251,7 +251,7 @@ const CampaignsView: React.FC = () => {
               {submitting ? 'Creating…' : 'Create as draft'}
             </button>
           </div>
-          <p className="text-[10px] text-slate-500">
+          <p className="text-[10px] text-[color:var(--nfq-text-faint)]">
             Newly created campaigns land as <code>draft</code>. Transition to <code>approved</code> →{' '}
             <code>active</code> from the table below.
           </p>
@@ -259,7 +259,7 @@ const CampaignsView: React.FC = () => {
       )}
 
       {list.length === 0 && !loading ? (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.commercialCampaignsEmpty}
         </div>
       ) : (
@@ -289,19 +289,19 @@ const CampaignsView: React.FC = () => {
                     <tbody>
                       {items.map((c) => (
                         <tr key={c.id} className="border-b border-[color:var(--nfq-border-ghost)]">
-                          <td className="px-3 py-2 font-mono text-xs text-slate-200">{c.code}</td>
-                          <td className="px-3 py-2 text-xs text-white">{c.name}</td>
-                          <td className="px-3 py-2 text-xs text-slate-300">
+                          <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{c.code}</td>
+                          <td className="px-3 py-2 text-xs text-[color:var(--nfq-text-primary)]">{c.name}</td>
+                          <td className="px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)]">
                             {c.segment} / {c.productType} / {c.currency}
                           </td>
-                          <td className="px-3 py-2 text-xs text-slate-400">{c.channel ?? 'any'}</td>
+                          <td className="px-3 py-2 text-xs text-[color:var(--nfq-text-muted)]">{c.channel ?? 'any'}</td>
                           <td className="px-3 py-2 text-right font-mono tabular-nums text-xs">
                             {fmtBps(c.rateDeltaBps)}
                           </td>
                           <td className="px-3 py-2 text-right font-mono tabular-nums text-xs">
                             {fmtEur(c.consumedVolumeEur)} / {fmtEur(c.maxVolumeEur)}
                           </td>
-                          <td className="px-3 py-2 font-mono text-[11px] text-slate-400">
+                          <td className="px-3 py-2 font-mono text-[11px] text-[color:var(--nfq-text-muted)]">
                             {c.activeFrom} → {c.activeTo}
                           </td>
                           <td className="px-3 py-2 text-right space-x-1">
@@ -316,7 +316,7 @@ const CampaignsView: React.FC = () => {
                                 className="ml-1 nfq-button nfq-button-ghost px-2 py-0.5 text-[10px]"
                                 title="Approve"
                               >
-                                <CheckCircle2 className="h-3 w-3 inline text-cyan-400" />
+                                <CheckCircle2 className="h-3 w-3 inline text-[color:var(--nfq-accent)]" />
                               </button>
                             )}
                             {c.status === 'approved' && (
@@ -325,7 +325,7 @@ const CampaignsView: React.FC = () => {
                                 className="ml-1 nfq-button nfq-button-ghost px-2 py-0.5 text-[10px]"
                                 title="Activate"
                               >
-                                <CheckCircle2 className="h-3 w-3 inline text-emerald-400" />
+                                <CheckCircle2 className="h-3 w-3 inline text-[color:var(--nfq-success)]" />
                               </button>
                             )}
                             {(c.status === 'draft' || c.status === 'approved' || c.status === 'active') && (
@@ -334,7 +334,7 @@ const CampaignsView: React.FC = () => {
                                 className="ml-1 nfq-button nfq-button-ghost px-2 py-0.5 text-[10px]"
                                 title="Cancel"
                               >
-                                <XCircle className="h-3 w-3 inline text-rose-400" />
+                                <XCircle className="h-3 w-3 inline text-[color:var(--nfq-danger)]" />
                               </button>
                             )}
                           </td>
@@ -359,6 +359,6 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
   </label>
 );
 const inputCls =
-  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-white focus:border-amber-400 focus:outline-none';
+  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)] focus:border-amber-400 focus:outline-none';
 
 export default CampaignsView;

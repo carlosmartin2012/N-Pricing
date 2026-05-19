@@ -20,11 +20,11 @@ interface Props {
 function fmtPct(v: number): string { return `${v.toFixed(2)}%`; }
 
 const DeltaCell: React.FC<{ delta: number }> = ({ delta }) => {
-  if (Math.abs(delta) < 0.01) return <span className="flex items-center gap-0.5 text-slate-500"><Equal size={10} /> 0bp</span>;
+  if (Math.abs(delta) < 0.01) return <span className="flex items-center gap-0.5 text-[color:var(--nfq-text-faint)]"><Equal size={10} /> 0bp</span>;
   const isPositive = delta > 0;
   const Icon = isPositive ? ArrowUp : ArrowDown;
   return (
-    <span className={`flex items-center gap-0.5 font-mono ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+    <span className={`flex items-center gap-0.5 font-mono ${isPositive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
       <Icon size={10} />{Math.abs(delta * 100).toFixed(0)}bp
     </span>
   );
@@ -88,8 +88,8 @@ const ExPostRAROCDashboard: React.FC<Props> = ({ deals }) => {
       {/* Underpricing alert */}
       {underpriced.length > 0 && (
         <div className="flex items-center gap-3 rounded-[var(--nfq-radius-card)] border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-          <AlertTriangle size={16} className="text-amber-400 shrink-0" />
-          <p className="text-xs text-amber-300">
+          <AlertTriangle size={16} className="text-[color:var(--nfq-warning)] shrink-0" />
+          <p className="text-xs text-[color:var(--nfq-warning)]">
             {underpriced.length} deal(s) show systematic underpricing (realized RAROC &gt; expected by 200+bp).
           </p>
         </div>
@@ -103,13 +103,13 @@ const ExPostRAROCDashboard: React.FC<Props> = ({ deals }) => {
         </div>
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Avg RAROC Delta</div>
-          <div className={`font-mono text-2xl font-bold mt-2 ${avgDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <div className={`font-mono text-2xl font-bold mt-2 ${avgDelta >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
             {avgDelta >= 0 ? '+' : ''}{(avgDelta * 100).toFixed(0)}bp
           </div>
         </div>
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">RMSE</div>
-          <div className="font-mono text-2xl font-bold text-amber-400 mt-2">{(rmse * 100).toFixed(0)}bp</div>
+          <div className="font-mono text-2xl font-bold text-[color:var(--nfq-warning)] mt-2">{(rmse * 100).toFixed(0)}bp</div>
         </div>
         <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <div className="nfq-label">Accuracy</div>

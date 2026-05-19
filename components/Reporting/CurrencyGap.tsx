@@ -85,17 +85,17 @@ const CurrencyGap: React.FC<Props> = React.memo(({ deals }) => {
         {/* Summary Cards */}
         <div className="space-y-2">
           {data.map((row, idx) => (
-            <div key={row.currency} className="flex items-center gap-3 p-2 bg-slate-900/50 rounded border border-[color:var(--nfq-border-ghost)]">
+            <div key={row.currency} className="flex items-center gap-3 p-2 bg-[var(--nfq-bg-elevated)]/50 rounded border border-[color:var(--nfq-border-ghost)]">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-white">{row.currency}</div>
-                <div className="text-[10px] text-slate-500">{row.count} deals</div>
+                <div className="text-sm font-bold text-[color:var(--nfq-text-primary)]">{row.currency}</div>
+                <div className="text-[10px] text-[color:var(--nfq-text-faint)]">{row.count} deals</div>
               </div>
               <div className="text-right">
-                <div className={`text-xs font-mono font-bold ${row.netPosition >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <div className={`text-xs font-mono font-bold ${row.netPosition >= 0 ? 'text-[color:var(--nfq-success)]' : 'text-red-400'}`}>
                   {row.netPosition >= 0 ? '+' : ''}{fmtM(row.netPosition)}
                 </div>
-                <div className="text-[10px] text-slate-500">{row.pctOfTotal.toFixed(1)}% vol</div>
+                <div className="text-[10px] text-[color:var(--nfq-text-faint)]">{row.pctOfTotal.toFixed(1)}% vol</div>
               </div>
             </div>
           ))}

@@ -166,7 +166,7 @@ const UserManagement: React.FC = () => {
         isAdmin ? (
           <button
             onClick={() => setShowOnboarding(true)}
-            className="rounded bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-400"
+            className="rounded bg-amber-500 px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-amber-400"
           >
             {t.newEntity}
           </button>
@@ -181,7 +181,7 @@ const UserManagement: React.FC = () => {
           onAddUser={openCreateDrawer}
         />
 
-        <div className="flex-1 overflow-auto bg-slate-900 p-4">
+        <div className="flex-1 overflow-auto bg-[var(--nfq-bg-elevated)] p-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredUsers.map((user) => (
               <UserCard

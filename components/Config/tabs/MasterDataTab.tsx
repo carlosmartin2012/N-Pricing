@@ -184,23 +184,23 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             {/* Client Registry */}
             <MasterDataSection
                title="Client Registry (ID/Name)"
-               icon={<Users size={16} className="text-emerald-500" />}
+               icon={<Users size={16} className="text-[color:var(--nfq-success)]" />}
                addLabel={<><Plus size={12} /> Add Client</>}
                className="col-span-1 lg:col-span-2"
                onAdd={handleAddClient}
             >
                <div className="max-h-96 overflow-y-auto pr-1 space-y-2">
                   {clients.map(c => (
-                     <div key={c.id} className="flex justify-between items-center p-2 bg-slate-950 rounded border border-slate-800 text-xs group hover:border-slate-600">
+                     <div key={c.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-slate-800 text-xs group hover:border-slate-600">
                         <div>
-                           <span className="text-cyan-400 font-mono font-bold mr-3">{c.id}</span>
-                           <span className="text-slate-300">{c.name}</span>
+                           <span className="text-[color:var(--nfq-accent)] font-mono font-bold mr-3">{c.id}</span>
+                           <span className="text-[color:var(--nfq-text-secondary)]">{c.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                            <Badge variant="default">{c.type}</Badge>
                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 ml-2">
-                              <button onClick={() => handleEditClient(c)} className="text-slate-400 hover:text-cyan-400"><Edit size={14} /></button>
-                              <button onClick={() => handleDeleteClient(c.id)} className="text-slate-400 hover:text-red-400"><Trash2 size={14} /></button>
+                              <button onClick={() => handleEditClient(c)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]"><Edit size={14} /></button>
+                              <button onClick={() => handleDeleteClient(c.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400"><Trash2 size={14} /></button>
                            </div>
                         </div>
                      </div>
@@ -211,23 +211,23 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             {/* Product Defs */}
             <MasterDataSection
                title="Product Definitions"
-               icon={<Briefcase size={16} className="text-cyan-500" />}
+               icon={<Briefcase size={16} className="text-[color:var(--nfq-accent)]" />}
                addLabel={<><Plus size={10} /> Add</>}
                compactAddButton
                onAdd={handleAddProduct}
             >
                <div className="space-y-2 mb-4">
                   {products.map(p => (
-                     <div key={p.id} className="flex justify-between items-center p-2 bg-slate-950 rounded border border-slate-800 text-xs group hover:border-slate-600">
+                     <div key={p.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-slate-800 text-xs group hover:border-slate-600">
                         <div>
-                           <span className="text-slate-300">{p.name}</span>
-                           <div className="text-[9px] text-slate-500 font-mono">{p.id}</div>
+                           <span className="text-[color:var(--nfq-text-secondary)]">{p.name}</span>
+                           <div className="text-[9px] text-[color:var(--nfq-text-faint)] font-mono">{p.id}</div>
                         </div>
                         <div className="flex items-center gap-2">
                            <Badge variant="default">{p.category}</Badge>
                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                              <button onClick={() => handleEditProduct(p)} className="text-slate-400 hover:text-cyan-400"><Edit size={12} /></button>
-                              <button onClick={() => handleDeleteProduct(p.id)} className="text-slate-400 hover:text-red-400"><Trash2 size={12} /></button>
+                              <button onClick={() => handleEditProduct(p)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]"><Edit size={12} /></button>
+                              <button onClick={() => handleDeleteProduct(p.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400"><Trash2 size={12} /></button>
                            </div>
                         </div>
                      </div>
@@ -245,14 +245,14 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             >
                <div className="space-y-2 mb-4">
                   {businessUnits.map(b => (
-                     <div key={b.id} className="flex justify-between items-center p-2 bg-slate-950 rounded border border-slate-800 text-xs group hover:border-slate-600">
+                     <div key={b.id} className="flex justify-between items-center p-2 bg-[var(--nfq-bg-root)] rounded border border-slate-800 text-xs group hover:border-slate-600">
                         <div>
-                           <span className="text-slate-300">{b.name}</span>
-                           <div className="text-[9px] text-slate-500 font-mono">{b.code} ({b.id})</div>
+                           <span className="text-[color:var(--nfq-text-secondary)]">{b.name}</span>
+                           <div className="text-[9px] text-[color:var(--nfq-text-faint)] font-mono">{b.code} ({b.id})</div>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                           <button onClick={() => handleEditBU(b)} className="text-slate-400 hover:text-cyan-400"><Edit size={12} /></button>
-                           <button onClick={() => handleDeleteBU(b.id)} className="text-slate-400 hover:text-red-400"><Trash2 size={12} /></button>
+                           <button onClick={() => handleEditBU(b)} className="text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-accent)]"><Edit size={12} /></button>
+                           <button onClick={() => handleDeleteBU(b.id)} className="text-[color:var(--nfq-text-muted)] hover:text-red-400"><Trash2 size={12} /></button>
                         </div>
                      </div>
                   ))}
@@ -268,10 +268,10 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
             title={drawerTitle}
             footer={
                <div className="flex justify-end gap-2">
-                  <button onClick={closeDrawer} className="px-4 py-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+                  <button onClick={closeDrawer} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">Cancel</button>
                   <button
                      onClick={handleSave}
-                     className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded"
+                     className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
                   >
                      Save Changes
                   </button>

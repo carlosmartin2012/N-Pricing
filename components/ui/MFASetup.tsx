@@ -37,13 +37,13 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
     <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
       <div className="flex items-center gap-3 mb-4">
         {mfaState.isVerified ? (
-          <ShieldCheck className="h-5 w-5 text-emerald-400" />
+          <ShieldCheck className="h-5 w-5 text-[color:var(--nfq-success)]" />
         ) : (
-          <Shield className="h-5 w-5 text-amber-400" />
+          <Shield className="h-5 w-5 text-[color:var(--nfq-warning)]" />
         )}
         <div>
-          <h4 className="text-sm font-bold text-white">Two-Factor Authentication</h4>
-          <p className="text-xs text-slate-400">
+          <h4 className="text-sm font-bold text-[color:var(--nfq-text-primary)]">Two-Factor Authentication</h4>
+          <p className="text-xs text-[color:var(--nfq-text-muted)]">
             {mfaState.isVerified
               ? 'Enabled — your account is protected'
               : 'Not enabled — add an extra layer of security'}
@@ -87,14 +87,14 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
 
       {step === 'enroll' && mfaState.qrCode && (
         <div className="space-y-3">
-          <p className="text-xs text-slate-400">Scan this QR code with your authenticator app:</p>
+          <p className="text-xs text-[color:var(--nfq-text-muted)]">Scan this QR code with your authenticator app:</p>
           <div className="flex justify-center p-4 bg-white rounded-lg w-fit mx-auto">
             <img src={mfaState.qrCode} alt="MFA QR Code" className="h-40 w-40" />
           </div>
           {mfaState.secret && (
             <div className="text-center">
-              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-slate-500">Manual entry:</span>
-              <code className="block mt-1 text-xs font-mono text-cyan-400 select-all break-all">
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-[color:var(--nfq-text-faint)]">Manual entry:</span>
+              <code className="block mt-1 text-xs font-mono text-[color:var(--nfq-accent)] select-all break-all">
                 {mfaState.secret}
               </code>
             </div>
@@ -105,7 +105,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="Enter 6-digit code"
-              className="flex-1 text-center font-mono text-lg tracking-[0.3em] rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 text-white placeholder:text-slate-600 focus:border-cyan-500/40 focus:outline-none"
+              className="flex-1 text-center font-mono text-lg tracking-[0.3em] rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-cyan-500/40 focus:outline-none"
               maxLength={6}
               inputMode="numeric"
               autoComplete="one-time-code"

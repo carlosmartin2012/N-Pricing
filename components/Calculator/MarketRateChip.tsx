@@ -25,9 +25,9 @@ interface Props {
 }
 
 function toneClasses(relative: 'BELOW' | 'ON_MARKET' | 'ABOVE'): { bg: string; text: string; ring: string } {
-  if (relative === 'BELOW')   return { bg: 'bg-emerald-500/10', text: 'text-emerald-300', ring: 'ring-emerald-500/30' };
-  if (relative === 'ON_MARKET') return { bg: 'bg-amber-500/10',  text: 'text-amber-300',  ring: 'ring-amber-500/30'  };
-  return { bg: 'bg-rose-500/10',   text: 'text-rose-300',   ring: 'ring-rose-500/30'   };
+  if (relative === 'BELOW')   return { bg: 'bg-emerald-500/10', text: 'text-[color:var(--nfq-success)]', ring: 'ring-emerald-500/30' };
+  if (relative === 'ON_MARKET') return { bg: 'bg-amber-500/10',  text: 'text-[color:var(--nfq-warning)]',  ring: 'ring-amber-500/30'  };
+  return { bg: 'bg-rose-500/10',   text: 'text-[color:var(--nfq-danger)]',   ring: 'ring-rose-500/30'   };
 }
 
 const MarketRateChip: React.FC<Props> = ({ deal, finalClientRatePct }) => {

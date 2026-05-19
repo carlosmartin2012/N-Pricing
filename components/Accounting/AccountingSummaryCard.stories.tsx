@@ -29,7 +29,7 @@ export const SingleCurrencyAssets: Story = {
     title: 'Total Assets',
     emptyLabel: 'No assets booked',
     breakdown: [{ currency: 'EUR', amount: 12_500_000 }],
-    accentClassName: 'text-cyan-400',
+    accentClassName: 'text-[color:var(--nfq-accent)]',
   },
 };
 
@@ -42,7 +42,7 @@ export const MultiCurrencyAssets: Story = {
       { currency: 'USD', amount: 8_200_000 },
       { currency: 'GBP', amount: 3_100_000 },
     ],
-    accentClassName: 'text-cyan-400',
+    accentClassName: 'text-[color:var(--nfq-accent)]',
   },
 };
 
@@ -54,7 +54,7 @@ export const Liabilities: Story = {
       { currency: 'EUR', amount: 9_800_000 },
       { currency: 'USD', amount: 5_400_000 },
     ],
-    accentClassName: 'text-rose-400',
+    accentClassName: 'text-[color:var(--nfq-danger)]',
   },
 };
 
@@ -68,7 +68,7 @@ export const FTPIncome: Story = {
       { currency: 'GBP', amount: 67_000 },
       { currency: 'CHF', amount: 22_000 },
     ],
-    accentClassName: 'text-emerald-400',
+    accentClassName: 'text-[color:var(--nfq-success)]',
   },
 };
 
@@ -77,7 +77,7 @@ export const Commitments: Story = {
     title: 'Off-Balance Commitments',
     emptyLabel: 'No commitments',
     breakdown: [{ currency: 'EUR', amount: 4_750_000 }],
-    accentClassName: 'text-amber-400',
+    accentClassName: 'text-[color:var(--nfq-warning)]',
   },
 };
 
@@ -86,7 +86,7 @@ export const Empty: Story = {
     title: 'Total Assets',
     emptyLabel: 'No assets booked',
     breakdown: [],
-    accentClassName: 'text-cyan-400',
+    accentClassName: 'text-[color:var(--nfq-accent)]',
   },
 };
 
@@ -100,7 +100,7 @@ export const DashboardRow: StoryObj = {
           { currency: 'EUR', amount: 12_500_000 },
           { currency: 'USD', amount: 8_200_000 },
         ]}
-        accentClassName="text-cyan-400"
+        accentClassName="text-[color:var(--nfq-accent)]"
       />
       <AccountingSummaryCard
         title="Total Liabilities"
@@ -109,19 +109,19 @@ export const DashboardRow: StoryObj = {
           { currency: 'EUR', amount: 9_800_000 },
           { currency: 'USD', amount: 5_400_000 },
         ]}
-        accentClassName="text-rose-400"
+        accentClassName="text-[color:var(--nfq-danger)]"
       />
       <AccountingSummaryCard
         title="FTP Income"
         emptyLabel="No FTP income"
         breakdown={[{ currency: 'EUR', amount: 345_000 }]}
-        accentClassName="text-emerald-400"
+        accentClassName="text-[color:var(--nfq-success)]"
       />
       <AccountingSummaryCard
         title="Commitments"
         emptyLabel="No commitments"
         breakdown={[]}
-        accentClassName="text-amber-400"
+        accentClassName="text-[color:var(--nfq-warning)]"
       />
     </div>
   ),

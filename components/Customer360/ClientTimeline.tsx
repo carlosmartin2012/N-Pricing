@@ -18,17 +18,17 @@ import type { ClientEvent, ClientEventType } from '../../types/clv';
 
 const EVENT_META: Record<ClientEventType, { icon: React.ComponentType<{ className?: string }>; tone: string; label: string }> = {
   onboarding:        { icon: Sparkles,           tone: 'text-sky-300',     label: 'Onboarding' },
-  deal_booked:       { icon: CircleDollarSign,   tone: 'text-emerald-300', label: 'Deal booked' },
-  deal_cancelled:    { icon: XCircle,            tone: 'text-rose-300',    label: 'Deal cancelled' },
-  crosssell_attempt: { icon: Handshake,          tone: 'text-amber-300',   label: 'Crosssell attempt' },
-  crosssell_won:     { icon: Handshake,          tone: 'text-emerald-300', label: 'Crosssell won' },
-  claim:             { icon: AlertTriangle,      tone: 'text-rose-300',    label: 'Claim' },
-  churn_signal:      { icon: MessageSquareWarning, tone: 'text-rose-300',  label: 'Churn signal' },
-  contact:           { icon: Phone,              tone: 'text-slate-300',   label: 'Contact' },
+  deal_booked:       { icon: CircleDollarSign,   tone: 'text-[color:var(--nfq-success)]', label: 'Deal booked' },
+  deal_cancelled:    { icon: XCircle,            tone: 'text-[color:var(--nfq-danger)]',    label: 'Deal cancelled' },
+  crosssell_attempt: { icon: Handshake,          tone: 'text-[color:var(--nfq-warning)]',   label: 'Crosssell attempt' },
+  crosssell_won:     { icon: Handshake,          tone: 'text-[color:var(--nfq-success)]', label: 'Crosssell won' },
+  claim:             { icon: AlertTriangle,      tone: 'text-[color:var(--nfq-danger)]',    label: 'Claim' },
+  churn_signal:      { icon: MessageSquareWarning, tone: 'text-[color:var(--nfq-danger)]',  label: 'Churn signal' },
+  contact:           { icon: Phone,              tone: 'text-[color:var(--nfq-text-secondary)]',   label: 'Contact' },
   price_review:      { icon: RefreshCw,          tone: 'text-violet-300',  label: 'Price review' },
   committee_review:  { icon: Gavel,              tone: 'text-violet-300',  label: 'Committee review' },
   nba_generated:     { icon: Sparkles,           tone: 'text-sky-300',     label: 'NBA generated' },
-  nba_consumed:      { icon: Handshake,          tone: 'text-emerald-300', label: 'NBA consumed' },
+  nba_consumed:      { icon: Handshake,          tone: 'text-[color:var(--nfq-success)]', label: 'NBA consumed' },
 };
 
 interface Props { clientId: string }
@@ -56,13 +56,13 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-sky-400" />
-          <span className="nfq-label text-[10px] text-slate-300">{t.clvTimelineTitle}</span>
+          <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvTimelineTitle}</span>
         </div>
-        <span className="font-mono text-[10px] text-slate-500">{events.length} events</span>
+        <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{events.length} events</span>
       </header>
 
       {!loading && events.length === 0 && (
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.clvTimelineEmpty}
         </p>
       )}
@@ -70,10 +70,10 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
       <ul className="space-y-6">
         {grouped.map(([month, batch]) => (
           <li key={month}>
-            <div className="nfq-label mb-2 text-[9px] text-slate-500">{month || 'unknown'}</div>
+            <div className="nfq-label mb-2 text-[9px] text-[color:var(--nfq-text-faint)]">{month || 'unknown'}</div>
             <ul className="space-y-2 border-l border-[color:var(--nfq-border-ghost)] pl-4">
               {batch.map((e) => {
-                const meta = EVENT_META[e.eventType] ?? { icon: History, tone: 'text-slate-300', label: e.eventType };
+                const meta = EVENT_META[e.eventType] ?? { icon: History, tone: 'text-[color:var(--nfq-text-secondary)]', label: e.eventType };
                 const Icon = meta.icon;
                 return (
                   <li key={e.id} className="relative flex items-start gap-3">
@@ -81,14 +81,14 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
                     <Icon className={`h-3.5 w-3.5 shrink-0 ${meta.tone}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-mono text-slate-200">{meta.label}</span>
-                        <span className="font-mono text-[10px] text-slate-500">{(e.eventTs ?? '').slice(0, 10)}</span>
+                        <span className="font-mono text-[color:var(--nfq-text-secondary)]">{meta.label}</span>
+                        <span className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">{(e.eventTs ?? '').slice(0, 10)}</span>
                       </div>
                       {e.amountEur !== null && (
-                        <div className="font-mono text-[11px] text-slate-400">{fmtEur(e.amountEur)}</div>
+                        <div className="font-mono text-[11px] text-[color:var(--nfq-text-muted)]">{fmtEur(e.amountEur)}</div>
                       )}
                       {Object.keys(e.payload).length > 0 && (
-                        <div className="mt-1 font-mono text-[10px] text-slate-500 break-all">
+                        <div className="mt-1 font-mono text-[10px] text-[color:var(--nfq-text-faint)] break-all">
                           {summarisePayload(e.payload)}
                         </div>
                       )}

@@ -143,7 +143,7 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
             <button
               onClick={handleSave}
               disabled={!canSave || isSaving}
-              className="rounded bg-[var(--nfq-accent)] px-4 py-2 text-xs font-bold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded bg-[var(--nfq-accent)] px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isSaving ? 'Saving…' : 'Save outcome'}
             </button>
@@ -232,7 +232,7 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
                 <div className="flex gap-1">
                   <button
                     onClick={acceptSuggestion}
-                    className="rounded bg-[var(--nfq-accent)] p-1 text-white hover:opacity-90"
+                    className="rounded bg-[var(--nfq-accent)] p-1 text-[color:var(--nfq-text-primary)] hover:opacity-90"
                     aria-label="Accept AI suggestion"
                     title="Accept"
                   >

@@ -65,7 +65,7 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
 
   if (!dealId) {
     return (
-      <p className="p-6 text-xs text-slate-400">
+      <p className="p-6 text-xs text-[color:var(--nfq-text-muted)]">
         No deal selected. Open a deal from the blotter or escalations to see its timeline.
       </p>
     );
@@ -73,7 +73,7 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 p-6 text-xs text-slate-400" role="status">
+      <div className="flex items-center gap-2 p-6 text-xs text-[color:var(--nfq-text-muted)]" role="status">
         <History className="h-4 w-4 animate-pulse" />
         Loading timeline…
       </div>
@@ -82,7 +82,7 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
 
   if (isError || !timeline) {
     return (
-      <p className="p-6 text-xs text-rose-300">
+      <p className="p-6 text-xs text-[color:var(--nfq-danger)]">
         Could not load timeline for this deal. It may have been deleted or you may not have access.
       </p>
     );
@@ -92,16 +92,16 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
     <div ref={focusRef} className="space-y-6 p-4 md:p-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="nfq-label flex items-center gap-2 text-[10px] text-slate-400">
+          <div className="nfq-label flex items-center gap-2 text-[10px] text-[color:var(--nfq-text-muted)]">
             <History className="h-3.5 w-3.5" />
             Deal timeline
           </div>
-          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
             {timeline.dealId}
           </h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">
             Status:{' '}
-            <span className="font-mono-nums text-slate-200">{timeline.currentStatus}</span>
+            <span className="font-mono-nums text-[color:var(--nfq-text-secondary)]">{timeline.currentStatus}</span>
           </p>
         </div>
         <dl className="flex items-end gap-6">
@@ -120,7 +120,7 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
       />
 
       {visibleEvents.length === 0 ? (
-        <p className="rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/30 p-6 text-center text-xs text-slate-400">
+        <p className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/30 p-6 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {timeline.events.length === 0
             ? 'No events recorded yet for this deal.'
             : 'All event kinds are filtered out — toggle "All" to see them again.'}
@@ -145,8 +145,8 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
 interface KpiTileProps { label: string; value: number }
 const KpiTile: React.FC<KpiTileProps> = ({ label, value }) => (
   <div className="text-right">
-    <dt className="nfq-label text-[10px] text-slate-400">{label}</dt>
-    <dd className="font-mono-nums text-lg font-bold text-slate-100">{value}</dd>
+    <dt className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">{label}</dt>
+    <dd className="font-mono-nums text-lg font-bold text-[color:var(--nfq-text-primary)]">{value}</dd>
   </div>
 );
 

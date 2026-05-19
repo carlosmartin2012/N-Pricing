@@ -66,7 +66,7 @@ const colorMap: Record<ToastType, { bg: string; border: string; icon: string; te
   success: {
     bg: 'bg-emerald-500/10',
     border: 'border-emerald-500/25',
-    icon: 'text-emerald-400',
+    icon: 'text-[color:var(--nfq-success)]',
     text: 'text-[color:var(--nfq-text-primary)]',
   },
   error: {
@@ -78,13 +78,13 @@ const colorMap: Record<ToastType, { bg: string; border: string; icon: string; te
   warning: {
     bg: 'bg-amber-500/10',
     border: 'border-amber-500/25',
-    icon: 'text-amber-400',
+    icon: 'text-[color:var(--nfq-warning)]',
     text: 'text-[color:var(--nfq-text-primary)]',
   },
   info: {
     bg: 'bg-cyan-500/10',
     border: 'border-cyan-500/25',
-    icon: 'text-cyan-400',
+    icon: 'text-[color:var(--nfq-accent)]',
     text: 'text-[color:var(--nfq-text-primary)]',
   },
 };

@@ -47,10 +47,10 @@ const getActionIcon = (label: string) => {
 };
 
 const getActionColor = (to: string) => {
-  if (to === 'Approved') return 'bg-[var(--nfq-success)] hover:bg-[var(--nfq-success-hover)] text-white';
-  if (to === 'Rejected') return 'bg-[var(--nfq-danger)] hover:bg-[var(--nfq-danger-hover)] text-white';
-  if (to === 'Booked') return 'bg-[var(--nfq-info)] hover:bg-[var(--nfq-info-hover)] text-white';
-  if (to === 'Pending_Approval') return 'bg-[var(--nfq-warning)] hover:bg-[var(--nfq-warning-hover)] text-white';
+  if (to === 'Approved') return 'bg-[var(--nfq-success)] hover:bg-[var(--nfq-success-hover)] text-[color:var(--nfq-text-primary)]';
+  if (to === 'Rejected') return 'bg-[var(--nfq-danger)] hover:bg-[var(--nfq-danger-hover)] text-[color:var(--nfq-text-primary)]';
+  if (to === 'Booked') return 'bg-[var(--nfq-info)] hover:bg-[var(--nfq-info-hover)] text-[color:var(--nfq-text-primary)]';
+  if (to === 'Pending_Approval') return 'bg-[var(--nfq-warning)] hover:bg-[var(--nfq-warning-hover)] text-[color:var(--nfq-text-primary)]';
   return 'bg-[var(--nfq-bg-bright)] hover:bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-secondary)]';
 };
 
@@ -132,7 +132,7 @@ const DealRow: React.FC<{
             type="checkbox"
             checked={isSelected}
             onChange={onToggleSelect}
-            className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30"
+            className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-cyan-500/30"
           />
         </td>
       )}
@@ -278,7 +278,7 @@ const TableHeader: React.FC<{ hasSelection?: boolean; allSelected?: boolean; onT
             type="checkbox"
             checked={allSelected}
             onChange={onToggleAll}
-            className="rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500/30"
+            className="rounded border-slate-600 bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-accent)] focus:ring-cyan-500/30"
           />
         </th>
       )}

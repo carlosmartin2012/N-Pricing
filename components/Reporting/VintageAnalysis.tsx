@@ -358,7 +358,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
       {/* Header */}
       <div className="flex items-center gap-3">
         <Calendar className="w-5 h-5 text-purple-400" />
-        <h2 className="text-sm font-bold tracking-tight text-white uppercase font-mono">Vintage Analysis</h2>
+        <h2 className="text-sm font-bold tracking-tight text-[color:var(--nfq-text-primary)] uppercase font-mono">Vintage Analysis</h2>
         <span className="nfq-label ml-2">
           {vintageCohorts.length} cohorts / {pricingResults.length} deals
         </span>
@@ -383,7 +383,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                 <th
                   key={col.field}
                   onClick={() => handleSort(col.field)}
-                  className="py-2 px-3 text-left font-mono uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] cursor-pointer hover:text-white transition-colors whitespace-nowrap"
+                  className="py-2 px-3 text-left font-mono uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] cursor-pointer hover:text-[color:var(--nfq-text-primary)] transition-colors whitespace-nowrap"
                 >
                   {col.label}
                   {sortIndicator(col.field)}

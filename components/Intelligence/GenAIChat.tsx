@@ -258,7 +258,7 @@ const GenAIChat: React.FC = () => {
   }
 
   return (
-    <Panel className="h-full overflow-hidden border-0 bg-slate-950 p-0">
+    <Panel className="h-full overflow-hidden border-0 bg-[var(--nfq-bg-root)] p-0">
       <div className="flex h-full">
         <ChatHistoryPanel
           sessions={sessions}
@@ -267,7 +267,7 @@ const GenAIChat: React.FC = () => {
           onSelectSession={handleSelectSession}
         />
 
-        <div className="relative flex flex-1 flex-col bg-slate-950">
+        <div className="relative flex flex-1 flex-col bg-[var(--nfq-bg-root)]">
           <ChatComposer
             input={input}
             isThinking={isThinking}

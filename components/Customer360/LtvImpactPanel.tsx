@@ -58,7 +58,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 
   if (!clientId) {
     return (
-      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-[color:var(--nfq-text-faint)]">
         {t.clvImpactSelectClient}
       </div>
     );
@@ -66,7 +66,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 
   if (!candidateReady(candidate)) {
     return (
-      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-[color:var(--nfq-text-faint)]">
         {t.clvImpactIncompleteDeal}
       </div>
     );
@@ -75,33 +75,33 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
   const delta = result?.impact.deltaClvEur ?? 0;
   const positive = delta >= 0;
   const Arrow = positive ? TrendingUp : TrendingDown;
-  const accent = positive ? 'text-emerald-300' : 'text-rose-300';
+  const accent = positive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]';
 
   return (
     <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 space-y-3">
       <header className="flex items-center gap-2">
-        <Zap className="h-4 w-4 text-amber-400" />
-        <span className="nfq-label text-[10px] text-slate-300">{t.clvImpactTitle}</span>
-        {loading && <span className="font-mono text-[9px] text-slate-500">{t.clvImpactComputing}</span>}
+        <Zap className="h-4 w-4 text-[color:var(--nfq-warning)]" />
+        <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvImpactTitle}</span>
+        {loading && <span className="font-mono text-[9px] text-[color:var(--nfq-text-faint)]">{t.clvImpactComputing}</span>}
       </header>
 
       {result && (
         <>
           <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
             <div className="rounded bg-white/[0.02] p-2">
-              <div className="nfq-label text-[9px] text-slate-400">{t.clvImpactBefore}</div>
-              <div className="text-slate-200">{fmtEur(result.before.clvPointEur)}</div>
+              <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{t.clvImpactBefore}</div>
+              <div className="text-[color:var(--nfq-text-secondary)]">{fmtEur(result.before.clvPointEur)}</div>
             </div>
             <div className="rounded bg-white/[0.02] p-2">
-              <div className="nfq-label text-[9px] text-slate-400">{t.clvImpactAfter}</div>
-              <div className="text-slate-200">{fmtEur(result.impact.clvAfterEur)}</div>
+              <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{t.clvImpactAfter}</div>
+              <div className="text-[color:var(--nfq-text-secondary)]">{fmtEur(result.impact.clvAfterEur)}</div>
             </div>
             <div className="rounded bg-white/[0.02] p-2">
-              <div className="nfq-label text-[9px] text-slate-400">{t.clvImpactDelta}</div>
+              <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{t.clvImpactDelta}</div>
               <div className={`flex items-center gap-1 font-bold ${accent}`}>
                 <Arrow className="h-3 w-3" />
                 {fmtEur(delta)}
-                <span className="text-[9px] text-slate-500 ml-1">({fmtPct(result.impact.deltaClvPct)})</span>
+                <span className="text-[9px] text-[color:var(--nfq-text-faint)] ml-1">({fmtPct(result.impact.deltaClvPct)})</span>
               </div>
             </div>
           </div>
@@ -113,7 +113,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
             <Contrib label={t.clvImpactCapitalOpportunity} value={result.impact.breakdown.capitalOpportunityEur} />
           </div>
 
-          <p className="font-mono text-[9px] text-slate-500">
+          <p className="font-mono text-[9px] text-[color:var(--nfq-text-faint)]">
             Horizon {result.assumptions.horizonYears}y · r={(result.assumptions.discountRate * 100).toFixed(1)}% · λ={(result.assumptions.churnHazardAnnual * 100).toFixed(1)}%
           </p>
         </>
@@ -126,8 +126,8 @@ const Contrib: React.FC<{ label: string; value: number }> = ({ label, value }) =
   const positive = value >= 0;
   return (
     <div className="rounded bg-white/[0.02] p-2">
-      <div className="nfq-label text-[9px] text-slate-400">{label}</div>
-      <div className={`font-mono text-[11px] font-bold ${positive ? 'text-emerald-300' : 'text-rose-300'}`}>
+      <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{label}</div>
+      <div className={`font-mono text-[11px] font-bold ${positive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
         {fmtEur(value)}
       </div>
     </div>

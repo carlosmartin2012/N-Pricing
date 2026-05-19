@@ -39,13 +39,13 @@ const TimelineDeprecationBanner: React.FC<Props> = ({ surface }) => {
       data-testid="timeline-deprecation-banner"
       className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-xs"
     >
-      <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-300" aria-hidden="true" />
+      <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[color:var(--nfq-warning)]" aria-hidden="true" />
       <div className="flex-1 text-amber-100/90">
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200">
           {title}
         </p>
         <p className="mt-1 leading-relaxed text-amber-100/80">{body}</p>
-        <p className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] text-amber-300">
+        <p className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.12em] text-[color:var(--nfq-warning)]">
           <History className="h-3 w-3" />
           History icon
           <ArrowRight className="h-3 w-3" />

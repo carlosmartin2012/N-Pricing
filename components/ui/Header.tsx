@@ -87,9 +87,9 @@ export const Header: React.FC<HeaderProps> = ({
     'Pricing Cockpit': 'text-[color:var(--nfq-accent)]',
     'Data & Ops Hub': 'text-sky-300',
     'Governance Hub': 'text-violet-300',
-    Today: 'text-emerald-300',
+    Today: 'text-[color:var(--nfq-success)]',
     Assistant:  'text-fuchsia-300',
-    System:     'text-slate-400',
+    System:     'text-[color:var(--nfq-text-muted)]',
   };
   const sectionDot: Record<string, string> = {
     'Relationship Cockpit': 'bg-[var(--nfq-success)]',
@@ -190,7 +190,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onDataModeChange('demo')}
             className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
               dataMode === 'demo'
-                ? 'bg-amber-500/15 text-amber-300'
+                ? 'bg-amber-500/15 text-[color:var(--nfq-warning)]'
                 : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
             }`}
           >
@@ -201,7 +201,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onDataModeChange('live')}
             className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
               dataMode === 'live'
-                ? 'bg-emerald-500/15 text-emerald-300'
+                ? 'bg-emerald-500/15 text-[color:var(--nfq-success)]'
                 : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]'
             }`}
           >
@@ -241,7 +241,7 @@ export const Header: React.FC<HeaderProps> = ({
         {onlineUsers && onlineUsers.length > 0 && (
           <>
             <PresenceAvatars users={onlineUsers} />
-            <span className="ml-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300">
+            <span className="ml-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-mono text-[color:var(--nfq-success)]">
               {onlineUsers.length} live
             </span>
           </>

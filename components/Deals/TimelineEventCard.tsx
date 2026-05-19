@@ -39,7 +39,7 @@ const TimelineEventCard: React.FC<Props> = ({ event, onReplaySnapshot, focused }
     <article
       id={`tl-${event.id}`}
       data-event-kind={event.kind}
-      className={`relative rounded-lg border bg-slate-900/40 px-4 py-3 ${
+      className={`relative rounded-lg border bg-[var(--nfq-bg-elevated)]/40 px-4 py-3 ${
         focused ? 'border-cyan-500/60 ring-1 ring-cyan-500/40' : 'border-[color:var(--nfq-border-ghost)]'
       }`}
     >
@@ -51,7 +51,7 @@ const TimelineEventCard: React.FC<Props> = ({ event, onReplaySnapshot, focused }
           </span>
         </div>
         <time
-          className="font-mono-nums text-[10px] text-slate-500"
+          className="font-mono-nums text-[10px] text-[color:var(--nfq-text-faint)]"
           dateTime={event.occurredAt}
           title={formatTimestamp(event.occurredAt)}
         >
@@ -59,17 +59,17 @@ const TimelineEventCard: React.FC<Props> = ({ event, onReplaySnapshot, focused }
         </time>
       </header>
 
-      <p className="mt-2 font-mono text-xs text-slate-200">
+      <p className="mt-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">
         {summarizePayload(event)}
       </p>
 
-      <footer className="mt-2 flex items-center justify-between gap-3 text-[10px] text-slate-400">
+      <footer className="mt-2 flex items-center justify-between gap-3 text-[10px] text-[color:var(--nfq-text-muted)]">
         <span className="truncate">by {actor}</span>
         {event.snapshotId && onReplaySnapshot && (
           <button
             type="button"
             onClick={() => onReplaySnapshot(event.snapshotId!)}
-            className="flex items-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-slate-800/60 px-2 py-0.5 text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
+            className="flex items-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-highest)]/60 px-2 py-0.5 text-[10px] text-[color:var(--nfq-text-secondary)] hover:border-cyan-500/40 hover:text-[color:var(--nfq-accent)]"
             aria-label={`Replay snapshot ${event.snapshotId}`}
           >
             <RotateCcw className="h-3 w-3" />

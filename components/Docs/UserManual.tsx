@@ -57,7 +57,7 @@ const TocItem: React.FC<{ targetId: string; label: string; accent?: string }> = 
   return (
     <button
       onClick={handleClick}
-      className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm text-slate-400 transition-colors hover:bg-slate-800 hover:text-cyan-400"
+      className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm text-[color:var(--nfq-text-muted)] transition-colors hover:bg-[var(--nfq-bg-highest)] hover:text-[color:var(--nfq-accent)]"
     >
       {accent && <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent}`} />}
       {label}
@@ -83,16 +83,16 @@ const SectionHeader: React.FC<{ icon: LucideIcon; title: string; color: string }
 );
 
 const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc }) => (
-  <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-    <h4 className="mb-1 text-sm font-bold text-slate-200">{title}</h4>
-    <p className="text-xs leading-snug text-slate-500">{desc}</p>
+  <div className="rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+    <h4 className="mb-1 text-sm font-bold text-[color:var(--nfq-text-secondary)]">{title}</h4>
+    <p className="text-xs leading-snug text-[color:var(--nfq-text-faint)]">{desc}</p>
   </div>
 );
 
 const Shortcut: React.FC<{ keys: string; desc: string }> = ({ keys, desc }) => (
-  <div className="flex items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-4 py-2.5">
-    <span className="text-sm text-slate-300">{desc}</span>
-    <kbd className="rounded border border-slate-700 bg-slate-800 px-2 py-1 font-mono text-[11px] text-slate-200">
+  <div className="flex items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-4 py-2.5">
+    <span className="text-sm text-[color:var(--nfq-text-secondary)]">{desc}</span>
+    <kbd className="rounded border border-slate-700 bg-[var(--nfq-bg-highest)] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]">
       {keys}
     </kbd>
   </div>
@@ -115,8 +115,8 @@ const UserManual: React.FC = () => {
     <Panel title={`N Pricing — ${t.manual}`} className="h-full">
       <div className="flex h-full">
         {/* Table of Contents */}
-        <div className="hidden w-72 space-y-1 overflow-y-auto border-r border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/50 lg:block">
-          <h4 className="mb-3 text-xs font-medium text-slate-500">
+        <div className="hidden w-72 space-y-1 overflow-y-auto border-r border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[var(--nfq-bg-elevated)]/50 lg:block">
+          <h4 className="mb-3 text-xs font-medium text-[color:var(--nfq-text-faint)]">
             {L('Contents', 'Contenidos')}
           </h4>
           <nav className="space-y-0.5">
@@ -124,17 +124,17 @@ const UserManual: React.FC = () => {
             <TocItem targetId="whats-new" label={L("What's new", 'Novedades')} />
             <TocItem targetId="architecture" label={L('Architecture', 'Arquitectura')} />
 
-            <TocSectionLabel label={L('Relationships', 'Relaciones')} accent="text-emerald-400" />
+            <TocSectionLabel label={L('Relationships', 'Relaciones')} accent="text-[color:var(--nfq-success)]" />
             <TocItem targetId="customers"   label={L('Clients (360°)', 'Clientes (360°)')} accent="bg-emerald-400" />
             <TocItem targetId="campaigns"   label={L('Campaigns', 'Campañas')}              accent="bg-emerald-400" />
             <TocItem targetId="target-grid" label={L('Targets', 'Targets')}                 accent="bg-emerald-400" />
 
-            <TocSectionLabel label="Pricing" accent="text-cyan-400" />
+            <TocSectionLabel label="Pricing" accent="text-[color:var(--nfq-accent)]" />
             <TocItem targetId="pricing-engine" label={L('Pricing Engine (4 tabs)', 'Motor de Pricing (4 tabs)')} accent="bg-cyan-400" />
             <TocItem targetId="blotter" label={L('Deal Blotter', 'Deal Blotter')} accent="bg-cyan-400" />
             <TocItem targetId="accounting" label={L('Accounting Ledger', 'Libro Contable')} accent="bg-cyan-400" />
 
-            <TocSectionLabel label="Insights" accent="text-amber-400" />
+            <TocSectionLabel label="Insights" accent="text-[color:var(--nfq-warning)]" />
             <TocItem targetId="analytics" label="Analytics" accent="bg-amber-400" />
             <TocItem targetId="market-data" label={L('Yield Curves', 'Curvas de Tipos')} accent="bg-amber-400" />
             <TocItem targetId="behavioural" label={L('Behavioural Models', 'Modelos Comportamentales')} accent="bg-amber-400" />
@@ -151,13 +151,13 @@ const UserManual: React.FC = () => {
             <TocItem targetId="customer-drawer" label="Customer 360 Drawer" accent="bg-fuchsia-400" />
             <TocItem targetId="shortcuts" label={L('Keyboard shortcuts', 'Atajos de teclado')} accent="bg-fuchsia-400" />
 
-            <TocSectionLabel label={L('Operational guide', 'Guía operativa')} accent="text-cyan-300" />
+            <TocSectionLabel label={L('Operational guide', 'Guía operativa')} accent="text-[color:var(--nfq-accent)]" />
             <TocItem targetId="quickstart" label={L('Quick start', 'Puesta en marcha')} accent="bg-cyan-400" />
             <TocItem targetId="workflows" label={L('Workflows', 'Flujos operativos')} accent="bg-cyan-400" />
             <TocItem targetId="data-modes" label={L('Data modes', 'Modos de datos')} accent="bg-cyan-400" />
             <TocItem targetId="troubleshooting" label={L('Troubleshooting', 'Resolución problemas')} accent="bg-cyan-400" />
 
-            <TocSectionLabel label={L('Reference', 'Referencia')} accent="text-slate-400" />
+            <TocSectionLabel label={L('Reference', 'Referencia')} accent="text-[color:var(--nfq-text-muted)]" />
             <TocItem targetId="formulas" label={t.manual_formulasTitle} />
             <TocItem targetId="glossary" label={t.manual_glossaryTitle} />
           </nav>
@@ -170,14 +170,14 @@ const UserManual: React.FC = () => {
             {/* Introduction */}
             <section id="intro" className="space-y-4 pt-4">
               <div className="mb-2 flex items-center gap-3">
-                <div className="rounded-lg border border-cyan-900 bg-cyan-950 p-2 text-cyan-400">
+                <div className="rounded-lg border border-cyan-900 bg-cyan-950 p-2 text-[color:var(--nfq-accent)]">
                   <BookOpen size={24} />
                 </div>
-                <h2 className="text-3xl font-bold text-slate-100">
+                <h2 className="text-3xl font-bold text-[color:var(--nfq-text-primary)]">
                   {L('Welcome to N Pricing', 'Bienvenido a N Pricing')}
                 </h2>
               </div>
-              <p className="leading-relaxed text-slate-400">
+              <p className="leading-relaxed text-[color:var(--nfq-text-muted)]">
                 {L(
                   'N Pricing is an integrated bank-pricing platform covering three scopes on a single engine: internal Funds Transfer Pricing (FTP), relational customer pricing, and real-time channel quoting for branch/web/mobile/partner. Multi-tenant with strict RLS, snapshot-first for regulatory reproducibility, MRM-governed under SR 11-7 / EBA.',
                   'N Pricing es una plataforma integral de pricing bancario que cubre tres ámbitos en un mismo motor: Funds Transfer Pricing (FTP) interno, pricing relacional al cliente y cotización de canales en tiempo real para sucursal/web/móvil/partner. Multi-tenant con RLS estricto, snapshot-first por requerimiento regulatorio, gobernado bajo MRM SR 11-7 / EBA.',
@@ -189,10 +189,10 @@ const UserManual: React.FC = () => {
               >
                 <Compass size={20} className="shrink-0 text-[var(--nfq-accent)]" />
                 <div>
-                  <span className="text-sm font-semibold text-slate-200">
+                  <span className="text-sm font-semibold text-[color:var(--nfq-text-secondary)]">
                     {L('Start guided tour (~1 min)', 'Iniciar tour guiado (~1 min)')}
                   </span>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-xs text-[color:var(--nfq-text-faint)]">
                     {L(
                       'Walk through the 4 lifecycle buckets + Command Palette + Customer 360 drawer.',
                       'Recorre los 4 buckets del ciclo de vida + Command Palette + drawer Customer 360.',
@@ -206,15 +206,15 @@ const UserManual: React.FC = () => {
                   data-testid="replay-role-tour"
                   className="mt-2 flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-cyan-500/5 px-4 py-3 text-left transition-colors hover:bg-cyan-500/10"
                 >
-                  <Compass size={20} className="shrink-0 text-cyan-300" />
+                  <Compass size={20} className="shrink-0 text-[color:var(--nfq-accent)]" />
                   <div>
-                    <span className="text-sm font-semibold text-slate-200">
+                    <span className="text-sm font-semibold text-[color:var(--nfq-text-secondary)]">
                       {L(
                         `Replay your ${currentUser?.role ?? ''} onboarding`,
                         `Repetir el onboarding de ${currentUser?.role ?? ''}`,
                       )}
                     </span>
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-[color:var(--nfq-text-faint)]">
                       {L(
                         'Role-specific tour — same one you saw on first login.',
                         'Tour específico por rol — el mismo que viste en el primer login.',
@@ -232,7 +232,7 @@ const UserManual: React.FC = () => {
                 title={L("What's new — Nav restructure (Q2 2026)", 'Novedades — Reestructuración de nav (Q2 2026)')}
                 color="text-fuchsia-300"
               />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The navigation has been reorganized around the pricing lifecycle (4 buckets instead of 7 sections), the Pricing Engine is now a single entry with 4 internal tabs (Deal · RAROC · Stress · What-If), and a global Command Palette (⌘K) plus a Customer 360 Drawer give power users contextual access without cluttering the sidebar.',
                   'La navegación se ha reorganizado en torno al ciclo de vida del pricing (4 buckets en lugar de 7 secciones), el Pricing Engine es ahora una sola entrada con 4 tabs internas (Deal · RAROC · Stress · What-If), y el Command Palette global (⌘K) más el Drawer Customer 360 dan acceso contextual a usuarios avanzados sin saturar el sidebar.',
@@ -286,8 +286,8 @@ const UserManual: React.FC = () => {
 
             {/* Architecture — high level */}
             <section id="architecture" className="space-y-4 pt-4">
-              <SectionHeader icon={Briefcase} title={L('Architecture at a glance', 'Arquitectura de un vistazo')} color="text-slate-200" />
-              <p className="text-slate-400">
+              <SectionHeader icon={Briefcase} title={L('Architecture at a glance', 'Arquitectura de un vistazo')} color="text-[color:var(--nfq-text-secondary)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'React 19 SPA with Context API for state, @tanstack/react-query for data fetching, and Express + PostgreSQL for the server. Pricing runs on a server-side engine with snapshot-first reproducibility. Multi-tenant via Postgres RLS; every entity-scoped request carries x-entity-id and resolves through the tenancy middleware.',
                   'SPA de React 19 con Context API para estado, @tanstack/react-query para data fetching, y Express + PostgreSQL en el servidor. El pricing corre en un motor server-side con reproducibilidad snapshot-first. Multi-tenant vía RLS de Postgres; cada request entity-scoped lleva x-entity-id y pasa por el middleware de tenancy.',
@@ -298,14 +298,14 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ COMMERCIAL ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-emerald-400 pl-4 text-2xl font-bold text-emerald-400">
+            <h2 className="flex items-center gap-3 border-l-4 border-emerald-400 pl-4 text-2xl font-bold text-[color:var(--nfq-success)]">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
               {L('Commercial — pre-deal', 'Comercial — pre-deal')}
             </h2>
 
             <section id="customers" className="space-y-4 pt-2">
-              <SectionHeader icon={Users} title={L('Customers (Customer 360)', 'Clientes (Customer 360)')} color="text-emerald-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={Users} title={L('Customers (Customer 360)', 'Clientes (Customer 360)')} color="text-[color:var(--nfq-success)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The relational view of the customer. Aggregates active positions, snapshot metrics (NIM, fees, EVA, NPS, share of wallet), and applicable top-down pricing targets. Cross-bonus for pricing is derived automatically from the customer\'s real holdings — no manual per-deal attachment needed.',
                   'La vista relacional del cliente. Agrega posiciones activas, métricas snapshot (NIM, fees, EVA, NPS, share of wallet) y targets top-down de pricing aplicables. El cross-bonus se deriva automáticamente de las posiciones reales del cliente — no hace falta adjuntarlo deal a deal.',
@@ -322,8 +322,8 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="campaigns" className="space-y-4 pt-4">
-              <SectionHeader icon={Target} title={L('Campaigns', 'Campañas')} color="text-emerald-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={Target} title={L('Campaigns', 'Campañas')} color="text-[color:var(--nfq-success)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Time-bound commercial deltas applied to channel pricing. Matched by segment × product × currency × channel × window × volume, with a state machine (DRAFT → ACTIVE → PAUSED → ENDED) enforcing governance before any delta hits a quote.',
                   'Deltas comerciales con vigencia temporal aplicados al pricing de canal. Se emparejan por segmento × producto × divisa × canal × ventana × volumen, con una máquina de estados (DRAFT → ACTIVE → PAUSED → ENDED) que garantiza el control antes de que ningún delta toque una cotización.',
@@ -332,8 +332,8 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="target-grid" className="space-y-4 pt-4">
-              <SectionHeader icon={Grid3X3} title="Target Grid" color="text-emerald-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={Grid3X3} title="Target Grid" color="text-[color:var(--nfq-success)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The official rate card derived from the current pricing methodology snapshot. Three view modes: Table (exact values), Heatmap (visual density of deviations), and Diff (compare any two snapshots field-by-field to audit methodology evolution).',
                   'La rate card oficial derivada del snapshot metodológico vigente. Tres modos de vista: Table (valores exactos), Heatmap (densidad visual de desviaciones) y Diff (compara cualquier par de snapshots campo a campo para auditar la evolución metodológica).',
@@ -344,7 +344,7 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ PRICING ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-cyan-400">
+            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
               <span className="h-2 w-2 rounded-full bg-cyan-400" />
               {L('Pricing — calculate + execute', 'Pricing — calcular + ejecutar')}
             </h2>
@@ -353,9 +353,9 @@ const UserManual: React.FC = () => {
               <SectionHeader
                 icon={Calculator}
                 title={L('Pricing Engine (4 tabs in one workspace)', 'Pricing Engine (4 tabs en un mismo workspace)')}
-                color="text-cyan-400"
+                color="text-[color:var(--nfq-accent)]"
               />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The single entry point for pricing. Four tabs share the same deal context — switching tab never loses your inputs:',
                   'Punto único de entrada para pricing. Cuatro tabs comparten el mismo contexto del deal — cambiar de tab nunca borra tus inputs:',
@@ -382,19 +382,19 @@ const UserManual: React.FC = () => {
                   desc={L('Simulate methodology changes, calibrate elasticity from historical take-rate, and backtest against realized book.', 'Simula cambios metodológicos, calibra elasticidad desde take-rate histórico y backtest contra el book realizado.')}
                 />
               </ul>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[color:var(--nfq-text-faint)]">
                 {L('Direct URLs: ', 'URLs directas: ')}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-cyan-400">/pricing</code>{' '}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-cyan-400">/raroc</code>{' '}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-cyan-400">/stress-testing</code>{' '}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-cyan-400">/what-if</code>
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-accent)]">/pricing</code>{' '}
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-accent)]">/raroc</code>{' '}
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-accent)]">/stress-testing</code>{' '}
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-accent)]">/what-if</code>
                 {L(' — all resolve to the same workspace with the matching tab active.', ' — todas resuelven al mismo workspace con la tab correspondiente activa.')}
               </p>
             </section>
 
             <section id="blotter" className="space-y-4 pt-4">
-              <SectionHeader icon={FileText} title={L('Deal Blotter', 'Deal Blotter')} color="text-cyan-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={FileText} title={L('Deal Blotter', 'Deal Blotter')} color="text-[color:var(--nfq-accent)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Centralized registry of all priced, booked, pending and rejected deals. Used for audit and portfolio management. Inline CRUD, search, CSV/XML bulk import and export for regulatory reporting.',
                   'Registro centralizado de todas las operaciones cotizadas, reservadas, pendientes y rechazadas. Usado para auditoría y gestión de cartera. CRUD inline, búsqueda, import/export masivo CSV/XML para reporting regulatorio.',
@@ -403,8 +403,8 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="accounting" className="space-y-4 pt-4">
-              <SectionHeader icon={LayoutDashboard} title={L('Accounting Ledger', 'Libro Contable')} color="text-cyan-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={LayoutDashboard} title={L('Accounting Ledger', 'Libro Contable')} color="text-[color:var(--nfq-accent)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Double-entry view of FTP flows between Business Units and Central Treasury. Click any row to see T-accounts: debits on the Commercial Unit, credits on the ALM Desk. Reconciles against pricing_snapshots for audit trail.',
                   'Vista de partida doble de los flujos FTP entre Unidades de Negocio y Tesorería Central. Click en cualquier fila para ver T-accounts: débitos en la Unidad Comercial, créditos en la Mesa ALM. Reconcilia contra pricing_snapshots para el rastro de auditoría.',
@@ -415,29 +415,29 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ INSIGHTS ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-amber-400 pl-4 text-2xl font-bold text-amber-400">
+            <h2 className="flex items-center gap-3 border-l-4 border-amber-400 pl-4 text-2xl font-bold text-[color:var(--nfq-warning)]">
               <span className="h-2 w-2 rounded-full bg-amber-400" />
               {L('Insights — understand the portfolio', 'Insights — entender la cartera')}
             </h2>
 
             <section id="analytics" className="space-y-4 pt-2">
-              <SectionHeader icon={LineChart} title="Analytics" color="text-amber-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={LineChart} title="Analytics" color="text-[color:var(--nfq-warning)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The analytics suite — previously "Reporting". 15+ dashboards grouped in tabs: Overview, Funding Curves, Pipeline, Executive, Scenario Repricing, Vintage, Backtest, Portfolio Review (AI), Client Profitability, Concentration, Price Elasticity, Ex-Post RAROC, Pricing Discipline, Custom Dashboard, and Behavioural Impact.',
                   'La suite analítica — antes «Reporting». 15+ dashboards agrupados en tabs: Overview, Funding Curves, Pipeline, Executive, Scenario Repricing, Vintage, Backtest, Portfolio Review (IA), Client Profitability, Concentration, Price Elasticity, Ex-Post RAROC, Pricing Discipline, Custom Dashboard y Behavioural Impact.',
                 )}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[color:var(--nfq-text-faint)]">
                 {L('Pricing Discipline is now a tab inside Analytics — the old ', 'Pricing Discipline es ahora una tab dentro de Analytics — la antigua ')}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-amber-400">/discipline</code>
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-warning)]">/discipline</code>
                 {L(' route deep-links into it.', ' deep-linkea directamente.')}
               </p>
             </section>
 
             <section id="market-data" className="space-y-4 pt-4">
-              <SectionHeader icon={LineChart} title={L('Yield Curves', 'Curvas de Tipos')} color="text-amber-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={LineChart} title={L('Yield Curves', 'Curvas de Tipos')} color="text-[color:var(--nfq-warning)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Multi-currency (USD, EUR, GBP, JPY) sovereign and swap curves that drive the engine in real time. Parallel shift controls (bps), collateral-type switches, and a centralized history of curve snapshots for audit.',
                   'Curvas soberanas y swap multi-divisa (USD, EUR, GBP, JPY) que alimentan el motor en tiempo real. Controles de shift paralelo (bps), switches de tipo de colateral y un historial centralizado de snapshots de curvas para auditoría.',
@@ -446,8 +446,8 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="behavioural" className="space-y-4 pt-4">
-              <SectionHeader icon={Activity} title={L('Behavioural Models', 'Modelos Comportamentales')} color="text-amber-400" />
-              <p className="text-slate-400">
+              <SectionHeader icon={Activity} title={L('Behavioural Models', 'Modelos Comportamentales')} color="text-[color:var(--nfq-warning)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Configuration for non-maturing deposits (NMDs) and loan prepayments (CPR). Define replicating-portfolio tranches for sticky deposits and penalty-free allowances for mortgages. Calibrations feed back into behavioural maturity (BM) in the pricing engine.',
                   'Configuración para depósitos sin vencimiento (NMDs) y prepagos de préstamos (CPR). Define tramos del portfolio replicante para depósitos estables y permisos sin penalización para hipotecas. Las calibraciones vuelven al motor vía vencimiento comportamental (BM).',
@@ -465,7 +465,7 @@ const UserManual: React.FC = () => {
 
             <section id="methodology" className="space-y-4 pt-2">
               <SectionHeader icon={GitBranch} title={L('Methodology', 'Metodología')} color="text-violet-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The source of truth for pricing rules. Rate Cards (liquidity premia, credit spreads), ESG Grid (transition, physical, greenium), General Rules (priority-based logic per business unit), Master Data (clients, business units, products), Governance thresholds (RAROC for auto-approval vs committee), and Report Scheduling. Every change versions a new methodology snapshot.',
                   'Fuente de verdad para las reglas de pricing. Rate Cards (prima de liquidez, spreads de crédito), ESG Grid (transition, physical, greenium), General Rules (lógica por prioridad por unidad de negocio), Master Data (clientes, unidades, productos), umbrales de Governance (RAROC para auto-aprobación vs comité) y Report Scheduling. Cada cambio versiona un nuevo snapshot metodológico.',
@@ -475,7 +475,7 @@ const UserManual: React.FC = () => {
 
             <section id="model-inventory" className="space-y-4 pt-4">
               <SectionHeader icon={BookOpenCheck} title={L('Model Inventory', 'Model Inventory')} color="text-violet-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The SR 11-7 / EBA model inventory. Every behavioural model, pricing rule, elasticity model, or AI model is catalogued with kind, version, status, owner and validation-doc URL. Auditor-facing view; populated automatically from the rules and behavioural models modules.',
                   'El inventario SR 11-7 / EBA. Cada modelo comportamental, regla de pricing, modelo de elasticidad o IA se cataloga con kind, versión, status, owner y URL del documento de validación. Vista orientada al auditor; se puebla automáticamente desde Rules y Behavioural Models.',
@@ -485,7 +485,7 @@ const UserManual: React.FC = () => {
 
             <section id="dossiers" className="space-y-4 pt-4">
               <SectionHeader icon={FileSignature} title={L('Signed Dossiers', 'Dossiers Firmados')} color="text-violet-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Committee-grade pricing dossiers signed with HMAC-SHA256 over canonical JSON. Any tampering breaks the signature; the regulator can verify independently. Each dossier bundles the deal, the pricing result, the methodology snapshot, and the approval trail.',
                   'Dossiers de pricing aptos para comité firmados con HMAC-SHA256 sobre JSON canónico. Cualquier manipulación rompe la firma; el supervisor puede verificar de forma independiente. Cada dossier agrupa el deal, el resultado, el snapshot metodológico y el rastro de aprobación.',
@@ -495,7 +495,7 @@ const UserManual: React.FC = () => {
 
             <section id="escalations" className="space-y-4 pt-4">
               <SectionHeader icon={ShieldAlert} title="Escalations" color="text-violet-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Temporal approval escalation workflow: L1 → L2 → Committee with per-entity timeouts. A server-side sweeper promotes stale pending approvals so nothing gets stuck. UI shows the queue state and the aging of each item.',
                   'Flujo de escalado temporal de aprobaciones: L1 → L2 → Comité con timeouts por entidad. Un sweeper server-side promueve las aprobaciones estancadas para que nada se quede bloqueado. La UI muestra el estado de la cola y el aging de cada item.',
@@ -505,15 +505,15 @@ const UserManual: React.FC = () => {
 
             <section id="snapshots" className="space-y-4 pt-4">
               <SectionHeader icon={History} title="Snapshot Replay" color="text-violet-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Every pricing calculation writes an immutable snapshot (input + context + output + sha256 hashes + engine version). The Snapshot Replay UI lets you re-run any recorded snapshot against the current engine and see field-level diffs (deltaAbs / deltaBps). If the output hash matches byte-for-byte, reproducibility is guaranteed. If it drifts, the diff shows exactly which fields and by how much.',
                   'Cada cálculo del motor escribe un snapshot inmutable (input + contexto + output + hashes sha256 + versión del motor). La UI de Snapshot Replay permite re-ejecutar cualquier snapshot contra el motor actual y ver el diff a nivel de campo (deltaAbs / deltaBps). Si el hash coincide byte a byte, la reproducibilidad está garantizada. Si cambia, el diff muestra qué campos han derivado y en qué magnitud.',
                 )}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[color:var(--nfq-text-faint)]">
                 {L('Access via ⌘K → "Snapshot Replay" or ', 'Acceso vía ⌘K → «Snapshot Replay» o ')}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-violet-300">/snapshots</code>
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-violet-300">/snapshots</code>
               </p>
             </section>
 
@@ -527,24 +527,24 @@ const UserManual: React.FC = () => {
 
             <section id="command-palette" className="space-y-4 pt-2">
               <SectionHeader icon={Search} title="Command Palette (⌘K)" color="text-fuchsia-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'The keyboard-first way to navigate. Press ⌘K (Mac) or Ctrl+K (Windows/Linux) from anywhere, or click the "Search…" pill in the header. Searches fuzzy over:',
                   'La forma keyboard-first de navegar. Pulsa ⌘K (Mac) o Ctrl+K (Windows/Linux) desde cualquier punto, o haz click en el pill «Search…» del header. Búsqueda fuzzy sobre:',
                 )}
               </p>
-              <ul className="space-y-2 pl-5 text-sm text-slate-400 list-disc">
-                <li><strong className="text-slate-200">{L('18 main-nav destinations', '18 destinos del main nav')}</strong></li>
-                <li><strong className="text-slate-200">{L('7 auxiliary destinations', '7 destinos auxiliares')}</strong>: RAROC, Stress, What-If, Discipline, SLO Dashboard, Adapter Health, Snapshot Replay</li>
-                <li><strong className="text-slate-200">{L('Up to 50 clients', 'Hasta 50 clientes')}</strong> — {L('clicking one opens the Customer 360 drawer over your current view (no navigation).', 'al hacer click se abre el drawer Customer 360 sobre tu vista actual (sin navegar).')}</li>
-                <li><strong className="text-slate-200">{L('Up to 20 recent deals', 'Hasta 20 deals recientes')}</strong> — {L('jumps to the Blotter filtered on that deal.', 'salta al Blotter filtrado por ese deal.')}</li>
-                <li><strong className="text-slate-200">{L('Actions', 'Acciones')}</strong>: New Deal · Import Data · Toggle theme</li>
+              <ul className="space-y-2 pl-5 text-sm text-[color:var(--nfq-text-muted)] list-disc">
+                <li><strong className="text-[color:var(--nfq-text-secondary)]">{L('18 main-nav destinations', '18 destinos del main nav')}</strong></li>
+                <li><strong className="text-[color:var(--nfq-text-secondary)]">{L('7 auxiliary destinations', '7 destinos auxiliares')}</strong>: RAROC, Stress, What-If, Discipline, SLO Dashboard, Adapter Health, Snapshot Replay</li>
+                <li><strong className="text-[color:var(--nfq-text-secondary)]">{L('Up to 50 clients', 'Hasta 50 clientes')}</strong> — {L('clicking one opens the Customer 360 drawer over your current view (no navigation).', 'al hacer click se abre el drawer Customer 360 sobre tu vista actual (sin navegar).')}</li>
+                <li><strong className="text-[color:var(--nfq-text-secondary)]">{L('Up to 20 recent deals', 'Hasta 20 deals recientes')}</strong> — {L('jumps to the Blotter filtered on that deal.', 'salta al Blotter filtrado por ese deal.')}</li>
+                <li><strong className="text-[color:var(--nfq-text-secondary)]">{L('Actions', 'Acciones')}</strong>: New Deal · Import Data · Toggle theme</li>
               </ul>
             </section>
 
             <section id="customer-drawer" className="space-y-4 pt-4">
               <SectionHeader icon={LayoutPanelLeft} title={L('Customer 360 Drawer', 'Drawer Customer 360')} color="text-fuchsia-300" />
-              <p className="text-slate-400">
+              <p className="text-[color:var(--nfq-text-muted)]">
                 {L(
                   'Customer context should never force you to leave what you are doing. The drawer opens on the right (640px wide) with the full relationship panel — KPIs, positions, applicable targets, latest metrics — over any view. ESC or backdrop click dismisses. A "Full page" button jumps to /customers?id=X when you need the standalone workspace (e.g. to import CSV positions).',
                   'El contexto del cliente nunca debería obligarte a salir de lo que estés haciendo. El drawer se abre a la derecha (640px) con el panel relacional completo — KPIs, posiciones, targets aplicables, métricas recientes — sobre cualquier vista. ESC o click en el backdrop lo cierran. Un botón «Full page» salta a /customers?id=X cuando necesites el workspace completo (p. ej. para importar positions CSV).',
@@ -565,23 +565,23 @@ const UserManual: React.FC = () => {
             <hr className="border-slate-800" />
 
             {/* ═══════════════ OPERATIONAL GUIDE ═══════════════ */}
-            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-cyan-300">
+            <h2 className="flex items-center gap-3 border-l-4 border-cyan-400 pl-4 text-2xl font-bold text-[color:var(--nfq-accent)]">
               <span className="h-2 w-2 rounded-full bg-cyan-400" />
               {L('Operational guide', 'Guía operativa')}
             </h2>
 
             <section id="quickstart" className="space-y-4 pt-2">
-              <SectionHeader icon={Route} title={L('Quick start', 'Puesta en marcha rápida')} color="text-cyan-300" />
-              <p className="text-slate-400">{guide.hero.subtitle}</p>
+              <SectionHeader icon={Route} title={L('Quick start', 'Puesta en marcha rápida')} color="text-[color:var(--nfq-accent)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">{guide.hero.subtitle}</p>
               <ol className="space-y-3 pl-1">
                 {guide.quickStart.map((step, idx) => (
-                  <li key={step.title} className="flex gap-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 font-mono text-xs font-bold text-cyan-400">
+                  <li key={step.title} className="flex gap-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 font-mono text-xs font-bold text-[color:var(--nfq-accent)]">
                       {idx + 1}
                     </span>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-100">{step.title}</h4>
-                      <p className="mt-1 text-xs leading-relaxed text-slate-400">{step.description}</p>
+                      <h4 className="text-sm font-bold text-[color:var(--nfq-text-primary)]">{step.title}</h4>
+                      <p className="mt-1 text-xs leading-relaxed text-[color:var(--nfq-text-muted)]">{step.description}</p>
                     </div>
                   </li>
                 ))}
@@ -589,15 +589,15 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="workflows" className="space-y-4 pt-4">
-              <SectionHeader icon={Compass} title={L('Operational workflows', 'Flujos operativos')} color="text-cyan-300" />
+              <SectionHeader icon={Compass} title={L('Operational workflows', 'Flujos operativos')} color="text-[color:var(--nfq-accent)]" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {guide.workflows.map((wf) => (
-                  <div key={wf.title} className="space-y-3 rounded-lg border border-slate-800 bg-slate-900 p-4">
+                  <div key={wf.title} className="space-y-3 rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
                     <div>
-                      <h4 className="text-sm font-bold text-slate-100">{wf.title}</h4>
-                      <p className="mt-1 text-[11px] tracking-normal text-cyan-400">{wf.audience}</p>
+                      <h4 className="text-sm font-bold text-[color:var(--nfq-text-primary)]">{wf.title}</h4>
+                      <p className="mt-1 text-[11px] tracking-normal text-[color:var(--nfq-accent)]">{wf.audience}</p>
                     </div>
-                    <ol className="list-decimal space-y-2 pl-4 text-xs leading-relaxed text-slate-400">
+                    <ol className="list-decimal space-y-2 pl-4 text-xs leading-relaxed text-[color:var(--nfq-text-muted)]">
                       {wf.steps.map((s) => (<li key={s}>{s}</li>))}
                     </ol>
                   </div>
@@ -606,21 +606,21 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="data-modes" className="space-y-4 pt-4">
-              <SectionHeader icon={DatabaseZap} title={L('Data modes', 'Modos de datos')} color="text-cyan-300" />
+              <SectionHeader icon={DatabaseZap} title={L('Data modes', 'Modos de datos')} color="text-[color:var(--nfq-accent)]" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-                  <h4 className="mb-2 text-sm font-bold text-amber-300">{guide.dataModes.demo.title}</h4>
-                  <ul className="space-y-1.5 pl-1 text-xs text-slate-400">
+                  <h4 className="mb-2 text-sm font-bold text-[color:var(--nfq-warning)]">{guide.dataModes.demo.title}</h4>
+                  <ul className="space-y-1.5 pl-1 text-xs text-[color:var(--nfq-text-muted)]">
                     {guide.dataModes.demo.bullets.map((b) => (
-                      <li key={b} className="flex gap-2"><span className="text-amber-400">•</span><span>{b}</span></li>
+                      <li key={b} className="flex gap-2"><span className="text-[color:var(--nfq-warning)]">•</span><span>{b}</span></li>
                     ))}
                   </ul>
                 </div>
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-                  <h4 className="mb-2 text-sm font-bold text-emerald-300">{guide.dataModes.live.title}</h4>
-                  <ul className="space-y-1.5 pl-1 text-xs text-slate-400">
+                  <h4 className="mb-2 text-sm font-bold text-[color:var(--nfq-success)]">{guide.dataModes.live.title}</h4>
+                  <ul className="space-y-1.5 pl-1 text-xs text-[color:var(--nfq-text-muted)]">
                     {guide.dataModes.live.bullets.map((b) => (
-                      <li key={b} className="flex gap-2"><span className="text-emerald-400">•</span><span>{b}</span></li>
+                      <li key={b} className="flex gap-2"><span className="text-[color:var(--nfq-success)]">•</span><span>{b}</span></li>
                     ))}
                   </ul>
                 </div>
@@ -628,22 +628,22 @@ const UserManual: React.FC = () => {
             </section>
 
             <section id="troubleshooting" className="space-y-4 pt-4">
-              <SectionHeader icon={LifeBuoy} title={L('Troubleshooting', 'Resolución de problemas')} color="text-cyan-300" />
+              <SectionHeader icon={LifeBuoy} title={L('Troubleshooting', 'Resolución de problemas')} color="text-[color:var(--nfq-accent)]" />
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {guide.troubleshooting.map((item) => (
-                  <div key={item.title} className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-                    <h4 className="mb-1 text-sm font-bold text-slate-200">{item.title}</h4>
-                    <p className="text-xs leading-relaxed text-slate-500">{item.description}</p>
+                  <div key={item.title} className="rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)] p-4">
+                    <h4 className="mb-1 text-sm font-bold text-[color:var(--nfq-text-secondary)]">{item.title}</h4>
+                    <p className="text-xs leading-relaxed text-[color:var(--nfq-text-faint)]">{item.description}</p>
                   </div>
                 ))}
               </div>
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-                <h4 className="mb-3 text-xs font-medium text-slate-300">
+              <div className="rounded-lg border border-slate-800 bg-[var(--nfq-bg-elevated)]/60 p-4">
+                <h4 className="mb-3 text-xs font-medium text-[color:var(--nfq-text-secondary)]">
                   {L('Support checklist', 'Checklist de soporte')}
                 </h4>
-                <ul className="space-y-2 text-xs text-slate-400">
+                <ul className="space-y-2 text-xs text-[color:var(--nfq-text-muted)]">
                   {guide.supportChecklist.map((c) => (
-                    <li key={c} className="flex gap-2 leading-relaxed"><span className="text-cyan-400">•</span><span>{c}</span></li>
+                    <li key={c} className="flex gap-2 leading-relaxed"><span className="text-[color:var(--nfq-accent)]">•</span><span>{c}</span></li>
                   ))}
                 </ul>
               </div>
@@ -653,16 +653,16 @@ const UserManual: React.FC = () => {
 
             {/* Pricing Formulas */}
             <section id="formulas" className="space-y-4 pt-4">
-              <SectionHeader icon={Calculator} title={t.manual_formulasTitle} color="text-amber-400" />
-              <p className="text-slate-400">{t.manual_formulasIntro}</p>
+              <SectionHeader icon={Calculator} title={t.manual_formulasTitle} color="text-[color:var(--nfq-warning)]" />
+              <p className="text-[color:var(--nfq-text-muted)]">{t.manual_formulasIntro}</p>
               <div className="overflow-x-auto rounded-lg border border-slate-800">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-800 bg-slate-900/80">
-                      <th className="px-4 py-3 text-left font-mono text-[11px] text-slate-500">
+                    <tr className="border-b border-slate-800 bg-[var(--nfq-bg-elevated)]/80">
+                      <th className="px-4 py-3 text-left font-mono text-[11px] text-[color:var(--nfq-text-faint)]">
                         {L('Component', 'Componente')}
                       </th>
-                      <th className="px-4 py-3 text-left font-mono text-[11px] text-slate-500">
+                      <th className="px-4 py-3 text-left font-mono text-[11px] text-[color:var(--nfq-text-faint)]">
                         {L('Formula', 'Fórmula')}
                       </th>
                     </tr>
@@ -686,9 +686,9 @@ const UserManual: React.FC = () => {
                         ['RAROC', t.tooltip_formula_raroc],
                       ] as const
                     ).map(([component, formula]) => (
-                      <tr key={component} className="transition-colors hover:bg-slate-900/40">
-                        <td className="whitespace-nowrap px-4 py-2.5 font-medium text-slate-300">{component}</td>
-                        <td className="px-4 py-2.5 font-mono text-xs leading-relaxed text-slate-400">{formula}</td>
+                      <tr key={component} className="transition-colors hover:bg-[var(--nfq-bg-elevated)]/40">
+                        <td className="whitespace-nowrap px-4 py-2.5 font-medium text-[color:var(--nfq-text-secondary)]">{component}</td>
+                        <td className="px-4 py-2.5 font-mono text-xs leading-relaxed text-[color:var(--nfq-text-muted)]">{formula}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -699,7 +699,7 @@ const UserManual: React.FC = () => {
             {/* Glossary */}
             <section id="glossary" className="space-y-4 pt-4">
               <SectionHeader icon={BookA} title={t.manual_glossaryTitle} color="text-purple-400" />
-              <p className="text-slate-400">{t.manual_glossaryIntro}</p>
+              <p className="text-[color:var(--nfq-text-muted)]">{t.manual_glossaryIntro}</p>
               <div className="space-y-3">
                 {(
                   [
@@ -721,10 +721,10 @@ const UserManual: React.FC = () => {
                   const term = colonIdx > -1 ? entry.slice(0, colonIdx) : entry;
                   const definition = colonIdx > -1 ? entry.slice(colonIdx + 1).trim() : '';
                   return (
-                    <div key={term} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-4 py-3">
-                      <dt className="font-mono text-sm font-bold tracking-wide text-slate-200">{term}</dt>
+                    <div key={term} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/60 px-4 py-3">
+                      <dt className="font-mono text-sm font-bold tracking-wide text-[color:var(--nfq-text-secondary)]">{term}</dt>
                       {definition && (
-                        <dd className="mt-1 text-xs leading-relaxed text-slate-400">{definition}</dd>
+                        <dd className="mt-1 text-xs leading-relaxed text-[color:var(--nfq-text-muted)]">{definition}</dd>
                       )}
                     </div>
                   );
@@ -734,17 +734,17 @@ const UserManual: React.FC = () => {
 
             {/* Operational health */}
             <section id="ops" className="space-y-4 pt-4">
-              <SectionHeader icon={HeartPulse} title={L('Operational health (reachable via ⌘K)', 'Salud operativa (vía ⌘K)')} color="text-slate-400" />
+              <SectionHeader icon={HeartPulse} title={L('Operational health (reachable via ⌘K)', 'Salud operativa (vía ⌘K)')} color="text-[color:var(--nfq-text-muted)]" />
               <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <FeatureCard title="SLO Dashboard" desc={L('p50/p95/p99 latency per minute for the pricing engine. 8 SLIs catalogued.', 'Latencia p50/p95/p99 por minuto del motor de pricing. 8 SLIs catalogados.')} />
                 <FeatureCard title="Adapter Health" desc={L('CoreBanking · CRM · MarketData · SSO — live health from the adapter registry.', 'CoreBanking · CRM · MarketData · SSO — salud en vivo del adapter registry.')} />
                 <FeatureCard title="System Audit" desc={L('Full real-time traceability of user and system actions, filterable and paginable.', 'Trazabilidad completa en tiempo real de acciones de usuario y sistema, filtrable y paginable.')} />
               </ul>
-              <p className="text-xs text-slate-500 flex items-center gap-2">
+              <p className="text-xs text-[color:var(--nfq-text-faint)] flex items-center gap-2">
                 <Plug size={12} />
                 {L('These live outside the main sidebar to keep it lean — use ⌘K or direct URLs (', 'Viven fuera del sidebar principal para no sobre-extenderlo — usa ⌘K o URLs directas (')}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-slate-400">/slo</code>{' '}
-                <code className="rounded bg-slate-900 px-1.5 py-0.5 font-mono text-slate-400">/adapters</code>
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-text-muted)]">/slo</code>{' '}
+                <code className="rounded bg-[var(--nfq-bg-elevated)] px-1.5 py-0.5 font-mono text-[color:var(--nfq-text-muted)]">/adapters</code>
                 {L(').', ').')}
               </p>
             </section>

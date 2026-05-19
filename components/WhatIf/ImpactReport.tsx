@@ -58,9 +58,9 @@ function fmtRaroc(value: number): string {
 }
 
 function deltaColor(value: number): string {
-  if (value > 0) return 'text-emerald-400';
-  if (value < 0) return 'text-rose-400';
-  return 'text-amber-400';
+  if (value > 0) return 'text-[color:var(--nfq-success)]';
+  if (value < 0) return 'text-[color:var(--nfq-danger)]';
+  return 'text-[color:var(--nfq-warning)]';
 }
 
 function deltaBgColor(value: number): string {
@@ -152,7 +152,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
     return (
       <Panel
         title="Impact Report"
-        icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+        icon={<BarChart3 className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
       >
         <Skeleton />
       </Panel>
@@ -163,7 +163,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
     return (
       <Panel
         title="Impact Report"
-        icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+        icon={<BarChart3 className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
       >
         <div className="flex flex-col items-center justify-center py-12 text-[color:var(--nfq-text-secondary)]">
           <BarChart3 className="mb-3 h-8 w-8 opacity-30" />
@@ -178,7 +178,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
   return (
     <Panel
       title="Impact Report"
-      icon={<BarChart3 className="h-5 w-5 text-cyan-400" />}
+      icon={<BarChart3 className="h-5 w-5 text-[color:var(--nfq-accent)]" />}
       actions={
         <span className="text-[10px] font-mono text-[color:var(--nfq-text-secondary)]">
           {new Date(report.computedAt).toLocaleString()}
@@ -193,9 +193,9 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
             value={fmtCurrency(summary.estimatedNiiDelta)}
             icon={
               summary.estimatedNiiDelta >= 0 ? (
-                <TrendingUp className="h-6 w-6 text-emerald-400" />
+                <TrendingUp className="h-6 w-6 text-[color:var(--nfq-success)]" />
               ) : (
-                <TrendingDown className="h-6 w-6 text-rose-400" />
+                <TrendingDown className="h-6 w-6 text-[color:var(--nfq-danger)]" />
               )
             }
             tone={deltaColor(summary.estimatedNiiDelta)}
@@ -205,9 +205,9 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
             value={`${summary.avgRarocChangePp >= 0 ? '+' : ''}${summary.avgRarocChangePp.toFixed(2)} pp`}
             icon={
               summary.avgRarocChangePp >= 0 ? (
-                <TrendingUp className="h-6 w-6 text-emerald-400" />
+                <TrendingUp className="h-6 w-6 text-[color:var(--nfq-success)]" />
               ) : (
-                <TrendingDown className="h-6 w-6 text-rose-400" />
+                <TrendingDown className="h-6 w-6 text-[color:var(--nfq-danger)]" />
               )
             }
             tone={deltaColor(summary.avgRarocChangePp)}
@@ -215,14 +215,14 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
           <SummaryCard
             label="Cells Affected"
             value={summary.totalCellsAffected.toLocaleString()}
-            icon={<BarChart3 className="h-6 w-6 text-cyan-400" />}
+            icon={<BarChart3 className="h-6 w-6 text-[color:var(--nfq-accent)]" />}
             tone="text-[color:var(--nfq-text-primary)]"
           />
           <SummaryCard
             label="Volume at Risk"
             value={`${fmtCurrency(summary.volumeAtRisk)} (${fmtPct(summary.volumeAtRiskPct)})`}
-            icon={<TrendingDown className="h-6 w-6 text-amber-400" />}
-            tone="text-amber-400"
+            icon={<TrendingDown className="h-6 w-6 text-[color:var(--nfq-warning)]" />}
+            tone="text-[color:var(--nfq-warning)]"
           />
         </div>
 
@@ -303,7 +303,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                   <td className="px-4 py-2.5 text-right font-mono text-[color:var(--nfq-text-primary)]">
                     {portfolioImpact.affectedDealCount.toLocaleString()}
                   </td>
-                  <td className="px-4 py-2.5 text-right font-mono text-amber-400">
+                  <td className="px-4 py-2.5 text-right font-mono text-[color:var(--nfq-warning)]">
                     {fmtPct((portfolioImpact.affectedDealCount / Math.max(portfolioImpact.dealCount, 1)) * 100)}
                   </td>
                 </tr>
@@ -362,7 +362,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                       </td>
                       <td className="px-3 py-2 text-[color:var(--nfq-text-secondary)]">
                         {cell.elasticityModelId ? (
-                          <span className="font-mono text-[10px] text-cyan-300">{cell.elasticityModelId}</span>
+                          <span className="font-mono text-[10px] text-[color:var(--nfq-accent)]">{cell.elasticityModelId}</span>
                         ) : (
                           <span>No model</span>
                         )}

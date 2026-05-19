@@ -41,20 +41,20 @@ const KIND_LABEL: Record<ModelKind, string> = {
 };
 
 const KIND_COLOR: Record<ModelKind, string> = {
-  engine:      'bg-cyan-500/10 text-cyan-300',
-  ruleset:     'bg-emerald-500/10 text-emerald-300',
+  engine:      'bg-cyan-500/10 text-[color:var(--nfq-accent)]',
+  ruleset:     'bg-emerald-500/10 text-[color:var(--nfq-success)]',
   elasticity:  'bg-violet-500/10 text-violet-300',
-  shock_pack:  'bg-amber-500/10 text-amber-300',
+  shock_pack:  'bg-amber-500/10 text-[color:var(--nfq-warning)]',
   behavioural: 'bg-sky-500/10 text-sky-300',
-  rate_card:   'bg-slate-500/10 text-slate-300',
-  other:       'bg-slate-500/10 text-slate-400',
+  rate_card:   'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  other:       'bg-slate-500/10 text-[color:var(--nfq-text-muted)]',
 };
 
 const STATUS_COLOR: Record<ModelStatus, string> = {
-  candidate: 'bg-slate-500/10 text-slate-300',
-  active:    'bg-emerald-500/10 text-emerald-300',
-  retired:   'bg-amber-500/10 text-amber-300',
-  rejected:  'bg-rose-500/10 text-rose-300',
+  candidate: 'bg-slate-500/10 text-[color:var(--nfq-text-secondary)]',
+  active:    'bg-emerald-500/10 text-[color:var(--nfq-success)]',
+  retired:   'bg-amber-500/10 text-[color:var(--nfq-warning)]',
+  rejected:  'bg-rose-500/10 text-[color:var(--nfq-danger)]',
 };
 
 const STATUS_ICON: Record<ModelStatus, React.ComponentType<{ size?: number }>> = {
@@ -202,7 +202,7 @@ const ModelInventoryView: React.FC = () => {
       </header>
 
       {error && !isTourActive && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-[color:var(--nfq-danger)]">
           {error}
         </div>
       )}
@@ -210,11 +210,11 @@ const ModelInventoryView: React.FC = () => {
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {([
-          ['Candidate', counts.candidate, 'text-slate-300'],
-          ['Active',    counts.active,    'text-emerald-300'],
-          ['Retired',   counts.retired,   'text-amber-300'],
-          ['Rejected',  counts.rejected,  'text-rose-300'],
-          ['Global',    counts.global,    'text-cyan-300'],
+          ['Candidate', counts.candidate, 'text-[color:var(--nfq-text-secondary)]'],
+          ['Active',    counts.active,    'text-[color:var(--nfq-success)]'],
+          ['Retired',   counts.retired,   'text-[color:var(--nfq-warning)]'],
+          ['Rejected',  counts.rejected,  'text-[color:var(--nfq-danger)]'],
+          ['Global',    counts.global,    'text-[color:var(--nfq-accent)]'],
         ] as const).map(([label, value, color]) => (
           <div
             key={label}
@@ -418,7 +418,7 @@ const ModelInventoryView: React.FC = () => {
                   <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">{m.version}</td>
                   <td className="px-3 py-2">
                     {m.entityId === null ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] tracking-normal text-cyan-300">
+                      <span className="inline-flex items-center gap-1 rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] tracking-normal text-[color:var(--nfq-accent)]">
                         <Globe size={10} /> global
                       </span>
                     ) : (

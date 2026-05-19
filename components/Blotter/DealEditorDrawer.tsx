@@ -62,10 +62,10 @@ const DealEditorDrawer: React.FC<DealEditorDrawerProps> = ({
       title={copy.title(selectedDeal?.id)}
       footer={
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-xs text-slate-400 hover:text-white">
+          <button onClick={onClose} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
             Cancel
           </button>
-          <button onClick={onSubmit} className={`rounded px-4 py-2 text-xs font-bold text-white ${copy.tone}`}>
+          <button onClick={onSubmit} className={`rounded px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] ${copy.tone}`}>
             {copy.confirm}
           </button>
         </div>

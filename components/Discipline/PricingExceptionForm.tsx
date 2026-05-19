@@ -50,7 +50,7 @@ const PricingExceptionForm: React.FC<Props> = ({ dealId, onSubmit, onCancel }) =
     <div className="nfq-kpi-card">
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileWarning size={16} className="text-amber-400" />
+          <FileWarning size={16} className="text-[color:var(--nfq-warning)]" />
           <span className="nfq-kpi-label">New Pricing Exception</span>
         </div>
         <button
@@ -65,7 +65,7 @@ const PricingExceptionForm: React.FC<Props> = ({ dealId, onSubmit, onCancel }) =
       {/* Deal info summary */}
       <div className="mb-5 rounded-lg border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-4 py-3">
         <div className="nfq-kpi-label mb-1">Deal Reference</div>
-        <span className="font-mono text-xs text-cyan-400">{dealId}</span>
+        <span className="font-mono text-xs text-[color:var(--nfq-accent)]">{dealId}</span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -103,7 +103,7 @@ const PricingExceptionForm: React.FC<Props> = ({ dealId, onSubmit, onCancel }) =
 
         {/* Error state */}
         {createMutation.isError && (
-          <div className="rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-rose-400">
+          <div className="rounded-lg border border-rose-500/30 bg-rose-950/20 px-4 py-2 text-xs text-[color:var(--nfq-danger)]">
             Failed to create exception. Please try again.
           </div>
         )}

@@ -141,30 +141,30 @@ const AuditLog: React.FC = () => {
     return (
         <Panel title="Monitor de Actividad del Sistema" className="h-full min-h-0">
             <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-b-lg bg-[var(--nfq-bg-surface)]">
-                <div className="flex shrink-0 items-center justify-between border-b border-[color:var(--nfq-border-ghost)] bg-slate-950 px-4 py-3">
+                <div className="flex shrink-0 items-center justify-between border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] px-4 py-3">
                     <div className="flex items-center gap-2 font-mono text-xs">
                         {status === 'live' ? (
-                            <Wifi size={13} className="text-emerald-400" />
+                            <Wifi size={13} className="text-[color:var(--nfq-success)]" />
                         ) : status === 'error' ? (
                             <WifiOff size={13} className="text-red-400" />
                         ) : (
-                            <Activity size={13} className="text-amber-400 animate-pulse" />
+                            <Activity size={13} className="text-[color:var(--nfq-warning)] animate-pulse" />
                         )}
                         <span className={
-                            status === 'live' ? 'text-emerald-400' :
-                                status === 'error' ? 'text-red-400' : 'text-amber-400'
+                            status === 'live' ? 'text-[color:var(--nfq-success)]' :
+                                status === 'error' ? 'text-red-400' : 'text-[color:var(--nfq-warning)]'
                         }>
                             {statusMsg}
                         </span>
-                        <span className="ml-2 text-slate-600">{totalCount} registros persistidos</span>
+                        <span className="ml-2 text-[color:var(--nfq-text-faint)]">{totalCount} registros persistidos</span>
                     </div>
                 </div>
 
                 <div className="grid shrink-0 grid-cols-1 gap-3 border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] px-4 py-4 md:grid-cols-4">
-                    <SummaryTile label="Visible Events" value={summary.total} toneClass="text-cyan-400" />
-                    <SummaryTile label="Destructive Ops" value={summary.destructiveCount} toneClass="text-rose-400" />
-                    <SummaryTile label="Access Events" value={summary.accessCount} toneClass="text-emerald-400" />
-                    <SummaryTile label="Modules in Scope" value={summary.modules} toneClass="text-amber-400" />
+                    <SummaryTile label="Visible Events" value={summary.total} toneClass="text-[color:var(--nfq-accent)]" />
+                    <SummaryTile label="Destructive Ops" value={summary.destructiveCount} toneClass="text-[color:var(--nfq-danger)]" />
+                    <SummaryTile label="Access Events" value={summary.accessCount} toneClass="text-[color:var(--nfq-success)]" />
+                    <SummaryTile label="Modules in Scope" value={summary.modules} toneClass="text-[color:var(--nfq-warning)]" />
                 </div>
 
                 <AuditLogToolbar
@@ -180,7 +180,7 @@ const AuditLog: React.FC = () => {
                 />
 
                 {visibleLogs.length === 0 && !isLoading ? (
-                    <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-600">
+                    <div className="flex flex-1 flex-col items-center justify-center gap-3 text-[color:var(--nfq-text-faint)]">
                             <Activity size={32} />
                         <p className="text-sm">
                             No hay eventos para el filtro actual. Puedes limpiar filtros o generar un evento de prueba.

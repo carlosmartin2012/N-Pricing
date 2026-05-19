@@ -170,12 +170,12 @@ const PipelineView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <GitPullRequestArrow className="h-5 w-5 text-emerald-400" />
-          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-white">
+          <GitPullRequestArrow className="h-5 w-5 text-[color:var(--nfq-success)]" />
+          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
             Pipeline
           </h2>
           {activeEntity && (
-            <span className="nfq-label text-[10px] text-slate-400">
+            <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">
               {activeEntity.shortCode}
             </span>
           )}
@@ -213,8 +213,8 @@ const PipelineView: React.FC = () => {
                 data-testid={`pipeline-status-${s}`}
                 className={`rounded-md px-3 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                   status === s
-                    ? 'bg-white/[0.08] text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)]'
+                    : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
                 {s}
@@ -232,25 +232,25 @@ const PipelineView: React.FC = () => {
       </section>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Filter className="h-3 w-3 text-slate-400" />
-        <label className="nfq-label text-[10px] text-slate-400">Product</label>
+        <Filter className="h-3 w-3 text-[color:var(--nfq-text-muted)]" />
+        <label className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">Product</label>
         <select
           value={productFilter}
           onChange={(e) => setProductFilter(e.target.value)}
           data-testid="pipeline-filter-product"
-          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
         >
           <option value="all">All</option>
           {products.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
         </select>
-        <label className="nfq-label text-[10px] text-slate-400 ml-3">Confidence</label>
+        <label className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)] ml-3">Confidence</label>
         <select
           value={confidenceBand}
           onChange={(e) => setConfidenceBand(e.target.value as ConfidenceBand)}
           data-testid="pipeline-filter-confidence"
-          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
         >
           <option value="all">All</option>
           <option value="high">High (≥80%)</option>
@@ -293,7 +293,7 @@ const PipelineView: React.FC = () => {
       )}
 
       {sorted.length > 0 && (
-        <label className="flex items-center gap-2 font-mono text-[10px] text-slate-400">
+        <label className="flex items-center gap-2 font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
           <input
             type="checkbox"
             checked={allVisibleSelected}
@@ -306,7 +306,7 @@ const PipelineView: React.FC = () => {
       )}
 
       {!isLoading && sorted.length === 0 && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.clvNbaEmpty}
         </div>
       )}
@@ -332,13 +332,13 @@ const PipelineView: React.FC = () => {
 const KpiTile: React.FC<{ label: string; value: string; tone: 'sky' | 'amber' | 'emerald' | 'violet' }> = ({ label, value, tone }) => {
   const toneClass = {
     sky:      'text-sky-300',
-    amber:    'text-amber-300',
-    emerald:  'text-emerald-300',
+    amber:    'text-[color:var(--nfq-warning)]',
+    emerald:  'text-[color:var(--nfq-success)]',
     violet:   'text-violet-300',
   }[tone];
   return (
     <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
-      <div className="nfq-label text-[9px] text-slate-400">{label}</div>
+      <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{label}</div>
       <div className={`mt-1 font-mono text-sm font-bold tabular-nums ${toneClass}`}>{value}</div>
     </div>
   );
@@ -380,29 +380,29 @@ const PipelineRow: React.FC<RowProps> = ({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Tag className="h-3 w-3 text-violet-300 shrink-0" />
-              <span className="font-mono text-sm font-bold text-white truncate">
+              <span className="font-mono text-sm font-bold text-[color:var(--nfq-text-primary)] truncate">
                 {row.clientName}
               </span>
               {row.clientSegment && (
-                <span className="font-mono text-[9px] text-slate-500">
+                <span className="font-mono text-[9px] text-[color:var(--nfq-text-faint)]">
                   · {row.clientSegment} · {row.clientRating ?? 'BBB'}
                 </span>
               )}
             </div>
-            <div className="mt-1 font-mono text-[11px] text-slate-300">
+            <div className="mt-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]">
               {row.recommendedProduct}
-              <span className="text-slate-500"> · {fmtEur(row.recommendedVolumeEur)} · {fmtBps(row.recommendedRateBps)}</span>
+              <span className="text-[color:var(--nfq-text-faint)]"> · {fmtEur(row.recommendedVolumeEur)} · {fmtBps(row.recommendedRateBps)}</span>
             </div>
             {row.rationale && (
-              <p className="mt-1 text-[11px] text-slate-400">{row.rationale}</p>
+              <p className="mt-1 text-[11px] text-[color:var(--nfq-text-muted)]">{row.rationale}</p>
             )}
           </div>
           <div className="text-right shrink-0">
-            <div className="flex items-center justify-end gap-1 font-mono text-sm font-bold text-emerald-300">
+            <div className="flex items-center justify-end gap-1 font-mono text-sm font-bold text-[color:var(--nfq-success)]">
               <TrendingUp className="h-3 w-3" />
               +{fmtEur(row.expectedClvDeltaEur)}
             </div>
-            <div className="font-mono text-[10px] text-slate-500">
+            <div className="font-mono text-[10px] text-[color:var(--nfq-text-faint)]">
               conf. {fmtPct(row.confidence)}
             </div>
           </div>
@@ -412,7 +412,7 @@ const PipelineRow: React.FC<RowProps> = ({
       {row.reasonCodes.length > 0 && (
         <div className="flex flex-wrap gap-1 pl-6">
           {row.reasonCodes.map((code) => (
-            <span key={code} className="rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-slate-300">
+            <span key={code} className="rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-[color:var(--nfq-text-secondary)]">
               {REASON_LABEL[code] ?? code}
             </span>
           ))}

@@ -107,11 +107,11 @@ const GeneralRuleEditor: React.FC<Props> = ({
         </SelectInput>
       </InputGroup>
 
-      <div className="my-4 rounded border border-slate-800 bg-slate-900 p-3">
-        <h5 className="mb-2 flex items-center text-[10px] font-bold uppercase text-slate-500">Base Method<TooltipTrigger content={t.tooltip_config_baseMethod} size={11} /></h5>
+      <div className="my-4 rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-3">
+        <h5 className="mb-2 flex items-center text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">Base Method<TooltipTrigger content={t.tooltip_config_baseMethod} size={11} /></h5>
         <div className="mb-3 space-y-2">
           {['Matched Maturity', 'Rate Card', 'Moving Average'].map(method => (
-            <label key={method} className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+            <label key={method} className="flex cursor-pointer items-center gap-2 text-xs text-[color:var(--nfq-text-secondary)]">
               <input
                 type="radio"
                 checked={editingRule.baseMethod === method}
@@ -140,11 +140,11 @@ const GeneralRuleEditor: React.FC<Props> = ({
         </InputGroup>
       </div>
 
-      <div className="my-4 rounded border border-slate-800 bg-slate-900 p-3">
-        <h5 className="mb-2 text-[10px] font-bold uppercase text-slate-500">Liquidity / Spread Method</h5>
+      <div className="my-4 rounded border border-slate-800 bg-[var(--nfq-bg-elevated)] p-3">
+        <h5 className="mb-2 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">Liquidity / Spread Method</h5>
         <div className="mb-3 space-y-2">
           {['Curve Lookup', 'Fixed Spread', 'Grid Pricing', 'Dynamic Beta'].map(method => (
-            <label key={method} className="flex cursor-pointer items-center gap-2 text-xs text-slate-300">
+            <label key={method} className="flex cursor-pointer items-center gap-2 text-xs text-[color:var(--nfq-text-secondary)]">
               <input
                 type="radio"
                 checked={editingRule.spreadMethod === method}
