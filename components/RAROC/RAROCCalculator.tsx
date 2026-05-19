@@ -82,7 +82,7 @@ const RAROCCalculator: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--nfq-radius-card)] border border-white/5 bg-slate-900/30 px-4 py-2 text-xs">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-[10px] text-slate-500">MODEL_v4.2.X</span>
-                    <Badge variant="outline" className="text-[9px] border-cyan-500/30 text-cyan-400">BASIL III COMPLIANT</Badge>
+                    <Badge variant="outline" className="text-[9px] border-cyan-500/30 text-cyan-400">BASEL III COMPLIANT</Badge>
                     <Badge variant="secondary" className="text-[9px]">ENGINE SYNCED</Badge>
                 </div>
                 <div className="flex items-baseline gap-2 font-mono">

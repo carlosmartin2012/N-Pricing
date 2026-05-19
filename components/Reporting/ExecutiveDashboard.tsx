@@ -51,9 +51,9 @@ const ExecutiveDashboard: React.FC<Props> = ({
   }, [bookedDeals]);
 
   const fmtM = (value: number) => {
-    if (Math.abs(value) >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
-    if (Math.abs(value) >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-    return `$${(value / 1e3).toFixed(0)}K`;
+    if (Math.abs(value) >= 1e9) return `€${(value / 1e9).toFixed(1)}B`;
+    if (Math.abs(value) >= 1e6) return `€${(value / 1e6).toFixed(1)}M`;
+    return `€${(value / 1e3).toFixed(0)}K`;
   };
 
   return (

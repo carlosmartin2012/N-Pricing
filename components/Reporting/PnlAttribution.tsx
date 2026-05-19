@@ -98,7 +98,7 @@ const PnlAttribution: React.FC<Props> = React.memo(({ deals, products, businessU
     [attribution]
   );
 
-  const fmtM = (value: number) => `$${(value / 1e6).toFixed(2)}M`;
+  const fmtM = (value: number) => `€${(value / 1e6).toFixed(2)}M`;
 
   return (
     <div className="space-y-6">

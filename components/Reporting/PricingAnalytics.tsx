@@ -28,10 +28,10 @@ interface Props {
 }
 
 const fmtM = (v: number) => {
-  if (Math.abs(v) >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
-  if (Math.abs(v) >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
-  if (Math.abs(v) >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
-  return `$${v.toFixed(0)}`;
+  if (Math.abs(v) >= 1e9) return `€${(v / 1e9).toFixed(1)}B`;
+  if (Math.abs(v) >= 1e6) return `€${(v / 1e6).toFixed(1)}M`;
+  if (Math.abs(v) >= 1e3) return `€${(v / 1e3).toFixed(0)}K`;
+  return `€${v.toFixed(0)}`;
 };
 
 const fmtPercent = (value: number | string | readonly (number | string)[] | undefined) => {

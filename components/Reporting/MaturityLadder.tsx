@@ -58,7 +58,7 @@ const MaturityLadder: React.FC<Props> = React.memo(({ deals }) => {
     });
   }, [deals]);
 
-  const fmtM = (v: number) => `${v >= 0 ? '' : '-'}$${Math.abs(v).toFixed(1)}M`;
+  const fmtM = (v: number) => `${v >= 0 ? '' : '-'}€${Math.abs(v).toFixed(1)}M`;
 
   return (
     <div className="space-y-4">
