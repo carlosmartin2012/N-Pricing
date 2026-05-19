@@ -58,7 +58,7 @@ const BudgetReconciliationView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Scale className="h-5 w-5 text-[color:var(--nfq-success)]" />
+          <Scale className="h-5 w-5 text-[color:var(--nfq-cat-d)]" />
           <div>
             <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
               {t.view}

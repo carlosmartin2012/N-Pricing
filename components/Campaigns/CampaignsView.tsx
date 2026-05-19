@@ -123,7 +123,7 @@ const CampaignsView: React.FC = () => {
     <div className="space-y-6 p-4 md:p-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Target className="h-5 w-5 text-[color:var(--nfq-warning)]" />
+          <Target className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
             {t.commercialCampaignsHeader}
           </h2>
@@ -147,7 +147,7 @@ const CampaignsView: React.FC = () => {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="rounded-lg border border-amber-400/30 bg-amber-500/[0.04] p-4 space-y-3"
+          className="rounded-lg border border-[color:var(--nfq-success)]/30 bg-[var(--nfq-success-subtle)] p-4 space-y-3"
         >
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Field label="Code">

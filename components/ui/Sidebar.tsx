@@ -35,9 +35,9 @@ export interface NavItem {
 const SECTION_ACCENTS: Record<string, { dot: string; label: string }> = {
   'Relationship Cockpit': { dot: 'bg-[var(--nfq-success)]',  label: 'text-[color:var(--nfq-success)]' },
   'Pricing Cockpit': { dot: 'bg-[var(--nfq-accent)]',   label: 'text-[color:var(--nfq-accent)]'  },
-  'Data & Ops Hub': { dot: 'bg-sky-400',               label: 'text-sky-300'                     },
-  'Governance Hub': { dot: 'bg-violet-400',            label: 'text-violet-300'                  },
-  Assistant:     { dot: 'bg-fuchsia-400',           label: 'text-fuchsia-300'                 },
+  'Data & Ops Hub': { dot: 'bg-[var(--nfq-cat-a)]',    label: 'text-[color:var(--nfq-cat-a)]'    },
+  'Governance Hub': { dot: 'bg-[var(--nfq-cat-d)]',    label: 'text-[color:var(--nfq-cat-d)]'    },
+  Assistant:     { dot: 'bg-[var(--nfq-cat-g)]',    label: 'text-[color:var(--nfq-cat-g)]'    },
   System:        { dot: 'bg-slate-400',             label: 'text-[color:var(--nfq-text-muted)]'                   },
 };
 
