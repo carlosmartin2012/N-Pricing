@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import type { SandboxMethodology, SandboxDiff, SandboxStatus } from '../../types';
 import {
+  ArrowRight,
   BarChart3,
   FlaskConical,
   History,
@@ -212,10 +213,10 @@ const DiffCard: React.FC<{
           <div className="mt-2 text-[11px] font-mono text-[color:var(--nfq-text-secondary)]">
             {diff.parameterPath}
           </div>
-          <div className="mt-2 flex items-center gap-3 text-xs">
-            <span className="text-[color:var(--nfq-danger)] line-through">{formatChangeValue(diff.currentValue)}</span>
-            <span className="text-[color:var(--nfq-text-secondary)]">&rarr;</span>
-            <span className="text-[color:var(--nfq-success)]">{formatChangeValue(diff.proposedValue)}</span>
+          <div className="mt-2 flex items-baseline gap-3 text-xs font-mono">
+            <span className="text-[color:var(--nfq-text-muted)]">{formatChangeValue(diff.currentValue)}</span>
+            <ArrowRight size={12} className="self-center text-[color:var(--nfq-text-faint)]" />
+            <span className="font-semibold text-[color:var(--nfq-text-primary)]">{formatChangeValue(diff.proposedValue)}</span>
           </div>
         </div>
         <button
