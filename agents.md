@@ -52,7 +52,7 @@
 **Scope**: `components/` (227 archivos), `App.tsx`, `contexts/UIContext.tsx`
 
 **Reglas**:
-- Tailwind CSS utility-first, tema dark por defecto — diseño NFQ Meridian Obsidian
+- Tailwind CSS utility-first, tema dark por defecto — diseño NFQ
 - Componentes lazy-loaded via `React.lazy()` — mantener este patrón para nuevas vistas
 - Todo texto visible al usuario debe usar `translations.ts` via `ui.t.clave`
 - Iconos: solo `lucide-react`, no añadir otras librerías de iconos

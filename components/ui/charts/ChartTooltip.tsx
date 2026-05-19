@@ -8,7 +8,7 @@ interface Props {
 }
 
 /**
- * Custom Recharts tooltip with NFQ Meridian Obsidian styling.
+ * Custom Recharts tooltip with NFQ design system styling.
  * Replaces the default tooltip with dark surface, monospace values,
  * and color-coded series indicators.
  */

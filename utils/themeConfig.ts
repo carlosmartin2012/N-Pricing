@@ -21,7 +21,7 @@ export interface ThemeConfig {
 
 export const NFQ_THEME: ThemeConfig = {
   id: 'nfq-default',
-  name: 'NFQ Meridian Obsidian',
+  name: 'NFQ',
   colors: {
     accent: '#06b6d4',
     accentRgb: '6, 182, 212',
