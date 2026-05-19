@@ -283,7 +283,7 @@ const OverviewDashboard: React.FC<Props> = ({
             <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={waterfallData.chartData} barCategoryGap="20%">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} vertical={false} />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
@@ -297,7 +297,7 @@ const OverviewDashboard: React.FC<Props> = ({
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#475569', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                    tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                     tickFormatter={(v: number) => `${v} bps`}
                   />
                   <Tooltip
@@ -413,12 +413,12 @@ const OverviewDashboard: React.FC<Props> = ({
                     <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} vertical={false} />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: tokens.axis, fontSize: 9 }} />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#475569', fontSize: 9 }}
+                  tick={{ fill: tokens.axis, fontSize: 9 }}
                   domain={['dataMin - 5', 'dataMax + 5']}
                 />
                 <Tooltip

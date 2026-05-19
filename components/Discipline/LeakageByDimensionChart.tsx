@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { Layers } from 'lucide-react';
 import type { DealVariance } from '../../types';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 type Dimension = 'product' | 'segment' | 'originator';
 
@@ -32,6 +33,7 @@ const DIMENSIONS: { value: Dimension; label: string }[] = [
 
 const LeakageByDimensionChart: React.FC<Props> = ({ variances, isLoading }) => {
   const [dimension, setDimension] = useState<Dimension>('product');
+  const tokens = useChartTokens();
 
   const chartData = useMemo(() => {
     const agg: Record<string, number> = {};
@@ -81,7 +83,7 @@ const LeakageByDimensionChart: React.FC<Props> = ({ variances, isLoading }) => {
             <CartesianGrid strokeDasharray="3 3" stroke="var(--nfq-border-ghost)" horizontal={false} />
             <XAxis
               type="number"
-              tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+              tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
               tickFormatter={(v: number) => fmtEur(v)}
             />
             <YAxis

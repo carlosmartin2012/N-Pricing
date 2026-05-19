@@ -13,6 +13,7 @@ import type { Transaction, ProductDefinition, BusinessUnit, ClientEntity } from 
 import { calculateFullCreditRisk, backtestCreditRisk } from '../../utils/pricing/creditRiskEngine';
 import type { BacktestRecord } from '../../utils/pricing/creditRiskEngine';
 import { useUI } from '../../contexts/UIContext';
+import { useChartTokens } from '../../hooks/useChartTokens';
 import { ShieldCheck, Info } from 'lucide-react';
 
 interface Props {
@@ -70,6 +71,7 @@ function accuracyBgColor(ratio: number): string {
 
 const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
   const { t } = useUI();
+  const tokens = useChartTokens();
 
   // Filter to booked/approved deals with valid data
   const bookedDeals = useMemo(
@@ -291,13 +293,13 @@ const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
                 dataKey="predictedEL"
                 name="Predicted EL"
                 domain={[scatterDomain.min, scatterDomain.max]}
-                tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => formatCurrency(v)}
                 label={{
                   value: 'Predicted EL',
                   position: 'insideBottom',
                   offset: -5,
-                  fill: 'var(--nfq-text-muted)',
+                  fill: tokens.axis,
                   fontSize: 10,
                 }}
               />
@@ -306,13 +308,13 @@ const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
                 dataKey="actualLoss"
                 name="Actual Loss"
                 domain={[scatterDomain.min, scatterDomain.max]}
-                tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => formatCurrency(v)}
                 label={{
                   value: 'Actual Loss',
                   angle: -90,
                   position: 'insideLeft',
-                  fill: 'var(--nfq-text-muted)',
+                  fill: tokens.axis,
                   fontSize: 10,
                 }}
               />

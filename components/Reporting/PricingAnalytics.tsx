@@ -17,6 +17,7 @@ import { calculatePricing } from '@npricing/pricing-core';
 import { useData } from '../../contexts/DataContext';
 import { TrendingUp, BarChart4, PieChart as PieIcon, Activity } from 'lucide-react';
 import { buildPricingContext } from '../../utils/pricingContext';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 // Chart palette mapped to NFQ design-system tokens. Recharts requires
 // literal color strings (it does not read CSS custom properties), so we
@@ -62,6 +63,7 @@ const tooltipStyle: React.CSSProperties = {
 
 const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, clients }) => {
   const contextData = useData();
+  const tokens = useChartTokens();
 
   const bookedDeals = useMemo(() => deals.filter((d) => d.status === 'Booked' || d.status === 'Approved'), [deals]);
 
@@ -277,12 +279,12 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rarocDistribution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} vertical={false} />
+                <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: tokens.axis, fontSize: 9 }} />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#475569', fontSize: 9 }}
+                  tick={{ fill: tokens.axis, fontSize: 9 }}
                   allowDecimals={false}
                 />
                 <Tooltip contentStyle={tooltipStyle} />
@@ -305,9 +307,9 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ftpByCategory}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} unit="%" />
+                <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} vertical={false} />
+                <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fill: tokens.axis, fontSize: 9 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: tokens.axis, fontSize: 9 }} unit="%" />
                 <Tooltip contentStyle={tooltipStyle} formatter={(value) => fmtPercent(value)} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
                 <Bar dataKey="avgBaseRate" name="Base Rate" fill="#06b6d4" radius={[2, 2, 0, 0]} />

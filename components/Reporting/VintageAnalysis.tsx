@@ -451,7 +451,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
         <div className="h-[340px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} barCategoryGap="15%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} vertical={false} />
               <XAxis
                 dataKey="cohort"
                 axisLine={false}
@@ -462,7 +462,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                 yAxisId="left"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#475569', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => `${v}%`}
               />
               <YAxis

@@ -10,6 +10,7 @@ import {
 } from '../ui/charts/lazyRecharts';
 import { Badge } from '../ui/LayoutComponents';
 import type { BehaviouralModel } from '../../types';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 const BUCKETS = ['ON', '1M', '3M', '6M', '12M', '2Y', '4Y', '6Y', '10Y', '>10Y'];
 const TENOR_TO_MONTHS: Record<string, number> = {
@@ -54,7 +55,9 @@ const buildModelData = (model: BehaviouralModel) => (
   })
 );
 
-const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
+const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => {
+  const tokens = useChartTokens();
+  return (
   <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
     {behaviouralModels.map(model => {
       const data = buildModelData(model);
@@ -85,12 +88,12 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
                     <stop offset="95%" stopColor={model.type === 'NMD_Replication' ? '#a855f7' : '#f59e0b'} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 9 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={tokens.grid} vertical={false} />
+                <XAxis dataKey="bucket" axisLine={false} tickLine={false} tick={{ fill: tokens.axis, fontSize: 9 }} />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: '#475569', fontSize: 9 }}
+                  tick={{ fill: tokens.axis, fontSize: 9 }}
                   domain={['auto', 'auto']}
                   tickFormatter={(v: number) => `${v.toFixed(0)}`}
                 />
@@ -152,6 +155,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
       );
     })}
   </div>
-);
+  );
+};
 
 export default BehaviourFocusDashboard;

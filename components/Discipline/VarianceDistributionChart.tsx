@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { BarChart3 } from 'lucide-react';
 import type { DealVariance } from '../../types';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 interface Props {
   variances: DealVariance[];
@@ -31,6 +32,7 @@ interface Bucket {
 }
 
 const VarianceDistributionChart: React.FC<Props> = ({ variances, toleranceBps = 20 }) => {
+  const tokens = useChartTokens();
   const buckets = useMemo(() => {
     const result: Bucket[] = [];
     for (let start = MIN_BUCKET; start < MAX_BUCKET; start += BUCKET_WIDTH) {
@@ -105,12 +107,12 @@ const VarianceDistributionChart: React.FC<Props> = ({ variances, toleranceBps = 
           <CartesianGrid strokeDasharray="3 3" stroke="var(--nfq-border-ghost)" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: 'var(--nfq-text-muted)', fontSize: 9, fontFamily: 'var(--nfq-font-mono)' }}
+            tick={{ fill: tokens.axis, fontSize: 9, fontFamily: 'var(--nfq-font-mono)' }}
             interval={1}
             axisLine={{ stroke: 'var(--nfq-border-ghost)' }}
           />
           <YAxis
-            tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+            tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
             allowDecimals={false}
             domain={[0, Math.ceil(maxCount * 1.1)]}
           />

@@ -18,6 +18,7 @@ import {
 import { calculatePricing } from '@npricing/pricing-core';
 import { useData } from '../../contexts/DataContext';
 import { buildPricingContext } from '../../utils/pricingContext';
+import { useChartTokens } from '../../hooks/useChartTokens';
 
 interface Props {
   deals: Transaction[];
@@ -59,6 +60,7 @@ const tooltipStyle: React.CSSProperties = {
 
 const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
   const contextData = useData();
+  const tokens = useChartTokens();
 
   // Filter to meaningful deals
   const activeDealsList = useMemo(
@@ -273,13 +275,13 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 dataKey="technicalPrice"
                 name="Technical Price"
                 domain={[axisDomain.min, axisDomain.max]}
-                tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => `${v.toFixed(1)}%`}
                 label={{
                   value: 'Technical Price (%)',
                   position: 'insideBottom',
                   offset: -5,
-                  fill: 'var(--nfq-text-muted)',
+                  fill: tokens.axis,
                   fontSize: 10,
                 }}
               />
@@ -288,13 +290,13 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 dataKey="finalRate"
                 name="Final Rate"
                 domain={[axisDomain.min, axisDomain.max]}
-                tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 tickFormatter={(v: number) => `${v.toFixed(1)}%`}
                 label={{
                   value: 'Final Rate (%)',
                   angle: -90,
                   position: 'insideLeft',
-                  fill: 'var(--nfq-text-muted)',
+                  fill: tokens.axis,
                   fontSize: 10,
                 }}
               />
@@ -380,10 +382,10 @@ const NIISensitivity: React.FC<Props> = React.memo(({ deals }) => {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--nfq-border-ghost)" />
                 <XAxis
                   dataKey="month"
-                  tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                  tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                 />
                 <YAxis
-                  tick={{ fill: 'var(--nfq-text-muted)', fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
+                  tick={{ fill: tokens.axis, fontSize: 10, fontFamily: 'var(--nfq-font-mono)' }}
                   tickFormatter={(v: number) => `${v.toFixed(1)}%`}
                   domain={['auto', 'auto']}
                 />
