@@ -18,7 +18,18 @@ import { useData } from '../../contexts/DataContext';
 import { TrendingUp, BarChart4, PieChart as PieIcon, Activity } from 'lucide-react';
 import { buildPricingContext } from '../../utils/pricingContext';
 
-const COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899'];
+// Chart palette mapped to NFQ design-system tokens. Recharts requires
+// literal color strings (it does not read CSS custom properties), so we
+// duplicate the exact hex values here. Keep in sync with index.css:
+//   #06b6d4 = --nfq-accent       (cyan)
+//   #8b5cf6 = --nfq-cat-d        (violet)
+//   #f59e0b = --nfq-warning      (amber)
+//   #10b981 = --nfq-success      (emerald)
+//   #f43f5e = --nfq-danger       (rose)  ← was #ef4444 (Tailwind red-500),
+//                                          which is NOT in the NFQ palette.
+//                                          Fixed to match --nfq-danger.
+//   #ec4899 = --nfq-cat-g        (pink)
+const COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#f43f5e', '#ec4899'];
 
 interface Props {
   deals: Transaction[];
@@ -106,10 +117,13 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
   }, [pricingResults]);
 
   // ── Section 2: RAROC Distribution ──
+  // Threshold-based coloring: <5% breach (--nfq-danger), 5-10% watch
+  // (--nfq-warning), >=10% healthy (--nfq-success). Hex literals match
+  // the design-system tokens since Recharts cannot read CSS variables.
   const rarocDistribution = useMemo(() => {
     const buckets = [
-      { label: '<0%', min: -Infinity, max: 0, color: '#ef4444' },
-      { label: '0-5%', min: 0, max: 5, color: '#ef4444' },
+      { label: '<0%', min: -Infinity, max: 0, color: '#f43f5e' },
+      { label: '0-5%', min: 0, max: 5, color: '#f43f5e' },
       { label: '5-10%', min: 5, max: 10, color: '#f59e0b' },
       { label: '10-15%', min: 10, max: 15, color: '#10b981' },
       { label: '15-20%', min: 15, max: 20, color: '#10b981' },
@@ -247,7 +261,7 @@ const PricingAnalytics: React.FC<Props> = ({ deals, businessUnits, products, cli
               <span className="text-[color:var(--nfq-text-muted)]">{kpi.icon}</span>
               <span className="nfq-kpi-label">{kpi.label}</span>
             </div>
-            <div className={`nfq-kpi-value text-xl ${kpi.color}`}>{kpi.value}</div>
+            <div className={`nfq-kpi-value ${kpi.color}`}>{kpi.value}</div>
           </div>
         ))}
       </div>

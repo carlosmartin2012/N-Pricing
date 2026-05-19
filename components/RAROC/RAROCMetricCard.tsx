@@ -30,7 +30,7 @@ export const RAROCMetricCard: React.FC<RarocMetricCardData> = React.memo(({
       </div>
       <div className="nfq-kpi-label mb-2">{title}</div>
       <div className="flex items-baseline gap-2">
-        <div className={`nfq-kpi-value text-3xl ${toneClasses[tone]}`}>{value}</div>
+        <div className={`nfq-kpi-value ${toneClasses[tone]}`}>{value}</div>
         {trend !== 'neutral' && (
           <div className={`text-[10px] font-mono font-bold uppercase tracking-[0.18em] ${statusClass}`}>
             {trend === 'positive' ? 'Pass' : 'Fail'}

@@ -68,7 +68,7 @@ const ExecutiveDashboard: React.FC<Props> = ({
         ].map(kpi => (
           <div key={kpi.label} className="nfq-kpi-card">
             <div className="nfq-kpi-label mb-2">{kpi.label}</div>
-            <div className={`nfq-kpi-value text-2xl ${kpi.color}`}>{kpi.value}</div>
+            <div className={`nfq-kpi-value ${kpi.color}`}>{kpi.value}</div>
             <div className="mt-1 nfq-label">{kpi.sub}</div>
           </div>
         ))}

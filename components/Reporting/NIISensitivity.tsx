@@ -28,13 +28,21 @@ interface Props {
 const fmtPct = (v: number) => `${v.toFixed(2)}%`;
 const fmtCount = (v: number) => v.toLocaleString('en-US');
 
+// Segment colors mapped to NFQ design-system tokens (Recharts requires
+// literal hex values, no CSS-var support):
+//   Corporate         #06b6d4  --nfq-accent      (cyan)
+//   SME               #8b5cf6  --nfq-cat-d       (violet)
+//   Retail            #f59e0b  --nfq-warning     (amber)
+//   Wealth Management #10b981  --nfq-success     (emerald)
+//   Institutional     #ec4899  --nfq-cat-g       (pink)
+//   Consumer          #f43f5e  --nfq-danger      (rose)  ← was #ef4444 red-500
 const SEGMENT_COLORS: Record<string, string> = {
   Corporate: '#06b6d4',
   SME: '#8b5cf6',
   Retail: '#f59e0b',
   'Wealth Management': '#10b981',
   Institutional: '#ec4899',
-  Consumer: '#ef4444',
+  Consumer: '#f43f5e',
 };
 const DEFAULT_DOT_COLOR = '#94a3b8';
 
