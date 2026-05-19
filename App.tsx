@@ -197,6 +197,94 @@ const AppContent: React.FC = () => {
   ]);
   const compactHero = !BIG_HERO_VIEWS.has(ui.currentView);
 
+  // Per-view contextual KPIs for the compact hero. Each view declares
+  // its own 0-4 KPIs based on the data it operates on. Views without
+  // an entry get a title-only hero — much cleaner than the old behaviour
+  // of forcing universal Deals/Pending/Snapshots/AI-traces on every
+  // surface even when they made no sense (Yield Curves, Dossiers,
+  // Stress Test...). Control Room still uses the spacious hero where
+  // the system-wide KPIs are the primary content.
+  interface CompactKpi {
+    label: string;
+    value: React.ReactNode;
+    toneClass?: string;
+  }
+  const compactKpis = useMemo<CompactKpi[]>(() => {
+    switch (ui.currentView) {
+      case 'BLOTTER':
+        return [
+          { label: ui.t.workspaceDeals, value: data.deals.length },
+          {
+            label: ui.t.workspacePending,
+            value: data.deals.filter((d) => d.status === 'Pending_Approval').length,
+            toneClass: 'text-[color:var(--nfq-warning)]',
+          },
+          {
+            label: 'Booked',
+            value: data.deals.filter((d) => d.status === 'Booked' || d.status === 'Approved').length,
+            toneClass: 'text-[color:var(--nfq-success)]',
+          },
+        ];
+      case 'MARKET_DATA': {
+        const activeSources = data.marketDataSources.filter((s) => s.status === 'Active').length;
+        return [
+          { label: 'Curves', value: data.yieldCurves.length, toneClass: 'text-[color:var(--nfq-accent)]' },
+          {
+            label: 'Sources',
+            value: activeSources,
+            toneClass: activeSources > 0 ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-warning)]',
+          },
+        ];
+      }
+      case 'CUSTOMER_360':
+        return [
+          { label: 'Clients', value: data.clients.length, toneClass: 'text-[color:var(--nfq-success)]' },
+        ];
+      case 'REPORTING': {
+        const booked = data.deals.filter((d) => d.status === 'Booked' || d.status === 'Approved');
+        return [
+          { label: ui.t.workspaceDeals, value: booked.length },
+          { label: 'Snapshots', value: data.portfolioSnapshots.length, toneClass: 'text-[color:var(--nfq-accent)]' },
+        ];
+      }
+      case 'APPROVALS':
+      case 'ESCALATIONS': {
+        const pending = data.deals.filter((d) => d.status === 'Pending_Approval').length;
+        return [
+          {
+            label: ui.t.workspacePending,
+            value: pending,
+            toneClass: pending > 0 ? 'text-[color:var(--nfq-warning)]' : 'text-[color:var(--nfq-success)]',
+          },
+        ];
+      }
+      case 'DOSSIERS':
+        return [
+          { label: 'Dossiers', value: data.pricingDossiers.length, toneClass: 'text-[color:var(--nfq-cat-d)]' },
+        ];
+      case 'SHOCKS':
+      case 'STRESS_PRICING':
+      case 'RAROC':
+      case 'WHAT_IF':
+      case 'CALCULATOR':
+        // Per-deal workflow views: keep title-only, the in-view receipt
+        // panels carry the relevant deal numbers (FTP, RAROC, etc.).
+        return [];
+      default:
+        // Title-only hero for all other views. Less is more.
+        return [];
+    }
+  }, [
+    ui.currentView,
+    ui.t,
+    data.deals,
+    data.marketDataSources,
+    data.yieldCurves,
+    data.clients,
+    data.portfolioSnapshots,
+    data.pricingDossiers,
+  ]);
+
   if (!isAuthenticated) {
     return (
       <Suspense fallback={<div aria-hidden="true" className="min-h-screen bg-[color:var(--nfq-bg-base,#0e0e0e)]" />}>
@@ -278,31 +366,18 @@ const AppContent: React.FC = () => {
                       </h1>
                       <span className="nfq-label hidden md:inline">{ui.t.workspaceEyebrow}</span>
                     </div>
-                    <div className="ml-auto flex flex-wrap items-center gap-x-5 gap-y-1 font-mono-nums text-xs">
-                      <span className="flex items-baseline gap-1.5">
-                        <span className="nfq-label text-[10px]">{ui.t.workspaceDeals}</span>
-                        <span className="font-semibold text-[color:var(--nfq-text-primary)]">{data.deals.length}</span>
-                      </span>
-                      <span className="flex items-baseline gap-1.5">
-                        <span className="nfq-label text-[10px]">{ui.t.workspacePending}</span>
-                        <span className="font-semibold text-[color:var(--nfq-warning)]">
-                          {data.deals.filter((deal) => deal.status === 'Pending_Approval').length}
-                        </span>
-                      </span>
-                      <span className="flex items-baseline gap-1.5">
-                        <span className="nfq-label text-[10px]">{ui.t.workspaceSnapshots}</span>
-                        <span className="font-semibold text-[color:var(--nfq-accent)]">{data.portfolioSnapshots.length}</span>
-                      </span>
-                      <span className="flex items-baseline gap-1.5">
-                        <span className="nfq-label text-[10px]">{ui.t.workspaceAiTraces}</span>
-                        <span className="font-semibold text-[color:var(--nfq-cat-d)]">
-                          {data.pricingDossiers.reduce(
-                            (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
-                            0
-                          )}
-                        </span>
-                      </span>
-                    </div>
+                    {compactKpis.length > 0 && (
+                      <div className="ml-auto flex flex-wrap items-center gap-x-5 gap-y-1 font-mono-nums text-xs">
+                        {compactKpis.map((kpi) => (
+                          <span key={kpi.label} className="flex items-baseline gap-1.5">
+                            <span className="nfq-label text-[10px]">{kpi.label}</span>
+                            <span className={`font-semibold ${kpi.toneClass ?? 'text-[color:var(--nfq-text-primary)]'}`}>
+                              {kpi.value}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </section>
               ) : (
