@@ -208,7 +208,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => setSelectedId(model.id)}
-                        className="inline-flex h-7 items-center rounded-md bg-white/5 px-2.5 font-mono text-[10px] tracking-normal text-neutral-200 transition hover:bg-white/10"
+                        className="inline-flex h-7 items-center rounded-md bg-[var(--nfq-bg-elevated)]/40 px-2.5 font-mono text-[10px] tracking-normal text-neutral-200 transition hover:bg-[var(--nfq-bg-elevated)]/60"
                       >
                         Ver detalles
                       </button>

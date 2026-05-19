@@ -198,7 +198,7 @@ const MarketBenchmarksView: React.FC = () => {
       >
         <div className="grid h-full min-h-0 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="flex min-h-0 flex-col gap-4">
-            <div className="grid gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4 md:grid-cols-3">
+            <div className="grid gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 md:grid-cols-3">
               <label className="space-y-1.5">
                 <span className="nfq-label flex items-center gap-2">
                   <Search className="h-3.5 w-3.5" />
@@ -251,7 +251,7 @@ const MarketBenchmarksView: React.FC = () => {
                     </tr>
                   ) : (
                     benchmarks.map((row) => (
-                      <tr key={row.id} className="border-b border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.03]">
+                      <tr key={row.id} className="border-b border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40">
                         <td className="px-4 py-3 font-medium text-[color:var(--nfq-text-primary)]">{row.productType}</td>
                         <td className="px-4 py-3 text-[color:var(--nfq-text-secondary)]">{row.clientType}</td>
                         <td className="px-4 py-3"><Badge variant="outline">{row.tenorBucket}</Badge></td>
@@ -280,7 +280,7 @@ const MarketBenchmarksView: React.FC = () => {
           </div>
 
           <div className="flex min-h-0 flex-col gap-4 overflow-auto">
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <div className="nfq-label">{draft.id ? 'Edit benchmark' : 'New benchmark'}</div>
@@ -352,7 +352,7 @@ const MarketBenchmarksView: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <div className="nfq-label">CSV import</div>

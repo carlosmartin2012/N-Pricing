@@ -63,7 +63,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => {
       const data = buildModelData(model);
 
       return (
-        <div key={model.id} className="flex flex-col gap-4 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">
+        <div key={model.id} className="flex flex-col gap-4 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
           <div className="flex items-start justify-between">
             <div>
               <h4 className="text-sm font-bold uppercase text-[color:var(--nfq-text-primary)]">{model.name}</h4>
@@ -75,7 +75,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => {
               </Badge>
             </div>
             <div className="text-right">
-              <div className="font-mono text-[9px] italic text-[color:var(--nfq-text-faint)]">ID: {model.id}</div>
+              <div className="font-mono text-[9px] text-[color:var(--nfq-text-faint)]">ID: {model.id}</div>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => {
                 </div>
                 <div className="text-center">
                   <div className="text-[8px] uppercase text-[color:var(--nfq-text-faint)]">Method</div>
-                  <div className="text-xs font-bold uppercase italic text-[color:var(--nfq-text-primary)] font-mono">Standard</div>
+                  <div className="text-xs font-bold uppercase text-[color:var(--nfq-text-primary)] font-mono">Standard</div>
                 </div>
               </>
             )}

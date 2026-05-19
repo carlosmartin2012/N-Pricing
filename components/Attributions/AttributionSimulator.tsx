@@ -258,7 +258,7 @@ const AttributionSimulator: React.FC<Props> = ({
             <button
               type="button"
               onClick={reset}
-              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40"
             >
               {t.simulatorReset}
             </button>
@@ -266,7 +266,7 @@ const AttributionSimulator: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => onApply({ quote: result.adjustedQuote, proposedAdjustments })}
-                className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] hover:bg-white/10"
+                className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-3 py-1.5 text-xs text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-bg-elevated)]/60"
               >
                 {t.simulatorApply}
               </button>

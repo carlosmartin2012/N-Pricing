@@ -395,12 +395,12 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
           </thead>
           <tbody>
             {sortedCohorts.map((c) => {
-              const rarocClass = c.avgRaroc < 5 ? 'bg-[#f43f5e]/10' : c.avgRaroc < 10 ? 'bg-[#f59e0b]/10' : '';
+              const rarocClass = c.avgRaroc < 5 ? 'bg-[var(--nfq-danger)]/10' : c.avgRaroc < 10 ? 'bg-[var(--nfq-warning)]/10' : '';
 
               return (
                 <tr
                   key={c.cohort}
-                  className={`border-b border-[var(--nfq-border-ghost)]/50 hover:bg-white/[0.02] transition-colors ${rarocClass}`}
+                  className={`border-b border-[var(--nfq-border-ghost)]/50 hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors ${rarocClass}`}
                 >
                   <td className="py-2.5 px-3 font-mono font-bold text-[color:var(--nfq-text-primary)]">{c.cohort}</td>
                   <td className="py-2.5 px-3 font-mono text-right text-[color:var(--nfq-text-secondary)]">
@@ -553,7 +553,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                     </div>
                   </div>
                   {seg.belowFloorPct > 20 && (
-                    <div className="text-[9px] font-mono text-[color:var(--nfq-danger)] bg-[#f43f5e]/10 px-2 py-0.5 rounded shrink-0">
+                    <div className="text-[9px] font-mono text-[color:var(--nfq-danger)] bg-[var(--nfq-danger)]/10 px-2 py-0.5 rounded shrink-0">
                       {seg.belowFloorPct.toFixed(0)}% below floor
                     </div>
                   )}
@@ -603,7 +603,7 @@ const VintageAnalysis: React.FC<Props> = ({ deals, products, businessUnits, clie
                     </div>
                   </div>
                   {seg.belowFloorPct > 20 && (
-                    <div className="text-[9px] font-mono text-[color:var(--nfq-danger)] bg-[#f43f5e]/10 px-2 py-0.5 rounded shrink-0">
+                    <div className="text-[9px] font-mono text-[color:var(--nfq-danger)] bg-[var(--nfq-danger)]/10 px-2 py-0.5 rounded shrink-0">
                       {seg.belowFloorPct.toFixed(0)}% below floor
                     </div>
                   )}

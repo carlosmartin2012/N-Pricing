@@ -303,7 +303,7 @@ const ElasticityCalibration: React.FC = () => {
                 {models.map((model) => (
                   <tr
                     key={model.id}
-                    className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
+                    className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors"
                   >
                     <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">{model.product}</td>
                     <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)]">{model.segment}</td>
@@ -327,7 +327,7 @@ const ElasticityCalibration: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(model)}
-                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-[color:var(--nfq-accent)] transition-colors"
+                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40 hover:text-[color:var(--nfq-accent)] transition-colors"
                           aria-label={`Edit ${model.product} model`}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ const ElasticityCalibration: React.FC = () => {
                           type="button"
                           onClick={() => handleCalibrate(model.id, model.product, model.segment)}
                           disabled={calibratingId === model.id}
-                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-white/5 hover:text-[color:var(--nfq-warning)] transition-colors disabled:opacity-40"
+                          className="rounded-lg p-1.5 text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40 hover:text-[color:var(--nfq-warning)] transition-colors disabled:opacity-40"
                           aria-label={`Calibrate ${model.product} model`}
                         >
                           <RefreshCw className={`h-3.5 w-3.5 ${calibratingId === model.id ? 'animate-spin' : ''}`} />

@@ -75,7 +75,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
   return (
     <Panel
       title={`${title} (${currency})`}
-      className="flex flex-1 flex-col overflow-hidden bg-white/50 dark:bg-[var(--nfq-bg-root)]/50"
+      className="flex flex-1 flex-col overflow-hidden bg-[var(--nfq-bg-elevated)]/80 dark:bg-[var(--nfq-bg-root)]/50"
     >
       <div className="flex h-full min-h-0 flex-col xl:flex-row">
         <div className="relative flex min-h-[300px] flex-1 flex-col border-b border-[color:var(--nfq-border)] dark:border-[color:var(--nfq-border-ghost)] xl:border-b-0 xl:border-r">

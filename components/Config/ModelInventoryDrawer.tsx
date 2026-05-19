@@ -73,7 +73,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 transition hover:bg-white/5 hover:text-[color:var(--nfq-text-primary)]"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-400 transition hover:bg-[var(--nfq-bg-elevated)]/40 hover:text-[color:var(--nfq-text-primary)]"
             aria-label="Cerrar panel de detalles"
           >
             <X size={18} />
@@ -273,7 +273,7 @@ function TagSection({
         {items.map((item) => (
           <span
             key={item}
-            className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-neutral-200"
+            className="rounded-md bg-[var(--nfq-bg-elevated)]/40 px-2 py-0.5 text-xs text-neutral-200"
           >
             {item}
           </span>

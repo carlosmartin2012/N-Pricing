@@ -63,10 +63,10 @@ function accuracyColor(ratio: number): string {
 }
 
 function accuracyBgColor(ratio: number): string {
-  if (!Number.isFinite(ratio)) return 'bg-[#f43f5e]/10';
-  if (ratio >= 0.8 && ratio <= 1.2) return 'bg-[#10b981]/10';
-  if ((ratio >= 0.5 && ratio < 0.8) || (ratio > 1.2 && ratio <= 1.5)) return 'bg-[#f59e0b]/10';
-  return 'bg-[#f43f5e]/10';
+  if (!Number.isFinite(ratio)) return 'bg-[var(--nfq-danger)]/10';
+  if (ratio >= 0.8 && ratio <= 1.2) return 'bg-[var(--nfq-success)]/10';
+  if ((ratio >= 0.5 && ratio < 0.8) || (ratio > 1.2 && ratio <= 1.5)) return 'bg-[var(--nfq-warning)]/10';
+  return 'bg-[var(--nfq-danger)]/10';
 }
 
 const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
@@ -255,7 +255,7 @@ const BacktestingDashboard: React.FC<Props> = ({ deals }) => {
             {sortedSegments.map(seg => (
               <tr
                 key={seg.segment}
-                className={`border-b border-[var(--nfq-border-ghost)]/50 hover:bg-white/[0.02] transition-colors ${accuracyBgColor(seg.accuracyRatio)}`}
+                className={`border-b border-[var(--nfq-border-ghost)]/50 hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors ${accuracyBgColor(seg.accuracyRatio)}`}
               >
                 <td className="py-2.5 px-3 font-mono font-bold text-[color:var(--nfq-text-primary)]">
                   {seg.segment.replace(/_/g, ' ')}

@@ -128,7 +128,7 @@ const ReconciliationView: React.FC = () => {
             value={period}
             onChange={(e) => setPeriod(e.target.value || currentPeriod())}
             data-testid="reconciliation-period"
-            className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
+            className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
           />
           <button
             type="button"
@@ -188,7 +188,7 @@ const ReconciliationView: React.FC = () => {
               data-testid={`reconciliation-filter-${s}`}
               className={`rounded-md px-2 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                 active
-                  ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)] ring-1 ring-[color:var(--nfq-cat-d)]/40'
+                  ? 'bg-[var(--nfq-bg-elevated)]/60 text-[color:var(--nfq-text-primary)] ring-1 ring-[color:var(--nfq-cat-d)]/40'
                   : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
               }`}
             >
@@ -201,7 +201,7 @@ const ReconciliationView: React.FC = () => {
       {!isLoading && filtered.length === 0 && (
         <div
           data-testid="reconciliation-empty"
-          className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]"
+          className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-xs text-[color:var(--nfq-text-muted)]"
         >
           No entries for the current filter. Try a different period or widen the status filter.
         </div>
@@ -211,7 +211,7 @@ const ReconciliationView: React.FC = () => {
         <div className="overflow-hidden rounded-lg border border-[color:var(--nfq-border-ghost)]">
           <table className="w-full text-sm" data-testid="reconciliation-table">
             <thead>
-              <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
+              <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
                 <Th>Deal</Th>
                 <Th>Client</Th>
                 <Th>BU</Th>
@@ -250,7 +250,7 @@ const KpiTile: React.FC<KpiTileProps> = ({ icon: Icon, label, value, sub, tone }
     sky: 'text-[color:var(--nfq-cat-a)]',
   }[tone];
   return (
-    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
       <div className="nfq-label flex items-center gap-1.5 text-[9px] text-[color:var(--nfq-text-muted)]">
         <Icon className={`h-3 w-3 ${toneClass}`} />
         {label}

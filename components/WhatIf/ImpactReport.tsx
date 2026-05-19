@@ -337,7 +337,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                   {cellImpacts.map((cell, idx) => (
                     <tr
                       key={`${cell.product}-${cell.segment}-${cell.tenorBucket}-${cell.currency}-${idx}`}
-                      className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
+                      className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors"
                     >
                       <td className="px-3 py-2 text-[color:var(--nfq-text-primary)]">{cell.product}</td>
                       <td className="px-3 py-2 text-[color:var(--nfq-text-primary)]">{cell.segment}</td>

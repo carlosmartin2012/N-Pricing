@@ -395,7 +395,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
                   {result.cohortBreakdown.map((cohort, idx) => (
                     <tr
                       key={`${cohort.product}-${cohort.segment}-${idx}`}
-                      className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
+                      className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors"
                     >
                       <td className="px-3 py-2 font-medium text-[color:var(--nfq-text-primary)]">{cohort.product}</td>
                       <td className="px-3 py-2 text-[color:var(--nfq-text-primary)]">{cohort.segment}</td>

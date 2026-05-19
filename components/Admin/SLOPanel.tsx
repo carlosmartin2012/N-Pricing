@@ -94,7 +94,7 @@ const SLOPanel: React.FC = () => {
       </div>
 
       {!summary && !isLoading && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">
           SLO endpoint not available yet — apply migration <code className="font-mono">20260602000005_slo_metrics</code> and emit at least one metric.
         </div>
       )}
@@ -107,7 +107,7 @@ const SLOPanel: React.FC = () => {
             return (
               <article
                 key={`${slo.name}-${idx}`}
-                className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4"
+                className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4"
                 style={{ boxShadow: `inset 0 0 0 1px ${color}22` }}
               >
                 <header className="mb-3 flex items-center gap-2">
@@ -148,7 +148,7 @@ const SLOPanel: React.FC = () => {
       )}
 
       {violations && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
           <header className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Lock
@@ -196,7 +196,7 @@ const SLOPanel: React.FC = () => {
       )}
 
       {summary && summary.activeAlerts.length > 0 && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
           <h4 className="mb-3 font-mono text-[11px] tracking-normal text-[color:var(--nfq-text-secondary)]">
             Active alerts
           </h4>

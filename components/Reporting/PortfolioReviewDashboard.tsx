@@ -27,9 +27,9 @@ interface PortfolioReviewDashboardProps {
 type TabKey = 'clusters' | 'repricing' | 'renegotiation';
 
 const SEVERITY_BADGE: Record<UnderpricingCluster['severity'], string> = {
-  HIGH: 'bg-[#f43f5e]/15 text-[#f43f5e] border-[#f43f5e]/40',
-  MEDIUM: 'bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/40',
-  LOW: 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/40',
+  HIGH: 'bg-[var(--nfq-danger)]/15 text-[#f43f5e] border-[color:var(--nfq-danger)]/40',
+  MEDIUM: 'bg-[var(--nfq-warning)]/15 text-[#f59e0b] border-[color:var(--nfq-warning)]/40',
+  LOW: 'bg-[var(--nfq-success)]/15 text-[#10b981] border-[color:var(--nfq-success)]/40',
 };
 
 const numberFormatter = new Intl.NumberFormat('es-ES', {
@@ -179,7 +179,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
               type="button"
               onClick={generateNarrative}
               disabled={!review || isGenerating}
-              className="inline-flex h-7 items-center gap-2 rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border)] bg-transparent px-4 text-sm font-medium text-[var(--nfq-text-primary)] transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-2 rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border)] bg-transparent px-4 text-sm font-medium text-[var(--nfq-text-primary)] transition hover:bg-[var(--nfq-bg-elevated)]/40 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isGenerating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -192,7 +192,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
         </div>
 
         {analyzeError && (
-          <div className="mt-4 flex items-start gap-2 rounded-[var(--nfq-radius-card)] border border-[#f43f5e]/40 bg-[#f43f5e]/10 p-3 text-sm text-[#f43f5e]">
+          <div className="mt-4 flex items-start gap-2 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-danger)]/40 bg-[var(--nfq-danger)]/10 p-3 text-sm text-[#f43f5e]">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span className="font-mono">{analyzeError}</span>
           </div>
@@ -346,7 +346,7 @@ const TabButton: React.FC<TabButtonProps> = ({ label, count, active, onClick }) 
     className={`inline-flex h-8 items-center gap-2 rounded-[var(--nfq-radius-card)] px-3 text-xs font-medium transition ${
       active
         ? 'bg-[var(--nfq-accent)]/15 text-[var(--nfq-accent)]'
-        : 'text-[var(--nfq-text-secondary)] hover:bg-white/5'
+        : 'text-[var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40'
     }`}
   >
     <span>{label}</span>
@@ -375,7 +375,7 @@ const ClustersTable: React.FC<{ clusters: UnderpricingCluster[] }> = ({ clusters
           {clusters.map((c) => (
             <tr
               key={c.id}
-              className="border-b border-[var(--nfq-border)]/40 last:border-b-0 hover:bg-white/5"
+              className="border-b border-[var(--nfq-border)]/40 last:border-b-0 hover:bg-[var(--nfq-bg-elevated)]/40"
             >
               <Td>
                 <span
@@ -425,7 +425,7 @@ const RepricingTable: React.FC<{ candidates: RepricingCandidate[] }> = ({ candid
           {candidates.map((c) => (
             <tr
               key={c.dealId}
-              className="border-b border-[var(--nfq-border)]/40 last:border-b-0 hover:bg-white/5"
+              className="border-b border-[var(--nfq-border)]/40 last:border-b-0 hover:bg-[var(--nfq-bg-elevated)]/40"
             >
               <Td>
                 <span className="font-mono text-xs text-[var(--nfq-text-primary)]">
@@ -476,7 +476,7 @@ const RenegotiationTable: React.FC<{ candidates: RenegotiationCandidate[] }> = (
           {candidates.map((c) => (
             <tr
               key={c.dealId}
-              className="border-b border-[var(--nfq-border)]/40 last:border-b-0 hover:bg-white/5"
+              className="border-b border-[var(--nfq-border)]/40 last:border-b-0 hover:bg-[var(--nfq-bg-elevated)]/40"
             >
               <Td>
                 <span className="font-mono text-xs text-[var(--nfq-text-primary)]">

@@ -110,7 +110,7 @@ const BenchmarkTable: React.FC<{ rows: BenchmarkComparison[] }> = ({ rows }) => 
           {sorted.map((row, idx) => (
             <tr
               key={`${row.product}-${row.segment}-${row.tenorBucket}-${row.currency}-${idx}`}
-              className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
+              className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors"
             >
               <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">{row.product}</td>
               <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)]">{row.segment}</td>
@@ -158,7 +158,7 @@ const BudgetConsistencyTable: React.FC<{ rows: BudgetConsistency[] }> = ({ rows 
         {rows.map((row, idx) => (
           <tr
             key={`${row.product}-${row.segment}-${row.currency}-${idx}`}
-            className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
+            className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors"
           >
             <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">{row.product}</td>
             <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)]">{row.segment}</td>

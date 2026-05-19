@@ -120,7 +120,7 @@ const ApprovalCockpit: React.FC = () => {
         <button
           type="button"
           onClick={() => decisionsQuery.refetch()}
-          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
+          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40"
         >
           <RefreshCw className={`h-3 w-3 ${decisionsQuery.isFetching ? 'animate-spin' : ''}`} />
           <span>{t.retry}</span>
@@ -277,7 +277,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
         data-focused={focused ? 'true' : undefined}
         data-approval-focus-target={item.decision.id}
         tabIndex={focused ? -1 : undefined}
-        className={`scroll-mt-24 border-b border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] ${
+        className={`scroll-mt-24 border-b border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40 ${
           focused ? 'bg-[var(--nfq-accent)]/10 outline outline-1 outline-cyan-400/50' : ''
         }`}
       >
@@ -317,7 +317,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending}
               onClick={() => setConfirming('escalated')}
               title={t.cockpitEscalate}
-              className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 p-1 text-[color:var(--nfq-text-secondary)] hover:bg-white/10 disabled:opacity-40"
+              className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-1 text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/60 disabled:opacity-40"
               aria-label={t.cockpitEscalate}
             >
               <ArrowUpRight className="h-4 w-4" />
@@ -355,7 +355,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               <button
                 type="button"
                 onClick={() => { setConfirming(null); setReason(''); }}
-                className="rounded border border-[color:var(--nfq-border-ghost)] px-3 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
+                className="rounded border border-[color:var(--nfq-border-ghost)] px-3 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40"
               >
                 {t.matrixCancel}
               </button>
@@ -453,7 +453,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending}
           onClick={() => setConfirming('escalated')}
-          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-2 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/10 disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-2 py-2 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/60 disabled:opacity-40"
           aria-label={t.cockpitEscalate}
         >
           <ArrowUpRight className="h-4 w-4" />
@@ -490,7 +490,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
             <button
               type="button"
               onClick={() => { setConfirming(null); setReason(''); }}
-              className="flex-1 rounded border border-[color:var(--nfq-border-ghost)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
+              className="flex-1 rounded border border-[color:var(--nfq-border-ghost)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40"
             >
               {t.matrixCancel}
             </button>

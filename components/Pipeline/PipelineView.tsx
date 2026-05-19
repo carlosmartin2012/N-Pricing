@@ -237,7 +237,7 @@ const PipelineView: React.FC = () => {
             <Download className="h-3 w-3" />
             Export CSV
           </button>
-          <div className="flex items-center gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-1">
             {(['open', 'consumed', 'all'] as PipelineStatusFilter[]).map((s) => (
               <button
                 key={s}
@@ -247,7 +247,7 @@ const PipelineView: React.FC = () => {
                 data-testid={`pipeline-status-${s}`}
                 className={`rounded-md px-3 py-1 font-mono text-[10px] tracking-normal transition-colors ${
                   status === s
-                    ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)]'
+                    ? 'bg-[var(--nfq-bg-elevated)]/60 text-[color:var(--nfq-text-primary)]'
                     : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
@@ -272,7 +272,7 @@ const PipelineView: React.FC = () => {
           value={productFilter}
           onChange={(e) => setProductFilter(e.target.value)}
           data-testid="pipeline-filter-product"
-          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
         >
           <option value="all">All</option>
           {products.map((p) => (
@@ -284,7 +284,7 @@ const PipelineView: React.FC = () => {
           value={confidenceBand}
           onChange={(e) => setConfidenceBand(e.target.value as ConfidenceBand)}
           data-testid="pipeline-filter-confidence"
-          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-2 py-1 font-mono text-[11px] text-[color:var(--nfq-text-secondary)]"
         >
           <option value="all">All</option>
           <option value="high">High (≥80%)</option>
@@ -340,7 +340,7 @@ const PipelineView: React.FC = () => {
       )}
 
       {!isLoading && sorted.length === 0 && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.clvNbaEmpty}
         </div>
       )}
@@ -371,7 +371,7 @@ const KpiTile: React.FC<{ label: string; value: string; tone: 'sky' | 'amber' | 
     violet:   'text-[color:var(--nfq-cat-d)]',
   }[tone];
   return (
-    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
       <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{label}</div>
       <div className={`mt-1 font-mono text-sm font-bold tabular-nums ${toneClass}`}>{value}</div>
     </div>
@@ -398,7 +398,7 @@ const PipelineRow: React.FC<RowProps> = ({
       className={`rounded border p-3 space-y-2 transition-colors ${
         selected
           ? 'border-[color:var(--nfq-success)]/40 bg-[var(--nfq-success)]/[0.04]'
-          : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.03]'
+          : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -446,7 +446,7 @@ const PipelineRow: React.FC<RowProps> = ({
       {row.reasonCodes.length > 0 && (
         <div className="flex flex-wrap gap-1 pl-6">
           {row.reasonCodes.map((code) => (
-            <span key={code} className="rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-[color:var(--nfq-text-secondary)]">
+            <span key={code} className="rounded bg-[var(--nfq-bg-elevated)]/60 px-2 py-0.5 font-mono text-[9px] text-[color:var(--nfq-text-secondary)]">
               {REASON_LABEL[code] ?? code}
             </span>
           ))}

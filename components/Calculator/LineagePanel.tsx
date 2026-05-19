@@ -247,7 +247,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
         className={`px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-[0.16em] transition-colors ${
           active
             ? 'bg-[var(--nfq-accent,#F48B4A)] text-black'
-            : 'bg-white/5 text-[color:var(--nfq-text-primary)]/70 hover:bg-white/10'
+            : 'bg-[var(--nfq-bg-elevated)]/40 text-[color:var(--nfq-text-primary)]/70 hover:bg-[var(--nfq-bg-elevated)]/60'
         }`}
       >
         {label}
@@ -271,7 +271,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
       </header>
 
       {/* Reconciliation banner */}
-      <div className="mb-5 rounded-[var(--nfq-radius-card)] bg-white/[0.04] p-4">
+      <div className="mb-5 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/40 p-4">
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-[color:var(--nfq-success)]" />
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/70">
@@ -298,7 +298,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
 
       {/* Date pickers for historical modes */}
       {queryMode !== 'CURRENT' && (
-        <div className="mb-5 flex flex-wrap gap-4 rounded-[var(--nfq-radius-card)] bg-white/[0.03] p-4">
+        <div className="mb-5 flex flex-wrap gap-4 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/40 p-4">
           <label className="flex flex-col gap-1">
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-primary)]/50">
               Valid at
@@ -307,7 +307,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
               type="date"
               value={validAt}
               onChange={(e) => setValidAt(e.target.value)}
-              className="rounded-md bg-white/5 px-3 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)]/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
+              className="rounded-md bg-[var(--nfq-bg-elevated)]/40 px-3 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)]/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
             />
           </label>
           {queryMode === 'BITEMPORAL' && (
@@ -319,7 +319,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                 type="date"
                 value={systemAt}
                 onChange={(e) => setSystemAt(e.target.value)}
-                className="rounded-md bg-white/5 px-3 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)]/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
+                className="rounded-md bg-[var(--nfq-bg-elevated)]/40 px-3 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)]/90 outline-none focus:ring-1 focus:ring-[var(--nfq-accent,#F48B4A)]"
               />
             </label>
           )}
@@ -327,7 +327,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
       )}
 
       {/* Lineage table */}
-      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] bg-white/[0.02]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/40">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[color:var(--nfq-border-ghost)] text-left">
@@ -377,7 +377,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                   <tr
                     key={entry.parameterId}
                     className={`border-b border-[color:var(--nfq-border-ghost)] last:border-b-0 ${
-                      idx % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]'
+                      idx % 2 === 0 ? 'bg-transparent' : 'bg-[var(--nfq-bg-elevated)]/40'
                     }`}
                   >
                     <td className="px-4 py-3">
@@ -432,7 +432,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                       <button
                         type="button"
                         onClick={() => openDrawer(entry.parameterId)}
-                        className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/80 transition-colors hover:bg-white/10"
+                        className="inline-flex items-center gap-1 rounded-md bg-[var(--nfq-bg-elevated)]/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:var(--nfq-text-primary)]/80 transition-colors hover:bg-[var(--nfq-bg-elevated)]/60"
                       >
                         Ver historial
                         <ChevronRight className="h-3 w-3" />
@@ -474,7 +474,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
               <button
                 type="button"
                 onClick={closeDrawer}
-                className="rounded-md p-1.5 text-[color:var(--nfq-text-primary)]/60 transition-colors hover:bg-white/5 hover:text-[color:var(--nfq-text-primary)]/90"
+                className="rounded-md p-1.5 text-[color:var(--nfq-text-primary)]/60 transition-colors hover:bg-[var(--nfq-bg-elevated)]/40 hover:text-[color:var(--nfq-text-primary)]/90"
                 aria-label="Cerrar"
               >
                 <X className="h-4 w-4" />
@@ -488,7 +488,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                   return (
                     <li
                       key={`${record.id}-v${record.version}`}
-                      className="relative rounded-[var(--nfq-radius-card)] bg-white/[0.03] p-4"
+                      className="relative rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/40 p-4"
                     >
                       <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">

@@ -162,7 +162,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-[color:var(--nfq-success)]" />
                 Approval Lens
@@ -173,7 +173,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               <div className="mt-1 text-xs text-[color:var(--nfq-text-muted)]">Auto-approval threshold currently enforced.</div>
             </div>
 
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
                 <Layers3 className="h-4 w-4 text-[color:var(--nfq-accent)]" />
                 Scenario Definition
@@ -184,7 +184,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
             </div>
 
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="nfq-label mb-1 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[color:var(--nfq-warning)]" />
                 Shock Pack
@@ -233,7 +233,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
           {selectedSnapshot ? (
             <>
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">Exposure</div>
                   <div className="mt-2 text-xl font-semibold text-[color:var(--nfq-text-primary)]">
                     {formatNominal(selectedSnapshot.totals.exposure)}
@@ -243,7 +243,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                     {formatNominal(delta.exposureDelta)}
                   </div>
                 </div>
-                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">Average RAROC</div>
                   <div className="mt-2 text-xl font-semibold text-[color:var(--nfq-text-primary)]">
                     {percentageFormatter.format(selectedSnapshot.totals.averageRaroc)}%
@@ -253,7 +253,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                     {percentageFormatter.format(delta.rarocDelta)}%
                   </div>
                 </div>
-                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+                <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">Average Client Rate</div>
                   <div className="mt-2 text-xl font-semibold text-[color:var(--nfq-text-primary)]">
                     {percentageFormatter.format(selectedSnapshot.totals.averageFinalRate)}%
@@ -284,7 +284,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                         className={`w-full rounded-[var(--nfq-radius-card)] border p-4 text-left transition ${
                           snapshot.id === selectedSnapshot.id
                             ? 'border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10'
-                            : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                            : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 hover:border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -326,7 +326,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
                     {selectedSnapshot.results.slice(0, 8).map((result) => (
                       <div
                         key={`${selectedSnapshot.id}-${result.dealId}`}
-                        className="grid grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-3 py-2 text-sm"
+                        className="grid grid-cols-[1.2fr_0.7fr_0.7fr_0.7fr] gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-3 py-2 text-sm"
                       >
                         <div>
                           <div className="truncate font-medium text-[color:var(--nfq-text-primary)]">{result.dealId}</div>
@@ -356,7 +356,7 @@ const PortfolioSnapshotsDashboard: React.FC<PortfolioSnapshotsDashboardProps> = 
               </div>
             </>
           ) : (
-            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-sm text-[color:var(--nfq-text-muted)]">
+            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-sm text-[color:var(--nfq-text-muted)]">
               No portfolio snapshot yet. Create one to freeze a governed pricing state for reporting and committee.
             </div>
           )}

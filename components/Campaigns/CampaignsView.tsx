@@ -259,7 +259,7 @@ const CampaignsView: React.FC = () => {
       )}
 
       {list.length === 0 && !loading ? (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
           {t.commercialCampaignsEmpty}
         </div>
       ) : (
@@ -275,7 +275,7 @@ const CampaignsView: React.FC = () => {
                 <div className="overflow-hidden rounded-lg border border-[color:var(--nfq-border-ghost)]">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
+                      <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
                         <th className="nfq-label text-[10px] px-3 py-2 text-left">Code</th>
                         <th className="nfq-label text-[10px] px-3 py-2 text-left">Name</th>
                         <th className="nfq-label text-[10px] px-3 py-2 text-left">Segment / Product</th>
@@ -359,6 +359,6 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
   </label>
 );
 const inputCls =
-  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-warning)] focus:outline-none';
+  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-2 py-1.5 font-mono text-xs text-[color:var(--nfq-text-primary)] focus:border-[color:var(--nfq-warning)] focus:outline-none';
 
 export default CampaignsView;

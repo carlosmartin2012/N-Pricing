@@ -48,7 +48,7 @@ const AttributionReportingView: React.FC = () => {
           <button
             type="button"
             onClick={() => refetch()}
-            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-white/5"
+            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40"
           >
             <RefreshCw className={`h-3 w-3 ${isFetching ? 'animate-spin' : ''}`} />
             <span>{t.retry}</span>

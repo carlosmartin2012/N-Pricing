@@ -56,7 +56,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-      <div className="relative rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/30 p-4 lg:col-span-8">
+      <div className="relative rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/30 p-4 lg:col-span-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h4 className="flex items-center gap-3 text-lg font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
@@ -116,7 +116,7 @@ const FundingCurvesDashboard: React.FC<Props> = ({
       </div>
 
       <div className="space-y-6 lg:col-span-4">
-        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
           <h5 className="nfq-label mb-4">Summary Yield/Spread</h5>
           <div className="space-y-4">
             {summaryItems.map(item => (
@@ -149,10 +149,10 @@ const FundingCurvesDashboard: React.FC<Props> = ({
               <span className="text-[10px] uppercase text-[color:var(--nfq-text-muted)]">Wtd. LP Gap</span>
               <span className="font-mono text-[11px] font-bold">+4.2 bps</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--nfq-bg-elevated)]/40">
               <div className="h-full w-[72%] bg-[var(--nfq-accent)] shadow-[0_0_10px_#06b6d4]" />
             </div>
-            <p className="mt-2 text-[9px] italic text-[color:var(--nfq-text-faint)]">
+            <p className="mt-2 text-[9px] text-[color:var(--nfq-text-faint)]">
               * Analysis relative to 100% of the active portfolio notional.
             </p>
           </div>

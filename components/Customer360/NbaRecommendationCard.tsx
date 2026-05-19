@@ -43,7 +43,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
   const onConsume = (id: string) => consumeMutation.mutate(id);
 
   return (
-    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-[color:var(--nfq-cat-d)]" />
@@ -70,7 +70,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
         {recs.map((r) => (
           <li
             key={r.id}
-            className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-3 space-y-2"
+            className="rounded border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3 space-y-2"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -100,7 +100,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
                 {r.reasonCodes.map((code) => (
                   <span
                     key={code}
-                    className="rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-[color:var(--nfq-text-secondary)]"
+                    className="rounded bg-[var(--nfq-bg-elevated)]/60 px-2 py-0.5 font-mono text-[9px] text-[color:var(--nfq-text-secondary)]"
                   >
                     {REASON_LABEL[code] ?? code}
                   </span>

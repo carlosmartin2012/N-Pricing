@@ -25,7 +25,7 @@ export const PricingLineageDrawer: React.FC<Props> = ({ isOpen, onClose, lineage
     <Drawer isOpen={isOpen} onClose={onClose} title="Pricing Lineage" size="md">
       <div className="space-y-1 p-4">
         {dealId && (
-          <div className="mb-4 rounded-lg bg-white/5 px-4 py-3">
+          <div className="mb-4 rounded-lg bg-[var(--nfq-bg-elevated)]/40 px-4 py-3">
             <span className="nfq-label text-[10px]">DEAL ID</span>
             <div className="font-mono text-sm text-[color:var(--nfq-text-primary)]">{dealId}</div>
           </div>
@@ -43,7 +43,7 @@ export const PricingLineageDrawer: React.FC<Props> = ({ isOpen, onClose, lineage
                   <step.icon size={16} />
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="mt-1 h-full w-[1px] bg-white/10" />
+                  <div className="mt-1 h-full w-[1px] bg-[var(--nfq-bg-elevated)]/60" />
                 )}
               </div>
 

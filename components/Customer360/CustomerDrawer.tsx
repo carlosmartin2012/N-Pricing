@@ -46,7 +46,7 @@ const CustomerDrawer: React.FC = () => {
       />
 
       {/* Drawer */}
-      <aside className="relative flex h-full w-full max-w-[640px] flex-col overflow-hidden border-l border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] shadow-[0_0_60px_rgba(0,0,0,0.45)] animate-in slide-in-from-right duration-150">
+      <aside className="relative flex h-full w-full max-w-[640px] flex-col overflow-hidden border-l border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-root)] shadow-[var(--nfq-shadow-dialog)] animate-in slide-in-from-right duration-150">
         <header className="flex items-center justify-between border-b border-[var(--nfq-border-ghost)] px-5 py-3">
           <div className="flex items-center gap-2">
             <span className="nfq-label">Customer 360</span>

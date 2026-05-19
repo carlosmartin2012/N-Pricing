@@ -87,7 +87,7 @@ const CustomerPricingView: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search clients..."
-              className="w-full rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] py-2 pl-8 pr-3 font-mono text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-[color:var(--nfq-success)] focus:outline-none"
+              className="w-full rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 py-2 pl-8 pr-3 font-mono text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-faint)] focus:border-[color:var(--nfq-success)] focus:outline-none"
             />
           </div>
           <ul className="max-h-[70vh] space-y-1 overflow-y-auto">
@@ -100,7 +100,7 @@ const CustomerPricingView: React.FC = () => {
                     className={`block w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                       active
                         ? 'border-[color:var(--nfq-success)]/50 bg-[var(--nfq-success)]/5'
-                        : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.02] hover:border-[color:var(--nfq-border-ghost)]'
+                        : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 hover:border-[color:var(--nfq-border-ghost)]'
                     }`}
                   >
                     <div className={`font-medium ${active ? 'text-[color:var(--nfq-text-primary)]' : 'text-[color:var(--nfq-text-secondary)]'}`}>{c.name}</div>
@@ -112,7 +112,7 @@ const CustomerPricingView: React.FC = () => {
               );
             })}
             {filtered.length === 0 && (
-              <li className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-3 py-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
+              <li className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-3 py-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
                 No clients match.
               </li>
             )}
@@ -122,7 +122,7 @@ const CustomerPricingView: React.FC = () => {
         <section className="space-y-4">
           {selectedId ? (
             <>
-              <nav className="flex flex-wrap gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-1">
+              <nav className="flex flex-wrap gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-1">
                 {TABS.map(({ id, label, icon: Icon }) => {
                   const isActive = activeTab === id;
                   return (
@@ -132,7 +132,7 @@ const CustomerPricingView: React.FC = () => {
                       onClick={() => setActiveTab(id)}
                       className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-[11px] font-mono tracking-normal transition-colors ${
                         isActive
-                          ? 'bg-white/[0.08] text-[color:var(--nfq-text-primary)]'
+                          ? 'bg-[var(--nfq-bg-elevated)]/60 text-[color:var(--nfq-text-primary)]'
                           : 'text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-secondary)]'
                       }`}
                     >
@@ -149,7 +149,7 @@ const CustomerPricingView: React.FC = () => {
               {activeTab === 'nba'      && <NbaRecommendationCard clientId={selectedId} />}
             </>
           ) : (
-            <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
+            <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
               Select a client to see their relationship.
             </div>
           )}

@@ -188,7 +188,7 @@ const DiffCard: React.FC<{
           <button
             type="button"
             onClick={handleCancel}
-            className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[color:var(--nfq-text-secondary)] hover:bg-white/5 transition-colors"
+            className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-[color:var(--nfq-text-secondary)] hover:bg-[var(--nfq-bg-elevated)]/40 transition-colors"
           >
             Cancel
           </button>

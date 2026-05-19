@@ -223,7 +223,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
           >
             {isExporting ? (
               <>
-                <div className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
+                <div className="h-3 w-3 animate-spin rounded-full border border-[color:var(--nfq-border-ghost)] border-t-white" />
                 Exporting...
               </>
             ) : (

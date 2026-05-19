@@ -58,7 +58,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 
   if (!clientId) {
     return (
-      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-[color:var(--nfq-text-faint)]">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-[11px] text-[color:var(--nfq-text-faint)]">
         {t.clvImpactSelectClient}
       </div>
     );
@@ -66,7 +66,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 
   if (!candidateReady(candidate)) {
     return (
-      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-[color:var(--nfq-text-faint)]">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-[11px] text-[color:var(--nfq-text-faint)]">
         {t.clvImpactIncompleteDeal}
       </div>
     );
@@ -78,7 +78,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
   const accent = positive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]';
 
   return (
-    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 space-y-3">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 space-y-3">
       <header className="flex items-center gap-2">
         <Zap className="h-4 w-4 text-[color:var(--nfq-warning)]" />
         <span className="nfq-label text-[10px] text-[color:var(--nfq-text-secondary)]">{t.clvImpactTitle}</span>
@@ -88,15 +88,15 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
       {result && (
         <>
           <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
-            <div className="rounded bg-white/[0.02] p-2">
+            <div className="rounded bg-[var(--nfq-bg-elevated)]/40 p-2">
               <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{t.clvImpactBefore}</div>
               <div className="text-[color:var(--nfq-text-secondary)]">{fmtEur(result.before.clvPointEur)}</div>
             </div>
-            <div className="rounded bg-white/[0.02] p-2">
+            <div className="rounded bg-[var(--nfq-bg-elevated)]/40 p-2">
               <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{t.clvImpactAfter}</div>
               <div className="text-[color:var(--nfq-text-secondary)]">{fmtEur(result.impact.clvAfterEur)}</div>
             </div>
-            <div className="rounded bg-white/[0.02] p-2">
+            <div className="rounded bg-[var(--nfq-bg-elevated)]/40 p-2">
               <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{t.clvImpactDelta}</div>
               <div className={`flex items-center gap-1 font-bold ${accent}`}>
                 <Arrow className="h-3 w-3" />
@@ -125,7 +125,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 const Contrib: React.FC<{ label: string; value: number }> = ({ label, value }) => {
   const positive = value >= 0;
   return (
-    <div className="rounded bg-white/[0.02] p-2">
+    <div className="rounded bg-[var(--nfq-bg-elevated)]/40 p-2">
       <div className="nfq-label text-[9px] text-[color:var(--nfq-text-muted)]">{label}</div>
       <div className={`font-mono text-[11px] font-bold ${positive ? 'text-[color:var(--nfq-success)]' : 'text-[color:var(--nfq-danger)]'}`}>
         {fmtEur(value)}

@@ -115,7 +115,7 @@ const PnlAttribution: React.FC<Props> = React.memo(({ deals, products, businessU
             color: totals.netMargin >= 0 ? 'text-[color:var(--nfq-accent)]' : 'text-[color:var(--nfq-danger)]',
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">
+          <div key={kpi.label} className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
             <div className="mb-1 text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)]">{kpi.label}</div>
             <div className={`text-lg font-mono font-bold ${kpi.color}`}>{fmtM(kpi.value)}</div>
           </div>

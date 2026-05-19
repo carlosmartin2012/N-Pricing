@@ -101,7 +101,7 @@ const HealthDashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">
         {summary?.latencySampleCount24h
           ? `${t.healthMetricsWindow} ${summary.latencySampleCount24h} ${t.healthLatencySamples}.`
           : t.noHealthMetrics}
@@ -127,7 +127,7 @@ const HealthDashboard: React.FC = () => {
           {summary ? ` · ${summary.activeAlertRules} ${t.active.toLowerCase()}` : ''}
         </h3>
         {alertRules.length === 0 ? (
-          <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-6 py-8 text-center">
+          <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-6 py-8 text-center">
             <AlertTriangle className="h-8 w-8 text-[color:var(--nfq-text-faint)] mx-auto mb-2" />
             <p className="text-sm text-[color:var(--nfq-text-muted)]">{t.noAlertRules}</p>
             <p className="text-xs text-[color:var(--nfq-text-faint)] mt-1">
@@ -138,7 +138,7 @@ const HealthDashboard: React.FC = () => {
           <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
+                <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
                   <th className="nfq-label text-[10px] text-left px-4 py-2">{t.name}</th>
                   <th className="nfq-label text-[10px] text-left px-4 py-2">{t.metric}</th>
                   <th className="nfq-label text-[10px] text-left px-4 py-2">{t.condition}</th>

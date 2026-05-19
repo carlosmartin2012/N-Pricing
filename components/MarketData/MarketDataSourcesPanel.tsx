@@ -92,7 +92,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
       <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">
                 <DatabaseZap className="h-4 w-4 text-[color:var(--nfq-accent)]" />
                 Active Capture Context
@@ -106,7 +106,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
               </div>
             </div>
 
-            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
               <div className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">
                 <Sparkles className="h-4 w-4 text-[color:var(--nfq-success)]" />
                 Governance Intent
@@ -209,7 +209,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
 
           <div className="space-y-3">
             {yieldCurveSources.length === 0 ? (
-              <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-sm text-[color:var(--nfq-text-muted)]">
+              <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-sm text-[color:var(--nfq-text-muted)]">
                 No governed source yet. You can still save a curve, but provenance will be weaker until a source is
                 registered.
               </div>
@@ -226,7 +226,7 @@ const MarketDataSourcesPanel: React.FC<MarketDataSourcesPanelProps> = ({
                     className={`w-full rounded-[var(--nfq-radius-card)] border p-4 text-left transition ${
                       isSelected
                         ? 'border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10'
-                        : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                        : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 hover:border-[color:var(--nfq-border-ghost)] hover:bg-[var(--nfq-bg-elevated)]/40'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">

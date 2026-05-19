@@ -221,7 +221,7 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
               FTP Analytics <span className="text-[color:var(--nfq-text-faint)] font-normal">v4.6</span>
             </h2>
           </div>
-          <div className="hidden xl:block h-4 w-[1px] bg-white/10" />
+          <div className="hidden xl:block h-4 w-[1px] bg-[var(--nfq-bg-elevated)]/60" />
           <nav className="nfq-tab-list">
             {TAB_GROUPS.map((group, gi) => (
               <React.Fragment key={gi}>
@@ -272,19 +272,19 @@ const ReportingDashboard: React.FC<ReportingDashboardProps> = ({ initialTab }) =
               <div className="absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-lg bg-[var(--nfq-bg-surface)] border border-[var(--nfq-border-ghost)] shadow-xl py-1">
                 <button
                   onClick={handleExportLCR}
-                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-[var(--nfq-bg-elevated)]/40 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
                 >
                   {t.exportLCR}
                 </button>
                 <button
                   onClick={handleExportNSFR}
-                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-[var(--nfq-bg-elevated)]/40 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
                 >
                   {t.exportNSFR}
                 </button>
                 <button
                   onClick={handleExportIRRBB}
-                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-white/5 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
+                  className="w-full text-left px-4 py-2 text-xs font-mono hover:bg-[var(--nfq-bg-elevated)]/40 text-[color:var(--nfq-text-secondary)] hover:text-[color:var(--nfq-text-primary)] transition-colors"
                 >
                   {t.exportIRRBB}
                 </button>

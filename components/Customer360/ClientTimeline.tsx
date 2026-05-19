@@ -52,7 +52,7 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
   }, [events]);
 
   return (
-    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-[color:var(--nfq-cat-a)]" />
@@ -77,7 +77,7 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
                 const Icon = meta.icon;
                 return (
                   <li key={e.id} className="relative flex items-start gap-3">
-                    <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-white/30" />
+                    <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-[var(--nfq-bg-elevated)]/80" />
                     <Icon className={`h-3.5 w-3.5 shrink-0 ${meta.tone}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 text-xs">

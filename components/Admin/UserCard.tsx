@@ -49,7 +49,7 @@ export const UserCard: React.FC<Props> = React.memo(({
             {getUserInitials(user.name)}
           </div>
           {isOnline && (
-            <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-slate-950 bg-[var(--nfq-success)] shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 animate-pulse rounded-full border-2 border-[var(--nfq-bg-root)] bg-[var(--nfq-success)] shadow-[0_0_8px_rgba(var(--nfq-success-rgb),0.5)]" />
           )}
         </div>
         <div>

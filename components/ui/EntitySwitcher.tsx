@@ -35,7 +35,7 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-white/5"
+        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-[var(--nfq-bg-elevated)]/40"
         aria-label={labels.entitySwitcher}
       >
         {isGroupScope ? (
@@ -58,7 +58,7 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
           {availableEntities.length > 1 && (
             <button
               onClick={() => { setGroupScope(true); setIsOpen(false); }}
-              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/5 ${
+              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-[var(--nfq-bg-elevated)]/40 ${
                 isGroupScope ? 'bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]' : ''
               }`}
             >
@@ -71,8 +71,8 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
             <button
               key={entity.id}
               onClick={() => { switchEntity(entity.id); setIsOpen(false); }}
-              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/5 ${
-                !isGroupScope && activeEntity?.id === entity.id ? 'bg-white/5' : ''
+              className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-[var(--nfq-bg-elevated)]/40 ${
+                !isGroupScope && activeEntity?.id === entity.id ? 'bg-[var(--nfq-bg-elevated)]/40' : ''
               }`}
             >
               <div

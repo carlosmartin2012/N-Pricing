@@ -129,14 +129,14 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
               Positions ({data.positions.length})
             </h4>
             {data.positions.length === 0 ? (
-              <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-xs text-[color:var(--nfq-text-muted)]">
+              <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-xs text-[color:var(--nfq-text-muted)]">
                 No positions on file.
               </div>
             ) : (
               <div className="overflow-x-auto rounded-lg border border-[color:var(--nfq-border-ghost)]">
                 <table className="w-full min-w-[480px] text-sm">
                   <thead>
-                    <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
+                    <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40">
                       <th className="nfq-label text-[10px] px-3 py-2 text-left">Product</th>
                       <th className="nfq-label text-[10px] px-3 py-2 text-left">Cat</th>
                       <th className="nfq-label text-[10px] px-3 py-2 text-right">Amount</th>
@@ -185,7 +185,7 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
               </h4>
               <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {data.applicableTargets.map((tgt) => (
-                  <li key={tgt.id} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+                  <li key={tgt.id} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
                     <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase text-[color:var(--nfq-text-muted)]">
                       <span>{tgt.segment} · {tgt.productType} · {tgt.currency}</span>
                       <span>{tgt.period}</span>
@@ -218,19 +218,19 @@ const CustomerRelationshipPanel: React.FC<Props> = ({ clientId }) => {
                 Latest metrics ({data.metrics.latest.period})
               </h4>
               <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
                   <dt className="nfq-label text-[10px]">NIM</dt>
                   <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">{fmtBps(data.metrics.latest.nimBps)}</dd>
                 </div>
-                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
                   <dt className="nfq-label text-[10px]">Fees</dt>
                   <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">{fmtEur(data.metrics.latest.feesEur)}</dd>
                 </div>
-                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
                   <dt className="nfq-label text-[10px]">EVA</dt>
                   <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">{fmtEur(data.metrics.latest.evaEur)}</dd>
                 </div>
-                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-3">
                   <dt className="nfq-label text-[10px]">NPS</dt>
                   <dd className="font-mono tabular-nums text-base text-[color:var(--nfq-text-primary)]">
                     {data.metrics.latest.npsScore ?? '—'}

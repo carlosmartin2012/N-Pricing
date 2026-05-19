@@ -131,7 +131,7 @@ export const UserConfigModal: React.FC<UserConfigModalProps> = ({
 
                     {/* Contrast Note */}
                     <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
-                        <p className="text-xs italic leading-relaxed text-[color:var(--nfq-text-muted)]">
+                        <p className="text-xs leading-relaxed text-[color:var(--nfq-text-muted)]">
                             {t.configNote}
                         </p>
                     </div>
