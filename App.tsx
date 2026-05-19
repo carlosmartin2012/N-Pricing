@@ -182,25 +182,20 @@ const AppContent: React.FC = () => {
     return all.find((d) => d.path === location.pathname)?.label;
   }, [auxDestinations, bottomNavItems, location.pathname, mainNavItems]);
 
-  // Hero compaction: tool views (Calculator and siblings) get a 1-line hero
-  // so the work surface starts at ~140px instead of ~600px. Dashboard views
-  // keep the spacious hero. The KPI strip moves inline next to the title in
-  // compact mode.
-  const COMPACT_HERO_VIEWS: ReadonlySet<string> = new Set([
-    'CALCULATOR',
-    'RAROC',
-    'SHOCKS',
-    'STRESS_PRICING',
-    'WHAT_IF',
-    'TARGET_GRID',
-    'GOV_SNAPSHOTS',
-    'ESCALATIONS',
-    'ATTRIBUTION_MATRIX',
-    'ATTRIBUTION_REPORTING',
-    'BUDGET_RECONCILIATION',
-    'RECONCILIATION',
+  // Hero compaction: COMPACT is the default for every view so work surfaces
+  // start at ~140px instead of ~600px. Only the Control Room dashboard keeps
+  // the spacious big hero because its primary content IS the system-wide KPIs
+  // displayed up there — anywhere else, the universal "Governed pricing,
+  // methodology control..." subtitle and the 4 universal KPI tiles compete
+  // with the actual view content for no informational value.
+  //
+  // The KPI strip is rendered inline next to the title in compact mode so
+  // the operating-shell metrics stay accessible at a glance without consuming
+  // a quarter of the viewport.
+  const BIG_HERO_VIEWS: ReadonlySet<string> = new Set([
+    'CONTROL_ROOM',
   ]);
-  const compactHero = COMPACT_HERO_VIEWS.has(ui.currentView);
+  const compactHero = !BIG_HERO_VIEWS.has(ui.currentView);
 
   if (!isAuthenticated) {
     return (
@@ -273,7 +268,7 @@ const AppContent: React.FC = () => {
 
             <div className="relative z-10 flex h-full min-h-0 flex-col gap-4">
               {compactHero ? (
-                <section className="rounded-[18px] bg-[var(--nfq-bg-surface)] px-4 py-3 shadow-[var(--nfq-shadow-platform)] md:px-5 md:py-3">
+                <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] px-4 py-3 shadow-[var(--nfq-shadow-platform)] md:px-5 md:py-3">
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <div className="flex min-w-0 items-baseline gap-3">
                       <h1 className="text-xl font-semibold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)] md:text-2xl">
@@ -300,7 +295,7 @@ const AppContent: React.FC = () => {
                       </span>
                       <span className="flex items-baseline gap-1.5">
                         <span className="nfq-label text-[10px]">{ui.t.workspaceAiTraces}</span>
-                        <span className="font-semibold text-violet-300">
+                        <span className="font-semibold text-[color:var(--nfq-cat-d)]">
                           {data.pricingDossiers.reduce(
                             (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
                             0
@@ -311,7 +306,7 @@ const AppContent: React.FC = () => {
                   </div>
                 </section>
               ) : (
-                <section className="rounded-[28px] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)] md:px-7 md:py-6">
+                <section className="rounded-[var(--nfq-radius-xl)] bg-[var(--nfq-bg-surface)] px-5 py-5 shadow-[var(--nfq-shadow-platform)] md:px-7 md:py-6">
                   <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                     <div className="max-w-3xl">
                       <div className="nfq-eyebrow">{ui.t.workspaceEyebrow}</div>
@@ -326,7 +321,7 @@ const AppContent: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] px-4 py-4">
                         <div className="nfq-label">{ui.t.workspaceDeals}</div>
                         <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
                           {data.deals.length}
@@ -335,7 +330,7 @@ const AppContent: React.FC = () => {
                           {data.dataMode === 'demo' ? ui.t.workspaceDemoBook : ui.t.workspaceLiveBook}
                         </div>
                       </div>
-                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] px-4 py-4">
                         <div className="nfq-label">{ui.t.workspacePending}</div>
                         <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-warning)]">
                           {data.deals.filter((deal) => deal.status === 'Pending_Approval').length}
@@ -344,7 +339,7 @@ const AppContent: React.FC = () => {
                           {ui.t.workspaceApprovalQueue}
                         </div>
                       </div>
-                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] px-4 py-4">
                         <div className="nfq-label">{ui.t.workspaceSnapshots}</div>
                         <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-accent)]">
                           {data.portfolioSnapshots.length}
@@ -353,9 +348,9 @@ const AppContent: React.FC = () => {
                           {ui.t.workspacePortfolioFrames}
                         </div>
                       </div>
-                      <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-4 py-4">
+                      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] px-4 py-4">
                         <div className="nfq-label">{ui.t.workspaceAiTraces}</div>
-                        <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-violet-300">
+                        <div className="font-mono-nums mt-3 text-[28px] font-bold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-cat-d)]">
                           {data.pricingDossiers.reduce(
                             (count, dossier) => count + (dossier.aiResponseTraces?.length || 0),
                             0
