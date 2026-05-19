@@ -97,7 +97,7 @@ export function getAuditActionTextClass(action: string) {
     case 'DELETE':
       return 'text-rose-400';
     case 'ACCESS':
-      return 'text-cyan-400';
+      return 'text-[color:var(--nfq-accent)]';
     case 'TEST':
       return 'text-violet-400';
     case 'EXPORT':

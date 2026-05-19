@@ -250,7 +250,7 @@ const ToleranceBandEditor: React.FC = () => {
       {/* Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-[color:var(--nfq-accent)]" />
         </div>
       ) : (
         <div className="overflow-auto">

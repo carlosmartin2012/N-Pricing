@@ -159,7 +159,7 @@ describe('getStatusColor', () => {
     expect(getStatusColor('Pending')).toContain('amber');
     expect(getStatusColor('Review')).toContain('blue');
     expect(getStatusColor('Approved')).toContain('emerald');
-    expect(getStatusColor('Booked')).toContain('cyan');
+    expect(getStatusColor('Booked')).toContain('nfq-accent');
     expect(getStatusColor('Rejected')).toContain('red');
     expect(getStatusColor('Unknown')).toContain('slate');
   });

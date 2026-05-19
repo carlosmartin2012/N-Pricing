@@ -73,7 +73,7 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
                       ? 'border-amber-900/50 bg-amber-900/20 text-[color:var(--nfq-warning)]'
                       : entry.type === 'DEPOSIT'
                         ? 'border-rose-900/50 bg-rose-900/20 text-[color:var(--nfq-danger)]'
-                        : 'border-cyan-900/50 bg-[var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]'
+                        : 'border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]'
                   }`}
                 >
                   <div className="font-bold">{labels.unitCredit}</div>
@@ -120,7 +120,7 @@ export const AccountingEntryDetail: React.FC<Props> = ({ entry }) => {
         </div>
       </Panel>
 
-      <Panel title={`Central Treasury (ALM) — ${entry.currency}`} className="border-l-4 border-l-cyan-500">
+      <Panel title={`Central Treasury (ALM) — ${entry.currency}`} className="border-l-4 border-l-[color:var(--nfq-accent)]">
         <div className="flex h-full flex-col p-4">
           <div className="relative flex-1 rounded-lg border border-slate-800 bg-[var(--nfq-bg-root)] p-4">
             <div className="absolute -top-3 left-4 bg-[var(--nfq-bg-elevated)] px-2 text-xs font-bold text-[color:var(--nfq-accent)]">

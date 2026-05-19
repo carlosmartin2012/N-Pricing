@@ -69,7 +69,7 @@ export const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP'] as const;
 
 /** Color map for active tab highlight (Tailwind classes) */
 export const TAB_ACTIVE_STYLES: Record<TabDefinition['activeColor'], string> = {
-  cyan: 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]',
+  cyan: 'bg-[var(--nfq-accent)] text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]',
   emerald: 'bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]',
   purple: 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]',
 };

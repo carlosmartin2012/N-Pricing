@@ -194,7 +194,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                     {/* STEP 2: PARSING */}
                     {status === 'parsing' && (
                         <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                            <div className="w-12 h-10 border-4 border-[color:var(--nfq-accent)]/20 border-t-cyan-500 rounded-full animate-spin"></div>
+                            <div className="w-12 h-10 border-4 border-[color:var(--nfq-accent)]/20 border-t-[color:var(--nfq-accent)] rounded-full animate-spin"></div>
                             <div className="text-center">
                                 <h3 className="text-lg font-bold text-[color:var(--nfq-text-primary)]">{t.analyzingFile}</h3>
                                 <p className="text-sm text-[color:var(--nfq-text-faint)]">{t.validatingFormat}</p>
@@ -294,7 +294,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                         <button
                             onClick={handleConfirmImport}
                             disabled={status === 'importing'}
-                            className={`px-8 py-2 rounded-lg text-sm font-bold flex items-center gap-2 ${status === 'importing' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)] cursor-not-allowed' : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)] shadow-lg shadow-cyan-500/20'}`}
+                            className={`px-8 py-2 rounded-lg text-sm font-bold flex items-center gap-2 ${status === 'importing' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)] cursor-not-allowed' : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)] shadow-lg shadow-[color:var(--nfq-accent)]/20'}`}
                         >
                             {status === 'importing' ? t.importing : t.completeImport}
                             {status !== 'importing' && <CheckCircle2 size={16} />}

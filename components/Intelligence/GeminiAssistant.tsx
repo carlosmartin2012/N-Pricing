@@ -159,7 +159,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
     <div className="fixed bottom-20 right-6 w-96 h-[600px] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right-10 fade-in duration-300">
       <div className="absolute inset-0 bg-[var(--nfq-bg-root)]/95 backdrop-blur-xl border border-[color:var(--nfq-accent)]/30 rounded-lg shadow-[0_0_40px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="h-10 border-b border-cyan-900/50 bg-cyan-950/20 flex items-center justify-between px-4 shrink-0">
+        <div className="h-10 border-b border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/10 flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-2 text-[color:var(--nfq-accent)]">
             <Sparkles size={16} className="animate-pulse" />
             <span className="font-bold text-sm tracking-wider uppercase">Gemini Intelligence</span>
@@ -186,7 +186,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
         <div className="border-b border-slate-800 bg-[var(--nfq-bg-root)]/70 px-4 py-2">
           <div className="flex flex-wrap gap-2">
             {grounding.groundedContext.dossierId && (
-              <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
+              <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-[var(--nfq-accent)]/10/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
                 DOS {grounding.groundedContext.dossierId}
               </span>
             )}
@@ -215,7 +215,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${
                   msg.role === 'model'
-                    ? 'bg-[var(--nfq-bg-elevated)] border-cyan-900 text-[color:var(--nfq-accent)]'
+                    ? 'bg-[var(--nfq-bg-elevated)] border-[color:var(--nfq-accent)]/30 text-[color:var(--nfq-accent)]'
                     : 'bg-[var(--nfq-bg-highest)] border-slate-700 text-[color:var(--nfq-text-secondary)]'
                 }`}
               >
@@ -225,7 +225,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
                 className={`p-3 rounded-lg text-xs leading-relaxed max-w-[80%] ${
                   msg.role === 'model'
                     ? 'bg-[var(--nfq-bg-elevated)]/50 border border-slate-800 text-[color:var(--nfq-text-secondary)]'
-                    : 'bg-cyan-950/30 border border-cyan-900/50 text-[color:var(--nfq-accent)]'
+                    : 'bg-[var(--nfq-accent)]/15 border border-[color:var(--nfq-accent)]/20 text-[color:var(--nfq-accent)]'
                 }`}
               >
                 {msg.text}
@@ -234,7 +234,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
           ))}
           {isThinking && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-[var(--nfq-bg-elevated)] border border-cyan-900 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[var(--nfq-bg-elevated)] border border-[color:var(--nfq-accent)]/30 flex items-center justify-center shrink-0">
                 <Bot size={16} className="text-[color:var(--nfq-accent)]" />
               </div>
               <div className="p-3 rounded-lg bg-[var(--nfq-bg-elevated)]/50 border border-slate-800">

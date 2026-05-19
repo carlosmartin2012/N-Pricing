@@ -237,7 +237,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                   <div
                     key={key}
                     onClick={() => onDateChange(date)}
-                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-cyan-50 dark:bg-[var(--nfq-accent)]/20' : ''}`}
+                    className={`flex cursor-pointer items-center justify-between border-b border-slate-100 p-3 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-[var(--nfq-bg-highest)]/50 ${selectedDate === date ? 'bg-[var(--nfq-accent)]/5 dark:bg-[var(--nfq-accent)]/20' : ''}`}
                   >
                     <div className="flex items-center gap-2">
                       <FileCheck size={14} className="text-[color:var(--nfq-success)]" />

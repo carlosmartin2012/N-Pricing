@@ -51,7 +51,7 @@ const BlotterHeaderActions: React.FC<Props> = ({
     <button
       onClick={onNewDeal}
       disabled={!canMutate}
-      className="px-3 py-1.5 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded text-xs flex items-center gap-1 transition-colors font-bold shadow-lg shadow-cyan-900/20 disabled:cursor-not-allowed disabled:opacity-40"
+      className="px-3 py-1.5 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded text-xs flex items-center gap-1 transition-colors font-bold shadow-lg shadow-[color:var(--nfq-accent)]/30 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <Plus size={14} /> <span className="hidden sm:inline">New Deal</span>
     </button>

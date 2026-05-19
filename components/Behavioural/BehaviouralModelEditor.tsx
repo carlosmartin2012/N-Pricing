@@ -100,7 +100,7 @@ const BehaviouralModelEditor: React.FC<Props> = ({
               </h5>
               <button
                 onClick={onAddTranche}
-                className="flex items-center gap-1 rounded border border-cyan-900/50 bg-cyan-950/30 px-2 py-1 text-[10px] font-bold text-[color:var(--nfq-accent)] hover:text-[color:var(--nfq-accent)]"
+                className="flex items-center gap-1 rounded border border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/15 px-2 py-1 text-[10px] font-bold text-[color:var(--nfq-accent)] hover:text-[color:var(--nfq-accent)]"
               >
                 <Plus size={10} /> Add Tranche
               </button>

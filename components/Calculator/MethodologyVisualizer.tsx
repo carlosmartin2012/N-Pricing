@@ -44,11 +44,11 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
 
                      {/* Step 1: Product */}
                      <div className="flex items-center gap-3 text-sm">
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('LOAN') ? 'border-[color:var(--nfq-accent)] bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('LOAN') ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            L
                         </div>
                         <ArrowRight size={14} className="text-[color:var(--nfq-text-faint)]" />
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('DEP') ? 'border-[color:var(--nfq-accent)] bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${deal.productType.includes('DEP') ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            D
                         </div>
                         <div className="ml-auto text-xs font-mono text-[color:var(--nfq-text-muted)]">
@@ -58,11 +58,11 @@ const MethodologyVisualizer: React.FC<Props> = ({ deal, matchedMethod }) => {
 
                      {/* Step 2: Tenor */}
                      <div className="flex items-center gap-3 text-sm mt-2">
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${!isShortTerm ? 'border-[color:var(--nfq-accent)] bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${!isShortTerm ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            &gt;1Y
                         </div>
                         <ArrowRight size={14} className="text-[color:var(--nfq-text-faint)]" />
-                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${isShortTerm ? 'border-[color:var(--nfq-accent)] bg-cyan-950/30 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
+                        <div className={`w-8 h-8 rounded border flex items-center justify-center ${isShortTerm ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/15 text-[color:var(--nfq-accent)]' : 'border-slate-600 text-[color:var(--nfq-text-faint)]'}`}>
                            &lt;1Y
                         </div>
                         <div className="ml-auto text-xs font-mono text-[color:var(--nfq-text-muted)]">

@@ -33,7 +33,7 @@ export const ChatMessageList: React.FC<Props> = ({ messages, isThinking, scrollR
             {message.role === 'model' && message.trace && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {message.trace.groundedContext.dossierId && (
-                  <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-cyan-950/40 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
+                  <span className="rounded-full border border-[color:var(--nfq-accent)]/60 bg-[var(--nfq-accent)]/15 px-2 py-1 font-mono text-[10px] text-[color:var(--nfq-accent)]">
                     DOS {message.trace.groundedContext.dossierId}
                   </span>
                 )}

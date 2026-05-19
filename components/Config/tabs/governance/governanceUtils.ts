@@ -9,7 +9,7 @@ import type {
 export const statusTone: Record<MethodologyChangeStatus, string> = {
   Pending_Review: 'border-amber-900/50 bg-amber-950/20 text-amber-200',
   Approved: 'border-emerald-900/50 bg-emerald-950/20 text-emerald-200',
-  Applied: 'border-cyan-900/50 bg-cyan-950/20 text-cyan-200',
+  Applied: 'border-[color:var(--nfq-accent)]/20 bg-[var(--nfq-accent)]/10 text-[color:var(--nfq-accent)]',
   Rejected: 'border-rose-900/50 bg-rose-950/20 text-rose-200',
   Rolled_Back: 'border-slate-700 bg-slate-900 text-slate-300',
 };

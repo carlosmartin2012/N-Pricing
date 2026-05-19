@@ -170,7 +170,7 @@ const UserManual: React.FC = () => {
             {/* Introduction */}
             <section id="intro" className="space-y-4 pt-4">
               <div className="mb-2 flex items-center gap-3">
-                <div className="rounded-lg border border-cyan-900 bg-cyan-950 p-2 text-[color:var(--nfq-accent)]">
+                <div className="rounded-lg border border-[color:var(--nfq-accent)]/30 bg-[var(--nfq-accent)]/10 p-2 text-[color:var(--nfq-accent)]">
                   <BookOpen size={24} />
                 </div>
                 <h2 className="text-3xl font-bold text-[color:var(--nfq-text-primary)]">

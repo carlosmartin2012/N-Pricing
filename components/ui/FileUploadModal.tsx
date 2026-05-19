@@ -171,7 +171,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             onDragOver={handleDrag}
                             onDrop={handleDrop}
                             onClick={() => fileInputRef.current?.click()}
-                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-[color:var(--nfq-accent)] bg-cyan-950/20' : 'border-slate-700 hover:border-slate-600 hover:bg-[var(--nfq-bg-highest)]/50'
+                            className={`border-2 border-dashed rounded-[var(--nfq-radius-card)] p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${isDragging ? 'border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)]/10' : 'border-slate-700 hover:border-slate-600 hover:bg-[var(--nfq-bg-highest)]/50'
                                 }`}
                         >
                             <input
@@ -184,7 +184,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
 
                             {status === 'parsing' ? (
                                 <div className="flex flex-col items-center">
-                                    <div className="w-12 h-10 border-4 border-[color:var(--nfq-accent)]/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
+                                    <div className="w-12 h-10 border-4 border-[color:var(--nfq-accent)]/20 border-t-[color:var(--nfq-accent)] rounded-full animate-spin mb-4" />
                                     <p className="text-sm text-[color:var(--nfq-accent)] font-medium">{t.parsingValidating}</p>
                                 </div>
                             ) : (

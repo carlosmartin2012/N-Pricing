@@ -132,7 +132,7 @@ export const ShockControlPanel: React.FC<Props> = ({
             {t.template}
           </button>
           <label
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded border border-cyan-200 bg-cyan-50/10 py-2 text-sm text-[color:var(--nfq-accent)] transition-colors hover:text-[color:var(--nfq-accent)] dark:border-cyan-900/50 dark:bg-cyan-950/20"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded border border-[color:var(--nfq-accent)]/40 bg-[var(--nfq-accent)]/10 py-2 text-sm text-[color:var(--nfq-accent)] transition-colors hover:text-[color:var(--nfq-accent)] dark:border-[color:var(--nfq-accent)]/20 dark:bg-[var(--nfq-accent)]/10"
             title="Import Excel"
           >
             <TrendingUp size={14} />

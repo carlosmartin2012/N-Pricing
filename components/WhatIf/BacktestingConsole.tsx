@@ -202,7 +202,7 @@ const BacktestingConsole: React.FC = () => {
           <div className="p-2">
             {loadingRuns ? (
               <div className="flex items-center justify-center py-8">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-[color:var(--nfq-accent)]" />
               </div>
             ) : sortedRuns.length === 0 ? (
               <div className="py-8 text-center text-xs text-[color:var(--nfq-text-secondary)]">
@@ -250,7 +250,7 @@ const BacktestingConsole: React.FC = () => {
           </div>
         ) : loadingResult ? (
           <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-[color:var(--nfq-accent)]" />
           </div>
         ) : !result ? (
           <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">

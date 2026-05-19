@@ -437,7 +437,7 @@ const WhatIfWorkspace: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {loadingSandboxes ? (
             <div className="flex items-center justify-center py-8">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-[color:var(--nfq-accent)]" />
             </div>
           ) : sortedSandboxes.length === 0 ? (
             <div className="py-8 text-center text-xs text-[color:var(--nfq-text-secondary)]">

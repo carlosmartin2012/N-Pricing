@@ -75,7 +75,7 @@ const OriginatorScorecardComponent: React.FC<Props> = ({ scorecard, isLoading })
     <div className="nfq-kpi-card">
       {/* Header: originator info */}
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-950/40">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--nfq-accent)]/15">
           <User size={18} className="text-[color:var(--nfq-accent)]" />
         </div>
         <div className="min-w-0 flex-1">

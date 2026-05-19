@@ -37,7 +37,7 @@ export const UserManagementToolbar: React.FC<Props> = ({
 
       <button
         onClick={onAddUser}
-        className="flex items-center gap-1 rounded border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)] px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] shadow-lg shadow-cyan-900/20 transition-colors hover:bg-[var(--nfq-accent)]"
+        className="flex items-center gap-1 rounded border border-[color:var(--nfq-accent)] bg-[var(--nfq-accent)] px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] shadow-lg shadow-[color:var(--nfq-accent)]/30 transition-colors hover:bg-[var(--nfq-accent)]"
       >
         <Plus size={12} /> Add User
       </button>

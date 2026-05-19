@@ -26,7 +26,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
     <>
       <div className="flex h-11 items-center justify-between border-b border-slate-800 bg-[var(--nfq-bg-elevated)]/50 px-6 backdrop-blur">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded border border-cyan-900 bg-cyan-950">
+          <div className="flex h-8 w-8 items-center justify-center rounded border border-[color:var(--nfq-accent)]/30 bg-[var(--nfq-accent)]/10">
             <Terminal size={16} className="text-[color:var(--nfq-accent)]" />
           </div>
           <div>

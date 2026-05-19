@@ -75,7 +75,7 @@ const CohortDrilldownModal: React.FC<Props> = ({ isOpen, onClose, cohort, dateRa
         <div className="overflow-auto p-4" style={{ maxHeight: 'calc(80vh - 88px)' }}>
           {isLoading ? (
             <div className="flex flex-col items-center justify-center gap-4 py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-cyan-500" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[color:var(--nfq-accent)]/30 border-t-[color:var(--nfq-accent)]" />
               <span className="text-[10px] font-mono tracking-normal text-[color:var(--nfq-text-muted)]">
                 Loading cohort data...
               </span>
