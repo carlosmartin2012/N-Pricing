@@ -113,9 +113,9 @@ const AttributionSimulator: React.FC<Props> = ({
         <header className="mb-4 flex items-center gap-3">
           <Sliders className="h-5 w-5 text-[color:var(--nfq-success)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
+            <h1 className="nfq-headline">
               {t.simulatorTitle}
-            </h2>
+            </h1>
             <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.simulatorSubtitle}</p>
           </div>
         </header>

@@ -124,9 +124,9 @@ const CampaignsView: React.FC = () => {
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Target className="h-5 w-5 text-[color:var(--nfq-success)]" />
-          <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
+          <h1 className="nfq-headline">
             {t.commercialCampaignsHeader}
-          </h2>
+          </h1>
           {activeEntity && <span className="nfq-label text-[10px] text-[color:var(--nfq-text-muted)]">{activeEntity.shortCode}</span>}
         </div>
         <div className="flex items-center gap-2">

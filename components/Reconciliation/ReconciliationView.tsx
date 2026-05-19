@@ -108,9 +108,9 @@ const ReconciliationView: React.FC = () => {
         <div className="flex items-center gap-3">
           <Scale className="h-5 w-5 text-[color:var(--nfq-cat-d)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
+            <h1 className="nfq-headline">
               FTP Reconciliation
-            </h2>
+            </h1>
             <p className="font-mono text-[10px] text-[color:var(--nfq-text-muted)]">
               Controller view · BU ↔ Treasury journal matching
             </p>

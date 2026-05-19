@@ -111,9 +111,9 @@ const ApprovalCockpit: React.FC = () => {
         <div className="flex items-center gap-3">
           <Inbox className="h-5 w-5 text-[color:var(--nfq-cat-d)]" />
           <div>
-            <h2 className="font-mono text-sm font-bold uppercase tracking-tight text-[color:var(--nfq-text-primary)]">
+            <h1 className="nfq-headline">
               {t.cockpitTitle}
-            </h2>
+            </h1>
             <p className="text-xs text-[color:var(--nfq-text-muted)]">{t.cockpitSubtitle}</p>
           </div>
         </div>
