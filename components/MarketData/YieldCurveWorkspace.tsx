@@ -129,7 +129,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className="flex flex-1 items-center justify-center overflow-hidden bg-white p-4 dark:bg-[var(--nfq-bg-input)]">
+          <div className="flex flex-1 items-center justify-center overflow-hidden bg-[var(--nfq-bg-surface)] p-4 dark:bg-transparent">
             <svg viewBox={`0 0 ${width} ${height}`} className="h-full max-h-[300px] w-full overflow-visible">
               {[0, 0.25, 0.5, 0.75, 1].map(tick => {
                 const y = padding + tick * (height - 2 * padding);
@@ -143,15 +143,16 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                       x2={width - padding}
                       y2={y}
                       stroke="currentColor"
-                      className="text-[color:var(--nfq-text-secondary)] dark:text-[color:var(--nfq-text-primary)]"
+                      className="text-[color:var(--nfq-border)] dark:text-[color:var(--nfq-border-ghost)]"
                       strokeWidth="1"
                       strokeDasharray="4 4"
+                      strokeOpacity="0.6"
                     />
                     <text
                       x={padding - 10}
                       y={y + 3}
                       textAnchor="end"
-                      className="fill-slate-400 dark:fill-slate-600"
+                      className="fill-[var(--nfq-text-muted)]"
                       fontSize="10"
                       fontFamily="monospace"
                     >
@@ -180,7 +181,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                     cx={getX(index)}
                     cy={getY(point.rate)}
                     r="4"
-                    className="fill-white dark:fill-slate-900"
+                    className="fill-[var(--nfq-bg-surface)] dark:fill-[var(--nfq-bg-root)]"
                     stroke={shockBps !== 0 ? '#fbbf24' : '#22d3ee'}
                     strokeWidth="2"
                   />
@@ -188,7 +189,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
                     x={getX(index)}
                     y={height - 10}
                     textAnchor="middle"
-                    className="fill-slate-400 dark:fill-slate-500"
+                    className="fill-[var(--nfq-text-muted)] dark:fill-[var(--nfq-text-faint)]"
                     fontSize="10"
                     fontWeight="bold"
                     fontFamily="monospace"
@@ -222,7 +223,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col bg-white dark:bg-[var(--nfq-bg-input)] xl:w-64">
+        <div className="flex w-full shrink-0 flex-col bg-[var(--nfq-bg-surface)] dark:bg-transparent xl:w-64">
           <div className="flex items-center justify-between border-b border-[color:var(--nfq-border)] bg-[var(--nfq-bg-surface)] p-3 dark:border-[color:var(--nfq-border-ghost)] dark:bg-[var(--nfq-bg-elevated)]/50">
             <span className="text-[10px] font-bold uppercase text-[color:var(--nfq-text-faint)] dark:text-[color:var(--nfq-text-muted)]">Saved Snapshots</span>
             <History size={14} className="text-[color:var(--nfq-text-muted)]" />

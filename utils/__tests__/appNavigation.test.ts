@@ -189,9 +189,10 @@ describe('appNavigation routing helpers', () => {
       ]);
     });
 
-    it('Data & Ops Hub keeps 2 input-only entries (Methodology + Market Data)', () => {
+    it('Data & Ops Hub holds 3 input-only entries (Market Data + Market Benchmarks + Methodology)', () => {
       const dataOps = items.filter((i) => i.section === 'Data & Ops Hub');
       expect(dataOps.map((i) => i.id).sort()).toEqual([
+        'MARKET_BENCHMARKS',
         'MARKET_DATA',
         'METHODOLOGY',
       ]);

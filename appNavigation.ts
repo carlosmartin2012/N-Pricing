@@ -168,8 +168,9 @@ export function buildMainNavItems(t: NavigationLabels): NavItem[] {
     // models + methodology configuration). FTP Reconciliation moved to
     // Governance Hub because it's a controller workflow over recorded
     // pricing outputs — not an input to the engine.
-    { id: 'MARKET_DATA',    label: t.yieldCurves,          icon: TrendingUp, section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/market-data' },
-    { id: 'METHODOLOGY',    label: t.navMethodology,       icon: GitBranch,  section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/methodology' },
+    { id: 'MARKET_DATA',       label: t.yieldCurves,          icon: TrendingUp, section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/market-data' },
+    { id: 'MARKET_BENCHMARKS', label: t.navMarketBenchmarks,  icon: DatabaseZap, section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/market-benchmarks' },
+    { id: 'METHODOLOGY',       label: t.navMethodology,       icon: GitBranch,  section: 'Data & Ops Hub', sectionLabel: sectionLabels.dataOps, path: '/methodology' },
 
     // ─────────────── GOVERNANCE HUB ───────────────
     { id: 'REPORTING',      label: t.navAnalytics,         icon: BarChart4,   section: 'Governance Hub', sectionLabel: sectionLabels.governance, path: '/analytics' },
@@ -202,7 +203,6 @@ export function getViewNavigationMeta(
     WHAT_IF: { label: t.navWhatIf, section: 'Pricing Cockpit' },
     ACCOUNTING: { label: t.auxAccountingLedger, section: 'Pricing Cockpit' },
     BEHAVIOURAL: { label: t.behaviouralModels, section: 'Data & Ops Hub' },
-    MARKET_BENCHMARKS: { label: t.navMarketBenchmarks, section: 'Data & Ops Hub' },
     CAMPAIGNS: { label: t.navCampaigns, section: 'Relationship Cockpit' },
     CONTROL_ROOM: { label: t.navControlRoom, section: 'Today' },
     MODEL_INVENTORY: { label: t.navModelInventory, section: 'Governance Hub' },
@@ -239,7 +239,6 @@ export function buildAuxDestinations(t: NavigationLabels): AuxDestination[] {
     { id: 'WHAT_IF',               label: t.navWhatIf,                 sublabel: t.commandNavigateSublabel,        icon: FlaskConical,    path: '/what-if',                section: 'Pricing Cockpit' },
     { id: 'ACCOUNTING',            label: t.auxAccountingLedger,        sublabel: t.auxAccountingLedgerDesc,        icon: LayoutDashboard, path: '/accounting',             section: 'Pricing Cockpit' },
     { id: 'BEHAVIOURAL',           label: t.behaviouralModels,          sublabel: t.commandNavigateSublabel,        icon: Activity,        path: '/behavioural',            section: 'Data & Ops Hub' },
-    { id: 'MARKET_BENCHMARKS',     label: t.navMarketBenchmarks,        sublabel: t.auxMarketBenchmarksDesc,        icon: DatabaseZap,     path: '/market-benchmarks',      section: 'Data & Ops Hub' },
     { id: 'GOV_ADAPTERS',          label: t.auxAdapterHealth,           sublabel: t.auxAdapterHealthDesc,           icon: Plug,            path: '/adapters',               section: 'Data & Ops Hub' },
     { id: 'GOV_SLO',               label: t.auxSloDashboard,            sublabel: t.auxSloDashboardDesc,            icon: HeartPulse,      path: '/slo',                    section: 'Data & Ops Hub' },
     { id: 'GOV_SNAPSHOTS',         label: t.auxSnapshotReplay,          sublabel: t.auxSnapshotReplayDesc,          icon: History,         path: '/snapshots',              section: 'Governance Hub' },
