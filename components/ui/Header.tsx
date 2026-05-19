@@ -112,10 +112,10 @@ export const Header: React.FC<HeaderProps> = ({
   const sectionDot: Record<string, string> = {
     'Relationship Cockpit': 'bg-[var(--nfq-success)]',
     'Pricing Cockpit': 'bg-[var(--nfq-accent)]',
-    'Data & Ops Hub': 'bg-sky-400',
-    'Governance Hub': 'bg-violet-400',
+    'Data & Ops Hub': 'bg-[var(--nfq-info)]',
+    'Governance Hub': 'bg-[var(--nfq-cat-d)]',
     Today: 'bg-[var(--nfq-success)]',
-    Assistant:  'bg-fuchsia-400',
+    Assistant:  'bg-[var(--nfq-cat-g)]',
     System:     'bg-slate-400',
   };
   const ThemeIcon = themeMode === 'system' ? Monitor : theme === 'dark' ? Moon : Sun;

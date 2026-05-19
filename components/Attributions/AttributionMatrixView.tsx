@@ -283,7 +283,7 @@ const LevelForm: React.FC<LevelFormProps> = ({ levels, onSubmit, onCancel, pendi
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
-          className="flex items-center gap-1 rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:bg-[var(--nfq-bg-bright)]">
+          className="flex items-center gap-1 rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success-hover)] disabled:bg-[var(--nfq-bg-bright)]">
           <Save className="h-3 w-3" /> {t.matrixSave}
         </button>
       </div>
@@ -341,7 +341,7 @@ const ThresholdForm: React.FC<ThresholdFormProps> = ({ levelId, onSubmit, onCanc
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
-          className="flex items-center gap-1 rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:bg-[var(--nfq-bg-bright)]">
+          className="flex items-center gap-1 rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success-hover)] disabled:bg-[var(--nfq-bg-bright)]">
           <Save className="h-3 w-3" /> {t.matrixSave}
         </button>
       </div>

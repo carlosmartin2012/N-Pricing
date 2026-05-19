@@ -332,7 +332,7 @@ const ReportSchedulingTab: React.FC<Props> = ({ user }) => {
               <button
                 onClick={() => void handleSave()}
                 disabled={saving || !draft.name?.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--nfq-text-primary)] text-xs font-bold rounded transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--nfq-text-primary)] text-xs font-bold rounded transition-colors"
               >
                 <Check size={12} /> {saving ? 'Saving…' : 'Save Schedule'}
               </button>

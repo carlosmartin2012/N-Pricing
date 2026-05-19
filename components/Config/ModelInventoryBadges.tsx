@@ -18,8 +18,8 @@ export function TrafficLightDot({
     light === 'GREEN'
       ? 'bg-[var(--nfq-success)]'
       : light === 'AMBER'
-        ? 'bg-amber-400'
-        : 'bg-red-400';
+        ? 'bg-[var(--nfq-warning)]'
+        : 'bg-[var(--nfq-danger)]';
   return (
     <div
       className={`inline-block h-2 w-2 rounded-full ${color}`}

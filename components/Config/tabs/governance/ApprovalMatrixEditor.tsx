@@ -116,7 +116,7 @@ const ApprovalMatrixEditor: React.FC<ApprovalMatrixEditorProps> = ({
           <button
             onClick={onSubmit}
             disabled={!isDirty}
-            className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded disabled:opacity-50"
+            className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent-hover)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded disabled:opacity-50"
           >
             Submit Threshold Change
           </button>

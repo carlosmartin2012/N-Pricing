@@ -276,7 +276,7 @@ const AttributionSimulator: React.FC<Props> = ({
                 type="button"
                 disabled={result.newRouting.belowHardFloor}
                 onClick={() => onRequestApproval({ quote: result.adjustedQuote, proposedAdjustments })}
-                className="rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)] disabled:text-[color:var(--nfq-text-muted)]"
+                className="rounded-md bg-[var(--nfq-success)]/80 px-3 py-1.5 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success-hover)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)] disabled:text-[color:var(--nfq-text-muted)]"
               >
                 {t.simulatorRequest}
               </button>

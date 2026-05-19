@@ -208,7 +208,7 @@ export const FileUploadModal: React.FC<Props> = ({ isOpen, onClose, onUpload, ti
                             </p>
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2 bg-emerald-600 hover:bg-[var(--nfq-success)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded-lg transition-colors"
+                                className="px-6 py-2 bg-[var(--nfq-success)] hover:bg-[var(--nfq-success-hover)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded-lg transition-colors"
                             >
                                 {t.closeAndRefresh}
                             </button>

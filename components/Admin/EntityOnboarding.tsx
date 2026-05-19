@@ -164,7 +164,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
     <div className="flex justify-end">
       <button
         onClick={handleClose}
-        className="rounded bg-emerald-600 px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)]"
+        className="rounded bg-[var(--nfq-success)] px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success-hover)]"
       >
         {t.close}
       </button>
@@ -190,7 +190,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
           <button
             onClick={() => void handleCreate()}
             disabled={isSubmitting}
-            className="rounded bg-[var(--nfq-warning)] px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-warning)] disabled:opacity-50"
+            className="rounded bg-[var(--nfq-warning)] px-5 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-warning-hover)] disabled:opacity-50"
           >
             {isSubmitting ? '...' : t.createEntity}
           </button>
@@ -222,7 +222,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
                   <div
                     className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
                       isDone
-                        ? 'bg-emerald-600 text-[color:var(--nfq-text-primary)]'
+                        ? 'bg-[var(--nfq-success)] text-[color:var(--nfq-text-primary)]'
                         : isActive
                           ? 'bg-[var(--nfq-warning)] text-[color:var(--nfq-text-primary)]'
                           : 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)]'
@@ -245,7 +245,7 @@ const EntityOnboarding: React.FC<Props> = ({ isOpen, onClose }) => {
                 {idx < STEP_ICONS.length - 1 && (
                   <div
                     className={`mx-1 mt-4 h-px flex-1 transition-colors ${
-                      step < currentStep ? 'bg-emerald-600' : 'bg-[var(--nfq-bg-highest)]'
+                      step < currentStep ? 'bg-[var(--nfq-success)]' : 'bg-[var(--nfq-bg-highest)]'
                     }`}
                   />
                 )}

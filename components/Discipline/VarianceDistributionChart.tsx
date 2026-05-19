@@ -156,11 +156,11 @@ const VarianceDistributionChart: React.FC<Props> = ({ variances, toleranceBps = 
           In-band
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-rose-400 opacity-75" />
+          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[var(--nfq-danger)] opacity-75" />
           Out-of-band
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-px border-l-2 border-dashed border-amber-400" />
+          <span className="inline-block h-2.5 w-px border-l-2 border-dashed border-[color:var(--nfq-warning)]" />
           Tolerance
         </span>
       </div>

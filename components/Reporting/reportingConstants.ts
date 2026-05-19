@@ -71,5 +71,5 @@ export const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP'] as const;
 export const TAB_ACTIVE_STYLES: Record<TabDefinition['activeColor'], string> = {
   cyan: 'bg-[var(--nfq-accent)] text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]',
   emerald: 'bg-[var(--nfq-success)] text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]',
-  purple: 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]',
+  purple: 'bg-[var(--nfq-cat-d)] text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]',
 };

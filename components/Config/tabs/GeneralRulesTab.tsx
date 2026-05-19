@@ -244,7 +244,7 @@ const GeneralRulesTab: React.FC<Props> = ({ rules, businessUnits, ftpRateCards, 
             </button>
             <button
               onClick={handleSaveRule}
-              className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
+              className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent-hover)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
             >
               Submit Change
             </button>

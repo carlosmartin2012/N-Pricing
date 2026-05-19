@@ -271,7 +271,7 @@ const MasterDataTab: React.FC<Props> = ({ clients, setClients, products, setProd
                   <button onClick={closeDrawer} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">Cancel</button>
                   <button
                      onClick={handleSave}
-                     className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
+                     className="px-4 py-2 bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent-hover)] text-[color:var(--nfq-text-primary)] text-xs font-bold rounded"
                   >
                      Save Changes
                   </button>

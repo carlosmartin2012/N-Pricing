@@ -346,7 +346,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
                 type="button"
                 onClick={() => submit(confirming)}
                 disabled={pending || (belowFloor && confirming === 'approved')}
-                className="rounded bg-[var(--nfq-success)]/80 px-3 py-1 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
+                className="rounded bg-[var(--nfq-success)]/80 px-3 py-1 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success-hover)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
               >
                 {confirming === 'approved' && t.cockpitConfirmApprove}
                 {confirming === 'rejected' && t.cockpitConfirmReject}
@@ -481,7 +481,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
               type="button"
               onClick={() => submit(confirming)}
               disabled={pending || (belowFloor && confirming === 'approved')}
-              className="flex-1 rounded bg-[var(--nfq-success)]/80 px-3 py-2 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
+              className="flex-1 rounded bg-[var(--nfq-success)]/80 px-3 py-2 text-xs font-medium text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-success-hover)] disabled:cursor-not-allowed disabled:bg-[var(--nfq-bg-bright)]"
             >
               {confirming === 'approved' && t.cockpitConfirmApprove}
               {confirming === 'rejected' && t.cockpitConfirmReject}

@@ -271,7 +271,7 @@ const GeminiAssistant: React.FC<Props> = ({ isOpen, onClose, onOpenFullChat, act
             <button
               onClick={handleSend}
               disabled={!input.trim() || isThinking}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[var(--nfq-accent)]/30 text-[color:var(--nfq-accent)] rounded hover:bg-[var(--nfq-accent)] hover:text-[color:var(--nfq-text-primary)] transition-colors disabled:opacity-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[var(--nfq-accent)]/30 text-[color:var(--nfq-accent)] rounded hover:bg-[var(--nfq-accent-hover)] hover:text-[color:var(--nfq-text-primary)] transition-colors disabled:opacity-50"
             >
               <Send size={14} />
             </button>

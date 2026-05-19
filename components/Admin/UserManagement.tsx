@@ -174,7 +174,7 @@ const UserManagement: React.FC = () => {
         isAdmin ? (
           <button
             onClick={() => setShowOnboarding(true)}
-            className="rounded bg-amber-500 px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-amber-400"
+            className="rounded bg-[var(--nfq-warning)] px-3 py-1.5 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-warning-hover)]"
           >
             {t.newEntity}
           </button>

@@ -210,7 +210,7 @@ const YieldCurveWorkspace: React.FC<Props> = ({
           <div className="flex h-8 shrink-0 items-center justify-between border-t border-slate-200 bg-slate-100 px-4 font-mono text-[10px] text-[color:var(--nfq-text-faint)] dark:border-slate-800 dark:bg-[var(--nfq-bg-root)]">
             <div className="flex gap-4">
               <span className="flex items-center gap-1.5">
-                <div className={`h-0.5 w-3 rounded-full ${isPersisted ? 'bg-[var(--nfq-accent)]' : 'bg-amber-400'}`} />
+                <div className={`h-0.5 w-3 rounded-full ${isPersisted ? 'bg-[var(--nfq-accent)]' : 'bg-[var(--nfq-warning)]'}`} />
                 {isPersisted ? 'PERSISTED' : 'REALTIME'}
               </span>
               <span className="flex items-center gap-1.5">

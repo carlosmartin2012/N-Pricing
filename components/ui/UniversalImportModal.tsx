@@ -180,7 +180,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                             const input = document.getElementById('universal-upload');
                                             input?.click();
                                         }}
-                                        className="px-4 py-2 bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded text-xs font-bold hover:bg-[var(--nfq-accent)] transition-colors"
+                                        className="px-4 py-2 bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded text-xs font-bold hover:bg-[var(--nfq-accent-hover)] transition-colors"
                                     >
                                         {t.browseFile}
                                     </button>
@@ -277,7 +277,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                                 {selectedModule && (
                                     <button
                                         onClick={() => document.getElementById('universal-upload')?.click()}
-                                        className="px-6 py-2 bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded-lg text-xs hover:bg-[var(--nfq-accent)]"
+                                        className="px-6 py-2 bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] rounded-lg text-xs hover:bg-[var(--nfq-accent-hover)]"
                                     >
                                         {t.tryAnotherFile}
                                     </button>
@@ -294,7 +294,7 @@ export const UniversalImportModal: React.FC<Props> = ({ isOpen, onClose, onImpor
                         <button
                             onClick={handleConfirmImport}
                             disabled={status === 'importing'}
-                            className={`px-8 py-2 rounded-lg text-sm font-bold flex items-center gap-2 ${status === 'importing' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)] cursor-not-allowed' : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)] shadow-lg shadow-[color:var(--nfq-accent)]/20'}`}
+                            className={`px-8 py-2 rounded-lg text-sm font-bold flex items-center gap-2 ${status === 'importing' ? 'bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)] cursor-not-allowed' : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent-hover)] shadow-lg shadow-[color:var(--nfq-accent)]/20'}`}
                         >
                             {status === 'importing' ? t.importing : t.completeImport}
                             {status !== 'importing' && <CheckCircle2 size={16} />}

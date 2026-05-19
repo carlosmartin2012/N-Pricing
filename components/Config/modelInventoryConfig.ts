@@ -133,7 +133,7 @@ export const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   INTERNAL_VALIDATION: { bg: 'bg-[var(--nfq-warning)]/10', text: 'text-[color:var(--nfq-warning)]' },
   APPROVED: { bg: 'bg-[var(--nfq-info)]/10', text: 'text-[color:var(--nfq-info)]' },
   PRODUCTION: { bg: 'bg-[var(--nfq-success)]/10', text: 'text-[color:var(--nfq-success)]' },
-  DEPRECATED: { bg: 'bg-orange-500/10', text: 'text-orange-400' },
+  DEPRECATED: { bg: 'bg-[var(--nfq-warning)]/10', text: 'text-[color:var(--nfq-warning)]' },
   RETIRED: { bg: 'bg-[var(--nfq-danger)]/10', text: 'text-[color:var(--nfq-danger)]' },
 };
 

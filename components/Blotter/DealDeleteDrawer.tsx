@@ -19,7 +19,7 @@ const DealDeleteDrawer: React.FC<DealDeleteDrawerProps> = ({ isOpen, dealId, onC
         <button onClick={onClose} className="px-4 py-2 text-xs text-[color:var(--nfq-text-muted)] hover:text-[color:var(--nfq-text-primary)]">
           Cancel
         </button>
-        <button onClick={onConfirm} className="rounded bg-[var(--nfq-danger)] px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-danger)]">
+        <button onClick={onConfirm} className="rounded bg-[var(--nfq-danger)] px-4 py-2 text-xs font-bold text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-danger-hover)]">
           Confirm Delete
         </button>
       </div>

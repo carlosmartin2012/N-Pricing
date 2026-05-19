@@ -76,7 +76,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
             <button
               onClick={() => onSendMessage()}
               disabled={!input.trim() || isThinking}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-[var(--nfq-accent)] p-2 text-[color:var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-accent)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-[var(--nfq-accent)] p-2 text-[color:var(--nfq-text-primary)] transition-colors hover:bg-[var(--nfq-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send size={16} />
             </button>

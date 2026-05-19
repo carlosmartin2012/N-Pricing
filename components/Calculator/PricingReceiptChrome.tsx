@@ -70,7 +70,7 @@ export function PricingReceiptSummary({
             : result.approvalLevel === 'L1_Manager'
               ? 'border-[color:var(--nfq-warning)]/30 bg-amber-950/30 text-[color:var(--nfq-warning)]'
               : result.approvalLevel === 'L2_Committee'
-                ? 'border-[color:var(--nfq-warning)]/30 bg-orange-950/30 text-orange-400'
+                ? 'border-[color:var(--nfq-warning)]/30 bg-orange-950/30 text-[color:var(--nfq-warning)]'
                 : 'border-[color:var(--nfq-danger)]/30 bg-red-950/30 text-[color:var(--nfq-danger)]'
         }`}
       >
@@ -118,8 +118,8 @@ export function PricingReceiptFooter({
           validationErrorCount > 0
             ? 'cursor-not-allowed bg-[var(--nfq-bg-highest)] text-[color:var(--nfq-text-faint)]'
             : dealSaveStatus === 'saved'
-              ? 'bg-emerald-600 text-[color:var(--nfq-text-primary)]'
-              : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent)]'
+              ? 'bg-[var(--nfq-success)] text-[color:var(--nfq-text-primary)]'
+              : 'bg-[var(--nfq-accent)] text-[color:var(--nfq-text-primary)] hover:bg-[var(--nfq-accent-hover)]'
         }`}
       >
         {dealSaveStatus === 'saved' ? (

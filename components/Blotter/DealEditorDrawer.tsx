@@ -30,12 +30,12 @@ const actionCopy = {
   edit: {
     title: (dealId?: string) => `Edit Deal: ${dealId || ''}`,
     confirm: 'Save Changes',
-    tone: 'bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent)]',
+    tone: 'bg-[var(--nfq-accent)] hover:bg-[var(--nfq-accent-hover)]',
   },
   create: {
     title: () => 'Create New Transaction',
     confirm: 'Create Deal',
-    tone: 'bg-emerald-600 hover:bg-[var(--nfq-success)]',
+    tone: 'bg-[var(--nfq-success)] hover:bg-[var(--nfq-success-hover)]',
   },
 } as const;
 
