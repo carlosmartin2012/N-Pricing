@@ -45,6 +45,17 @@ export const DataFreshnessStrip: React.FC = () => {
     Admin: t.workspaceModeAdmin,
   }[workspaceMode];
 
+  // Conditional rendering: the strip is informational ambient chrome. When
+  // everything is healthy (live mode + recent sync) it adds visual weight
+  // without conveying anything actionable, so we hide it entirely. The
+  // data-mode chip in the Header still surfaces DEMO/LIVE state at all
+  // times. When stale or in fallback (demo) mode, the strip shows so the
+  // user sees the warning and the freshness metadata.
+  const shouldRender = stale || fallback;
+  if (!shouldRender) {
+    return null;
+  }
+
   return (
     <div data-testid="data-freshness-strip" className="border-b border-[color:var(--nfq-border-ghost)] bg-[color:rgba(8,12,18,0.82)] px-3 py-2 backdrop-blur md:px-5 xl:px-6">
       <div className="flex flex-col gap-2 text-[11px] text-[color:var(--nfq-text-secondary)] lg:flex-row lg:items-center lg:justify-between">
