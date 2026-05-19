@@ -392,7 +392,7 @@ const WhatIfWorkspace: React.FC = () => {
       {activeTab === 'sandboxes' && (
         <div className="flex min-h-0 flex-1 gap-4">
       {/* --- Left sidebar: sandbox list --- */}
-      <aside className="flex w-72 shrink-0 flex-col self-start rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)] overflow-hidden lg:sticky lg:top-2 lg:max-h-[calc(100vh-6rem)]">
+      <aside className="flex w-60 shrink-0 flex-col self-start rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)] overflow-hidden lg:sticky lg:top-2 lg:max-h-[calc(100vh-6rem)]">
         <div className="flex items-center justify-between gap-2 border-b border-[color:var(--nfq-border-ghost)] px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--nfq-text-primary)]">
             <FlaskConical className="h-4 w-4 text-[color:var(--nfq-accent)]" />
@@ -579,7 +579,7 @@ const WhatIfWorkspace: React.FC = () => {
 
       {/* --- Right panel: impact preview --- */}
       {sandbox && (sandbox.status === 'ready' || sandbox.status === 'computing') && (
-        <aside className="w-[420px] shrink-0 overflow-y-auto">
+        <aside className="w-80 shrink-0 overflow-y-auto">
           <ImpactReportPanel report={impactReport ?? null} isLoading={loadingReport || isComputing} />
         </aside>
       )}
