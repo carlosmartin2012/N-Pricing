@@ -6,10 +6,13 @@ import {
     Shield,
     Zap,
 } from 'lucide-react';
+import { calculatePricing } from '@npricing/pricing-core';
 import { Panel, Badge } from '../ui/LayoutComponents';
 import { RAROCInputs } from '../../types';
 import { saveRarocInputs } from '../../api/config';
 import { useData } from '../../contexts/DataContext';
+import { useOptionalPricingState } from '../../contexts/PricingStateContext';
+import { applyRarocInputsPatch, dealToRarocInputsPatch } from '../../utils/raroc/dealToRarocInputs';
 import { RAROCBreakdownPanel } from './RAROCBreakdownPanel';
 import { RAROCInputSection } from './RAROCInputSection';
 import { createLogger } from '../../utils/logger';
@@ -33,19 +36,46 @@ import {
 } from './rarocCalculatorUtils';
 
 const RAROCCalculator: React.FC = () => {
-    const { rarocInputs: externalInputs, setRarocInputs } = useData();
+    const { rarocInputs: externalInputs, setRarocInputs, approvalMatrix } = useData();
+    const pricingState = useOptionalPricingState();
+    const dealParams = pricingState?.dealParams;
     const onUpdateExternal = useCallback((inputs: RAROCInputs) => {
         setRarocInputs(inputs);
         saveRarocInputs(inputs).catch((err) => logger.error('Failed to save RAROC inputs', undefined, err));
     }, [setRarocInputs]);
     const [inputs, setInputs] = useState<RAROCInputs>(() => normalizeRarocInputs(externalInputs || INITIAL_RAROC_INPUTS));
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const hydratedDealIdRef = useRef<string | null>(null);
 
     useEffect(() => {
         if (!externalInputs) return;
         const normalizedInputs = normalizeRarocInputs(externalInputs);
         setInputs((prev) => (areRarocInputsEqual(prev, normalizedInputs) ? prev : normalizedInputs));
     }, [externalInputs]);
+
+    // Hydrate from the live Calculator deal whenever a NEW transaction enters the
+    // workspace. Same deal → keep user edits; new deal → mirror Calculator.
+    useEffect(() => {
+        if (!dealParams?.id) return;
+        if (hydratedDealIdRef.current === dealParams.id) return;
+        let result = null;
+        try {
+            result = calculatePricing(dealParams, approvalMatrix);
+        } catch (err) {
+            logger.error(
+                'calculatePricing failed during RAROC hydration',
+                undefined,
+                err instanceof Error ? err : undefined,
+            );
+        }
+        const patch = dealToRarocInputsPatch(dealParams, result);
+        setInputs((prev) => {
+            const next = applyRarocInputsPatch(prev, patch);
+            queueExternalUpdateRef.current?.(next);
+            return next;
+        });
+        hydratedDealIdRef.current = dealParams.id;
+    }, [dealParams, approvalMatrix]);
 
     useEffect(() => {
         return () => {
@@ -59,6 +89,14 @@ const RAROCCalculator: React.FC = () => {
             onUpdateExternal(nextInputs);
         }, 600);
     }, [onUpdateExternal]);
+
+    // Kept in sync each render so the hydration effect can persist mirrored
+    // inputs without depending on the callback identity (avoids re-running
+    // hydration when the debounced setter is re-created).
+    const queueExternalUpdateRef = useRef(queueExternalUpdate);
+    useEffect(() => {
+        queueExternalUpdateRef.current = queueExternalUpdate;
+    }, [queueExternalUpdate]);
 
     const handleInputChange = useCallback((key: EditableRarocField, value: number) => {
         setInputs((prev) => {
