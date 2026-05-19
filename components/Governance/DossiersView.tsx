@@ -70,7 +70,7 @@ const DossierRow: React.FC<RowProps> = ({
 
   return (
     <>
-      <tr className="border-t border-[color:var(--nfq-border-subtle)]">
+      <tr className="border-t border-[color:var(--nfq-border-ghost)]">
         <td className="px-3 py-2 font-mono text-xs text-[color:var(--nfq-text-secondary)]">
           {shortHash(dossier.id, 8)}
         </td>
@@ -92,7 +92,7 @@ const DossierRow: React.FC<RowProps> = ({
             <button
               onClick={onVerify}
               disabled={verifying}
-              className="inline-flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-subtle)] px-2 py-1 text-[11px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)] disabled:opacity-60"
+              className="inline-flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] px-2 py-1 text-[11px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)] disabled:opacity-60"
             >
               <Fingerprint size={11} /> {verifying ? 'verifying…' : 'verify'}
             </button>
@@ -111,7 +111,7 @@ const DossierRow: React.FC<RowProps> = ({
         <td className="px-3 py-2 text-right">
           <button
             onClick={onToggle}
-            className="rounded-md border border-[color:var(--nfq-border-subtle)] px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
+            className="rounded-md border border-[color:var(--nfq-border-ghost)] px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
             title={expanded ? 'Hide payload' : 'Show payload'}
           >
             {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
@@ -119,7 +119,7 @@ const DossierRow: React.FC<RowProps> = ({
         </td>
       </tr>
       {expanded && (
-        <tr className="border-t border-[color:var(--nfq-border-subtle)]">
+        <tr className="border-t border-[color:var(--nfq-border-ghost)]">
           <td colSpan={8} className="bg-[rgba(255,255,255,0.015)] px-3 py-3">
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="sm:col-span-1">
@@ -246,7 +246,7 @@ const DossiersView: React.FC = () => {
           <button
             onClick={() => void handleVerifyAll()}
             disabled={list.length === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-[color:var(--nfq-border-subtle)] bg-transparent px-3 py-2 text-sm text-[color:var(--nfq-text-secondary)] transition hover:bg-[rgba(255,255,255,0.03)] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-2 text-sm text-[color:var(--nfq-text-secondary)] transition hover:bg-[rgba(255,255,255,0.03)] disabled:opacity-50"
           >
             <Fingerprint size={14} /> Verify all
           </button>
@@ -269,22 +269,22 @@ const DossiersView: React.FC = () => {
 
       {/* KPI strip */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Dossiers</div>
           <div className="mt-1 font-mono text-2xl font-semibold text-[color:var(--nfq-text-primary)]">{counts.total}</div>
         </div>
-        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Verified OK</div>
           <div className="mt-1 font-mono text-2xl font-semibold text-emerald-300">{counts.verified}</div>
         </div>
-        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4">
           <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">Tampered</div>
           <div className="mt-1 font-mono text-2xl font-semibold text-rose-300">{counts.tampered}</div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
         <table className="min-w-full text-sm">
           <thead className="bg-[rgba(255,255,255,0.02)]">
             <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">

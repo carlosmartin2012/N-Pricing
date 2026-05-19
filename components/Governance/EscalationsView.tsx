@@ -134,7 +134,7 @@ const EscalationsView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowConfigs((s) => !s)}
-            className="flex items-center gap-1.5 rounded-lg border border-[color:var(--nfq-border-subtle)] bg-transparent px-3 py-2 text-sm text-[color:var(--nfq-text-secondary)] transition hover:bg-[rgba(255,255,255,0.03)]"
+            className="flex items-center gap-1.5 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-2 text-sm text-[color:var(--nfq-text-secondary)] transition hover:bg-[rgba(255,255,255,0.03)]"
           >
             <Settings2 size={14} /> Configs
           </button>
@@ -168,7 +168,7 @@ const EscalationsView: React.FC = () => {
         ] as const).map(([label, value, color]) => (
           <div
             key={label}
-            className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4"
+            className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4"
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
               {label}
@@ -180,7 +180,7 @@ const EscalationsView: React.FC = () => {
 
       {/* Configs panel */}
       {showConfigs && (
-        <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4">
+        <section className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4">
           <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
             Timeout configuration · per level
           </h2>
@@ -188,7 +188,7 @@ const EscalationsView: React.FC = () => {
             {(['L1', 'L2', 'Committee'] as EscalationLevel[]).map((lvl) => {
               const cfg = configs[lvl];
               return (
-                <div key={lvl} className="rounded-lg border border-[color:var(--nfq-border-subtle)] p-3">
+                <div key={lvl} className="rounded-lg border border-[color:var(--nfq-border-ghost)] p-3">
                   <div className={`mb-2 inline-flex rounded px-2 py-0.5 text-xs font-medium ${LEVEL_COLOR[lvl]}`}>{lvl}</div>
                   {cfg ? (
                     <dl className="space-y-1 font-mono text-xs text-[color:var(--nfq-text-secondary)]">
@@ -234,7 +234,7 @@ const EscalationsView: React.FC = () => {
           </button>
         </div>
 
-        <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)]">
+        <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
           <table className="min-w-full text-sm">
             <thead className="bg-[rgba(255,255,255,0.02)]">
               <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
@@ -278,7 +278,7 @@ const EscalationsView: React.FC = () => {
               {list.map((e) => {
                 const overdue = e.status === 'open' && new Date(e.dueAt).getTime() < Date.now();
                 return (
-                  <tr key={e.id} className="border-t border-[color:var(--nfq-border-subtle)]">
+                  <tr key={e.id} className="border-t border-[color:var(--nfq-border-ghost)]">
                     <td className="px-3 py-2">
                       <span className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${LEVEL_COLOR[e.level]}`}>
                         {e.level}
@@ -306,7 +306,7 @@ const EscalationsView: React.FC = () => {
                       {e.status === 'open' && (
                         <button
                           onClick={() => void handleResolve(e.id)}
-                          className="inline-flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-subtle)] px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
+                          className="inline-flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] px-2 py-1 text-xs text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
                           title="Mark resolved"
                         >
                           <CheckCircle2 size={12} /> resolve

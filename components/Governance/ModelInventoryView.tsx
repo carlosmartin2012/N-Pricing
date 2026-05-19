@@ -218,7 +218,7 @@ const ModelInventoryView: React.FC = () => {
         ] as const).map(([label, value, color]) => (
           <div
             key={label}
-            className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4"
+            className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4"
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
               {label}
@@ -232,14 +232,14 @@ const ModelInventoryView: React.FC = () => {
       {showForm && (
         <form
           onSubmit={handleCreate}
-          className="grid gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-surface)] p-4 sm:grid-cols-3"
+          className="grid gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-surface)] p-4 sm:grid-cols-3"
         >
           <label className="flex flex-col gap-1 text-xs">
             <span className="font-mono uppercase tracking-[0.12em] text-[color:var(--nfq-text-muted)]">Kind</span>
             <select
               value={form.kind}
               onChange={(e) => setForm((f) => ({ ...f, kind: e.target.value as ModelKind }))}
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
             >
               {(Object.keys(KIND_LABEL) as ModelKind[]).map((k) => (
                 <option key={k} value={k}>{KIND_LABEL[k]}</option>
@@ -253,7 +253,7 @@ const ModelInventoryView: React.FC = () => {
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="e.g. IRRBB EBA 2018/02"
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs">
@@ -263,7 +263,7 @@ const ModelInventoryView: React.FC = () => {
               value={form.version}
               onChange={(e) => setForm((f) => ({ ...f, version: e.target.value }))}
               placeholder="1.0.0"
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm font-mono"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm font-mono"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs">
@@ -271,7 +271,7 @@ const ModelInventoryView: React.FC = () => {
             <select
               value={form.entityScope}
               onChange={(e) => setForm((f) => ({ ...f, entityScope: e.target.value as 'entity' | 'global' }))}
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
             >
               <option value="entity">This entity</option>
               <option value="global">Global (engine-wide)</option>
@@ -284,7 +284,7 @@ const ModelInventoryView: React.FC = () => {
               value={form.ownerEmail}
               onChange={(e) => setForm((f) => ({ ...f, ownerEmail: e.target.value }))}
               placeholder="mrm@bank.es"
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs">
@@ -294,7 +294,7 @@ const ModelInventoryView: React.FC = () => {
               value={form.validationDocUrl}
               onChange={(e) => setForm((f) => ({ ...f, validationDocUrl: e.target.value }))}
               placeholder="https://…"
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs sm:col-span-3">
@@ -303,14 +303,14 @@ const ModelInventoryView: React.FC = () => {
               rows={2}
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-[color:var(--nfq-bg-elevated)] px-2 py-1.5 text-sm"
             />
           </label>
           <div className="sm:col-span-3 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
-              className="rounded-md border border-[color:var(--nfq-border-subtle)] px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)]"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-[color:var(--nfq-text-secondary)]"
             >
               Cancel
             </button>
@@ -364,7 +364,7 @@ const ModelInventoryView: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-subtle)]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
         <table className="min-w-full text-sm">
           <thead className="bg-[rgba(255,255,255,0.02)]">
             <tr className="text-left font-mono text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
@@ -408,7 +408,7 @@ const ModelInventoryView: React.FC = () => {
               const StatusIcon = STATUS_ICON[m.status];
               const transitions = NEXT_STATUSES[m.status];
               return (
-                <tr key={m.id} className="border-t border-[color:var(--nfq-border-subtle)]">
+                <tr key={m.id} className="border-t border-[color:var(--nfq-border-ghost)]">
                   <td className="px-3 py-2">
                     <span className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${KIND_COLOR[m.kind]}`}>
                       {KIND_LABEL[m.kind]}
@@ -444,7 +444,7 @@ const ModelInventoryView: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Validation document"
-                          className="inline-flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-subtle)] px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
+                          className="inline-flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
                         >
                           <ExternalLink size={10} /> doc
                         </a>
@@ -453,7 +453,7 @@ const ModelInventoryView: React.FC = () => {
                         <button
                           key={next}
                           onClick={() => void handleTransition(m.id, next)}
-                          className="rounded-md border border-[color:var(--nfq-border-subtle)] px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
+                          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-2 py-1 text-[10px] text-[color:var(--nfq-text-secondary)] hover:bg-[rgba(255,255,255,0.04)]"
                           title={`Transition to ${next}`}
                         >
                           → {next}
