@@ -70,7 +70,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
   return (
     <section
       data-testid="ftp-ledger-summary-card"
-      className="rounded-lg border border-white/5 bg-white/[0.02] p-5 md:p-6 space-y-4"
+      className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-5 md:p-6 space-y-4"
     >
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
       </header>
 
       <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+        <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
           <dt className="nfq-label text-[9px] text-slate-400">FTP income (MTD)</dt>
           <dd className="mt-1 font-mono text-base font-bold tabular-nums text-emerald-300">
             {fmtEur(summary.ftpIncomeMtdEur)}
@@ -100,7 +100,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
           </p>
         </div>
 
-        <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+        <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
           <dt className="nfq-label text-[9px] text-slate-400">Deals ledgerized</dt>
           <dd className="mt-1 font-mono text-base font-bold tabular-nums text-slate-100">
             {summary.dealsLedgerizedMtd}
@@ -108,7 +108,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
           <p className="font-mono text-[10px] text-slate-500">entries posted</p>
         </div>
 
-        <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+        <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
           <dt className="nfq-label text-[9px] text-slate-400">Avg transfer rate</dt>
           <dd className="mt-1 font-mono text-base font-bold tabular-nums text-amber-300">
             {fmtPct(summary.avgTransferRatePct, 2)}
@@ -116,7 +116,7 @@ const FtpLedgerSummaryCard: React.FC<Props> = ({
           <p className="font-mono text-[10px] text-slate-500">portfolio weighted</p>
         </div>
 
-        <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+        <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
           <dt className="nfq-label text-[9px] text-slate-400">Reconciliation</dt>
           <dd className={`mt-1 flex items-center gap-1.5 font-mono text-sm font-bold ${statusCfg.tone}`}>
             <StatusIcon className="h-4 w-4" />

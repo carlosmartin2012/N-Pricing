@@ -268,7 +268,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             <div data-tour="methodology-panel" className="flex h-full w-full min-w-0 min-h-0 flex-col lg:col-span-4">
               <Suspense
                 fallback={
-                  <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
+                  <div className="h-full min-h-[320px] animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />
                 }
               >
                 <MethodologyVisualizer deal={dealParams} matchedMethod={matchedMethod} />
@@ -281,7 +281,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             >
               <Suspense
                 fallback={
-                  <div className="h-full min-h-[320px] animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />
+                  <div className="h-full min-h-[320px] animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />
                 }
               >
                 <PricingReceipt
@@ -356,12 +356,12 @@ export const CalculatorWorkspace: React.FC<Props> = ({
             {dealParams.clientId && (
               <div className="grid gap-4 lg:grid-cols-12">
                 <div data-tour="customer-360-panel" className="w-full min-w-0 lg:col-span-8">
-                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />}>
                     <CustomerRelationshipPanel clientId={dealParams.clientId} />
                   </Suspense>
                 </div>
                 <div data-tour="ltv-impact-panel" className="w-full min-w-0 lg:col-span-4">
-                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />}>
                     <LtvImpactPanel
                       clientId={dealParams.clientId}
                       candidate={{
@@ -454,7 +454,7 @@ export const CalculatorWorkspace: React.FC<Props> = ({
 
             <div className="grid gap-4 lg:grid-cols-12">
               <div className="w-full min-w-0 lg:col-span-9">
-                <Suspense fallback={<div className="h-24 animate-pulse rounded-[24px] bg-[var(--nfq-bg-surface)]" />}>
+                <Suspense fallback={<div className="h-24 animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />}>
                   <PricingComparison baseDeal={dealParams} approvalMatrix={approvalMatrix} />
                 </Suspense>
               </div>

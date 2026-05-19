@@ -52,7 +52,7 @@ const PricingLayoutShell: React.FC = () => {
               key={tab.id}
               onClick={() => navigate(tab.path)}
               aria-current={isActive ? 'page' : undefined}
-              className={`group flex items-center gap-2 rounded-[14px] px-4 py-2 text-sm font-medium transition-all ${
+              className={`group flex items-center gap-2 rounded-[var(--nfq-radius-card)] px-4 py-2 text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-[var(--nfq-bg-surface)] text-[color:var(--nfq-text-primary)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.22)]'
                   : 'text-[color:var(--nfq-text-muted)] hover:bg-[var(--nfq-bg-elevated)] hover:text-[color:var(--nfq-text-primary)]'

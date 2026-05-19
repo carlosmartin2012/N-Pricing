@@ -89,7 +89,7 @@ const GridCellDetailPanel: React.FC<Props> = ({ cell, onClose }) => {
           {/* Key metrics */}
           <section className="mb-6">
             <h3 className="nfq-eyebrow mb-3">Key Metrics</h3>
-            <div className="rounded-[16px] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
               <MetricRow label="FTP (all-in)" value={fmt(cell.ftp, 'bps')} />
               <MetricRow label={t.marginTargetPct ?? 'Margin'} value={fmt(cell.targetMargin, 'pct')} accent />
               <MetricRow label="Client Rate" value={fmt(cell.targetClientRate, 'pct')} accent />
@@ -108,7 +108,7 @@ const GridCellDetailPanel: React.FC<Props> = ({ cell, onClose }) => {
           {/* Component breakdown */}
           <section className="mb-6">
             <h3 className="nfq-eyebrow mb-3">FTP Component Breakdown</h3>
-            <div className="rounded-[16px] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
               <MetricRow label="Base Rate" value={fmt(components?.baseRate, 'bps')} />
               <MetricRow label="Liquidity Premium" value={fmt(cell.liquidityPremium, 'bps')} />
               <MetricRow label="Capital Charge" value={fmt(cell.capitalCharge, 'bps')} />
@@ -125,7 +125,7 @@ const GridCellDetailPanel: React.FC<Props> = ({ cell, onClose }) => {
           {/* Canonical deal inputs */}
           <section>
             <h3 className="nfq-eyebrow mb-3">Canonical Deal Inputs</h3>
-            <div className="rounded-[16px] bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
               {cell.canonicalDealInput &&
                 Object.entries(cell.canonicalDealInput).map(([key, value]) => {
                   if (value == null) return null;

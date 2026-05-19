@@ -50,7 +50,7 @@ export const EntitySwitcher: React.FC<EntitySwitcherProps> = ({ labels }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 min-w-[220px] rounded-lg border border-white/10 bg-[var(--nfq-bg-surface)] p-1 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-[220px] rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-1 shadow-xl">
           <div className="px-3 py-1.5">
             <span className="nfq-label text-[10px]">{labels.activeEntity}</span>
           </div>

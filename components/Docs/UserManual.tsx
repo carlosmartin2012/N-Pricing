@@ -90,7 +90,7 @@ const FeatureCard: React.FC<{ title: string; desc: string }> = ({ title, desc })
 );
 
 const Shortcut: React.FC<{ keys: string; desc: string }> = ({ keys, desc }) => (
-  <div className="flex items-center justify-between rounded-lg border border-slate-800/60 bg-slate-900/60 px-4 py-2.5">
+  <div className="flex items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-4 py-2.5">
     <span className="text-sm text-slate-300">{desc}</span>
     <kbd className="rounded border border-slate-700 bg-slate-800 px-2 py-1 font-mono text-[11px] text-slate-200">
       {keys}
@@ -575,7 +575,7 @@ const UserManual: React.FC = () => {
               <p className="text-slate-400">{guide.hero.subtitle}</p>
               <ol className="space-y-3 pl-1">
                 {guide.quickStart.map((step, idx) => (
-                  <li key={step.title} className="flex gap-3 rounded-lg border border-slate-800/60 bg-slate-900/40 p-4">
+                  <li key={step.title} className="flex gap-3 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 font-mono text-xs font-bold text-cyan-400">
                       {idx + 1}
                     </span>
@@ -721,7 +721,7 @@ const UserManual: React.FC = () => {
                   const term = colonIdx > -1 ? entry.slice(0, colonIdx) : entry;
                   const definition = colonIdx > -1 ? entry.slice(colonIdx + 1).trim() : '';
                   return (
-                    <div key={term} className="rounded-lg border border-slate-800/60 bg-slate-900/60 px-4 py-3">
+                    <div key={term} className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-4 py-3">
                       <dt className="font-mono text-sm font-bold tracking-wide text-slate-200">{term}</dt>
                       {definition && (
                         <dd className="mt-1 text-xs leading-relaxed text-slate-400">{definition}</dd>

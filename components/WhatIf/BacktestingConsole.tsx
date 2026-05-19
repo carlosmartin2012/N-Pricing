@@ -215,7 +215,7 @@ const BacktestingConsole: React.FC = () => {
                     key={run.id}
                     type="button"
                     onClick={() => setSelectedRunId(run.id)}
-                    className={`w-full text-left rounded-[12px] px-3 py-2.5 transition-colors ${
+                    className={`w-full text-left rounded-[var(--nfq-radius-card)] px-3 py-2.5 transition-colors ${
                       run.id === selectedRunId
                         ? 'bg-cyan-500/10 border border-cyan-500/30'
                         : 'hover:bg-[var(--nfq-bg-elevated)] border border-transparent'
@@ -242,18 +242,18 @@ const BacktestingConsole: React.FC = () => {
       {/* --- Right: selected result --- */}
       <div className="flex flex-1 min-w-0 flex-col">
         {!selectedRunId ? (
-          <div className="flex flex-1 items-center justify-center rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5">
+          <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">
             <div className="text-center">
               <BarChart3 className="mx-auto mb-3 h-10 w-10 text-[color:var(--nfq-text-secondary)] opacity-30" />
               <span className="text-xs text-[color:var(--nfq-text-secondary)]">Select a run to view results</span>
             </div>
           </div>
         ) : loadingResult ? (
-          <div className="flex flex-1 items-center justify-center rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5">
+          <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-500" />
           </div>
         ) : !result ? (
-          <div className="flex flex-1 items-center justify-center rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5">
+          <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">
             <span className="text-xs text-[color:var(--nfq-text-secondary)]">
               Results not available yet. The run may still be in progress.
             </span>
@@ -282,7 +282,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
       <div className="space-y-6 p-4">
         {/* --- P&L comparison cards --- */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Simulated P&L
             </div>
@@ -290,7 +290,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
               {fmtCurrency(result.simulatedPnl)}
             </div>
           </div>
-          <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Actual P&L
             </div>
@@ -298,7 +298,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
               {fmtCurrency(result.actualPnl)}
             </div>
           </div>
-          <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               P&L Delta
             </div>
@@ -310,7 +310,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
 
         {/* RAROC summary */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Simulated RAROC
             </div>
@@ -318,7 +318,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
               {fmtRaroc(result.simulatedAvgRaroc)}
             </div>
           </div>
-          <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Actual RAROC
             </div>
@@ -326,7 +326,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
               {fmtRaroc(result.actualAvgRaroc)}
             </div>
           </div>
-          <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+          <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
             <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               RAROC Delta
             </div>
@@ -378,7 +378,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
             <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Cohort Breakdown
             </h4>
-            <div className="max-h-64 overflow-auto rounded-[16px] border border-white/5">
+            <div className="max-h-64 overflow-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
               <table className="w-full text-[11px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[var(--nfq-bg-elevated)]">
@@ -395,7 +395,7 @@ const BacktestResultView: React.FC<{ result: BacktestResult }> = ({ result }) =>
                   {result.cohortBreakdown.map((cohort, idx) => (
                     <tr
                       key={`${cohort.product}-${cohort.segment}-${idx}`}
-                      className="border-t border-white/5 hover:bg-white/[0.02] transition-colors"
+                      className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
                     >
                       <td className="px-3 py-2 font-medium text-[color:var(--nfq-text-primary)]">{cohort.product}</td>
                       <td className="px-3 py-2 text-[color:var(--nfq-text-primary)]">{cohort.segment}</td>

@@ -89,7 +89,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
   }, [selectedModel]);
 
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
@@ -142,7 +142,7 @@ const ModelInventoryPanel: React.FC<ModelInventoryPanelProps> = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-[10px]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)]">
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="font-mono text-[10px] tracking-normal text-neutral-500">
@@ -260,7 +260,7 @@ function FilterSelect({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-7 rounded-md border border-white/10 bg-[var(--nfq-bg-elevated)] px-3 font-mono text-xs text-neutral-200 focus:border-nfq-amber focus:outline-none"
+        className="h-7 rounded-md border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 font-mono text-xs text-neutral-200 focus:border-nfq-amber focus:outline-none"
       >
         {children}
       </select>

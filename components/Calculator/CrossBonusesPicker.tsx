@@ -81,7 +81,7 @@ export const CrossBonusesPicker: React.FC<CrossBonusesPickerProps> = ({
   const attachedCount = attachments.length;
 
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <div className="mb-5">
         <h3 className="text-sm font-semibold text-slate-200">

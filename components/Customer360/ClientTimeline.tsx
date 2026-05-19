@@ -52,7 +52,7 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
   }, [events]);
 
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-sky-400" />
@@ -71,7 +71,7 @@ const ClientTimeline: React.FC<Props> = ({ clientId }) => {
         {grouped.map(([month, batch]) => (
           <li key={month}>
             <div className="nfq-label mb-2 text-[9px] text-slate-500">{month || 'unknown'}</div>
-            <ul className="space-y-2 border-l border-white/10 pl-4">
+            <ul className="space-y-2 border-l border-[color:var(--nfq-border-ghost)] pl-4">
               {batch.map((e) => {
                 const meta = EVENT_META[e.eventType] ?? { icon: History, tone: 'text-slate-300', label: e.eventType };
                 const Icon = meta.icon;

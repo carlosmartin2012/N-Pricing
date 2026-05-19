@@ -79,7 +79,7 @@ const RAROCCalculator: React.FC = () => {
             {/* Compact metadata strip — replaces the older in-page header block.
                 The view title ('RAROC') lives in the App.tsx compact hero now,
                 so this strip carries only the model + transaction context. */}
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--nfq-radius-card)] border border-white/5 bg-slate-900/30 px-4 py-2 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-slate-900/30 px-4 py-2 text-xs">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono text-[10px] text-slate-500">MODEL_v4.2.X</span>
                     <Badge variant="outline" className="text-[9px] border-cyan-500/30 text-cyan-400">BASEL III COMPLIANT</Badge>
@@ -174,7 +174,7 @@ const RAROCCalculator: React.FC = () => {
                                 Capital income is now computed from the same engine used by pricing, and spread revenue is
                                 derived from commercial spread instead of duplicating a separate client-rate formula.
                             </p>
-                            <div className="mt-auto rounded-[var(--nfq-radius-card)] border border-white/5 bg-slate-950/40 p-4">
+                            <div className="mt-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-slate-950/40 p-4">
                                 <div className="nfq-label">Current Margin Stack</div>
                                 <div className="mt-3 flex items-end justify-between gap-4">
                                     <div>

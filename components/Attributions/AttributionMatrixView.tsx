@@ -81,7 +81,7 @@ const AttributionMatrixView: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowLevelForm((v) => !v)}
-          className="flex items-center gap-1 rounded-md border border-white/10 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 hover:bg-emerald-500/20"
+          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300 hover:bg-emerald-500/20"
         >
           <Plus className="h-3 w-3" />
           {t.matrixAddLevel}
@@ -102,13 +102,13 @@ const AttributionMatrixView: React.FC = () => {
       )}
 
       {matrixQuery.isLoading && (
-        <div className="rounded-xl border border-white/5 bg-slate-900/40 p-6 text-center text-xs text-slate-400">
+        <div className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-6 text-center text-xs text-slate-400">
           {t.loading}
         </div>
       )}
 
       {!matrixQuery.isLoading && sortedLevels.length === 0 && (
-        <div className="rounded-xl border border-white/5 bg-slate-900/40 p-6 text-center text-xs text-slate-400">
+        <div className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-6 text-center text-xs text-slate-400">
           {t.matrixEmpty}
         </div>
       )}
@@ -121,7 +121,7 @@ const AttributionMatrixView: React.FC = () => {
               : null;
             const thresholds = thresholdsByLevel.get(level.id) ?? [];
             return (
-              <li key={level.id} className="rounded-xl border border-white/5 bg-slate-900/40 p-4">
+              <li key={level.id} className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ const AttributionMatrixView: React.FC = () => {
                       onClick={() =>
                         setShowThresholdForm((current) => (current === level.id ? null : level.id))
                       }
-                      className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-200 hover:bg-white/10"
+                      className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-1 text-xs text-slate-200 hover:bg-white/10"
                     >
                       <Plus className="h-3 w-3" />
                       {t.matrixAddThreshold}
@@ -193,7 +193,7 @@ const AttributionMatrixView: React.FC = () => {
                       </thead>
                       <tbody>
                         {thresholds.map((thr) => (
-                          <tr key={thr.id} className="border-t border-white/5">
+                          <tr key={thr.id} className="border-t border-[color:var(--nfq-border-ghost)]">
                             <td className="px-2 py-1 font-mono text-[11px] text-slate-300">
                               {scopeSummary(thr.scope)}
                             </td>
@@ -265,7 +265,7 @@ const LevelForm: React.FC<LevelFormProps> = ({ levels, onSubmit, onCancel, pendi
   };
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-white/5 bg-slate-900/40 p-4">
+    <form onSubmit={submit} className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
       <div className="grid gap-3 md:grid-cols-4">
         <FieldText label={t.matrixLevelName} value={name} onChange={setName} required />
         <FieldNumber label={t.matrixLevelOrder} value={levelOrder} min={1} onChange={setLevelOrder} />
@@ -279,7 +279,7 @@ const LevelForm: React.FC<LevelFormProps> = ({ levels, onSubmit, onCancel, pendi
       </div>
       <div className="mt-3 flex items-center justify-end gap-2">
         <button type="button" onClick={onCancel}
-          className="rounded-md border border-white/10 px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5">
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5">
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
@@ -326,7 +326,7 @@ const ThresholdForm: React.FC<ThresholdFormProps> = ({ levelId, onSubmit, onCanc
   };
 
   return (
-    <form onSubmit={submit} className="rounded-md border border-white/10 bg-slate-950/40 p-3">
+    <form onSubmit={submit} className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-950/40 p-3">
       <div className="grid gap-3 md:grid-cols-3">
         <FieldText label="product (csv)" value={productCsv} onChange={setProductCsv} placeholder="loan, mortgage" />
         <FieldText label="segment (csv)" value={segmentCsv} onChange={setSegmentCsv} placeholder="SME, Retail" />
@@ -337,7 +337,7 @@ const ThresholdForm: React.FC<ThresholdFormProps> = ({ levelId, onSubmit, onCanc
       </div>
       <div className="mt-3 flex items-center justify-end gap-2">
         <button type="button" onClick={onCancel}
-          className="rounded-md border border-white/10 px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5">
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5">
           {t.matrixCancel}
         </button>
         <button type="submit" disabled={pending}
@@ -369,7 +369,7 @@ const FieldText: React.FC<FieldTextProps> = ({ label, value, onChange, required,
       onChange={(e) => onChange(e.target.value)}
       required={required}
       placeholder={placeholder}
-      className="mt-1 w-full rounded border border-white/10 bg-slate-900/60 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500"
+      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500"
     />
   </label>
 );
@@ -390,7 +390,7 @@ const FieldNumber: React.FC<FieldNumberProps> = ({ label, value, min, step, onCh
       min={min}
       step={step ?? 0.1}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="mt-1 w-full rounded border border-white/10 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
     />
   </label>
 );
@@ -407,7 +407,7 @@ const FieldSelect: React.FC<FieldSelectProps> = ({ label, value, onChange, optio
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-1 w-full rounded border border-white/10 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+      className="mt-1 w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>

@@ -180,7 +180,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
         <section className="hidden min-h-screen flex-col justify-between px-12 py-10 lg:flex xl:px-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[color:rgba(var(--nfq-accent-rgb),0.12)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[color:rgba(var(--nfq-accent-rgb),0.12)] shadow-[inset_0_0_0_1px_rgba(var(--nfq-accent-rgb),0.18)]">
               <Logo className="h-6 w-6" />
             </div>
             <span className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--nfq-text-muted)]">
@@ -232,8 +232,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
         {/* ── Right panel — login card ── */}
         <section className="flex min-h-screen items-center justify-center px-6 py-10 lg:px-10">
           <div className="w-full max-w-sm">
-            <div className="rounded-[28px] bg-[var(--nfq-bg-surface)] p-1.5 shadow-[var(--nfq-shadow-dialog)]">
-              <div className="rounded-[22px] bg-[var(--nfq-bg-elevated)] px-7 py-8">
+            <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-1.5 shadow-[var(--nfq-shadow-dialog)]">
+              <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] px-7 py-8">
 
                 <h2 className="text-2xl font-semibold tracking-[var(--nfq-tracking-tight)] text-[color:var(--nfq-text-primary)]">
                   Bienvenido
@@ -249,7 +249,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                       data-testid="google-login-btn"
                       onClick={handleGoogleClick}
                       disabled={googleLoading}
-                      className="flex w-full items-center gap-3 rounded-[18px] bg-white px-4 py-3.5 text-black transition-colors hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex w-full items-center gap-3 rounded-[var(--nfq-radius-card)] bg-white px-4 py-3.5 text-black transition-colors hover:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
                         {googleLoading
@@ -317,7 +317,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, language }) => {
                       data-testid="login-error"
                       role="alert"
                       aria-live="polite"
-                      className="flex items-start gap-2.5 rounded-[16px] bg-[var(--nfq-danger-subtle)] px-4 py-3 text-xs leading-5 text-[color:var(--nfq-danger)]"
+                      className="flex items-start gap-2.5 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-danger-subtle)] px-4 py-3 text-xs leading-5 text-[color:var(--nfq-danger)]"
                     >
                       <AlertCircle size={14} className="mt-0.5 shrink-0" />
                       <span>{error}</span>

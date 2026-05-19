@@ -83,7 +83,7 @@ const SnapshotReplayView: React.FC = () => {
 
       <div className="grid flex-1 min-h-0 grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
         {/* List */}
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-[18px] bg-[var(--nfq-bg-surface)]">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]">
           <div className="border-b border-[var(--nfq-border-ghost)] px-4 py-3">
             <div className="nfq-label">Snapshots (latest {snapshots.length})</div>
           </div>
@@ -128,7 +128,7 @@ const SnapshotReplayView: React.FC = () => {
         </section>
 
         {/* Detail / Replay result */}
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-[18px] bg-[var(--nfq-bg-surface)]">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]">
           <div className="border-b border-[var(--nfq-border-ghost)] px-4 py-3">
             <div className="nfq-label">Replay result</div>
           </div>

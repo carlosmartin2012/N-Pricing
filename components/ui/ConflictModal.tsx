@@ -54,14 +54,14 @@ export const ConflictModal: React.FC<ConflictModalProps> = ({
         </p>
 
         {diffs.length > 0 ? (
-          <div className="rounded-lg border border-white/10 overflow-hidden mb-6">
+          <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] overflow-hidden mb-6">
             <div className="grid grid-cols-3 gap-0 bg-white/5 px-4 py-2">
               <span className="nfq-label text-[10px]">Field</span>
               <span className="nfq-label text-[10px] text-cyan-400">Your Version</span>
               <span className="nfq-label text-[10px] text-amber-400">Server Version</span>
             </div>
             {diffs.map((diff) => (
-              <div key={diff.key} className="grid grid-cols-3 gap-0 px-4 py-2 border-t border-white/5">
+              <div key={diff.key} className="grid grid-cols-3 gap-0 px-4 py-2 border-t border-[color:var(--nfq-border-ghost)]">
                 <span className="text-xs text-slate-300">{diff.label}</span>
                 <span className="text-xs font-mono text-cyan-400">
                   {String(myVersion[diff.key] ?? '—')}

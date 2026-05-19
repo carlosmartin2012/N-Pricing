@@ -48,7 +48,7 @@ const AttributionReportingView: React.FC = () => {
           <button
             type="button"
             onClick={() => refetch()}
-            className="flex items-center gap-1 rounded-md border border-white/10 bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
+            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
           >
             <RefreshCw className={`h-3 w-3 ${isFetching ? 'animate-spin' : ''}`} />
             <span>{t.retry}</span>
@@ -65,7 +65,7 @@ const AttributionReportingView: React.FC = () => {
       </section>
 
       {/* Tabs */}
-      <nav className="flex flex-wrap gap-1 border-b border-white/5">
+      <nav className="flex flex-wrap gap-1 border-b border-[color:var(--nfq-border-ghost)]">
         <TabButton active={tab === 'volume'} icon={BarChart4} label={t.reportingTabVolume}        onClick={() => setTab('volume')} />
         <TabButton active={tab === 'drift'}  icon={AlertTriangle} label={t.reportingTabDrift}     onClick={() => setTab('drift')} />
         <TabButton active={tab === 'funnel'} icon={GitFork}    label={t.reportingTabFunnel}        onClick={() => setTab('funnel')} />
@@ -73,7 +73,7 @@ const AttributionReportingView: React.FC = () => {
       </nav>
 
       {/* Body */}
-      <section className="rounded-xl border border-white/5 bg-slate-900/40 p-4">
+      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
         {isLoading && <div className="py-6 text-center text-xs text-slate-400">{t.loading}</div>}
         {isError && <div className="py-6 text-center text-xs text-rose-300">{t.cockpitErrorLoading}</div>}
         {data && tab === 'volume' && <VolumeTab summary={data} t={t} />}
@@ -99,7 +99,7 @@ const VolumeTab: React.FC<TabContentProps> = ({ summary, t }) => (
     <h3 className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{t.reportingByLevelTitle}</h3>
     <div className="overflow-x-auto">
       <table className="w-full text-left text-xs">
-        <thead className="border-b border-white/5 text-[10px] uppercase tracking-wide text-slate-400">
+        <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
           <tr>
             <th className="px-2 py-1">Nivel</th>
             <th className="px-2 py-1 text-right">N</th>
@@ -111,7 +111,7 @@ const VolumeTab: React.FC<TabContentProps> = ({ summary, t }) => (
         </thead>
         <tbody>
           {summary.byLevel.map((entry) => (
-            <tr key={entry.levelId} className="border-b border-white/5">
+            <tr key={entry.levelId} className="border-b border-[color:var(--nfq-border-ghost)]">
               <td className="px-2 py-1 text-slate-200">{entry.level?.name ?? entry.levelId}</td>
               <td className="px-2 py-1 text-right font-mono text-slate-200">{entry.stats.count}</td>
               <td className="px-2 py-1 text-right font-mono text-slate-200">{fmtEur(entry.stats.totalEur)}</td>
@@ -234,7 +234,7 @@ const TimeTab: React.FC<TabContentProps> = ({ summary, t }) => {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-white/5 text-[10px] uppercase tracking-wide text-slate-400">
+          <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
             <tr>
               <th className="px-2 py-1">Nivel</th>
               <th className="px-2 py-1 text-right">N</th>
@@ -244,7 +244,7 @@ const TimeTab: React.FC<TabContentProps> = ({ summary, t }) => {
           </thead>
           <tbody>
             {Object.entries(byLevel).map(([levelId, entry]) => (
-              <tr key={levelId} className="border-b border-white/5">
+              <tr key={levelId} className="border-b border-[color:var(--nfq-border-ghost)]">
                 <td className="px-2 py-1 text-slate-200">{levelId}</td>
                 <td className="px-2 py-1 text-right font-mono text-slate-200">{entry.count}</td>
                 <td className="px-2 py-1 text-right font-mono text-slate-300">{fmtMs(entry.medianMs)}</td>
@@ -275,7 +275,7 @@ function fmtMs(ms: number): string {
 
 interface StatProps { label: string; value: string }
 const Stat: React.FC<StatProps> = ({ label, value }) => (
-  <div className="rounded-md border border-white/5 bg-slate-900/40 px-4 py-3">
+  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 px-4 py-3">
     <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
     <div className="font-mono text-lg font-semibold text-white">{value}</div>
   </div>
@@ -309,7 +309,7 @@ const WindowToggle: React.FC<WindowToggleProps> = ({ value, onChange, t }) => {
     { value: 180, label: t.reportingWindow180 },
   ];
   return (
-    <div className="inline-flex overflow-hidden rounded-md border border-white/10">
+    <div className="inline-flex overflow-hidden rounded-md border border-[color:var(--nfq-border-ghost)]">
       {opts.map((o) => (
         <button
           key={o.value}

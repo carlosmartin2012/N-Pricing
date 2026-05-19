@@ -191,7 +191,7 @@ const ElasticityCalibration: React.FC = () => {
       <div className="space-y-4 p-4">
         {/* --- Form --- */}
         {showForm && (
-          <div className="rounded-[16px] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
+          <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
             <h4 className="text-xs font-medium text-[color:var(--nfq-text-secondary)]">
               {editingId ? 'Edit Model' : 'New Expert Model'}
             </h4>
@@ -281,14 +281,14 @@ const ElasticityCalibration: React.FC = () => {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-500" />
           </div>
         ) : models.length === 0 ? (
-          <div className="rounded-[16px] border border-dashed border-white/10 py-10 text-center text-xs text-[color:var(--nfq-text-secondary)]">
+          <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] py-10 text-center text-xs text-[color:var(--nfq-text-secondary)]">
             No elasticity models configured. Add an expert model or calibrate from history.
           </div>
         ) : (
-          <div className="overflow-auto rounded-[16px] border border-white/5">
+          <div className="overflow-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-[var(--nfq-bg-elevated)] border-b border-white/5">
+                <tr className="bg-[var(--nfq-bg-elevated)] border-b border-[color:var(--nfq-border-ghost)]">
                   <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Product</th>
                   <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Segment</th>
                   <th className="px-4 py-2.5 text-right font-semibold text-[color:var(--nfq-text-secondary)]">Slope</th>
@@ -303,7 +303,7 @@ const ElasticityCalibration: React.FC = () => {
                 {models.map((model) => (
                   <tr
                     key={model.id}
-                    className="border-t border-white/5 hover:bg-white/[0.02] transition-colors"
+                    className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
                   >
                     <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">{model.product}</td>
                     <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)]">{model.segment}</td>

@@ -142,7 +142,7 @@ const TargetGridTable: React.FC<Props> = ({ cells, onCellSelect, isLoading }) =>
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
+      <div className="flex flex-col gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
         <div className="flex items-center gap-3">
           <div className="h-7 w-64 animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
         </div>
@@ -176,7 +176,7 @@ const TargetGridTable: React.FC<Props> = ({ cells, onCellSelect, isLoading }) =>
       {/* Table */}
       <div
         ref={parentRef}
-        className="overflow-auto rounded-[22px] bg-[var(--nfq-bg-surface)]"
+        className="overflow-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]"
         style={useVirtual ? { maxHeight: 600 } : undefined}
       >
         <table className="w-full min-w-[720px] border-collapse text-left">

@@ -256,7 +256,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
   };
 
   return (
-    <section className="rounded-[14px] bg-[var(--nfq-bg-surface,#171717)] p-4 text-white/90">
+    <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface,#171717)] p-4 text-white/90">
       {/* Heading */}
       <header className="mb-5 flex items-start justify-between gap-4">
         <div>
@@ -271,7 +271,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
       </header>
 
       {/* Reconciliation banner */}
-      <div className="mb-5 rounded-[10px] bg-white/[0.04] p-4">
+      <div className="mb-5 rounded-[var(--nfq-radius-card)] bg-white/[0.04] p-4">
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-emerald-400" />
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-white/70">
@@ -298,7 +298,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
 
       {/* Date pickers for historical modes */}
       {queryMode !== 'CURRENT' && (
-        <div className="mb-5 flex flex-wrap gap-4 rounded-[10px] bg-white/[0.03] p-4">
+        <div className="mb-5 flex flex-wrap gap-4 rounded-[var(--nfq-radius-card)] bg-white/[0.03] p-4">
           <label className="flex flex-col gap-1">
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
               Valid at
@@ -327,10 +327,10 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
       )}
 
       {/* Lineage table */}
-      <div className="overflow-x-auto rounded-[10px] bg-white/[0.02]">
+      <div className="overflow-x-auto rounded-[var(--nfq-radius-card)] bg-white/[0.02]">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/5 text-left">
+            <tr className="border-b border-[color:var(--nfq-border-ghost)] text-left">
               <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
                 Parámetro
               </th>
@@ -376,7 +376,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                 return (
                   <tr
                     key={entry.parameterId}
-                    className={`border-b border-white/5 last:border-b-0 ${
+                    className={`border-b border-[color:var(--nfq-border-ghost)] last:border-b-0 ${
                       idx % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]'
                     }`}
                   >
@@ -459,7 +459,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
             aria-label="Historial de parámetro"
             className="fixed right-0 top-0 z-50 flex h-full w-[500px] max-w-[95vw] flex-col bg-[var(--nfq-bg-surface,#171717)] shadow-2xl"
           >
-            <div className="flex items-start justify-between border-b border-white/5 p-5">
+            <div className="flex items-start justify-between border-b border-[color:var(--nfq-border-ghost)] p-5">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
                   Historial completo
@@ -488,7 +488,7 @@ const LineagePanel: React.FC<LineagePanelProps> = ({ deal: _deal, result: _resul
                   return (
                     <li
                       key={`${record.id}-v${record.version}`}
-                      className="relative rounded-[10px] bg-white/[0.03] p-4"
+                      className="relative rounded-[var(--nfq-radius-card)] bg-white/[0.03] p-4"
                     >
                       <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">

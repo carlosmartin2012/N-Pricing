@@ -34,7 +34,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
   };
 
   return (
-    <div className="rounded-[var(--nfq-radius-card)] border border-white/10 bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
       <div className="flex items-center gap-3 mb-4">
         {mfaState.isVerified ? (
           <ShieldCheck className="h-5 w-5 text-emerald-400" />
@@ -105,7 +105,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({ userEmail: _userEmail }) => 
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="Enter 6-digit code"
-              className="flex-1 text-center font-mono text-lg tracking-[0.3em] rounded-lg border border-white/10 bg-[var(--nfq-bg-elevated)] px-3 py-2 text-white placeholder:text-slate-600 focus:border-cyan-500/40 focus:outline-none"
+              className="flex-1 text-center font-mono text-lg tracking-[0.3em] rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] px-3 py-2 text-white placeholder:text-slate-600 focus:border-cyan-500/40 focus:outline-none"
               maxLength={6}
               inputMode="numeric"
               autoComplete="one-time-code"

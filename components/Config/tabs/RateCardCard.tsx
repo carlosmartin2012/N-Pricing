@@ -33,7 +33,7 @@ const RateCardCard: React.FC<Props> = ({
     <h4 className="mb-1 text-sm font-bold text-slate-200">{card.name}</h4>
     <div className="mb-4 font-mono text-[10px] text-slate-500">{card.id}</div>
 
-    <div className="rounded border border-slate-800/50 bg-slate-900/50 p-2">
+    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/50 p-2">
       <div className="flex gap-2 overflow-x-auto pb-1">
         {(card.points || []).map((point, index) => (
           <div key={`${card.id}-${index}`} className="min-w-[50px] flex-shrink-0 rounded bg-slate-800 px-2 py-1 text-center">

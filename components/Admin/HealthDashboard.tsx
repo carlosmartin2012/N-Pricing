@@ -99,7 +99,7 @@ const HealthDashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
         {summary?.latencySampleCount24h
           ? `${t.healthMetricsWindow} ${summary.latencySampleCount24h} ${t.healthLatencySamples}.`
           : t.noHealthMetrics}
@@ -125,7 +125,7 @@ const HealthDashboard: React.FC = () => {
           {summary ? ` · ${summary.activeAlertRules} ${t.active.toLowerCase()}` : ''}
         </h3>
         {alertRules.length === 0 ? (
-          <div className="rounded-lg border border-white/5 bg-white/[0.02] px-6 py-8 text-center">
+          <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-6 py-8 text-center">
             <AlertTriangle className="h-8 w-8 text-slate-600 mx-auto mb-2" />
             <p className="text-sm text-slate-400">{t.noAlertRules}</p>
             <p className="text-xs text-slate-500 mt-1">
@@ -133,10 +133,10 @@ const HealthDashboard: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="rounded-lg border border-white/10 overflow-hidden">
+          <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/5 bg-white/[0.02]">
+                <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
                   <th className="nfq-label text-[10px] text-left px-4 py-2">{t.name}</th>
                   <th className="nfq-label text-[10px] text-left px-4 py-2">{t.metric}</th>
                   <th className="nfq-label text-[10px] text-left px-4 py-2">{t.condition}</th>
@@ -145,7 +145,7 @@ const HealthDashboard: React.FC = () => {
               </thead>
               <tbody>
                 {alertRules.map((rule) => (
-                  <tr key={rule.id} className="border-b border-white/5">
+                  <tr key={rule.id} className="border-b border-[color:var(--nfq-border-ghost)]">
                     <td className="px-4 py-2 text-white">{rule.name}</td>
                     <td className="px-4 py-2 font-mono text-xs text-slate-300">{rule.metricName}</td>
                     <td className="px-4 py-2 font-mono text-xs text-amber-400">

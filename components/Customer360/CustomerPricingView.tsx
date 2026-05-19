@@ -87,7 +87,7 @@ const CustomerPricingView: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search clients..."
-              className="w-full rounded-lg border border-white/10 bg-white/[0.02] py-2 pl-8 pr-3 font-mono text-xs text-white placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none"
+              className="w-full rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] py-2 pl-8 pr-3 font-mono text-xs text-white placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none"
             />
           </div>
           <ul className="max-h-[70vh] space-y-1 overflow-y-auto">
@@ -100,7 +100,7 @@ const CustomerPricingView: React.FC = () => {
                     className={`block w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                       active
                         ? 'border-emerald-400/50 bg-emerald-400/5'
-                        : 'border-white/5 bg-white/[0.02] hover:border-white/10'
+                        : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.02] hover:border-[color:var(--nfq-border-ghost)]'
                     }`}
                   >
                     <div className={`font-medium ${active ? 'text-white' : 'text-slate-200'}`}>{c.name}</div>
@@ -112,7 +112,7 @@ const CustomerPricingView: React.FC = () => {
               );
             })}
             {filtered.length === 0 && (
-              <li className="rounded-lg border border-white/5 bg-white/[0.02] px-3 py-4 text-center text-xs text-slate-400">
+              <li className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-3 py-4 text-center text-xs text-slate-400">
                 No clients match.
               </li>
             )}
@@ -122,7 +122,7 @@ const CustomerPricingView: React.FC = () => {
         <section className="space-y-4">
           {selectedId ? (
             <>
-              <nav className="flex flex-wrap gap-1 rounded-lg border border-white/5 bg-white/[0.02] p-1">
+              <nav className="flex flex-wrap gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-1">
                 {TABS.map(({ id, label, icon: Icon }) => {
                   const isActive = activeTab === id;
                   return (
@@ -149,7 +149,7 @@ const CustomerPricingView: React.FC = () => {
               {activeTab === 'nba'      && <NbaRecommendationCard clientId={selectedId} />}
             </>
           ) : (
-            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400">
+            <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400">
               Select a client to see their relationship.
             </div>
           )}

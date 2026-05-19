@@ -95,7 +95,7 @@ export const InverseOptimizerPanel: React.FC<InverseOptimizerPanelProps> = ({
   return (
     <div
       data-testid="inverse-optimizer-panel"
-      className="rounded-[14px] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-5"
+      className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-5"
     >
       {/* Header */}
       <div className="mb-4 flex items-start gap-3">

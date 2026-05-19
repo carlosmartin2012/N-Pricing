@@ -76,7 +76,7 @@ const SnapshotDiffView: React.FC<Props> = ({ snapshots }) => {
 
       {/* Loading */}
       {isLoading && (
-        <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
+        <div className="flex flex-col gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
           <div className="h-10 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-11 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
@@ -86,14 +86,14 @@ const SnapshotDiffView: React.FC<Props> = ({ snapshots }) => {
 
       {/* Same snapshot warning */}
       {fromId === toId && !isLoading && (
-        <div className="rounded-[22px] bg-[var(--nfq-bg-surface)] px-6 py-12 text-center text-sm text-[color:var(--nfq-text-muted)]">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] px-6 py-12 text-center text-sm text-[color:var(--nfq-text-muted)]">
           Select two different snapshots to compare.
         </div>
       )}
 
       {/* Diff table */}
       {!isLoading && fromId !== toId && (
-        <div className="overflow-auto rounded-[22px] bg-[var(--nfq-bg-surface)]">
+        <div className="overflow-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]">
           <table className="w-full min-w-[680px] border-collapse text-left">
             <thead className="sticky top-0 z-10 bg-[var(--nfq-bg-elevated)]">
               <tr>

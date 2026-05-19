@@ -59,7 +59,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
         className="relative flex h-full w-full max-w-[500px] flex-col overflow-hidden bg-[var(--nfq-bg-elevated)] shadow-2xl"
         style={{ width: '500px' }}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-white/5 px-6 py-5">
+        <div className="flex items-start justify-between gap-4 border-b border-[color:var(--nfq-border-ghost)] px-6 py-5">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex items-center gap-2">
               <CategoryBadge category={model.category} />
@@ -140,7 +140,7 @@ const ModelInventoryDrawer: React.FC<ModelInventoryDrawerProps> = ({
             titleClassName="text-amber-400"
           />
 
-          <section className="rounded-[10px] bg-[var(--nfq-bg-surface)]/60 p-4">
+          <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]/60 p-4">
             <div className="mb-3 flex items-center justify-between">
               <h4 className="flex items-center gap-1.5 font-mono text-[11px] tracking-normal text-neutral-400">
                 <ClipboardList size={12} />

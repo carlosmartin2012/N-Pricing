@@ -16,7 +16,7 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className,
 }) => (
-  <div className={`grid gap-4 pb-4 border-b border-slate-800/50 ${className ?? 'grid-cols-2'}`}>
+  <div className={`grid gap-4 pb-4 border-b border-[color:var(--nfq-border-ghost)] ${className ?? 'grid-cols-2'}`}>
     {children}
   </div>
 );

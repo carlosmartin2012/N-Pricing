@@ -120,7 +120,7 @@ const ApprovalCockpit: React.FC = () => {
         <button
           type="button"
           onClick={() => decisionsQuery.refetch()}
-          className="flex items-center gap-1 rounded-md border border-white/10 bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
+          className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
         >
           <RefreshCw className={`h-3 w-3 ${decisionsQuery.isFetching ? 'animate-spin' : ''}`} />
           <span>{t.retry}</span>
@@ -153,7 +153,7 @@ const ApprovalCockpit: React.FC = () => {
       )}
 
       {/* Bandeja */}
-      <section className="rounded-xl border border-white/5 bg-slate-900/40">
+      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40">
         {isLoading && (
           <div className="p-6 text-center text-xs text-slate-400">{t.loading}</div>
         )}
@@ -170,7 +170,7 @@ const ApprovalCockpit: React.FC = () => {
           <>
             {/* Desktop: tabla. Mobile: oculta — cards debajo. */}
             <table className="hidden w-full text-left text-sm md:table" role="table">
-              <thead className="border-b border-white/5 text-[10px] uppercase tracking-wide text-slate-400">
+              <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
                 <tr>
                   <th className="px-4 py-2">{t.cockpitDeal}</th>
                   <th className="px-4 py-2 text-right">{t.cockpitDeviation}</th>
@@ -244,7 +244,7 @@ const ApprovalCockpit: React.FC = () => {
 
 interface KpiProps { label: string; value: string }
 const Kpi: React.FC<KpiProps> = ({ label, value }) => (
-  <div className="rounded-md border border-white/5 bg-slate-900/40 px-4 py-3">
+  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 px-4 py-3">
     <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
     <div className="font-mono text-lg font-semibold text-white">{value}</div>
   </div>
@@ -277,7 +277,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
         data-focused={focused ? 'true' : undefined}
         data-approval-focus-target={item.decision.id}
         tabIndex={focused ? -1 : undefined}
-        className={`scroll-mt-24 border-b border-white/5 hover:bg-white/[0.02] ${
+        className={`scroll-mt-24 border-b border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] ${
           focused ? 'bg-cyan-500/10 outline outline-1 outline-cyan-400/50' : ''
         }`}
       >
@@ -317,7 +317,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               disabled={pending}
               onClick={() => setConfirming('escalated')}
               title={t.cockpitEscalate}
-              className="rounded border border-white/10 bg-white/5 p-1 text-slate-200 hover:bg-white/10 disabled:opacity-40"
+              className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 p-1 text-slate-200 hover:bg-white/10 disabled:opacity-40"
               aria-label={t.cockpitEscalate}
             >
               <ArrowUpRight className="h-4 w-4" />
@@ -326,7 +326,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
         </td>
       </tr>
       {confirming && (
-        <tr className="border-b border-white/5 bg-slate-950/40">
+        <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-slate-950/40">
           <td colSpan={6} className="px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">
               {belowFloor && confirming === 'approved' && (
@@ -340,7 +340,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={t.cockpitDecisionReason}
-                className="flex-1 min-w-[220px] rounded border border-white/10 bg-slate-900/60 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500"
+                className="flex-1 min-w-[220px] rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100 placeholder:text-slate-500"
               />
               <button
                 type="button"
@@ -355,7 +355,7 @@ const PendingRow: React.FC<PendingRowProps> = ({ item, pending, focused = false,
               <button
                 type="button"
                 onClick={() => { setConfirming(null); setReason(''); }}
-                className="rounded border border-white/10 px-3 py-1 text-xs text-slate-300 hover:bg-white/5"
+                className="rounded border border-[color:var(--nfq-border-ghost)] px-3 py-1 text-xs text-slate-300 hover:bg-white/5"
               >
                 {t.matrixCancel}
               </button>
@@ -398,13 +398,13 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
       data-approval-focus-target={item.decision.id}
       tabIndex={focused ? -1 : undefined}
       className={`scroll-mt-24 rounded-xl border bg-slate-900/40 p-3 text-sm ${
-        focused ? 'border-cyan-400/50 bg-cyan-500/10 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]' : 'border-white/5'
+        focused ? 'border-cyan-400/50 bg-cyan-500/10 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]' : 'border-[color:var(--nfq-border-ghost)]'
       }`}
     >
       <header className="flex items-center justify-between">
         <span className="font-mono text-xs text-slate-200">{item.decision.dealId}</span>
         {item.requiredLevel && (
-          <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+          <span className="rounded-full border border-[color:var(--nfq-border-ghost)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
             {item.requiredLevel.name}
           </span>
         )}
@@ -453,7 +453,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
           type="button"
           disabled={pending}
           onClick={() => setConfirming('escalated')}
-          className="flex items-center justify-center gap-1 rounded border border-white/10 bg-white/5 px-2 py-2 text-xs text-slate-200 hover:bg-white/10 disabled:opacity-40"
+          className="flex items-center justify-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-white/5 px-2 py-2 text-xs text-slate-200 hover:bg-white/10 disabled:opacity-40"
           aria-label={t.cockpitEscalate}
         >
           <ArrowUpRight className="h-4 w-4" />
@@ -462,7 +462,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
       </div>
 
       {confirming && (
-        <div className="mt-3 space-y-2 rounded-md border border-white/10 bg-slate-950/40 p-3">
+        <div className="mt-3 space-y-2 rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-950/40 p-3">
           {belowFloor && confirming === 'approved' && (
             <span className="flex items-center gap-1 text-xs text-rose-300">
               <AlertTriangle className="h-3 w-3" />
@@ -474,7 +474,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={t.cockpitDecisionReason}
-            className="w-full rounded border border-white/10 bg-slate-900/60 px-2 py-2 text-xs text-slate-100 placeholder:text-slate-500"
+            className="w-full rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-2 text-xs text-slate-100 placeholder:text-slate-500"
           />
           <div className="flex gap-2">
             <button
@@ -490,7 +490,7 @@ const PendingCard: React.FC<PendingCardProps> = ({ item, pending, focused = fals
             <button
               type="button"
               onClick={() => { setConfirming(null); setReason(''); }}
-              className="flex-1 rounded border border-white/10 px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
+              className="flex-1 rounded border border-[color:var(--nfq-border-ghost)] px-3 py-2 text-xs text-slate-300 hover:bg-white/5"
             >
               {t.matrixCancel}
             </button>

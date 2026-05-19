@@ -17,7 +17,7 @@ const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className,
 }) => (
-  <div className={`grid gap-4 pb-4 border-b border-slate-800/50 ${className ?? 'grid-cols-2'}`}>
+  <div className={`grid gap-4 pb-4 border-b border-[color:var(--nfq-border-ghost)] ${className ?? 'grid-cols-2'}`}>
     {children}
   </div>
 );
@@ -49,7 +49,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
   );
 
   return (
-    <div className="border-t border-slate-800/50 pt-2">
+    <div className="border-t border-[color:var(--nfq-border-ghost)] pt-2">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -61,7 +61,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
 
       {open && (
         <div className="grid gap-4 pt-3">
-          <div className="pb-3 border-b border-slate-800/50">
+          <div className="pb-3 border-b border-[color:var(--nfq-border-ghost)]">
             <span className="nfq-label mb-2 block">{t.creditRiskMode}</span>
             <div className="flex gap-0">
               <button
@@ -230,12 +230,12 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
             )}
           </Section>
 
-          <div className="border-t border-slate-800/50 pt-3">
+          <div className="border-t border-[color:var(--nfq-border-ghost)] pt-3">
             <span className="nfq-label mb-2 block">{t.forwardLookingScenarios}</span>
             <div className="overflow-hidden rounded-lg border border-[var(--nfq-border-ghost)]">
               <table className="w-full text-[11px] font-mono">
                 <thead>
-                  <tr className="border-b border-slate-800/50 text-[10px] tracking-normal text-[var(--nfq-text-muted)]">
+                  <tr className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] tracking-normal text-[var(--nfq-text-muted)]">
                     <th className="px-3 py-1.5 text-left font-medium">Scenario</th>
                     <th className="px-3 py-1.5 text-right font-medium">{t.scenarioWeight}</th>
                     <th className="px-3 py-1.5 text-right font-medium">{t.scenarioCoverageFactor}</th>
@@ -258,7 +258,7 @@ export const CreditRiskSection: React.FC<Props> = ({ values, t, onFieldInputChan
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t border-slate-800/50">
+                  <tr className="border-t border-[color:var(--nfq-border-ghost)]">
                     <td className="px-3 py-1.5 text-[10px] font-semibold tracking-normal text-[var(--nfq-text-muted)]">
                       Weighted
                     </td>

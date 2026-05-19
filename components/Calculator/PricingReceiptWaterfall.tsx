@@ -109,7 +109,7 @@ export function PricingReceiptWaterfall({
           />
         </div>
 
-        <div className="mb-1 mt-3 border-t border-slate-800/50 pt-2">
+        <div className="mb-1 mt-3 border-t border-[color:var(--nfq-border-ghost)] pt-2">
           <WaterfallItem
             label={t.liquidityCost || 'Total Liquidity Spread'}
             value={result.liquiditySpread}

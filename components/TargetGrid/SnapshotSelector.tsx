@@ -61,7 +61,7 @@ const SnapshotDropdown: React.FC<{
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 top-full z-30 mt-1 max-h-64 w-72 overflow-auto rounded-[16px] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] py-1 shadow-xl"
+          className="absolute left-0 top-full z-30 mt-1 max-h-64 w-72 overflow-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] py-1 shadow-xl"
         >
           {snapshots.length === 0 && (
             <li className="px-4 py-3 text-xs text-[color:var(--nfq-text-muted)]">

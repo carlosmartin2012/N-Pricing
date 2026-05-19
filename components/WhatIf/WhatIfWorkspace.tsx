@@ -83,7 +83,7 @@ const SandboxListItem: React.FC<{
   <button
     type="button"
     onClick={() => onSelect(sandbox.id)}
-    className={`w-full text-left px-4 py-3 rounded-[12px] transition-colors ${
+    className={`w-full text-left px-4 py-3 rounded-[var(--nfq-radius-card)] transition-colors ${
       isSelected
         ? 'bg-cyan-500/10 border border-cyan-500/30'
         : 'hover:bg-[var(--nfq-bg-elevated)] border border-transparent'
@@ -137,7 +137,7 @@ const DiffCard: React.FC<{
 
   if (editing) {
     return (
-      <div className="rounded-[16px] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
+      <div className="rounded-[var(--nfq-radius-card)] border border-cyan-500/20 bg-[var(--nfq-bg-elevated)] p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">Label</label>
@@ -198,7 +198,7 @@ const DiffCard: React.FC<{
 
   return (
     <div
-      className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4 cursor-pointer hover:border-cyan-500/20 transition-colors"
+      className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4 cursor-pointer hover:border-cyan-500/20 transition-colors"
       onClick={() => setEditing(true)}
     >
       <div className="flex items-start justify-between gap-3">
@@ -363,7 +363,7 @@ const WhatIfWorkspace: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="shrink-0 rounded-[18px] border border-white/5 bg-[var(--nfq-bg-surface)] p-1">
+      <div className="shrink-0 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-1">
         <div className="grid gap-1 md:grid-cols-4">
           {WORKSPACE_TABS.map((tab) => {
             const Icon = tab.icon;
@@ -374,7 +374,7 @@ const WhatIfWorkspace: React.FC = () => {
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
                 aria-pressed={selected}
-                className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 text-left transition-colors ${
+                className={`flex items-center gap-3 rounded-[var(--nfq-radius-card)] px-3 py-2.5 text-left transition-colors ${
                   selected
                     ? 'bg-cyan-500/10 text-[color:var(--nfq-text-primary)] ring-1 ring-cyan-500/30'
                     : 'text-[color:var(--nfq-text-secondary)] hover:bg-white/[0.03] hover:text-[color:var(--nfq-text-primary)]'
@@ -391,8 +391,8 @@ const WhatIfWorkspace: React.FC = () => {
       {activeTab === 'sandboxes' && (
         <div className="flex min-h-0 flex-1 gap-4">
       {/* --- Left sidebar: sandbox list --- */}
-      <aside className="flex w-72 shrink-0 flex-col self-start rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5 overflow-hidden lg:sticky lg:top-2 lg:max-h-[calc(100vh-6rem)]">
-        <div className="flex items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
+      <aside className="flex w-72 shrink-0 flex-col self-start rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)] overflow-hidden lg:sticky lg:top-2 lg:max-h-[calc(100vh-6rem)]">
+        <div className="flex items-center justify-between gap-2 border-b border-[color:var(--nfq-border-ghost)] px-4 py-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--nfq-text-primary)]">
             <FlaskConical className="h-4 w-4 text-cyan-400" />
             Sandboxes
@@ -409,7 +409,7 @@ const WhatIfWorkspace: React.FC = () => {
 
         {/* Create form */}
         {isCreating && (
-          <div className="border-b border-white/5 p-4 space-y-2">
+          <div className="border-b border-[color:var(--nfq-border-ghost)] p-4 space-y-2">
             <TextInput
               placeholder="Sandbox name"
               value={newName}
@@ -458,7 +458,7 @@ const WhatIfWorkspace: React.FC = () => {
       {/* --- Center: sandbox editor --- */}
       <main className="flex flex-1 min-w-0 flex-col gap-4">
         {!sandbox ? (
-          <div className="flex flex-1 items-center justify-center rounded-[22px] bg-[var(--nfq-bg-surface)] border border-white/5">
+          <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] border border-[color:var(--nfq-border-ghost)]">
             <div className="text-center">
               <FlaskConical className="mx-auto mb-3 h-10 w-10 text-[color:var(--nfq-text-secondary)] opacity-30" />
               <div className="text-sm text-[color:var(--nfq-text-secondary)]">
@@ -515,7 +515,7 @@ const WhatIfWorkspace: React.FC = () => {
               )}
 
               {/* Base snapshot */}
-              <div className="rounded-[12px] bg-[var(--nfq-bg-elevated)] px-4 py-3">
+              <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] px-4 py-3">
                 <span className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                   Base Snapshot
                 </span>
@@ -541,7 +541,7 @@ const WhatIfWorkspace: React.FC = () => {
                 </div>
 
                 {sandbox.diffs.length === 0 ? (
-                  <div className="rounded-[16px] border border-dashed border-white/10 py-6 text-center text-xs text-[color:var(--nfq-text-secondary)]">
+                  <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] py-6 text-center text-xs text-[color:var(--nfq-text-secondary)]">
                     No changes yet. Add a parameter change to begin.
                   </div>
                 ) : (
@@ -554,7 +554,7 @@ const WhatIfWorkspace: React.FC = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center gap-3 border-t border-white/5 pt-4">
+              <div className="flex items-center gap-3 border-t border-[color:var(--nfq-border-ghost)] pt-4">
                 <Button
                   onClick={handleComputeImpact}
                   disabled={!canCompute || isComputing}
@@ -625,7 +625,7 @@ const WhatIfWorkspace: React.FC = () => {
           {effectiveBenchmarkSnapshotId ? (
             <BenchmarkGrid snapshotId={effectiveBenchmarkSnapshotId} />
           ) : (
-            <div className="flex flex-1 items-center justify-center rounded-[22px] border border-white/5 bg-[var(--nfq-bg-surface)]">
+            <div className="flex flex-1 items-center justify-center rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)]">
               <span className="text-xs text-[color:var(--nfq-text-secondary)]">
                 Select a sandbox or enter a snapshot ID to compare against market and budget targets.
               </span>

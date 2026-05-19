@@ -139,14 +139,14 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
 
   if (empty) {
     return (
-      <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
+      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
         <div className="mb-2 text-base font-semibold text-[color:var(--nfq-text-primary)]">
           Explicación del waterfall
         </div>
         <div className="text-xs text-[color:var(--nfq-text-secondary)]">
           Desglose componente a componente del cálculo FTP
         </div>
-        <div className="mt-6 rounded-[10px] bg-[var(--nfq-bg-elevated)]/50 p-4 text-center text-sm text-[color:var(--nfq-text-muted)]">
+        <div className="mt-6 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/50 p-4 text-center text-sm text-[color:var(--nfq-text-muted)]">
           Calcula un precio para ver el waterfall
         </div>
       </div>
@@ -154,7 +154,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
   }
 
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
+    <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
@@ -186,7 +186,7 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-[10px]">
+      <div className="overflow-hidden rounded-[var(--nfq-radius-card)]">
         {rows.map((row, idx) => {
           const base =
             idx % 2 === 0 ? 'bg-[var(--nfq-bg-elevated)]/50' : 'bg-transparent';
@@ -215,12 +215,12 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
       </div>
 
       {/* Copilot section */}
-      <div className="mt-6 border-t border-white/5 pt-5">
+      <div className="mt-6 border-t border-[color:var(--nfq-border-ghost)] pt-5">
         {!copilotOpen ? (
           <button
             type="button"
             onClick={() => setCopilotOpen(true)}
-            className="inline-flex items-center gap-2 rounded-[10px] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-[var(--nfq-radius-card)] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90"
           >
             <Sparkles className="h-4 w-4" />
             Preguntar al copiloto
@@ -237,14 +237,14 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
               placeholder="Ej. ¿Qué componente pesa más en el total FTP? ¿Puedo mejorar el RAROC ajustando el plazo?"
               rows={3}
               disabled={loading}
-              className="w-full rounded-[10px] bg-[var(--nfq-bg-elevated)]/80 p-3 text-sm text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-muted)] focus:outline-none focus:ring-1 focus:ring-[color:var(--nfq-accent)]"
+              className="w-full rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/80 p-3 text-sm text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-muted)] focus:outline-none focus:ring-1 focus:ring-[color:var(--nfq-accent)]"
             />
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleAsk}
                 disabled={loading || question.trim().length === 0}
-                className="inline-flex items-center gap-2 rounded-[10px] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-[var(--nfq-radius-card)] bg-gradient-to-r from-[#F48B4A] to-[#E04870] px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {loading ? (
                   <>
@@ -267,20 +267,20 @@ export const WaterfallExplainerCard: React.FC<WaterfallExplainerCardProps> = ({
                   setError(null);
                 }}
                 disabled={loading}
-                className="rounded-[10px] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] transition hover:text-[color:var(--nfq-text-primary)] disabled:opacity-40"
+                className="rounded-[var(--nfq-radius-card)] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] transition hover:text-[color:var(--nfq-text-primary)] disabled:opacity-40"
               >
                 Cerrar
               </button>
             </div>
 
             {error && (
-              <div className="rounded-[10px] bg-rose-500/10 p-3 text-xs text-rose-300">
+              <div className="rounded-[var(--nfq-radius-card)] bg-rose-500/10 p-3 text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             {answer && (
-              <div className="rounded-[10px] bg-[var(--nfq-bg-elevated)]/60 p-4">
+              <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]/60 p-4">
                 <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)]">
                   Respuesta
                 </div>

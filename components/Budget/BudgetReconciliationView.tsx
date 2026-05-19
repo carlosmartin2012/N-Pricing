@@ -18,7 +18,7 @@ const STATUS_CLASSES: Record<BudgetVarianceStatus, string> = {
   under_budget_rate:  'bg-amber-500/10   text-amber-300   border-amber-500/30',
   over_budget_volume: 'bg-sky-500/10     text-sky-300     border-sky-500/30',
   under_budget_volume:'bg-violet-500/10  text-violet-300  border-violet-500/30',
-  budget_only:        'bg-slate-500/10   text-slate-300   border-slate-500/30',
+  budget_only:        'bg-slate-500/10   text-slate-300   border-[color:var(--nfq-border-ghost)]',
   realized_only:      'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/30',
 };
 
@@ -90,7 +90,7 @@ const BudgetReconciliationView: React.FC = () => {
           <button
             type="button"
             onClick={() => query.refetch()}
-            className="flex items-center gap-1 rounded-md border border-white/10 bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
+            className="flex items-center gap-1 rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-2 py-1 text-xs text-slate-300 hover:bg-white/5"
           >
             <RefreshCw className={`h-3 w-3 ${query.isFetching ? 'animate-spin' : ''}`} />
             <span>{t.retry}</span>
@@ -107,7 +107,7 @@ const BudgetReconciliationView: React.FC = () => {
       </section>
 
       {/* Table */}
-      <section className="rounded-xl border border-white/5 bg-slate-900/40">
+      <section className="rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40">
         {query.isLoading && (
           <div className="p-6 text-center text-xs text-slate-400">{t.loading}</div>
         )}
@@ -120,7 +120,7 @@ const BudgetReconciliationView: React.FC = () => {
         {query.data && query.data.items.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-white/5 text-[10px] uppercase tracking-wide text-slate-400">
+              <thead className="border-b border-[color:var(--nfq-border-ghost)] text-[10px] uppercase tracking-wide text-slate-400">
                 <tr>
                   <th className="px-3 py-2">{t.tableSegment}</th>
                   <th className="px-3 py-2">{t.tableProduct}</th>
@@ -153,7 +153,7 @@ interface RowProps {
 }
 
 const Row: React.FC<RowProps> = ({ row, t }) => (
-  <tr className="border-b border-white/5">
+  <tr className="border-b border-[color:var(--nfq-border-ghost)]">
     <td className="px-3 py-2 text-slate-200">{row.segment}</td>
     <td className="px-3 py-2 text-slate-200">{row.productType}</td>
     <td className="px-3 py-2 font-mono text-[11px] text-slate-300">{row.currency}</td>
@@ -173,7 +173,7 @@ const Row: React.FC<RowProps> = ({ row, t }) => (
 
 interface StatProps { label: string; value: string }
 const Stat: React.FC<StatProps> = ({ label, value }) => (
-  <div className="rounded-md border border-white/5 bg-slate-900/40 px-4 py-3">
+  <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 px-4 py-3">
     <div className="font-mono text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
     <div className="font-mono text-lg font-semibold text-white">{value}</div>
   </div>
@@ -197,7 +197,7 @@ const NumberField: React.FC<NumberFieldProps> = ({ label, value, type = 'number'
       min={min}
       step={step}
       onChange={(e) => onChange(e.target.value)}
-      className="mt-1 w-32 rounded border border-white/10 bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
+      className="mt-1 w-32 rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-2 py-1 text-xs text-slate-100"
     />
   </label>
 );

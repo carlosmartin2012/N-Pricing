@@ -116,10 +116,10 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
     return (
       <section
         aria-labelledby="delegation-audit-heading"
-        className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4"
+        className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4"
       >
         <header className="mb-4 flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[var(--nfq-bg-elevated)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]">
             <Shield className="h-5 w-5 text-[var(--nfq-text-muted)]" aria-hidden="true" />
           </div>
           <div>
@@ -134,7 +134,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
             </p>
           </div>
         </header>
-        <div className="flex items-start gap-3 rounded-[10px] bg-[var(--nfq-bg-elevated)] p-4">
+        <div className="flex items-start gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--nfq-text-muted)]" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-[var(--nfq-text-muted)]">
             Configura clientRating, LTV y rating para activar la delegación multi-dimensional
@@ -150,11 +150,11 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
   return (
     <section
       aria-labelledby="delegation-audit-heading"
-      className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4"
+      className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4"
     >
       <header className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[var(--nfq-bg-elevated)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]">
             <Shield className="h-5 w-5 text-[var(--nfq-accent)]" aria-hidden="true" />
           </div>
           <div>
@@ -185,7 +185,7 @@ const DelegationAuditPanel: React.FC<DelegationAuditPanelProps> = ({ deal, resul
       </header>
 
       {/* Matched tier + rule */}
-      <div className="mb-5 rounded-[10px] bg-[var(--nfq-bg-elevated)] p-4">
+      <div className="mb-5 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4">
         <div className="mb-2 flex items-center gap-2">
           <span
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold tracking-normal ${tierConfig.bg} ${tierConfig.text}`}

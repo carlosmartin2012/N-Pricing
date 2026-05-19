@@ -81,7 +81,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
         role="dialog"
         aria-modal="true"
         aria-label="Export target grid"
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[22px] bg-[var(--nfq-bg-surface)] shadow-[var(--nfq-shadow-dialog)]"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] shadow-[var(--nfq-shadow-dialog)]"
       >
         {/* Header */}
         <div className="flex items-center justify-between bg-[var(--nfq-bg-elevated)] px-6 py-5 rounded-t-[22px]">
@@ -107,7 +107,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
           <div className="mb-6 flex gap-3">
             <button
               onClick={() => setFormat('xlsx')}
-              className={`flex flex-1 flex-col items-center gap-2 rounded-[16px] border-2 px-4 py-4 transition-colors ${
+              className={`flex flex-1 flex-col items-center gap-2 rounded-[var(--nfq-radius-card)] border-2 px-4 py-4 transition-colors ${
                 format === 'xlsx'
                   ? 'border-[var(--nfq-accent)] bg-[var(--nfq-accent)]/10'
                   : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] hover:border-[color:var(--nfq-text-muted)]'
@@ -126,7 +126,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
             </button>
             <button
               onClick={() => setFormat('pdf')}
-              className={`flex flex-1 flex-col items-center gap-2 rounded-[16px] border-2 px-4 py-4 transition-colors ${
+              className={`flex flex-1 flex-col items-center gap-2 rounded-[var(--nfq-radius-card)] border-2 px-4 py-4 transition-colors ${
                 format === 'pdf'
                   ? 'border-[var(--nfq-accent)] bg-[var(--nfq-accent)]/10'
                   : 'border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] hover:border-[color:var(--nfq-text-muted)]'
@@ -161,7 +161,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
 
           {/* Active filters summary */}
           {filters && (filters.products?.length || filters.segments?.length || filters.tenorBuckets?.length || filters.currencies?.length) ? (
-            <div className="mb-4 rounded-[12px] bg-[var(--nfq-bg-elevated)] p-3">
+            <div className="mb-4 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3">
               <div className="text-[11px] font-medium text-[color:var(--nfq-text-muted)] mb-1.5">
                 Active Filters
               </div>
@@ -198,7 +198,7 @@ const ExportGridModal: React.FC<Props> = ({ isOpen, onClose, snapshotId, filters
           )}
 
           {/* Cell count */}
-          <div className="rounded-[12px] bg-[var(--nfq-bg-elevated)] p-3 text-center">
+          <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-3 text-center">
             <span className="font-mono text-2xl font-bold text-[var(--nfq-accent)]">
               {cellCount}
             </span>

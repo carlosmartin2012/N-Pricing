@@ -99,7 +99,7 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
     <div className="mt-4">
       <button
         onClick={() => setIsExpanded((currentValue) => !currentValue)}
-        className="group flex w-full items-center justify-between rounded-lg border border-slate-700/50 bg-slate-900/60 px-4 py-3 transition-colors hover:bg-slate-800/60"
+        className="group flex w-full items-center justify-between rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-4 py-3 transition-colors hover:bg-slate-800/60"
       >
         <div className="flex items-center gap-2">
           <GitCompare size={16} className="text-cyan-400" />
@@ -116,7 +116,7 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
       </button>
 
       {isExpanded && (
-        <div className="mt-3 space-y-4 rounded-lg border border-slate-700/40 bg-slate-900/40 p-4">
+        <div className="mt-3 space-y-4 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 p-4">
           <div className="flex flex-wrap gap-3">
             {scenarios.map((scenario, index) => (
               <PricingScenarioCard
@@ -138,7 +138,7 @@ const PricingComparison: React.FC<Props> = ({ baseDeal, approvalMatrix }) => {
             {scenarios.length < MAX_COMPARISON_SCENARIOS && (
               <button
                 onClick={addScenario}
-                className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600/40 bg-slate-800/30 p-3 transition-colors hover:border-cyan-600/50 hover:bg-slate-800/50"
+                className="flex min-w-[180px] max-w-[320px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[color:var(--nfq-border-ghost)] bg-slate-800/30 p-3 transition-colors hover:border-cyan-600/50 hover:bg-slate-800/50"
               >
                 <Plus size={20} className="text-slate-500" />
                 <span className="text-xs text-slate-500">{t.addScenario || 'Add Scenario'}</span>

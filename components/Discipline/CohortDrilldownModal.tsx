@@ -51,7 +51,7 @@ const CohortDrilldownModal: React.FC<Props> = ({ isOpen, onClose, cohort, dateRa
         role="dialog"
         aria-modal="true"
         aria-label={`Cohort drilldown: ${cohortLabel}`}
-        className="fixed inset-x-4 top-[10%] z-50 mx-auto max-h-[80vh] w-full max-w-3xl overflow-hidden rounded-[22px] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[var(--nfq-shadow-dialog)] md:inset-x-auto"
+        className="fixed inset-x-4 top-[10%] z-50 mx-auto max-h-[80vh] w-full max-w-3xl overflow-hidden rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] shadow-[var(--nfq-shadow-dialog)] md:inset-x-auto"
       >
         {/* Header */}
         <div className="flex items-center justify-between bg-[var(--nfq-bg-elevated)] px-6 py-5">

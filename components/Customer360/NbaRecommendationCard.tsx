@@ -43,7 +43,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
   const onConsume = (id: string) => consumeMutation.mutate(id);
 
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-violet-400" />
@@ -70,7 +70,7 @@ const NbaRecommendationCard: React.FC<Props> = ({ clientId }) => {
         {recs.map((r) => (
           <li
             key={r.id}
-            className="rounded border border-white/5 bg-white/[0.03] p-3 space-y-2"
+            className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.03] p-3 space-y-2"
           >
             <div className="flex items-start justify-between gap-3">
               <div>

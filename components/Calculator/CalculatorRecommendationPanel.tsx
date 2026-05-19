@@ -94,7 +94,7 @@ const CalculatorRecommendationPanel: React.FC<Props> = ({
 
   if (!model) {
     return (
-      <div className="rounded-[10px] bg-[var(--nfq-bg-surface)] p-3">
+      <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-3">
         <div className="flex items-center gap-2">
           <Sparkles size={14} className="text-[var(--nfq-accent)]" />
           <span className="text-[10px] uppercase tracking-[0.16em] font-mono text-[color:var(--nfq-text-muted)]">
@@ -111,7 +111,7 @@ const CalculatorRecommendationPanel: React.FC<Props> = ({
   const deltaBp = optimal ? Math.round((proposedRate - optimal.rate) * 100) : 0;
 
   return (
-    <div className="rounded-[10px] bg-[var(--nfq-bg-surface)] p-3 space-y-3">
+    <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-3 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles size={14} className="text-[var(--nfq-accent)]" />

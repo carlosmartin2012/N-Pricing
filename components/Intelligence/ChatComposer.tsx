@@ -54,7 +54,7 @@ export const ChatComposer: React.FC<Props> = ({ input, isThinking, onChangeInput
                 key={action.label}
                 onClick={() => handleQuickAction(action.prompt)}
                 disabled={isThinking}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-700/50 bg-slate-800/60 px-3 py-1.5 font-mono text-[11px] text-slate-400 transition-all hover:border-cyan-700/50 hover:bg-slate-800 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--nfq-border-ghost)] bg-slate-800/60 px-3 py-1.5 font-mono text-[11px] text-slate-400 transition-all hover:border-cyan-700/50 hover:bg-slate-800 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <action.icon size={12} />
                 {action.label}

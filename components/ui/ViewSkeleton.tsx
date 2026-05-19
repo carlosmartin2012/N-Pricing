@@ -29,7 +29,7 @@ export const CalculatorSkeleton: React.FC = () => (
 
 /** Table-style skeleton: toolbar + rows */
 export const TableSkeleton: React.FC = () => (
-  <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
+  <div className="flex flex-col gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
     <div className="flex items-center gap-3">
       <Bone className="h-7 w-64 rounded-lg" />
       <Bone className="h-7 w-32 rounded-lg" />
@@ -61,7 +61,7 @@ export const DashboardSkeleton: React.FC = () => (
 
 /** Config-style skeleton: tab bar + form fields */
 export const ConfigSkeleton: React.FC = () => (
-  <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
+  <div className="flex flex-col gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
     <div className="flex gap-2 border-b border-[var(--nfq-border-ghost)] pb-3">
       {Array.from({ length: 5 }).map((_, i) => (
         <Bone key={i} className="h-8 w-24 rounded-lg" />

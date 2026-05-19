@@ -60,7 +60,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
       const data = buildModelData(model);
 
       return (
-        <div key={model.id} className="flex flex-col gap-4 rounded-[var(--nfq-radius-card)] border border-white/10 bg-[#0f172a]/40 p-4">
+        <div key={model.id} className="flex flex-col gap-4 rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[#0f172a]/40 p-4">
           <div className="flex items-start justify-between">
             <div>
               <h4 className="text-sm font-bold uppercase text-white">{model.name}</h4>
@@ -115,7 +115,7 @@ const BehaviourFocusDashboard: React.FC<Props> = ({ behaviouralModels }) => (
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-2">
+          <div className="grid grid-cols-3 gap-2 border-t border-[color:var(--nfq-border-ghost)] pt-2">
             {model.type === 'NMD_Replication' ? (
               <>
                 <div className="text-center">

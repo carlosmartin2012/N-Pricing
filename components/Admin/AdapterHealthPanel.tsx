@@ -102,7 +102,7 @@ export const AdapterHealthPanel: React.FC = () => {
       </div>
 
       {adapters.length === 0 ? (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] px-6 py-8 text-center">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-6 py-8 text-center">
           <Plug className="h-8 w-8 text-slate-600 mx-auto mb-2" />
           <p className="text-sm text-slate-400">
             {data === null
@@ -115,10 +115,10 @@ export const AdapterHealthPanel: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="rounded-lg border border-white/10 overflow-hidden">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02]">
+              <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
                 <th className="nfq-label text-[10px] text-left px-4 py-2">Kind</th>
                 <th className="nfq-label text-[10px] text-left px-4 py-2">Name</th>
                 <th className="nfq-label text-[10px] text-left px-4 py-2">Status</th>
@@ -132,7 +132,7 @@ export const AdapterHealthPanel: React.FC = () => {
                 const Icon = KIND_ICON[a.kind];
                 const FlagIcon = a.ok ? PlugZap : PlugZap2;
                 return (
-                  <tr key={`${a.kind}:${a.name}`} className="border-b border-white/5">
+                  <tr key={`${a.kind}:${a.name}`} className="border-b border-[color:var(--nfq-border-ghost)]">
                     <td className="px-4 py-2 text-slate-300">
                       <div className="flex items-center gap-2">
                         <Icon className="h-3.5 w-3.5 text-slate-500" />

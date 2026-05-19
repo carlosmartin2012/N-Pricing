@@ -44,7 +44,7 @@ const PricingInsightsWidget: React.FC<Props> = ({ deals }) => {
   }, [models]);
 
   return (
-    <div className="grid grid-cols-3 gap-3 rounded-[10px] bg-[var(--nfq-bg-surface)] p-3">
+    <div className="grid grid-cols-3 gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-3">
       <div className="flex items-start gap-2">
         <Sparkles size={14} className="mt-0.5 text-[var(--nfq-accent)]" />
         <div>

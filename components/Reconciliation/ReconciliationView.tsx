@@ -128,7 +128,7 @@ const ReconciliationView: React.FC = () => {
             value={period}
             onChange={(e) => setPeriod(e.target.value || currentPeriod())}
             data-testid="reconciliation-period"
-            className="rounded-md border border-white/10 bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
+            className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
           />
           <button
             type="button"
@@ -201,17 +201,17 @@ const ReconciliationView: React.FC = () => {
       {!isLoading && filtered.length === 0 && (
         <div
           data-testid="reconciliation-empty"
-          className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400"
+          className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400"
         >
           No entries for the current filter. Try a different period or widen the status filter.
         </div>
       )}
 
       {filtered.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-white/10">
+        <div className="overflow-hidden rounded-lg border border-[color:var(--nfq-border-ghost)]">
           <table className="w-full text-sm" data-testid="reconciliation-table">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02]">
+              <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
                 <Th>Deal</Th>
                 <Th>Client</Th>
                 <Th>BU</Th>
@@ -250,7 +250,7 @@ const KpiTile: React.FC<KpiTileProps> = ({ icon: Icon, label, value, sub, tone }
     sky: 'text-sky-300',
   }[tone];
   return (
-    <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
       <div className="nfq-label flex items-center gap-1.5 text-[9px] text-slate-400">
         <Icon className={`h-3 w-3 ${toneClass}`} />
         {label}
@@ -269,7 +269,7 @@ const RowEntry: React.FC<{ pair: EntryPair }> = ({ pair }) => {
   return (
     <tr
       data-testid={`reconciliation-row-${pair.dealId}`}
-      className="border-b border-white/5"
+      className="border-b border-[color:var(--nfq-border-ghost)]"
     >
       <td className="px-3 py-2 font-mono text-xs text-slate-200">{pair.dealId.slice(0, 12)}…</td>
       <td className="px-3 py-2 text-xs text-slate-300">{pair.clientName ?? '—'}</td>

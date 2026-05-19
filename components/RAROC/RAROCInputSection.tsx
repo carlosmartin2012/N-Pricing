@@ -54,7 +54,7 @@ export const RAROCInputSection: React.FC<Props> = ({ section, inputs, onChange }
 
   return (
     <div className="space-y-3">
-      <div className="border-b border-white/5 pb-2">
+      <div className="border-b border-[color:var(--nfq-border-ghost)] pb-2">
         <h4 className="text-[10px] font-black uppercase tracking-[0.24em] text-[color:var(--nfq-text-muted)]">
           {section.title}
         </h4>

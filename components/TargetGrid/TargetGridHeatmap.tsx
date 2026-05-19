@@ -115,7 +115,7 @@ const TargetGridHeatmap: React.FC<Props> = ({ cells, onCellSelect }) => {
       </div>
 
       {/* Matrix */}
-      <div className="overflow-auto rounded-[22px] bg-[var(--nfq-bg-surface)]">
+      <div className="overflow-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]">
         <table className="w-full min-w-[600px] border-collapse">
           <thead>
             <tr>

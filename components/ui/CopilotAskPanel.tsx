@@ -231,7 +231,7 @@ const CopilotAskPanel: React.FC<Props> = ({ context, language, onClose, initialQ
                       type="button"
                       onClick={() => handleApplyAction(action)}
                       data-testid={`copilot-action-${action.id}`}
-                      className="flex w-full items-center justify-between gap-2 rounded border border-slate-700/60 bg-slate-800/40 px-2 py-1.5 text-left text-[11px] text-slate-200 transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
+                      className="flex w-full items-center justify-between gap-2 rounded border border-[color:var(--nfq-border-ghost)] bg-slate-800/40 px-2 py-1.5 text-left text-[11px] text-slate-200 transition-colors hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200"
                     >
                       <span>{action.label}</span>
                       <ArrowRight size={11} className="shrink-0" />

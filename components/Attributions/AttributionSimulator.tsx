@@ -107,7 +107,7 @@ const AttributionSimulator: React.FC<Props> = ({
   return (
     <section
       data-testid="attribution-simulator"
-      className={`rounded-xl border border-white/5 bg-slate-900/40 ${compact ? 'p-4' : 'p-6'}`}
+      className={`rounded-xl border border-[color:var(--nfq-border-ghost)] bg-slate-900/40 ${compact ? 'p-4' : 'p-6'}`}
     >
       {!compact && (
         <header className="mb-4 flex items-center gap-3">
@@ -199,7 +199,7 @@ const AttributionSimulator: React.FC<Props> = ({
           </div>
 
           {/* Routing */}
-          <div className="rounded-md border border-white/5 bg-slate-900/60 p-4">
+          <div className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 p-4">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {result.newRouting.belowHardFloor ? (
@@ -211,7 +211,7 @@ const AttributionSimulator: React.FC<Props> = ({
                   {t.simulatorRequiredLevel}
                 </span>
               </div>
-              <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+              <span className="rounded-full border border-[color:var(--nfq-border-ghost)] px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
                 {t[reasonKey(result.newRouting.reason)]}
               </span>
             </div>
@@ -258,7 +258,7 @@ const AttributionSimulator: React.FC<Props> = ({
             <button
               type="button"
               onClick={reset}
-              className="rounded-md border border-white/10 bg-transparent px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5"
+              className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-transparent px-3 py-1.5 text-xs text-slate-300 hover:bg-white/5"
             >
               {t.simulatorReset}
             </button>
@@ -266,7 +266,7 @@ const AttributionSimulator: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => onApply({ quote: result.adjustedQuote, proposedAdjustments })}
-                className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-100 hover:bg-white/10"
+                className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/5 px-3 py-1.5 text-xs text-slate-100 hover:bg-white/10"
               >
                 {t.simulatorApply}
               </button>

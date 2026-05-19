@@ -144,7 +144,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
   return (
     <div className="flex flex-col gap-4">
       {/* Header card */}
-      <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4 shadow-sm">
+      <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
               type="button"
               onClick={analyzePortfolio}
               disabled={isAnalyzing || portfolio.length === 0}
-              className="inline-flex h-7 items-center gap-2 rounded-[10px] bg-[var(--nfq-accent)] px-4 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-2 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-accent)] px-4 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isAnalyzing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -179,7 +179,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
               type="button"
               onClick={generateNarrative}
               disabled={!review || isGenerating}
-              className="inline-flex h-7 items-center gap-2 rounded-[10px] border border-[var(--nfq-border)] bg-transparent px-4 text-sm font-medium text-[var(--nfq-text-primary)] transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-7 items-center gap-2 rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border)] bg-transparent px-4 text-sm font-medium text-[var(--nfq-text-primary)] transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isGenerating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -192,14 +192,14 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
         </div>
 
         {analyzeError && (
-          <div className="mt-4 flex items-start gap-2 rounded-[10px] border border-[#f43f5e]/40 bg-[#f43f5e]/10 p-3 text-sm text-[#f43f5e]">
+          <div className="mt-4 flex items-start gap-2 rounded-[var(--nfq-radius-card)] border border-[#f43f5e]/40 bg-[#f43f5e]/10 p-3 text-sm text-[#f43f5e]">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span className="font-mono">{analyzeError}</span>
           </div>
         )}
 
         {!review && !isAnalyzing && !analyzeError && (
-          <div className="mt-4 rounded-[10px] border border-dashed border-[var(--nfq-border)] p-4 text-sm text-[var(--nfq-text-secondary)]">
+          <div className="mt-4 rounded-[var(--nfq-radius-card)] border border-dashed border-[var(--nfq-border)] p-4 text-sm text-[var(--nfq-text-secondary)]">
             Ejecuta "Analizar cartera" para detectar clusters y candidatos. Hay{' '}
             <span className="font-mono text-[var(--nfq-text-primary)]">{portfolio.length}</span>{' '}
             deals disponibles.
@@ -240,7 +240,7 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
 
       {/* Tabs + tables */}
       {review && (
-        <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-5">
+        <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
           <div className="mb-4 flex flex-wrap gap-2">
             <TabButton
               label="Clusters underpricing"
@@ -275,13 +275,13 @@ const PortfolioReviewDashboard: React.FC<PortfolioReviewDashboardProps> = ({ dea
       {/* AI narrative */}
       {(aiNarrative || aiError) && (
         <section
-          className="rounded-[14px] p-[1px]"
+          className="rounded-[var(--nfq-radius-card)] p-[1px]"
           style={{
             background:
               'linear-gradient(135deg, var(--nfq-accent, #F48B4A), #9B59B6 45%, #06b6d4)',
           }}
         >
-          <div className="rounded-[13px] bg-[var(--nfq-bg-surface)] p-5">
+          <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
             <div className="mb-3 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[var(--nfq-accent)]" />
               <h3 className="font-mono text-xs uppercase tracking-[0.16em] text-[var(--nfq-text-secondary)]">
@@ -319,7 +319,7 @@ const KpiCard: React.FC<KpiCardProps> = ({ icon, label, value, hint, tone = 'def
   const valueClass =
     tone === 'warning' ? 'text-[#f59e0b]' : 'text-[var(--nfq-text-primary)]';
   return (
-    <div className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-5">
+    <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
       <div className="mb-3 flex items-center gap-2 text-[var(--nfq-text-secondary)]">
         {icon}
         <span className="font-mono text-[11px] uppercase tracking-[0.16em]">{label}</span>
@@ -343,7 +343,7 @@ const TabButton: React.FC<TabButtonProps> = ({ label, count, active, onClick }) 
   <button
     type="button"
     onClick={onClick}
-    className={`inline-flex h-8 items-center gap-2 rounded-[10px] px-3 text-xs font-medium transition ${
+    className={`inline-flex h-8 items-center gap-2 rounded-[var(--nfq-radius-card)] px-3 text-xs font-medium transition ${
       active
         ? 'bg-[var(--nfq-accent)]/15 text-[var(--nfq-accent)]'
         : 'text-[var(--nfq-text-secondary)] hover:bg-white/5'
@@ -506,7 +506,7 @@ const RenegotiationTable: React.FC<{ candidates: RenegotiationCandidate[] }> = (
 };
 
 const EmptyState: React.FC<{ message: string }> = ({ message }) => (
-  <div className="rounded-[10px] border border-dashed border-[var(--nfq-border)] p-4 text-center text-sm text-[var(--nfq-text-secondary)]">
+  <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[var(--nfq-border)] p-4 text-center text-sm text-[var(--nfq-text-secondary)]">
     {message}
   </div>
 );

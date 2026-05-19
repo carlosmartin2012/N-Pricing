@@ -92,7 +92,7 @@ const SummaryCard: React.FC<{
   icon: React.ReactNode;
   tone: string;
 }> = ({ label, value, icon, tone }) => (
-  <div className="group relative overflow-hidden rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+  <div className="group relative overflow-hidden rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
     <div className="absolute right-0 top-0 p-3 opacity-10 transition-opacity group-hover:opacity-20">
       {icon}
     </div>
@@ -107,11 +107,11 @@ const Skeleton: React.FC = () => (
   <div className="space-y-4 p-4 animate-pulse">
     <div className="grid grid-cols-2 gap-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-20 rounded-[16px] bg-[var(--nfq-bg-elevated)]" />
+        <div key={i} className="h-20 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]" />
       ))}
     </div>
-    <div className="h-48 rounded-[16px] bg-[var(--nfq-bg-elevated)]" />
-    <div className="h-32 rounded-[16px] bg-[var(--nfq-bg-elevated)]" />
+    <div className="h-48 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]" />
+    <div className="h-32 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)]" />
   </div>
 );
 
@@ -260,10 +260,10 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
           <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
             Portfolio Impact
           </h4>
-          <div className="overflow-hidden rounded-[16px] border border-white/5">
+          <div className="overflow-hidden rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-white/5 bg-[var(--nfq-bg-elevated)]">
+                <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]">
                   <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Metric</th>
                   <th className="px-4 py-2.5 text-right font-semibold text-[color:var(--nfq-text-secondary)]">Current</th>
                   <th className="px-4 py-2.5 text-right font-semibold text-[color:var(--nfq-text-secondary)]">Projected</th>
@@ -271,7 +271,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-[color:var(--nfq-border-ghost)]">
                   <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">NII</td>
                   <td className="px-4 py-2.5 text-right font-mono text-[color:var(--nfq-text-primary)]">
                     {fmtCurrency(portfolioImpact.currentNii)}
@@ -283,7 +283,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                     {fmtCurrency(portfolioImpact.niiDelta)}
                   </td>
                 </tr>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-[color:var(--nfq-border-ghost)]">
                   <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">Avg RAROC</td>
                   <td className="px-4 py-2.5 text-right font-mono text-[color:var(--nfq-text-primary)]">
                     {fmtRaroc(portfolioImpact.currentAvgRaroc)}
@@ -318,7 +318,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
             <h4 className="mb-3 text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
               Cell-by-Cell Impact ({cellImpacts.length})
             </h4>
-            <div className="max-h-64 overflow-auto rounded-[16px] border border-white/5">
+            <div className="max-h-64 overflow-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
               <table className="w-full text-[11px]">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-[var(--nfq-bg-elevated)]">
@@ -337,7 +337,7 @@ const ImpactReportPanel: React.FC<Props> = ({ report, isLoading }) => {
                   {cellImpacts.map((cell, idx) => (
                     <tr
                       key={`${cell.product}-${cell.segment}-${cell.tenorBucket}-${cell.currency}-${idx}`}
-                      className="border-t border-white/5 hover:bg-white/[0.02] transition-colors"
+                      className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
                     >
                       <td className="px-3 py-2 text-[color:var(--nfq-text-primary)]">{cell.product}</td>
                       <td className="px-3 py-2 text-[color:var(--nfq-text-primary)]">{cell.segment}</td>

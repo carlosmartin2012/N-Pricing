@@ -40,7 +40,7 @@ const TimelineEventCard: React.FC<Props> = ({ event, onReplaySnapshot, focused }
       id={`tl-${event.id}`}
       data-event-kind={event.kind}
       className={`relative rounded-lg border bg-slate-900/40 px-4 py-3 ${
-        focused ? 'border-cyan-500/60 ring-1 ring-cyan-500/40' : 'border-slate-700/40'
+        focused ? 'border-cyan-500/60 ring-1 ring-cyan-500/40' : 'border-[color:var(--nfq-border-ghost)]'
       }`}
     >
       <header className="flex items-start justify-between gap-3">
@@ -69,7 +69,7 @@ const TimelineEventCard: React.FC<Props> = ({ event, onReplaySnapshot, focused }
           <button
             type="button"
             onClick={() => onReplaySnapshot(event.snapshotId!)}
-            className="flex items-center gap-1 rounded border border-slate-700/60 bg-slate-800/60 px-2 py-0.5 text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
+            className="flex items-center gap-1 rounded border border-[color:var(--nfq-border-ghost)] bg-slate-800/60 px-2 py-0.5 text-[10px] text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
             aria-label={`Replay snapshot ${event.snapshotId}`}
           >
             <RotateCcw className="h-3 w-3" />

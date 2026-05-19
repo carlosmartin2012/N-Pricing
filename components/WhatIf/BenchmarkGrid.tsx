@@ -91,10 +91,10 @@ const BenchmarkTable: React.FC<{ rows: BenchmarkComparison[] }> = ({ rows }) => 
   );
 
   return (
-    <div className="overflow-auto rounded-[16px] border border-white/5">
+    <div className="overflow-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-[var(--nfq-bg-elevated)] border-b border-white/5">
+          <tr className="bg-[var(--nfq-bg-elevated)] border-b border-[color:var(--nfq-border-ghost)]">
             <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Product</th>
             <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Segment</th>
             <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Tenor</th>
@@ -110,7 +110,7 @@ const BenchmarkTable: React.FC<{ rows: BenchmarkComparison[] }> = ({ rows }) => 
           {sorted.map((row, idx) => (
             <tr
               key={`${row.product}-${row.segment}-${row.tenorBucket}-${row.currency}-${idx}`}
-              className="border-t border-white/5 hover:bg-white/[0.02] transition-colors"
+              className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
             >
               <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">{row.product}</td>
               <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)]">{row.segment}</td>
@@ -140,10 +140,10 @@ const BenchmarkTable: React.FC<{ rows: BenchmarkComparison[] }> = ({ rows }) => 
 };
 
 const BudgetConsistencyTable: React.FC<{ rows: BudgetConsistency[] }> = ({ rows }) => (
-  <div className="overflow-auto rounded-[16px] border border-white/5">
+  <div className="overflow-auto rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)]">
     <table className="w-full text-xs">
       <thead>
-        <tr className="bg-[var(--nfq-bg-elevated)] border-b border-white/5">
+        <tr className="bg-[var(--nfq-bg-elevated)] border-b border-[color:var(--nfq-border-ghost)]">
           <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Product</th>
           <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Segment</th>
           <th className="px-4 py-2.5 text-left font-semibold text-[color:var(--nfq-text-secondary)]">Ccy</th>
@@ -158,7 +158,7 @@ const BudgetConsistencyTable: React.FC<{ rows: BudgetConsistency[] }> = ({ rows 
         {rows.map((row, idx) => (
           <tr
             key={`${row.product}-${row.segment}-${row.currency}-${idx}`}
-            className="border-t border-white/5 hover:bg-white/[0.02] transition-colors"
+            className="border-t border-[color:var(--nfq-border-ghost)] hover:bg-white/[0.02] transition-colors"
           >
             <td className="px-4 py-2.5 font-medium text-[color:var(--nfq-text-primary)]">{row.product}</td>
             <td className="px-4 py-2.5 text-[color:var(--nfq-text-primary)]">{row.segment}</td>
@@ -229,7 +229,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
         {/* --- Summary row --- */}
         {stats && (
           <div className="grid grid-cols-4 gap-3">
-            <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Total Cells
               </div>
@@ -237,7 +237,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
                 {stats.total}
               </div>
             </div>
-            <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Competitive
               </div>
@@ -246,7 +246,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
                 <span className="text-lg font-mono font-bold text-emerald-400">{stats.competitive}</span>
               </div>
             </div>
-            <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Above Market
               </div>
@@ -255,7 +255,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
                 <span className="text-lg font-mono font-bold text-rose-400">{stats.above}</span>
               </div>
             </div>
-            <div className="rounded-[16px] border border-white/5 bg-[var(--nfq-bg-elevated)] p-4">
+            <div className="rounded-[var(--nfq-radius-card)] border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)] p-4">
               <div className="text-[11px] font-medium text-[color:var(--nfq-text-secondary)]">
                 Avg Delta
               </div>
@@ -274,7 +274,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
           {loadingComparisons ? (
             <Skeleton />
           ) : comparisons.length === 0 ? (
-            <div className="rounded-[16px] border border-dashed border-white/10 py-10 text-center text-xs text-[color:var(--nfq-text-secondary)]">
+            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] py-10 text-center text-xs text-[color:var(--nfq-text-secondary)]">
               No benchmark data available for this snapshot.
             </div>
           ) : (
@@ -290,7 +290,7 @@ const BenchmarkGrid: React.FC<Props> = ({ snapshotId }) => {
           {loadingBudget ? (
             <Skeleton />
           ) : budgetConsistency.length === 0 ? (
-            <div className="rounded-[16px] border border-dashed border-white/10 py-6 text-center text-xs text-[color:var(--nfq-text-secondary)]">
+            <div className="rounded-[var(--nfq-radius-card)] border border-dashed border-[color:var(--nfq-border-ghost)] py-6 text-center text-xs text-[color:var(--nfq-text-secondary)]">
               No budget targets configured for this entity.
             </div>
           ) : (

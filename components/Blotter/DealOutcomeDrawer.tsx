@@ -153,7 +153,7 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
     >
       <div className="space-y-6 p-4">
         {/* Deal context header */}
-        <div className="rounded-[10px] bg-[var(--nfq-bg-surface)] p-3">
+        <div className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-3">
           <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--nfq-text-muted)] font-mono">
             Deal
           </div>
@@ -181,7 +181,7 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
                 <button
                   key={opt.value}
                   onClick={() => setWonLost(opt.value)}
-                  className={`flex flex-col items-start gap-1 rounded-[10px] p-3 text-left transition-colors ${
+                  className={`flex flex-col items-start gap-1 rounded-[var(--nfq-radius-card)] p-3 text-left transition-colors ${
                     isActive
                       ? 'bg-[var(--nfq-bg-highest)] ring-1 ring-[var(--nfq-accent)]'
                       : 'bg-[var(--nfq-bg-surface)] hover:bg-[var(--nfq-bg-bright)]'
@@ -211,10 +211,10 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               placeholder="Context that led to the loss (Spanish or English). AI will suggest a category if you describe enough."
-              className="mt-2 w-full rounded-[10px] bg-[var(--nfq-bg-surface)] p-2 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--nfq-accent)]"
+              className="mt-2 w-full rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-2 text-xs text-[color:var(--nfq-text-primary)] placeholder:text-[color:var(--nfq-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--nfq-accent)]"
             />
             {aiSuggestion && (
-              <div className="mt-2 flex items-center justify-between gap-2 rounded-[10px] bg-[rgba(6,182,212,0.08)] px-3 py-2">
+              <div className="mt-2 flex items-center justify-between gap-2 rounded-[var(--nfq-radius-card)] bg-[rgba(6,182,212,0.08)] px-3 py-2">
                 <div className="flex items-start gap-2">
                   <Sparkles size={12} className="mt-0.5 text-[var(--nfq-accent)]" />
                   <div className="text-[11px]">
@@ -265,7 +265,7 @@ const DealOutcomeDrawer: React.FC<Props> = ({ isOpen, deal, onClose, onSave }) =
                   <button
                     key={opt.value}
                     onClick={() => setLossReason(opt.value)}
-                    className={`flex w-full items-start justify-between gap-3 rounded-[10px] p-2.5 text-left transition-colors ${
+                    className={`flex w-full items-start justify-between gap-3 rounded-[var(--nfq-radius-card)] p-2.5 text-left transition-colors ${
                       isActive
                         ? 'bg-[var(--nfq-bg-highest)] ring-1 ring-[var(--nfq-accent)]'
                         : 'bg-[var(--nfq-bg-surface)] hover:bg-[var(--nfq-bg-bright)]'

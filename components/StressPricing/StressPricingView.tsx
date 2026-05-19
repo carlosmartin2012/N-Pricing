@@ -138,7 +138,7 @@ const StressPricingView: React.FC = () => {
         ) : (
           <select
             id="stress-deal-select"
-            className="w-full max-w-md rounded-md border border-slate-700/60 bg-slate-900/60 px-3 py-2 font-mono text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"
+            className="w-full max-w-md rounded-md border border-[color:var(--nfq-border-ghost)] bg-slate-900/60 px-3 py-2 font-mono text-xs text-slate-200 focus:border-cyan-500 focus:outline-none"
             value={selectedDeal?.id ?? ''}
             onChange={(e) => setSelectedId(e.target.value)}
           >
@@ -152,10 +152,10 @@ const StressPricingView: React.FC = () => {
       </section>
 
       {selectedDeal && rows.length > 0 && (
-        <section className="overflow-x-auto rounded-lg border border-slate-700/40 bg-slate-900/40">
+        <section className="overflow-x-auto rounded-lg border border-[color:var(--nfq-border-ghost)] bg-slate-900/40">
           <table className="w-full min-w-[780px] text-xs">
             <thead>
-              <tr className="border-b border-slate-700/40 text-left">
+              <tr className="border-b border-[color:var(--nfq-border-ghost)] text-left">
                 <th className="nfq-label px-4 py-3 text-[10px] text-slate-400">Scenario</th>
                 <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">FTP</th>
                 <th className="nfq-label px-4 py-3 text-right text-[10px] text-slate-400">Δ FTP</th>
@@ -171,7 +171,7 @@ const StressPricingView: React.FC = () => {
                 return (
                   <tr
                     key={row.scenario.id}
-                    className={`border-b border-slate-800/40 ${isBase ? 'bg-slate-800/30' : ''}`}
+                    className={`border-b border-[color:var(--nfq-border-ghost)] ${isBase ? 'bg-slate-800/30' : ''}`}
                   >
                     <td className="px-4 py-3 text-slate-200">
                       {row.scenario.label}

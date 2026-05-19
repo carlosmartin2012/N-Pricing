@@ -80,7 +80,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
   };
 
   return (
-    <section className="rounded-[14px] bg-[var(--nfq-bg-surface)] p-4">
+    <section className="rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-4">
       {/* Header */}
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
@@ -114,7 +114,7 @@ const IFRS9StagePanel: React.FC<IFRS9StagePanelProps> = ({ deal, onChange }) => 
                   style.text,
                   isSelected
                     ? 'border-white/30 ring-2 ring-white/20'
-                    : 'border-white/10 hover:border-white/20',
+                    : 'border-[color:var(--nfq-border-ghost)] hover:border-white/20',
                 ].join(' ')}
                 aria-pressed={isSelected}
               >

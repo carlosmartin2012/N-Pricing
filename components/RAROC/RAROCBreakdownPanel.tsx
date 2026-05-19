@@ -46,7 +46,7 @@ export const RAROCBreakdownPanel: React.FC<Props> = ({
           );
         })}
 
-        <div className="flex items-center justify-between border-t border-white/5 pt-3">
+        <div className="flex items-center justify-between border-t border-[color:var(--nfq-border-ghost)] pt-3">
           <span className="text-xs font-bold uppercase text-[color:var(--nfq-text-primary)]">
             {totalLabel}
           </span>

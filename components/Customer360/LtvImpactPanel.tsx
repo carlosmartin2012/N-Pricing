@@ -58,7 +58,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 
   if (!clientId) {
     return (
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
         {t.clvImpactSelectClient}
       </div>
     );
@@ -66,7 +66,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
 
   if (!candidateReady(candidate)) {
     return (
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-[11px] text-slate-500">
         {t.clvImpactIncompleteDeal}
       </div>
     );
@@ -78,7 +78,7 @@ const LtvImpactPanel: React.FC<Props> = ({ clientId, candidate, debounceMs = 400
   const accent = positive ? 'text-emerald-300' : 'text-rose-300';
 
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-3">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 space-y-3">
       <header className="flex items-center gap-2">
         <Zap className="h-4 w-4 text-amber-400" />
         <span className="nfq-label text-[10px] text-slate-300">{t.clvImpactTitle}</span>

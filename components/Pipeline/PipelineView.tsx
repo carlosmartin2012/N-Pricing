@@ -203,7 +203,7 @@ const PipelineView: React.FC = () => {
             <Download className="h-3 w-3" />
             Export CSV
           </button>
-          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.02] p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-1">
             {(['open', 'consumed', 'all'] as PipelineStatusFilter[]).map((s) => (
               <button
                 key={s}
@@ -238,7 +238,7 @@ const PipelineView: React.FC = () => {
           value={productFilter}
           onChange={(e) => setProductFilter(e.target.value)}
           data-testid="pipeline-filter-product"
-          className="rounded-md border border-white/10 bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
         >
           <option value="all">All</option>
           {products.map((p) => (
@@ -250,7 +250,7 @@ const PipelineView: React.FC = () => {
           value={confidenceBand}
           onChange={(e) => setConfidenceBand(e.target.value as ConfidenceBand)}
           data-testid="pipeline-filter-confidence"
-          className="rounded-md border border-white/10 bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
+          className="rounded-md border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1 font-mono text-[11px] text-slate-200"
         >
           <option value="all">All</option>
           <option value="high">High (≥80%)</option>
@@ -306,7 +306,7 @@ const PipelineView: React.FC = () => {
       )}
 
       {!isLoading && sorted.length === 0 && (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400">
           {t.clvNbaEmpty}
         </div>
       )}
@@ -337,7 +337,7 @@ const KpiTile: React.FC<{ label: string; value: string; tone: 'sky' | 'amber' | 
     violet:   'text-violet-300',
   }[tone];
   return (
-    <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+    <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
       <div className="nfq-label text-[9px] text-slate-400">{label}</div>
       <div className={`mt-1 font-mono text-sm font-bold tabular-nums ${toneClass}`}>{value}</div>
     </div>
@@ -364,7 +364,7 @@ const PipelineRow: React.FC<RowProps> = ({
       className={`rounded border p-3 space-y-2 transition-colors ${
         selected
           ? 'border-emerald-400/40 bg-emerald-500/[0.04]'
-          : 'border-white/5 bg-white/[0.03]'
+          : 'border-[color:var(--nfq-border-ghost)] bg-white/[0.03]'
       }`}
     >
       <div className="flex items-start gap-3">

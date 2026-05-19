@@ -120,13 +120,13 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
       />
 
       {visibleEvents.length === 0 ? (
-        <p className="rounded border border-slate-700/40 bg-slate-900/30 p-6 text-center text-xs text-slate-400">
+        <p className="rounded border border-[color:var(--nfq-border-ghost)] bg-slate-900/30 p-6 text-center text-xs text-slate-400">
           {timeline.events.length === 0
             ? 'No events recorded yet for this deal.'
             : 'All event kinds are filtered out — toggle "All" to see them again.'}
         </p>
       ) : (
-        <ol className="relative space-y-3 border-l border-slate-700/40 pl-4">
+        <ol className="relative space-y-3 border-l border-[color:var(--nfq-border-ghost)] pl-4">
           {visibleEvents.map((ev) => (
             <li key={ev.id}>
               <TimelineEventCard

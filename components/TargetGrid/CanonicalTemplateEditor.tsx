@@ -107,7 +107,7 @@ const CanonicalTemplateEditor: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-3 rounded-[24px] bg-[var(--nfq-bg-surface)] p-5">
+      <div className="flex flex-col gap-3 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] p-5">
         <div className="h-10 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-[var(--nfq-bg-elevated)]" />
@@ -136,7 +136,7 @@ const CanonicalTemplateEditor: React.FC = () => {
       </div>
 
       {/* Template list */}
-      <div className="overflow-auto rounded-[22px] bg-[var(--nfq-bg-surface)]">
+      <div className="overflow-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]">
         <table className="w-full min-w-[600px] border-collapse text-left">
           <thead className="bg-[var(--nfq-bg-elevated)]">
             <tr>
@@ -254,7 +254,7 @@ const CanonicalTemplateEditor: React.FC = () => {
             className="fixed inset-0 z-40 bg-black/55 backdrop-blur-md"
             onClick={() => setEditingTemplate(null)}
           />
-          <div className="fixed inset-x-4 top-[5%] z-50 mx-auto max-h-[90vh] max-w-2xl overflow-auto rounded-[22px] bg-[var(--nfq-bg-surface)] shadow-[var(--nfq-shadow-dialog)]">
+          <div className="fixed inset-x-4 top-[5%] z-50 mx-auto max-h-[90vh] max-w-2xl overflow-auto rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] shadow-[var(--nfq-shadow-dialog)]">
             {/* Form header */}
             <div className="flex items-center justify-between bg-[var(--nfq-bg-elevated)] px-6 py-5 rounded-t-[22px]">
               <div>

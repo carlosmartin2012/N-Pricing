@@ -85,7 +85,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
 
   if (booked.length < 3) {
     return (
-      <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[24px] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
+      <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-4 rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)] px-8 py-16 text-center">
         <TrendingUp size={28} className="text-[var(--nfq-text-muted)] opacity-60" />
         <h3 className="text-base font-semibold text-[var(--nfq-text-primary)]">Insufficient data</h3>
         <p className="text-sm text-[var(--nfq-text-muted)]">Need at least 3 booked deals to calibrate elasticity models.</p>
@@ -96,7 +96,7 @@ const PriceElasticityDashboard: React.FC<Props> = ({ deals }) => {
   return (
     <div className="space-y-4">
       {/* Calibration method banner */}
-      <div className={`flex items-center justify-between rounded-[10px] px-3 py-2 text-[11px] ${
+      <div className={`flex items-center justify-between rounded-[var(--nfq-radius-card)] px-3 py-2 text-[11px] ${
         isMockFallback
           ? 'bg-[rgba(245,158,11,0.08)] text-[var(--nfq-warning)]'
           : 'bg-[var(--nfq-bg-surface)] text-[color:var(--nfq-text-secondary)]'

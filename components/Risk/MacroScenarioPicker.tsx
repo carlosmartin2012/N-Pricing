@@ -50,7 +50,7 @@ export const MacroScenarioPicker: React.FC<MacroScenarioPickerProps> = ({
   const scenarios = Object.values(MACRO_SCENARIOS);
 
   return (
-    <section className="rounded-[14px] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
+    <section className="rounded-[var(--nfq-radius-card)] border border-[var(--nfq-border-ghost)] bg-[var(--nfq-bg-surface)] p-4">
       <header className="mb-5">
         <h2 className="text-base font-semibold text-[var(--nfq-text-primary)]">
           Escenarios de stress EBA
@@ -87,7 +87,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, isActive, onSelec
   const isBaseline = scenario.id === 'BASELINE';
 
   const baseClasses =
-    'rounded-[14px] bg-[var(--nfq-bg-elevated)] p-4 border cursor-pointer transition-colors text-left w-full';
+    'rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-elevated)] p-4 border cursor-pointer transition-colors text-left w-full';
   const borderClasses = isBaseline
     ? 'border-dashed border-[var(--nfq-border-ghost)] hover:border-[var(--nfq-accent)]'
     : 'border-[var(--nfq-border-ghost)] hover:border-[var(--nfq-accent)]';

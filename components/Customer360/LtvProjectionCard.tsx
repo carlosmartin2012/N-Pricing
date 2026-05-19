@@ -39,7 +39,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
   // interpretaba como "sin datos" en vez de "cargando".
   if (loading && !latest) {
     return (
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -54,7 +54,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
 
   if (!latest && !loading) {
     return (
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+      <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -78,7 +78,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
   }
 
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-5">
+    <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 space-y-5">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -135,7 +135,7 @@ const LtvProjectionCard: React.FC<Props> = ({ clientId }) => {
             <Breakdown label="Churn cost" value={-latest.breakdown.churnCostEur}  icon={BarChart3} tone="rose" />
           </section>
 
-          <section className="rounded border border-white/5 bg-white/[0.02] p-3">
+          <section className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
             <div className="nfq-label text-[9px] text-slate-400 mb-2 flex items-center gap-2">
               <Gauge className="h-3 w-3" /> {t.clvHazardRenewal}
             </div>
@@ -166,7 +166,7 @@ const accentClass: Record<MetricProps['accent'], string> = {
 };
 
 const Metric: React.FC<MetricProps> = ({ label, value, accent }) => (
-  <div className="rounded border border-white/5 bg-white/[0.02] p-3">
+  <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-3">
     <div className="nfq-label text-[9px] text-slate-400">{label}</div>
     <div className={`mt-1 font-mono text-sm font-bold ${accentClass[accent]}`}>{value}</div>
   </div>
@@ -185,7 +185,7 @@ const toneClass: Record<BreakdownProps['tone'], string> = {
   rose: 'text-rose-300',
 };
 const Breakdown: React.FC<BreakdownProps> = ({ label, value, icon: Icon, tone }) => (
-  <div className="rounded border border-white/5 bg-white/[0.02] p-2">
+  <div className="rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-2">
     <div className="nfq-label flex items-center gap-1 text-[9px] text-slate-400">
       <Icon className="h-3 w-3" />
       {label}

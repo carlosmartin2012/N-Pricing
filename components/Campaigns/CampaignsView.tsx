@@ -259,7 +259,7 @@ const CampaignsView: React.FC = () => {
       )}
 
       {list.length === 0 && !loading ? (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-center text-xs text-slate-400">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4 text-center text-xs text-slate-400">
           {t.commercialCampaignsEmpty}
         </div>
       ) : (
@@ -272,10 +272,10 @@ const CampaignsView: React.FC = () => {
                 <h3 className="nfq-label text-[10px] mb-2 uppercase">
                   {status} ({items.length})
                 </h3>
-                <div className="overflow-hidden rounded-lg border border-white/10">
+                <div className="overflow-hidden rounded-lg border border-[color:var(--nfq-border-ghost)]">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-white/5 bg-white/[0.02]">
+                      <tr className="border-b border-[color:var(--nfq-border-ghost)] bg-white/[0.02]">
                         <th className="nfq-label text-[10px] px-3 py-2 text-left">Code</th>
                         <th className="nfq-label text-[10px] px-3 py-2 text-left">Name</th>
                         <th className="nfq-label text-[10px] px-3 py-2 text-left">Segment / Product</th>
@@ -288,7 +288,7 @@ const CampaignsView: React.FC = () => {
                     </thead>
                     <tbody>
                       {items.map((c) => (
-                        <tr key={c.id} className="border-b border-white/5">
+                        <tr key={c.id} className="border-b border-[color:var(--nfq-border-ghost)]">
                           <td className="px-3 py-2 font-mono text-xs text-slate-200">{c.code}</td>
                           <td className="px-3 py-2 text-xs text-white">{c.name}</td>
                           <td className="px-3 py-2 text-xs text-slate-300">
@@ -359,6 +359,6 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
   </label>
 );
 const inputCls =
-  'w-full rounded border border-white/10 bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-white focus:border-amber-400 focus:outline-none';
+  'w-full rounded border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-2 py-1.5 font-mono text-xs text-white focus:border-amber-400 focus:outline-none';
 
 export default CampaignsView;

@@ -94,7 +94,7 @@ const SLOPanel: React.FC = () => {
       </div>
 
       {!summary && !isLoading && (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] px-4 py-3 text-xs text-slate-400">
           SLO endpoint not available yet — apply migration <code className="font-mono">20260602000005_slo_metrics</code> and emit at least one metric.
         </div>
       )}
@@ -107,7 +107,7 @@ const SLOPanel: React.FC = () => {
             return (
               <article
                 key={`${slo.name}-${idx}`}
-                className="rounded-lg border border-white/5 bg-white/[0.02] p-4"
+                className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4"
                 style={{ boxShadow: `inset 0 0 0 1px ${color}22` }}
               >
                 <header className="mb-3 flex items-center gap-2">
@@ -148,7 +148,7 @@ const SLOPanel: React.FC = () => {
       )}
 
       {violations && (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
           <header className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Lock
@@ -176,7 +176,7 @@ const SLOPanel: React.FC = () => {
               {violations.topEndpoints.map((row, idx) => (
                 <li
                   key={`${row.endpoint}-${row.errorCode}-${idx}`}
-                  className="flex items-center justify-between rounded border border-white/5 bg-black/20 px-3 py-1.5 text-xs"
+                  className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-black/20 px-3 py-1.5 text-xs"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <code className="truncate font-mono text-slate-200">{row.endpoint}</code>
@@ -196,7 +196,7 @@ const SLOPanel: React.FC = () => {
       )}
 
       {summary && summary.activeAlerts.length > 0 && (
-        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-white/[0.02] p-4">
           <h4 className="mb-3 font-mono text-[11px] tracking-normal text-slate-300">
             Active alerts
           </h4>
@@ -204,7 +204,7 @@ const SLOPanel: React.FC = () => {
             {summary.activeAlerts.map((a) => (
               <li
                 key={a.ruleId}
-                className="flex items-center justify-between rounded border border-white/5 bg-black/20 px-3 py-2 text-xs"
+                className="flex items-center justify-between rounded border border-[color:var(--nfq-border-ghost)] bg-black/20 px-3 py-2 text-xs"
               >
                 <div className="flex items-center gap-3">
                   <span
