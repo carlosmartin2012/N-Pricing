@@ -84,6 +84,11 @@ const NavButton: React.FC<NavButtonProps> = ({
         if (window.innerWidth < 768) onClose();
       }}
       aria-current={isActive ? 'page' : undefined}
+      // Native title surfaces the full label when the sidebar is collapsed
+      // (icon-only mode on tablet / mobile). When open, the visible text
+      // already conveys this — the title becomes a redundant aria layer.
+      title={item.label}
+      aria-label={!isSidebarOpen ? item.label : undefined}
       className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
         isActive
           ? 'text-[color:var(--nfq-text-primary)]'
