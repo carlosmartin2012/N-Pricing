@@ -4,11 +4,14 @@ import type { NavigationTranslationKeys } from './translations/navigation.en';
 import { pricingDisciplineEn } from './translations/pricingDiscipline.en';
 import { pricingDisciplineEs } from './translations/pricingDiscipline.es';
 import type { PricingDisciplineTranslationKeys } from './translations/pricingDiscipline.en';
+import { whatIfEn } from './translations/whatIf.en';
+import { whatIfEs } from './translations/whatIf.es';
+import type { WhatIfTranslationKeys } from './translations/whatIf.en';
 
 export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
 
 // Re-export so the namespace barrel and direct importers find the type here.
-export type { NavigationTranslationKeys, PricingDisciplineTranslationKeys };
+export type { NavigationTranslationKeys, PricingDisciplineTranslationKeys, WhatIfTranslationKeys };
 
 export const translations = {
     en: {
@@ -805,34 +808,8 @@ export const translations = {
         // translations/pricingDiscipline.{en,es}.ts now (extracted 2026-05-20).
         // getTranslations() merges them in so legacy callers keep working.
 
-        // ── What-If (Ola 3) ────────────────────────────────────────
-        whatIf: 'What-If Analysis',
-        whatIfDesc: 'Simulate methodology changes, calibrate elasticity, and backtest against history',
-        sandboxMethodology: 'Sandbox Methodology',
-        createSandbox: 'Create Sandbox',
-        publishToGovernance: 'Publish to Governance',
-        computeImpact: 'Compute Impact',
-        impactReport: 'Impact Report',
-        niiDelta: 'NII Delta',
-        rarocDelta: 'RAROC Delta',
-        volumeAtRisk: 'Volume at Risk',
-        cellsAffected: 'Cells Affected',
-        elasticityModels: 'Elasticity Models',
-        calibrateFromHistory: 'Calibrate from History',
-        addExpertModel: 'Add Expert Model',
-        slope: 'Slope',
-        rSquared: 'R²',
-        backtesting: 'Backtesting',
-        runBacktest: 'Run Backtest',
-        simulatedPnl: 'Simulated P&L',
-        actualPnl: 'Actual P&L',
-        pnlDelta: 'P&L Delta',
-        benchmarkComparison: 'Benchmark Comparison',
-        marketRate: 'Market Rate',
-        gapVsMarket: 'Gap vs Market',
-        budgetConsistency: 'Budget Consistency',
-        budgetNii: 'Budget NII',
-        gridImpliedNii: 'Grid-Implied NII',
+        // What-If (Ola 3) keys live in translations/whatIf.{en,es}.ts now
+        // (extracted 2026-05-20). getTranslations() merges them in.
     },
     es: {
         // General
@@ -1627,34 +1604,8 @@ export const translations = {
         // Pricing Discipline (Ola 2) keys live in
         // translations/pricingDiscipline.{en,es}.ts now (extracted 2026-05-20).
 
-        // ── What-If (Ola 3) ────────────────────────────────────────
-        whatIf: 'Análisis What-If',
-        whatIfDesc: 'Simular cambios metodológicos, calibrar elasticidad y backtestear contra histórico',
-        sandboxMethodology: 'Metodología Sandbox',
-        createSandbox: 'Crear Sandbox',
-        publishToGovernance: 'Publicar a Governance',
-        computeImpact: 'Calcular Impacto',
-        impactReport: 'Informe de Impacto',
-        niiDelta: 'Delta NII',
-        rarocDelta: 'Delta RAROC',
-        volumeAtRisk: 'Volumen en Riesgo',
-        cellsAffected: 'Celdas Afectadas',
-        elasticityModels: 'Modelos de Elasticidad',
-        calibrateFromHistory: 'Calibrar desde Histórico',
-        addExpertModel: 'Añadir Modelo Experto',
-        slope: 'Pendiente',
-        rSquared: 'R²',
-        backtesting: 'Backtesting',
-        runBacktest: 'Ejecutar Backtest',
-        simulatedPnl: 'P&L Simulado',
-        actualPnl: 'P&L Real',
-        pnlDelta: 'Delta P&L',
-        benchmarkComparison: 'Comparativa de Mercado',
-        marketRate: 'Tasa de Mercado',
-        gapVsMarket: 'Gap vs Mercado',
-        budgetConsistency: 'Consistencia Presupuestaria',
-        budgetNii: 'NII Presupuesto',
-        gridImpliedNii: 'NII Implícito de la Matriz',
+        // What-If (Ola 3) keys live in translations/whatIf.{en,es}.ts now
+        // (extracted 2026-05-20).
     }
 };
 
@@ -1663,7 +1614,8 @@ export const translations = {
 // them here. `getTranslations()` merges them at runtime.
 export type TranslationKeys = (typeof translations)['en']
   & NavigationTranslationKeys
-  & PricingDisciplineTranslationKeys;
+  & PricingDisciplineTranslationKeys
+  & WhatIfTranslationKeys;
 
 /** Partial translations for additional languages */
 const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
@@ -1713,11 +1665,12 @@ export function getTranslations(lang: Language): TranslationKeys {
   const navigation: NavigationTranslationKeys = lang === 'es' ? navigationEs : navigationEn;
   const discipline: PricingDisciplineTranslationKeys =
     lang === 'es' ? pricingDisciplineEs : pricingDisciplineEn;
+  const whatIf: WhatIfTranslationKeys = lang === 'es' ? whatIfEs : whatIfEn;
   if (lang === 'en' || lang === 'es') {
-    return { ...translations[lang], ...navigation, ...discipline };
+    return { ...translations[lang], ...navigation, ...discipline, ...whatIf };
   }
   const partial = partialTranslations[lang] || {};
-  return { ...translations.en, ...navigation, ...discipline, ...partial } as TranslationKeys;
+  return { ...translations.en, ...navigation, ...discipline, ...whatIf, ...partial } as TranslationKeys;
 }
 
 export const AVAILABLE_LANGUAGES: { code: Language; label: string }[] = [

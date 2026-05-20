@@ -36,6 +36,8 @@ import { navigationEn } from './navigation.en';
 import { navigationEs } from './navigation.es';
 import { pricingDisciplineEn } from './pricingDiscipline.en';
 import { pricingDisciplineEs } from './pricingDiscipline.es';
+import { whatIfEn } from './whatIf.en';
+import { whatIfEs } from './whatIf.es';
 import type { Language } from '../translations';
 
 function byLang<T>(en: T, es: T): Record<Language, T> {
@@ -53,6 +55,7 @@ const ATTRIBUTIONS_BY_LANG = byLang(attributionsEn, attributionsEs);
 const BUDGET_BY_LANG       = byLang(budgetEn, budgetEs);
 const NAVIGATION_BY_LANG   = byLang(navigationEn, navigationEs);
 const PRICING_DISCIPLINE_BY_LANG = byLang(pricingDisciplineEn, pricingDisciplineEs);
+const WHAT_IF_BY_LANG = byLang(whatIfEn, whatIfEs);
 
 export function clvTranslations(lang: Language): typeof clvEn {
   return CLV_BY_LANG[lang] ?? clvEn;
@@ -98,6 +101,10 @@ export function pricingDisciplineTranslations(lang: Language): typeof pricingDis
   return PRICING_DISCIPLINE_BY_LANG[lang] ?? pricingDisciplineEn;
 }
 
+export function whatIfTranslations(lang: Language): typeof whatIfEn {
+  return WHAT_IF_BY_LANG[lang] ?? whatIfEn;
+}
+
 export {
   clvEn, clvEs,
   commercialEn, commercialEs,
@@ -110,6 +117,7 @@ export {
   budgetEn, budgetEs,
   navigationEn, navigationEs,
   pricingDisciplineEn, pricingDisciplineEs,
+  whatIfEn, whatIfEs,
 };
 export type { ClvTranslationKeys } from './clv.en';
 export type { CommercialTranslationKeys } from './commercial.en';
@@ -122,3 +130,4 @@ export type { AttributionsTranslationKeys } from './attributions.en';
 export type { BudgetTranslationKeys } from './budget.en';
 export type { NavigationTranslationKeys } from './navigation.en';
 export type { PricingDisciplineTranslationKeys } from './pricingDiscipline.en';
+export type { WhatIfTranslationKeys } from './whatIf.en';
