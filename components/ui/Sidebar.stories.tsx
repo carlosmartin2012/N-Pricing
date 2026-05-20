@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Sidebar } from './Sidebar';
 import { buildMainNavItems, buildBottomNavItems } from '../../appNavigation';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 
-const t = translations.en;
+// Use getTranslations() so the story sees the same merged shape
+// (monolith + namespace packs) that production components consume.
+const t = getTranslations('en');
 const mainNavItems = buildMainNavItems(t);
 const bottomNavItems = buildBottomNavItems(t);
 

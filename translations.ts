@@ -1,11 +1,14 @@
 import { navigationEn } from './translations/navigation.en';
 import { navigationEs } from './translations/navigation.es';
 import type { NavigationTranslationKeys } from './translations/navigation.en';
+import { pricingDisciplineEn } from './translations/pricingDiscipline.en';
+import { pricingDisciplineEs } from './translations/pricingDiscipline.es';
+import type { PricingDisciplineTranslationKeys } from './translations/pricingDiscipline.en';
 
 export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
 
 // Re-export so the namespace barrel and direct importers find the type here.
-export type { NavigationTranslationKeys };
+export type { NavigationTranslationKeys, PricingDisciplineTranslationKeys };
 
 export const translations = {
     en: {
@@ -798,38 +801,9 @@ export const translations = {
         componentBreakdown: 'Component Breakdown',
         tenorBucket: 'Tenor Bucket',
 
-        // ── Pricing Discipline (Ola 2) ─────────────────────────────
-        pricingDiscipline: 'Pricing Discipline',
-        pricingDisciplineDesc: 'Portfolio variance analysis, margin leakage and originator scorecards',
-        datePresetToday: 'Today',
-        datePresetWeek: 'Last 7d',
-        datePresetMonth: 'Last 30d',
-        datePresetQuarter: 'Quarter',
-        datePresetCustom: 'Custom',
-        inBand: 'In Band',
-        outOfBand: 'Out of Band',
-        totalLeakage: 'Total Leakage',
-        leakageTrend: 'Leakage Trend',
-        avgFtpVariance: 'Avg FTP Variance',
-        avgRarocVariance: 'Avg RAROC Variance',
-        toleranceBands: 'Tolerance Bands',
-        addBand: 'Add Band',
-        editBand: 'Edit Band',
-        ftpTolerance: 'FTP Tolerance (bps)',
-        rarocTolerance: 'RAROC Tolerance (pp)',
-        marginTolerance: 'Margin Tolerance (bps)',
-        bandPriority: 'Priority',
-        effectiveFrom: 'Effective From',
-        effectiveTo: 'Effective To',
-        outliers: 'Outliers',
-        topOutliers: 'Top Outliers',
-        leakageByDimension: 'Leakage by Dimension',
-        varianceDistribution: 'Variance Distribution',
-        pricingException: 'Pricing Exception',
-        exceptionReason: 'Exception Reason',
-        exceptionDetail: 'Exception Detail',
-        originatorScorecard: 'Originator Scorecard',
-        cohortDrilldown: 'Cohort Drilldown',
+        // Pricing Discipline (Ola 2) keys live in
+        // translations/pricingDiscipline.{en,es}.ts now (extracted 2026-05-20).
+        // getTranslations() merges them in so legacy callers keep working.
 
         // ── What-If (Ola 3) ────────────────────────────────────────
         whatIf: 'What-If Analysis',
@@ -1650,38 +1624,8 @@ export const translations = {
         componentBreakdown: 'Desglose de Componentes',
         tenorBucket: 'Bucket de Tenor',
 
-        // ── Pricing Discipline (Ola 2) ─────────────────────────────
-        pricingDiscipline: 'Disciplina de Pricing',
-        pricingDisciplineDesc: 'Análisis de varianza de cartera, fuga de margen y scorecards de originadores',
-        datePresetToday: 'Hoy',
-        datePresetWeek: 'Últimos 7d',
-        datePresetMonth: 'Últimos 30d',
-        datePresetQuarter: 'Trimestre',
-        datePresetCustom: 'Personalizado',
-        inBand: 'En Banda',
-        outOfBand: 'Fuera de Banda',
-        totalLeakage: 'Fuga Total',
-        leakageTrend: 'Tendencia de Fuga',
-        avgFtpVariance: 'Varianza FTP Promedio',
-        avgRarocVariance: 'Varianza RAROC Promedio',
-        toleranceBands: 'Bandas de Tolerancia',
-        addBand: 'Añadir Banda',
-        editBand: 'Editar Banda',
-        ftpTolerance: 'Tolerancia FTP (bps)',
-        rarocTolerance: 'Tolerancia RAROC (pp)',
-        marginTolerance: 'Tolerancia Margen (bps)',
-        bandPriority: 'Prioridad',
-        effectiveFrom: 'Vigente Desde',
-        effectiveTo: 'Vigente Hasta',
-        outliers: 'Outliers',
-        topOutliers: 'Top Outliers',
-        leakageByDimension: 'Fuga por Dimensión',
-        varianceDistribution: 'Distribución de Varianza',
-        pricingException: 'Excepción de Pricing',
-        exceptionReason: 'Motivo de Excepción',
-        exceptionDetail: 'Detalle de Excepción',
-        originatorScorecard: 'Scorecard del Originador',
-        cohortDrilldown: 'Detalle por Cohorte',
+        // Pricing Discipline (Ola 2) keys live in
+        // translations/pricingDiscipline.{en,es}.ts now (extracted 2026-05-20).
 
         // ── What-If (Ola 3) ────────────────────────────────────────
         whatIf: 'Análisis What-If',
@@ -1717,7 +1661,9 @@ export const translations = {
 // `TranslationKeys` intersects the monolith with namespace packs that have
 // been migrated out. As more namespaces move to `translations/*.ts`, add
 // them here. `getTranslations()` merges them at runtime.
-export type TranslationKeys = (typeof translations)['en'] & NavigationTranslationKeys;
+export type TranslationKeys = (typeof translations)['en']
+  & NavigationTranslationKeys
+  & PricingDisciplineTranslationKeys;
 
 /** Partial translations for additional languages */
 const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
@@ -1765,11 +1711,13 @@ const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> =
  */
 export function getTranslations(lang: Language): TranslationKeys {
   const navigation: NavigationTranslationKeys = lang === 'es' ? navigationEs : navigationEn;
+  const discipline: PricingDisciplineTranslationKeys =
+    lang === 'es' ? pricingDisciplineEs : pricingDisciplineEn;
   if (lang === 'en' || lang === 'es') {
-    return { ...translations[lang], ...navigation };
+    return { ...translations[lang], ...navigation, ...discipline };
   }
   const partial = partialTranslations[lang] || {};
-  return { ...translations.en, ...navigation, ...partial } as TranslationKeys;
+  return { ...translations.en, ...navigation, ...discipline, ...partial } as TranslationKeys;
 }
 
 export const AVAILABLE_LANGUAGES: { code: Language; label: string }[] = [

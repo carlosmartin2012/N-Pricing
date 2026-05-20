@@ -3,10 +3,12 @@ import { action } from '@storybook/addon-actions';
 import { Header } from './Header';
 import { EntityProvider } from '../../contexts/EntityContext';
 import { buildMainNavItems, buildBottomNavItems } from '../../appNavigation';
-import { translations } from '../../translations';
+import { getTranslations } from '../../translations';
 import type { UserProfile } from '../../types';
 
-const t = translations.en;
+// Use getTranslations() so the story sees the same merged shape
+// (monolith + namespace packs) that production components consume.
+const t = getTranslations('en');
 const mainNav = buildMainNavItems(t).map(({ id, label }) => ({ id, label }));
 const bottomNav = buildBottomNavItems(t).map(({ id, label }) => ({ id, label }));
 

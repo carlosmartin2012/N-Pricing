@@ -34,6 +34,8 @@ import { budgetEn } from './budget.en';
 import { budgetEs } from './budget.es';
 import { navigationEn } from './navigation.en';
 import { navigationEs } from './navigation.es';
+import { pricingDisciplineEn } from './pricingDiscipline.en';
+import { pricingDisciplineEs } from './pricingDiscipline.es';
 import type { Language } from '../translations';
 
 function byLang<T>(en: T, es: T): Record<Language, T> {
@@ -50,6 +52,7 @@ const SHARED_BY_LANG     = byLang(sharedEn, sharedEs);
 const ATTRIBUTIONS_BY_LANG = byLang(attributionsEn, attributionsEs);
 const BUDGET_BY_LANG       = byLang(budgetEn, budgetEs);
 const NAVIGATION_BY_LANG   = byLang(navigationEn, navigationEs);
+const PRICING_DISCIPLINE_BY_LANG = byLang(pricingDisciplineEn, pricingDisciplineEs);
 
 export function clvTranslations(lang: Language): typeof clvEn {
   return CLV_BY_LANG[lang] ?? clvEn;
@@ -91,6 +94,10 @@ export function navigationTranslations(lang: Language): typeof navigationEn {
   return NAVIGATION_BY_LANG[lang] ?? navigationEn;
 }
 
+export function pricingDisciplineTranslations(lang: Language): typeof pricingDisciplineEn {
+  return PRICING_DISCIPLINE_BY_LANG[lang] ?? pricingDisciplineEn;
+}
+
 export {
   clvEn, clvEs,
   commercialEn, commercialEs,
@@ -102,6 +109,7 @@ export {
   attributionsEn, attributionsEs,
   budgetEn, budgetEs,
   navigationEn, navigationEs,
+  pricingDisciplineEn, pricingDisciplineEs,
 };
 export type { ClvTranslationKeys } from './clv.en';
 export type { CommercialTranslationKeys } from './commercial.en';
@@ -113,3 +121,4 @@ export type { SharedTranslationKeys } from './shared.en';
 export type { AttributionsTranslationKeys } from './attributions.en';
 export type { BudgetTranslationKeys } from './budget.en';
 export type { NavigationTranslationKeys } from './navigation.en';
+export type { PricingDisciplineTranslationKeys } from './pricingDiscipline.en';
