@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Panel } from '../ui/LayoutComponents';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import GeneralRulesTab from './tabs/GeneralRulesTab';
-import RateCardsTab from './tabs/RateCardsTab';
-import ESGGridTab from './tabs/ESGGridTab';
-import GovernanceTab from './tabs/GovernanceTab';
-import MasterDataTab from './tabs/MasterDataTab';
-import ReportSchedulingTab from './tabs/ReportSchedulingTab';
 import MethodologyTabNavigation from './MethodologyTabNavigation';
-import ModelInventoryPanel from './ModelInventoryPanel';
 import type { MethodologyConfigMode, MethodologyTabId } from './configTypes';
+
+// Each tab is its own chunk — only the active tab downloads. Keeps the
+// MethodologyConfig shell under the per-route bundle budget.
+const GeneralRulesTab = React.lazy(() => import('./tabs/GeneralRulesTab'));
+const RateCardsTab = React.lazy(() => import('./tabs/RateCardsTab'));
+const ESGGridTab = React.lazy(() => import('./tabs/ESGGridTab'));
+const GovernanceTab = React.lazy(() => import('./tabs/GovernanceTab'));
+const MasterDataTab = React.lazy(() => import('./tabs/MasterDataTab'));
+const ReportSchedulingTab = React.lazy(() => import('./tabs/ReportSchedulingTab'));
+const ModelInventoryPanel = React.lazy(() => import('./ModelInventoryPanel'));
 
 interface Props {
   mode: MethodologyConfigMode;
@@ -73,7 +76,9 @@ const MethodologyConfig: React.FC<Props> = ({ mode }) => {
       <div data-tour="config-panel" className="flex flex-col h-full">
         <MethodologyTabNavigation mode={mode} activeTab={activeTab} onChange={setActiveTab} />
 
-        {tabContent[activeTab]}
+        <Suspense fallback={<div className="mt-4 h-40 animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />}>
+          {tabContent[activeTab]}
+        </Suspense>
       </div>
     </Panel>
   );
