@@ -61,14 +61,20 @@ describe('DealTimelineRoute', () => {
   it('extracts dealId from the URL and fetches the timeline', async () => {
     api.getDealTimeline.mockResolvedValue(sampleTimeline);
     renderRoute('/deals/D-001/timeline');
-    await waitFor(() => screen.getByText('D-001'));
+    // D-001 now appears both in the new DealBreadcrumb (testid
+    // `deal-breadcrumb-id`) and in the timeline header heading. Wait for
+    // any occurrence via getAllByText to confirm the deal loaded.
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     expect(api.getDealTimeline).toHaveBeenCalledWith('D-001');
   });
 
   it('forwards ?focus=<eventId> as focusEventId to the view', async () => {
     api.getDealTimeline.mockResolvedValue(sampleTimeline);
     renderRoute('/deals/D-001/timeline?focus=snapshot:S-7');
-    await waitFor(() => screen.getByText('D-001'));
+    // D-001 now appears both in the new DealBreadcrumb (testid
+    // `deal-breadcrumb-id`) and in the timeline header heading. Wait for
+    // any occurrence via getAllByText to confirm the deal loaded.
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     // Focus is wired by id="tl-<eventId>" + a cyan ring class on the focused card.
     const card = document.getElementById('tl-snapshot:S-7');
     expect(card).not.toBeNull();
@@ -78,7 +84,10 @@ describe('DealTimelineRoute', () => {
   it('navigates to /snapshots?focus=<id> when Replay is clicked', async () => {
     api.getDealTimeline.mockResolvedValue(sampleTimeline);
     renderRoute('/deals/D-001/timeline');
-    await waitFor(() => screen.getByText('D-001'));
+    // D-001 now appears both in the new DealBreadcrumb (testid
+    // `deal-breadcrumb-id`) and in the timeline header heading. Wait for
+    // any occurrence via getAllByText to confirm the deal loaded.
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
 
     const replay = screen.getByRole('button', { name: /replay snapshot s-7/i });
     fireEvent.click(replay);

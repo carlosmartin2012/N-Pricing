@@ -165,6 +165,16 @@ export const useCoreData = (): CoreDataContextType => {
 };
 
 /**
+ * Soft variant — returns `null` instead of throwing when no provider is
+ * mounted. Use for components that legitimately render both inside and
+ * outside the data shell (deep-linked routes, test harnesses, breadcrumbs
+ * that gracefully degrade). Mirrors `useOptionalPricingState`.
+ */
+export const useOptionalCoreData = (): CoreDataContextType | null => {
+  return useContext(CoreDataContext);
+};
+
+/**
  * Backward-compatible hook that merges all three sub-contexts.
  * Existing components that call useData() continue to work unchanged.
  */

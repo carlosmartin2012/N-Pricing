@@ -4,6 +4,7 @@ import { useDealTimelineQuery } from '../../hooks/queries/useDealTimelineQuery';
 import type { DealTimelineEventKind } from '../../types/dealTimeline';
 import TimelineEventCard from './TimelineEventCard';
 import TimelineFilters from './TimelineFilters';
+import DealBreadcrumb from './DealBreadcrumb';
 
 const ALL_KINDS: DealTimelineEventKind[] = [
   'deal_created',
@@ -90,6 +91,7 @@ const DealTimelineView: React.FC<Props> = ({ dealId, focusEventId, onReplaySnaps
 
   return (
     <div ref={focusRef} className="space-y-6 p-4 md:p-6">
+      <DealBreadcrumb dealId={dealId} />
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="nfq-label flex items-center gap-2 text-[10px] text-[color:var(--nfq-text-muted)]">

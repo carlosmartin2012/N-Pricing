@@ -2,6 +2,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { DealTimeline } from '../../../types/dealTimeline';
 
@@ -18,7 +19,11 @@ function wrap() {
     defaultOptions: { queries: { retry: false } },
   });
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    // MemoryRouter is required since the view now renders <DealBreadcrumb/>
+    // which uses useNavigate for the "back to blotter" link.
+    <MemoryRouter>
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    </MemoryRouter>
   );
   return { qc, Wrapper };
 }
@@ -88,7 +93,7 @@ describe('DealTimelineView', () => {
     const { Wrapper } = wrap();
     render(<DealTimelineView dealId="D-001" />, { wrapper: Wrapper });
 
-    await waitFor(() => screen.getByText('D-001'));
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     expect(screen.getByText('Repricings').nextElementSibling?.textContent).toBe('1');
     expect(screen.getByText('Escalations').nextElementSibling?.textContent).toBe('1');
     expect(screen.getByText('Dossiers').nextElementSibling?.textContent).toBe('1');
@@ -99,7 +104,7 @@ describe('DealTimelineView', () => {
     const { Wrapper } = wrap();
     render(<DealTimelineView dealId="D-001" />, { wrapper: Wrapper });
 
-    await waitFor(() => screen.getByText('D-001'));
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     const articles = document.querySelectorAll('article[data-event-kind]');
     expect(articles).toHaveLength(4);
   });
@@ -109,7 +114,7 @@ describe('DealTimelineView', () => {
     const { Wrapper } = wrap();
     render(<DealTimelineView dealId="D-001" />, { wrapper: Wrapper });
 
-    await waitFor(() => screen.getByText('D-001'));
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     fireEvent.click(screen.getByRole('button', { name: /dossier signed/i }));
 
     const visible = document.querySelectorAll('article[data-event-kind]');
@@ -123,7 +128,7 @@ describe('DealTimelineView', () => {
     const { Wrapper } = wrap();
     render(<DealTimelineView dealId="D-001" />, { wrapper: Wrapper });
 
-    await waitFor(() => screen.getByText('D-001'));
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     fireEvent.click(screen.getByText('None'));
     expect(screen.getByText(/all event kinds are filtered out/i)).toBeInTheDocument();
   });
@@ -133,7 +138,7 @@ describe('DealTimelineView', () => {
     const { Wrapper } = wrap();
     render(<DealTimelineView dealId="D-001" />, { wrapper: Wrapper });
 
-    await waitFor(() => screen.getByText('D-001'));
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     expect(screen.getByText(/no events recorded yet/i)).toBeInTheDocument();
   });
 
@@ -153,7 +158,7 @@ describe('DealTimelineView', () => {
     const { Wrapper } = wrap();
     render(<DealTimelineView dealId="D-001" onReplaySnapshot={onReplay} />, { wrapper: Wrapper });
 
-    await waitFor(() => screen.getByText('D-001'));
+    await waitFor(() => expect(screen.getAllByText('D-001').length).toBeGreaterThan(0));
     const replayButtons = screen.getAllByRole('button', { name: /replay snapshot/i });
     // 3 events have snapshotId (S-1, S-2 deal_repriced, X-1 dossier_signed → S-2)
     expect(replayButtons).toHaveLength(3);
