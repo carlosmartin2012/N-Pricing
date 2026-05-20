@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router';
 import ControlRoomView from '../ControlRoomView';
-import { translations } from '../../../translations';
+import { getTranslations } from '../../../translations';
 import type { DataContextType } from '../../../contexts/DataContext';
 import { INITIAL_DEAL, MOCK_LIQUIDITY_CURVES, MOCK_YIELD_CURVE } from '../../../utils/seedData';
 import { MOCK_ENTITIES } from '../../../utils/seedData.entities';
@@ -39,8 +39,13 @@ vi.mock('../../../contexts/DataContext', () => ({
   useData: () => mockData,
 }));
 
+// Use getTranslations() (not translations.en directly) so namespace packs
+// like controlRoom.{en,es} are merged in — production components consume
+// the merged shape.
+const tEn = getTranslations('en');
+
 vi.mock('../../../contexts/UIContext', () => ({
-  useUI: () => ({ t: translations.en, workspaceMode: 'Risk' }),
+  useUI: () => ({ t: tEn, workspaceMode: 'Risk' }),
 }));
 
 describe('ControlRoomView', () => {

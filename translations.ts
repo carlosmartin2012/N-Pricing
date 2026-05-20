@@ -7,11 +7,19 @@ import type { PricingDisciplineTranslationKeys } from './translations/pricingDis
 import { whatIfEn } from './translations/whatIf.en';
 import { whatIfEs } from './translations/whatIf.es';
 import type { WhatIfTranslationKeys } from './translations/whatIf.en';
+import { controlRoomEn } from './translations/controlRoom.en';
+import { controlRoomEs } from './translations/controlRoom.es';
+import type { ControlRoomTranslationKeys } from './translations/controlRoom.en';
 
 export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
 
 // Re-export so the namespace barrel and direct importers find the type here.
-export type { NavigationTranslationKeys, PricingDisciplineTranslationKeys, WhatIfTranslationKeys };
+export type {
+  NavigationTranslationKeys,
+  PricingDisciplineTranslationKeys,
+  WhatIfTranslationKeys,
+  ControlRoomTranslationKeys,
+};
 
 export const translations = {
     en: {
@@ -97,39 +105,8 @@ export const translations = {
         freshnessSources: 'Sources',
         freshnessLastSync: 'Last sync',
         freshnessUnavailable: 'n/a',
-        controlRoomToday: 'Today',
-        controlRoomDecisions: 'Decision queue',
-        controlRoomActionQueue: 'Action queue',
-        controlRoomActionQueueSub: 'Approvals and review items',
-        controlRoomExposure: 'Exposure',
-        controlRoomExposureSub: 'Current deal book',
-        controlRoomDataFreshness: 'Stale feeds',
-        controlRoomDataFreshnessSub: 'Market sources older than 24h',
-        controlRoomExceptions: 'Exceptions',
-        controlRoomExceptionsSub: 'Rejected or blocked deals',
-        controlRoomOpenBlotter: 'Open blotter',
-        controlRoomNoActionsTitle: 'Inbox at zero',
-        controlRoomNoActionsCta: 'Start new deal',
-        controlRoomNoActions: 'No deal requires immediate action.',
-        controlRoomRecommended: 'Recommended next',
-        controlRoomMarketReadiness: 'Market readiness',
-        controlRoomActiveSources: 'Active sources',
-        controlRoomYieldCurvePoints: 'Yield curve points',
-        controlRoomLiquidityCurves: 'Liquidity curves',
-        controlRoomDossiers: 'Signed dossiers',
-        controlRoomOperationalSignals: 'Operational signals',
-        controlRoomPendingApprovals: 'Pending approvals',
-        controlRoomOverdueApprovals: 'Overdue approvals',
-        controlRoomMethodologyChanges: 'Methodology changes',
-        controlRoomSyncState: 'Sync state',
-        controlRoomStressPricing: 'Stress pricing',
-        controlRoomDiscipline: 'Pricing discipline',
-        controlRoomApprovals: 'Approvals',
-        controlRoomMarketData: 'Market data',
-        controlRoomMethodology: 'Methodology',
-        controlRoomHealth: 'System health',
-        controlRoomNewQuote: 'New quote',
-        controlRoomPipeline: 'Pipeline',
+        // Control Room keys live in translations/controlRoom.{en,es}.ts now
+        // (extracted 2026-05-20).
         dealFlowTitle: 'Deal flow',
         dealFlowQuote: 'Quote',
         dealFlowDossier: 'Dossier',
@@ -894,39 +871,8 @@ export const translations = {
         freshnessSources: 'Fuentes',
         freshnessLastSync: 'Última sync',
         freshnessUnavailable: 'n/d',
-        controlRoomToday: 'Hoy',
-        controlRoomDecisions: 'Cola de decisiones',
-        controlRoomActionQueue: 'Cola de acción',
-        controlRoomActionQueueSub: 'Aprobaciones y revisiones',
-        controlRoomExposure: 'Exposición',
-        controlRoomExposureSub: 'Libro de operaciones actual',
-        controlRoomDataFreshness: 'Feeds obsoletos',
-        controlRoomDataFreshnessSub: 'Fuentes de mercado con más de 24h',
-        controlRoomExceptions: 'Excepciones',
-        controlRoomExceptionsSub: 'Deals rechazados o bloqueados',
-        controlRoomOpenBlotter: 'Abrir blotter',
-        controlRoomNoActionsTitle: 'Bandeja vacía',
-        controlRoomNoActionsCta: 'Iniciar nuevo deal',
-        controlRoomNoActions: 'Ningún deal requiere acción inmediata.',
-        controlRoomRecommended: 'Siguiente recomendado',
-        controlRoomMarketReadiness: 'Preparación de mercado',
-        controlRoomActiveSources: 'Fuentes activas',
-        controlRoomYieldCurvePoints: 'Puntos de curva',
-        controlRoomLiquidityCurves: 'Curvas de liquidez',
-        controlRoomDossiers: 'Dossiers firmados',
-        controlRoomOperationalSignals: 'Señales operativas',
-        controlRoomPendingApprovals: 'Aprobaciones pendientes',
-        controlRoomOverdueApprovals: 'Aprobaciones vencidas',
-        controlRoomMethodologyChanges: 'Cambios metodológicos',
-        controlRoomSyncState: 'Estado de sync',
-        controlRoomStressPricing: 'Stress pricing',
-        controlRoomDiscipline: 'Disciplina de pricing',
-        controlRoomApprovals: 'Aprobaciones',
-        controlRoomMarketData: 'Datos de mercado',
-        controlRoomMethodology: 'Metodología',
-        controlRoomHealth: 'Salud del sistema',
-        controlRoomNewQuote: 'Nueva cotización',
-        controlRoomPipeline: 'Pipeline',
+        // Control Room keys live in translations/controlRoom.{en,es}.ts now
+        // (extracted 2026-05-20).
         dealFlowTitle: 'Flujo del deal',
         dealFlowQuote: 'Cotización',
         dealFlowDossier: 'Dossier',
@@ -1615,7 +1561,8 @@ export const translations = {
 export type TranslationKeys = (typeof translations)['en']
   & NavigationTranslationKeys
   & PricingDisciplineTranslationKeys
-  & WhatIfTranslationKeys;
+  & WhatIfTranslationKeys
+  & ControlRoomTranslationKeys;
 
 /** Partial translations for additional languages */
 const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
@@ -1666,11 +1613,19 @@ export function getTranslations(lang: Language): TranslationKeys {
   const discipline: PricingDisciplineTranslationKeys =
     lang === 'es' ? pricingDisciplineEs : pricingDisciplineEn;
   const whatIf: WhatIfTranslationKeys = lang === 'es' ? whatIfEs : whatIfEn;
+  const controlRoom: ControlRoomTranslationKeys = lang === 'es' ? controlRoomEs : controlRoomEn;
   if (lang === 'en' || lang === 'es') {
-    return { ...translations[lang], ...navigation, ...discipline, ...whatIf };
+    return { ...translations[lang], ...navigation, ...discipline, ...whatIf, ...controlRoom };
   }
   const partial = partialTranslations[lang] || {};
-  return { ...translations.en, ...navigation, ...discipline, ...whatIf, ...partial } as TranslationKeys;
+  return {
+    ...translations.en,
+    ...navigation,
+    ...discipline,
+    ...whatIf,
+    ...controlRoom,
+    ...partial,
+  } as TranslationKeys;
 }
 
 export const AVAILABLE_LANGUAGES: { code: Language; label: string }[] = [
