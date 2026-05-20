@@ -206,8 +206,16 @@ router.get('/slo-summary', async (req, res) => {
       return res.status(400).json({ code: 'tenancy_missing_header', message: 'entity_id required' });
     }
 
-    const [latencySingle, latencyBatch, tenancyViolations, mockCalls, snapshotFailures, alerts] =
-      await Promise.all([
+    const [
+      latencySingle,
+      latencyBatch,
+      tenancyViolations,
+      mockCalls,
+      snapshotFailures,
+      pricingErrorRate,
+      attributionRouteLatency,
+      alerts,
+    ] = await Promise.all([
         queryOne<{ p50: string | null; p95: string | null; p99: string | null; n: string }>(
           `SELECT
              percentile_cont(0.5)  WITHIN GROUP (ORDER BY metric_value)::text AS p50,
@@ -258,6 +266,28 @@ router.get('/slo-summary', async (req, res) => {
            WHERE entity_id = $1
              AND metric_name = 'snapshot_write_failures_total'
              AND recorded_at >= NOW() - INTERVAL '5 minutes'`,
+          [entityId],
+        ),
+        queryOne<{ avg: string | null; n: string }>(
+          // pricing_error_rate emits 0 / 1 per call (success / error). AVG
+          // collapses to the error rate in [0, 1].
+          `SELECT AVG(metric_value)::text AS avg, COUNT(*)::text AS n
+           FROM metrics
+           WHERE entity_id = $1
+             AND metric_name = 'pricing_error_rate'
+             AND recorded_at >= NOW() - INTERVAL '5 minutes'`,
+          [entityId],
+        ),
+        queryOne<{ p50: string | null; p95: string | null; p99: string | null; n: string }>(
+          `SELECT
+             percentile_cont(0.5)  WITHIN GROUP (ORDER BY metric_value)::text AS p50,
+             percentile_cont(0.95) WITHIN GROUP (ORDER BY metric_value)::text AS p95,
+             percentile_cont(0.99) WITHIN GROUP (ORDER BY metric_value)::text AS p99,
+             COUNT(*)::text AS n
+           FROM metrics
+           WHERE entity_id = $1
+             AND metric_name = 'attribution_route_latency_ms'
+             AND recorded_at >= NOW() - INTERVAL '1 hour'`,
           [entityId],
         ),
         query<{
@@ -332,6 +362,32 @@ router.get('/slo-summary', async (req, res) => {
         current: Number(snapshotFailures?.n ?? '0'),
         status: Number(snapshotFailures?.n ?? '0') === 0 ? 'ok' : 'breached',
         window: '5m',
+      },
+      {
+        name: 'pricing_error_rate',
+        target: 0.005,
+        current: Number(pricingErrorRate?.avg ?? '0'),
+        status: (() => {
+          const n = Number(pricingErrorRate?.n ?? '0');
+          if (n === 0) return 'ok';
+          const rate = Number(pricingErrorRate?.avg ?? '0');
+          return rate <= 0.005 ? 'ok' : rate <= 0.02 ? 'warning' : 'breached';
+        })(),
+        window: '5m',
+        sampleCount: Number(pricingErrorRate?.n ?? '0'),
+      },
+      {
+        name: 'attribution_route_latency_ms',
+        target: 50,
+        current: Number(attributionRouteLatency?.p95 ?? 0),
+        status: Number(attributionRouteLatency?.p95 ?? 0) <= 50 ? 'ok' : 'breached',
+        window: '1h',
+        percentiles: {
+          p50: Number(attributionRouteLatency?.p50 ?? 0),
+          p95: Number(attributionRouteLatency?.p95 ?? 0),
+          p99: Number(attributionRouteLatency?.p99 ?? 0),
+        },
+        sampleCount: Number(attributionRouteLatency?.n ?? '0'),
       },
     ];
 

@@ -3,6 +3,7 @@ import { safeError } from '../middleware/errorHandler';
 import { pool } from '../db';
 import { createLogger } from '../logger';
 import { recorderFromPool } from '../../utils/metering/usageRecorder';
+import { recordMetric } from '../observability/recordMetric';
 
 const router = Router();
 const meter = recorderFromPool(pool);
@@ -63,9 +64,23 @@ router.post('/inverse-optimize', async (req, res) => {
       void meter.insert(req.tenancy.entityId, 'pricing_call', 1, { endpoint: 'inverse-optimize' });
     }
     res.json(result);
+    // Catalogued SLI (types/phase0.ts:271) — error rate < 0.5% (rolling 5 min).
+    // Emit 0 on success / 1 on error so /slo-summary can average → rate.
+    void recordMetric({
+      entityId: req.tenancy?.entityId ?? null,
+      metricName: 'pricing_error_rate',
+      value: 0,
+      dimensions: { endpoint: 'inverse-optimize' },
+    });
   } catch (err) {
     logger.error('inverse-optimize error', undefined, err);
     res.status(500).json({ error: safeError(err) });
+    void recordMetric({
+      entityId: req.tenancy?.entityId ?? null,
+      metricName: 'pricing_error_rate',
+      value: 1,
+      dimensions: { endpoint: 'inverse-optimize' },
+    });
   }
 });
 

@@ -24,6 +24,7 @@ import { hashSnapshotInput, hashSnapshotOutput } from '@npricing/evidence';
 import { query, queryOne, withTransaction, type Tx } from '../db';
 import { createLogger } from '../logger';
 import { safeError } from '../middleware/errorHandler';
+import { recordMetric } from '../observability/recordMetric';
 
 const escalationLogger = createLogger('escalation-push');
 import { routeApproval } from '../../utils/attributions/attributionRouter';
@@ -568,6 +569,7 @@ router.patch('/thresholds/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 
 router.post('/route', async (req, res) => {
+  const startedAt = Date.now();
   try {
     const tenancy = requireTenancy(req, res);
     if (!tenancy) return;
@@ -592,6 +594,15 @@ router.post('/route', async (req, res) => {
 
     const result = routeApproval(body.quote, matrix);
     res.json(result);
+    // Catalogued SLI (types/phase0.ts:304) — p95 < 50 ms over 1h.
+    // Fire-and-forget; the helper swallows db errors so this never blocks
+    // the response or breaks the business path.
+    void recordMetric({
+      entityId: tenancy.entityId,
+      metricName: 'attribution_route_latency_ms',
+      value: Date.now() - startedAt,
+      dimensions: { levelsCount: matrix.levels.length },
+    });
   } catch (err) {
     res.status(500).json({ error: safeError(err) });
   }
