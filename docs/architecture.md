@@ -234,7 +234,18 @@ T0 puede demostrarse byte-perfect en T+N.
 ### Pipeline
 
 1. Edge Functions y server emiten métricas a la tabla `metrics` con
-   dimensions `{ request_id, endpoint, status_code }`.
+   dimensions `{ request_id, endpoint, status_code, ... }`. Hasta
+   2026-05-20 la tabla estaba creada por migration pero **vacía** —
+   ningún code path emitía. El canonical write path es ahora
+   `server/observability/recordMetric.ts` (best-effort: NaN guard,
+   error swallow para no romper el path de negocio). Emisores reales:
+   - `attribution_drift_signals_total` ← worker `attributionDriftDetector`
+   - `attribution_route_latency_ms`    ← handler `POST /api/attributions/route`
+   - `pricing_error_rate`              ← handler `POST /api/pricing/inverse-optimize`
+   Pendientes de instrumentar: `attribution_decision_time_ms`,
+   `pricing_single_latency_ms`, `pricing_batch_latency_ms_per_deal`
+   (cada uno requiere instrumentar su handler — 3 líneas con
+   `recordMetric()`).
 2. Vista materializada `pricing_slo_minute` agrega p50/p95/p99 + n_errors
    por (entity, minuto, endpoint). Refresh por pg_cron (opcional) o por el
    propio worker.

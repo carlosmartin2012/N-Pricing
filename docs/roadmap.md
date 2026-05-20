@@ -1,6 +1,6 @@
 # N-Pricing — Roadmap
 
-> **Última actualización:** 2026-05-18 · **Decisión de dirección:** continuar en monorepo actual (greenfield descartado).
+> **Última actualización:** 2026-05-20 · **Decisión de dirección:** continuar en monorepo actual (greenfield descartado).
 > Single source of truth para el estado de desarrollo del producto. Sustituye a `roadmap-execution-summary.md`,
 > `ola-{6,7,8}-*.md`, `methodology-first-evolution-plan.md`, `next-gen-application-spec.md`,
 > `next-gen-extraction-map.md` y `refactor-followups.md` (todos consolidados aquí o archivados).
@@ -10,15 +10,16 @@
 
 ---
 
-## 1. Estado actual (2026-05-18)
+## 1. Estado actual (2026-05-20)
 
 | Capa | Estado | Métrica |
 |---|---|---|
-| Tests | ✅ Verde | 1944 passing / 31 skipped (integration opt-in) |
+| Tests | ✅ Verde | 1993 passing / 31 skipped (integration opt-in) |
 | Lint | ✅ Verde | `--max-warnings=0` |
-| Typecheck | ✅ Verde | `strict` global; `noUncheckedIndexedAccess` opt-in en 4 archivos |
+| Typecheck | ✅ Verde | `strict` global; `noUncheckedIndexedAccess` opt-in en **30 archivos auditados** |
 | Migrations | 48 SQL secuenciales | última: `20260630000003_market_data_tenancy_hardening.sql` |
-| Bundle `index` | 525 KB budget | code-split aplicado a CommandPalette y Login |
+| Bundle | **172/172 chunks PASS** | code-split aplicado a CommandPalette, Login, **CalculatorWorkspace y MethodologyConfig** (split en 7 tabs lazy) |
+| Observability | 🟢 Pipeline activo | `metrics` table ahora se popula vía `server/observability/recordMetric.ts`; 7 de 9 SLIs catalogados con emisor real |
 
 **Cobertura funcional:** Phase 0-5 + Olas 1-3 + Olas 6 + 8-10 + 11 cerradas en `main`.
 **Banca March demo:** entregable, deck en `~/Developer/Cowork/decks/n-pricing-banca-march-demo.html`.
@@ -87,10 +88,17 @@ Cinco bloques ortogonales del plan original. Auditoría 2026-05-18 confirmó que
 
 | Item | Esfuerzo | Razón |
 |---|---|---|
+| ~~**Continuidad de operación entre Calculator y RAROC**~~ | ✅ Hecho 2026-05-20 | `RAROCCalculator` consume `usePricingState()` y se hidrata desde el deal cargado vía mapper puro `utils/raroc/dealToRarocInputs.ts`. Commit `65275ee`. Bug reportado por Carlos Martin (Banca March). |
+| ~~**Bundle: 2 chunks sobre presupuesto**~~ | ✅ Hecho 2026-05-20 | `CalculatorWorkspace` 98.8 → 77.5 KB (lazy `LineagePanel` + `DelegationAuditPanel`, commit `0d77696`). `MethodologyConfig` 99 → 5.87 KB (split en 7 tabs lazy, commit `757db41`). Bundle check ahora reporta 172/172 chunks PASS. |
+| ~~**Cmd+K affordance invisible en desktops normales**~~ | ✅ Hecho 2026-05-20 | Breakpoint `min-[1440px]` → `md:` (≥768px). Cmd+K palette ahora descubrible para el ~80% de usuarios desktop que antes no la veían. Commit `e0a0f2c`. |
+| ~~**Tabla `metrics` vacía — SLO panel sin datos**~~ | ✅ Hecho 2026-05-20 | Pipeline construido desde cero (helper canónico `server/observability/recordMetric.ts`, commit `a541bfa`). 3 emisores instrumentados: `attribution_drift_signals_total` (worker), `attribution_route_latency_ms` (route handler), `pricing_error_rate` (inverse-optimize). `/slo-summary` extendido con 2 SLIs adicionales. Commits `a541bfa` + `d773899`. Pendiente: `attribution_decision_time_ms` (requiere timestamp arithmetic sobre append-only `attribution_decisions`). |
+| ~~**Tests IRRBB shocks EBA §115**~~ | ✅ Hecho 2026-05-20 | Suite de 28 property-based assertions en `utils/__tests__/shockPresets.test.ts` cubriendo los 6 shocks EBA (parallel ±200, short ±250, steepener, flattener) + scaling invariants + interpolación. Property-based contra la closed-form de §115; cuando llegue el Excel benchmark del banco, anchorar valores en place. Commit `c38269d`. |
+| ~~**`whatIf.ts` 1531L mezcla 5 dominios**~~ | 🟡 20% hecho | Budget extraído a `server/routes/whatIfBudget.ts` + helpers compartidos en `server/routes/_whatIfShared.ts` (commit `f8956bd`). whatIf.ts ahora 1331L. Pendientes: sandboxes, elasticity, backtests, benchmarks (acoplados — sandbox-impact depende de elasticity-models — requieren sprint dedicado). |
+| ~~**`pricingEngine` sin contrato público explícito**~~ | ✅ Hecho 2026-05-20 | JSDoc estructurado al top de `utils/pricingEngine.ts` listando functions/types/constants públicos vs sub-modules internos (`utils/pricing/*` con razones: snapshot-write invariant, type contracts, lo que el regulador audita). Comentario complementario en `utils/pricing/index.ts`. Commit `77cf48f`. |
 | ~~**CSP reporting en Vercel**~~ | ✅ Hecho 2026-05-18 | `api/csp-report.ts` Vercel Serverless Function declarada explícitamente en `vercel.json` `functions`. Mirrors `server/routes/cspReport.ts` normalize logic. 4 tests. |
 | ~~**`legacy-peer-deps` audit**~~ | ✅ Hecho 2026-05-18 | `eslint-plugin-react-hooks` bumped 7.0.1 → 7.1.1 (peer eslint ahora `^10.0.0`). `.npmrc` borrado, `vercel.json installCommand` sin `--legacy-peer-deps`. Side-effect: recharts 3.7→3.8 — 6 formatters de Tooltip ajustados al nuevo `Formatter<ValueType, NameType>`. |
 | ~~**`VERCEL_FORCE_NO_BUILD_CACHE` audit**~~ | ✅ Hecho 2026-05-18 | Flag retirado. `buildCommand` ya hace `rm -rf node_modules/.vite` (la caché crítica). Esperado 30-60s/deploy más rápidos. Re-añadir sólo si reaparece el bug original. |
-| **Ampliar `noUncheckedIndexedAccess`** | iterativo (en progreso) | 4 → 23 archivos auditados (2026-05-18). Cubre TODOS los módulos puros del motor financiero (pricing helpers, attributions, governance, customer360, dealTimeline aggregator, backtesting drift). Pendientes: server/* routes (lower priority — bound viene del SQL), components/* UI. Mover flag a `tsconfig.json` global cuando prod-code esté completo. |
+| **Ampliar `noUncheckedIndexedAccess`** | iterativo (en progreso) | 4 → 23 → **30 archivos auditados** (2026-05-20: +7, incluye `additionalCharges`, `crossBonuses`, `delegationEngine`, `priceElasticity`, `raroc/dealToRarocInputs`, `reconciliation/matchEntries`, `metering/usageRecorder`). Pendientes: resto de `utils/pricing/*` (5-8 archivos), server/* routes, components/* UI. Mover flag a `tsconfig.json` global cuando prod-code esté completo. |
 
 ### 3.3 Bloqueados por input externo (no código)
 

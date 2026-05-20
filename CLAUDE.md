@@ -38,7 +38,7 @@ PWA con soporte offline. **Multi-tenant** vía RLS Postgres.
 | Backend | Express + pg.Pool sobre Postgres (Supabase para client/Edge) |
 | Edge Functions | Deno (Supabase Edge) — pricing, realize-raroc, elasticity-recalibrate |
 | Auth | JWT propio HMAC + Google SSO real (`GoogleSsoProvider`) |
-| Testing | Vitest 4 (~1.4k+ tests, **118+** archivos en `utils/__tests__/`) + Playwright 1.59 (**24** specs, incl. `smoke.spec.ts`) |
+| Testing | Vitest 4 (**~2.0k tests · 192 test files**) + Playwright 1.59 (**23 specs**, incl. `smoke.spec.ts`) |
 | Storybook | Storybook 8.6 (React Vite) |
 | IA | Google Generative AI (@google/genai) |
 | Charts | Recharts 3.7 |
@@ -55,8 +55,8 @@ npm run build            # Build producción (PWA incluido)
 npm run lint             # ESLint
 npm run typecheck        # tsc --noEmit
 npm run typecheck:edge   # Build + deno check de Edge Functions
-npm run test             # Vitest (~1.4k+ tests, 118+ archivos)
-npm run test:e2e         # Playwright (24 specs, incluye smoke.spec.ts)
+npm run test             # Vitest (~2.0k tests, 192 test files)
+npm run test:e2e         # Playwright (23 specs, incluye smoke.spec.ts)
 npm run verify           # lint + typecheck + edge + sync + data + security + test + build + bundle
 npm run verify:full      # verify + test:e2e
 npm run check:sync       # Validar seed↔schema (lee migrations)
@@ -159,10 +159,15 @@ server/                    # Express server
     tenancy.ts             # Phase 0, valida x-entity-id contra entity_users
     requireTenancy.ts      # Belt-and-suspenders guard + helpers tenancyScope / entityScopedClause
     errorHandler.ts validate.ts
-  routes/                  # 28 routers; reagrupados por ola
+  observability/           # NUEVO (2026-05-20) — pipeline de emisión a tabla `metrics`
+    recordMetric.ts        # Canonical write path (best-effort, NaN guard, error swallow)
+  routes/                  # 30 routers; reagrupados por ola
     # Core (pre-ola)
     deals.ts audit.ts config.ts marketData.ts entities.ts
     reportSchedules.ts observability.ts auth.ts gemini.ts pricing.ts
+    # NUEVO 2026-05-20 — split parcial de whatIf.ts (Bloque 5 del refactor)
+    _whatIfShared.ts       # Helpers compartidos: tenant, requireMethodologyAuthor, asString, asNumber, etc.
+    whatIfBudget.ts        # Budget targets endpoints (/api/what-if/budget)
     # Phase 0
     snapshots.ts           # replay endpoint
     # Phase 1
@@ -238,12 +243,16 @@ utils/
     dossierSigning.ts               # signDossier + verifyDossierSignature (HMAC)
   metering/                         # NUEVO — Phase 5
     usageRecorder.ts                # recorderFromPool + InMemoryRecorder
+  raroc/                            # NUEVO (2026-05-20)
+    dealToRarocInputs.ts            # Mapper Transaction + FTPResult → Partial<RAROCInputs>
+                                    # consumido por RAROCCalculator para hidratarse
+                                    # desde el deal cargado en Calculator (commit 65275ee)
   backtesting/                      # Olas 1-3 + extensión
     runner.ts
     driftDetector.ts                # NUEVO — Phase 3
     index.ts
   supabase/                         # Servicios especializados (preexistente)
-  __tests__/                        # ~85 archivos · ~1 373 tests + 17 integration opt-in
+  __tests__/                        # ~192 archivos · ~1 993 tests + 17 integration opt-in
 
 supabase/
   fix_rls_realtime.sql
@@ -396,11 +405,15 @@ docs/                               # Doc operativa (ver índice abajo)
   2. Añadir guards (`if`, `??`) donde NO sea provable.
   3. Añadir el archivo a `tsconfig.strict.json` `include`.
   4. `npm run typecheck:strict-audited` debe pasar.
-  Estado: 4 archivos auditados (utils/pricing/{nelsonSiegelSvensson,
-  interpolation}, utils/ruleMatchingEngine, utils/customer360/csvImport).
-  Próximos candidatos prioritarios: shockPresets, liquidityEngine,
-  snapshotHash, creditRiskEngine. Cuando todo prod-code esté auditado,
-  mover el flag a tsconfig.json global y borrar tsconfig.strict.json.
+  Estado (2026-05-20): **30 archivos auditados** — todos los módulos puros
+  del motor financiero (pricing helpers, attributions, governance, customer360,
+  dealTimeline aggregator, backtesting drift) + recientemente añadidos
+  (`additionalCharges`, `crossBonuses`, `delegationEngine`, `priceElasticity`,
+  `raroc/dealToRarocInputs`, `reconciliation/matchEntries`,
+  `metering/usageRecorder`). Próximos candidatos: resto de `utils/pricing/*`
+  (5-8 archivos), server/* routes, components/* UI. Cuando todo prod-code
+  esté auditado, mover el flag a tsconfig.json global y borrar
+  tsconfig.strict.json.
 
 ### React
 
@@ -490,7 +503,7 @@ Adapter Health, Escalations, Attribution matrix.
 
 ## Testing
 
-- **Unit (Vitest 4):** ~85 archivos, ~1.37k tests + 17 integration opt-in.
+- **Unit (Vitest 4):** ~192 archivos, ~2.0k tests + 17 integration opt-in.
 - **E2E (Playwright 1.59):** 23 specs.
 - **Component (Storybook 8.6):** stories en `*.stories.tsx`.
 - **Integration RLS (opt-in):** `INTEGRATION_DATABASE_URL=… npx vitest run utils/__tests__/integration`.
