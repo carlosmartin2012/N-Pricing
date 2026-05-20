@@ -145,7 +145,9 @@ export function calculateContingentLiquidityCharge(
     factorKey = 'STANDBY_LC';
   }
 
-  const drawFactor = CONTINGENT_DRAW_FACTOR[factorKey] ?? CONTINGENT_DRAW_FACTOR.DEFAULT;
+  // `DEFAULT` is provably present in the const record above, so the post-??
+  // fallback is non-null by construction. The `!` is safe and documented.
+  const drawFactor = CONTINGENT_DRAW_FACTOR[factorKey] ?? CONTINGENT_DRAW_FACTOR.DEFAULT!;
   const undrawnRatio = undrawn / drawn;
 
   // Charge = expected undrawn draw × liquidity cost, scaled per drawn unit

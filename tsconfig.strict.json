@@ -50,6 +50,13 @@
     "utils/attributions/attributionReporter.ts",
     "utils/attributions/chainBuilder.ts",
     "utils/backtesting/driftDetector.ts",
-    "utils/dealTimeline/aggregator.ts"
+    "utils/dealTimeline/aggregator.ts",
+    "utils/raroc/dealToRarocInputs.ts",
+    "utils/reconciliation/matchEntries.ts",
+    "utils/metering/usageRecorder.ts",
+    "utils/pricing/additionalCharges.ts",
+    "utils/pricing/crossBonuses.ts",
+    "utils/pricing/delegationEngine.ts",
+    "utils/pricing/priceElasticity.ts"
   ]
 }

@@ -174,7 +174,10 @@ export function fitElasticityModel(
   const intercept = meanY - slope * meanX;
 
   const elasticity = -slope; // ε = -β₁
-  const anchorRate = bins[Math.floor(bins.length / 2)].avgRate;
+  // Reaching this line requires the singular-regression guard above to have
+  // passed, which itself requires n > 0 and a finite denom — bins is
+  // therefore non-empty and the middle index is in range.
+  const anchorRate = bins[Math.floor(bins.length / 2)]!.avgRate;
   const baselineConversion = Math.exp(intercept) * Math.pow(anchorRate, slope);
   if (!Number.isFinite(elasticity) || !Number.isFinite(baselineConversion)) {
     const convRate = observations.reduce((s, o) => s + o.converted, 0) / observations.length;
