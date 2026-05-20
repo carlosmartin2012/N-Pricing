@@ -6,6 +6,7 @@ import { commercialTranslations } from '../../translations/index';
 import * as campaignsApi from '../../api/campaigns';
 import type { CampaignStatus, ChannelType, PricingCampaign } from '@npricing/domain';
 import { createLogger } from '../../utils/logger';
+import EmptyStateBanner from '../ui/EmptyStateBanner';
 
 const log = createLogger('CampaignsView');
 
@@ -259,9 +260,20 @@ const CampaignsView: React.FC = () => {
       )}
 
       {list.length === 0 && !loading ? (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
-          {t.commercialCampaignsEmpty}
-        </div>
+        <EmptyStateBanner
+          variant="no-data"
+          title={t.commercialCampaignsEmptyTitle}
+          body={t.commercialCampaignsEmpty}
+          data-testid="campaigns-empty"
+          actions={[
+            {
+              label: t.commercialCampaignNew,
+              onClick: () => setShowForm(true),
+              icon: Plus,
+              variant: 'primary',
+            },
+          ]}
+        />
       ) : (
         <div className="space-y-4">
           {(['draft', 'approved', 'active', 'exhausted', 'expired', 'cancelled'] as CampaignStatus[]).map((status) => {

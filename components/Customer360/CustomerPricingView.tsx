@@ -113,7 +113,12 @@ const CustomerPricingView: React.FC = () => {
             })}
             {filtered.length === 0 && (
               <li className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 px-3 py-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
-                No clients match.
+                {clients.length === 0
+                  // Distinguish "no clients in DB" (operator needs to run
+                  // the positions CSV import — see the header link) from
+                  // "no clients match the current search filter".
+                  ? 'No clients yet. Import positions via the CSV endpoint to seed this view.'
+                  : 'No clients match.'}
               </li>
             )}
           </ul>

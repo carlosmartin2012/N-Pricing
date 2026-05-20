@@ -9,6 +9,7 @@ export const commercialEs: CommercialTranslationKeys = {
 
   commercialCampaignsHeader: 'Campañas de pricing',
   commercialCampaignsEmpty: 'No hay campañas activas. Crea una para desplegar un delta de producto.',
+  commercialCampaignsEmptyTitle: 'Sin campañas todavía',
   commercialCampaignNew: 'Nueva campaña',
   commercialCampaignStateDraft: 'Borrador',
   commercialCampaignStateActive: 'Activa',

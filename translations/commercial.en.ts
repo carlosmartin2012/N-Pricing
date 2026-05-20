@@ -24,6 +24,7 @@ export const commercialEn: CommercialPack = {
   // Campaigns
   commercialCampaignsHeader: 'Pricing Campaigns',
   commercialCampaignsEmpty: 'No active campaigns. Create one to roll out a product-level delta.',
+  commercialCampaignsEmptyTitle: 'No campaigns yet',
   commercialCampaignNew: 'New campaign',
   commercialCampaignStateDraft: 'Draft',
   commercialCampaignStateActive: 'Active',
