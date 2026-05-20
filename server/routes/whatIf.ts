@@ -1,13 +1,24 @@
-import { Router, type Request, type Response } from 'express';
+import { Router, type Request } from 'express';
 import { randomUUID } from 'crypto';
 import { execute, query, queryOne, withTransaction, type Tx } from '../db';
 import { safeError } from '../middleware/errorHandler';
+import {
+  asJsonArray,
+  asJsonObject,
+  asNumber,
+  asString,
+  dateOnly,
+  isoDate,
+  requireMethodologyAuthor,
+  tenant,
+  userEmail,
+  userName,
+} from './_whatIfShared';
 
 const router = Router();
 
 const SANDBOX_STATUSES = new Set(['draft', 'computing', 'ready', 'published', 'archived']);
 const BACKTEST_STATUSES = new Set(['pending', 'running', 'completed', 'failed']);
-const METHODOLOGY_AUTHOR_ROLES = new Set(['Admin', 'Risk_Manager', 'Methodologist', 'admin', 'risk_manager', 'methodologist']);
 const TENOR_TO_BENCHMARK: Record<string, 'ST' | 'MT' | 'LT'> = {
   '0-1Y': 'ST',
   '1-3Y': 'MT',
@@ -68,77 +79,6 @@ interface BacktestPeriodTotals {
   simulatedPnl: number;
   actualPnl: number;
   dealCount: number;
-}
-
-function tenant(req: Request, res: Response) {
-  if (!req.tenancy) {
-    res.status(400).json({ code: 'tenancy_missing_header', message: 'x-entity-id required' });
-    return null;
-  }
-  return req.tenancy;
-}
-
-function requireMethodologyAuthor(req: Request, res: Response): boolean {
-  const role = req.tenancy?.role ?? req.user?.role ?? '';
-  if (!METHODOLOGY_AUTHOR_ROLES.has(role)) {
-    res.status(403).json({ code: 'forbidden', message: 'Admin, Risk_Manager or Methodologist role required' });
-    return false;
-  }
-  return true;
-}
-
-function asString(value: unknown, fallback = ''): string {
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
-}
-
-function asNumber(value: unknown, fallback = 0): number {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function asJsonArray(value: unknown): unknown[] {
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value) as unknown;
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
-function asJsonObject(value: unknown): Record<string, unknown> {
-  if (value && typeof value === 'object' && !Array.isArray(value)) return value as Record<string, unknown>;
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value) as unknown;
-      return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-        ? parsed as Record<string, unknown>
-        : {};
-    } catch {
-      return {};
-    }
-  }
-  return {};
-}
-
-function isoDate(value: unknown): string {
-  if (value instanceof Date) return value.toISOString();
-  return String(value ?? '');
-}
-
-function dateOnly(value: unknown): string {
-  return isoDate(value).slice(0, 10);
-}
-
-function userEmail(req: Request): string {
-  return req.tenancy?.userEmail ?? req.user?.email ?? 'system@n-pricing.local';
-}
-
-function userName(req: Request): string {
-  return req.user?.name ?? req.tenancy?.userEmail ?? 'System';
 }
 
 async function resolveSnapshotId(entityId: string, candidate: unknown): Promise<string | null> {
@@ -804,22 +744,6 @@ async function saveConfigArray(tx: Tx, key: string, value: unknown[]): Promise<v
   );
 }
 
-function budgetToDto(row: Record<string, unknown>) {
-  return {
-    id: String(row.id),
-    product: String(row.product ?? ''),
-    segment: String(row.segment ?? ''),
-    currency: String(row.currency ?? ''),
-    entityId: row.entity_id == null ? undefined : String(row.entity_id),
-    period: String(row.period ?? ''),
-    targetNii: asNumber(row.target_nii),
-    targetVolume: asNumber(row.target_volume),
-    targetRaroc: asNumber(row.target_raroc),
-    createdAt: isoDate(row.created_at),
-    updatedAt: isoDate(row.updated_at),
-  };
-}
-
 function elasticityToDto(row: Record<string, unknown>) {
   const [product = '', segment = ''] = String(row.segment_key ?? '').split('|');
   const method = String(row.method ?? '');
@@ -1403,129 +1327,5 @@ router.get('/benchmarks/compare', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Budget targets
 // ---------------------------------------------------------------------------
-
-router.get('/budget', async (req, res) => {
-  try {
-    const tenancy = tenant(req, res);
-    if (!tenancy) return;
-    const rows = await query<Record<string, unknown>>(
-      `SELECT * FROM budget_targets
-       WHERE entity_id = $1
-       ORDER BY period DESC, product, segment, currency
-       LIMIT 500`,
-      [tenancy.entityId],
-    );
-    res.json(rows.map(budgetToDto));
-  } catch (err) {
-    res.status(500).json({ error: safeError(err) });
-  }
-});
-
-router.post('/budget', async (req, res) => {
-  try {
-    const tenancy = tenant(req, res);
-    if (!tenancy) return;
-    if (!requireMethodologyAuthor(req, res)) return;
-    const body = (req.body ?? {}) as Record<string, unknown>;
-    const product = asString(body.product);
-    const segment = asString(body.segment);
-    const currency = asString(body.currency);
-    const period = asString(body.period);
-    if (!product || !segment || !currency || !period) {
-      res.status(400).json({ code: 'invalid_payload' });
-      return;
-    }
-    const row = await withTransaction(async (tx) => {
-      const updated = await tx.queryOne<Record<string, unknown>>(
-        `UPDATE budget_targets
-         SET target_nii = $1, target_volume = $2, target_raroc = $3, updated_at = now()
-         WHERE product = $4 AND segment = $5 AND currency = $6 AND entity_id = $7 AND period = $8
-         RETURNING *`,
-        [
-          asNumber(body.targetNii),
-          asNumber(body.targetVolume),
-          asNumber(body.targetRaroc),
-          product,
-          segment,
-          currency,
-          tenancy.entityId,
-          period,
-        ],
-      );
-      if (updated) return updated;
-      return tx.queryOne<Record<string, unknown>>(
-        `INSERT INTO budget_targets
-           (id, product, segment, currency, entity_id, period,
-            target_nii, target_volume, target_raroc)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         RETURNING *`,
-        [
-          asString(body.id, randomUUID()),
-          product,
-          segment,
-          currency,
-          tenancy.entityId,
-          period,
-          asNumber(body.targetNii),
-          asNumber(body.targetVolume),
-          asNumber(body.targetRaroc),
-        ],
-      );
-    });
-    res.status(201).json(row ? budgetToDto(row) : null);
-  } catch (err) {
-    res.status(500).json({ error: safeError(err) });
-  }
-});
-
-router.get('/budget/consistency', async (req, res) => {
-  try {
-    const tenancy = tenant(req, res);
-    if (!tenancy) return;
-    const snapshotId = asString(req.query.snapshot_id);
-    if (!snapshotId) {
-      res.status(400).json({ code: 'invalid_params', message: 'snapshot_id required' });
-      return;
-    }
-    const [budgets, cells] = await Promise.all([
-      query<Record<string, unknown>>(
-        `SELECT * FROM budget_targets WHERE entity_id = $1 ORDER BY product, segment, currency`,
-        [tenancy.entityId],
-      ),
-      query<Record<string, unknown>>(
-        `SELECT * FROM target_grid_cells WHERE snapshot_id = $1 AND entity_id = $2`,
-        [snapshotId, tenancy.entityId],
-      ),
-    ]);
-    const comparisons = budgets.map((budget) => {
-      const match = cells.find((cell) => (
-        String(cell.product) === String(budget.product) &&
-        String(cell.segment) === String(budget.segment) &&
-        String(cell.currency) === String(budget.currency)
-      ));
-      const budgetNii = asNumber(budget.target_nii);
-      const budgetVolume = asNumber(budget.target_volume);
-      const gridRate = match ? asNumber(match.target_client_rate) : 0;
-      const gridImpliedNii = budgetVolume * (gridRate / 100);
-      const niiGap = gridImpliedNii - budgetNii;
-      return {
-        product: String(budget.product),
-        segment: String(budget.segment),
-        currency: String(budget.currency),
-        budgetNii,
-        gridImpliedNii,
-        niiGap,
-        niiGapPct: budgetNii === 0 ? 0 : (niiGap / budgetNii) * 100,
-        budgetVolume,
-        gridImpliedVolume: budgetVolume,
-        volumeGap: 0,
-        volumeGapPct: 0,
-      };
-    });
-    res.json(comparisons);
-  } catch (err) {
-    res.status(500).json({ error: safeError(err) });
-  }
-});
 
 export default router;
