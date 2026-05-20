@@ -208,14 +208,17 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </button>
 
-        {/* R2: Search button kept ONLY as Cmd+K discovery affordance. Show
-            from min-[1440px] (previously: same breakpoint). Functionality
-            unchanged. */}
+        {/* R2: Search button kept ONLY as Cmd+K discovery affordance. Shown
+            from md: (≥768px) — covers desktops + tablets landscape. The
+            previous min-[1440px] gate hid the palette from ~80% of desktop
+            users; the palette is the only entry to Aux destinations
+            (RAROC, Stress, Attributions, Escalations, …) so making it
+            visible is the cheapest discoverability win on the surface. */}
         {onOpenCommandPalette && (
           <button
             onClick={onOpenCommandPalette}
             aria-label={t.headerSearchTitle}
-            className="hidden items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] min-[1440px]:flex"
+            className="hidden items-center gap-2 rounded-full bg-[var(--nfq-bg-elevated)] px-3 py-2 text-xs text-[color:var(--nfq-text-secondary)] shadow-[inset_0_0_0_1px_var(--nfq-border-ghost)] transition-colors hover:text-[color:var(--nfq-text-primary)] md:flex"
             title={t.headerSearchTitle}
           >
             <Search size={14} />
