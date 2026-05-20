@@ -1,3 +1,14 @@
+/**
+ * `utils/pricing/` — INTERNAL sub-modules of the pricing engine.
+ *
+ * The canonical public entry point is `utils/pricingEngine.ts`. This
+ * barrel exists only to re-export the few curve-math primitives that
+ * callers building custom scenarios (Stress Pricing UI, backtest runner)
+ * legitimately need, plus the experimental bounded-context split below.
+ *
+ * For everyday pricing use the public API in `pricingEngine.ts`.
+ */
+
 export { interpolateYieldCurve, bootstrapZeroRates } from './curveUtils';
 export type { FormulaResult } from './formulaEngine';
 export { linearInterpolate, prepareYieldCurvePoints, prepareLiquidityCurvePoints } from './interpolation';

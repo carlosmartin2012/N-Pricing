@@ -1,3 +1,60 @@
+/**
+ * N-Pricing — Pricing engine entry point.
+ *
+ * This file is the **canonical public API** for the pricing engine. All
+ * external callers (Calculator UI, RAROC workspace, Edge Functions,
+ * server routes, tests) should import from here — not from the
+ * sub-modules under `utils/pricing/`.
+ *
+ * ────────────────────────────────────────────────────────────────────────
+ *  Public API
+ * ────────────────────────────────────────────────────────────────────────
+ *
+ *  Functions
+ *    `calculatePricing(deal, approvalMatrix, ...context, shocks)`
+ *        Core FTP + RAROC + ESG + capital engine. Single deal, full result.
+ *    `batchReprice(deals, approvalMatrix, context)`
+ *        Bulk re-pricing for backtesting / what-if; cheaper per-deal than
+ *        repeated single calls because it amortises curve preparation.
+ *    `resolveEffectiveTenors(deal, behaviouralModels)`
+ *        Derives DTM / RM / BM (depth, repricing and behavioural maturity)
+ *        from a deal + the bank's behavioural model catalogue.
+ *
+ *  Types
+ *    `PricingContext` — curves, rate cards, behavioural models, configs
+ *    `PricingShocks`   — interest-rate stress inputs (per-tenor or single rate)
+ *    `PricingFeatureFlags` — opt-in toggles for staged rollouts
+ *
+ *  Constants
+ *    `DEFAULT_PRICING_SHOCKS` — neutral shock (no stress applied)
+ *
+ *  Re-exports (curve math reused by callers building their own scenarios)
+ *    `interpolateYieldCurve`, `bootstrapZeroRates`, `FormulaResult`
+ *
+ * ────────────────────────────────────────────────────────────────────────
+ *  Internal sub-modules — DO NOT import directly from outside this file
+ * ────────────────────────────────────────────────────────────────────────
+ *
+ *  `utils/pricing/curveUtils`        — yield curve math
+ *  `utils/pricing/shockPresets`      — EBA §115 scenarios
+ *  `utils/pricing/liquidityEngine`   — LP / CLC / NSFR / LCR / LR
+ *  `utils/pricing/creditRiskEngine`  — Anejo IX, IFRS 9 stages, ECL
+ *  `utils/pricing/capitalEngineCRR3` — RWA, output floor, capital charge
+ *  `utils/pricing/formulaEngine`     — final all-in formula composition
+ *  `utils/pricing/additionalCharges` — CSRBB, contingent liquidity (gaps 20-21)
+ *  `utils/pricing/contexts/*`        — bounded-context experimental split
+ *
+ *  Each sub-module is a private implementation detail of `calculatePricing`.
+ *  Importing them directly bypasses our type contracts, ordering invariants,
+ *  and the snapshot-write side effect that `calculatePricing` upholds for
+ *  regulatory reproducibility. The `@npricing/pricing-core` package facade
+ *  (`packages/pricing-core`) wraps this file for consumption from outside
+ *  `utils/`.
+ *
+ *  If you need behaviour not exposed here, add it to the public surface
+ *  consciously rather than reaching into the sub-modules — the public API
+ *  is what the regulator audits.
+ */
 import {
   Transaction,
   FTPResult,
