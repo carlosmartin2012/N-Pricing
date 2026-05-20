@@ -51,11 +51,14 @@
     "@types/web-push": "^3.6.4",
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
+    "drizzle-zod": "^0.8.3",
     "express": "^5.2.1",
     "google-auth-library": "^10.6.2",
     "idb-keyval": "^6.2.2",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.563.0",
+    "p-limit": "^6.2.0",
+    "p-retry": "^6.2.1",
     "pg": "^8.20.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -67,7 +70,9 @@
     "recharts": "^3.7.0",
     "tsx": "^4.21.0",
     "web-push": "^3.6.7",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^4.4.3",
+    "zod-validation-error": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
