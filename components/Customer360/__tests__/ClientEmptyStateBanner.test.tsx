@@ -101,6 +101,9 @@ describe('ClientEmptyStateBanner', () => {
     const { container } = render(
       <ClientEmptyStateBanner variant="no-snapshot" title="T" body="B" actions={[]} />,
     );
-    expect(container.querySelector('[data-testid="client-empty-state-no-snapshot"]')).toBeTruthy();
+    // Default testid changed when the banner was promoted from Customer360
+    // to a shared `components/ui/EmptyStateBanner`. The old `client-empty-state-*`
+    // prefix is no longer applied; the new prefix is `empty-state-*`.
+    expect(container.querySelector('[data-testid="empty-state-no-snapshot"]')).toBeTruthy();
   });
 });

@@ -33,6 +33,8 @@ export const clvEs: ClvTranslationKeys = {
   clvNbaConsume: 'Marcar consumida',
   clvNbaConfidence: 'confianza',
   clvNbaEmpty: 'No hay recomendaciones abiertas. Genera para rankear productos por ΔCLV esperado.',
+  clvNbaEmptyTitle: 'Pipeline en calma',
+  clvNbaEmptyCta: 'Explorar clientes',
 
   clvImpactTitle: 'Previsualización ΔCLV',
   clvImpactBefore: 'Antes',

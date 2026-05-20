@@ -46,6 +46,8 @@ export const clvEn: ClvPack = {
   clvNbaConsume: 'Mark consumed',
   clvNbaConfidence: 'confidence',
   clvNbaEmpty: 'No open recommendations. Generate to rank products by expected ΔCLV.',
+  clvNbaEmptyTitle: 'Pipeline is quiet',
+  clvNbaEmptyCta: 'Browse clients',
 
   // LTV impact panel
   clvImpactTitle: 'ΔCLV preview',

@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   DatabaseZap,
   FileText,
+  Plus,
   TimerReset,
   GitPullRequestArrow,
   ShieldCheck,
@@ -17,6 +18,7 @@ import {
 import { useData } from '../../contexts/DataContext';
 import { useUI } from '../../contexts/UIContext';
 import { viewToPath } from '../../appNavigation';
+import EmptyStateBanner from '../ui/EmptyStateBanner';
 import type { Transaction } from '../../types';
 
 function exposure(deals: Transaction[]): number {
@@ -121,10 +123,25 @@ const ControlRoomView: React.FC = () => {
                 </div>
               </button>
             )) : (
-              <div className="rounded-lg border border-[color:var(--nfq-success)]/15 bg-[var(--nfq-success)]/10 p-4 text-sm text-emerald-200">
-                <CheckCircle2 className="mb-2" size={18} />
-                {t.controlRoomNoActions}
-              </div>
+              <EmptyStateBanner
+                variant="no-snapshot"
+                title={t.controlRoomNoActionsTitle}
+                body={t.controlRoomNoActions}
+                data-testid="controlroom-no-actions"
+                actions={[
+                  {
+                    label: t.controlRoomOpenBlotter,
+                    onClick: () => navigate('/blotter'),
+                    variant: 'primary',
+                  },
+                  {
+                    label: t.controlRoomNoActionsCta,
+                    onClick: () => navigate('/pricing'),
+                    icon: Plus,
+                    variant: 'ghost',
+                  },
+                ]}
+              />
             )}
           </div>
         </div>

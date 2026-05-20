@@ -10,6 +10,7 @@ import { useUI } from '../../contexts/UIContext';
 import { clvTranslations } from '../../translations/index';
 import type { NbaReasonCode, PipelineNbaRow, PipelineStatusFilter } from '../../types/clv';
 import { pipelineCsvFilename, pipelineRowsToCsv } from './pipelineCsv';
+import EmptyStateBanner from '../ui/EmptyStateBanner';
 
 /**
  * /pipeline — firmwide NBA feed.
@@ -340,9 +341,20 @@ const PipelineView: React.FC = () => {
       )}
 
       {!isLoading && sorted.length === 0 && (
-        <div className="rounded-lg border border-[color:var(--nfq-border-ghost)] bg-[var(--nfq-bg-elevated)]/40 p-4 text-center text-xs text-[color:var(--nfq-text-muted)]">
-          {t.clvNbaEmpty}
-        </div>
+        <EmptyStateBanner
+          variant="no-data"
+          title={t.clvNbaEmptyTitle}
+          body={t.clvNbaEmpty}
+          data-testid="pipeline-empty"
+          actions={[
+            {
+              label: t.clvNbaEmptyCta,
+              onClick: () => navigate('/customers'),
+              icon: ArrowUpRight,
+              variant: 'primary',
+            },
+          ]}
+        />
       )}
 
       <ul className="space-y-2" data-testid="pipeline-feed">
