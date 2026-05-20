@@ -11,10 +11,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import DealInputPanel from './DealInputPanel';
 import InverseOptimizerPanel from './InverseOptimizerPanel';
-import DelegationAuditPanel from './DelegationAuditPanel';
 import CrossBonusesPicker from './CrossBonusesPicker';
 import IFRS9StagePanel from './IFRS9StagePanel';
-import LineagePanel from './LineagePanel';
 import { WaterfallExplainerCard } from '../RAROC/WaterfallExplainerCard';
 import { DealFlowRail } from './DealFlowRail';
 import { PricingDriversSummary } from './PricingDriversSummary';
@@ -27,6 +25,10 @@ const PricingInsightsWidget = React.lazy(() => import('./PricingInsightsWidget')
 const CustomerRelationshipPanel = React.lazy(() => import('../Customer360/CustomerRelationshipPanel'));
 const LtvImpactPanel = React.lazy(() => import('../Customer360/LtvImpactPanel'));
 const AttributionSimulator = React.lazy(() => import('../Attributions/AttributionSimulator'));
+// Lazy-loaded to keep the CalculatorWorkspace chunk under its bundle budget —
+// both panels render only when `currentResult` exists (post-pricing).
+const DelegationAuditPanel = React.lazy(() => import('./DelegationAuditPanel'));
+const LineagePanel = React.lazy(() => import('./LineagePanel'));
 import { ScenarioLibraryPanel } from './ScenarioLibraryPanel';
 import { DEFAULT_PRICING_SCENARIOS, type PricingScenario } from './pricingComparisonUtils';
 import LiveCursorOverlay from '../ui/LiveCursorOverlay';
@@ -439,7 +441,11 @@ export const CalculatorWorkspace: React.FC<Props> = ({
                 />
               </div>
               <div className="w-full min-w-0 lg:col-span-6">
-                {currentResult && <DelegationAuditPanel deal={dealParams} result={currentResult} />}
+                {currentResult && (
+                  <Suspense fallback={<div className="h-40 animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />}>
+                    <DelegationAuditPanel deal={dealParams} result={currentResult} />
+                  </Suspense>
+                )}
               </div>
             </div>
 
@@ -451,7 +457,11 @@ export const CalculatorWorkspace: React.FC<Props> = ({
               />
             )}
 
-            {currentResult && <LineagePanel deal={dealParams} result={currentResult} />}
+            {currentResult && (
+              <Suspense fallback={<div className="h-40 animate-pulse rounded-[var(--nfq-radius-card)] bg-[var(--nfq-bg-surface)]" />}>
+                <LineagePanel deal={dealParams} result={currentResult} />
+              </Suspense>
+            )}
 
             <div className="grid gap-4 lg:grid-cols-12">
               <div className="w-full min-w-0 lg:col-span-9">
