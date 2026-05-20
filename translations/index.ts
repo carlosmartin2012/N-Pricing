@@ -40,6 +40,10 @@ import { whatIfEn } from './whatIf.en';
 import { whatIfEs } from './whatIf.es';
 import { controlRoomEn } from './controlRoom.en';
 import { controlRoomEs } from './controlRoom.es';
+import { targetGridEn } from './targetGrid.en';
+import { targetGridEs } from './targetGrid.es';
+import { anejoCreditRiskEn } from './anejoCreditRisk.en';
+import { anejoCreditRiskEs } from './anejoCreditRisk.es';
 import type { Language } from '../translations';
 
 function byLang<T>(en: T, es: T): Record<Language, T> {
@@ -59,6 +63,8 @@ const NAVIGATION_BY_LANG   = byLang(navigationEn, navigationEs);
 const PRICING_DISCIPLINE_BY_LANG = byLang(pricingDisciplineEn, pricingDisciplineEs);
 const WHAT_IF_BY_LANG = byLang(whatIfEn, whatIfEs);
 const CONTROL_ROOM_BY_LANG = byLang(controlRoomEn, controlRoomEs);
+const TARGET_GRID_BY_LANG = byLang(targetGridEn, targetGridEs);
+const ANEJO_CREDIT_RISK_BY_LANG = byLang(anejoCreditRiskEn, anejoCreditRiskEs);
 
 export function clvTranslations(lang: Language): typeof clvEn {
   return CLV_BY_LANG[lang] ?? clvEn;
@@ -112,6 +118,14 @@ export function controlRoomTranslations(lang: Language): typeof controlRoomEn {
   return CONTROL_ROOM_BY_LANG[lang] ?? controlRoomEn;
 }
 
+export function targetGridTranslations(lang: Language): typeof targetGridEn {
+  return TARGET_GRID_BY_LANG[lang] ?? targetGridEn;
+}
+
+export function anejoCreditRiskTranslations(lang: Language): typeof anejoCreditRiskEn {
+  return ANEJO_CREDIT_RISK_BY_LANG[lang] ?? anejoCreditRiskEn;
+}
+
 export {
   clvEn, clvEs,
   commercialEn, commercialEs,
@@ -126,6 +140,8 @@ export {
   pricingDisciplineEn, pricingDisciplineEs,
   whatIfEn, whatIfEs,
   controlRoomEn, controlRoomEs,
+  targetGridEn, targetGridEs,
+  anejoCreditRiskEn, anejoCreditRiskEs,
 };
 export type { ClvTranslationKeys } from './clv.en';
 export type { CommercialTranslationKeys } from './commercial.en';
@@ -140,3 +156,5 @@ export type { NavigationTranslationKeys } from './navigation.en';
 export type { PricingDisciplineTranslationKeys } from './pricingDiscipline.en';
 export type { WhatIfTranslationKeys } from './whatIf.en';
 export type { ControlRoomTranslationKeys } from './controlRoom.en';
+export type { TargetGridTranslationKeys } from './targetGrid.en';
+export type { AnejoCreditRiskTranslationKeys } from './anejoCreditRisk.en';

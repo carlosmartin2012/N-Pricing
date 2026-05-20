@@ -10,6 +10,12 @@ import type { WhatIfTranslationKeys } from './translations/whatIf.en';
 import { controlRoomEn } from './translations/controlRoom.en';
 import { controlRoomEs } from './translations/controlRoom.es';
 import type { ControlRoomTranslationKeys } from './translations/controlRoom.en';
+import { targetGridEn } from './translations/targetGrid.en';
+import { targetGridEs } from './translations/targetGrid.es';
+import type { TargetGridTranslationKeys } from './translations/targetGrid.en';
+import { anejoCreditRiskEn } from './translations/anejoCreditRisk.en';
+import { anejoCreditRiskEs } from './translations/anejoCreditRisk.es';
+import type { AnejoCreditRiskTranslationKeys } from './translations/anejoCreditRisk.en';
 
 export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
 
@@ -19,6 +25,8 @@ export type {
   PricingDisciplineTranslationKeys,
   WhatIfTranslationKeys,
   ControlRoomTranslationKeys,
+  TargetGridTranslationKeys,
+  AnejoCreditRiskTranslationKeys,
 };
 
 export const translations = {
@@ -726,60 +734,11 @@ export const translations = {
         glossary_cpr: 'CPR (Constant Prepayment Rate): Annual rate at which borrowers prepay loans early. Affects WAL and option cost.',
         glossary_esg: 'ESG: Environmental, Social, and Governance factors. Transition risk = carbon exposure; Physical risk = climate hazards; Greenium = discount for green-format instruments; DNSH = Do No Significant Harm capital discount; ISF = Infrastructure Supporting Factor (Art. 501a CRR2).',
 
-        // ── Anejo IX Credit Risk ────────────────────────────────────
-        tooltip_formula_anejoCreditCost: 'Expected Loss per Anejo IX (Circular 6/2021). Stage 1 coverage % applied to net exposure after guarantee haircuts.',
-        anejo_creditProvision: 'Credit Provision (Anejo IX)',
-        anejo_segment: 'Segment',
-        creditRiskDetail: 'Credit Risk Detail (Anejo IX)',
-        creditMode: 'Mode',
-        creditModeNative: 'Native (BdE Soluciones Alt.)',
-        creditModeMirror: 'Mirror (External IFRS 9)',
-        creditCoverage: 'Coverage (Stage 1)',
-        creditScenarioWeighted: 'Scenario-Weighted',
-        creditDay1Provision: 'Day 1 Provision',
-        creditMigrationCost: 'Migration Cost / yr',
-        creditProbS2: 'P(→ Stage 2)',
-        creditProbS3: 'P(S2 → Stage 3)',
-        creditELLifetime: 'EL Lifetime',
-        creditCapitalParams: 'Capital Params',
-        modelBacktest: 'Model Backtest',
-        backtestDeals: 'Deals Tested',
-        observedDefaultRate: 'Observed Default Rate',
-        predictedDefaultRate: 'Predicted Default Rate',
-        elAccuracyRatio: 'EL Accuracy Ratio',
-        backtestBySegment: 'Accuracy by Segment',
-        backtestNote: 'Backtest uses simulated losses for demonstration. Connect to loss history API for production back-testing.',
+        // Anejo IX Credit Risk keys live in translations/anejoCreditRisk.{en,es}.ts
+        // (extracted 2026-05-20).
 
-        // ── Target Grid (Ola 1) ────────────────────────────────────
-        targetGrid: 'Target Grid',
-        targetGridDesc: 'Official rate card derived from the current pricing methodology',
-        methodologySnapshots: 'Methodology Snapshots',
-        currentSnapshot: 'Current',
-        snapshotVersion: 'Version',
-        approvedAt: 'Approved At',
-        approvedBy: 'Approved By',
-        gridCells: 'Grid Cells',
-        canonicalTemplates: 'Canonical Templates',
-        editTemplate: 'Edit Template',
-        addTemplate: 'Add Template',
-        deleteTemplate: 'Delete Template',
-        compareSnapshots: 'Compare Snapshots',
-        snapshotDiff: 'Snapshot Diff',
-        significantChanges: 'Significant Changes',
-        noChanges: 'No Changes',
-        ftpTarget: 'FTP Target',
-        gridTargetMargin: 'Target Margin',
-        gridTargetClientRate: 'Target Client Rate',
-        gridTargetRaroc: 'Target RAROC',
-        heatmapView: 'Heatmap View',
-        tableView: 'Table View',
-        exportGrid: 'Export Grid',
-        exportAsPdf: 'Export as PDF',
-        exportAsXlsx: 'Export as XLSX',
-        cellDetail: 'Cell Detail',
-        canonicalDealInputs: 'Canonical Deal Inputs',
-        componentBreakdown: 'Component Breakdown',
-        tenorBucket: 'Tenor Bucket',
+        // Target Grid (Ola 1) keys live in translations/targetGrid.{en,es}.ts
+        // (extracted 2026-05-20).
 
         // Pricing Discipline (Ola 2) keys live in
         // translations/pricingDiscipline.{en,es}.ts now (extracted 2026-05-20).
@@ -1492,60 +1451,11 @@ export const translations = {
         glossary_cpr: 'CPR (Constant Prepayment Rate): Tasa anual a la que los prestatarios prepagan préstamos anticipadamente. Afecta WAL y coste de opción.',
         glossary_esg: 'ESG: Factores Ambientales, Sociales y de Gobernanza. Riesgo de transición = exposición al carbono; Riesgo físico = peligros climáticos; Greenium = descuento para instrumentos green; DNSH = descuento de capital Do No Significant Harm; ISF = Infrastructure Supporting Factor (Art. 501a CRR2).',
 
-        // ── Anejo IX Riesgo de Crédito ──────────────────────────────
-        tooltip_formula_anejoCreditCost: 'Pérdida Esperada según Anejo IX (Circular 6/2021). Cobertura Stage 1 % aplicada sobre exposición neta tras recortes de garantía.',
-        anejo_creditProvision: 'Provisión Crédito (Anejo IX)',
-        anejo_segment: 'Segmento',
-        creditRiskDetail: 'Detalle Riesgo de Crédito (Anejo IX)',
-        creditMode: 'Modo',
-        creditModeNative: 'Nativo (Soluciones Alt. BdE)',
-        creditModeMirror: 'Espejo (IFRS 9 Externo)',
-        creditCoverage: 'Cobertura (Stage 1)',
-        creditScenarioWeighted: 'Ponderada por Escenarios',
-        creditDay1Provision: 'Provisión Día 1',
-        creditMigrationCost: 'Coste Migración / año',
-        creditProbS2: 'P(→ Stage 2)',
-        creditProbS3: 'P(S2 → Stage 3)',
-        creditELLifetime: 'PE Vida',
-        creditCapitalParams: 'Params Capital',
-        modelBacktest: 'Backtest del Modelo',
-        backtestDeals: 'Operaciones Testadas',
-        observedDefaultRate: 'Tasa Mora Observada',
-        predictedDefaultRate: 'Tasa Mora Predicha',
-        elAccuracyRatio: 'Ratio Precisión PE',
-        backtestBySegment: 'Precisión por Segmento',
-        backtestNote: 'Backtest usa pérdidas simuladas para demostración. Conectar con API de historial de pérdidas para producción.',
+        // Anejo IX Riesgo de Crédito keys live in
+        // translations/anejoCreditRisk.{en,es}.ts (extracted 2026-05-20).
 
-        // ── Target Grid (Ola 1) ────────────────────────────────────
-        targetGrid: 'Matriz Objetivo',
-        targetGridDesc: 'Rate card oficial derivada de la metodología de pricing actual',
-        methodologySnapshots: 'Snapshots Metodológicos',
-        currentSnapshot: 'Actual',
-        snapshotVersion: 'Versión',
-        approvedAt: 'Aprobado el',
-        approvedBy: 'Aprobado por',
-        gridCells: 'Celdas de la Matriz',
-        canonicalTemplates: 'Plantillas Canónicas',
-        editTemplate: 'Editar Plantilla',
-        addTemplate: 'Añadir Plantilla',
-        deleteTemplate: 'Eliminar Plantilla',
-        compareSnapshots: 'Comparar Snapshots',
-        snapshotDiff: 'Diff de Snapshots',
-        significantChanges: 'Cambios Significativos',
-        noChanges: 'Sin Cambios',
-        ftpTarget: 'FTP Objetivo',
-        gridTargetMargin: 'Margen Objetivo',
-        gridTargetClientRate: 'Tasa Cliente Objetivo',
-        gridTargetRaroc: 'RAROC Objetivo',
-        heatmapView: 'Vista Heatmap',
-        tableView: 'Vista Tabla',
-        exportGrid: 'Exportar Matriz',
-        exportAsPdf: 'Exportar como PDF',
-        exportAsXlsx: 'Exportar como XLSX',
-        cellDetail: 'Detalle Celda',
-        canonicalDealInputs: 'Inputs del Deal Canónico',
-        componentBreakdown: 'Desglose de Componentes',
-        tenorBucket: 'Bucket de Tenor',
+        // Target Grid (Ola 1) keys live in translations/targetGrid.{en,es}.ts
+        // (extracted 2026-05-20).
 
         // Pricing Discipline (Ola 2) keys live in
         // translations/pricingDiscipline.{en,es}.ts now (extracted 2026-05-20).
@@ -1562,7 +1472,9 @@ export type TranslationKeys = (typeof translations)['en']
   & NavigationTranslationKeys
   & PricingDisciplineTranslationKeys
   & WhatIfTranslationKeys
-  & ControlRoomTranslationKeys;
+  & ControlRoomTranslationKeys
+  & TargetGridTranslationKeys
+  & AnejoCreditRiskTranslationKeys;
 
 /** Partial translations for additional languages */
 const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
@@ -1614,8 +1526,18 @@ export function getTranslations(lang: Language): TranslationKeys {
     lang === 'es' ? pricingDisciplineEs : pricingDisciplineEn;
   const whatIf: WhatIfTranslationKeys = lang === 'es' ? whatIfEs : whatIfEn;
   const controlRoom: ControlRoomTranslationKeys = lang === 'es' ? controlRoomEs : controlRoomEn;
+  const targetGrid: TargetGridTranslationKeys = lang === 'es' ? targetGridEs : targetGridEn;
+  const anejo: AnejoCreditRiskTranslationKeys = lang === 'es' ? anejoCreditRiskEs : anejoCreditRiskEn;
   if (lang === 'en' || lang === 'es') {
-    return { ...translations[lang], ...navigation, ...discipline, ...whatIf, ...controlRoom };
+    return {
+      ...translations[lang],
+      ...navigation,
+      ...discipline,
+      ...whatIf,
+      ...controlRoom,
+      ...targetGrid,
+      ...anejo,
+    };
   }
   const partial = partialTranslations[lang] || {};
   return {
@@ -1624,6 +1546,8 @@ export function getTranslations(lang: Language): TranslationKeys {
     ...discipline,
     ...whatIf,
     ...controlRoom,
+    ...targetGrid,
+    ...anejo,
     ...partial,
   } as TranslationKeys;
 }
