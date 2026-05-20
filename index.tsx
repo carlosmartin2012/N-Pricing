@@ -16,6 +16,7 @@ import { WalkthroughProvider } from './contexts/WalkthroughContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ProviderErrorBoundary } from './components/ProviderErrorBoundary';
 import { errorTracker } from './utils/errorTracking';
+import { tryReloadForChunkError } from './utils/chunkReload';
 
 // ---------------------------------------------------------------------------
 // React Query client — shared cache for all data fetching
@@ -40,6 +41,7 @@ class RootErrorBoundary extends React.Component<
     return { error };
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    if (tryReloadForChunkError(error)) return;
     errorTracker.captureException(error, {
       module: 'RootErrorBoundary',
       extra: { componentStack: info.componentStack },
@@ -77,11 +79,13 @@ errorTracker.init({
 
 window.onerror = (_message, _source, _lineno, _colno, error) => {
   if (error) {
+    if (tryReloadForChunkError(error)) return;
     errorTracker.captureException(error, { module: 'window.onerror' });
   }
 };
 
 window.onunhandledrejection = (event: PromiseRejectionEvent) => {
+  if (tryReloadForChunkError(event.reason)) return;
   const error = event.reason instanceof Error
     ? event.reason
     : new Error(String(event.reason));

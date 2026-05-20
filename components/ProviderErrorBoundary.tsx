@@ -1,5 +1,6 @@
 import React from 'react';
 import { errorTracker } from '../utils/errorTracking';
+import { tryReloadForChunkError } from '../utils/chunkReload';
 
 interface Props {
   /** Layer name surfaced en telemetría (`ProviderErrorBoundary:<name>`) y en la UI fallback. */
@@ -32,6 +33,7 @@ export class ProviderErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    if (tryReloadForChunkError(error)) return;
     errorTracker.captureException(error, {
       module: `ProviderErrorBoundary:${this.props.name}`,
       extra: { componentStack: info.componentStack },

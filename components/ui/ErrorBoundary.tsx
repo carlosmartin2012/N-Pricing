@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { errorTracker } from '../../utils/errorTracking';
+import { tryReloadForChunkError } from '../../utils/chunkReload';
 
 interface Props {
   children: ReactNode;
@@ -23,6 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    if (tryReloadForChunkError(error)) return;
     errorTracker.captureException(error, {
       module: 'ErrorBoundary',
       extra: { componentStack: info.componentStack },
