@@ -19,6 +19,7 @@
 
 import { query } from '../db';
 import { createLogger } from '../logger';
+import { recordMetric } from '../observability/recordMetric';
 
 const logger = createLogger('attribution-drift');
 import { runWorkerTick } from './workerHealth';
@@ -147,8 +148,10 @@ export async function runAttributionDriftSweep(
         report.signalsByEntity[entityId] = signals;
         report.signalsTotal += signals.length;
         for (const s of signals) {
-          // Log estructurado — alertEvaluator puede recoger via métrica
-          // attribution_drift_signals_total.
+          // Log estructurado para tracing humano + métrica para que el
+          // alertEvaluator / SLO Panel la consuman como
+          // `attribution_drift_signals_total` (catalogada en
+          // types/phase0.ts:PRICING_SLOS).
           logger.warn('signal', {
             entityId,
             userId:    s.userId,
@@ -157,6 +160,16 @@ export async function runAttributionDriftSweep(
             meanBps:   s.meanDeviationBps,
             atLimit:   s.pctAtLimit,
             reasons:   s.reasons,
+          });
+          await recordMetric({
+            entityId,
+            metricName: 'attribution_drift_signals_total',
+            value: s.count,
+            dimensions: {
+              userId: s.userId,
+              severity: s.severity,
+              meanBps: s.meanDeviationBps,
+            },
           });
         }
       }
