@@ -44,6 +44,8 @@ import { targetGridEn } from './targetGrid.en';
 import { targetGridEs } from './targetGrid.es';
 import { anejoCreditRiskEn } from './anejoCreditRisk.en';
 import { anejoCreditRiskEs } from './anejoCreditRisk.es';
+import { walkthroughEn } from './walkthrough.en';
+import { walkthroughEs } from './walkthrough.es';
 import type { Language } from '../translations';
 
 function byLang<T>(en: T, es: T): Record<Language, T> {
@@ -65,6 +67,7 @@ const WHAT_IF_BY_LANG = byLang(whatIfEn, whatIfEs);
 const CONTROL_ROOM_BY_LANG = byLang(controlRoomEn, controlRoomEs);
 const TARGET_GRID_BY_LANG = byLang(targetGridEn, targetGridEs);
 const ANEJO_CREDIT_RISK_BY_LANG = byLang(anejoCreditRiskEn, anejoCreditRiskEs);
+const WALKTHROUGH_BY_LANG = byLang(walkthroughEn, walkthroughEs);
 
 export function clvTranslations(lang: Language): typeof clvEn {
   return CLV_BY_LANG[lang] ?? clvEn;
@@ -126,6 +129,10 @@ export function anejoCreditRiskTranslations(lang: Language): typeof anejoCreditR
   return ANEJO_CREDIT_RISK_BY_LANG[lang] ?? anejoCreditRiskEn;
 }
 
+export function walkthroughTranslations(lang: Language): typeof walkthroughEn {
+  return WALKTHROUGH_BY_LANG[lang] ?? walkthroughEn;
+}
+
 export {
   clvEn, clvEs,
   commercialEn, commercialEs,
@@ -142,6 +149,7 @@ export {
   controlRoomEn, controlRoomEs,
   targetGridEn, targetGridEs,
   anejoCreditRiskEn, anejoCreditRiskEs,
+  walkthroughEn, walkthroughEs,
 };
 export type { ClvTranslationKeys } from './clv.en';
 export type { CommercialTranslationKeys } from './commercial.en';
@@ -158,3 +166,4 @@ export type { WhatIfTranslationKeys } from './whatIf.en';
 export type { ControlRoomTranslationKeys } from './controlRoom.en';
 export type { TargetGridTranslationKeys } from './targetGrid.en';
 export type { AnejoCreditRiskTranslationKeys } from './anejoCreditRisk.en';
+export type { WalkthroughTranslationKeys } from './walkthrough.en';

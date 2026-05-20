@@ -16,6 +16,9 @@ import type { TargetGridTranslationKeys } from './translations/targetGrid.en';
 import { anejoCreditRiskEn } from './translations/anejoCreditRisk.en';
 import { anejoCreditRiskEs } from './translations/anejoCreditRisk.es';
 import type { AnejoCreditRiskTranslationKeys } from './translations/anejoCreditRisk.en';
+import { walkthroughEn } from './translations/walkthrough.en';
+import { walkthroughEs } from './translations/walkthrough.es';
+import type { WalkthroughTranslationKeys } from './translations/walkthrough.en';
 
 export type Language = 'en' | 'es' | 'pt' | 'fr' | 'de';
 
@@ -27,6 +30,7 @@ export type {
   ControlRoomTranslationKeys,
   TargetGridTranslationKeys,
   AnejoCreditRiskTranslationKeys,
+  WalkthroughTranslationKeys,
 };
 
 export const translations = {
@@ -633,88 +637,8 @@ export const translations = {
         tooltip_behav_cpr: 'Constant Prepayment Rate (annual %). Affects WAL and option cost. Typical: 5-15% for mortgages.',
         tooltip_behav_penaltyFree: 'Percentage of balance that can prepay without penalty. Affects option cost calculation.',
 
-        // ── Walkthrough ─────────────────────────────────────────────
-        walkthrough_startTour: 'Start Guided Tour',
-        walkthrough_next: 'Next',
-        walkthrough_prev: 'Back',
-        walkthrough_skip: 'Skip tour',
-        walkthrough_finish: 'Finish',
-        walkthrough_stepOf: 'of',
-        walkthrough_sidebar: 'Navigation',
-        walkthrough_sidebarDesc: 'N-Pricing is organized into modules: Pricing, Portfolio, Analytics, Market Data, and Configuration. Use the sidebar to switch views.',
-        walkthrough_dealInput: 'Deal Input',
-        walkthrough_dealInputDesc: 'Start by configuring your deal: select a client, product, set the principal amount and tenor.',
-        walkthrough_levers: 'Pricing Levers',
-        walkthrough_leversDesc: 'Adjust amount, tenor, and target margin using sliders. Quick-adjust buttons apply common increments.',
-        walkthrough_dealConfig: 'Deal Configuration',
-        walkthrough_dealConfigDesc: 'Expand to configure risk weights, LCR outflows, ESG parameters, and behavioural models that affect pricing.',
-        walkthrough_methodology: 'Methodology Match',
-        walkthrough_methodologyDesc: 'This panel shows which pricing rules matched your deal in real-time, including the base method and spread logic.',
-        walkthrough_receipt: 'Pricing Receipt',
-        walkthrough_receiptDesc: 'The waterfall breaks down every cost component: base rate, liquidity, capital, ESG, and more. Click the ℹ icon on each line to see its formula.',
-        walkthrough_raroc: 'RAROC Scorecard',
-        walkthrough_rarocDesc: 'Risk-adjusted return metric. Green = auto-approval, amber = manager review, red = committee escalation.',
-        walkthrough_saveDeal: 'Save to Blotter',
-        walkthrough_saveDealDesc: 'Save your priced deal to the blotter for tracking, governance approval, and portfolio analytics.',
-        walkthrough_curves: 'Yield Curves',
-        walkthrough_curvesDesc: 'Market data drives the base rate. Manage yield curves, liquidity curves, and apply parallel shocks here.',
-        walkthrough_config: 'Rules & Config',
-        walkthrough_configDesc: 'Administrators configure pricing rules, rate cards, ESG grids, approval thresholds, and master data here.',
-        walkthrough_replay: 'Replay Tour',
-
-        // ── Role-specific tour steps (Trader / Risk / Auditor / Admin) ──
-        walkthrough_blotter: 'Deal Blotter',
-        walkthrough_blotterDesc: 'Every priced deal lands here. Filter by status, drill into the lineage, or export the working set as CSV.',
-        walkthrough_governance: 'Methodology & Governance',
-        walkthrough_governanceDesc: 'Pricing rules, rate cards, approval thresholds and model inventory live under Methodology. Changes here are versioned and signed.',
-        walkthrough_shocks: 'Stress Testing',
-        walkthrough_shocksDesc: 'Apply EBA parallel and steepener shocks to the portfolio, inspect the 7×7 stress pricing grid and export the resulting diff.',
-        walkthrough_auditLog: 'Audit Log',
-        walkthrough_auditLogDesc: 'Every write operation produces an immutable audit entry — auth, pricing, governance, integrations. Filter by user, scope or time.',
-        walkthrough_reporting: 'Attribution Reporting',
-        walkthrough_reportingDesc: 'Drill into approvals by figure, zone, product and segment. Charts and tables export to CSV/PDF for the committee.',
-        walkthrough_blotterReadonly: 'Deal Blotter (read-only)',
-        walkthrough_blotterReadonlyDesc: 'You can inspect any deal but Auditor role cannot modify pricing. Use this view for replay sessions and walk-throughs with the committee.',
-        // Admin tour
-        walkthrough_admin_userMgmt: 'User Management',
-        walkthrough_admin_userMgmtDesc: 'Invite teammates, assign roles (Admin / Trader / Risk / Auditor) and revoke access. Each change is audited.',
-        walkthrough_admin_modelInventory: 'Model Inventory',
-        walkthrough_admin_modelInventoryDesc: 'SR 11-7 / EBA-compliant catalogue: every pricing or risk model has an owner, status and validation document.',
-        walkthrough_admin_tenancy: 'Tenancy & Entities',
-        walkthrough_admin_tenancyDesc: 'Provision new banking entities, manage feature flags per tenant and watch the strict-flip readiness widget in the SLO panel.',
-        walkthrough_admin_health: 'System Health',
-        walkthrough_admin_healthDesc: 'p50/p95/p99 of the pricing engine, alert evaluator status, adapter health for CRM / market data / core banking and the recent CSP violations widget.',
-
-        // ── Business-flow tour (post-login welcome) ─────────────────
-        walkthrough_bf_welcomeEyebrow: 'Welcome to N-Pricing',
-        walkthrough_bf_welcome: 'Pricing de banca, organizado por ciclo de vida.',
-        walkthrough_bf_welcomeDesc: 'Un mismo motor para pricing cliente, canales en tiempo real y transfer pricing interno. Multi-tenant, snapshot-first, gobernado con MRM. Te guío por los 4 buckets del sidebar en menos de un minuto — y te enseño el ⌘K que usarás cada día.',
-        walkthrough_bf_stage1: 'Stage 1 of 4 · Commercial',
-        walkthrough_bf_commercial: 'Customers, Campaigns and Targets',
-        walkthrough_bf_commercialDesc: 'El pre-deal. Customer 360 agrega posiciones reales y métricas del cliente, deriva cross-bonus de esas posiciones y aplica targets top-down. Las campañas son deltas versionadas por segmento × producto × canal.',
-        walkthrough_bf_clvTabs: 'Customer Lifetime Value — Snapshot · LTV · Timeline · NBA',
-        walkthrough_bf_clvTabsDesc: 'Cada cliente tiene 4 pestañas. Snapshot es la foto actual. LTV projection estima el CLV a 10 años con banda p5/p95 reproducible (assumptions hash). Timeline muestra los eventos reales de la relación. Next-Best-Action rankea 2-3 productos por ΔCLV esperado con reason codes auditables. El botón "Initialize CLV" arranca todo en un click si el cliente está sin computar.',
-        walkthrough_bf_pipeline: 'Pipeline — NBA feed firmwide',
-        walkthrough_bf_pipelineDesc: 'Tu landing matutina como RM. Un único endpoint cross-cliente devuelve cada NBA abierto con su cliente, ΔCLV esperado y confianza. KPIs arriba (recomendaciones · clientes cubiertos · ΔCLV total · confianza media), filtros por producto + banda de confianza, y bulk consume si quieres cerrar varios a la vez. Export CSV y auto-refresh opcional.',
-        walkthrough_bf_stage2: 'Stage 2 of 4 · Pricing',
-        walkthrough_bf_pricing: 'Pricing Engine — motor + blotter + accounting',
-        walkthrough_bf_pricingDesc: 'Un único workspace con 4 tabs compartiendo contexto del deal: Deal (motor 19-componentes), RAROC, Stress EBA y What-If. El Blotter y Accounting Ledger viven en el mismo bucket: lo que priceas aquí aterriza allí automáticamente.',
-        walkthrough_bf_ltvPreview: 'ΔCLV preview — pricing por relación en vivo',
-        walkthrough_bf_ltvPreviewDesc: 'Con un cliente seleccionado en el Calculator, el panel ΔCLV muestra en tiempo real cómo cambia el CLV del cliente al mover el rate. Descompone el delta en NII directo + crosssell + reducción de churn + coste de oportunidad de capital. Permite decir literalmente en una negociación: "bajo 15 bp y el CLV del cliente sube 2.3M€". Este es el diferencial comercial — pricing por relación, no por deal.',
-        walkthrough_bf_stage3: 'Stage 3 of 4 · Insights',
-        walkthrough_bf_insights: 'Analytics, Yield Curves y Behavioural',
-        walkthrough_bf_insightsDesc: 'Entender la cartera. Analytics agrupa ~15 dashboards (Executive, Client Profitability, Discipline, Backtest, Ex-Post RAROC…). Yield Curves alimentan el motor en tiempo real. Behavioural Models calibra NMDs y prepagos.',
-        walkthrough_bf_stage4: 'Stage 4 of 4 · Governance',
-        walkthrough_bf_governance: 'MRM, reproducibilidad y aprobaciones',
-        walkthrough_bf_governanceDesc: 'Model Inventory (SR 11-7 / EBA), Dossiers firmados HMAC, cola de Escalations L1→L2→Committee, y Methodology como source of truth. Cada cálculo del motor escribe un snapshot inmutable — reproducible desde /snapshots vía ⌘K.',
-        walkthrough_bf_powerUser: 'Power-user features',
-        walkthrough_bf_command: 'Command Palette (⌘K)',
-        walkthrough_bf_commandDesc: 'Atajo universal para saltar a cualquier vista, abrir cualquier cliente en drawer, o lanzar acciones (New Deal, Import Data, toggle theme). Pulsa ⌘K (Mac) o Ctrl+K en cualquier momento — o click en el "Search…" del header. 7 destinos extra (RAROC, Stress, What-If, Discipline, SLO, Adapters, Snapshot Replay) viven aquí y no en el sidebar para no sobre-extenderlo.',
-        walkthrough_bf_drawer: 'Customer 360 Drawer',
-        walkthrough_bf_drawerDesc: 'Customer 360 también es contexto global: desde ⌘K busca cualquier cliente y se abre en drawer sobre la vista actual sin perder tu deal en curso. ESC lo cierra. "Full page" salta a /customers con el cliente pre-seleccionado si necesitas importar positions.',
-        walkthrough_bf_finishEyebrow: 'Ready to price',
-        walkthrough_bf_finish: 'Todo listo.',
-        walkthrough_bf_finishDesc: 'Puedes re-lanzar este tour desde el botón Help del header. Arranca priceando un deal y el flujo completo sale solo. ⌘K es tu mejor amigo.',
+        // Walkthrough keys live in translations/walkthrough.{en,es}.ts now
+        // (extracted 2026-05-20).
 
         // ── User Manual extras ──────────────────────────────────────
         manual_formulasTitle: 'Pricing Formulas',
@@ -1350,88 +1274,8 @@ export const translations = {
         tooltip_behav_cpr: 'Tasa de Prepago Constante (anual %). Afecta WAL y coste de opción. Típico: 5-15% para hipotecas.',
         tooltip_behav_penaltyFree: 'Porcentaje del saldo que puede prepagar sin penalización. Afecta al cálculo del coste de opción.',
 
-        // ── Walkthrough ─────────────────────────────────────────────
-        walkthrough_startTour: 'Iniciar Tour Guiado',
-        walkthrough_next: 'Siguiente',
-        walkthrough_prev: 'Anterior',
-        walkthrough_skip: 'Saltar tour',
-        walkthrough_finish: 'Finalizar',
-        walkthrough_stepOf: 'de',
-        walkthrough_sidebar: 'Navegación',
-        walkthrough_sidebarDesc: 'N-Pricing se organiza en módulos: Pricing, Cartera, Analítica, Datos de Mercado y Configuración. Usa el menú lateral para cambiar de vista.',
-        walkthrough_dealInput: 'Datos de la Operación',
-        walkthrough_dealInputDesc: 'Comienza configurando tu operación: selecciona cliente, producto, establece el importe y plazo.',
-        walkthrough_levers: 'Palancas de Pricing',
-        walkthrough_leversDesc: 'Ajusta importe, plazo y margen objetivo con deslizadores. Los botones de ajuste rápido aplican incrementos habituales.',
-        walkthrough_dealConfig: 'Configuración de la Operación',
-        walkthrough_dealConfigDesc: 'Expande para configurar ponderaciones de riesgo, salidas LCR, parámetros ESG y modelos conductuales que afectan al pricing.',
-        walkthrough_methodology: 'Match de Metodología',
-        walkthrough_methodologyDesc: 'Este panel muestra qué reglas de pricing coinciden con tu operación en tiempo real, incluyendo método base y lógica de spread.',
-        walkthrough_receipt: 'Recibo de Pricing',
-        walkthrough_receiptDesc: 'El waterfall desglosa cada componente de coste: tipo base, liquidez, capital, ESG y más. Pulsa el icono ℹ en cada línea para ver su fórmula.',
-        walkthrough_raroc: 'Scorecard RAROC',
-        walkthrough_rarocDesc: 'Métrica de rentabilidad ajustada al riesgo. Verde = aprobación automática, ámbar = revisión, rojo = escalado a comité.',
-        walkthrough_saveDeal: 'Guardar en Blotter',
-        walkthrough_saveDealDesc: 'Guarda tu operación valorada en el blotter para seguimiento, aprobación de governance y analítica de cartera.',
-        walkthrough_curves: 'Curvas de Tipos',
-        walkthrough_curvesDesc: 'Los datos de mercado determinan el tipo base. Gestiona curvas de tipos, curvas de liquidez y aplica shocks paralelos aquí.',
-        walkthrough_config: 'Reglas y Configuración',
-        walkthrough_configDesc: 'Los administradores configuran reglas de pricing, rate cards, tablas ESG, umbrales de aprobación y datos maestros aquí.',
-        walkthrough_replay: 'Repetir tour',
-
-        // ── Tours específicos por rol (Trader / Risk / Auditor / Admin) ──
-        walkthrough_blotter: 'Blotter de operaciones',
-        walkthrough_blotterDesc: 'Todas las operaciones valoradas llegan aquí. Filtra por estado, abre el linaje o exporta el conjunto activo como CSV.',
-        walkthrough_governance: 'Metodología y gobernanza',
-        walkthrough_governanceDesc: 'Las reglas de pricing, rate cards, umbrales de aprobación y el inventario de modelos viven en Metodología. Los cambios se versionan y se firman.',
-        walkthrough_shocks: 'Pruebas de estrés',
-        walkthrough_shocksDesc: 'Aplica shocks paralelos y steepener (EBA) a la cartera, revisa la matriz 7×7 de stress pricing y exporta el diff resultante.',
-        walkthrough_auditLog: 'Registro de auditoría',
-        walkthrough_auditLogDesc: 'Cada operación de escritura produce un audit entry inmutable — auth, pricing, governance, integraciones. Filtra por usuario, scope o tiempo.',
-        walkthrough_reporting: 'Reporting de atribuciones',
-        walkthrough_reportingDesc: 'Drill-down de aprobaciones por figura, zona, producto y segmento. Gráficos y tablas se exportan a CSV/PDF para el comité.',
-        walkthrough_blotterReadonly: 'Blotter (solo lectura)',
-        walkthrough_blotterReadonlyDesc: 'Puedes inspeccionar cualquier operación, pero el rol Auditor no puede modificar pricing. Úsalo para sesiones de replay y walk-throughs con el comité.',
-        // Tour de administrador
-        walkthrough_admin_userMgmt: 'Gestión de usuarios',
-        walkthrough_admin_userMgmtDesc: 'Invita compañeros, asigna roles (Admin / Trader / Risk / Auditor) y revoca accesos. Cada cambio queda auditado.',
-        walkthrough_admin_modelInventory: 'Inventario de modelos',
-        walkthrough_admin_modelInventoryDesc: 'Catálogo SR 11-7 / EBA: cada modelo de pricing o riesgo tiene un owner, estado y documento de validación.',
-        walkthrough_admin_tenancy: 'Tenancy y entidades',
-        walkthrough_admin_tenancyDesc: 'Provisiona nuevas entidades bancarias, gestiona feature flags por tenant y monitoriza el widget de readiness del strict-flip en el panel SLO.',
-        walkthrough_admin_health: 'Salud del sistema',
-        walkthrough_admin_healthDesc: 'p50/p95/p99 del motor de pricing, estado del evaluador de alertas, salud de adapters de CRM / mercado / core banking y el widget de violaciones CSP recientes.',
-
-        // ── Tour de flujo de negocio (bienvenida tras login) ────────
-        walkthrough_bf_welcomeEyebrow: 'Bienvenido a N-Pricing',
-        walkthrough_bf_welcome: 'Pricing de banca, organizado por ciclo de vida.',
-        walkthrough_bf_welcomeDesc: 'Un mismo motor para pricing cliente, canales en tiempo real y transfer pricing interno. Multi-tenant, snapshot-first, gobernado con MRM. Te guío por los 4 buckets del sidebar en menos de un minuto — y te enseño el ⌘K que usarás cada día.',
-        walkthrough_bf_stage1: 'Etapa 1 de 4 · Comercial',
-        walkthrough_bf_commercial: 'Clientes, campañas y targets',
-        walkthrough_bf_commercialDesc: 'El pre-deal. Customer 360 agrega las posiciones y métricas reales del cliente, deriva el cross-bonus de esas posiciones y aplica targets top-down. Las campañas son deltas versionadas por segmento × producto × canal.',
-        walkthrough_bf_clvTabs: 'Customer Lifetime Value — Snapshot · LTV · Timeline · NBA',
-        walkthrough_bf_clvTabsDesc: 'Cada cliente tiene 4 pestañas. Snapshot es la foto actual. Proyección LTV estima el CLV a 10 años con banda p5/p95 reproducible (hash de supuestos). Timeline muestra los eventos reales de la relación. Siguiente acción rankea 2-3 productos por ΔCLV esperado con reason codes auditables. El botón "Inicializar CLV" arranca todo en un click si el cliente aún no se ha computado.',
-        walkthrough_bf_pipeline: 'Pipeline — feed NBA de toda la cartera',
-        walkthrough_bf_pipelineDesc: 'Tu landing matutina como RM. Un único endpoint cross-cliente devuelve cada NBA abierta con su cliente, ΔCLV esperado y confianza. KPIs arriba (recomendaciones · clientes cubiertos · ΔCLV total · confianza media), filtros por producto + banda de confianza, y bulk consume si quieres cerrar varias a la vez. Export CSV y auto-refresh opcional.',
-        walkthrough_bf_stage2: 'Etapa 2 de 4 · Pricing',
-        walkthrough_bf_pricing: 'Pricing Engine — motor + blotter + contabilidad',
-        walkthrough_bf_pricingDesc: 'Un único workspace con 4 tabs que comparten el contexto del deal: Deal (motor 19-componentes), RAROC, Stress EBA y What-If. El Blotter y el Accounting Ledger viven en el mismo bucket: lo que cotizas aquí aterriza allí de forma automática.',
-        walkthrough_bf_ltvPreview: 'Previsualización ΔCLV — pricing por relación en vivo',
-        walkthrough_bf_ltvPreviewDesc: 'Con un cliente seleccionado en el Calculator, el panel ΔCLV muestra en tiempo real cómo cambia el CLV del cliente al mover el rate. Descompone el delta en NII directo + crosssell + reducción de churn + coste oportunidad de capital. Permite decir literalmente en una negociación: "bajo 15 pb y el CLV del cliente sube 2,3 M€". Éste es el diferencial comercial — pricing por relación, no por deal.',
-        walkthrough_bf_stage3: 'Etapa 3 de 4 · Insights',
-        walkthrough_bf_insights: 'Analytics, curvas y modelos comportamentales',
-        walkthrough_bf_insightsDesc: 'Entender la cartera. Analytics agrupa ~15 dashboards (Executive, Client Profitability, Discipline, Backtest, Ex-Post RAROC…). Las curvas alimentan el motor en tiempo real. Behavioural Models calibra NMDs y prepagos.',
-        walkthrough_bf_stage4: 'Etapa 4 de 4 · Gobierno',
-        walkthrough_bf_governance: 'MRM, reproducibilidad y aprobaciones',
-        walkthrough_bf_governanceDesc: 'Model Inventory (SR 11-7 / EBA), dossiers firmados HMAC, cola de Escalations L1→L2→Comité y Methodology como fuente de verdad. Cada cálculo del motor escribe un snapshot inmutable — reproducible desde /snapshots vía ⌘K.',
-        walkthrough_bf_powerUser: 'Power-user features',
-        walkthrough_bf_command: 'Command Palette (⌘K)',
-        walkthrough_bf_commandDesc: 'Atajo universal: salta a cualquier vista, abre cualquier cliente en drawer, o lanza acciones (New Deal, Import Data, cambiar tema). Pulsa ⌘K (Mac) o Ctrl+K en cualquier momento — o click en el botón «Search…» del header. 7 destinos adicionales (RAROC, Stress, What-If, Discipline, SLO, Adapters, Snapshot Replay) viven aquí y no en el sidebar para no sobre-extenderlo.',
-        walkthrough_bf_drawer: 'Drawer Customer 360',
-        walkthrough_bf_drawerDesc: 'Customer 360 también es contexto global: desde ⌘K buscas cualquier cliente y se abre en drawer sobre la vista actual sin perder tu deal en curso. ESC lo cierra. «Full page» salta a /customers con el cliente pre-seleccionado si necesitas importar positions.',
-        walkthrough_bf_finishEyebrow: 'Listo para empezar',
-        walkthrough_bf_finish: 'Todo preparado.',
-        walkthrough_bf_finishDesc: 'Puedes relanzar este tour desde el botón Help del header. Arranca cotizando un deal y el flujo completo sale solo. ⌘K es tu mejor amigo.',
+        // Walkthrough keys live in translations/walkthrough.{en,es}.ts
+        // (extracted 2026-05-20).
 
         // ── User Manual extras ──────────────────────────────────────
         manual_formulasTitle: 'Fórmulas de Pricing',
@@ -1474,7 +1318,8 @@ export type TranslationKeys = (typeof translations)['en']
   & WhatIfTranslationKeys
   & ControlRoomTranslationKeys
   & TargetGridTranslationKeys
-  & AnejoCreditRiskTranslationKeys;
+  & AnejoCreditRiskTranslationKeys
+  & WalkthroughTranslationKeys;
 
 /** Partial translations for additional languages */
 const partialTranslations: Partial<Record<Language, Partial<TranslationKeys>>> = {
@@ -1528,6 +1373,7 @@ export function getTranslations(lang: Language): TranslationKeys {
   const controlRoom: ControlRoomTranslationKeys = lang === 'es' ? controlRoomEs : controlRoomEn;
   const targetGrid: TargetGridTranslationKeys = lang === 'es' ? targetGridEs : targetGridEn;
   const anejo: AnejoCreditRiskTranslationKeys = lang === 'es' ? anejoCreditRiskEs : anejoCreditRiskEn;
+  const walkthrough: WalkthroughTranslationKeys = lang === 'es' ? walkthroughEs : walkthroughEn;
   if (lang === 'en' || lang === 'es') {
     return {
       ...translations[lang],
@@ -1537,6 +1383,7 @@ export function getTranslations(lang: Language): TranslationKeys {
       ...controlRoom,
       ...targetGrid,
       ...anejo,
+      ...walkthrough,
     };
   }
   const partial = partialTranslations[lang] || {};
@@ -1548,6 +1395,7 @@ export function getTranslations(lang: Language): TranslationKeys {
     ...controlRoom,
     ...targetGrid,
     ...anejo,
+    ...walkthrough,
     ...partial,
   } as TranslationKeys;
 }
