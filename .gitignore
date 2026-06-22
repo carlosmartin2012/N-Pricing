@@ -43,3 +43,4 @@ client_secret*.json
 supabase/functions/pricing/pricingBundle.js
 supabase/functions/pricing/pricingBundle.js.map
 supabase/.temp/
+playwright-shots/
